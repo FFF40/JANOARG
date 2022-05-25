@@ -92,9 +92,14 @@ public class Charter : EditorWindow
 
         float lastP = 0;
 
+        List<LaneStep> steps = new List<LaneStep>();
+
         for (int a = 0; a < lane.LaneSteps.Count; a++)
+            steps.Add((LaneStep)lane.LaneSteps[a].Get(this.pos));
+
+        for (int a = 0; a < steps.Count; a++)
         {
-            LaneStep step = lane.LaneSteps[a];
+            LaneStep step = steps[a];
 
             float time = TargetSong.Timing.ToSeconds(step.Offset);
             Vector3 start = step.StartPos;
@@ -102,11 +107,11 @@ public class Charter : EditorWindow
             float p = 0;
             if (CurrentAudioSource.time > time) 
             {
-                if (a >= lane.LaneSteps.Count - 1) {
+                if (a >= steps.Count - 1) {
                     lastP = 1;
                     continue;
                 }
-                LaneStep next = lane.LaneSteps[a + 1];
+                LaneStep next = steps[a + 1];
                 float nexttime = TargetSong.Timing.ToSeconds(next.Offset);
                 if (CurrentAudioSource.time > nexttime) 
                 {
@@ -130,7 +135,7 @@ public class Charter : EditorWindow
             }
             else 
             {
-                LaneStep prev = lane.LaneSteps[a - 1];
+                LaneStep prev = steps[a - 1];
                 if (lastP >= 1 || (step.StartEaseX == "Linear" && step.StartEaseY == "Linear" &&
                     step.EndEaseX == "Linear" && step.EndEaseY == "Linear"))
                 {
@@ -208,11 +213,11 @@ public class Charter : EditorWindow
                 tris.Add(vertices.Count - 8);
             }
         }
-        float angle = Vector3.Angle(step.EndPos - step.StartPos, Vector3.left);
+        float angle = Vector2.SignedAngle(step.EndPos - step.StartPos, Vector2.left);
         Vector3 fwd = Vector3.forward * step.Offset * 120;
         for (float ang = 45; ang <= 405; ang += 90) 
         {
-            Vector3 ofs = Quaternion.Euler(0, 0, angle) 
+            Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
                 * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
                 * .2f;
             AddStep((Vector3)startPos + ofs + fwd, (Vector3)endPos + ofs + fwd);
@@ -278,40 +283,42 @@ public class Charter : EditorWindow
 
             float camLeft = (bound.center.x - (width - bound.center.x));
             float camRatio = (bound.height / (height - 184));
-            CurrentCamera.transform.position = Vector3.zero;
-            CurrentCamera.transform.eulerAngles = Vector3.left * -30;
-            CurrentCamera.transform.Translate(Vector3.back * 10 / camRatio);
-            CurrentCamera.backgroundColor = TargetChart != null ? TargetChart.BackgroundColor : Color.black;
 
 
             if (TargetChart != null) 
             {
+                Chart chart = (Chart)TargetChart.Get(pos);
+                CurrentCamera.transform.position = chart.CameraPivot;
+                CurrentCamera.transform.eulerAngles = chart.CameraRotation;
+                CurrentCamera.transform.Translate(Vector3.back * 10);
+                CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
+                CurrentCamera.backgroundColor = chart.BackgroundColor;
                 CurrentCamera.Render();
-                foreach (Lane lane in TargetChart.Lanes)
+                foreach (Lane lane in chart.Lanes)
                 {
-                    if (TargetChart.LaneMaterial) {
-                        Graphics.DrawMesh(MakeLaneMesh(lane), Vector3.zero, Quaternion.identity, TargetChart.LaneMaterial, 0, CurrentCamera);
+                    if (chart.LaneMaterial) {
+                        Graphics.DrawMesh(MakeLaneMesh(lane), Vector3.zero, Quaternion.identity, chart.LaneMaterial, 0, CurrentCamera);
                     }
-                    if (TargetChart.HitMaterial) {
+                    if (chart.HitMaterial) {
                         foreach (HitObject hit in lane.Objects)
                         {
                             if (hit.Offset > pos)
                             {
                                 Mesh mesh = MakeHitMesh(hit, lane, out Vector2 startPos, out Vector2 endPos);
-                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, TargetChart.HitMaterial, 0, CurrentCamera);
+                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HitMaterial, 0, CurrentCamera);
                             }
                         } 
                     }
                 }
+                EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
+                Handles.DrawCamera(new Rect(0, 26, width + camLeft, height - 184), CurrentCamera);
+                Handles.color = chart.InterfaceColor;
+                Handles.DrawPolyLine(new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y), 
+                    new Vector2(bound.x + bound.width, bound.y + bound.height), new Vector2(bound.x, bound.y + bound.height),
+                    new Vector2(bound.x, bound.y));
             }
 
 
-            EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
-            Handles.DrawCamera(new Rect(0, 26, width + camLeft, height - 184), CurrentCamera);
-            Handles.color = new Color(1 - CurrentCamera.backgroundColor.r, 1 - CurrentCamera.backgroundColor.g, 1 - CurrentCamera.backgroundColor.b);
-            Handles.DrawPolyLine(new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y), 
-                new Vector2(bound.x + bound.width, bound.y + bound.height), new Vector2(bound.x, bound.y + bound.height),
-                new Vector2(bound.x, bound.y));
         }
         else 
         {
@@ -400,7 +407,7 @@ public class Charter : EditorWindow
         }
 
         label.fontStyle = FontStyle.Italic;
-        GUI.Label(new Rect(0, 190, 500, 20), "J.A.N.O.A.R.G.    © 2022-2022    by FFF40", label);
+        GUI.Label(new Rect(0, 190, 500, 20), "J.A.N.O.A.R.G.    © 2022-2022    by FFF40 Studios", label);
     }
 
     #endregion
@@ -510,6 +517,9 @@ public class Charter : EditorWindow
 
         if (TargetLane != null && GUI.Toggle(timelineMode == "hit" ? new Rect(87, 132, 80, 24) : new Rect(87, 136, 80, 20), timelineMode == "hit", "Hits", "buttonLeft")) timelineMode = "hit";
         
+
+        CurrentAudioSource.pitch = EditorGUI.Slider(new Rect(width - 202, 136, 200, 20), CurrentAudioSource.pitch, 0, 4);
+        if (CurrentAudioSource.pitch > .95f && CurrentAudioSource.pitch < 1.05f) CurrentAudioSource.pitch = 1;
 
 
         GUIStyle label = new GUIStyle("miniLabel");
@@ -844,11 +854,18 @@ public class Charter : EditorWindow
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Difficulty", "boldLabel");
+                thing.DifficultyIndex = EditorGUILayout.IntField("Index", thing.DifficultyIndex);
                 thing.DifficultyName = EditorGUILayout.TextField("Name", thing.DifficultyName);
                 thing.DifficultyLevel = EditorGUILayout.TextField("Level", thing.DifficultyLevel);
+                thing.ChartConstant = EditorGUILayout.IntField("Constant", thing.ChartConstant);
+                GUILayout.Space(8);
+                GUILayout.Label("Layout", "boldLabel");
+                thing.CameraPivot = EditorGUILayout.Vector3Field("Camera Pivot", thing.CameraPivot);
+                thing.CameraRotation = EditorGUILayout.Vector3Field("Camera Rotation", thing.CameraRotation);
                 GUILayout.Space(8);
                 GUILayout.Label("Appearance", "boldLabel");
                 thing.BackgroundColor = EditorGUILayout.ColorField("Background Color", thing.BackgroundColor);
+                thing.InterfaceColor = EditorGUILayout.ColorField("Interface Color", thing.InterfaceColor);
                 thing.LaneMaterial = (Material)EditorGUILayout.ObjectField("Lane Material", thing.LaneMaterial, typeof(Material), false);
                 thing.HitMaterial = (Material)EditorGUILayout.ObjectField("Hit Material", thing.HitMaterial, typeof(Material), false);
                 GUILayout.EndScrollView();
@@ -1077,7 +1094,7 @@ public class Charter : EditorWindow
                     int newType = EditorGUI.Popup(new Rect(116, h + o + 4, 83, 14), type, tst.ToArray(), buttonLeftStyle);
                     if (newType != type) ts.ID = tso[newType];
 
-                    ts.Target = EditorGUI.FloatField(new Rect(75, h + o + 4, 40, 14), ts.Duration, bStyle);
+                    ts.Target = EditorGUI.FloatField(new Rect(75, h + o + 4, 40, 14), ts.Target, bStyle);
 
                     ts.EaseMode = (EaseMode)EditorGUI.EnumPopup(new Rect(75, h + o + 19, 40, 14), ts.EaseMode, buttonStyle);
 

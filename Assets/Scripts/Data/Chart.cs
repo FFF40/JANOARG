@@ -3,17 +3,62 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Chart
+public class Chart : IStoryboardable 
 {
     public string DifficultyName = "Normal";
     public string DifficultyLevel = "6";
+    public int DifficultyIndex = 1;
+    public int ChartConstant = 6;
 
     public List<LaneGroup> Groups = new List<LaneGroup>();
     public List<Lane> Lanes = new List<Lane>();
 
     public Color BackgroundColor = Color.black;
+    public Color InterfaceColor = Color.white;
     public Material LaneMaterial;
     public Material HitMaterial;
+
+    public Vector3 CameraPivot;
+    public Vector3 CameraRotation;
+
+    public new static TimestampType[] TimestampTypes = {
+        new TimestampType {
+            ID = "CameraPivot_X",
+            Name = "Camera Pivot X",
+            Get = (x) => ((Chart)x).CameraPivot.x,
+            Set = (x, a) => { ((Chart)x).CameraPivot.x = a; },
+        },
+        new TimestampType {
+            ID = "CameraPivot_Y",
+            Name = "Camera Pivot Y",
+            Get = (x) => ((Chart)x).CameraPivot.y,
+            Set = (x, a) => { ((Chart)x).CameraPivot.y = a; },
+        },
+        new TimestampType {
+            ID = "CameraPivot_Z",
+            Name = "Camera Pivot Z",
+            Get = (x) => ((Chart)x).CameraPivot.z,
+            Set = (x, a) => { ((Chart)x).CameraPivot.z = a; },
+        },
+        new TimestampType {
+            ID = "CameraRotation_X",
+            Name = "Camera Rotation X",
+            Get = (x) => ((Chart)x).CameraRotation.x,
+            Set = (x, a) => { ((Chart)x).CameraRotation.x = a; },
+        },
+        new TimestampType {
+            ID = "CameraRotation_Y",
+            Name = "Camera Rotation Y",
+            Get = (x) => ((Chart)x).CameraRotation.y,
+            Set = (x, a) => { ((Chart)x).CameraRotation.y = a; },
+        },
+        new TimestampType {
+            ID = "CameraRotation_Z",
+            Name = "Camera Rotation Z",
+            Get = (x) => ((Chart)x).CameraRotation.z,
+            Set = (x, a) => { ((Chart)x).CameraRotation.z = a; },
+        },
+    };
 
     public Chart() {
         
@@ -61,7 +106,7 @@ public class Lane : IStoryboardable
     public List<HitObject> Objects = new List<HitObject>();
     public List<LaneStep> LaneSteps = new List<LaneStep>();
     public bool ExpandToInfinity = true;
-    public float ZOffset;
+    public Vector3 Offset;
     public string Group;
 
     public LaneStep GetLaneStep(float time, float laneTime, Metronome timing) 
@@ -70,9 +115,11 @@ public class Lane : IStoryboardable
         float timeT = timing.ToSeconds(time);
         float laneTimeT = timing.ToSeconds(laneTime);
         float curtime = laneTimeT;
+        List<LaneStep> steps = new List<LaneStep>();
         for (int a = 0; a < LaneSteps.Count; a++) 
         {
-            LaneStep step = LaneSteps[a];
+            LaneStep step = (LaneStep)LaneSteps[a].Get(laneTime);
+            steps.Add(step);
 
             float t = timing.ToSeconds(step.Offset);
             offset += step.Speed * (Mathf.Max(t, laneTimeT) - curtime);
@@ -93,7 +140,7 @@ public class Lane : IStoryboardable
                     Offset = laneTime < time ? offset : float.NaN,
                 };
 
-                LaneStep prev = LaneSteps[a - 1];
+                LaneStep prev = steps[a - 1];
                 float p = (time - prev.Offset) / (step.Offset - prev.Offset);
 
                 if (step.StartEaseX == "Linear" && step.StartEaseY == "Linear" &&
@@ -122,11 +169,11 @@ public class Lane : IStoryboardable
             
         }
         {
-            float t = timing.ToSeconds(LaneSteps[LaneSteps.Count - 1].Offset);
+            float t = timing.ToSeconds(steps[steps.Count - 1].Offset);
             return new LaneStep 
             {
-                StartPos = LaneSteps[LaneSteps.Count - 1].StartPos,
-                EndPos = LaneSteps[LaneSteps.Count - 1].EndPos,
+                StartPos = steps[steps.Count - 1].StartPos,
+                EndPos = steps[steps.Count - 1].EndPos,
                 Offset = laneTime < time ? offset + (timeT - t) * LaneSteps[LaneSteps.Count - 1].Speed : float.NaN,
             };
         }
@@ -134,10 +181,22 @@ public class Lane : IStoryboardable
 
     public new static TimestampType[] TimestampTypes = {
         new TimestampType {
-            ID = "ZOffset",
-            Name = "Z Offset",
-            Get = (x) => ((Lane)x).ZOffset,
-            Set = (x, a) => { ((Lane)x).ZOffset = a; },
+            ID = "Offset_X",
+            Name = "Offset X",
+            Get = (x) => ((Lane)x).Offset.x,
+            Set = (x, a) => { ((Lane)x).Offset.x = a; },
+        },
+        new TimestampType {
+            ID = "Offset_Y",
+            Name = "Offset Y",
+            Get = (x) => ((Lane)x).Offset.y,
+            Set = (x, a) => { ((Lane)x).Offset.y = a; },
+        },
+        new TimestampType {
+            ID = "Offset_Z",
+            Name = "Offset Z",
+            Get = (x) => ((Lane)x).Offset.z,
+            Set = (x, a) => { ((Lane)x).Offset.z = a; },
         },
     };
 }
