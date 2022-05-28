@@ -89,9 +89,9 @@ public class Metronome
         return 0;
     }
 
-    public BPMStop GetStop(float seconds) {
-        int tag = 0;
-        while (tag < Stops.Count - 1 && Stops[tag].Offset < seconds) tag++;
+    public BPMStop GetStop(float seconds, out int tag) {
+        tag = 0;
+        while (tag < Stops.Count - 1 && Stops[tag + 1].Offset < seconds) tag++;
         return Stops[tag];
     }
 }

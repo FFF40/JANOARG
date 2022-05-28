@@ -32,9 +32,13 @@ public class Charter : EditorWindow
     public AudioSource CurrentAudioSource;
     public Camera CurrentCamera;
     public AudioClip MetronomeSound;
+    public AudioClip HitSound;
 
     public bool PlayMetronome;
     public bool SeparateUnits;
+    public bool PlayHitsounds;
+
+    public List<Mesh> Meshes = new List<Mesh>();
 
     CultureInfo invariant = CultureInfo.InvariantCulture;
 
@@ -232,20 +236,158 @@ public class Charter : EditorWindow
         return mesh;
     }
 
+    public Mesh MakeHoldMesh(HitObject hit, Lane lane) 
+    {
+        Mesh mesh = new Mesh();
+
+        float pos = 0;
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
+        List<int> tris = new List<int>();
+
+        void AddStep(Vector3 start, Vector3 end) {
+
+            vertices.Add(start);
+            vertices.Add(end);
+            vertices.Add(start);
+            vertices.Add(end);
+
+            uvs.Add(Vector2.zero);
+            uvs.Add(Vector2.zero);
+            uvs.Add(Vector2.zero);
+            uvs.Add(Vector2.zero);
+            
+            if (vertices.Count >= 8) 
+            {
+                tris.Add(vertices.Count - 1);
+                tris.Add(vertices.Count - 5);
+                tris.Add(vertices.Count - 6);
+                
+                tris.Add(vertices.Count - 6);
+                tris.Add(vertices.Count - 2);
+                tris.Add(vertices.Count - 1);
+
+                tris.Add(vertices.Count - 8);
+                tris.Add(vertices.Count - 7);
+                tris.Add(vertices.Count - 3);
+                
+                tris.Add(vertices.Count - 3);
+                tris.Add(vertices.Count - 4);
+                tris.Add(vertices.Count - 8);
+            }
+        }
+
+        float startP = TargetSong.Timing.ToSeconds(hit.Offset);
+        float endP = TargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength);
+
+        float curtime = CurrentAudioSource.time;
+
+        List<LaneStep> steps = new List<LaneStep>();
+
+        for (int a = 0; a < lane.LaneSteps.Count; a++)
+            steps.Add((LaneStep)lane.LaneSteps[a].Get(this.pos));
+
+
+        float p = Mathf.Max(TargetSong.Timing.ToSeconds(steps[0].Offset) - curtime, 0) * steps[0].Speed * 120;
+
+        for (int a = 0; a < steps.Count - 1; a++)
+        {
+            LaneStep step = steps[a];
+            LaneStep next = steps[a + 1];
+
+            float sTime = TargetSong.Timing.ToSeconds(step.Offset);
+            float nTime = TargetSong.Timing.ToSeconds(next.Offset);
+            Vector3 start = step.StartPos;
+            Vector3 end = step.EndPos;
+            float startPos = (Math.Max(curtime, startP) - sTime) / (nTime - sTime);
+            float endPos = (endP - sTime) / (nTime - sTime);
+
+            float nextP = p + Mathf.Max(nTime - Mathf.Max(sTime, curtime), 0) * step.Speed * 120;
+
+            if (startPos >= 1) { 
+                curtime = Mathf.Max(nTime, curtime);
+                p = nextP;
+                continue;
+            }
+
+
+            if (vertices.Count == 0)
+            {
+                if (next.StartEaseX == "Linear" && next.StartEaseY == "Linear" && next.EndEaseX == "Linear" && next.EndEaseY == "Linear")
+                {
+                    start = Vector2.Lerp(step.StartPos, next.StartPos, startPos);
+                    end = Vector2.Lerp(step.EndPos, next.EndPos, startPos);
+                }
+                else 
+                {
+                    start = new Vector3(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(Mathf.Clamp01(startPos), next.StartEaseX, next.StartEaseXMode)),
+                        Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(Mathf.Clamp01(startPos), next.StartEaseY, next.StartEaseYMode)));
+                    end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(Mathf.Clamp01(startPos), next.EndEaseX, next.EndEaseXMode)),
+                        Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(Mathf.Clamp01(startPos), next.EndEaseY, next.EndEaseYMode)));
+                }
+                Vector2 s = Vector2.Lerp(start, end, hit.Position);
+                Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                float pp = p + ((nTime - sTime) * startPos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
+                AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
+            }
+            {
+                if (next.StartEaseX == "Linear" && next.StartEaseY == "Linear" && next.EndEaseX == "Linear" && next.EndEaseY == "Linear")
+                {
+                    start = Vector2.Lerp(step.StartPos, next.StartPos, endPos);
+                    end = Vector2.Lerp(step.EndPos, next.EndPos, endPos);
+                }
+                else 
+                {
+                    start = new Vector3(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(Mathf.Clamp01(endPos), next.StartEaseX, next.StartEaseXMode)),
+                        Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(Mathf.Clamp01(endPos), next.StartEaseY, next.StartEaseYMode)));
+                    end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(Mathf.Clamp01(endPos), next.EndEaseX, next.EndEaseXMode)),
+                        Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(Mathf.Clamp01(endPos), next.EndEaseY, next.EndEaseYMode)));
+                }
+                Vector2 s = Vector2.Lerp(start, end, hit.Position);
+                Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
+                AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
+            }
+
+            curtime = Mathf.Max(nTime, curtime);
+            p = nextP;
+
+            if (endPos <= 1) break;
+            
+        }
+
+        mesh.Clear();
+        mesh.vertices = vertices.ToArray();
+        mesh.uv = uvs.ToArray();
+        mesh.triangles = tris.ToArray();
+        mesh.RecalculateNormals();
+
+        return mesh;
+    }
+
+    int HitCount;
+
     public void OnGUI()
     {
-        if (!CurrentCamera) {
+        if (!CurrentCamera) 
+        {
             CurrentCamera = new GameObject("Charter Camera").AddComponent<Camera>();
             CurrentCamera.clearFlags = CameraClearFlags.SolidColor;
             CurrentCamera.targetDisplay = 8;
             CurrentCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
         }
-        if (!CurrentAudioSource) {
+        if (!CurrentAudioSource) 
+        {
             CurrentAudioSource = new GameObject("Charter Audio").AddComponent<AudioSource>();
             CurrentAudioSource.gameObject.hideFlags = HideFlags.HideAndDontSave;
         }
-        if (!MetronomeSound) {
+        if (!MetronomeSound) 
+        {
             MetronomeSound = Resources.Load<AudioClip>("Sounds/Metronome");
+        }
+        if (!HitSound) 
+        {
+            HitSound = Resources.Load<AudioClip>("Sounds/Hit");
         }
 
 
@@ -284,6 +426,7 @@ public class Charter : EditorWindow
             float camLeft = (bound.center.x - (width - bound.center.x));
             float camRatio = (bound.height / (height - 184));
 
+            int count = 0;
 
             if (TargetChart != null) 
             {
@@ -297,7 +440,12 @@ public class Charter : EditorWindow
                 foreach (Lane lane in chart.Lanes)
                 {
                     if (chart.LaneMaterial) {
-                        Graphics.DrawMesh(MakeLaneMesh(lane), Vector3.zero, Quaternion.identity, chart.LaneMaterial, 0, CurrentCamera);
+                        Mesh mesh = MakeLaneMesh(lane);
+                        if (CurrentAudioSource.isPlaying || TargetThing != lane || DateTime.Now.Millisecond % 500 < 250) 
+                            Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.LaneMaterial, 0, CurrentCamera);
+                        if (TargetThing == lane && mesh.vertices.Length > 0) 
+                            Repaint();
+                        Meshes.Add(mesh);
                     }
                     if (chart.HitMaterial) {
                         foreach (HitObject hit in lane.Objects)
@@ -305,7 +453,19 @@ public class Charter : EditorWindow
                             if (hit.Offset > pos)
                             {
                                 Mesh mesh = MakeHitMesh(hit, lane, out Vector2 startPos, out Vector2 endPos);
-                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HitMaterial, 0, CurrentCamera);
+                                if (CurrentAudioSource.isPlaying || TargetThing != hit || DateTime.Now.Millisecond % 500 < 250) 
+                                    Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HitMaterial, 0, CurrentCamera);
+                                if (TargetThing == hit && mesh.vertices.Length > 0) 
+                                    Repaint();
+                                Meshes.Add(mesh);
+                                count++;
+                            }
+                            if (hit.HoldLength > 0 && hit.Offset + hit.HoldLength > pos)
+                            {
+                                Mesh mesh = MakeHoldMesh(hit, lane);
+                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HoldMaterial == null ? chart.HitMaterial : chart.HoldMaterial, 0, CurrentCamera);
+                                Meshes.Add(mesh);
+                                count++;
                             }
                         } 
                     }
@@ -318,7 +478,14 @@ public class Charter : EditorWindow
                     new Vector2(bound.x, bound.y));
             }
 
+            if (HitCount > count && PlayHitsounds && CurrentAudioSource.isPlaying)
+            {
+                for (int a = 0; a < HitCount - count; a++) CurrentAudioSource.PlayOneShot(HitSound);
+            }
+            HitCount = count;
 
+            foreach (Mesh mesh in Meshes) DestroyImmediate(mesh);
+            Meshes = new List<Mesh>();
         }
         else 
         {
@@ -355,7 +522,6 @@ public class Charter : EditorWindow
             Repaint();
         }
     }
-
 
 
     ///////////////////
@@ -458,7 +624,8 @@ public class Charter : EditorWindow
         }
 
         PlayMetronome = GUI.Toggle(new Rect(position.width / 2 + 24, 5, 40, 20), PlayMetronome, new GUIContent("Met", "Metronome"), "buttonLeft");
-        SeparateUnits = GUI.Toggle(new Rect(position.width / 2 + 65, 5, 40, 20), SeparateUnits, new GUIContent("Sep", "Separate Units"), "buttonRight");
+        PlayHitsounds = GUI.Toggle(new Rect(position.width / 2 + 65, 5, 40, 20), PlayHitsounds, new GUIContent("Snd", "Play Hitsounds"), "buttonMid");
+        SeparateUnits = GUI.Toggle(new Rect(position.width / 2 + 106, 5, 40, 20), SeparateUnits, new GUIContent("Sep", "Separate Units"), "buttonRight");
 
 
 
@@ -485,9 +652,31 @@ public class Charter : EditorWindow
             counterX -= 10;
         }
 
-        EditorGUI.DrawRect(new Rect(width - 64, 6, 62, 18), Color.black);
-        BPMStop bstop = TargetSong.Timing.GetStop(CurrentAudioSource.time);
-        EditorGUI.DrawRect(new Rect(width - 63 + beat * 60 / bstop.Signature, 7, 60 / bstop.Signature, 16), Color.white * (1 - dec / 1000));
+
+
+        BPMStop bstop = TargetSong.Timing.GetStop(CurrentAudioSource.time, out int index);
+        Color color = Color.black;
+        if (index <= 0)
+        {
+
+        }
+        else if (TargetSong.Timing.Stops[index - 1].BPM < bstop.BPM)
+        {
+            float time = 1 - (CurrentAudioSource.time - bstop.Offset);
+            color = new Color(time * .8f, 0, 0);
+        }
+        else if (TargetSong.Timing.Stops[index - 1].BPM > bstop.BPM)
+        {
+            float time = 1 - (CurrentAudioSource.time - bstop.Offset);
+            color = new Color(time * .1f, time * .1f, time);
+        }
+
+        EditorGUI.DrawRect(new Rect(width - 64, 6, 62, 18), color);
+        if (beat >= 0) 
+        {
+            EditorGUI.DrawRect(new Rect(width - 63 + beat * 60 / bstop.Signature, 7, 60 / bstop.Signature, 16), new Color(1, 1, 1, (1 - dec / 1000) * (1 - dec / 1000)));
+        }
+            
 
     }
 
@@ -502,6 +691,8 @@ public class Charter : EditorWindow
     public string dragMode = "";
     public bool dragged = false;
     public string timelineMode = "lane";
+
+    public int verSeek = 0;
 
     public void Timeline(int id) {
         float seekLimit = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
@@ -590,18 +781,19 @@ public class Charter : EditorWindow
                         float a = lane.LaneSteps[0].Offset;
                         float b = lane.LaneSteps[lane.LaneSteps.Count - 1].Offset;
                         float pos2 = (b - seekStart) / (seekEnd - seekStart) * width;
-                        int time = AddTime(pos2, 21);
+                        int time = AddTime(pos, 21) - verSeek;
+                        if (time < 0 || time >= 5) continue;
                         if (b > seekStart && a < seekEnd) 
                         {
                             float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                            EditorGUI.DrawRect(new Rect(pos, 5 + time * 25, pos2 - pos, 20), new Color(0, 1, 0, .1f));
+                            EditorGUI.DrawRect(new Rect(pos, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .1f));
                         }
                         for (int x = 1; x < lane.LaneSteps.Count; x++) {
                             float c = lane.LaneSteps[x].Offset;
                             if (c > seekStart && c < seekEnd) 
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
-                                if (GUI.Button(new Rect(pos3 - 2, 5 + time * 25, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : ""))
+                                if (GUI.Button(new Rect(pos3 - 2, 3 + time * 22, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : "|"))
                                 {
                                     if (pickermode == "delete")
                                     {
@@ -623,10 +815,10 @@ public class Charter : EditorWindow
                                 }
                             }
                         }
-                        if (a > seekStart && a < seekEnd) 
+                        if (a > seekStart || a < seekEnd) 
                         {
-                            float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                            if (GUI.Button(new Rect(pos - 9, 5 + time * 25, 20, 20), DeletingThing == lane ? "?" : ""))
+                            float pos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 13), (b - seekStart) / (seekEnd - seekStart) * width - 15);
+                            if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "|"))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -673,10 +865,11 @@ public class Charter : EditorWindow
                 {
                     float x = hit.Offset;
                     float pos = (x - seekStart) / (seekEnd - seekStart) * width;
-                    int time = AddTime(pos, 21);
+                    int time = AddTime(pos, 21) - verSeek;
+                    if (time < 0 || time >= 5) continue;
                     if (hit.Offset > seekStart && hit.Offset < seekEnd) 
                     {
-                        if (GUI.Button(new Rect(pos - 9, 5 + time * 25, 20, 20), DeletingThing == hit ? "?" : ""))
+                        if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == hit ? "?" : "|"))
                         {
                             if (pickermode == "delete")
                             {
@@ -700,6 +893,12 @@ public class Charter : EditorWindow
                     }
                 }
             }
+
+            if (Times.Count > 5)
+            {
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 4f / Times.Count, 0, Times.Count - 4));
+            }
+            verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - 4), 0);
         }
 
         
@@ -708,18 +907,21 @@ public class Charter : EditorWindow
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0) 
         {
             Vector2 mPos = Event.current.mousePosition;
-            float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
-            if (mPos.y > 100 && mPos.y < 115) 
+            if (mPos.x < width - 10) 
             {
-                CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
-                dragMode = "seek";
-                Repaint();
-            }
-            else if (mPos.y > 0 && mPos.y < 100) 
-            {
-                CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
-                dragMode = "seeksnap";
-                Repaint();
+                float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
+                if (mPos.y > 100 && mPos.y < 115) 
+                {
+                    CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
+                    dragMode = "seek";
+                    Repaint();
+                }
+                else if (mPos.y > 0 && mPos.y < 100) 
+                {
+                    CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
+                    dragMode = "seeksnap";
+                    Repaint();
+                }
             }
             dragged = false;
         }
@@ -761,7 +963,6 @@ public class Charter : EditorWindow
                     TargetLane.Objects.Add(hit);
                     hit.Offset = Mathf.Round(pos * 1000) / 1000;
                     TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                    Debug.Log("Made hit");
                     Repaint();
                 }
             }
@@ -868,6 +1069,7 @@ public class Charter : EditorWindow
                 thing.InterfaceColor = EditorGUILayout.ColorField("Interface Color", thing.InterfaceColor);
                 thing.LaneMaterial = (Material)EditorGUILayout.ObjectField("Lane Material", thing.LaneMaterial, typeof(Material), false);
                 thing.HitMaterial = (Material)EditorGUILayout.ObjectField("Hit Material", thing.HitMaterial, typeof(Material), false);
+                thing.HoldMaterial = (Material)EditorGUILayout.ObjectField("Hold Material", thing.HoldMaterial, typeof(Material), false);
                 GUILayout.EndScrollView();
             }
             else if (TargetThing is Lane)
@@ -1003,6 +1205,7 @@ public class Charter : EditorWindow
                 GUILayout.Label("Transform", "boldLabel");
                 thing.Position = EditorGUILayout.FloatField("Position", thing.Position);
                 thing.Length = EditorGUILayout.FloatField("Length", thing.Length);
+                thing.HoldLength = EditorGUILayout.FloatField("Hold Length", thing.HoldLength);
 
                 float start, end;
                 float startR = start = thing.Position;

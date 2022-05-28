@@ -5857,8 +5857,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 1280
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d916ac164a192d840a84ee5cc726cddb, type: 2}
-  m_sharedMaterial: {fileID: -157536004462948509, guid: d916ac164a192d840a84ee5cc726cddb, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a45475bbff7d3214aa65958b1909c0b1, type: 2}
+  m_sharedMaterial: {fileID: 5448809311310781862, guid: a45475bbff7d3214aa65958b1909c0b1, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5882,8 +5882,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 150
-  m_fontSizeBase: 150
+  m_fontSize: 120
+  m_fontSizeBase: 120
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
@@ -5892,7 +5892,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 50
+  m_characterSpacing: 80
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -6134,11 +6134,12 @@ MonoBehaviour:
   Score: 0
   MaxScore: 0
   Combo: 0
-  SyncThreshold: 0.05
+  SyncThreshold: 0.025
   LanePlayerSample: {fileID: 611740523456537445, guid: 21d1e5daa792aad4599081b3d9a9aa5a, type: 3}
   LaneMeshSample: {fileID: 7365512444115722430, guid: fdd8a7df2354c7344a30378f8d613d42, type: 3}
   HitPlayerSample: {fileID: 4237198392429212824, guid: 32a76adba7b53204d8c7d51f6db9f332, type: 3}
   MainCamera: {fileID: 963194227}
+  HitSound: {fileID: 8300000, guid: f01894ade637c3842929aa7c7a46c22d, type: 3}
   AudioPlayer: {fileID: 1633994385}
   SongNameLabel: {fileID: 2127960960}
   SongArtistLabel: {fileID: 2122555631}
@@ -6166,6 +6167,7 @@ MonoBehaviour:
     InterfaceColor: {r: 1, g: 1, b: 1, a: 1}
     LaneMaterial: {fileID: 0}
     HitMaterial: {fileID: 0}
+    HoldMaterial: {fileID: 0}
     CameraPivot: {x: 0, y: 0, z: 0}
     CameraRotation: {x: 0, y: 0, z: 0}
 --- !u!4 &1633994384

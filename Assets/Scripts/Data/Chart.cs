@@ -17,6 +17,7 @@ public class Chart : IStoryboardable
     public Color InterfaceColor = Color.white;
     public Material LaneMaterial;
     public Material HitMaterial;
+    public Material HoldMaterial;
 
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
@@ -59,6 +60,7 @@ public class Chart : IStoryboardable
             Set = (x, a) => { ((Chart)x).CameraRotation.z = a; },
         },
     };
+
 
     public Chart() {
         
@@ -257,6 +259,7 @@ public class HitObject : IStoryboardable
     public float Offset = 0;
     public float Position;
     public float Length;
+    public float HoldLength = 0;
     
     public enum HitType
     {

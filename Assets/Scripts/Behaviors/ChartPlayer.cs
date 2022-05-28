@@ -27,6 +27,9 @@ public class ChartPlayer : MonoBehaviour
     public HitPlayer HitPlayerSample;
     public Camera MainCamera;
 
+    [Header("Sounds")]
+    public AudioClip HitSound;
+
     [Header("Interface")]
     public AudioSource AudioPlayer;
     public TMP_Text SongNameLabel;
@@ -91,7 +94,7 @@ public class ChartPlayer : MonoBehaviour
     void UpdateScore() 
     {
         ScoreText.text = ((int)(Score / Mathf.Max(MaxScore, 1) * 1e6)).ToString("D7") + "<size=12>ppm</size>";
-        ComboText.text = Combo.ToString("0");
+        ComboText.text = Combo.ToString("#");
     }
 
     public void AddScore(float weight, bool combo)

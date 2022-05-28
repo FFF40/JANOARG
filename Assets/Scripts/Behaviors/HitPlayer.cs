@@ -48,6 +48,7 @@ public class HitPlayer : MonoBehaviour
             Destroy(gameObject);
             Indicator.gameObject.SetActive(false);
             ChartPlayer.main.AddScore(3, true);
+            ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.HitSound);
         }
         else if (time > CurrentHit.Offset + .2f)
         {
