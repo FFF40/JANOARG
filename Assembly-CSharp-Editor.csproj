@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Editor\Charter.cs" />
+     <Compile Include="Assets\Scripts\Editor\CharterSettings.cs" />
     <Reference Include="UnityEngine">
         <HintPath>E:\Unity\2021.1.24f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

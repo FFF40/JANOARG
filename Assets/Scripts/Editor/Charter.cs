@@ -7,7 +7,7 @@ using System.Globalization;
 
 public class Charter : EditorWindow
 {
-    [MenuItem("J.A.N.O.A.R.G./Charter")]
+    [MenuItem("J.A.N.O.A.R.G./Open Charter", false, 0)]
     public static void Open()
     {
         Charter wnd = GetWindow<Charter>();
@@ -383,6 +383,7 @@ public class Charter : EditorWindow
 
     public void OnGUI()
     {
+        CharterSettings.InitSettings();
         if (!CurrentCamera) 
         {
             CurrentCamera = new GameObject("Charter Camera").AddComponent<Camera>();
@@ -534,6 +535,64 @@ public class Charter : EditorWindow
                 if (PlayMetronome) CurrentAudioSource.PlayOneShot(MetronomeSound);
             }
             Repaint();
+        }
+
+        HandleKeybinds();
+    }
+
+    #endregion
+
+    ///////////////////
+    #region Keybindings
+    ///////////////////
+
+    void HandleKeybinds() 
+    {
+        if (Event.current.type == EventType.KeyDown) 
+        {
+            if (Event.current == CharterSettings.Keybinds["General/Toggle Play/Pause"])
+            {
+                if (CurrentAudioSource.isPlaying) 
+                {
+                    CurrentAudioSource.Pause();
+                }
+                else 
+                {
+                    CurrentAudioSource.clip = TargetSong.Clip;
+                    CurrentAudioSource.Play();
+                }
+            }
+            else if (Event.current == CharterSettings.Keybinds["Picker/Cursor"])
+            {
+                pickermode = "cursor";
+            }
+            else if (Event.current == CharterSettings.Keybinds["Picker/Select"])
+            {
+                pickermode = "select";
+            }
+            else if (Event.current == CharterSettings.Keybinds["Picker/Delete"])
+            {
+                pickermode = "delete";
+            }
+            else if (Event.current == CharterSettings.Keybinds["Selection/Previous Item"])
+            {
+                if (TargetThing is Lane) TargetThing = 
+                    TargetChart.Lanes[Math.Max(TargetChart.Lanes.IndexOf((Lane)TargetThing) - 1, 0)];
+                else if (TargetThing is HitObject) TargetThing = 
+                    TargetLane.Objects[Math.Max(TargetLane.Objects.IndexOf((HitObject)TargetThing) - 1, 0)];
+            }
+            else if (Event.current == CharterSettings.Keybinds["Selection/Next Item"])
+            {
+                if (TargetThing is Lane) TargetThing = 
+                    TargetChart.Lanes[Math.Min(TargetChart.Lanes.IndexOf((Lane)TargetThing) + 1, TargetChart.Lanes.Count - 1)];
+                else if (TargetThing is HitObject) TargetThing = 
+                    TargetLane.Objects[Math.Min(TargetLane.Objects.IndexOf((HitObject)TargetThing) + 1, TargetLane.Objects.Count - 1)];
+            }
+            else if (Event.current == CharterSettings.Keybinds["Misc./Show Keybindings"])
+            {
+                CharterSettings.Open();
+            }
+            Event.current.Use();
         }
     }
 
@@ -730,11 +789,12 @@ public class Charter : EditorWindow
     public int verSeek = 0;
 
     public void Timeline(int id) {
-        float seekLimit = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
+        float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
+        float seekLimitEnd = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
         float seekTime = TargetSong.Timing.ToBeat(CurrentAudioSource.time);
         if (seekEnd == seekStart && seekStart == 0) 
         {
-            seekEnd = Mathf.Min(width / 100, seekLimit);
+            seekEnd = Mathf.Min(width / 100, seekLimitEnd);
         }
 
         // Category
@@ -744,7 +804,7 @@ public class Charter : EditorWindow
         if (GUI.Toggle(timelineMode == "lane" ? new Rect(86, 132, 80, 24) : new Rect(86, 136, 80, 20), timelineMode == "lane", "Lanes", "buttonRight")) 
             timelineMode = "lane";
 
-        if (TargetLane != null && GUI.Toggle(timelineMode == "hit" ? new Rect(168, 132, 80, 24) : new Rect(168, 136, 80, 20), timelineMode == "hit", "Hits", "button")) 
+        if (TargetLane != null && (GUI.Toggle(timelineMode == "hit" ? new Rect(168, 132, 80, 24) : new Rect(168, 136, 80, 20), timelineMode == "hit", "Hits", "button"))) 
             timelineMode = "hit";
         
 
@@ -789,10 +849,11 @@ public class Charter : EditorWindow
         }
 
         EditorGUI.DrawRect(new Rect(0, 115, width + 4, 18), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
-        EditorGUI.MinMaxSlider(new Rect(2, 118, width, 15), ref seekStart, ref seekEnd, -4, seekLimit);
+        EditorGUI.MinMaxSlider(new Rect(2, 118, width, 15), ref seekStart, ref seekEnd, seekLimitStart, seekLimitEnd);
 
-        EditorGUI.DrawRect(new Rect((seekTime + 4) / (seekLimit + 4) * (width - 12) + 7, 116, 1, 14), EditorGUIUtility.isProSkin ? Color.white : Color.black);
-        EditorGUI.DrawRect(new Rect((seekTime + 4) / (seekLimit + 4) * (width - 12) + 7, 122, 1, 10), 
+        EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, 116, 1, 14), 
+            EditorGUIUtility.isProSkin ? Color.white : Color.black);
+        EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, 122, 1, 10), 
             (EditorGUIUtility.isProSkin ^ (seekTime >= seekStart && seekTime < seekEnd)) ? new Color(.9f, .9f, .9f, .75f) : new Color(.2f, .2f, .2f, .75f));
 
         if (TargetChart != null) {
@@ -821,7 +882,7 @@ public class Charter : EditorWindow
                     if (time < 0 || time >= 5) continue;
                     if (a > seekStart && a < seekEnd) 
                     {
-                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", CultureInfo.InvariantCulture)))
+                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant)))
                         {
                             if (pickermode == "delete")
                             {
@@ -1439,23 +1500,24 @@ public class Charter : EditorWindow
     #region Picker Window
     /////////////////////
 
-    public string pickermode = "select";
+    public string pickermode = "cursor";
 
     public void Picker(int id) {
-        if (GUI.Toggle(new Rect(0, 0, 33, 33), pickermode == "select", new GUIContent("SEL", "Select"), "button")) pickermode = "select";
-        if (GUI.Toggle(new Rect(0, 32, 33, 33), pickermode == "delete", new GUIContent("DEL", "Delete"), "button")) pickermode = "delete";
+        if (GUI.Toggle(new Rect(0, 0, 33, 33), pickermode == "cursor", EditorGUIUtility.IconContent("Grid.Default@2x", "Cursor"), "button")) pickermode = "cursor";
+        if (GUI.Toggle(new Rect(0, 32, 33, 33), pickermode == "select", EditorGUIUtility.IconContent("Selectable Icon", "Select"), "button")) pickermode = "select";
+        if (GUI.Toggle(new Rect(0, 64, 33, 33), pickermode == "delete", EditorGUIUtility.IconContent("winbtn_win_close@2x", "Select"), "button")) pickermode = "delete";
 
         if (timelineMode == "timing") 
         {
-            if (GUI.Toggle(new Rect(0, 74, 33, 33), pickermode == "bpmstop", new GUIContent("STP", "BPM Stop"), "button")) pickermode = "bpmstop";
+            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "bpmstop", new GUIContent("STP", "BPM Stop"), "button")) pickermode = "bpmstop";
         }
         else if (timelineMode == "lane") 
         {
-            if (GUI.Toggle(new Rect(0, 74, 33, 33), pickermode == "lane", new GUIContent("LNE", "Lane"), "button")) pickermode = "lane";
+            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "lane", new GUIContent("LNE", "Lane"), "button")) pickermode = "lane";
         }
         else if (timelineMode == "hit") 
         {
-            if (GUI.Toggle(new Rect(0, 74, 33, 33), pickermode == "hit_normal", new GUIContent("NOR", "Normal Hit"), "button")) pickermode = "hit_normal";
+            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "hit_normal", new GUIContent("NOR", "Normal Hit"), "button")) pickermode = "hit_normal";
         }
     }
 
