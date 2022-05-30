@@ -50,6 +50,10 @@ public class Charter : EditorWindow
         Destroy(CurrentCamera);
     }
 
+    ///////////////////////
+    #region Mesh Generation
+    ///////////////////////
+
     // Literally a miracle
     public Mesh MakeLaneMesh(Lane lane) 
     {
@@ -240,7 +244,6 @@ public class Charter : EditorWindow
     {
         Mesh mesh = new Mesh();
 
-        float pos = 0;
         List<Vector3> vertices = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
         List<int> tris = new List<int>();
@@ -335,6 +338,10 @@ public class Charter : EditorWindow
                 {
                     start = Vector2.Lerp(step.StartPos, next.StartPos, endPos);
                     end = Vector2.Lerp(step.EndPos, next.EndPos, endPos);
+                    Vector2 s = Vector2.Lerp(start, end, hit.Position);
+                    Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                    float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
+                    AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                 }
                 else 
                 {
@@ -342,11 +349,12 @@ public class Charter : EditorWindow
                         Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(Mathf.Clamp01(endPos), next.StartEaseY, next.StartEaseYMode)));
                     end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(Mathf.Clamp01(endPos), next.EndEaseX, next.EndEaseXMode)),
                         Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(Mathf.Clamp01(endPos), next.EndEaseY, next.EndEaseYMode)));
+                        
+                    Vector2 s = Vector2.Lerp(start, end, hit.Position);
+                    Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                    float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
+                    AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                 }
-                Vector2 s = Vector2.Lerp(start, end, hit.Position);
-                Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
-                float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
-                AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
             }
 
             curtime = Mathf.Max(nTime, curtime);
@@ -364,6 +372,12 @@ public class Charter : EditorWindow
 
         return mesh;
     }
+
+    #endregion
+
+    /////////////////////
+    #region Main GUI Loop
+    /////////////////////
 
     int HitCount;
 
@@ -523,6 +537,7 @@ public class Charter : EditorWindow
         }
     }
 
+    #endregion
 
     ///////////////////
     #region Init Window
@@ -563,7 +578,7 @@ public class Charter : EditorWindow
             song.SongArtist = initArtist;
             song.Clip = initClip;
 
-            string path = AssetDatabase.GetAssetPath(Selection.activeInstanceID);
+            string path = AssetDatabase.GetAssetPath(initClip);
             if (!System.IO.Directory.Exists(path)) path = System.IO.Path.GetDirectoryName(path);
 
             AssetDatabase.CreateAsset(song, AssetDatabase.GenerateUniqueAssetPath(path + "/" + initName + " - " + initArtist + ".asset"));
@@ -582,28 +597,35 @@ public class Charter : EditorWindow
     #region Toolbar Window
     //////////////////////
 
-    public void Toolbar(int id) {
-        TargetSong = (PlayableSong)EditorGUI.ObjectField(new Rect(133, 5, 21, 20), TargetSong, typeof(PlayableSong), false);
+    public void Toolbar(int id) 
+    {
+        // -------------------- Song selection
 
-        if (GUI.Toggle(new Rect(5, 5, 130, 20), TargetThing == (object)TargetSong, TargetSong.SongName, "buttonLeft") && TargetThing != (object)TargetSong) {
+        TargetSong = (PlayableSong)EditorGUI.ObjectField(new Rect(155, 5, 21, 20), TargetSong, typeof(PlayableSong), false);
+
+        if (GUI.Toggle(new Rect(27, 5, 130, 20), TargetThing == (object)TargetSong, TargetSong.SongName, "buttonLeft") && TargetThing != (object)TargetSong) {
             TargetThing = TargetSong;
         }
+
+        // -------------------- Chart selection
                 
         List<string> sels = new List<string>();
         foreach (Chart chart in TargetSong.Charts) sels.Add(chart.DifficultyName + " " + chart.DifficultyLevel);
-        int sel = TargetChart != null ? EditorGUI.Popup(new Rect(287, 5, 18, 20), -1, sels.ToArray(), "buttonRight") :
-            EditorGUI.Popup(new Rect(157, 5, 148, 20), -1, sels.ToArray(), "button");
+        int sel = TargetChart != null ? EditorGUI.Popup(new Rect(309, 5, 18, 20), -1, sels.ToArray(), "buttonRight") :
+            EditorGUI.Popup(new Rect(179, 5, 148, 20), -1, sels.ToArray(), "button");
         if (TargetChart == null) 
         {
             GUIStyle style = new GUIStyle("label");
             style.alignment = TextAnchor.MiddleCenter;
-            GUI.Label(new Rect(157, 5, 148, 20), "Select Chart...", style);
+            GUI.Label(new Rect(179, 5, 148, 20), "Select Chart...", style);
         }
         if (sel >= 0) TargetChart = TargetSong.Charts[sel];
         
-        if (TargetChart != null && GUI.Toggle(new Rect(157, 5, 130, 20), TargetThing == (object)TargetChart, TargetChart.DifficultyName + " " + TargetChart.DifficultyLevel, "buttonLeft") && TargetThing != (object)TargetChart) {
+        if (TargetChart != null && GUI.Toggle(new Rect(179, 5, 130, 20), TargetThing == (object)TargetChart, TargetChart.DifficultyName + " " + TargetChart.DifficultyLevel, "buttonLeft") && TargetThing != (object)TargetChart) {
             TargetThing = TargetChart;
         }
+
+        // -------------------- Player
 
         if (GUI.Button(new Rect(position.width / 2 - 20, 1, 40, 28), EditorGUIUtility.IconContent(CurrentAudioSource.isPlaying ? "PauseButton" : "PlayButton"), "buttonMid")) 
         {
@@ -618,6 +640,19 @@ public class Charter : EditorWindow
             }
         }
 
+        // -------------------- Menu
+
+        if (GUI.Button(new Rect(5, 5, 20, 20), EditorGUIUtility.IconContent("_Menu"), new GUIStyle("Button") { padding = new RectOffset(0, 0, 0, 0) }))
+        {
+            GenericMenu menu = new GenericMenu();
+
+            menu.AddDisabledItem(new GUIContent("Coming soon..."));
+
+            menu.DropDown(new Rect(5, 5, 20, 20));
+        }
+
+        // -------------------- Options
+
         if (GUI.Button(new Rect(position.width / 2 - 66, 5, 40, 20), new GUIContent("Save", "Save Chart")))
         {
             EditorUtility.SetDirty(TargetSong);
@@ -627,7 +662,7 @@ public class Charter : EditorWindow
         PlayHitsounds = GUI.Toggle(new Rect(position.width / 2 + 65, 5, 40, 20), PlayHitsounds, new GUIContent("Snd", "Play Hitsounds"), "buttonMid");
         SeparateUnits = GUI.Toggle(new Rect(position.width / 2 + 106, 5, 40, 20), SeparateUnits, new GUIContent("Sep", "Separate Units"), "buttonRight");
 
-
+        // -------------------- Timers
 
         GUIStyle counter = new GUIStyle("label");
         counter.alignment = TextAnchor.MiddleCenter;
@@ -652,7 +687,7 @@ public class Charter : EditorWindow
             counterX -= 10;
         }
 
-
+        // -------------------- Metronome thing
 
         BPMStop bstop = TargetSong.Timing.GetStop(CurrentAudioSource.time, out int index);
         Color color = Color.black;
@@ -704,9 +739,13 @@ public class Charter : EditorWindow
 
         // Category
 
-        if (GUI.Toggle(timelineMode == "lane" ? new Rect(5, 132, 80, 24) : new Rect(5, 136, 80, 20), timelineMode == "lane", "Lanes", "button")) timelineMode = "lane";
+        if (GUI.Toggle(timelineMode == "timing" ? new Rect(5, 132, 80, 24) : new Rect(5, 136, 80, 20), timelineMode == "timing", "Timing", "buttonLeft")) 
+            timelineMode = "timing";
+        if (GUI.Toggle(timelineMode == "lane" ? new Rect(86, 132, 80, 24) : new Rect(86, 136, 80, 20), timelineMode == "lane", "Lanes", "buttonRight")) 
+            timelineMode = "lane";
 
-        if (TargetLane != null && GUI.Toggle(timelineMode == "hit" ? new Rect(87, 132, 80, 24) : new Rect(87, 136, 80, 20), timelineMode == "hit", "Hits", "buttonLeft")) timelineMode = "hit";
+        if (TargetLane != null && GUI.Toggle(timelineMode == "hit" ? new Rect(168, 132, 80, 24) : new Rect(168, 136, 80, 20), timelineMode == "hit", "Hits", "button")) 
+            timelineMode = "hit";
         
 
         CurrentAudioSource.pitch = EditorGUI.Slider(new Rect(width - 202, 136, 200, 20), CurrentAudioSource.pitch, 0, 4);
@@ -772,7 +811,41 @@ public class Charter : EditorWindow
                 return Times.Count - 1;
             }
 
-            if (timelineMode == "lane") 
+            if (timelineMode == "timing")
+            {
+                foreach (BPMStop stop in TargetSong.Timing.Stops) 
+                {
+                    float a = TargetSong.Timing.ToBeat(stop.Offset);
+                    float pos = (a - seekStart) / (seekEnd - seekStart) * width;
+                    int time = AddTime(pos, 21) - verSeek;
+                    if (time < 0 || time >= 5) continue;
+                    if (a > seekStart && a < seekEnd) 
+                    {
+                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", CultureInfo.InvariantCulture)))
+                        {
+                            if (pickermode == "delete")
+                            {
+                                if (DeletingThing == stop)
+                                {
+                                    TargetSong.Timing.Stops.Remove(stop);
+                                    TargetThing = null;
+                                    break;
+                                }
+                                else
+                                {
+                                    DeletingThing = stop;
+                                }
+                            }
+                            else 
+                            {
+                                TargetThing = stop;
+                                DeletingThing = null;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (timelineMode == "lane") 
             {
                 foreach (Lane lane in TargetChart.Lanes) 
                 {
@@ -945,24 +1018,41 @@ public class Charter : EditorWindow
         {
             if (!dragged && !CurrentAudioSource.isPlaying) 
             {
+                if (dragMode == "seeksnap" && pickermode == "bpmstop") 
+                {
+                    BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(CurrentAudioSource.time, out _).BPM, Mathf.Round(CurrentAudioSource.time * 1000) / 1000);
+                    TargetSong.Timing.Stops.Add(stop);
+                    TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                    Repaint();
+                }
                 if (dragMode == "seeksnap" && pickermode == "lane") 
                 {
                     Lane lane = new Lane();
+
                     LaneStep step = new LaneStep();
                     step.Offset = Mathf.Round(pos * 1000) / 1000;
                     step.StartPos = new Vector2(-6, -3);
                     step.EndPos = new Vector2(6, -3);
                     lane.LaneSteps.Add(step);
+
                     TargetChart.Lanes.Add(lane);
                     TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+                    TargetThing = lane;
                     Repaint();
                 }
                 else if (dragMode == "seeksnap" && pickermode == "hit_normal" && TargetLane != null) 
                 {
                     HitObject hit = new HitObject();
-                    TargetLane.Objects.Add(hit);
                     hit.Offset = Mathf.Round(pos * 1000) / 1000;
+                    if (TargetThing is HitObject)
+                    {
+                        HitObject thing = (HitObject)TargetThing;
+                        hit.Position = thing.Position;
+                        hit.Length = thing.Length;
+                    }
+                    TargetLane.Objects.Add(hit);
                     TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                    TargetThing = hit;
                     Repaint();
                 }
             }
@@ -1047,6 +1137,26 @@ public class Charter : EditorWindow
                 }
                 GUILayout.EndScrollView();
             }
+            else if (TargetThing is BPMStop)
+            {
+                BPMStop thing = (BPMStop)TargetThing;
+
+                GUIStyle rightStyle = new GUIStyle("label");
+                rightStyle.alignment = TextAnchor.UpperRight;
+                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r, 
+                    rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
+                
+                GUI.Label(new Rect(7, 2, 226, 20), "BPM Stop", "boldLabel");
+                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset);
+                GUI.Label(new Rect(163, 2, 75, 20), "s", rightStyle);
+
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+                GUILayout.Label("Timing", "boldLabel");
+                thing.BPM = EditorGUILayout.FloatField("BPM", thing.BPM);
+                thing.Signature = EditorGUILayout.IntField("Signature", thing.Signature);
+                GUILayout.EndScrollView();
+            }
             else if (TargetThing is Chart)
             {
                 Chart thing = (Chart)TargetThing;
@@ -1126,7 +1236,7 @@ public class Charter : EditorWindow
 
                     {
                         step.StartPos.x = EditorGUI.FloatField(new Rect(20, h + o + 19, 40, 14), step.StartPos.x, fieldStyle);
-                    GUI.Label(new Rect(20, h + o + 19, 40, 14), "x0", rightStyle);
+                        GUI.Label(new Rect(20, h + o + 19, 40, 14), "x0", rightStyle);
                         int easeX = eso.IndexOf(step.StartEaseX);
                         step.StartEaseXMode = (EaseMode)EditorGUI.EnumPopup(new Rect(61, h + o + 19, 17, 14), step.StartEaseXMode, buttonStyle);
                         GUI.Button(new Rect(61, h + o + 19, 17, 14), new [] { "I", "O", "IO" }[(int)step.StartEaseXMode], buttonStyle );
@@ -1134,7 +1244,7 @@ public class Charter : EditorWindow
                         if (newEaseX != easeX) step.StartEaseX = eso[newEaseX];
                         
                         step.StartPos.y = EditorGUI.FloatField(new Rect(110, h + o + 19, 40, 14), step.StartPos.y, fieldStyle);
-                    GUI.Label(new Rect(110, h + o + 19, 40, 14), "y0", rightStyle);
+                        GUI.Label(new Rect(110, h + o + 19, 40, 14), "y0", rightStyle);
                         int easeY = eso.IndexOf(step.StartEaseY);
                         step.StartEaseYMode = (EaseMode)EditorGUI.EnumPopup(new Rect(151, h + o + 19, 17, 14), step.StartEaseYMode, buttonStyle);
                         GUI.Button(new Rect(151, h + o + 19, 17, 14), new [] { "I", "O", "IO" }[(int)step.StartEaseYMode], buttonStyle );
@@ -1143,7 +1253,7 @@ public class Charter : EditorWindow
                     }
                     {
                         step.EndPos.x = EditorGUI.FloatField(new Rect(20, h + o + 34, 40, 14), step.EndPos.x, fieldStyle);
-                    GUI.Label(new Rect(20, h + o + 34, 40, 14), "x1", rightStyle);
+                        GUI.Label(new Rect(20, h + o + 34, 40, 14), "x1", rightStyle);
                         int easeX = eso.IndexOf(step.EndEaseX);
                         step.EndEaseXMode = (EaseMode)EditorGUI.EnumPopup(new Rect(61, h + o + 34, 17, 14), step.EndEaseXMode, buttonStyle);
                         GUI.Button(new Rect(61, h + o + 34, 17, 14), new [] { "I", "O", "IO" }[(int)step.EndEaseXMode], buttonStyle );
@@ -1151,7 +1261,7 @@ public class Charter : EditorWindow
                         if (newEaseX != easeX) step.EndEaseX = eso[newEaseX];
                         
                         step.EndPos.y = EditorGUI.FloatField(new Rect(110, h + o + 34, 40, 14), step.EndPos.y, fieldStyle);
-                    GUI.Label(new Rect(110, h + o + 34, 40, 14), "y1", rightStyle);
+                        GUI.Label(new Rect(110, h + o + 34, 40, 14), "y1", rightStyle);
                         int easeY = eso.IndexOf(step.EndEaseY);
                         step.EndEaseYMode = (EaseMode)EditorGUI.EnumPopup(new Rect(151, h + o + 34, 17, 14), step.EndEaseYMode, buttonStyle);
                         GUI.Button(new Rect(151, h + o + 34, 17, 14), new [] { "I", "O", "IO" }[(int)step.EndEaseYMode], buttonStyle );
@@ -1335,7 +1445,11 @@ public class Charter : EditorWindow
         if (GUI.Toggle(new Rect(0, 0, 33, 33), pickermode == "select", new GUIContent("SEL", "Select"), "button")) pickermode = "select";
         if (GUI.Toggle(new Rect(0, 32, 33, 33), pickermode == "delete", new GUIContent("DEL", "Delete"), "button")) pickermode = "delete";
 
-        if (timelineMode == "lane") 
+        if (timelineMode == "timing") 
+        {
+            if (GUI.Toggle(new Rect(0, 74, 33, 33), pickermode == "bpmstop", new GUIContent("STP", "BPM Stop"), "button")) pickermode = "bpmstop";
+        }
+        else if (timelineMode == "lane") 
         {
             if (GUI.Toggle(new Rect(0, 74, 33, 33), pickermode == "lane", new GUIContent("LNE", "Lane"), "button")) pickermode = "lane";
         }
@@ -1346,4 +1460,5 @@ public class Charter : EditorWindow
     }
 
     #endregion
+
 }

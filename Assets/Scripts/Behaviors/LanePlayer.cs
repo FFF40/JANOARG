@@ -66,7 +66,6 @@ public class LanePlayer : MonoBehaviour
             }
             else
             {
-                Debug.Log(t);
                 Destroy(LaneMeshes[0].gameObject);
                 LaneMeshes.RemoveAt(0);
                 Index++;
