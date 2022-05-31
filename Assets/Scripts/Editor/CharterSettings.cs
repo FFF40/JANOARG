@@ -22,6 +22,13 @@ public class CharterSettings : EditorWindow
         wnd.titleContent = new GUIContent("Charter Settings");
         wnd.minSize = new Vector2(640, 400);
     }
+    public static void Open(int tab)
+    {
+        CharterSettings wnd = GetWindow<CharterSettings>();
+        wnd.titleContent = new GUIContent("Charter Settings");
+        wnd.minSize = new Vector2(640, 400);
+        wnd.currentTab = tab;
+    }
 
     Vector2 scrollPos = Vector2.zero;
 
@@ -53,13 +60,20 @@ public class CharterSettings : EditorWindow
 
         GUI.Label(new Rect(0, 0, 149, Screen.height), "", bg);
         EditorGUILayout.BeginScrollView(scrollPos, GUILayout.MinWidth(150), GUILayout.MaxWidth(150));
-        if (GUILayout.Toggle(currentTab == 0, "Keybindings" , tab)) currentTab = 0;
-        if (GUILayout.Toggle(currentTab == 1, "Preferences", tab)) currentTab = 1;
+        if (GUILayout.Toggle(currentTab == 0, "Preferences", tab)) currentTab = 0;
+        if (GUILayout.Toggle(currentTab == 1, "Keybindings", tab)) currentTab = 1;
         EditorGUILayout.EndScrollView();
 
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
         GUILayout.Space(4);
         if (currentTab == 0)
+        {
+            GUILayout.Label("Preferences", title);
+            GUILayout.Space(8);
+            GUILayout.Label("Coming soon...");
+            GUILayout.Label("(I need to figure out how to store data in the editor first)");
+        }
+        else if (currentTab == 1)
         {
             GUILayout.Label("Keybindings", title);
             string curCat = "";
@@ -80,13 +94,6 @@ public class CharterSettings : EditorWindow
                 GUILayout.Label(kb.Value.ToString(), EditorStyles.textField, GUILayout.MaxWidth(100));
                 EditorGUILayout.EndHorizontal();
             }
-        }
-        else if (currentTab == 1)
-        {
-            GUILayout.Label("Preferences", title);
-            GUILayout.Space(8);
-            GUILayout.Label("Coming soon...");
-            GUILayout.Label("(I need to figure out how to store data in the editor first)");
         }
         EditorGUILayout.EndScrollView();
 
@@ -176,6 +183,8 @@ public class CharterKeybinds
 
         Values["Selection/Previous Item"] = new Keybind(KeyCode.LeftArrow, EventModifiers.None);
         Values["Selection/Next Item"] = new Keybind(KeyCode.RightArrow, EventModifiers.None);
+        Values["Selection/Previous Lane"] = new Keybind(KeyCode.LeftArrow, EventModifiers.Shift);
+        Values["Selection/Next Lane"] = new Keybind(KeyCode.RightArrow, EventModifiers.Shift);
 
         Values["Misc./Show Keybindings"] = new Keybind(KeyCode.Slash, EventModifiers.Shift);
     }

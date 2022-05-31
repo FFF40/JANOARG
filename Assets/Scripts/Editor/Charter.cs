@@ -588,9 +588,19 @@ public class Charter : EditorWindow
                 else if (TargetThing is HitObject) TargetThing = 
                     TargetLane.Objects[Math.Min(TargetLane.Objects.IndexOf((HitObject)TargetThing) + 1, TargetLane.Objects.Count - 1)];
             }
+            else if (Event.current == CharterSettings.Keybinds["Selection/Previous Lane"])
+            {
+                if (TargetLane != null) TargetThing = TargetLane = 
+                    TargetChart.Lanes[Math.Max(TargetChart.Lanes.IndexOf(TargetLane) - 1, 0)];
+            }
+            else if (Event.current == CharterSettings.Keybinds["Selection/Next Lane"])
+            {
+                if (TargetLane != null) TargetThing = TargetLane = 
+                    TargetChart.Lanes[Math.Min(TargetChart.Lanes.IndexOf(TargetLane) + 1, TargetChart.Lanes.Count - 1)];
+            }
             else if (Event.current == CharterSettings.Keybinds["Misc./Show Keybindings"])
             {
-                CharterSettings.Open();
+                CharterSettings.Open(1);
             }
             Event.current.Use();
         }
@@ -882,7 +892,7 @@ public class Charter : EditorWindow
                     if (time < 0 || time >= 5) continue;
                     if (a > seekStart && a < seekEnd) 
                     {
-                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant)))
+                        if (GUI.Toggle(new Rect(pos - 29, 3 + time * 22, 60, 20), TargetThing == stop && DeletingThing != stop, DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), "button"))
                         {
                             if (pickermode == "delete")
                             {
@@ -927,7 +937,7 @@ public class Charter : EditorWindow
                             if (c > seekStart && c < seekEnd) 
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
-                                if (GUI.Button(new Rect(pos3 - 2, 3 + time * 22, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : "|"))
+                                if (GUI.Toggle(new Rect(pos3 - 2, 3 + time * 22, 6, 20), TargetThing == lane.LaneSteps[x] && DeletingThing != lane.LaneSteps[x], DeletingThing == lane.LaneSteps[x] ? "?" : "|", "button"))
                                 {
                                     if (pickermode == "delete")
                                     {
@@ -952,7 +962,7 @@ public class Charter : EditorWindow
                         if (a > seekStart || a < seekEnd) 
                         {
                             float pos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 13), (b - seekStart) / (seekEnd - seekStart) * width - 15);
-                            if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "|"))
+                            if (GUI.Toggle(new Rect(pos - 9, 3 + time * 22, 20, 20), TargetThing == lane && DeletingThing != lane, DeletingThing == lane ? "?" : "|", "button"))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -1003,7 +1013,7 @@ public class Charter : EditorWindow
                     if (time < 0 || time >= 5) continue;
                     if (hit.Offset > seekStart && hit.Offset < seekEnd) 
                     {
-                        if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == hit ? "?" : "|"))
+                        if (GUI.Toggle(new Rect(pos - 9, 3 + time * 22, 20, 20), TargetThing == hit && DeletingThing != hit, DeletingThing == hit ? "?" : "|", "button"))
                         {
                             if (pickermode == "delete")
                             {
