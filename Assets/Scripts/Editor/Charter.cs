@@ -32,7 +32,8 @@ public class Charter : EditorWindow
     public AudioSource CurrentAudioSource;
     public Camera CurrentCamera;
     public AudioClip MetronomeSound;
-    public AudioClip HitSound;
+    public AudioClip NormalHitSound;
+    public AudioClip CatchHitSound;
 
     public bool PlayMetronome;
     public bool SeparateUnits;
@@ -46,8 +47,8 @@ public class Charter : EditorWindow
 
     public void OnDestroy() 
     {
-        Destroy(CurrentAudioSource);
-        Destroy(CurrentCamera);
+        DestroyImmediate(CurrentAudioSource);
+        DestroyImmediate(CurrentCamera);
     }
 
     ///////////////////////
@@ -190,7 +191,7 @@ public class Charter : EditorWindow
 
         if (Mathf.Abs(step.Offset) > 5) return mesh;
 
-        void AddStep(Vector3 start, Vector3 end) {
+        void AddStep(Vector3 start, Vector3 end, bool addTris = true) {
 
             vertices.Add(start);
             vertices.Add(end);
@@ -202,16 +203,8 @@ public class Charter : EditorWindow
             uvs.Add(Vector2.zero);
             uvs.Add(Vector2.zero);
             
-            if (vertices.Count >= 8) 
+            if (addTris && vertices.Count >= 8) 
             {
-                tris.Add(vertices.Count - 1);
-                tris.Add(vertices.Count - 5);
-                tris.Add(vertices.Count - 6);
-                
-                tris.Add(vertices.Count - 6);
-                tris.Add(vertices.Count - 2);
-                tris.Add(vertices.Count - 1);
-
                 tris.Add(vertices.Count - 8);
                 tris.Add(vertices.Count - 7);
                 tris.Add(vertices.Count - 3);
@@ -222,13 +215,62 @@ public class Charter : EditorWindow
             }
         }
         float angle = Vector2.SignedAngle(step.EndPos - step.StartPos, Vector2.left);
+        Vector3 afwd = Quaternion.Euler(0, 0, -angle) * Vector3.left;
         Vector3 fwd = Vector3.forward * step.Offset * 120;
-        for (float ang = 45; ang <= 405; ang += 90) 
+        if (hit.Type == HitObject.HitType.Normal)
         {
-            Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
-                * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
-                * .2f;
-            AddStep((Vector3)startPos + ofs + fwd, (Vector3)endPos + ofs + fwd);
+            for (float ang = 45; ang <= 405; ang += 90) 
+            {
+                Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
+                    * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
+                    * .2f;
+                AddStep((Vector3)startPos + ofs + fwd, (Vector3)endPos + ofs + fwd);
+            }
+            for (float ang = 45; ang <= 405; ang += 90) 
+            {
+                Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
+                    * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
+                    * .2f;
+                AddStep((Vector3)startPos - afwd * .2f + ofs + fwd, (Vector3)startPos - afwd * .1f + ofs + fwd, angle != 45);
+            }
+            for (float ang = 45; ang <= 405; ang += 90) 
+            {
+                Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
+                    * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
+                    * .2f;
+                AddStep((Vector3)endPos + afwd * .1f + ofs + fwd, (Vector3)endPos + afwd * .2f + ofs + fwd, angle != 45);
+            }
+        }
+        else if (hit.Type == HitObject.HitType.Catch)
+        {
+            /*vertices.Add((Vector3)startPos + fwd);
+            uvs.Add(Vector2.zero);
+            vertices.Add((Vector3)endPos + fwd);
+            uvs.Add(Vector2.zero);
+            for (float ang = 45; ang <= 405; ang += 90) 
+            {
+                Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
+                    * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
+                    * .3f;
+                vertices.Add((Vector3)(startPos + endPos) / 2 + ofs + fwd);
+                uvs.Add(Vector2.zero);
+            }
+            for (int a = 0; a < 4; a++) 
+            {
+                tris.Add(0);
+                tris.Add(2 + (a % 4));
+                tris.Add(2 + ((a + 1) % 4));
+                tris.Add(1);
+                tris.Add(2 + ((a + 1) % 4));
+                tris.Add(2 + (a % 4));
+            }*/
+            for (float ang = 45; ang <= 405; ang += 90) 
+            {
+                Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
+                    * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
+                    * .12f;
+                AddStep((Vector3)startPos + ofs + fwd, (Vector3)endPos + ofs + fwd);
+            }
         }
 
         mesh.Clear();
@@ -345,15 +387,20 @@ public class Charter : EditorWindow
                 }
                 else 
                 {
-                    start = new Vector3(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(Mathf.Clamp01(endPos), next.StartEaseX, next.StartEaseXMode)),
-                        Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(Mathf.Clamp01(endPos), next.StartEaseY, next.StartEaseYMode)));
-                    end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(Mathf.Clamp01(endPos), next.EndEaseX, next.EndEaseXMode)),
-                        Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(Mathf.Clamp01(endPos), next.EndEaseY, next.EndEaseYMode)));
-                        
-                    Vector2 s = Vector2.Lerp(start, end, hit.Position);
-                    Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
-                    float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
-                    AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
+
+                    void Add(float pos) 
+                    {
+                        start = new Vector3(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(pos, next.StartEaseX, next.StartEaseXMode)),
+                            Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(pos, next.StartEaseY, next.StartEaseYMode)));
+                        end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(pos, next.EndEaseX, next.EndEaseXMode)),
+                            Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(pos, next.EndEaseY, next.EndEaseYMode)));
+                        Vector2 s = Vector2.Lerp(start, end, hit.Position);
+                        Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                        float pp = p + ((nTime - sTime) * pos - Math.Max(curtime - sTime, 0)) * step.Speed * 120;
+                        AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
+                    }
+                    for (float x = Mathf.Floor(Mathf.Clamp01(startPos) * 16 + 1.01f) / 16; x < Mathf.Clamp01(endPos); x = Mathf.Floor(x * 16 + 1.01f) / 16) Add(x);
+                        Add(Mathf.Clamp01(endPos));
                 }
             }
 
@@ -379,7 +426,7 @@ public class Charter : EditorWindow
     #region Main GUI Loop
     /////////////////////
 
-    int HitCount;
+    int NormalCount, CatchCount;
 
     public void OnGUI()
     {
@@ -400,9 +447,13 @@ public class Charter : EditorWindow
         {
             MetronomeSound = Resources.Load<AudioClip>("Sounds/Metronome");
         }
-        if (!HitSound) 
+        if (!NormalHitSound) 
         {
-            HitSound = Resources.Load<AudioClip>("Sounds/Hit");
+            NormalHitSound = Resources.Load<AudioClip>("Sounds/Normal Hit");
+        }
+        if (!CatchHitSound) 
+        {
+            CatchHitSound = Resources.Load<AudioClip>("Sounds/Catch Hit");
         }
 
 
@@ -441,7 +492,7 @@ public class Charter : EditorWindow
             float camLeft = (bound.center.x - (width - bound.center.x));
             float camRatio = (bound.height / (height - 184));
 
-            int count = 0;
+            int ncount = 0, ccount = 0;
 
             if (TargetChart != null) 
             {
@@ -473,14 +524,16 @@ public class Charter : EditorWindow
                                 if (TargetThing == hit && mesh.vertices.Length > 0) 
                                     Repaint();
                                 Meshes.Add(mesh);
-                                count++;
+                                if (hit.Type == HitObject.HitType.Catch) ccount++;
+                                else ncount++;
                             }
                             if (hit.HoldLength > 0 && hit.Offset + hit.HoldLength > pos)
                             {
                                 Mesh mesh = MakeHoldMesh(hit, lane);
                                 Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HoldMaterial == null ? chart.HitMaterial : chart.HoldMaterial, 0, CurrentCamera);
                                 Meshes.Add(mesh);
-                                count++;
+                                if (hit.Type == HitObject.HitType.Catch) ccount++;
+                                else ncount++;
                             }
                         } 
                     }
@@ -493,11 +546,16 @@ public class Charter : EditorWindow
                     new Vector2(bound.x, bound.y));
             }
 
-            if (HitCount > count && PlayHitsounds && CurrentAudioSource.isPlaying)
+            if (NormalCount > ncount && PlayHitsounds && CurrentAudioSource.isPlaying)
             {
-                for (int a = 0; a < HitCount - count; a++) CurrentAudioSource.PlayOneShot(HitSound);
+                for (int a = 0; a < NormalCount - ncount; a++) CurrentAudioSource.PlayOneShot(NormalHitSound);
             }
-            HitCount = count;
+            NormalCount = ncount;
+            if (CatchCount > ccount && PlayHitsounds && CurrentAudioSource.isPlaying)
+            {
+                for (int a = 0; a < CatchCount - ccount; a++) CurrentAudioSource.PlayOneShot(CatchHitSound);
+            }
+            CatchCount = ccount;
 
             foreach (Mesh mesh in Meshes) DestroyImmediate(mesh);
             Meshes = new List<Mesh>();
@@ -1383,6 +1441,7 @@ public class Charter : EditorWindow
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
+                thing.Type = (HitObject.HitType)EditorGUILayout.EnumPopup("Type", (System.Enum)thing.Type);
                 GUILayout.Label("Transform", "boldLabel");
                 thing.Position = EditorGUILayout.FloatField("Position", thing.Position);
                 thing.Length = EditorGUILayout.FloatField("Length", thing.Length);

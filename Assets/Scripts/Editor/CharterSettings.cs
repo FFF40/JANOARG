@@ -20,13 +20,13 @@ public class CharterSettings : EditorWindow
     {
         CharterSettings wnd = GetWindow<CharterSettings>();
         wnd.titleContent = new GUIContent("Charter Settings");
-        wnd.minSize = new Vector2(640, 400);
+        wnd.minSize = new Vector2(720, 400);
     }
     public static void Open(int tab)
     {
         CharterSettings wnd = GetWindow<CharterSettings>();
         wnd.titleContent = new GUIContent("Charter Settings");
-        wnd.minSize = new Vector2(640, 400);
+        wnd.minSize = new Vector2(720, 400);
         wnd.currentTab = tab;
     }
 
@@ -75,8 +75,14 @@ public class CharterSettings : EditorWindow
         }
         else if (currentTab == 1)
         {
-            GUILayout.Label("Keybindings", title);
+            GUILayout.Label("Keybindings", title, GUILayout.MinWidth(Screen.width - 180));
             string curCat = "";
+            
+            int rows = Mathf.Max((int)(Screen.width - 180) / 220, 1);
+            int crow = 0;
+            float w = (Screen.width - 180) / rows;
+            float[] hs = new float[rows];
+
             foreach (KeyValuePair<string, Keybind> kb in Keybinds.Values)
             {
                 string cat = kb.Key.Remove(kb.Key.IndexOf("/"));
@@ -84,16 +90,21 @@ public class CharterSettings : EditorWindow
 
                 if (curCat != cat) 
                 {
-                    GUILayout.Space(8);
-                    GUILayout.Label(cat, title2);
+                    crow = 0;
+                    for (int a = 1; a < rows; a++) if (hs[a] < hs[crow]) crow = a;
+                    GUI.Label(new Rect(w * crow + 4, hs[crow] + 32, w - 5, 24), cat, title2);
+                    hs[crow] += 32;
                     curCat = cat;
                 }
 
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.Label(name, GUILayout.MaxWidth(120));
-                GUILayout.Label(kb.Value.ToString(), EditorStyles.textField, GUILayout.MaxWidth(100));
-                EditorGUILayout.EndHorizontal();
+                GUI.Label(new Rect(w * crow + 4, hs[crow] + 25, 120, 20), name);
+                GUI.Button(new Rect(w * crow + 130, hs[crow] + 24, w - 132, 20), kb.Value.ToString(), EditorStyles.textField);
+                hs[crow] += 22;
             }
+            
+            crow = 0;
+            for (int a = 1; a < rows; a++) if (hs[a] > hs[crow]) crow = a;
+            GUILayout.Space(hs[crow]);
         }
         EditorGUILayout.EndScrollView();
 

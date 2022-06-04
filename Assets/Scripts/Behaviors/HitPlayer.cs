@@ -33,7 +33,7 @@ public class HitPlayer : MonoBehaviour
         Indicator.localRotation = Quaternion.Euler(Vector3.forward * Vector2.SignedAngle(Vector2.right, rEnd - rStart));
         IndicatorMesh.material = ChartPlayer.main.CurrentChart.HitMaterial;
 
-        ChartPlayer.main.MaxScore += 3;
+        ChartPlayer.main.MaxScore += hit.Type == HitObject.HitType.Catch ? 1 : 3;
 
         CurrentLane = lane;
         CurrentHit = hit;
@@ -47,7 +47,7 @@ public class HitPlayer : MonoBehaviour
         {
             Destroy(gameObject);
             Indicator.gameObject.SetActive(false);
-            ChartPlayer.main.AddScore(3, true);
+            ChartPlayer.main.AddScore(CurrentHit.Type == HitObject.HitType.Catch ? 1 : 3, true);
             ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.HitSound);
         }
         else if (time > CurrentHit.Offset + .2f)

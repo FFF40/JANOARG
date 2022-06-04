@@ -256,6 +256,7 @@ public class LaneStep : IStoryboardable
 [System.Serializable]
 public class HitObject : IStoryboardable 
 {
+    public HitType Type;
     public float Offset = 0;
     public float Position;
     public float Length;
@@ -265,7 +266,6 @@ public class HitObject : IStoryboardable
     {
         Normal,
         Catch,
-        Flick,
     }
 
     public List<RailTimestamp> Rail = new List<RailTimestamp>();

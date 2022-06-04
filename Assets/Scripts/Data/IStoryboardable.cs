@@ -102,6 +102,20 @@ public class Ease
             Out = (x) => 1 - Mathf.Pow(1 - x, 5),
             InOut = (x) => x < 0.5f ? 16 * x * x * x * x * x : 1 - Mathf.Pow(-2 * x + 2, 5) / 2,
         },
+        new Ease {
+            ID = "Exponential",
+            Name = "Exponential",
+            In = (x) => x == 0 ? 0 : Mathf.Pow(2, 10 * x - 10),
+            Out = (x) => x == 1 ? 1 : 1 - Mathf.Pow(2, -10 * x),
+            InOut = (x) => x == 0 ? 0 : x == 1 ? 1 : x < 0.5 ? Mathf.Pow(2, 20 * x - 10) / 2 : (2 - Mathf.Pow(2, -20 * x + 10)) / 2,
+        },
+        new Ease {
+            ID = "Circle",
+            Name = "Circle",
+            In = (x) => 1 - Mathf.Sqrt(1 - Mathf.Pow(x, 2)),
+            Out = (x) => Mathf.Sqrt(1 - Mathf.Pow(x - 1, 2)),
+            InOut = (x) => x < 0.5 ? (1 - Mathf.Sqrt(1 - Mathf.Pow(2 * x, 2))) / 2 : (Mathf.Sqrt(1 - Mathf.Pow(-2 * x + 2, 2)) + 1) / 2,
+        },
     };
 }
 
