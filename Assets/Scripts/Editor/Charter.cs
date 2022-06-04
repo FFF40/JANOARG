@@ -1169,7 +1169,7 @@ public class Charter : EditorWindow
                     TargetThing = lane;
                     Repaint();
                 }
-                else if (dragMode == "seeksnap" && pickermode == "hit_normal" && TargetLane != null) 
+                else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null) 
                 {
                     HitObject hit = new HitObject();
                     hit.Offset = Mathf.Round(pos * 1000) / 1000;
@@ -1178,6 +1178,7 @@ public class Charter : EditorWindow
                         HitObject thing = (HitObject)TargetThing;
                         hit.Position = thing.Position;
                         hit.Length = thing.Length;
+                        hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
                     }
                     TargetLane.Objects.Add(hit);
                     TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
@@ -1587,6 +1588,7 @@ public class Charter : EditorWindow
         else if (timelineMode == "hit") 
         {
             if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "hit_normal", new GUIContent("NOR", "Normal Hit"), "button")) pickermode = "hit_normal";
+            if (GUI.Toggle(new Rect(0, 138, 33, 33), pickermode == "hit_catch", new GUIContent("CAT", "Catch Hit"), "button")) pickermode = "hit_catch";
         }
     }
 
