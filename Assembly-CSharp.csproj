@@ -42,6 +42,7 @@
      <Compile Include="Assets\Scripts\Behaviors\HitPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\LanePlayer.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\HitEffect.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />

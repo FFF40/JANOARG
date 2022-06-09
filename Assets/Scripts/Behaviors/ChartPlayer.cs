@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -17,18 +18,25 @@ public class ChartPlayer : MonoBehaviour
     public float Score;
     public float MaxScore;
     public int Combo;
+    public int MaxCombo;
 
     [Header("Settings")]
+    public float ScrollSpeed = 120;
     public float SyncThreshold = .05f;
 
     [Header("Objects")]
     public LanePlayer LanePlayerSample;
     public MeshFilter LaneMeshSample;
-    public HitPlayer HitPlayerSample;
+    public HitPlayer NormalHitSample;
+    public HitPlayer CatchHitSample;
+    public HitEffect HitJudgeEffectSample;
+    [Space]
     public Camera MainCamera;
+    public Transform JudgeEffectCanvas;
 
     [Header("Sounds")]
-    public AudioClip HitSound;
+    public AudioClip NormalHitSound;
+    public AudioClip CatchHitSound;
 
     [Header("Interface")]
     public AudioSource AudioPlayer;
@@ -98,9 +106,9 @@ public class ChartPlayer : MonoBehaviour
 
     void UpdateScore() 
     {
-        ComboText.text = Combo.ToString("#");
+        ComboText.text = Combo.ToString("#", CultureInfo.InvariantCulture);
 
-        string score = ((int)(Score / Mathf.Max(MaxScore, 1) * 1e6)).ToString("D7");
+        string score = ((int)(Score / Mathf.Max(MaxScore, 1) * 1e6)).ToString("D7", CultureInfo.InvariantCulture);
         bool d = false;
         for (int a = ScoreDigits.Count - 1; a >= 0; a--) 
         {
@@ -137,8 +145,9 @@ public class ChartPlayer : MonoBehaviour
         {
             if (!AudioPlayer.isPlaying) AudioPlayer.Play();
             if (Mathf.Abs(AudioPlayer.time - CurrentTime) > SyncThreshold) AudioPlayer.time = CurrentTime;
+            else CurrentTime = AudioPlayer.time;
         }
-        SongProgressSlider.value = AudioPlayer.time / Song.Clip.length;
+        SongProgressSlider.value = CurrentTime / Song.Clip.length;
         
         MainCamera.transform.position = CurrentChart.CameraPivot;
         MainCamera.transform.eulerAngles = CurrentChart.CameraRotation;

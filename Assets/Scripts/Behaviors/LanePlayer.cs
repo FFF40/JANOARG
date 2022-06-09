@@ -33,7 +33,7 @@ public class LanePlayer : MonoBehaviour
             float nSec = ChartPlayer.main.Song.Timing.ToSeconds(step.Offset);
             float nPos = pos + prev.Speed * (nSec - sec);
             MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, Container);
-            mf.mesh = MakeLaneMesh(prev, step, pos * 120, nPos * 120, 0);
+            mf.mesh = MakeLaneMesh(prev, step, pos * ChartPlayer.main.ScrollSpeed, nPos * ChartPlayer.main.ScrollSpeed, 0);
             mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.CurrentChart.LaneMaterial;
             pos = nPos;
             sec = nSec;
@@ -45,7 +45,8 @@ public class LanePlayer : MonoBehaviour
 
         foreach (HitObject hit in lane.Objects)
         {
-            HitPlayer hp = Instantiate(ChartPlayer.main.HitPlayerSample, Container);
+            
+            HitPlayer hp = Instantiate(hit.Type == HitObject.HitType.Catch ? ChartPlayer.main.CatchHitSample : ChartPlayer.main.NormalHitSample, Container);
             hp.SetHit(this, hit);
         }
     }
@@ -60,8 +61,8 @@ public class LanePlayer : MonoBehaviour
             if (t < 1)
             {
                 CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);
-                if (t > 0) LaneMeshes[0].mesh = MakeLaneMesh(CurrentLane.LaneSteps[Index], CurrentLane.LaneSteps[Index + 1], Positions[Index] * 120, Positions[Index + 1] * 120, Mathf.Clamp01(t));
-                Container.localPosition = Vector3.forward * CurrentPos * -120;
+                if (t > 0) LaneMeshes[0].mesh = MakeLaneMesh(CurrentLane.LaneSteps[Index], CurrentLane.LaneSteps[Index + 1], Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, Mathf.Clamp01(t));
+                Container.localPosition = Vector3.forward * CurrentPos * -ChartPlayer.main.ScrollSpeed;
                 break;
             }
             else
@@ -130,6 +131,82 @@ public class LanePlayer : MonoBehaviour
                     Mathf.Lerp(pre.EndPos.y, cur.EndPos.y, Ease.Get(x, cur.EndEaseY, cur.EndEaseYMode)), cPos);
                 AddStep(start, end);
             }
+        }
+
+        mesh.Clear();
+        mesh.vertices = vertices.ToArray();
+        mesh.uv = uvs.ToArray();
+        mesh.triangles = tris.ToArray();
+        mesh.RecalculateNormals();
+
+        return mesh;
+    }
+
+    public static Mesh MakeHoldMesh(HitObject ho, LaneStep pre, LaneStep cur, float prePos, float curPos, float minPos, float maxPos) 
+    {
+        Mesh mesh = new Mesh();
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
+        List<int> tris = new List<int>();
+
+        void AddStep(Vector3 start, Vector3 end) {
+
+            vertices.Add(start);
+            vertices.Add(end);
+            vertices.Add(start);
+            vertices.Add(end);
+
+            uvs.Add(Vector2.zero);
+            uvs.Add(Vector2.zero);
+            uvs.Add(Vector2.zero);
+            uvs.Add(Vector2.zero);
+            
+            if (vertices.Count >= 8) 
+            {
+                tris.Add(vertices.Count - 1);
+                tris.Add(vertices.Count - 5);
+                tris.Add(vertices.Count - 6);
+                
+                tris.Add(vertices.Count - 6);
+                tris.Add(vertices.Count - 2);
+                tris.Add(vertices.Count - 1);
+
+                tris.Add(vertices.Count - 8);
+                tris.Add(vertices.Count - 7);
+                tris.Add(vertices.Count - 3);
+                
+                tris.Add(vertices.Count - 3);
+                tris.Add(vertices.Count - 4);
+                tris.Add(vertices.Count - 8);
+            }
+        }
+
+        if (cur.StartEaseX == "Linear" && cur.StartEaseY == "Linear" && cur.EndEaseX == "Linear" && cur.EndEaseY == "Linear")
+        {
+            Vector3 start = Vector3.Lerp((Vector3)pre.StartPos + Vector3.forward * prePos, (Vector3)cur.StartPos + Vector3.forward * curPos, minPos);
+            Vector3 end = Vector3.Lerp((Vector3)pre.EndPos + Vector3.forward * prePos, (Vector3)cur.EndPos + Vector3.forward * curPos, minPos);
+            AddStep(Vector3.Lerp(start, end, ho.Position), Vector3.Lerp(start, end, ho.Position + ho.Length));
+            Vector3 start2 = Vector3.Lerp((Vector3)pre.StartPos + Vector3.forward * prePos, (Vector3)cur.StartPos + Vector3.forward * curPos, maxPos);
+            Vector3 end2 = Vector3.Lerp((Vector3)pre.EndPos + Vector3.forward * prePos, (Vector3)cur.EndPos + Vector3.forward * curPos, maxPos);
+            AddStep(Vector3.Lerp(start2, end2, ho.Position), Vector3.Lerp(start2, end2, ho.Position + ho.Length));
+        }
+        else
+        {
+            void AddPos(float x)
+            {
+                float cPos = Mathf.Lerp(prePos, curPos, x);
+                Vector3 start = new Vector3(Mathf.Lerp(pre.StartPos.x, cur.StartPos.x, Ease.Get(x, cur.StartEaseX, cur.StartEaseXMode)),
+                    Mathf.Lerp(pre.StartPos.y, cur.StartPos.y, Ease.Get(x, cur.StartEaseY, cur.StartEaseYMode)), cPos);
+                Vector3 end = new Vector3(Mathf.Lerp(pre.EndPos.x, cur.EndPos.x, Ease.Get(x, cur.EndEaseX, cur.EndEaseXMode)),
+                    Mathf.Lerp(pre.EndPos.y, cur.EndPos.y, Ease.Get(x, cur.EndEaseY, cur.EndEaseYMode)), cPos);
+                AddStep(Vector3.Lerp(start, end, ho.Position), Vector3.Lerp(start, end, ho.Position + ho.Length));
+            }
+            for (float x = minPos; x < maxPos; x = Mathf.Floor(x * 16 + 1.01f) / 16)
+            {
+                AddPos(x);
+            }
+            AddPos(maxPos);
         }
 
         mesh.Clear();

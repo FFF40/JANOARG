@@ -224,21 +224,21 @@ public class Charter : EditorWindow
                 Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
                     * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
                     * .2f;
-                AddStep((Vector3)startPos + ofs + fwd, (Vector3)endPos + ofs + fwd);
+                AddStep((Vector3)startPos + afwd * .2f + ofs + fwd, (Vector3)endPos - afwd * .2f + ofs + fwd);
             }
             for (float ang = 45; ang <= 405; ang += 90) 
             {
                 Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
                     * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
                     * .2f;
-                AddStep((Vector3)startPos - afwd * .2f + ofs + fwd, (Vector3)startPos - afwd * .1f + ofs + fwd, angle != 45);
+                AddStep((Vector3)startPos + ofs + fwd, (Vector3)startPos + afwd * .1f + ofs + fwd, angle != 45);
             }
             for (float ang = 45; ang <= 405; ang += 90) 
             {
                 Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
                     * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
                     * .2f;
-                AddStep((Vector3)endPos + afwd * .1f + ofs + fwd, (Vector3)endPos + afwd * .2f + ofs + fwd, angle != 45);
+                AddStep((Vector3)endPos - afwd * .1f + ofs + fwd, (Vector3)endPos + ofs + fwd, angle != 45);
             }
         }
         else if (hit.Type == HitObject.HitType.Catch)
