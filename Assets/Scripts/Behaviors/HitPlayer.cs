@@ -138,7 +138,7 @@ public class HitPlayer : MonoBehaviour
                 }
                 if (CurrentHit.Type == HitObject.HitType.Normal) 
                 {
-                    float acc = GetAccuracy(time - CurrentHit.Offset - Time.deltaTime / 2);
+                    float acc = 0; //GetAccuracy(time - CurrentHit.Offset - Time.deltaTime / 2);
                     MakeHitEffect(acc);
                     ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
                     ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);

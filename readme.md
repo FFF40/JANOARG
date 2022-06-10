@@ -5,6 +5,7 @@
     <br/><br/>
 </div>
 
+![Looks, name, and chart not final](Previews/preview.gif)
 
 ## How to Contribute Code / Make Charts
 
