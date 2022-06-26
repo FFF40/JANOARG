@@ -16,9 +16,11 @@ public class ChartPlayer : MonoBehaviour
     public bool AutoPlay;
     public float CurrentTime;
     public float Score;
-    public float MaxScore;
+    public float TotalScore;
     public int Combo;
     public int MaxCombo;
+    public int TotalCombo;
+    public int NoteCount;
 
     [Header("Settings")]
     public float ScrollSpeed = 120;
@@ -40,6 +42,8 @@ public class ChartPlayer : MonoBehaviour
 
     [Header("Interface")]
     public AudioSource AudioPlayer;
+    public GameObject SideObject;
+    public GameObject CenterObject;
     public TMP_Text SongNameLabel;
     public TMP_Text SongArtistLabel;
     public Image DifficultyBox;
@@ -51,8 +55,26 @@ public class ChartPlayer : MonoBehaviour
     public Image SongProgressFill;
     public TMP_Text ComboText;
 
+    [Header("Result Screen")]
+    public RectTransform SummaryBox;
+    public TMP_Text PlayStateText;
+    public TMP_Text RecordLabelText;
+    public TMP_Text RecordText;
+    public TMP_Text RecordDifferenceText;
+    public RectTransform ResultScoreBox;
+    public TMP_Text ResultScoreText;
+    public RectTransform ResultSongBox;
+    public TMP_Text ResultSongNameText;
+    public RectTransform DetailsBox;
+    public List<TMP_Text> ResultBasicInfoLabelText;
+    public List<TMP_Text> ResultBasicInfoText;
+    public TMP_Text ResultComboLabelText;
+    public TMP_Text ResultComboInfoText;
+
     [HideInInspector]
     public Chart CurrentChart;
+
+    bool isAnimating;
 
     public void Awake()
     {
@@ -90,7 +112,7 @@ public class ChartPlayer : MonoBehaviour
         UpdateScore();
     }
 
-    void SetInterfaceColor(Color color)
+    public void SetInterfaceColor(Color color)
     {
         SongNameLabel.color = SongArtistLabel.color = DifficultyBox.color = DifficultyLabel.color = 
         ScoreText.color = ComboText.color = SongProgressFill.color = color;
@@ -108,7 +130,9 @@ public class ChartPlayer : MonoBehaviour
     {
         ComboText.text = Combo.ToString("#", CultureInfo.InvariantCulture);
 
-        string score = ((int)(Score / Mathf.Max(MaxScore, 1) * 1e6)).ToString("D7", CultureInfo.InvariantCulture);
+        SideObject.SetActive(NoteCount > 0);
+
+        string score = ((int)(Score / Mathf.Max(TotalScore, 1) * 1e6)).ToString("D7", CultureInfo.InvariantCulture);
         bool d = false;
         for (int a = ScoreDigits.Count - 1; a >= 0; a--) 
         {
@@ -126,6 +150,8 @@ public class ChartPlayer : MonoBehaviour
     {
         Score += weight;
         Combo = combo ? Combo + 1 : 0;
+        MaxCombo = Mathf.Max(MaxCombo, Combo);
+        NoteCount--;
         
         StopCoroutine(ComboPop());
         if (combo)
@@ -133,6 +159,7 @@ public class ChartPlayer : MonoBehaviour
             StartCoroutine(ComboPop());
         }
 
+        if (NoteCount <= 0) StartCoroutine(SplashAnimation());
         UpdateScore();
     }
 
@@ -173,5 +200,79 @@ public class ChartPlayer : MonoBehaviour
             yield return null;
         }
         ScoreDigits[digit].rectTransform.anchoredPosition = new Vector2(ScoreDigits[digit].rectTransform.anchoredPosition.x, 0);
+    }
+
+    IEnumerator SplashAnimation () 
+    {
+        isAnimating = true;
+        if (Score >= TotalScore) PlayStateText.text = "TRACK MASTERED";
+        else if (Combo >= MaxCombo) PlayStateText.text = "FULL STREAK";
+        else PlayStateText.text = "TRACK CLEARED";
+
+        PlayStateText.rectTransform.anchorMin = PlayStateText.rectTransform.anchorMax = new Vector2(.5f, .5f);
+        PlayStateText.rectTransform.anchoredPosition = Vector2.zero;
+        RecordLabelText.margin = RecordText.margin = RecordDifferenceText.margin = new Vector4(0, 50, 10, 0);
+        ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 0);
+        DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 0);
+
+        ResultScoreBox.anchoredPosition = new Vector2(22500, 0);
+
+        for (float a = 0; a < 1; a += Time.deltaTime / 4f)
+        {
+            float ease = Ease.Get(a, "Circle", EaseMode.Out);
+            SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50 + (50 * (1 - ease)));
+            PlayStateText.fontSize = 32 + (15 / ease - 15);
+            PlayStateText.characterSpacing = 50 - (110 * (1 - ease));
+            yield return null;
+        }
+        SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50);
+        ComboText.fontSize = 120;
+        PlayStateText.fontSize = 32;
+        isAnimating = false;
+
+        StartCoroutine(ResultAnimation());
+    }
+
+    IEnumerator ResultAnimation () 
+    {
+        ResultSongNameText.text = Song.SongName;
+        for (int x = 0; x < ResultBasicInfoText.Count; x++) 
+        {
+            ResultBasicInfoText[x].text = "0";
+        }
+        ResultBasicInfoText[2].text = TotalCombo.ToString("0", CultureInfo.InvariantCulture);
+        ResultComboInfoText.text = MaxCombo.ToString("0", CultureInfo.InvariantCulture) + " / " + TotalCombo.ToString("0", CultureInfo.InvariantCulture);
+
+        void SetEase(float a) 
+        {
+            float ease = a < 1 ? Mathf.Pow(2 * Mathf.Clamp01(a / 2), 8) / 2 : 1 - Mathf.Pow(-2 * Mathf.Clamp01(a / 2) + 2, 8) / 2;
+            SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50 + (30 * ease));
+            PlayStateText.characterSpacing = 50 - (40 * ease);
+            PlayStateText.rectTransform.anchorMin = PlayStateText.rectTransform.anchorMax = new Vector2(.5f * (1 - ease), .5f);
+            PlayStateText.rectTransform.anchoredPosition = new Vector2(PlayStateText.preferredWidth / 2, 12) * ease;
+
+            RecordLabelText.margin = new Vector4(0, 50 * (1 - Ease.Get(Mathf.Clamp01(a - 1), "Quintic", EaseMode.Out)), 10, 0);
+            RecordText.margin = new Vector4(0, 50 * (1 - Ease.Get(Mathf.Clamp01(a - 1.1f), "Quintic", EaseMode.Out)), 10, 0);
+            RecordDifferenceText.margin = new Vector4(0, 50 * (1 - Ease.Get(Mathf.Clamp01(a - 1.2f), "Quintic", EaseMode.Out)), 10, 0);
+
+            ResultScoreBox.anchoredPosition = new Vector2((10 / Mathf.Clamp01(a - 1) - 10), 0);
+            ResultScoreText.text = ((int)(Score / Mathf.Max(TotalScore, 1) * 1e6 * (a > 3 ? 1 : 1 - Mathf.Pow(1e-7f, Mathf.Clamp01(a / 2 - .5f))))).ToString("D7", CultureInfo.InvariantCulture);
+
+            ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * Ease.Get(Mathf.Clamp01(a / 2 - 1.5f), "Quintic", EaseMode.Out));
+            DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * Ease.Get(Mathf.Clamp01(a / 2 - 1.5f), "Quintic", EaseMode.Out));
+            for (int x = 0; x < ResultBasicInfoText.Count; x++) 
+            {
+                ResultBasicInfoLabelText[x].margin = new Vector4(0, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3 + x * .1f)), "Quintic", EaseMode.Out)), 8, 0);
+                ResultBasicInfoText[x].margin = new Vector4(0, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3.05f + x * .1f)), "Quintic", EaseMode.Out)), 25, 0);
+            }
+            ResultComboLabelText.margin = new Vector4(25, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3.5f)), "Quintic", EaseMode.Out)), 8, 0);
+            ResultComboInfoText.margin = new Vector4(0, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3.55f)), "Quintic", EaseMode.Out)), 0, 0);
+        }
+        for (float a = 0; a < 1; a += Time.deltaTime / 6f)
+        {
+            SetEase(a * 6);
+            yield return null;
+        }
+        SetEase(6);
     }
 }

@@ -42,6 +42,7 @@
      <Compile Include="Assets\Scripts\Behaviors\HitPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\LanePlayer.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
+     <Compile Include="Assets\Scripts\UI\SafeAreaManager.cs" />
      <Compile Include="Assets\Scripts\Behaviors\HitEffect.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -639,8 +640,14 @@
     <Reference Include="Unity.VisualScripting.Flow.Editor">
         <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Flow.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Recorder.Editor">
+        <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VSCode.Editor">
         <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.VSCode.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Recorder.Base">
+        <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Base.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
         <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.TextMeshPro.Editor.dll</HintPath>
@@ -689,6 +696,9 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.Core">
         <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Recorder">
+        <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.dll</HintPath>
     </Reference>
     <Reference Include="Unity.EditorCoroutines.Editor">
         <HintPath>E:\Documents\JANOARG\Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>

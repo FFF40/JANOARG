@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Chart : IStoryboardable 
+public class Chart : IStoryboardable
 {
     public string DifficultyName = "Normal";
     public string DifficultyLevel = "6";

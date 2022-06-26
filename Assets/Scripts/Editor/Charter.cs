@@ -28,6 +28,7 @@ public class Charter : EditorWindow
     public Lane TargetLane;
     public object TargetThing;
     public object DeletingThing;
+    public Timestamp TargetTimestamp;
 
     public AudioSource CurrentAudioSource;
     public Camera CurrentCamera;
@@ -568,6 +569,22 @@ public class Charter : EditorWindow
         BeginWindows();
         if (TargetSong)
         {
+            if (extrasmode != "") 
+            {
+                Rect rect = new Rect();
+                if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
+
+                GUIStyle exStyle = new GUIStyle("window");
+                exStyle.focused = exStyle.normal;
+
+                GUI.Window(10, rect, Extras, "", exStyle);
+                if (Event.current.type == EventType.MouseDown && !rect.Contains(Event.current.mousePosition)) 
+                {
+                    extrasmode = "";
+                    Repaint();
+                }
+            }
+            
             GUI.Button(new Rect(0, 0, width, 30), "", "toolbar");
             GUI.Button(new Rect(0, 6, width, 30), "", "toolbar");
             GUI.Window(1, new Rect(-2, -2, width + 4, 30), Toolbar, "", "toolbar");
@@ -784,10 +801,11 @@ public class Charter : EditorWindow
         {
             EditorUtility.SetDirty(TargetSong);
         }
-
-        PlayMetronome = GUI.Toggle(new Rect(position.width / 2 + 24, 5, 40, 20), PlayMetronome, new GUIContent("Met", "Metronome"), "buttonLeft");
-        PlayHitsounds = GUI.Toggle(new Rect(position.width / 2 + 65, 5, 40, 20), PlayHitsounds, new GUIContent("Snd", "Play Hitsounds"), "buttonMid");
-        SeparateUnits = GUI.Toggle(new Rect(position.width / 2 + 106, 5, 40, 20), SeparateUnits, new GUIContent("Sep", "Separate Units"), "buttonRight");
+        if (GUI.Toggle(new Rect(width / 2 + 21, 5, 18, 20), extrasmode == "play_options", EditorGUIUtility.IconContent("icon dropdown"), 
+            new GUIStyle("buttonRight") { padding = new RectOffset(0, 0, 0, 0) }) ^ (extrasmode == "play_options"))
+        {
+            extrasmode = extrasmode == "play_options" ? "" : "play_options";
+        }
 
         // -------------------- Timers
 
@@ -867,17 +885,16 @@ public class Charter : EditorWindow
 
         // Category
 
-        if (GUI.Toggle(timelineMode == "timing" ? new Rect(5, 132, 80, 24) : new Rect(5, 136, 80, 20), timelineMode == "timing", "Timing", "buttonLeft")) 
+        if (GUI.Toggle(timelineMode == "story" ? new Rect(5, 132, 80, 24) : new Rect(5, 136, 80, 20), timelineMode == "story", "Storyboard", "button")) 
+            timelineMode = "story";
+
+        if (GUI.Toggle(timelineMode == "timing" ? new Rect(87, 132, 80, 24) : new Rect(87, 136, 80, 20), timelineMode == "timing", "Timing", "buttonLeft")) 
             timelineMode = "timing";
-        if (GUI.Toggle(timelineMode == "lane" ? new Rect(86, 132, 80, 24) : new Rect(86, 136, 80, 20), timelineMode == "lane", "Lanes", "buttonRight")) 
+        if (GUI.Toggle(timelineMode == "lane" ? new Rect(168, 132, 80, 24) : new Rect(168, 136, 80, 20), timelineMode == "lane", "Lanes", "buttonRight")) 
             timelineMode = "lane";
 
-        if (TargetLane != null && (GUI.Toggle(timelineMode == "hit" ? new Rect(168, 132, 80, 24) : new Rect(168, 136, 80, 20), timelineMode == "hit", "Hits", "button"))) 
+        if (TargetLane != null && (GUI.Toggle(timelineMode == "hit" ? new Rect(250, 132, 80, 24) : new Rect(250, 136, 80, 20), timelineMode == "hit", "Hits", "button"))) 
             timelineMode = "hit";
-        
-
-        CurrentAudioSource.pitch = EditorGUI.Slider(new Rect(width - 202, 136, 200, 20), CurrentAudioSource.pitch, 0, 4);
-        if (CurrentAudioSource.pitch > .95f && CurrentAudioSource.pitch < 1.05f) CurrentAudioSource.pitch = 1;
 
 
         GUIStyle label = new GUIStyle("miniLabel");
@@ -930,7 +947,7 @@ public class Charter : EditorWindow
             int AddTime(float pos, float size) {
                 for (int a = 0; a < Times.Count; a++)
                 {
-                    if (pos - Times[a] > 0) 
+                    if (pos > Times[a]) 
                     {
                         Times[a] = pos + size;
                         return a;
@@ -940,6 +957,68 @@ public class Charter : EditorWindow
                 return Times.Count - 1;
             }
 
+            if (timelineMode == "story")
+            {
+                if (TargetThing is IStoryboardable)
+                {
+                    IStoryboardable thing = (IStoryboardable)TargetThing;
+                    Storyboard sb = thing.Storyboard;
+
+                    List<string> tst = new List<string>();
+                    List<string> tso = new List<string>();
+                    foreach (TimestampType type in (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null)) {
+                        tso.Add(type.ID);
+                        tst.Add(type.Name);
+                        Times.Add(0);
+                    }
+
+                    GUIStyle inv = new GUIStyle("label");
+                    inv.normal.textColor = EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f);
+
+                    for (int a = verSeek; a < Math.Min(tst.Count, verSeek + 5); a++) 
+                    {
+                        GUI.Label(new Rect(9, 4 + (a - verSeek) * 22, 120, 20), tst[a], inv);
+                        GUI.Label(new Rect(8, 3 + (a - verSeek) * 22, 120, 20), tst[a]);
+                    }
+
+                    foreach (Timestamp ts in sb.Timestamps)
+                    {
+                        float a = ts.Time;
+                        float pos = (a - seekStart) / (seekEnd - seekStart) * width;
+                        float b = ts.Time + ts.Duration;
+                        float pos2 = (b - seekStart) / (seekEnd - seekStart) * width;
+
+                        float time = tso.IndexOf(ts.ID) - verSeek;
+                        if (time < 0 || time >= 5) continue;
+                        
+                        if (b > seekStart && a < seekEnd) 
+                        {
+                            EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .2f));
+
+                            float rpos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 5), (b - seekStart) / (seekEnd - seekStart) * width);
+                            if (GUI.Toggle(new Rect(rpos - 1, 3 + time * 22, 6, 20), TargetThing == ts && DeletingThing != ts, DeletingThing == ts ? "?" : " ", "button"))
+                            {
+                                if (pickermode == "delete")
+                                { 
+
+                                }
+                                else 
+                                {
+                                    TargetTimestamp = ts;
+                                    DeletingThing = null;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    GUIStyle center = new GUIStyle("label");
+                    center.alignment = TextAnchor.MiddleCenter;
+                    GUI.Label(new Rect(0, 0, width + 4, 115), TargetThing == null ? "Please select an object to start editing." : "This object is not storyboardable.", center);
+                }
+            }
             if (timelineMode == "timing")
             {
                 foreach (BPMStop stop in TargetSong.Timing.Stops) 
@@ -981,21 +1060,21 @@ public class Charter : EditorWindow
                     if (lane.LaneSteps.Count > 0) 
                     {
                         float a = lane.LaneSteps[0].Offset;
+                        float pos = (a - seekStart) / (seekEnd - seekStart) * width;
                         float b = lane.LaneSteps[lane.LaneSteps.Count - 1].Offset;
                         float pos2 = (b - seekStart) / (seekEnd - seekStart) * width;
-                        int time = AddTime(pos, 21) - verSeek;
+                        int time = AddTime(pos, Mathf.Max(pos2 - pos + 14, 21)) - verSeek;
                         if (time < 0 || time >= 5) continue;
                         if (b > seekStart && a < seekEnd) 
                         {
-                            float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                            EditorGUI.DrawRect(new Rect(pos, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .1f));
+                            EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .2f));
                         }
                         for (int x = 1; x < lane.LaneSteps.Count; x++) {
                             float c = lane.LaneSteps[x].Offset;
                             if (c > seekStart && c < seekEnd) 
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
-                                if (GUI.Toggle(new Rect(pos3 - 2, 3 + time * 22, 6, 20), TargetThing == lane.LaneSteps[x] && DeletingThing != lane.LaneSteps[x], DeletingThing == lane.LaneSteps[x] ? "?" : "|", "button"))
+                                if (GUI.Toggle(new Rect(pos3 - 1, 3 + time * 22, 6, 20), TargetThing == lane.LaneSteps[x] && DeletingThing != lane.LaneSteps[x], DeletingThing == lane.LaneSteps[x] ? "?" : "|", "button"))
                                 {
                                     if (pickermode == "delete")
                                     {
@@ -1017,10 +1096,10 @@ public class Charter : EditorWindow
                                 }
                             }
                         }
-                        if (a > seekStart || a < seekEnd) 
+                        if (b > seekStart && a < seekEnd) 
                         {
-                            float pos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 13), (b - seekStart) / (seekEnd - seekStart) * width - 15);
-                            if (GUI.Toggle(new Rect(pos - 9, 3 + time * 22, 20, 20), TargetThing == lane && DeletingThing != lane, DeletingThing == lane ? "?" : "|", "button"))
+                            float rpos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 13), (b - seekStart) / (seekEnd - seekStart) * width - 15);
+                            if (GUI.Toggle(new Rect(rpos - 9, 3 + time * 22, 20, 20), TargetThing == lane && DeletingThing != lane, DeletingThing == lane ? "?" : "|", "button"))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -1049,63 +1128,91 @@ public class Charter : EditorWindow
                     }
                 }
             }
-            else if (timelineMode == "hit" && TargetLane != null)
+            else if (timelineMode == "hit")
             {
-                float a = TargetLane.LaneSteps[0].Offset;
-                float b = TargetLane.LaneSteps[TargetLane.LaneSteps.Count - 1].Offset;
-                if (a > seekStart) 
+                if (TargetLane != null) 
                 {
-                    float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                    EditorGUI.DrawRect(new Rect(0, 0, pos + 2, 115), new Color(0, 0, 0, .25f));
-                }
-                if (b < seekEnd) 
-                {
-                    float pos = (b - seekStart) / (seekEnd - seekStart) * width;
-                    EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, 115), new Color(0, 0, 0, .25f));
-                }
-                foreach (HitObject hit in TargetLane.Objects) 
-                {
-                    float x = hit.Offset;
-                    float pos = (x - seekStart) / (seekEnd - seekStart) * width;
-                    int time = AddTime(pos, 21) - verSeek;
-                    if (time < 0 || time >= 5) continue;
-                    if (hit.Offset > seekStart && hit.Offset < seekEnd) 
+                    float a = TargetLane.LaneSteps[0].Offset;
+                    float b = TargetLane.LaneSteps[TargetLane.LaneSteps.Count - 1].Offset;
+                    if (a > seekStart) 
                     {
-                        if (GUI.Toggle(new Rect(pos - 9, 3 + time * 22, 20, 20), TargetThing == hit && DeletingThing != hit, DeletingThing == hit ? "?" : "|", "button"))
+                        float pos = (a - seekStart) / (seekEnd - seekStart) * width;
+                        EditorGUI.DrawRect(new Rect(0, 0, pos + 2, 115), new Color(0, 0, 0, .25f));
+                    }
+                    if (b < seekEnd) 
+                    {
+                        float pos = (b - seekStart) / (seekEnd - seekStart) * width;
+                        EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, 115), new Color(0, 0, 0, .25f));
+                    }
+                    foreach (HitObject hit in TargetLane.Objects) 
+                    {
+                        float x = hit.Offset;
+                        float pos = (x - seekStart) / (seekEnd - seekStart) * width;
+                        float y = hit.Offset + hit.HoldLength;
+                        float pos2 = (y - seekStart) / (seekEnd - seekStart) * width;
+
+                        int time = AddTime(pos, Mathf.Max(pos2 - pos + 14, 21)) - verSeek;
+                        if (time < 0 || time >= 5) continue;
+
+                        
+                        if (x != y) 
                         {
-                            if (pickermode == "delete")
+                            GUI.Label(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), "", "button");
+                        }
+                        if (hit.Offset > seekStart && hit.Offset < seekEnd) 
+                        {
+                            if (GUI.Toggle(new Rect(pos - 9, 3 + time * 22, 20, 20), TargetThing == hit && DeletingThing != hit, DeletingThing == hit ? "?" : "|", "button"))
                             {
-                                if (DeletingThing == hit)
+                                if (pickermode == "delete")
                                 {
-                                    TargetLane.Objects.Remove(hit);
-                                    TargetThing = null;
-                                    break;
+                                    if (DeletingThing == hit)
+                                    {
+                                        TargetLane.Objects.Remove(hit);
+                                        TargetThing = null;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        DeletingThing = hit;
+                                    }
                                 }
-                                else
+                                else 
                                 {
-                                    DeletingThing = hit;
+                                    TargetThing = hit;
+                                    DeletingThing = null;
                                 }
-                            }
-                            else 
-                            {
-                                TargetThing = hit;
-                                DeletingThing = null;
                             }
                         }
                     }
+                }
+                else
+                {
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    GUIStyle center = new GUIStyle("label");
+                    center.alignment = TextAnchor.MiddleCenter;
+                    GUI.Label(new Rect(0, 0, width + 4, 115), "Please select a lane to start editing.", center);
                 }
             }
 
             if (Times.Count > 5)
             {
                 verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 4f / Times.Count, 0, Times.Count - 4));
+
+                if (Event.current.type == EventType.ScrollWheel)
+                {
+                    Vector2 mPos = Event.current.mousePosition;
+                    if (mPos.y > 0 && mPos.y < 115) 
+                    {
+                        verSeek = verSeek + Math.Sign(Event.current.delta.y);
+                        Repaint();
+                    }
+                }
             }
-            verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - 4), 0);
+            verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - 5), 0);
         }
 
         
         // Click events
-
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0) 
         {
             Vector2 mPos = Event.current.mousePosition;
@@ -1572,7 +1679,8 @@ public class Charter : EditorWindow
 
     public string pickermode = "cursor";
 
-    public void Picker(int id) {
+    public void Picker(int id) 
+    {
         if (GUI.Toggle(new Rect(0, 0, 33, 33), pickermode == "cursor", EditorGUIUtility.IconContent("Grid.Default@2x", "Cursor"), "button")) pickermode = "cursor";
         if (GUI.Toggle(new Rect(0, 32, 33, 33), pickermode == "select", EditorGUIUtility.IconContent("Selectable Icon", "Select"), "button")) pickermode = "select";
         if (GUI.Toggle(new Rect(0, 64, 33, 33), pickermode == "delete", EditorGUIUtility.IconContent("winbtn_win_close@2x", "Select"), "button")) pickermode = "delete";
@@ -1589,6 +1697,28 @@ public class Charter : EditorWindow
         {
             if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "hit_normal", new GUIContent("NOR", "Normal Hit"), "button")) pickermode = "hit_normal";
             if (GUI.Toggle(new Rect(0, 138, 33, 33), pickermode == "hit_catch", new GUIContent("CAT", "Catch Hit"), "button")) pickermode = "hit_catch";
+        }
+    }
+
+    #endregion
+    
+    /////////////////////
+    #region Extras Window
+    /////////////////////
+
+    public string extrasmode = "";
+
+    public void Extras(int id) 
+    {
+        if (extrasmode == "play_options") 
+        {
+            GUI.Label(new Rect(5, 6, 90, 18), "Play Speed");
+            CurrentAudioSource.pitch = Mathf.Round(Mathf.Pow(10, GUI.HorizontalSlider(new Rect(95, 6, 150, 18), Mathf.Log10(CurrentAudioSource.pitch), Mathf.Log10(.05f), 0)) / .05f) * .05f;
+            CurrentAudioSource.pitch = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(252, 6, 43, 18), CurrentAudioSource.pitch), .05f, 1) / .05f) * .05f;
+
+            PlayMetronome = GUI.Toggle(new Rect(5, 73, 145, 20), PlayMetronome, "Metronome", "buttonLeft");
+            PlayHitsounds = GUI.Toggle(new Rect(150, 73, 145, 20), PlayHitsounds, "Hitsounds", "buttonRight");
+            SeparateUnits = GUI.Toggle(new Rect(5, 95, 290, 20), SeparateUnits, "Separate Units", "button");
         }
     }
 

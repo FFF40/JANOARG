@@ -90,8 +90,9 @@ public class HitPlayer : MonoBehaviour
             mr.material = ChartPlayer.main.CurrentChart.HitMaterial;
         }
 
-        ChartPlayer.main.MaxScore += (hit.Type == HitObject.HitType.Catch ? 1 : 3) + Ticks.Count;
-        ChartPlayer.main.MaxCombo += 1 + Ticks.Count;
+        ChartPlayer.main.TotalScore += (hit.Type == HitObject.HitType.Catch ? 1 : 3) + Ticks.Count;
+        ChartPlayer.main.TotalCombo += 1 + Ticks.Count;
+        ChartPlayer.main.NoteCount += 1 + Ticks.Count;
 
         CurrentLane = lane;
         CurrentHit = hit;
