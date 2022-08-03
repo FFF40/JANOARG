@@ -40,6 +40,8 @@ public class Charter : EditorWindow
     public bool SeparateUnits;
     public bool PlayHitsounds;
 
+    public List<LaneStyleManager> LaneStyleManagers = new List<LaneStyleManager>();
+    public List<HitStyleManager> HitStyleManagers = new List<HitStyleManager>();
     public List<Mesh> Meshes = new List<Mesh>();
 
     CultureInfo invariant = CultureInfo.InvariantCulture;
@@ -178,6 +180,11 @@ public class Charter : EditorWindow
         mesh.RecalculateNormals();
 
         return mesh;
+    }
+
+    public Mesh MakeJudgeMesh(Lane lane) 
+    {
+        throw new NotImplementedException();
     }
 
     public Mesh MakeHitMesh(HitObject hit, Lane lane, out Vector3 startPos, out Vector3 endPos) 
@@ -503,48 +510,89 @@ public class Charter : EditorWindow
             if (TargetChart != null) 
             {
                 Chart chart = (Chart)TargetChart.Get(pos);
+                Pallete pal = (Pallete)chart.Pallete.Get(pos);
+
                 CurrentCamera.transform.position = chart.CameraPivot;
                 CurrentCamera.transform.eulerAngles = chart.CameraRotation;
                 CurrentCamera.transform.Translate(Vector3.back * 10);
                 CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
-                CurrentCamera.backgroundColor = chart.BackgroundColor;
+                RenderSettings.fogColor = CurrentCamera.backgroundColor = pal.BackgroundColor;
                 CurrentCamera.Render();
+
+                for (int i = 0; i < pal.LaneStyles.Count; i++) 
+                {
+                    LaneStyle style = (LaneStyle)pal.LaneStyles[i].Get(pos);
+                    if (LaneStyleManagers.Count <= i) LaneStyleManagers.Add(new LaneStyleManager(style));
+                    else LaneStyleManagers[i].Update(style);
+                }
+                while (LaneStyleManagers.Count > pal.LaneStyles.Count) 
+                {
+                    LaneStyleManagers[pal.LaneStyles.Count].Dispose();
+                    LaneStyleManagers.RemoveAt(pal.LaneStyles.Count);
+                }
+
+                for (int i = 0; i < pal.HitStyles.Count; i++) 
+                {
+                    HitStyle style = (HitStyle)pal.HitStyles[i].Get(pos);
+                    if (HitStyleManagers.Count <= i) HitStyleManagers.Add(new HitStyleManager(style));
+                    else HitStyleManagers[i].Update(style);
+                }
+                while (HitStyleManagers.Count > pal.HitStyles.Count) 
+                {
+                    HitStyleManagers[pal.HitStyles.Count].Dispose();
+                    HitStyleManagers.RemoveAt(pal.HitStyles.Count);
+                }
+
                 foreach (Lane lane in chart.Lanes)
                 {
-                    if (chart.LaneMaterial) {
-                        Mesh mesh = MakeLaneMesh(lane);
-                        Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.LaneMaterial, 0, CurrentCamera);
-                        Meshes.Add(mesh);
-                    }
-                    if (chart.HitMaterial) {
-                        foreach (HitObject hit in lane.Objects)
+                    if (lane.StyleIndex >= 0 && lane.StyleIndex < LaneStyleManagers.Count) 
+                    {
+                        if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                         {
-                            if (hit.Offset > pos)
+                            Mesh mesh = MakeLaneMesh(lane);
+                            Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
+                            Meshes.Add(mesh);
+                        }
+                    }
+                    foreach (HitObject hit in lane.Objects)
+                    {
+                        bool valid = hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count;
+                        if (hit.Offset > pos)
+                        {
+                            if (valid) 
                             {
-                                Mesh mesh = MakeHitMesh(hit, lane, out Vector3 sp, out Vector3 ep);
-                                if (TargetThing == hit) {
-                                    startPos = sp;
-                                    endPos = ep;
+                                Material mat = HitStyleManagers[hit.StyleIndex].NormalMaterial;
+                                if (hit.Type == HitObject.HitType.Catch) mat = HitStyleManagers[hit.StyleIndex].CatchMaterial;
+                                if (mat) 
+                                {
+                                    Mesh mesh = MakeHitMesh(hit, lane, out Vector3 sp, out Vector3 ep);
+                                    if (TargetThing == hit) {
+                                        startPos = sp;
+                                        endPos = ep;
+                                    }
+                                    Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, mat, 0, CurrentCamera);
+                                    Meshes.Add(mesh);
                                 }
-                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HitMaterial, 0, CurrentCamera);
-                                Meshes.Add(mesh);
-                                if (hit.Type == HitObject.HitType.Catch) ccount++;
-                                else ncount++;
                             }
-                            if (hit.HoldLength > 0 && hit.Offset + hit.HoldLength > pos)
+                            if (hit.Type == HitObject.HitType.Catch) ccount++;
+                            else ncount++;
+                        }
+                        if (hit.HoldLength > 0 && hit.Offset + hit.HoldLength > pos)
+                        {
+                            if (valid && HitStyleManagers[hit.StyleIndex].HoldTailMaterial) 
                             {
                                 Mesh mesh = MakeHoldMesh(hit, lane);
-                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, chart.HoldMaterial == null ? chart.HitMaterial : chart.HoldMaterial, 0, CurrentCamera);
+                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
                                 Meshes.Add(mesh);
-                                if (hit.Type == HitObject.HitType.Catch) ccount++;
-                                else ncount++;
                             }
-                        } 
-                    }
+                            if (hit.Type == HitObject.HitType.Catch) ccount++;
+                            else ncount++;
+                        }
+                    } 
                 }
                 EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
                 Handles.DrawCamera(new Rect(0, 26, width + camLeft, height - 184), CurrentCamera);
-                Handles.color = chart.InterfaceColor;
+                Handles.color = pal.InterfaceColor;
                 Handles.DrawPolyLine(new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y), 
                     new Vector2(bound.x + bound.width, bound.y + bound.height), new Vector2(bound.x, bound.y + bound.height),
                     new Vector2(bound.x, bound.y));
@@ -1221,6 +1269,10 @@ public class Charter : EditorWindow
 
         if (TargetLane != null && (GUI.Toggle(timelineMode == "hit" ? new Rect(250, 132, 80, 24) : new Rect(250, 136, 80, 20), timelineMode == "hit", "Hits", "button"))) 
             timelineMode = "hit";
+            
+        if (GUI.Toggle(new Rect(width - 81, 136, 80, 20), TargetChart != null && TargetThing == TargetChart.Pallete, "Pallete", "buttonRight") 
+            && TargetChart != null && TargetThing != TargetChart.Pallete) 
+            TargetThing = TargetChart.Pallete;
 
 
         GUIStyle label = new GUIStyle("miniLabel");
@@ -1684,11 +1736,18 @@ public class Charter : EditorWindow
                     {
                         TargetChart = chart;
                     }
-                    if (GUILayout.Button("x", "ButtonRight", GUILayout.MaxWidth(18)) && TargetChart != chart)
+                    if (GUILayout.Button(DeletingThing == chart ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)) && TargetChart != chart)
                     {
-                        TargetSong.Charts.Remove(chart);
-                        EditorUtility.SetDirty(TargetSong);
-                        break;
+                        if (DeletingThing == chart) 
+                        {
+                            TargetSong.Charts.Remove(chart);
+                            EditorUtility.SetDirty(TargetSong);
+                            break;
+                        }
+                        else 
+                        {
+                            DeletingThing = chart;
+                        }
                     }
                     GUILayout.EndHorizontal();
                 }
@@ -1738,12 +1797,132 @@ public class Charter : EditorWindow
                 thing.CameraPivot = EditorGUILayout.Vector3Field("Camera Pivot", thing.CameraPivot);
                 thing.CameraRotation = EditorGUILayout.Vector3Field("Camera Rotation", thing.CameraRotation);
                 GUILayout.Space(8);
-                GUILayout.Label("Appearance", "boldLabel");
+                GUILayout.Label("Appearance (Legacy)", "boldLabel");
                 thing.BackgroundColor = EditorGUILayout.ColorField("Background Color", thing.BackgroundColor);
                 thing.InterfaceColor = EditorGUILayout.ColorField("Interface Color", thing.InterfaceColor);
                 thing.LaneMaterial = (Material)EditorGUILayout.ObjectField("Lane Material", thing.LaneMaterial, typeof(Material), false);
                 thing.HitMaterial = (Material)EditorGUILayout.ObjectField("Hit Material", thing.HitMaterial, typeof(Material), false);
                 thing.HoldMaterial = (Material)EditorGUILayout.ObjectField("Hold Material", thing.HoldMaterial, typeof(Material), false);
+                GUILayout.EndScrollView();
+            }
+            if (TargetThing is Pallete)
+            {
+                Pallete thing = (Pallete)TargetThing;
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Pallete", "boldLabel");
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+                GUILayout.Label("Appearance", "boldLabel");
+                thing.BackgroundColor = EditorGUILayout.ColorField("Background Color", thing.BackgroundColor);
+                thing.InterfaceColor = EditorGUILayout.ColorField("Interface Color", thing.InterfaceColor);
+
+                GUILayout.Space(8);
+                GUILayout.Label("Lane Styles", "boldLabel");
+                GUIStyle leftStyle = new GUIStyle("ButtonLeft") { alignment = TextAnchor.MiddleLeft };
+                for (int i = 0; i < thing.LaneStyles.Count; i++) 
+                {
+                    LaneStyle style = thing.LaneStyles[i];
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("ID " + i, leftStyle))
+                    {
+                        TargetThing = style;
+                    }
+                    if (GUILayout.Button(DeletingThing == style ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)))
+                    {
+                        if (DeletingThing == style) 
+                        {
+                            thing.LaneStyles.Remove(style);
+                            break;
+                        }
+                        else 
+                        {
+                            DeletingThing = style;
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                if (GUILayout.Button("Create New Style")) 
+                {
+                    LaneStyle style = new LaneStyle();
+                    thing.LaneStyles.Add(style);
+                    TargetThing = style;
+                }
+
+                GUILayout.Space(8);
+                GUILayout.Label("Hit Styles", "boldLabel");
+                for (int i = 0; i < thing.HitStyles.Count; i++) 
+                {
+                    HitStyle style = thing.HitStyles[i];
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("ID " + i, leftStyle))
+                    {
+                        TargetThing = style;
+                    }
+                    if (GUILayout.Button(DeletingThing == style ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)))
+                    {
+                        if (DeletingThing == style) 
+                        {
+                            thing.HitStyles.Remove(style);
+                            break;
+                        }
+                        else 
+                        {
+                            DeletingThing = style;
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                if (GUILayout.Button("Create New Style")) 
+                {
+                    HitStyle style = new HitStyle();
+                    thing.HitStyles.Add(style);
+                    TargetThing = style;
+                }
+
+                GUILayout.EndScrollView();
+            }
+            else if (TargetThing is LaneStyle)
+            {
+                LaneStyle thing = (LaneStyle)TargetThing;
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Lane Style", "boldLabel");
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+                GUILayout.Label("Lane", "boldLabel");
+                thing.LaneMaterial = (Material)EditorGUILayout.ObjectField("Lane Material", thing.LaneMaterial, typeof(Material), false);
+                thing.LaneColorTarget = EditorGUILayout.TextField("Lane Color Target", thing.LaneColorTarget);
+                thing.LaneColor = EditorGUILayout.ColorField("Lane Color", thing.LaneColor);
+
+                GUILayout.Space(8);
+                GUILayout.Label("Judge", "boldLabel");
+                thing.JudgeMaterial = (Material)EditorGUILayout.ObjectField("Judge Material", thing.JudgeMaterial, typeof(Material), false);
+                thing.JudgeColorTarget = EditorGUILayout.TextField("Judge Color Target", thing.JudgeColorTarget);
+                thing.JudgeColor = EditorGUILayout.ColorField("Judge Color", thing.JudgeColor);
+
+                GUILayout.EndScrollView();
+            }
+            else if (TargetThing is HitStyle)
+            {
+                HitStyle thing = (HitStyle)TargetThing;
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Lane Style", "boldLabel");
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+                GUILayout.Label("Body", "boldLabel");
+                thing.MainMaterial = (Material)EditorGUILayout.ObjectField("Body Material", thing.MainMaterial, typeof(Material), false);
+                thing.MainColorTarget = EditorGUILayout.TextField("Body Color Target", thing.MainColorTarget);
+                thing.NormalColor = EditorGUILayout.ColorField("Normal Color", thing.NormalColor);
+                thing.CatchColor = EditorGUILayout.ColorField("Catch Color", thing.CatchColor);
+
+                GUILayout.Space(8);
+                GUILayout.Label("Hold Tail", "boldLabel");
+                thing.HoldTailMaterial = (Material)EditorGUILayout.ObjectField("Hold Tail Material", thing.HoldTailMaterial, typeof(Material), false);
+                thing.HoldTailColorTarget = EditorGUILayout.TextField("Hold Tail Color Target", thing.HoldTailColorTarget);
+                thing.HoldTailColor = EditorGUILayout.ColorField("Hold Tail Color", thing.HoldTailColor);
+
                 GUILayout.EndScrollView();
             }
             else if (TargetThing is Lane)
@@ -1777,6 +1956,10 @@ public class Charter : EditorWindow
                 GUIStyle bStyle = new GUIStyle(fieldStyle);
                 bStyle.fontStyle = FontStyle.Bold;
 
+                GUILayout.Label("Appearance", "boldLabel");
+                thing.StyleIndex = EditorGUILayout.IntField("Style Index", thing.StyleIndex);
+
+                GUILayout.Space(8);
                 GUILayout.Label("Steps", "boldLabel");
                 float h = 0;
                 float o = GUILayoutUtility.GetLastRect().yMax;
@@ -1956,6 +2139,10 @@ public class Charter : EditorWindow
                     thing.Length = Mathf.Round((end - start) / .05f) * .05f;
                     thing.Position = Mathf.Round(start / .05f) * .05f;
                 }
+                
+                GUILayout.Space(8);
+                GUILayout.Label("Appearance", "boldLabel");
+                thing.StyleIndex = EditorGUILayout.IntField("Style Index", thing.StyleIndex);
 
                 GUILayout.EndScrollView();
             }

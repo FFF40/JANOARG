@@ -45,8 +45,9 @@ public class ChartPlayer : MonoBehaviour
     public GameObject SideObject;
     public GameObject CenterObject;
     public TMP_Text SongNameLabel;
+    public TMP_Text SongSeparatorLabel;
     public TMP_Text SongArtistLabel;
-    public Image DifficultyBox;
+    public TMP_Text DifficultyNameLabel;
     public List<Image> DifficultyIndicators;
     public TMP_Text DifficultyLabel;
     public TMP_Text ScoreText;
@@ -100,6 +101,7 @@ public class ChartPlayer : MonoBehaviour
 
         SongNameLabel.text = Song.SongName;
         SongArtistLabel.text = Song.SongArtist;
+        DifficultyNameLabel.text = CurrentChart.DifficultyName;
         DifficultyLabel.text = CurrentChart.DifficultyLevel;
         AudioPlayer.clip = Song.Clip;
 
@@ -114,10 +116,11 @@ public class ChartPlayer : MonoBehaviour
 
     public void SetInterfaceColor(Color color)
     {
-        SongNameLabel.color = SongArtistLabel.color = DifficultyBox.color = DifficultyLabel.color = 
-        ScoreText.color = ComboText.color = SongProgressFill.color = color;
+        SongNameLabel.color = SongSeparatorLabel.color = SongArtistLabel.color = DifficultyNameLabel.color =
+        DifficultyLabel.color = ScoreText.color = ComboText.color = SongProgressFill.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {
+            DifficultyIndicators[a].gameObject.SetActive(CurrentChart.DifficultyIndex >= a);
             DifficultyIndicators[a].color = new Color(color.r, color.g, color.b, color.a * (20 - CurrentChart.DifficultyIndex + a) / 20) * Mathf.Min(CurrentChart.DifficultyIndex - a + 1, 1);
         }
         for (int a = 0; a < ScoreDigits.Count; a++) 
