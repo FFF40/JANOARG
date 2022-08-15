@@ -27,3 +27,7 @@
 * If you want to contribute code:
     * Make edits to the code (of course)
     * Send the project (by making a pull request)
+
+## Contact
+We have a [Discord server](https://discord.gg/vXJTPFQBHm) for discussions/official songlist submission
+(guys i just need one song so i can make a proper preview video)
