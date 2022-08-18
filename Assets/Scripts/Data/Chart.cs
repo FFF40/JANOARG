@@ -220,7 +220,8 @@ public class LaneStyle : IStoryboardable {
 
     public LaneStyle() 
     {
-        
+        LaneMaterial = (Material)Resources.Load("Materials/Default Lane");
+        JudgeMaterial = (Material)Resources.Load("Materials/Default Judge");
     }
 }
 
@@ -359,7 +360,8 @@ public class HitStyle : IStoryboardable {
 
     public HitStyle() 
     {
-        
+        MainMaterial = (Material)Resources.Load("Materials/Default Hit");
+        HoldTailMaterial = (Material)Resources.Load("Materials/Default Hold");
     }
 }
 
