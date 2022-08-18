@@ -979,6 +979,17 @@ public class Charter : EditorWindow
         {
             GUI.Window(1, new Rect(width / 2 - 250, height / 2 - 110, 500, 220), CharterInit, "");
         }
+
+        if (TutorialStage >= 0) 
+        {
+            Rect rect = new Rect(
+                width * TutorialPopupAnchor.x + TutorialPopupPosition.x - 170, 
+                height * TutorialPopupAnchor.y + TutorialPopupPosition.y - 90, 
+                340, 180);
+
+            GUI.Window(20, rect, Tutorial, "");
+            GUI.BringWindowToFront(20);
+        }
         EndWindows();
 
         if (CurrentAudioSource.isPlaying) {
@@ -1080,14 +1091,20 @@ public class Charter : EditorWindow
         title = new GUIStyle("boldLabel");
         title.alignment = TextAnchor.MiddleCenter;
         
-        GUI.Label(new Rect(20, 60, 210, 40), "Edit an existing playable song:", title);
-        TargetSong = (PlayableSong)EditorGUI.ObjectField(new Rect(20, 100, 210, 20), TargetSong, typeof(PlayableSong), false);
-        GUIStyle label = new GUIStyle("miniLabel");
-        label.alignment = TextAnchor.MiddleCenter;
-        label.wordWrap = true;
-        GUI.Label(new Rect(20, 122, 210, 20), "(select a playable song to continue)", label);
+        GUI.Label(new Rect(20, 45, 210, 40), "Edit an existing playable song:", title);
+        TargetSong = (PlayableSong)EditorGUI.ObjectField(new Rect(20, 80, 210, 20), TargetSong, typeof(PlayableSong), false);
 
-        GUI.Label(new Rect(270, 40, 210, 40), "or create a new one:", title);
+        GUI.Label(new Rect(20, 111, 210, 40), "Stuck/First time user?", title);
+
+        if (GUI.Button(new Rect(20, 146, 210, 20), "Open Interactive Tutorial (BETA)"))
+        {
+            TutorialStage = 0;
+            TutorialPopupAnchor = TutorialSteps[0].PopupAnchor;
+            TutorialPopupPosition = TutorialSteps[0].PopupPosition;
+            TutorialLerp = 1;
+        }
+
+        GUI.Label(new Rect(270, 45, 210, 40), "or create a new one:", title);
         initName = EditorGUI.TextField(new Rect(270, 80, 210, 20), "Name", initName);
         initArtist = EditorGUI.TextField(new Rect(270, 102, 210, 20), "Artist", initArtist);
         initClip = (AudioClip)EditorGUI.ObjectField(new Rect(270, 124, 210, 20), "Clip", initClip, typeof(AudioClip), false);
@@ -1108,6 +1125,9 @@ public class Charter : EditorWindow
             TargetSong = song;
         }
 
+        GUIStyle label = new GUIStyle("miniLabel");
+        label.alignment = TextAnchor.MiddleCenter;
+        label.wordWrap = true;
         label.fontStyle = FontStyle.Italic;
         GUI.Label(new Rect(0, 190, 500, 20), "J.A.N.O.A.R.G.    © 2022-2022    by FFF40 Studios", label);
     }
@@ -1955,7 +1975,12 @@ public class Charter : EditorWindow
 
                 GUIStyle bStyle = new GUIStyle(fieldStyle);
                 bStyle.fontStyle = FontStyle.Bold;
+                
+                GUILayout.Label("Transform", "boldLabel");
+                thing.Offset = EditorGUILayout.Vector3Field("Offset", thing.Offset);
+                thing.OffsetRotation = EditorGUILayout.Vector3Field("Rotation", thing.OffsetRotation);
 
+                GUILayout.Space(8);
                 GUILayout.Label("Appearance", "boldLabel");
                 thing.StyleIndex = EditorGUILayout.IntField("Style Index", thing.StyleIndex);
 
@@ -2318,5 +2343,374 @@ public class Charter : EditorWindow
     }
 
     #endregion
+    
+    ///////////////////////
+    #region Tutorial Window
+    ///////////////////////
 
+    int TutorialStage = -1;
+    Vector2 TutorialPopupAnchor = new Vector2(.5f, .5f);
+    Vector2 TutorialPopupPosition = Vector2.zero;
+    float TutorialLerp = 1;
+
+    public class TutorialStep {
+        public string Content;
+        public string RequirementText;
+        public Func<Charter, bool> RequirementFunction;
+        public Vector2 PopupAnchor = new Vector2(.5f, .5f);
+        public Vector2 PopupPosition = Vector2.zero;
+    }
+
+    public TutorialStep[] TutorialSteps = new TutorialStep[] {
+        new TutorialStep() 
+        {
+            Content = "Welcome to J.A.N.O.A.R.G. Charter Engine's Interactive Tutorial! This window will introduce and guide you to the basics of creating J.A.N.O.A.R.G. charts.\n\n" 
+                + "If you ever decided to skip this at any point in the future, you can access the tutorial again in the playable song selection screen, which uhh... is this one.",
+        },
+        new TutorialStep() 
+        {
+            Content = "Before you can chart, you need to know that J.A.N.O.A.R.G. stores charts of each song inside a file called a \"Playable Song\". To be able to chart, you'll need to create one first.\n\n"
+                + "J.A.N.O.A.R.G. charts/playable songs do not have special folder/file name requirements, but it is recommended that you create a folder for each song for ease of access.",
+        },
+        new TutorialStep() 
+        {
+            Content = "To create a playable song, drag the song from the Project tab to the \"Clip\" field, enter song details, then press the \"Create New Chart\" button. The playable song file will be put in the same folder as the audio file.\n\n"
+                + "Or alternatively, you can use the left field to open an already existing playable song to make edits.",
+            PopupPosition = new Vector2(0, -160),
+            RequirementText = "Create/Open a Playable Song to continue",
+            RequirementFunction = x => x.TargetSong != null,
+        },
+        new TutorialStep() 
+        {
+            Content = "Welcome to the charting screen! You'll be redirected here when a playable song is selected.\n\n"
+                + "You'll spend a majority of the time spending on this screen when charting, so feel free to get yourself used to it.\n\n"
+                + "Anyways, may I introduce the interface to you?",
+        },
+        new TutorialStep() 
+        {
+            Content = "This is the Toolbar. Stuff that's pretty important and needs to be accessed often will be here.\n\n"
+                + "Controls from left to right: Main menu, playable song data, chart data, save button, play/pause, play settings, timers and the metronome.\n\n"
+                + "Note that charts are not auto-saved, which explains the presence of the \"Save\" button.",
+            PopupPosition = new Vector2(0, 120),
+            PopupAnchor = new Vector2(.5f, 0),
+        },
+        new TutorialStep() 
+        {
+            Content = "This is the Inspector. This panel will display information and let you adjust settings about the thing that's currently selected.\n\n"
+                + "The Inspector has two modes: Attributes and Storyboard. More on the Storyboard later, right now we only need the Attributes mode.",
+            PopupPosition = new Vector2(-380, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "This is the Timeline. This panel will display selectable items that has a time position on the chart.\n\n"
+                + "Below the Timelines are selectable modes on the left and general chart values on the right.",
+            PopupPosition = new Vector2(0, -220),
+            PopupAnchor = new Vector2(.5f, 1),
+        },
+        new TutorialStep() 
+        {
+            Content = "This is the Picker. Items will appear here depending on the Timeline mode you're currently in.\n\n"
+                + "Besides from Timeline-mode-specific items, there are three general commands that's available on every mode: Cursor, Select and Delete.",
+            PopupPosition = new Vector2(215, -80),
+            PopupAnchor = new Vector2(0, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "Enough talking, to be able to chart we'll need to have a chart first!\n\n"
+                + "Click on the song name above to open the song settings.",
+            PopupPosition = new Vector2(180, 120),
+            PopupAnchor = new Vector2(0, 0),
+            RequirementText = "Click on the song name above",
+            RequirementFunction = x => x.TargetThing == (object)x.TargetSong,
+        },
+        new TutorialStep() 
+        {
+            Content = "Good! The Inspector will now display the information about the Playable Song since you just selected it earlier.\n\n"
+                + "The section above display global song information that persists within charts, you can edit it here if you make some mistakes earlier.\n\n"
+                + "Press the Continue button once you finished editing.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "To create a chart, press the \"Create a Chart\" button on the right.\n\n"
+                + "If you already have a chart however, you can select a chart difficulty on the list here.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+            RequirementText = "Open or create a Chart to continue",
+            RequirementFunction = x => x.TargetChart != null,
+        },
+        new TutorialStep() 
+        {
+            Content = "Now that we opened a chart, you'll now see your chart being displayed here on the middle of the screen (defaults to a black screen with a white border).\n\n"
+                + "What you see here will be what the player will see when they play your chart!",
+        },
+        new TutorialStep() 
+        {
+            Content = "And yes, charts have their own global data too!\n\n"
+                + "Click on the chart difficulty to select the chart.\n\n"
+                + "Also you can click on the small button on the right to select charts.",
+            PopupPosition = new Vector2(180, 120),
+            PopupAnchor = new Vector2(0, 0),
+            RequirementText = "Click on the chart above to select",
+            RequirementFunction = x => x.TargetThing is Chart,
+        },
+        new TutorialStep() 
+        {
+            Content = "Here are the data of the chart. The Metadata contains data that will be used to separate chart of the same song.\n\n"
+                + "Besides the difficulty name and rating, charts also have an Index number that will be referenced internally and a Constant number that will be used in skill rating calculations.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "The first thing we should do when creating a chart is to make sure everything is synced!\n\n"
+                + "Click on the Timing tab here to open the BPM editor.",
+            PopupPosition = new Vector2(180, -120),
+            PopupAnchor = new Vector2(0, 1),
+            RequirementText = "Open the Timing tab",
+            RequirementFunction = x => x.timelineMode == "timing",
+        },
+        new TutorialStep() 
+        {
+            Content = "The Timeline will now display the BPM stops of the song here.\n\n"
+                + "If you just created the song, there should be a 140 BPM stop at the beginning of the song. We aren't sure if the song being charted is actually at 140 BPM, so it's good to know how to change it in case it isn't.",
+            PopupPosition = new Vector2(0, -260),
+            PopupAnchor = new Vector2(.5f, 1),
+        },
+        new TutorialStep() 
+        {
+            Content = "You might also noticed the Picker now showing an item called \"STP\".\n\n"
+                + "You can create another BPM stop by selecting it and placing it in the Timeline, in case you song has BPM changes. That should work for anything that'll be displayed here too.",
+            PopupPosition = new Vector2(215, -80),
+            PopupAnchor = new Vector2(0, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "To edit a BPM stop, bring it to the Inspector by selecting it on the Timeline. You'll also be doing this for anything that appears here too.",
+            PopupPosition = new Vector2(0, -260),
+            PopupAnchor = new Vector2(.5f, 1),
+            RequirementText = "Select the BPM Stop on the Timeline",
+            RequirementFunction = x => x.TargetThing is BPMStop,
+        },
+        new TutorialStep() 
+        {
+            Content = "The Inspector will display information about the BPM stop here.\n\n"
+                + "Since this item has a time placement, there'll be a number field in the top right corner to insert the time (in seconds). That's the \"offset\" value of the stop.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "The BPM field is the speed of the songs in beats per minute (duh!), and the Signature field indicates how many beats to form a bar.\n\n"
+                + "Note that in the Signature field the lower number (beat unit) is unnecessary and only the upper number is needed (e.g. type 3 instead of 3/4).",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "Quick tip: You can enable the audio metronome by opening this drop down near the Play/Pause button and toggle the Metronome button.\n\n"
+                + "There are also more features in the drop down that can help you in your charting too!",
+            PopupPosition = new Vector2(25, 120),
+            PopupAnchor = new Vector2(.5f, 0),
+        },
+        new TutorialStep() 
+        {
+            Content = "Now go edit the BPM, offset and signature of the song!\n\n"
+                + "Press the Play button to play the song. Click it again to pause it.\n\n"
+                + "Click Continue if you think the song is synced (when the metronome sounds are in sync with the song when enabled).",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "Now that's we synced the music, let's populate the chart!\n\n"
+                + "J.A.N.O.A.R.G. charts are made from lanes that can move, rotate, and resize, and notes are placed on them. Let's create one!",
+            PopupPosition = new Vector2(180, -120),
+            PopupAnchor = new Vector2(0, 1),
+            RequirementText = "Click the Lane tab to open the Lane editor.",
+            RequirementFunction = x => x.timelineMode == "lane",
+        },
+        new TutorialStep() 
+        {
+            Content = "This is the Lane editor. All your Lanes will be displayed here.\n\n"
+                + "To create a Lane, select \"LNE\" from the Picker and place it on the Timeline, or if a lane is present, you can click on it to select it.\n\n",
+            RequirementText = "Create/Select a Lane",
+            RequirementFunction = x => x.TargetThing is Lane,
+            PopupPosition = new Vector2(0, -260),
+            PopupAnchor = new Vector2(.5f, 1),
+        },
+        new TutorialStep() 
+        {
+            Content = "This is the Lane's Inspector screen, which might be confusing at first, but we'll try to unterstand it anyways.\n\n"
+                + "The Transform section contain rules that moves the entire lane at once, where the Lane Step section defines specific lane shapes.\n\n"
+                + "The Appearance determines how the lane looks, we'll leave it as is for now.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "The Lane Step format looks like this:\n"
+                + "Offset (beats) | Speed\n"
+                + "Start X | Start X Ease | Start Y | Start Y Ease\n"
+                + "End X | End X Ease | End Y | End Y Ease\n\n"
+                + "You can click on the ⋮ to expand on that lane step or click x to delete it.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "About the coordination system: The game uses the left handed coordination system with positive X = right, positive Y = up, and positive Z = forward. "
+                + "If you use Unity you probably won't need this but I heard that some people are having trouble with this so here you go.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "As before, I'll let you use you lanes to your liking.\n\n"
+                + "Click Continue when you're finished.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "Now the lanes are completed, let's add some gameplay!\n\n"
+                + "Here notes are called \"hit objects\" or just simply \"hits\" and these are instructions for players to hit them, just like other rhythm games. Use the Hits tab to create some of them, which just showed up because you selected a Lane.",
+            PopupPosition = new Vector2(180, -120),
+            PopupAnchor = new Vector2(0, 1),
+            RequirementText = "Click the Hits tab to open the Hit editor.",
+            RequirementFunction = x => x.timelineMode == "hit",
+        },
+        new TutorialStep() 
+        {
+            Content = "The Hits tabs shows the Timeline of the hit objects that are on the Lane that you selected.\n\n"
+                + "One again, you can select an item and place it here on the Timeline, but there will be different type of notes as well, so here are the abbreviations means:\n"
+                + "NOR = Normal notes, CAT = Catch notes",
+            PopupPosition = new Vector2(0, -260),
+            PopupAnchor = new Vector2(.5f, 1),
+            RequirementText = "Create/Select a Hit Object",
+            RequirementFunction = x => x.TargetThing is HitObject
+        },
+        new TutorialStep() 
+        {
+            Content = "The Hit Object also has its Inspector panel too, and it also has the time input on the top right corner to set its placement time.\n\n"
+                + "The Position and Length parameters determines where and how long the note will be, or you can just use the knobs and the slider to change it.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "The Hold Length parameter determines how long the note needs to be hold to be fully cleared.\n\n"
+                + "Similar to Lanes, Hit Objects also has an Appearance category that determines how they're shown, but we also leave that to you to change.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "It's time for you to do the charting! Use what you've learned to create a pattern that you like!\n\n"
+                + "Hit \"Continue\" when you're ready to continue. There'll be more to discover.",
+            PopupPosition = new Vector2(0, 120),
+            PopupAnchor = new Vector2(.5f, 0),
+        },
+        new TutorialStep() 
+        {
+            Content = "Let's take a tour on the more complex data of the chart.\n\n"
+                + "Click on the \"Pallete\" button to open the Pallete.",
+            PopupPosition = new Vector2(-175, -120),
+            PopupAnchor = new Vector2(1, 1),
+            RequirementText = "Open the Pallete",
+            RequirementFunction = x => x.TargetThing is Pallete,
+        },
+        new TutorialStep() 
+        {
+            Content = "The Pallete will determine how your chart will look.\n\n"
+                + "You can set the Background and the Interface's color get access to the styles here.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+            RequirementText = "Open a Style by clicking on one to continue",
+            RequirementFunction = x => x.TargetThing is LaneStyle || x.TargetThing is HitStyle,
+        },
+        new TutorialStep() 
+        {
+            Content = "There are also style groups for Lanes and Hit Objects located in the Pallete. Here you can set the color scheme and even change the feel by using the Material system!\n\n"
+                + "Note that Materials and Color Targets are advanced features for Unity users, if you don't know what you're doing you should probably leave them as is.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "All right, I've been saving this one for the last!\n\n"
+                + "Have you noticed a tab on the Inspector called \"Storyboard\"? Let's click on it →",
+            PopupPosition = new Vector2(-445, -80),
+            PopupAnchor = new Vector2(1, .5f),
+            RequirementText = "Open the Storyboard tab on the Inspector",
+            RequirementFunction = x => x.inspectMode == "storyboard"
+        },
+        new TutorialStep() 
+        {
+            Content = "Most of the numbers on items can be animated! That'll surely add a lot of complexity and creativity to our charts!\n\n"
+                + "You can add a new Timestamp by using the \"+\" on the top right corner...",
+            PopupPosition = new Vector2(-440, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep() 
+        {
+            Content = "...or by using the dedicated Storyboard tab on the Timeline.\n\n"
+                + "Either way, they will display the Timestamp controlled by the item that you selected earlier, so make sure you select an item first!",
+            PopupPosition = new Vector2(180, -120),
+            PopupAnchor = new Vector2(0, 1),
+        },
+        new TutorialStep() 
+        {
+            Content = "That concludes the tutorial! I hope you've gotten familliar with the editor.\n\n"
+                + "If you have any questions, feel free to leave it on our Discord server listed on the GitHub repository.\n"
+                + "(You should know where our GitHub repo is since you downloaded the editor there, right?)",
+        },
+    };
+
+    public void Tutorial(int id) 
+    {
+        TutorialStep step = TutorialSteps[TutorialStage];
+
+        if (TutorialStage > 0 && TutorialLerp < 1) 
+        {
+            TutorialLerp += Time.deltaTime / 2;
+            TutorialStep prev = TutorialSteps[TutorialStage - 1];
+            float ease = Ease.Get(TutorialLerp, "Quadratic", EaseMode.Out);
+            TutorialPopupAnchor = Vector2.Lerp(prev.PopupAnchor, step.PopupAnchor, ease);
+            TutorialPopupPosition = Vector2.Lerp(prev.PopupPosition, step.PopupPosition, ease);
+            Repaint();
+        } else {
+            TutorialPopupAnchor = step.PopupAnchor;
+            TutorialPopupPosition = step.PopupPosition;
+        }
+        
+        GUIStyle itemStyle = new GUIStyle("label");
+        itemStyle.wordWrap = true;
+        itemStyle.alignment = TextAnchor.MiddleCenter;
+        GUI.Label(new Rect(20, 0, 300, 156), step.Content, itemStyle);
+
+        if (GUI.Button(new Rect(4, 156, 68, 20), "Skip")) 
+        {
+            TutorialStage = -1;
+        }
+
+        if (step.RequirementText != null)
+        {
+            GUI.Label(new Rect(76, 156, 260, 20), step.RequirementText, itemStyle);
+            if (step.RequirementFunction(this)) 
+            {
+                TutorialStage = TutorialStage < TutorialSteps.Length - 1 ? TutorialStage + 1 : -1;
+                TutorialLerp = 0;
+            }
+        }
+        else if (GUI.Button(new Rect(76, 156, 260, 20), TutorialStage < TutorialSteps.Length - 1 ? "Continue →" : "Complete!")) 
+        {
+            TutorialStage = TutorialStage < TutorialSteps.Length - 1 ? TutorialStage + 1 : -1;
+            TutorialLerp = 0;
+        }
+    }
+
+    #endregion
 }

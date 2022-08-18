@@ -449,6 +449,7 @@ public class Lane : IStoryboardable
     public List<LaneStep> LaneSteps = new List<LaneStep>();
     public bool ExpandToInfinity = true;
     public Vector3 Offset;
+    public Vector3 OffsetRotation;
     public string Group;
 
     public int StyleIndex = 0;
