@@ -1673,9 +1673,15 @@ public class Charter : EditorWindow
                     step.EndPos = new Vector2(6, -3);
                     lane.LaneSteps.Add(step);
 
+                    LaneStep next = new LaneStep();
+                    next.Offset = step.Offset + 1;
+                    next.StartPos = step.StartPos;
+                    next.EndPos = step.EndPos;
+                    lane.LaneSteps.Add(next);
+
                     TargetChart.Lanes.Add(lane);
                     TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
-                    TargetThing = lane;
+                    TargetThing = TargetLane = lane;
                     Repaint();
                 }
                 else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null) 
