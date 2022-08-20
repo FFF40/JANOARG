@@ -409,37 +409,51 @@ public class HitStyleManager {
 public class LaneGroup : IStoryboardable 
 {
     public string Name;
-    public Vector3 Position;
-    public float Rotation;
+    public Vector3 Offset;
+    public Vector3 Rotation;
 
     public new static TimestampType[] TimestampTypes = {
         new TimestampType
         {
-            ID = "Position_X",
-            Name = "Position X",
-            Get = (x) => ((LaneGroup)x).Position.x,
-            Set = (x, a) => { ((LaneGroup)x).Position.x = a; },
+            ID = "Offset_X",
+            Name = "Offset X",
+            Get = (x) => ((LaneGroup)x).Offset.x,
+            Set = (x, a) => { ((LaneGroup)x).Offset.x = a; },
         },
         new TimestampType
         {
-            ID = "Position_Y",
-            Name = "Position Y",
-            Get = (x) => ((LaneGroup)x).Position.y,
-            Set = (x, a) => { ((LaneGroup)x).Position.y = a; },
+            ID = "Offset_Y",
+            Name = "Offset Y",
+            Get = (x) => ((LaneGroup)x).Offset.y,
+            Set = (x, a) => { ((LaneGroup)x).Offset.y = a; },
         },
         new TimestampType
         {
-            ID = "Position_Z",
-            Name = "Position Z",
-            Get = (x) => ((LaneGroup)x).Position.z,
-            Set = (x, a) => { ((LaneGroup)x).Position.z = a; },
+            ID = "Offset_Z",
+            Name = "Offset Z",
+            Get = (x) => ((LaneGroup)x).Offset.z,
+            Set = (x, a) => { ((LaneGroup)x).Offset.z = a; },
         },
         new TimestampType
         {
-            ID = "Rotation",
-            Name = "Rotation",
-            Get = (x) => ((LaneGroup)x).Rotation,
-            Set = (x, a) => { ((LaneGroup)x).Rotation = a; },
+            ID = "Rotation_X",
+            Name = "Rotation X",
+            Get = (x) => ((LaneGroup)x).Rotation.x,
+            Set = (x, a) => { ((LaneGroup)x).Rotation.x = a; },
+        },
+        new TimestampType
+        {
+            ID = "Rotation_Y",
+            Name = "Rotation Y",
+            Get = (x) => ((LaneGroup)x).Rotation.y,
+            Set = (x, a) => { ((LaneGroup)x).Rotation.y = a; },
+        },
+        new TimestampType
+        {
+            ID = "Rotation_Z",
+            Name = "Rotation Z",
+            Get = (x) => ((LaneGroup)x).Rotation.z,
+            Set = (x, a) => { ((LaneGroup)x).Rotation.z = a; },
         },
     };
 }

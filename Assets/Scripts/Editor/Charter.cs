@@ -543,19 +543,21 @@ public class Charter : EditorWindow
                     HitStyleManagers.RemoveAt(pal.HitStyles.Count);
                 }
 
-                foreach (Lane lane in chart.Lanes)
+                foreach (Lane l in chart.Lanes)
                 {
+                    Lane lane = (Lane)(l.Get(pos));
                     if (lane.StyleIndex >= 0 && lane.StyleIndex < LaneStyleManagers.Count) 
                     {
                         if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                         {
                             Mesh mesh = MakeLaneMesh(lane);
-                            Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
+                            Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
                             Meshes.Add(mesh);
                         }
                     }
-                    foreach (HitObject hit in lane.Objects)
+                    foreach (HitObject h in lane.Objects)
                     {
+                        HitObject hit = (HitObject)(h.Get(pos));
                         bool valid = hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count;
                         if (hit.Offset > pos)
                         {
@@ -570,7 +572,7 @@ public class Charter : EditorWindow
                                         startPos = sp;
                                         endPos = ep;
                                     }
-                                    Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, mat, 0, CurrentCamera);
+                                    Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), mat, 0, CurrentCamera);
                                     Meshes.Add(mesh);
                                 }
                             }
@@ -582,7 +584,7 @@ public class Charter : EditorWindow
                             if (valid && HitStyleManagers[hit.StyleIndex].HoldTailMaterial) 
                             {
                                 Mesh mesh = MakeHoldMesh(hit, lane);
-                                Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
+                                Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
                                 Meshes.Add(mesh);
                             }
                             if (hit.Type == HitObject.HitType.Catch) ccount++;
@@ -609,6 +611,7 @@ public class Charter : EditorWindow
                     if (step.Offset > pos)
                     {
                         LaneStep dat = TargetLane.GetLaneStep(step.Offset, pos, TargetSong.Timing);
+                        if (dat == null) dat = step;
                         float zPos = dat.Offset * ScrollSpeed;
                         startPos = (Vector3)step.StartPos + Vector3.forward * zPos;
                         endPos = (Vector3)step.EndPos + Vector3.forward * zPos;
