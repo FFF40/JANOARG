@@ -28,6 +28,7 @@ public class Charter : EditorWindow
     public Lane TargetLane;
     public object TargetThing;
     public object DeletingThing;
+    public object ClipboardThing;
     public Timestamp TargetTimestamp;
 
     public AudioSource CurrentAudioSource;
@@ -853,7 +854,7 @@ public class Charter : EditorWindow
                             if (GizmoMode != "")
                             {
                                 LaneStep step = TargetLane.GetLaneStep(hit.Offset, pos, TargetSong.Timing);
-                                Debug.Log("HO " + hit.Offset + " " + CurrentAudioSource.time + " " + step.Offset);
+                                // Debug.Log("HO " + hit.Offset + " " + CurrentAudioSource.time + " " + step.Offset);
                                 float stop = 0;
                                 float stopDist = float.PositiveInfinity;
 
@@ -1016,6 +1017,8 @@ public class Charter : EditorWindow
     {
         if (Event.current.type == EventType.KeyDown) 
         {
+            // Time to commit YandereDev coding
+
             if (Event.current == CharterSettings.Keybinds["General/Toggle Play/Pause"])
             {
                 if (CurrentAudioSource.isPlaying) 
@@ -1027,6 +1030,10 @@ public class Charter : EditorWindow
                     CurrentAudioSource.clip = TargetSong.Clip;
                     CurrentAudioSource.Play();
                 }
+            }
+            else if (Event.current == CharterSettings.Keybinds["Edit/Copy"])
+            {
+                CopySelection();
             }
             else if (Event.current == CharterSettings.Keybinds["Picker/Cursor"])
             {
@@ -1264,12 +1271,24 @@ public class Charter : EditorWindow
     ///////////////////////
 
     public float seekStart, seekEnd;
+    public float? selectStart, selectEnd;
 
     public string dragMode = "";
     public bool dragged = false;
     public string timelineMode = "lane";
 
     public int verSeek = 0;
+
+    public bool IsTargeted(object thing) 
+    {  
+        return TargetThing == thing || (TargetThing is IList && ((IList)TargetThing).Contains(thing));
+    }
+    
+    public void CopySelection() 
+    {
+        ClipboardThing = TargetThing;
+        Debug.Log("Copied " + ClipboardThing);
+    }
 
     public void Timeline(int id) {
         float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
@@ -1309,6 +1328,9 @@ public class Charter : EditorWindow
         EditorGUI.DrawRect(new Rect(0, 100, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
         for (float a = Mathf.Ceil(seekStart / sep) * sep; a < seekEnd; a += sep)
         {
+            // Infinite loop handler
+            if (a + sep == a) break;
+
             float pos = (a - seekStart) / (seekEnd - seekStart) * width;
 
             float op = .5f;
@@ -1358,6 +1380,23 @@ public class Charter : EditorWindow
                 return Times.Count - 1;
             }
 
+            if (selectStart != null && selectEnd != null)
+            {
+                float posStart = ((float)selectStart - seekStart) / (seekEnd - seekStart) * width;
+                float posEnd = ((float)selectEnd - seekStart) / (seekEnd - seekStart) * width;
+                if (posStart > posEnd) 
+                {
+                    float tmp = posStart;
+                    posStart = posEnd;
+                    posEnd = tmp;
+                }
+
+                EditorGUI.DrawRect(new Rect(posStart + 2, 0, posEnd - posStart, 115), new Color(.5f, .5f, 1, .2f));
+                Color color = EditorGUIUtility.isProSkin ? new Color(.5f, .5f, 1) : new Color(.1f, .1f, .2f);
+                EditorGUI.DrawRect(new Rect(posStart + 1, 0, 2, 115), color);
+                EditorGUI.DrawRect(new Rect(posEnd + 1, 0, 2, 115), color);
+            }
+
             if (timelineMode == "story")
             {
                 if (TargetThing is IStoryboardable)
@@ -1397,13 +1436,15 @@ public class Charter : EditorWindow
                             EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .2f));
 
                             float rpos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 5), (b - seekStart) / (seekEnd - seekStart) * width);
-                            if (GUI.Toggle(new Rect(rpos - 1, 3 + time * 22, 6, 20), TargetThing == ts && DeletingThing != ts, DeletingThing == ts ? "?" : " ", "button"))
+                            if (TargetTimestamp == ts || IsTargeted(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "button");
+                            if (GUI.Button(new Rect(rpos - 1, 3 + time * 22, 6, 20), DeletingThing == ts ? "?" : " ", "button"))
                             {
+                                
                                 if (pickermode == "delete")
                                 { 
 
                                 }
-                                else 
+                                else
                                 {
                                     TargetTimestamp = ts;
                                     DeletingThing = null;
@@ -1417,7 +1458,8 @@ public class Charter : EditorWindow
                     EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
                     GUIStyle center = new GUIStyle("label");
                     center.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(0, 0, width + 4, 115), TargetThing == null ? "Please select an object to start editing." : "This object is not storyboardable.", center);
+                    GUI.Label(new Rect(0, 0, width + 4, 115), TargetThing == null ? "Please select an object to start editing." : 
+                        (TargetThing is IList ? "Can not edit storyboard of multiple objects" : "This object is not storyboardable."), center);
                 }
             }
             if (timelineMode == "timing")
@@ -1430,7 +1472,8 @@ public class Charter : EditorWindow
                     if (time < 0 || time >= 5) continue;
                     if (a > seekStart && a < seekEnd) 
                     {
-                        if (GUI.Toggle(new Rect(pos - 29, 3 + time * 22, 60, 20), TargetThing == stop && DeletingThing != stop, DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), "button"))
+                        if (IsTargeted(stop)) GUI.Label(new Rect(pos - 30, 2 + time * 22, 62, 22), "", "button");
+                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), "button"))
                         {
                             if (pickermode == "delete")
                             {
@@ -1468,14 +1511,15 @@ public class Charter : EditorWindow
                         if (time < 0 || time >= 5) continue;
                         if (b > seekStart && a < seekEnd) 
                         {
-                            EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .2f));
+                            EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), TargetLane == lane ? new Color(1, 1, 0, .2f) : new Color(0, 1, 0, .2f));
                         }
                         for (int x = 1; x < lane.LaneSteps.Count; x++) {
                             float c = lane.LaneSteps[x].Offset;
                             if (c > seekStart && c < seekEnd) 
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
-                                if (GUI.Toggle(new Rect(pos3 - 1, 3 + time * 22, 6, 20), TargetThing == lane.LaneSteps[x] && DeletingThing != lane.LaneSteps[x], DeletingThing == lane.LaneSteps[x] ? "?" : "|", "button"))
+                                if (IsTargeted(lane.LaneSteps[x])) GUI.Label(new Rect(pos3 - 2, 2 + time * 22, 8, 22), "", "button");
+                                if (GUI.Button(new Rect(pos3 - 1, 3 + time * 22, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : "|", "button"))
                                 {
                                     if (pickermode == "delete")
                                     {
@@ -1489,7 +1533,7 @@ public class Charter : EditorWindow
                                             DeletingThing = lane.LaneSteps[x];
                                         }
                                     }
-                                    else 
+                                    else
                                     {
                                         TargetLane = lane;
                                         TargetThing = lane.LaneSteps[x];
@@ -1501,7 +1545,8 @@ public class Charter : EditorWindow
                         if (b > seekStart && a < seekEnd) 
                         {
                             float rpos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 13), (b - seekStart) / (seekEnd - seekStart) * width - 15);
-                            if (GUI.Toggle(new Rect(rpos - 9, 3 + time * 22, 20, 20), TargetThing == lane && DeletingThing != lane, DeletingThing == lane ? "?" : "|", "button"))
+                            if (IsTargeted(lane)) GUI.Label(new Rect(rpos - 10, 2 + time * 22, 22, 22), "", "button");
+                            if (GUI.Button(new Rect(rpos - 9, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "|", "button"))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -1516,7 +1561,7 @@ public class Charter : EditorWindow
                                         DeletingThing = lane;
                                     }
                                 }
-                                else 
+                                else
                                 {
                                     TargetThing = TargetLane = lane;
                                     DeletingThing = null;
@@ -1563,7 +1608,8 @@ public class Charter : EditorWindow
                         }
                         if (hit.Offset > seekStart && hit.Offset < seekEnd) 
                         {
-                            if (GUI.Toggle(new Rect(pos - 9, 3 + time * 22, 20, 20), TargetThing == hit && DeletingThing != hit, DeletingThing == hit ? "?" : "|", "button"))
+                            if (IsTargeted(hit)) GUI.Label(new Rect(pos - 10, 2 + time * 22, 22, 22), "", "button");
+                            if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == hit ? "?" : "|", "button"))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -1578,7 +1624,7 @@ public class Charter : EditorWindow
                                         DeletingThing = hit;
                                     }
                                 }
-                                else 
+                                else
                                 {
                                     TargetThing = hit;
                                     DeletingThing = null;
@@ -1629,9 +1675,18 @@ public class Charter : EditorWindow
                 }
                 else if (mPos.y > 0 && mPos.y < 100) 
                 {
-                    CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
-                    dragMode = "seeksnap";
-                    Repaint();
+                    if (pickermode == "select") 
+                    {
+                        selectStart = sPos;
+                        dragMode = "select";
+                        Repaint();
+                    }
+                    else 
+                    {
+                        CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
+                        dragMode = "seeksnap";
+                        Repaint();
+                    }
                 }
             }
             dragged = false;
@@ -1640,20 +1695,89 @@ public class Charter : EditorWindow
         {
             Vector2 mPos = Event.current.mousePosition;
             float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
-            if (dragMode == "seek") 
+            if (dragMode == "select") 
+            {
+                selectEnd = sPos;
+                Repaint();
+            }
+            else if (dragMode == "seek") 
             {
                 CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
                 Repaint();
             }
-            if (dragMode == "seeksnap") 
+            else if (dragMode == "seeksnap") 
             {
                 CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
+                Repaint();
+            }
+
+            if (mPos.x < 50) 
+            {
+                float drift = Mathf.Min((50 - mPos.x) / 10000 * (seekEnd - seekStart), seekStart - seekLimitStart);
+                seekStart -= drift;
+                seekEnd -= drift;
+                Repaint();
+            }
+            if (mPos.x > width - 50) 
+            {
+                float drift = Mathf.Min((mPos.x - width + 50) / 10000 * (seekEnd - seekStart), seekLimitEnd - seekEnd);
+                seekStart += drift;
+                seekEnd += drift;
                 Repaint();
             }
             dragged = true;
         }
         else if (Event.current.type == EventType.MouseUp && Event.current.button == 0) 
         {
+            if (dragMode == "select") 
+            {
+                if (selectEnd != null) 
+                {
+                    if (selectStart > selectEnd)
+                    {
+                        float? tmp = selectStart;
+                        selectStart = selectEnd;
+                        selectEnd = tmp;
+                    }
+
+                    if (timelineMode == "story" && TargetThing is IStoryboardable) 
+                    {
+                        List<Timestamp> sel = ((IStoryboardable)TargetThing).Storyboard.Timestamps.FindAll(x => {
+                            return x.Time >= selectStart && x.Time <= selectEnd; 
+                        });
+                        if (sel.Count == 1) TargetTimestamp = sel[0];
+                        else if (sel.Count > 1) TargetThing = sel;
+                    }
+                    else if (timelineMode == "timing")
+                    {
+                        List<BPMStop> sel = TargetSong.Timing.Stops.FindAll(x => {
+                            float rofs = TargetSong.Timing.ToBeat(x.Offset);
+                            return rofs >= selectStart && rofs <= selectEnd; 
+                        });
+                        if (sel.Count == 1) TargetThing = sel[0];
+                        else if (sel.Count > 1) TargetThing = sel;
+                    }
+                    else if (timelineMode == "lane")
+                    {
+                        List<Lane> sel = TargetChart.Lanes.FindAll(x => {
+                            return x.LaneSteps[0].Offset >= selectStart && x.LaneSteps[0].Offset <= selectEnd; 
+                        });
+                        if (sel.Count == 1) { TargetThing = TargetLane = sel[0]; }
+                        else if (sel.Count > 1) { TargetThing = sel; TargetLane = null; }
+                    }
+                    else if (timelineMode == "hit")
+                    {
+                        List<HitObject> sel = TargetLane.Objects.FindAll(x => {
+                            return x.Offset >= selectStart && x.Offset <= selectEnd; 
+                        });
+                        if (sel.Count == 1) TargetThing = sel[0];
+                        else if (sel.Count > 1) TargetThing = sel;
+                    }
+                }
+                selectStart = selectEnd = null;
+                Repaint();
+            }
+
             if (!dragged && !CurrentAudioSource.isPlaying) 
             {
                 if (dragMode == "seeksnap" && pickermode == "bpmstop") 
@@ -1663,7 +1787,7 @@ public class Charter : EditorWindow
                     TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                     Repaint();
                 }
-                if (dragMode == "seeksnap" && pickermode == "lane") 
+                else if (dragMode == "seeksnap" && pickermode == "lane") 
                 {
                     Lane lane = new Lane();
 
@@ -1688,12 +1812,16 @@ public class Charter : EditorWindow
                 {
                     HitObject hit = new HitObject();
                     hit.Offset = Mathf.Round(pos * 1000) / 1000;
+                    hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
                     if (TargetThing is HitObject)
                     {
                         HitObject thing = (HitObject)TargetThing;
                         hit.Position = thing.Position;
                         hit.Length = thing.Length;
-                        hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
+                    }
+                    else 
+                    {
+                        hit.Length = 1;
                     }
                     TargetLane.Objects.Add(hit);
                     TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
@@ -1701,6 +1829,7 @@ public class Charter : EditorWindow
                     Repaint();
                 }
             }
+
             dragMode = "";
         }
 
@@ -1743,6 +1872,13 @@ public class Charter : EditorWindow
         }
         else if (inspectMode == "properties")
         {
+            if (TargetThing is IList)
+            {
+                GUIStyle bStyle = new GUIStyle("textField");
+                bStyle.fontStyle = FontStyle.Bold;
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Multi-select", "boldLabel");
+            }
             if (TargetThing is PlayableSong)
             {
                 PlayableSong thing = (PlayableSong)TargetThing;
@@ -2276,6 +2412,10 @@ public class Charter : EditorWindow
                 
                 GUILayout.Space(h);
                 GUILayout.EndScrollView();
+            }
+            else if (TargetThing is IList)
+            {
+                GUILayout.Label("Can not edit storyboard of multiple objects");
             }
             else
             {

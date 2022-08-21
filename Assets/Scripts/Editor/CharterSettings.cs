@@ -76,6 +76,8 @@ public class CharterSettings : EditorWindow
         else if (currentTab == 1)
         {
             GUILayout.Label("Keybindings", title, GUILayout.MinWidth(Screen.width - 180));
+            GUILayout.Space(8);
+            GUILayout.Label("(These can't be modified yet, for now use this as a reference)");
             string curCat = "";
             
             int rows = Mathf.Max((int)(Screen.width - 180) / 220, 1);
@@ -92,13 +94,13 @@ public class CharterSettings : EditorWindow
                 {
                     crow = 0;
                     for (int a = 1; a < rows; a++) if (hs[a] < hs[crow]) crow = a;
-                    GUI.Label(new Rect(w * crow + 4, hs[crow] + 32, w - 5, 24), cat, title2);
+                    GUI.Label(new Rect(w * crow + 4, hs[crow] + 68, w - 5, 24), cat, title2);
                     hs[crow] += 32;
                     curCat = cat;
                 }
 
-                GUI.Label(new Rect(w * crow + 4, hs[crow] + 25, 120, 20), name);
-                GUI.Button(new Rect(w * crow + 130, hs[crow] + 24, w - 132, 20), kb.Value.ToString(), EditorStyles.textField);
+                GUI.Label(new Rect(w * crow + 4, hs[crow] + 59, 120, 20), name);
+                GUI.Button(new Rect(w * crow + 130, hs[crow] + 60, w - 132, 20), kb.Value.ToString(), EditorStyles.textField);
                 hs[crow] += 22;
             }
             
@@ -187,6 +189,9 @@ public class CharterKeybinds
         Values = new Dictionary<string, Keybind>();
 
         Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P, EventModifiers.None);
+
+        Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Control);
+        Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Control);
 
         Values["Picker/Cursor"] = new Keybind(KeyCode.A, EventModifiers.None);
         Values["Picker/Select"] = new Keybind(KeyCode.S, EventModifiers.None);
