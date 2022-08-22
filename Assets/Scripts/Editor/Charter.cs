@@ -547,7 +547,7 @@ public class Charter : EditorWindow
                 foreach (Lane l in chart.Lanes)
                 {
                     Lane lane = (Lane)(l.Get(pos));
-                    if (lane.StyleIndex >= 0 && lane.StyleIndex < LaneStyleManagers.Count) 
+                    if (Event.current.type == EventType.Repaint && lane.StyleIndex >= 0 && lane.StyleIndex < LaneStyleManagers.Count) 
                     {
                         if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                         {
@@ -559,7 +559,7 @@ public class Charter : EditorWindow
                     foreach (HitObject h in lane.Objects)
                     {
                         HitObject hit = (HitObject)(h.Get(pos));
-                        bool valid = hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count;
+                        bool valid = Event.current.type == EventType.Repaint && hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count;
                         if (hit.Offset > pos)
                         {
                             if (valid) 
@@ -1290,6 +1290,11 @@ public class Charter : EditorWindow
         Debug.Log("Copied " + ClipboardThing);
     }
 
+    public void PasteSelection() 
+    {
+
+    }
+
     public void Timeline(int id) {
         float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
         float seekLimitEnd = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
@@ -1468,7 +1473,7 @@ public class Charter : EditorWindow
                 {
                     float a = TargetSong.Timing.ToBeat(stop.Offset);
                     float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                    int time = AddTime(pos, 21) - verSeek;
+                    int time = AddTime(pos, 61) - verSeek;
                     if (time < 0 || time >= 5) continue;
                     if (a > seekStart && a < seekEnd) 
                     {
@@ -1874,10 +1879,23 @@ public class Charter : EditorWindow
         {
             if (TargetThing is IList)
             {
+                IList thing = (IList)TargetThing;
+                
                 GUIStyle bStyle = new GUIStyle("textField");
                 bStyle.fontStyle = FontStyle.Bold;
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Multi-select", "boldLabel");
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+                string name = "items";
+                if (thing is List<Timestamp>) name = "Timestamps";
+                else if (thing is List<BPMStop>) name = "BPM Stops";
+                else if (thing is List<Lane>) name = "Lanes";
+                else if (thing is List<LaneStep>) name = "Lane Steps";
+                else if (thing is List<HitObject>) name = "Hit Objects";
+                GUILayout.Label(thing.Count + " " + name, "boldLabel");
+
+                GUILayout.EndScrollView();
             }
             if (TargetThing is PlayableSong)
             {
