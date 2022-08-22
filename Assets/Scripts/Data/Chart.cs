@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -70,10 +71,25 @@ public class Chart : IStoryboardable
         },
     };
 
-
     public Chart() 
     {
         
+    }
+    
+    public Chart DeepClone()
+    {
+        Chart clone = new Chart()
+        {
+            DifficultyName = DifficultyName,
+            DifficultyLevel = DifficultyLevel,
+            DifficultyIndex = DifficultyIndex,
+            ChartConstant = ChartConstant,
+            Pallete = Pallete.DeepClone(),
+            Storyboard = Storyboard.DeepClone(),
+        };
+        foreach (LaneGroup group in Groups) clone.Groups.Add(group.DeepClone());
+        foreach (Lane lane in Lanes) clone.Lanes.Add(lane.DeepClone());
+        return clone;
     }
 }
 
@@ -144,6 +160,19 @@ public class Pallete : IStoryboardable  {
     {
         LaneStyles.Add(new LaneStyle());
         HitStyles.Add(new HitStyle());
+    }
+
+    public Pallete DeepClone()
+    {
+        Pallete clone = new Pallete()
+        {
+            BackgroundColor = new Color(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.a),
+            InterfaceColor = new Color(InterfaceColor.r, InterfaceColor.g, InterfaceColor.b, InterfaceColor.a),
+            Storyboard = Storyboard.DeepClone(),
+        };
+        foreach (LaneStyle ls in LaneStyles) clone.LaneStyles.Add(ls.DeepClone());
+        foreach (HitStyle hs in HitStyles) clone.HitStyles.Add(hs.DeepClone());
+        return clone;
     }
 }
 
@@ -222,6 +251,21 @@ public class LaneStyle : IStoryboardable {
     {
         LaneMaterial = (Material)Resources.Load("Materials/Default Lane");
         JudgeMaterial = (Material)Resources.Load("Materials/Default Judge");
+    }
+
+    public LaneStyle DeepClone()
+    {
+        LaneStyle clone = new LaneStyle()
+        {
+            LaneMaterial = LaneMaterial,
+            LaneColorTarget = LaneColorTarget,
+            LaneColor = new Color(LaneColor.r, LaneColor.g, LaneColor.b, LaneColor.a),
+            JudgeMaterial = JudgeMaterial,
+            JudgeColorTarget = JudgeColorTarget,
+            JudgeColor = new Color(JudgeColor.r, JudgeColor.g, JudgeColor.b, JudgeColor.a),
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
     }
 }
 
@@ -363,6 +407,22 @@ public class HitStyle : IStoryboardable {
         MainMaterial = (Material)Resources.Load("Materials/Default Hit");
         HoldTailMaterial = (Material)Resources.Load("Materials/Default Hold");
     }
+
+    public HitStyle DeepClone()
+    {
+        HitStyle clone = new HitStyle()
+        {
+            MainMaterial = MainMaterial,
+            MainColorTarget = MainColorTarget,
+            NormalColor = new Color(NormalColor.r, NormalColor.g, NormalColor.b, NormalColor.a),
+            CatchColor = new Color(CatchColor.r, CatchColor.g, CatchColor.b, CatchColor.a),
+            HoldTailMaterial = HoldTailMaterial,
+            HoldTailColorTarget = HoldTailColorTarget,
+            HoldTailColor = new Color(HoldTailColor.r, HoldTailColor.g, HoldTailColor.b, HoldTailColor.a),
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
 }
 
 public class HitStyleManager {
@@ -456,6 +516,18 @@ public class LaneGroup : IStoryboardable
             Set = (x, a) => { ((LaneGroup)x).Rotation.z = a; },
         },
     };
+
+    public LaneGroup DeepClone()
+    {
+        LaneGroup clone = new LaneGroup()
+        {
+            Name = Name,
+            Offset = new Vector3(Offset.x, Offset.y, Offset.z),
+            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
 }
 
 [System.Serializable]
@@ -564,6 +636,22 @@ public class Lane : IStoryboardable
             Set = (x, a) => { ((Lane)x).Offset.z = a; },
         },
     };
+
+    public Lane DeepClone()
+    {
+        Lane clone = new Lane()
+        {
+            ExpandToInfinity = ExpandToInfinity,
+            Offset = new Vector3(Offset.x, Offset.y, Offset.z),
+            OffsetRotation = new Vector3(OffsetRotation.x, OffsetRotation.y, OffsetRotation.z),
+            Group = Group,
+            StyleIndex = StyleIndex,
+            Storyboard = Storyboard.DeepClone(),
+        };
+        foreach (HitObject obj in Objects) clone.Objects.Add(obj.DeepClone());
+        foreach (LaneStep step in LaneSteps) clone.LaneSteps.Add(step.DeepClone());
+        return clone;
+    }
 }
 
 [System.Serializable]
@@ -620,10 +708,31 @@ public class LaneStep : IStoryboardable
             Set = (x, a) => { ((LaneStep)x).Speed = a; },
         },
     };
+    
+    public LaneStep DeepClone()
+    {
+        LaneStep clone = new LaneStep()
+        {
+            Offset = Offset,
+            StartPos = new Vector2(StartPos.x, StartPos.y),
+            StartEaseX = StartEaseX,
+            StartEaseXMode = StartEaseXMode,
+            StartEaseY = StartEaseY,
+            StartEaseYMode = StartEaseYMode,
+            EndPos = new Vector2(EndPos.x, EndPos.y),
+            EndEaseX = EndEaseX,
+            EndEaseXMode = EndEaseXMode,
+            EndEaseY = EndEaseY,
+            EndEaseYMode = EndEaseYMode,
+            Speed = Speed,
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
 }
 
 [System.Serializable]
-public class HitObject : IStoryboardable 
+public class HitObject : IStoryboardable
 {
     public HitType Type;
     public float Offset = 0;
@@ -638,8 +747,6 @@ public class HitObject : IStoryboardable
         Normal,
         Catch,
     }
-
-    public List<RailTimestamp> Rail = new List<RailTimestamp>();
 
     public new static TimestampType[] TimestampTypes = 
     {
@@ -658,47 +765,21 @@ public class HitObject : IStoryboardable
             Set = (x, a) => { ((HitObject)x).Length = a; },
         },
     };
-}
-
-[System.Serializable]
-public class RailTimestamp : IStoryboardable 
-{
-    public int Offset = 0;
-    public float Position;
-    public Vector3 Velocity;
     
-
-    public new static TimestampType[] TimestampTypes = 
+    public HitObject DeepClone()
     {
-        new TimestampType
+        HitObject clone = new HitObject()
         {
-            ID = "Position",
-            Name = "Position",
-            Get = (x) => ((RailTimestamp)x).Position,
-            Set = (x, a) => { ((RailTimestamp)x).Position = a; },
-        },
-        new TimestampType
-        {
-            ID = "Velocity_X",
-            Name = "Velocity X",
-            Get = (x) => ((RailTimestamp)x).Velocity.x,
-            Set = (x, a) => { ((RailTimestamp)x).Velocity.x = a; },
-        },
-        new TimestampType
-        {
-            ID = "Velocity_Y",
-            Name = "Velocity Y",
-            Get = (x) => ((RailTimestamp)x).Velocity.y,
-            Set = (x, a) => { ((RailTimestamp)x).Velocity.y = a; },
-        },
-        new TimestampType
-        {
-            ID = "Velocity_Z",
-            Name = "Velocity Z",
-            Get = (x) => ((RailTimestamp)x).Velocity.z,
-            Set = (x, a) => { ((RailTimestamp)x).Velocity.z = a; },
-        },
-    };
+            Type = Type,
+            Offset = Offset,
+            Position = Position,
+            Length = Length,
+            HoldLength = HoldLength,
+            StyleIndex = StyleIndex,
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
 }
 
 public enum CoordinateMode 

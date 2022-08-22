@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Globalization;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class Charter : EditorWindow
 {
@@ -1035,6 +1037,10 @@ public class Charter : EditorWindow
             {
                 CopySelection();
             }
+            else if (Event.current == CharterSettings.Keybinds["Edit/Paste"])
+            {
+                PasteSelection();
+            }
             else if (Event.current == CharterSettings.Keybinds["Picker/Cursor"])
             {
                 pickermode = "cursor";
@@ -1292,7 +1298,57 @@ public class Charter : EditorWindow
 
     public void PasteSelection() 
     {
+        if (ClipboardThing is BPMStop || ClipboardThing is List<BPMStop>)
+        {
+            if (timelineMode != "timing") return;
 
+            List<BPMStop> list = ClipboardThing is List<BPMStop> ? (List<BPMStop>)ClipboardThing :
+                new List<BPMStop>(new [] { (BPMStop)ClipboardThing });
+
+            float offset = pos - list[0].Offset;
+
+            foreach (BPMStop item in list)
+            {
+                BPMStop clone = item.DeepClone();
+                clone.Offset += offset;
+                TargetSong.Timing.Stops.Add(clone);
+            }
+            TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+        }
+        else if (ClipboardThing is Lane || ClipboardThing is List<Lane>)
+        {
+            if (timelineMode != "lane") return;
+
+            List<Lane> list = ClipboardThing is List<Lane> ? (List<Lane>)ClipboardThing :
+                new List<Lane>(new [] { (Lane)ClipboardThing });
+
+            float offset = pos - list[0].LaneSteps[0].Offset;
+
+            foreach (Lane item in list)
+            {
+                Lane clone = item.DeepClone();
+                foreach (LaneStep step in clone.LaneSteps) step.Offset += offset;
+                TargetChart.Lanes.Add(clone);
+            }
+            TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+        }
+        else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
+        {
+            if (timelineMode != "hit" || TargetLane == null) return;
+
+            List<HitObject> list = ClipboardThing is List<HitObject> ? (List<HitObject>)ClipboardThing :
+                new List<HitObject>(new [] { (HitObject)ClipboardThing });
+
+            float offset = pos - list[0].Offset;
+
+            foreach (HitObject item in list)
+            {
+                HitObject clone = item.DeepClone();
+                clone.Offset += offset;
+                TargetLane.Objects.Add(clone);
+            }
+            TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+        }
     }
 
     public void Timeline(int id) {

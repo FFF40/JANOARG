@@ -12,6 +12,20 @@ public class Timestamp
     public float Target;
     public string Easing = "Linear";
     public EaseMode EaseMode;
+
+    public Timestamp DeepClone()
+    {
+        Timestamp clone = new Timestamp() 
+        {
+            Time = Time,
+            Duration = Duration,
+            ID = ID,
+            Target = Target,
+            Easing = Easing,
+            EaseMode = EaseMode,
+        };
+        return clone;
+    }
 }
 
 public class TimestampType {
@@ -34,6 +48,13 @@ public class Storyboard
     public List<Timestamp> FromType(string type) {
         return Timestamps.FindAll(x => x.ID == type);
     }
+
+    public Storyboard DeepClone()
+    {
+        Storyboard clone = new Storyboard();
+        foreach (Timestamp ts in Timestamps) clone.Timestamps.Add(ts.DeepClone());
+        return clone;
+    }
 }
 
 [Serializable]
@@ -42,6 +63,7 @@ public enum EaseMode
     In, Out, InOut
 }
 
+[Serializable]
 public class Ease 
 {
     public string ID;

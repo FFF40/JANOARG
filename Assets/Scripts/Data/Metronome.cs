@@ -107,4 +107,13 @@ public class BPMStop
         Offset = offset;
         BPM = bpm;
     }
+
+    public BPMStop DeepClone()
+    {
+        BPMStop clone = new BPMStop(BPM, Offset)
+        {
+            Signature = Signature,
+        };
+        return clone;
+    }
 }
