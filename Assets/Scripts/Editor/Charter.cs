@@ -442,6 +442,7 @@ public class Charter : EditorWindow
     int NormalCount, CatchCount;
 
     string GizmoMode = "";
+    Rect startRect, midRect, endRect;
 
     public void OnGUI()
     {
@@ -571,7 +572,7 @@ public class Charter : EditorWindow
                                 if (mat) 
                                 {
                                     Mesh mesh = MakeHitMesh(hit, lane, out Vector3 sp, out Vector3 ep);
-                                    if (TargetThing == hit) {
+                                    if (TargetThing == h) {
                                         startPos = sp;
                                         endPos = ep;
                                     }
@@ -607,323 +608,271 @@ public class Charter : EditorWindow
                 {
                     // Don't show anything in play mode
                 }
-                else if (TargetThing is Lane) 
+                else 
                 {
-                    Lane lane = (Lane)TargetThing;
-                    LaneStep step = lane.LaneSteps[0];
-                    if (step.Offset > pos)
+                    if (TargetLane != null) 
                     {
-                        LaneStep dat = TargetLane.GetLaneStep(step.Offset, pos, TargetSong.Timing);
-                        if (dat == null) dat = step;
-                        float zPos = dat.Offset * ScrollSpeed;
-                        startPos = (Vector3)step.StartPos + Vector3.forward * zPos;
-                        endPos = (Vector3)step.EndPos + Vector3.forward * zPos;
-                        Vector3 midPos = (startPos + endPos) / 2;
-                        
-                        Vector3 startPosCamera = CurrentCamera.WorldToScreenPoint(startPos);
-                        startPosCamera = new Vector2(Mathf.Round(startPosCamera.x), Mathf.Round(height - startPosCamera.y));
-                        Vector3 midPosCamera = CurrentCamera.WorldToScreenPoint(midPos);
-                        midPosCamera = new Vector2(Mathf.Round(midPosCamera.x), Mathf.Round(height - midPosCamera.y));
-                        Vector3 endPosCamera = CurrentCamera.WorldToScreenPoint(endPos);
-                        endPosCamera = new Vector2(Mathf.Round(endPosCamera.x), Mathf.Round(height - endPosCamera.y));
-                        
-                        Vector2 fwd = Quaternion.Euler(0, 0, -Mathf.Atan2(endPosCamera.x - startPosCamera.x, endPosCamera.y - startPosCamera.y) * Mathf.Rad2Deg) * Vector3.up;
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                        Handles.DrawLine(startPosCamera + Vector3.back * 3, endPosCamera + Vector3.back * 3, 3);
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                        Handles.DrawLine(startPosCamera + Vector3.back * 1, endPosCamera + Vector3.back * 1, 1);
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                        if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 9);
-                        if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 9);
-                        if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 9.5f);
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                        if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 7);
-                        if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 7);
-                        if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 7);
-                    
-                        
-                        Rect startRect = new Rect(startPosCamera.x - 8, startPosCamera.y - 8, 16, 16);
-                        Rect midRect = new Rect(midPosCamera.x - 8, midPosCamera.y - 8, 16, 16);
-                        Rect endRect = new Rect(endPosCamera.x - 8, endPosCamera.y - 8, 16, 16);
-                        Vector2 mousePos = Event.current.mousePosition;
-
-                        if (Event.current.type == EventType.MouseDown) 
+                        Lane lane = (Lane)TargetLane.Get(pos);
+                        LaneStep first = lane.LaneSteps[0];
+                        LaneStep last = lane.LaneSteps[lane.LaneSteps.Count - 1];
+                        if (last.Offset > pos)
                         {
-                            if (startRect.Contains(mousePos)) GizmoMode = "start";
-                            else if (midRect.Contains(mousePos)) GizmoMode = "mid";
-                            else if (endRect.Contains(mousePos)) GizmoMode = "end";
-                            if (GizmoMode != "") Repaint();
+                            LaneStep dat = TargetLane.GetLaneStep(Mathf.Clamp(pos + 1e-5f, first.Offset, last.Offset), pos, TargetSong.Timing);
+                            Debug.Log(dat.Offset);
+                            float zPos = dat.Offset * ScrollSpeed;
+                            Vector3 laneStart = Quaternion.Euler(lane.OffsetRotation) * ((Vector3)dat.StartPos + Vector3.forward * zPos) + lane.Offset;
+                            Vector3 laneEnd = Quaternion.Euler(lane.OffsetRotation) * ((Vector3)dat.EndPos + Vector3.forward * zPos) + lane.Offset;
+                            Vector3 laneMid = (laneStart + laneEnd) / 2;
+                            
+                            Vector3 startPosCamera = CurrentCamera.WorldToScreenPoint(laneStart);
+                            startPosCamera = new Vector2(Mathf.Round(startPosCamera.x), Mathf.Round(height - startPosCamera.y));
+                            Vector3 midPosCamera = CurrentCamera.WorldToScreenPoint(laneMid);
+                            midPosCamera = new Vector2(Mathf.Round(midPosCamera.x), Mathf.Round(height - midPosCamera.y));
+                            Vector3 endPosCamera = CurrentCamera.WorldToScreenPoint(laneEnd);
+                            endPosCamera = new Vector2(Mathf.Round(endPosCamera.x), Mathf.Round(height - endPosCamera.y));
+                            
+                            Vector2 fwd = Quaternion.Euler(0, 0, -Mathf.Atan2(endPosCamera.x - startPosCamera.x, endPosCamera.y - startPosCamera.y) * Mathf.Rad2Deg) * Vector3.up;
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                            Handles.DrawLine(startPosCamera + Vector3.back * 3, endPosCamera + Vector3.back * 3, 3);
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                            Handles.DrawLine(startPosCamera + Vector3.back * 1, endPosCamera + Vector3.back * 1, 1);
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                            if (TargetThing == TargetLane) Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 9);
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                            if (TargetThing == TargetLane) Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 7);
+                        
+                            Rect midRect = new Rect(midPosCamera.x - 8, midPosCamera.y - 8, 16, 16);
+                            Vector2 mousePos = Event.current.mousePosition;
                         }
-                        else if (Event.current.type == EventType.MouseDrag) 
+                    }
+
+                    if (TargetThing is LaneStep) 
+                    {
+                        LaneStep step = (LaneStep)TargetThing;
+                        if (step.Offset > pos)
                         {
-                            if (GizmoMode != "")
+                            LaneStep dat = TargetLane.GetLaneStep(step.Offset, pos, TargetSong.Timing);
+                            float zPos = dat.Offset * ScrollSpeed;
+                            startPos = (Vector3)step.StartPos + Vector3.forward * zPos;
+                            endPos = (Vector3)step.EndPos + Vector3.forward * zPos;
+                            Vector3 midPos = (startPos + endPos) / 2;
+                            
+                            Vector3 startPosCamera = CurrentCamera.WorldToScreenPoint(startPos);
+                            startPosCamera = new Vector2(Mathf.Round(startPosCamera.x), Mathf.Round(height - startPosCamera.y));
+                            Vector3 midPosCamera = CurrentCamera.WorldToScreenPoint(midPos);
+                            midPosCamera = new Vector2(Mathf.Round(midPosCamera.x), Mathf.Round(height - midPosCamera.y));
+                            Vector3 endPosCamera = CurrentCamera.WorldToScreenPoint(endPos);
+                            endPosCamera = new Vector2(Mathf.Round(endPosCamera.x), Mathf.Round(height - endPosCamera.y));
+                            
+                            Vector2 fwd = Quaternion.Euler(0, 0, -Mathf.Atan2(endPosCamera.x - startPosCamera.x, endPosCamera.y - startPosCamera.y) * Mathf.Rad2Deg) * Vector3.up;
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                            Handles.DrawLine(startPosCamera + Vector3.back * 3, endPosCamera + Vector3.back * 3, 3);
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                            Handles.DrawLine(startPosCamera + Vector3.back * 1, endPosCamera + Vector3.back * 1, 1);
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                            if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 9);
+                            if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 9);
+                            if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 9.5f);
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                            if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 7);
+                            if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 7);
+                            if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 7);
+                        
+                            
+                            Rect startRect = new Rect(startPosCamera.x - 8, startPosCamera.y - 8, 16, 16);
+                            Rect midRect = new Rect(midPosCamera.x - 8, midPosCamera.y - 8, 16, 16);
+                            Rect endRect = new Rect(endPosCamera.x - 8, endPosCamera.y - 8, 16, 16);
+                            Vector2 mousePos = Event.current.mousePosition;
+
+                            if (Event.current.type == EventType.MouseDown) 
                             {
-                                Vector2 curPos = Vector2.zero;
-                                if (GizmoMode == "start")
+                                if (startRect.Contains(mousePos)) GizmoMode = "start";
+                                else if (midRect.Contains(mousePos)) GizmoMode = "mid";
+                                else if (endRect.Contains(mousePos)) GizmoMode = "end";
+                                if (GizmoMode != "") Repaint();
+                            }
+                            else if (Event.current.type == EventType.MouseDrag) 
+                            {
+                                if (GizmoMode != "")
                                 {
-                                    curPos = step.StartPos;
-                                }
-                                else if (GizmoMode == "mid") 
-                                {
-                                    curPos = (step.StartPos + step.EndPos) / 2;
-                                }
-                                else if (GizmoMode == "end") 
-                                {
-                                    curPos = step.EndPos;
-                                }
-
-                                Ray ray = CurrentCamera.ScreenPointToRay(new Vector2(mousePos.x, height - mousePos.y));
-                                bool valid = new Plane(Vector3.back, (Vector3)curPos + Vector3.forward * zPos).Raycast(ray, out float enter);
-                                if (valid) 
-                                {
-                                    Vector2 newPos = ray.GetPoint(enter);
-                                    newPos = new Vector2(Mathf.Round(newPos.x / .001f) * .001f, Mathf.Round(newPos.y / .001f) * .001f);
-
+                                    Vector2 curPos = Vector2.zero;
                                     if (GizmoMode == "start")
                                     {
-                                        step.StartPos = newPos;
+                                        curPos = step.StartPos;
                                     }
                                     else if (GizmoMode == "mid") 
                                     {
-                                        Vector2 offset = newPos - curPos;
-                                        step.StartPos += offset;
-                                        step.EndPos += offset;
+                                        curPos = (step.StartPos + step.EndPos) / 2;
                                     }
                                     else if (GizmoMode == "end") 
                                     {
-                                        step.EndPos = newPos;
+                                        curPos = step.EndPos;
                                     }
 
-                                    Repaint();
+                                    Ray ray = CurrentCamera.ScreenPointToRay(new Vector2(mousePos.x, height - mousePos.y));
+                                    bool valid = new Plane(Vector3.back, (Vector3)curPos + Vector3.forward * zPos).Raycast(ray, out float enter);
+                                    if (valid) 
+                                    {
+                                        Vector2 newPos = ray.GetPoint(enter);
+                                        newPos = new Vector2(Mathf.Round(newPos.x / .001f) * .001f, Mathf.Round(newPos.y / .001f) * .001f);
+
+                                        if (GizmoMode == "start")
+                                        {
+                                            step.StartPos = newPos;
+                                        }
+                                        else if (GizmoMode == "mid") 
+                                        {
+                                            Vector2 offset = newPos - curPos;
+                                            step.StartPos += offset;
+                                            step.EndPos += offset;
+                                        }
+                                        else if (GizmoMode == "end") 
+                                        {
+                                            step.EndPos = newPos;
+                                        }
+
+                                        Repaint();
+                                    }
                                 }
+                            } 
+                            if (Event.current.type == EventType.MouseUp) 
+                            {
+                                if (GizmoMode != "") Repaint();
+                                GizmoMode = "";
                             }
-                        } 
-                        if (Event.current.type == EventType.MouseUp) 
-                        {
-                            if (GizmoMode != "") Repaint();
-                            GizmoMode = "";
                         }
                     }
-                }
-                else if (TargetThing is LaneStep) 
-                {
-                    LaneStep step = (LaneStep)TargetThing;
-                    if (step.Offset > pos)
+                    else if (TargetThing is HitObject) 
                     {
-                        LaneStep dat = TargetLane.GetLaneStep(step.Offset, pos, TargetSong.Timing);
-                        float zPos = dat.Offset * ScrollSpeed;
-                        startPos = (Vector3)step.StartPos + Vector3.forward * zPos;
-                        endPos = (Vector3)step.EndPos + Vector3.forward * zPos;
-                        Vector3 midPos = (startPos + endPos) / 2;
-                        
-                        Vector3 startPosCamera = CurrentCamera.WorldToScreenPoint(startPos);
-                        startPosCamera = new Vector2(Mathf.Round(startPosCamera.x), Mathf.Round(height - startPosCamera.y));
-                        Vector3 midPosCamera = CurrentCamera.WorldToScreenPoint(midPos);
-                        midPosCamera = new Vector2(Mathf.Round(midPosCamera.x), Mathf.Round(height - midPosCamera.y));
-                        Vector3 endPosCamera = CurrentCamera.WorldToScreenPoint(endPos);
-                        endPosCamera = new Vector2(Mathf.Round(endPosCamera.x), Mathf.Round(height - endPosCamera.y));
-                        
-                        Vector2 fwd = Quaternion.Euler(0, 0, -Mathf.Atan2(endPosCamera.x - startPosCamera.x, endPosCamera.y - startPosCamera.y) * Mathf.Rad2Deg) * Vector3.up;
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                        Handles.DrawLine(startPosCamera + Vector3.back * 3, endPosCamera + Vector3.back * 3, 3);
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                        Handles.DrawLine(startPosCamera + Vector3.back * 1, endPosCamera + Vector3.back * 1, 1);
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                        if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 9);
-                        if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 9);
-                        if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 9.5f);
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                        if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 7);
-                        if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 7);
-                        if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 7);
-                    
-                        
-                        Rect startRect = new Rect(startPosCamera.x - 8, startPosCamera.y - 8, 16, 16);
-                        Rect midRect = new Rect(midPosCamera.x - 8, midPosCamera.y - 8, 16, 16);
-                        Rect endRect = new Rect(endPosCamera.x - 8, endPosCamera.y - 8, 16, 16);
-                        Vector2 mousePos = Event.current.mousePosition;
-
-                        if (Event.current.type == EventType.MouseDown) 
+                        Lane lane = (Lane)(((Lane)TargetLane).Get(pos));
+                        HitObject hit = (HitObject)TargetThing;
+                        if (hit.Offset > pos)
                         {
-                            if (startRect.Contains(mousePos)) GizmoMode = "start";
-                            else if (midRect.Contains(mousePos)) GizmoMode = "mid";
-                            else if (endRect.Contains(mousePos)) GizmoMode = "end";
-                            if (GizmoMode != "") Repaint();
-                        }
-                        else if (Event.current.type == EventType.MouseDrag) 
-                        {
-                            if (GizmoMode != "")
+                            startPos = Quaternion.Euler(lane.OffsetRotation) * startPos + lane.Offset;
+                            endPos = Quaternion.Euler(lane.OffsetRotation) * endPos + lane.Offset;
+                            Vector3 midPos = (startPos + endPos) / 2;
+                            
+                            Vector3 startPosCamera = CurrentCamera.WorldToScreenPoint(startPos);
+                            startPosCamera = new Vector2(Mathf.Round(startPosCamera.x), Mathf.Round(height - startPosCamera.y));
+                            Vector3 midPosCamera = CurrentCamera.WorldToScreenPoint(midPos);
+                            midPosCamera = new Vector2(Mathf.Round(midPosCamera.x), Mathf.Round(height - midPosCamera.y));
+                            Vector3 endPosCamera = CurrentCamera.WorldToScreenPoint(endPos);
+                            endPosCamera = new Vector2(Mathf.Round(endPosCamera.x), Mathf.Round(height - endPosCamera.y));
+
+                            Vector2 fwd = Quaternion.Euler(0, 0, -Mathf.Atan2(endPosCamera.x - startPosCamera.x, endPosCamera.y - startPosCamera.y) * Mathf.Rad2Deg) * Vector3.up;
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                            if (GizmoMode == "") Handles.DrawWireArc((startPosCamera + endPosCamera) / 2 + Vector3.back * 3, Vector3.forward, Vector3.up, 360, Vector2.Distance(startPosCamera, endPosCamera) / 2, 3);
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                            if (GizmoMode == "") Handles.DrawWireArc((startPosCamera + endPosCamera) / 2 + Vector3.back * 1, Vector3.forward, Vector3.up, 360, Vector2.Distance(startPosCamera, endPosCamera) / 2, 1);
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                            if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 9);
+                            if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 9);
+                            if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 9.5f);
+
+                            Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                            if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 7);
+                            if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 7);
+                            if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 7);
+
+
+                            if (Event.current.type == EventType.Repaint) 
                             {
-                                Vector2 curPos = Vector2.zero;
-                                if (GizmoMode == "start")
-                                {
-                                    curPos = step.StartPos;
-                                }
-                                else if (GizmoMode == "mid") 
-                                {
-                                    curPos = (step.StartPos + step.EndPos) / 2;
-                                }
-                                else if (GizmoMode == "end") 
-                                {
-                                    curPos = step.EndPos;
-                                }
+                                startRect = new Rect(startPosCamera.x - 8, startPosCamera.y - 8, 16, 16);
+                                midRect = new Rect(midPosCamera.x - 8, midPosCamera.y - 8, 16, 16);
+                                endRect = new Rect(endPosCamera.x - 8, endPosCamera.y - 8, 16, 16);
+                            }
+                            Vector2 mousePos = Event.current.mousePosition;
 
-                                Ray ray = CurrentCamera.ScreenPointToRay(new Vector2(mousePos.x, height - mousePos.y));
-                                bool valid = new Plane(Vector3.back, (Vector3)curPos + Vector3.forward * zPos).Raycast(ray, out float enter);
-                                if (valid) 
+                            if (Event.current.type == EventType.MouseDown) 
+                            {
+                                if (startRect.Contains(mousePos)) GizmoMode = "start";
+                                else if (midRect.Contains(mousePos)) GizmoMode = "mid";
+                                else if (endRect.Contains(mousePos)) GizmoMode = "end";
+                                if (GizmoMode != "") Repaint();
+                            }
+                            else if (Event.current.type == EventType.MouseDrag) 
+                            {
+                                if (GizmoMode != "")
                                 {
-                                    Vector2 newPos = ray.GetPoint(enter);
-                                    newPos = new Vector2(Mathf.Round(newPos.x / .001f) * .001f, Mathf.Round(newPos.y / .001f) * .001f);
+                                    LaneStep step = TargetLane.GetLaneStep(hit.Offset, pos, TargetSong.Timing);
+                                    // Debug.Log("HO " + hit.Offset + " " + CurrentAudioSource.time + " " + step.Offset);
+                                    float stop = 0;
+                                    float stopDist = float.PositiveInfinity;
 
+                                    float curPos = 0, minPos = 0, maxPos = 0;
                                     if (GizmoMode == "start")
                                     {
-                                        step.StartPos = newPos;
+                                        curPos = hit.Position;
+                                        minPos = 0;
+                                        maxPos = hit.Position + hit.Length;
                                     }
                                     else if (GizmoMode == "mid") 
                                     {
-                                        Vector2 offset = newPos - curPos;
-                                        step.StartPos += offset;
-                                        step.EndPos += offset;
+                                        curPos = hit.Position + hit.Length / 2;
+                                        minPos = hit.Length / 2;
+                                        maxPos = 1 - hit.Length / 2;
                                     }
                                     else if (GizmoMode == "end") 
                                     {
-                                        step.EndPos = newPos;
+                                        curPos = hit.Position + hit.Length;
+                                        minPos = hit.Position;
+                                        maxPos = 1;
                                     }
+
+                                    for (float p = Mathf.Ceil(minPos / .05f) * .05f + (curPos % .05f); p <= maxPos; p = (Mathf.Round(p / .05f) + 1) * .05f)
+                                    {
+                                        Vector3 wldPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, p) + Vector3.forward * (startPos.z + endPos.z) / 2;
+                                        wldPos = Quaternion.Euler(lane.OffsetRotation) * wldPos + lane.Offset;
+                                        Vector2 camPos = CurrentCamera.WorldToScreenPoint(wldPos);
+                                        camPos = new Vector2(Mathf.Round(camPos.x), Mathf.Round(height - camPos.y));
+                                        
+                                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
+                                        Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360, 2);
+                                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
+                                        Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360, 1);
+
+                                        float dist = Vector2.Distance(Event.current.mousePosition, camPos);
+                                        // Debug.Log(p + " " + dist + " " + wldPos + " " + camPos);
+                                        if (dist < stopDist) 
+                                        {
+                                            stop = p;
+                                            stopDist = dist;
+                                        }
+                                    }
+
+                                    if (GizmoMode == "start")
+                                    {
+                                        hit.Length = hit.Position - stop + hit.Length;
+                                        hit.Position = stop;
+                                    }
+                                    else if (GizmoMode == "mid") 
+                                    {
+                                        hit.Position = stop - hit.Length / 2;
+                                    }
+                                    else if (GizmoMode == "end") 
+                                    {
+                                        hit.Length = stop - hit.Position;
+                                    }
+
+                                    hit.Position = Mathf.Round(hit.Position / .05f) * .05f;
+                                    hit.Length = Mathf.Round(hit.Length / .05f) * .05f;
 
                                     Repaint();
                                 }
-                            }
-                        } 
-                        if (Event.current.type == EventType.MouseUp) 
-                        {
-                            if (GizmoMode != "") Repaint();
-                            GizmoMode = "";
-                        }
-                    }
-                }
-                else if (TargetThing is HitObject) 
-                {
-                    HitObject hit = (HitObject)TargetThing;
-                    if (hit.Offset > pos)
-                    {
-                        Vector3 midPos = (startPos + endPos) / 2;
-                        
-                        Vector3 startPosCamera = CurrentCamera.WorldToScreenPoint(startPos);
-                        startPosCamera = new Vector2(Mathf.Round(startPosCamera.x), Mathf.Round(height - startPosCamera.y));
-                        Vector3 midPosCamera = CurrentCamera.WorldToScreenPoint(midPos);
-                        midPosCamera = new Vector2(Mathf.Round(midPosCamera.x), Mathf.Round(height - midPosCamera.y));
-                        Vector3 endPosCamera = CurrentCamera.WorldToScreenPoint(endPos);
-                        endPosCamera = new Vector2(Mathf.Round(endPosCamera.x), Mathf.Round(height - endPosCamera.y));
-
-                        Vector2 fwd = Quaternion.Euler(0, 0, -Mathf.Atan2(endPosCamera.x - startPosCamera.x, endPosCamera.y - startPosCamera.y) * Mathf.Rad2Deg) * Vector3.up;
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                        if (GizmoMode == "") Handles.DrawWireArc((startPosCamera + endPosCamera) / 2 + Vector3.back * 3, Vector3.forward, Vector3.up, 360, Vector2.Distance(startPosCamera, endPosCamera) / 2, 3);
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                        if (GizmoMode == "") Handles.DrawWireArc((startPosCamera + endPosCamera) / 2 + Vector3.back * 1, Vector3.forward, Vector3.up, 360, Vector2.Distance(startPosCamera, endPosCamera) / 2, 1);
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                        if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 9);
-                        if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 9);
-                        if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 9.5f);
-
-                        Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                        if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360 * 59 / 4, 7);
-                        if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosCamera, Vector3.forward, Vector3.up, 360, 7);
-                        if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosCamera, Vector3.forward, fwd, 360 * 59 / 3, 7);
-
-
-                        Rect startRect = new Rect(startPosCamera.x - 8, startPosCamera.y - 8, 16, 16);
-                        Rect midRect = new Rect(midPosCamera.x - 8, midPosCamera.y - 8, 16, 16);
-                        Rect endRect = new Rect(endPosCamera.x - 8, endPosCamera.y - 8, 16, 16);
-                        Vector2 mousePos = Event.current.mousePosition;
-
-                        if (Event.current.type == EventType.MouseDown) 
-                        {
-                            if (startRect.Contains(mousePos)) GizmoMode = "start";
-                            else if (midRect.Contains(mousePos)) GizmoMode = "mid";
-                            else if (endRect.Contains(mousePos)) GizmoMode = "end";
-                            if (GizmoMode != "") Repaint();
-                        }
-                        else if (Event.current.type == EventType.MouseDrag) 
-                        {
-                            if (GizmoMode != "")
+                            } 
+                            if (Event.current.type == EventType.MouseUp) 
                             {
-                                LaneStep step = TargetLane.GetLaneStep(hit.Offset, pos, TargetSong.Timing);
-                                // Debug.Log("HO " + hit.Offset + " " + CurrentAudioSource.time + " " + step.Offset);
-                                float stop = 0;
-                                float stopDist = float.PositiveInfinity;
-
-                                float curPos = 0, minPos = 0, maxPos = 0;
-                                if (GizmoMode == "start")
-                                {
-                                    curPos = hit.Position;
-                                    minPos = 0;
-                                    maxPos = hit.Position + hit.Length;
-                                }
-                                else if (GizmoMode == "mid") 
-                                {
-                                    curPos = hit.Position + hit.Length / 2;
-                                    minPos = hit.Length / 2;
-                                    maxPos = 1 - hit.Length / 2;
-                                }
-                                else if (GizmoMode == "end") 
-                                {
-                                    curPos = hit.Position + hit.Length;
-                                    minPos = hit.Position;
-                                    maxPos = 1;
-                                }
-
-                                for (float p = Mathf.Ceil(minPos / .05f) * .05f + (curPos % .05f); p <= maxPos; p = (Mathf.Round(p / .05f) + 1) * .05f)
-                                {
-                                    Vector3 wldPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, p) + Vector3.forward * (startPos.z + endPos.z) / 2;
-                                    Vector2 camPos = CurrentCamera.WorldToScreenPoint(wldPos);
-                                    camPos = new Vector2(Mathf.Round(camPos.x), Mathf.Round(height - camPos.y));
-                                    
-                                    Handles.color = EditorGUIUtility.isProSkin ? Color.black : Color.white;
-                                    Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360, 2);
-                                    Handles.color = EditorGUIUtility.isProSkin ? Color.white : Color.black;
-                                    Handles.DrawSolidArc(startPosCamera, Vector3.forward, Vector3.up, 360, 1);
-
-                                    float dist = Vector2.Distance(Event.current.mousePosition, camPos);
-                                    // Debug.Log(p + " " + dist + " " + wldPos + " " + camPos);
-                                    if (dist < stopDist) 
-                                    {
-                                        stop = p;
-                                        stopDist = dist;
-                                    }
-                                }
-
-                                if (GizmoMode == "start")
-                                {
-                                    hit.Length = hit.Position - stop + hit.Length;
-                                    hit.Position = stop;
-                                }
-                                else if (GizmoMode == "mid") 
-                                {
-                                    hit.Position = stop - hit.Length / 2;
-                                }
-                                else if (GizmoMode == "end") 
-                                {
-                                    hit.Length = stop - hit.Position;
-                                }
-
-                                hit.Position = Mathf.Round(hit.Position / .05f) * .05f;
-                                hit.Length = Mathf.Round(hit.Length / .05f) * .05f;
-
-                                Repaint();
+                                if (GizmoMode != "") Repaint();
+                                GizmoMode = "";
                             }
-                        } 
-                        if (Event.current.type == EventType.MouseUp) 
-                        {
-                            if (GizmoMode != "") Repaint();
-                            GizmoMode = "";
                         }
                     }
                 }
@@ -2545,7 +2494,10 @@ public class Charter : EditorWindow
             itemStyle.alignment = TextAnchor.MiddleLeft;
             itemStyle.padding = new RectOffset(5, 5, 1, 2);
 
-            GUI.Button(new Rect(2, 2, 147, 20), "Coming Soon...", itemStyle);
+            if (GUI.Button(new Rect(2, 2, 147, 20), "File...", itemStyle))
+            {
+
+            }
         }
         if (extrasmode == "play_options") 
         {
