@@ -66,6 +66,8 @@ public class Charter : EditorWindow
     // Literally a miracle
     public Mesh MakeLaneMesh(Lane lane) 
     {
+        if (this.pos >= lane.LaneSteps[lane.LaneSteps.Count - 1].Offset) return null;
+
         Mesh mesh = new Mesh();
 
         float pos = 0;
@@ -196,13 +198,12 @@ public class Charter : EditorWindow
         float len = Mathf.Max(hit.Length, .2f / Vector3.Distance(step.StartPos, step.EndPos));
         startPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, hit.Position) + Vector3.forward * (step.Offset * (ScrollSpeed - 1));
         endPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, hit.Position + len) + Vector3.forward * (step.Offset * (ScrollSpeed - 1));
+        if (Mathf.Abs(step.Offset) > 5) return null;
 
         Mesh mesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
         List<Vector2> uvs = new List<Vector2>();
         List<int> tris = new List<int>();
-
-        if (Mathf.Abs(step.Offset) > 5) return mesh;
 
         void AddStep(Vector3 start, Vector3 end, bool addTris = true) {
 
@@ -297,6 +298,8 @@ public class Charter : EditorWindow
 
     public Mesh MakeHoldMesh(HitObject hit, Lane lane) 
     {
+        if (this.pos >= hit.Offset + hit.HoldLength) return null;
+
         Mesh mesh = new Mesh();
 
         List<Vector3> vertices = new List<Vector3>();
@@ -443,9 +446,13 @@ public class Charter : EditorWindow
 
     string GizmoMode = "";
     Rect startRect, midRect, endRect;
+    long delta, now, pass;
+    string strain;
 
     public void OnGUI()
     {
+        long strainNow = DateTime.Now.Ticks;
+
         CharterSettings.InitSettings();
         if (!CurrentCamera) 
         {
@@ -471,7 +478,6 @@ public class Charter : EditorWindow
         {
             CatchHitSound = Resources.Load<AudioClip>("Sounds/Catch Hit");
         }
-
 
         width = position.width;
         height = position.height;
@@ -555,8 +561,11 @@ public class Charter : EditorWindow
                         if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                         {
                             Mesh mesh = MakeLaneMesh(lane);
-                            Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
-                            Meshes.Add(mesh);
+                            if (mesh != null) 
+                            {
+                                Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
+                                Meshes.Add(mesh);
+                            }
                         }
                     }
                     foreach (HitObject h in lane.Objects)
@@ -576,8 +585,11 @@ public class Charter : EditorWindow
                                         startPos = sp;
                                         endPos = ep;
                                     }
-                                    Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), mat, 0, CurrentCamera);
-                                    Meshes.Add(mesh);
+                                    if (mesh != null)
+                                    {
+                                        Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), mat, 0, CurrentCamera);
+                                        Meshes.Add(mesh);
+                                    }
                                 }
                             }
                             if (hit.Type == HitObject.HitType.Catch) ccount++;
@@ -588,8 +600,11 @@ public class Charter : EditorWindow
                             if (valid && HitStyleManagers[hit.StyleIndex].HoldTailMaterial) 
                             {
                                 Mesh mesh = MakeHoldMesh(hit, lane);
-                                Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
-                                Meshes.Add(mesh);
+                                if (mesh != null) 
+                                {
+                                    Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
+                                    Meshes.Add(mesh);
+                                }
                             }
                             if (hit.Type == HitObject.HitType.Catch) ccount++;
                             else ncount++;
@@ -618,7 +633,6 @@ public class Charter : EditorWindow
                         if (last.Offset > pos)
                         {
                             LaneStep dat = TargetLane.GetLaneStep(Mathf.Clamp(pos + 1e-5f, first.Offset, last.Offset), pos, TargetSong.Timing);
-                            Debug.Log(dat.Offset);
                             float zPos = dat.Offset * ScrollSpeed;
                             Vector3 laneStart = Quaternion.Euler(lane.OffsetRotation) * ((Vector3)dat.StartPos + Vector3.forward * zPos) + lane.Offset;
                             Vector3 laneEnd = Quaternion.Euler(lane.OffsetRotation) * ((Vector3)dat.EndPos + Vector3.forward * zPos) + lane.Offset;
@@ -888,9 +902,6 @@ public class Charter : EditorWindow
                 for (int a = 0; a < CatchCount - ccount; a++) CurrentAudioSource.PlayOneShot(CatchHitSound);
             }
             CatchCount = ccount;
-
-            foreach (Mesh mesh in Meshes) DestroyImmediate(mesh);
-            Meshes = new List<Mesh>();
         }
         else 
         {
@@ -904,7 +915,6 @@ public class Charter : EditorWindow
             {
                 Rect rect = new Rect();
                 if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
-                if (extrasmode == "main_menu") rect = new Rect(3, 30, 150, 300);
 
                 GUIStyle exStyle = new GUIStyle("window");
                 exStyle.focused = exStyle.normal;
@@ -954,6 +964,24 @@ public class Charter : EditorWindow
             }
             Repaint();
         }
+
+        if (Event.current.type == EventType.Repaint)
+        {
+            long n = DateTime.Now.Ticks;
+            delta = n - now;
+            now += delta;
+            strain = ((n - strainNow) / 1e4).ToString("N0", invariant);
+            pass = 1;
+        }
+        else 
+        {
+            long n = DateTime.Now.Ticks;
+            strain += " " + ((n - strainNow) / 1e4).ToString("N0", invariant);
+            pass++;
+        }
+
+        foreach (Mesh mesh in Meshes) DestroyImmediate(mesh);
+        Meshes = new List<Mesh>();
 
         HandleKeybinds();
     }
@@ -1148,10 +1176,47 @@ public class Charter : EditorWindow
 
         // -------------------- Menu
 
-        if (GUI.Toggle(new Rect(5, 5, 20, 20), extrasmode == "main_menu",  EditorGUIUtility.IconContent("_Menu"),
-            new GUIStyle("button") { padding = new RectOffset(0, 0, 0, 0) }) ^ (extrasmode == "main_menu"))
+        if (GUI.Button(new Rect(5, 5, 20, 20), EditorGUIUtility.IconContent("_Menu"),
+            new GUIStyle("button") { padding = new RectOffset(0, 0, 0, 0) }))
         {
-            extrasmode = extrasmode == "main_menu" ? "" : "main_menu";
+            GenericMenu menu = new GenericMenu();
+            
+            menu.AddItem(new GUIContent("File/Close Song and Return to Main Screen"), false, () => TargetSong = null);
+
+            menu.AddItem(new GUIContent("Edit/Copy " + CharterSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
+            if (ClipboardThing != null)
+            {
+                string item = "";
+                if (ClipboardThing is Chart) item = "Chart";
+                else if (ClipboardThing is BPMStop) item = "BPM Stop";
+                else if (ClipboardThing is List<BPMStop>) item = ((IList)ClipboardThing).Count + " BPM Stops";
+                else if (ClipboardThing is HitStyle) item = "Hit Style";
+                else if (ClipboardThing is LaneStyle) item = "Lane Style";
+                else if (ClipboardThing is Lane) item = "Lane";
+                else if (ClipboardThing is List<Lane>) item = ((IList)ClipboardThing).Count + " Lanes";
+                else if (ClipboardThing is LaneStep) item = "Lane Step";
+                else if (ClipboardThing is List<LaneStep>) item = ((IList)ClipboardThing).Count + " Lane Steps";
+                else if (ClipboardThing is HitObject) item = "Hit Object";
+                else if (ClipboardThing is List<HitObject>) item = ((IList)ClipboardThing).Count + " Hit Objects";
+                menu.AddItem(new GUIContent("Edit/Paste " + item + " " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
+            }
+            else 
+            {
+                menu.AddDisabledItem(new GUIContent("Edit/Paste " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
+            }
+
+            menu.AddItem(new GUIContent("Options/Charter Settings"), false, () => CharterSettings.Open());
+            menu.AddItem(new GUIContent("Options/Show Keybindings " + CharterSettings.Keybinds["Misc./Show Keybindings"].ToUnityHotkeyString()), 
+                false, () => CharterSettings.Open(1));
+
+            menu.AddItem(new GUIContent("Help/Interactive Tutorial (closes song)"), false, () => { TargetSong = null; TutorialStage = 0; });
+            menu.AddSeparator("Help/");
+            menu.AddItem(new GUIContent("Help/Source Code on GitHub"), false, () => Application.OpenURL("https://github.com/ducdat0507/JANOARG"));
+            menu.AddItem(new GUIContent("Help/FFF40 Studios Discord Server"), false, () => Application.OpenURL("https://discord.com/invite/vXJTPFQBHm"));
+            menu.AddSeparator("Help/");
+            menu.AddItem(new GUIContent("Help/Debug Stats"), false, () => inspectMode = "debug");
+
+            menu.ShowAsContext();
         }
 
         // -------------------- Options
@@ -1402,7 +1467,7 @@ public class Charter : EditorWindow
                 }
 
                 EditorGUI.DrawRect(new Rect(posStart + 2, 0, posEnd - posStart, 115), new Color(.5f, .5f, 1, .2f));
-                Color color = EditorGUIUtility.isProSkin ? new Color(.5f, .5f, 1) : new Color(.1f, .1f, .2f);
+                Color color = EditorGUIUtility.isProSkin ? new Color(.5f, .5f, 1) : new Color(.3f, .3f, .6f);
                 EditorGUI.DrawRect(new Rect(posStart + 1, 0, 2, 115), color);
                 EditorGUI.DrawRect(new Rect(posEnd + 1, 0, 2, 115), color);
             }
@@ -1874,7 +1939,37 @@ public class Charter : EditorWindow
     public void Inspector(int id) {
         GUI.Label(new Rect(0, 0, 240, 24), "", "button");
         EditorGUIUtility.labelWidth = 80;
-        if (TargetThing == null) 
+        if (inspectMode == "debug")
+        {
+            GUI.Label(new Rect(7, 2, 226, 20), "Debug Stats", "boldLabel");
+            GUILayout.Space(8);
+
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+            GUILayout.Label("Performance", "boldLabel");
+            GUILayout.Label(
+                "loop: " + (1e7d / delta).ToString("N0", invariant) + "fps " + (delta / 1e4d).ToString("N0", invariant) + "ms" + 
+                "\npass count: " + (pass).ToString("N0", invariant) +
+                "\nstrain: " + strain
+            );
+
+            GUILayout.Space(8);
+            GUILayout.Label("Geometry", "boldLabel");
+            int v = 0, t = 0;
+            foreach (Mesh mesh in Meshes)
+            {
+                v += mesh.vertexCount;
+                t += mesh.triangles.Length / 3;
+            }
+            GUILayout.Label(
+                "mesh count: " + Meshes.Count.ToString("N0", invariant) + 
+                "\nv: " + v.ToString("N0", invariant) + " t: " + t.ToString("N0", invariant)
+                
+            );
+
+            GUILayout.EndScrollView();
+        }
+        else if (TargetThing == null) 
         {
             GUI.Label(new Rect(7, 2, 226, 20), "No object selected", "boldLabel");
             GUILayout.Space(8);
@@ -2444,7 +2539,7 @@ public class Charter : EditorWindow
             {
                 GUILayout.Label("This object is not storyboardable.");
             }
-        }
+        } 
     }
 
     #endregion
@@ -2483,22 +2578,10 @@ public class Charter : EditorWindow
     /////////////////////
 
     public string extrasmode = "";
+    public string mainmenutab = "file";
 
     public void Extras(int id) 
     {
-        if (extrasmode == "main_menu") 
-        {
-            GUIStyle itemStyle = new GUIStyle("iconButton");
-            itemStyle.fixedWidth = 0;
-            itemStyle.fixedHeight = 0;
-            itemStyle.alignment = TextAnchor.MiddleLeft;
-            itemStyle.padding = new RectOffset(5, 5, 1, 2);
-
-            if (GUI.Button(new Rect(2, 2, 147, 20), "File...", itemStyle))
-            {
-
-            }
-        }
         if (extrasmode == "play_options") 
         {
             GUI.Label(new Rect(5, 6, 90, 18), "Play Speed");

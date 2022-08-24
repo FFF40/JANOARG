@@ -128,7 +128,9 @@ public class Keybind
 
     public bool Matches(Event ev)
     {
-        EventModifiers cas = (EventModifiers.Shift | EventModifiers.Alt | EventModifiers.Control);
+        EventModifiers cas = (EventModifiers.Shift | EventModifiers.Alt | EventModifiers.Control | EventModifiers.Command);
+        if (Application.platform != RuntimePlatform.OSXEditor && ev.control) 
+            ev.modifiers = ev.modifiers ^ EventModifiers.Control | EventModifiers.Command;
         return ev.keyCode == KeyCode && (ev.modifiers & cas) == Modifiers;
     }
 
@@ -168,6 +170,27 @@ public class Keybind
         if ((Modifiers & EventModifiers.Shift) > 0) str = "Shift+" + str;
         if ((Modifiers & EventModifiers.Alt) > 0) str = "Alt+" + str;
         if ((Modifiers & EventModifiers.Control) > 0) str = "Ctrl+" + str;
+        if ((Modifiers & EventModifiers.Command) > 0) str = (Application.platform == RuntimePlatform.OSXEditor ? "Cmd+" : "Ctrl+") + str;
+        return str;
+    }
+
+    public string ToUnityHotkeyString() 
+    {
+        string str = KeyCode.ToString();
+        switch (str)
+        {
+            case "Slash": str = "/"; break;
+            case "Backslash": str = "\\"; break;
+            case "UpArrow": str = "UP"; break;
+            case "DownArrow": str = "DOWN"; break;
+            case "LeftArrow": str = "LEFT"; break;
+            case "RightArrow": str = "RIGHT"; break;
+        }
+
+        if ((Modifiers & EventModifiers.Shift) > 0) str = "#" + str;
+        if ((Modifiers & EventModifiers.Alt) > 0) str = "&" + str;
+        if ((Modifiers & EventModifiers.Control) > 0) str = "^" + str;
+        if ((Modifiers & EventModifiers.Command) > 0) str = "%" + str;
         return str;
     }
 }
@@ -190,8 +213,8 @@ public class CharterKeybinds
 
         Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P, EventModifiers.None);
 
-        Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Control);
-        Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Control);
+        Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Command);
+        Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Command);
 
         Values["Picker/Cursor"] = new Keybind(KeyCode.A, EventModifiers.None);
         Values["Picker/Select"] = new Keybind(KeyCode.S, EventModifiers.None);
