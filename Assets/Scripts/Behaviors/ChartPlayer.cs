@@ -52,8 +52,10 @@ public class ChartPlayer : MonoBehaviour
     public TMP_Text DifficultyLabel;
     public TMP_Text ScoreText;
     public List<TMP_Text> ScoreDigits;
+    public TMP_Text ScoreUnitText;
     public Slider SongProgressSlider;
     public Image SongProgressFill;
+    public TMP_Text ComboLabel;
     public TMP_Text ComboText;
 
     [Header("Result Screen")]
@@ -74,6 +76,10 @@ public class ChartPlayer : MonoBehaviour
 
     [HideInInspector]
     public Chart CurrentChart;
+    [HideInInspector]
+    public List<LaneStyleManager> LaneStyleManagers = new List<LaneStyleManager>();
+    [HideInInspector]
+    public List<HitStyleManager> HitStyleManagers = new List<HitStyleManager>();
 
     bool isAnimating;
 
@@ -82,16 +88,39 @@ public class ChartPlayer : MonoBehaviour
         main = this;
     }
 
-    // Start is called before the first frame update
+    public void NormalizeTimestamp(Timestamp ts)
+    {
+        ts.Duration = Song.Timing.ToSeconds(ts.Time + ts.Duration);
+        ts.Time = Song.Timing.ToSeconds(ts.Time);
+        ts.Duration -= ts.Time;
+    }
+
     public void Start()
     {
+        // Clone chart
+
         CurrentChart = Instantiate(Song).Charts[ChartPosition];
+
+        // Init chart data
         
         foreach (Timestamp ts in CurrentChart.Storyboard.Timestamps)
+            NormalizeTimestamp(ts);
+        
+        foreach (Timestamp ts in CurrentChart.Pallete.Storyboard.Timestamps)
+            NormalizeTimestamp(ts);
+
+        foreach (LaneStyle style in CurrentChart.Pallete.LaneStyles)
         {
-            ts.Duration = Song.Timing.ToSeconds(ts.Time + ts.Duration);
-            ts.Time = Song.Timing.ToSeconds(ts.Time);
-            ts.Duration -= ts.Time;
+            LaneStyleManagers.Add(new LaneStyleManager(style));
+            foreach (Timestamp ts in style.Storyboard.Timestamps)
+                NormalizeTimestamp(ts);
+        }
+
+        foreach (HitStyle style in CurrentChart.Pallete.HitStyles)
+        {
+            HitStyleManagers.Add(new HitStyleManager(style));
+            foreach (Timestamp ts in style.Storyboard.Timestamps)
+                NormalizeTimestamp(ts);
         }
 
         foreach (Lane lane in CurrentChart.Lanes) {
@@ -105,8 +134,8 @@ public class ChartPlayer : MonoBehaviour
         DifficultyLabel.text = CurrentChart.DifficultyLevel;
         AudioPlayer.clip = Song.Clip;
 
-        MainCamera.backgroundColor = CurrentChart.BackgroundColor;
-        SetInterfaceColor(CurrentChart.InterfaceColor);
+        RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
+        SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
 
         float camRatio = Mathf.Min(1, (3f * Screen.width) / (2f * Screen.height));
         MainCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
@@ -117,7 +146,7 @@ public class ChartPlayer : MonoBehaviour
     public void SetInterfaceColor(Color color)
     {
         SongNameLabel.color = SongSeparatorLabel.color = SongArtistLabel.color = DifficultyNameLabel.color =
-        DifficultyLabel.color = ScoreText.color = ComboText.color = SongProgressFill.color = color;
+        DifficultyLabel.color = ScoreText.color = ScoreUnitText.color = ComboLabel.color = ComboText.color = SongProgressFill.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {
             DifficultyIndicators[a].gameObject.SetActive(CurrentChart.DifficultyIndex >= a);
@@ -178,6 +207,21 @@ public class ChartPlayer : MonoBehaviour
             else CurrentTime = AudioPlayer.time;
         }
         SongProgressSlider.value = CurrentTime / Song.Clip.length;
+
+        CurrentChart.Pallete.Advance(CurrentTime);
+        RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
+        SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
+
+        for (int a = 0; a < LaneStyleManagers.Count; a++)
+        {
+            CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime);
+            LaneStyleManagers[a].Update(CurrentChart.Pallete.LaneStyles[a]);
+        }
+        for (int a = 0; a < HitStyleManagers.Count; a++)
+        {
+            CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime);
+            HitStyleManagers[a].Update(CurrentChart.Pallete.HitStyles[a]);
+        }
         
         MainCamera.transform.position = CurrentChart.CameraPivot;
         MainCamera.transform.eulerAngles = CurrentChart.CameraRotation;

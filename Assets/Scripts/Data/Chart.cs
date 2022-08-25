@@ -278,7 +278,7 @@ public class LaneStyleManager {
 
     public LaneStyleManager(LaneStyle style) 
     {
-        
+        Update(style);
     }
 
     public void Update(LaneStyle style) 

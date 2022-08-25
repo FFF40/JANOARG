@@ -1306,8 +1306,8 @@ public class Charter : EditorWindow
     
     public void CopySelection() 
     {
+        if (TargetThing is string) return;
         ClipboardThing = TargetThing;
-        Debug.Log("Copied " + ClipboardThing);
     }
 
     public void PasteSelection() 
@@ -1935,6 +1935,8 @@ public class Charter : EditorWindow
     ////////////////////////
 
     Vector2 scrollPos = Vector2.zero;
+
+    
 
     public void Inspector(int id) {
         GUI.Label(new Rect(0, 0, 240, 24), "", "button");

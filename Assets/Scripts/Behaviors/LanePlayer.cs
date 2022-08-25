@@ -34,7 +34,8 @@ public class LanePlayer : MonoBehaviour
             float nPos = pos + prev.Speed * (nSec - sec);
             MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, Container);
             mf.mesh = MakeLaneMesh(prev, step, pos * ChartPlayer.main.ScrollSpeed, nPos * ChartPlayer.main.ScrollSpeed, 0);
-            mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.CurrentChart.LaneMaterial;
+            mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.LaneStyleManagers[lane.StyleIndex].LaneMaterial;
+            Debug.Log(ChartPlayer.main.LaneStyleManagers[lane.StyleIndex].LaneMaterial);
             pos = nPos;
             sec = nSec;
             LaneMeshes.Add(mf);
@@ -54,6 +55,9 @@ public class LanePlayer : MonoBehaviour
     public void Update()
     {
         CurrentLane.Advance(ChartPlayer.main.CurrentTime);
+
+        transform.position = CurrentLane.Offset;
+        transform.eulerAngles = CurrentLane.OffsetRotation;
 
         while (LaneMeshes.Count > 0) 
         {

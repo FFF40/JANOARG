@@ -58,6 +58,6 @@ public class HitEffect : MonoBehaviour
     void SetColor() 
     {
         InnerCircle.color = FullArc.color = LeftArc.color = RightArc.color = TopTriangle.color = BottomTriangle.color = 
-            SmallSquare.color = ChartPlayer.main.CurrentChart.InterfaceColor;
+            SmallSquare.color = ChartPlayer.main.CurrentChart.Pallete.InterfaceColor;
     }
 }

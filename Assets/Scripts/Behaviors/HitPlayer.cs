@@ -51,7 +51,7 @@ public class HitPlayer : MonoBehaviour
                 
                 float start = (sec - pSec) / (nSec - pSec);
                 float end = (Ticks[Ticks.Count - 1] - pSec) / (nSec - pSec);
-                Debug.Log(start + " " + end);
+                // Debug.Log(start + " " + end);
                 if (start >= 1) 
                 {
                     IndexShift++;
@@ -66,7 +66,7 @@ public class HitPlayer : MonoBehaviour
 
                 MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, lane.Container);
                 mf.mesh = LanePlayer.MakeHoldMesh(hit, prev, step, pos * ChartPlayer.main.ScrollSpeed, nPos * ChartPlayer.main.ScrollSpeed, Mathf.Clamp01(start), Mathf.Clamp01(end));
-                mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.CurrentChart.HoldMaterial;
+                mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.HitStyleManagers[hit.StyleIndex].HoldTailMaterial;
                 pos = nPos;
                 sec = nSec;
                 LaneMeshes.Add(mf);
@@ -87,7 +87,10 @@ public class HitPlayer : MonoBehaviour
 
         foreach (MeshRenderer mr in IndicatorMeshes) 
         {
-            mr.material = ChartPlayer.main.CurrentChart.HitMaterial;
+            if (hit.Type == HitObject.HitType.Catch)
+                mr.material = ChartPlayer.main.HitStyleManagers[hit.StyleIndex].CatchMaterial;
+            else
+                mr.material = ChartPlayer.main.HitStyleManagers[hit.StyleIndex].NormalMaterial;
         }
 
         ChartPlayer.main.TotalScore += (hit.Type == HitObject.HitType.Catch ? 1 : 3) + Ticks.Count;
@@ -171,7 +174,7 @@ public class HitPlayer : MonoBehaviour
             {
                 float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
                 float m = Mathf.Min((Ticks[Ticks.Count - 1] - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
-                Debug.Log(t + " " + m);
+                // Debug.Log(t + " " + m);
                 if (t < m)
                 {
                     CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);

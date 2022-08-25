@@ -213,6 +213,8 @@ public class CharterKeybinds
 
         Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P, EventModifiers.None);
 
+        Values["Edit/Undo"] = new Keybind(KeyCode.X, EventModifiers.Command);
+        Values["Edit/Redo"] = new Keybind(KeyCode.Y, EventModifiers.Command);
         Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Command);
         Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Command);
 
