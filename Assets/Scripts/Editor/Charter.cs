@@ -1387,7 +1387,7 @@ public class Charter : EditorWindow
         if (TargetLane != null && (GUI.Toggle(timelineMode == "hit" ? new Rect(250, 132, 80, 24) : new Rect(250, 136, 80, 20), timelineMode == "hit", "Hits", "button"))) 
             timelineMode = "hit";
             
-        if (GUI.Toggle(new Rect(width - 81, 136, 80, 20), TargetChart != null && TargetThing == TargetChart.Pallete, "Pallete", "buttonRight") 
+        if (GUI.Toggle(new Rect(width - 81, 136, 80, 20), TargetChart != null && TargetThing == TargetChart.Pallete, "Palette", "buttonRight") 
             && TargetChart != null && TargetThing != TargetChart.Pallete) 
             TargetThing = TargetChart.Pallete;
 
@@ -2094,7 +2094,7 @@ public class Charter : EditorWindow
             {
                 Pallete thing = (Pallete)TargetThing;
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Pallete", "boldLabel");
+                GUI.Label(new Rect(7, 2, 226, 20), "Palette", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
