@@ -13,6 +13,7 @@ public class ChartPlayer : MonoBehaviour
     public PlayableSong Song;
     public int ChartPosition;
     [Space]
+    public bool IsPlaying;
     public bool AutoPlay;
     public float CurrentTime;
     public float Score;
@@ -97,36 +98,17 @@ public class ChartPlayer : MonoBehaviour
 
     public void Start()
     {
-        // Clone chart
+        StartCoroutine(InitChart());
 
+        float camRatio = Mathf.Min(1, (3f * Screen.width) / (2f * Screen.height));
+        MainCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
+
+        UpdateScore();
+    }
+
+    public IEnumerator InitChart()
+    {
         CurrentChart = Instantiate(Song).Charts[ChartPosition];
-
-        // Init chart data
-        
-        foreach (Timestamp ts in CurrentChart.Storyboard.Timestamps)
-            NormalizeTimestamp(ts);
-        
-        foreach (Timestamp ts in CurrentChart.Pallete.Storyboard.Timestamps)
-            NormalizeTimestamp(ts);
-
-        foreach (LaneStyle style in CurrentChart.Pallete.LaneStyles)
-        {
-            LaneStyleManagers.Add(new LaneStyleManager(style));
-            foreach (Timestamp ts in style.Storyboard.Timestamps)
-                NormalizeTimestamp(ts);
-        }
-
-        foreach (HitStyle style in CurrentChart.Pallete.HitStyles)
-        {
-            HitStyleManagers.Add(new HitStyleManager(style));
-            foreach (Timestamp ts in style.Storyboard.Timestamps)
-                NormalizeTimestamp(ts);
-        }
-
-        foreach (Lane lane in CurrentChart.Lanes) {
-            LanePlayer lp = Instantiate(LanePlayerSample, transform);
-            lp.SetLane(lane);
-        }
 
         SongNameLabel.text = Song.SongName;
         SongArtistLabel.text = Song.SongArtist;
@@ -137,10 +119,77 @@ public class ChartPlayer : MonoBehaviour
         RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
         SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
 
-        float camRatio = Mathf.Min(1, (3f * Screen.width) / (2f * Screen.height));
-        MainCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
+        long time = System.DateTime.Now.Ticks;
 
-        UpdateScore();
+        foreach (Timestamp ts in CurrentChart.Storyboard.Timestamps)
+        {
+            NormalizeTimestamp(ts);
+            long t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                yield return null;
+            }
+        }
+        
+        foreach (Timestamp ts in CurrentChart.Pallete.Storyboard.Timestamps)
+        {
+            NormalizeTimestamp(ts);
+            long t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                yield return null;
+            }
+        }
+
+        foreach (LaneStyle style in CurrentChart.Pallete.LaneStyles)
+        {
+            LaneStyleManagers.Add(new LaneStyleManager(style));
+            foreach (Timestamp ts in style.Storyboard.Timestamps)
+                NormalizeTimestamp(ts);
+            long t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                yield return null;
+            }
+        }
+
+        foreach (HitStyle style in CurrentChart.Pallete.HitStyles)
+        {
+            HitStyleManagers.Add(new HitStyleManager(style));
+            foreach (Timestamp ts in style.Storyboard.Timestamps)
+                NormalizeTimestamp(ts);
+            long t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                yield return null;
+            }
+        }
+
+        SongProgressSlider.value = 0;
+        foreach (Lane lane in CurrentChart.Lanes) {
+            LanePlayer lp = Instantiate(LanePlayerSample, transform);
+            lp.SetLane(lane);
+            if (lp.Ready) 
+            {
+                long t = System.DateTime.Now.Ticks;
+                if (t - time > 33e4)
+                {
+                    time = t;
+                    yield return null;
+                }
+            }
+            else 
+            {
+                yield return new WaitUntil(() => lp.Ready);
+            }
+            SongProgressSlider.value += 1f / CurrentChart.Lanes.Count;
+        }
+
+        IsPlaying = true;
     }
 
     public void SetInterfaceColor(Color color)
@@ -198,35 +247,37 @@ public class ChartPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CurrentTime += Time.deltaTime;
-        CurrentChart.Advance(CurrentTime);
-        if (CurrentTime > 0 && CurrentTime < AudioPlayer.clip.length) 
+        if (IsPlaying)
         {
-            if (!AudioPlayer.isPlaying) AudioPlayer.Play();
-            if (Mathf.Abs(AudioPlayer.time - CurrentTime) > SyncThreshold) AudioPlayer.time = CurrentTime;
-            else CurrentTime = AudioPlayer.time;
-        }
-        SongProgressSlider.value = CurrentTime / Song.Clip.length;
+            CurrentTime += Time.deltaTime;
+            CurrentChart.Advance(CurrentTime);
+            if (CurrentTime > 0 && CurrentTime < AudioPlayer.clip.length) 
+            {
+                if (!AudioPlayer.isPlaying) AudioPlayer.Play();
+                if (Mathf.Abs(AudioPlayer.time - CurrentTime) > SyncThreshold) AudioPlayer.time = CurrentTime;
+                else CurrentTime = AudioPlayer.time;
+            }
+            SongProgressSlider.value = CurrentTime / Song.Clip.length;
 
-        CurrentChart.Pallete.Advance(CurrentTime);
-        RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
-        SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
+            CurrentChart.Pallete.Advance(CurrentTime);
+            RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
+            SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
 
-        for (int a = 0; a < LaneStyleManagers.Count; a++)
-        {
-            CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime);
-            LaneStyleManagers[a].Update(CurrentChart.Pallete.LaneStyles[a]);
+            for (int a = 0; a < LaneStyleManagers.Count; a++)
+            {
+                CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime);
+                LaneStyleManagers[a].Update(CurrentChart.Pallete.LaneStyles[a]);
+            }
+            for (int a = 0; a < HitStyleManagers.Count; a++)
+            {
+                CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime);
+                HitStyleManagers[a].Update(CurrentChart.Pallete.HitStyles[a]);
+            }
+            
+            MainCamera.transform.position = CurrentChart.CameraPivot;
+            MainCamera.transform.eulerAngles = CurrentChart.CameraRotation;
+            MainCamera.transform.Translate(Vector3.back * 10);
         }
-        for (int a = 0; a < HitStyleManagers.Count; a++)
-        {
-            CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime);
-            HitStyleManagers[a].Update(CurrentChart.Pallete.HitStyles[a]);
-        }
-        
-        MainCamera.transform.position = CurrentChart.CameraPivot;
-        MainCamera.transform.eulerAngles = CurrentChart.CameraRotation;
-        MainCamera.transform.Translate(Vector3.back * 10);
-
     }
 
     IEnumerator ComboPop () 

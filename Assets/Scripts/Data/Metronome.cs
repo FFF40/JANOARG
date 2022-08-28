@@ -94,6 +94,8 @@ public class Metronome
         while (tag < Stops.Count - 1 && Stops[tag + 1].Offset < seconds) tag++;
         return Stops[tag];
     }
+
+    public static Metronome Normal = new Metronome(60);
 }
 
 [System.Serializable]

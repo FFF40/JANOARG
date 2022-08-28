@@ -9947,6 +9947,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Song: {fileID: 11400000, guid: f0cd95bf1b2cef94c88328a08751d627, type: 2}
   ChartPosition: 0
+  IsPlaying: 0
   AutoPlay: 1
   CurrentTime: -3
   Score: 0
@@ -9988,7 +9989,7 @@ MonoBehaviour:
   - {fileID: 21110625}
   - {fileID: 2065659507}
   - {fileID: 1079640427}
-  ScoreUnitText: {fileID: 2087591505}
+  ScoreUnitText: {fileID: 1866092921}
   SongProgressSlider: {fileID: 1621827489}
   SongProgressFill: {fileID: 1871331552}
   ComboLabel: {fileID: 81546203}

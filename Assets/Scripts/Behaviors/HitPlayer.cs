@@ -26,6 +26,8 @@ public class HitPlayer : MonoBehaviour
     public int IndexShift;
     public float CurrentPos;
     public float CurrentTime;
+    public Vector2 ScreenStart;
+    public Vector2 ScreenEnd;
 
     bool isHit;
 
@@ -130,79 +132,82 @@ public class HitPlayer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float time = ChartPlayer.main.AudioPlayer.isPlaying ? ChartPlayer.main.AudioPlayer.time : ChartPlayer.main.CurrentTime;
-        if (!isHit) 
+        if (ChartPlayer.main.IsPlaying)
         {
-            if (ChartPlayer.main.AutoPlay && time > CurrentHit.Offset)
+            float time = ChartPlayer.main.AudioPlayer.isPlaying ? ChartPlayer.main.AudioPlayer.time : ChartPlayer.main.CurrentTime;
+            if (!isHit) 
             {
-                if (Ticks.Count == 0) 
+                if (ChartPlayer.main.AutoPlay && time > CurrentHit.Offset)
                 {
-                    Destroy(gameObject);
-                    Indicator.gameObject.SetActive(false);
+                    if (Ticks.Count == 0) 
+                    {
+                        Destroy(gameObject);
+                        Indicator.gameObject.SetActive(false);
+                    }
+                    if (CurrentHit.Type == HitObject.HitType.Normal) 
+                    {
+                        float acc = 0; //GetAccuracy(time - CurrentHit.Offset - Time.deltaTime / 2);
+                        MakeHitEffect(acc);
+                        ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
+                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                    }
+                    else if (CurrentHit.Type == HitObject.HitType.Catch) 
+                    {
+                        MakeHitEffect(null);
+                        ChartPlayer.main.AddScore(1, true);
+                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                    }
+                    isHit = true;
                 }
-                if (CurrentHit.Type == HitObject.HitType.Normal) 
+                else if (time > CurrentHit.Offset + .2f)
                 {
-                    float acc = 0; //GetAccuracy(time - CurrentHit.Offset - Time.deltaTime / 2);
-                    MakeHitEffect(acc);
-                    ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
-                    ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
-                }
-                else if (CurrentHit.Type == HitObject.HitType.Catch) 
-                {
-                    MakeHitEffect(null);
-                    ChartPlayer.main.AddScore(1, true);
-                    ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
-                }
-                isHit = true;
-            }
-            else if (time > CurrentHit.Offset + .2f)
-            {
-                if (Ticks.Count == 0) 
-                {
-                    Destroy(gameObject);
-                    Indicator.gameObject.SetActive(false);
-                }
-                ChartPlayer.main.AddScore(0, false);
-                isHit = true;
-            }
-        }
-        else 
-        {
-            UpdateIndicator(ChartPlayer.main.CurrentTime);
-            
-            while (LaneMeshes.Count > 0) 
-            {
-                float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
-                float m = Mathf.Min((Ticks[Ticks.Count - 1] - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
-                // Debug.Log(t + " " + m);
-                if (t < m)
-                {
-                    CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);
-                    if (t > 0) LaneMeshes[0].mesh = LanePlayer.MakeHoldMesh(CurrentHit, 
-                        CurrentLane.CurrentLane.LaneSteps[Index + IndexShift], CurrentLane.CurrentLane.LaneSteps[Index + IndexShift + 1], 
-                        Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, 
-                        Mathf.Clamp01(t), Mathf.Clamp01(m));
-                    break;
-                }
-                else
-                {
-                    Destroy(LaneMeshes[0].gameObject);
-                    LaneMeshes.RemoveAt(0);
-                    Index++;
+                    if (Ticks.Count == 0) 
+                    {
+                        Destroy(gameObject);
+                        Indicator.gameObject.SetActive(false);
+                    }
+                    ChartPlayer.main.AddScore(0, false);
+                    isHit = true;
                 }
             }
+            else 
+            {
+                UpdateIndicator(ChartPlayer.main.CurrentTime);
+                
+                while (LaneMeshes.Count > 0) 
+                {
+                    float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
+                    float m = Mathf.Min((Ticks[Ticks.Count - 1] - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
+                    // Debug.Log(t + " " + m);
+                    if (t < m)
+                    {
+                        CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);
+                        if (t > 0) LaneMeshes[0].mesh = LanePlayer.MakeHoldMesh(CurrentHit, 
+                            CurrentLane.CurrentLane.LaneSteps[Index + IndexShift], CurrentLane.CurrentLane.LaneSteps[Index + IndexShift + 1], 
+                            Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, 
+                            Mathf.Clamp01(t), Mathf.Clamp01(m));
+                        break;
+                    }
+                    else
+                    {
+                        Destroy(LaneMeshes[0].gameObject);
+                        LaneMeshes.RemoveAt(0);
+                        Index++;
+                    }
+                }
 
-            while (Ticks.Count > 0 && time > Ticks[0])
-            {
-                Ticks.RemoveAt(0);
-                if (Ticks.Count == 0)
+                while (Ticks.Count > 0 && time > Ticks[0])
                 {
-                    Destroy(gameObject);
-                    Indicator.gameObject.SetActive(false);
+                    Ticks.RemoveAt(0);
+                    if (Ticks.Count == 0)
+                    {
+                        Destroy(gameObject);
+                        Indicator.gameObject.SetActive(false);
+                    }
+                    // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                    ChartPlayer.main.AddScore(1, true);
+                    MakeHitEffect(null, false);
                 }
-                // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
-                ChartPlayer.main.AddScore(1, true);
-                MakeHitEffect(null);
             }
         }
     }
@@ -213,12 +218,20 @@ public class HitPlayer : MonoBehaviour
         else return (absDist) / 200 * Mathf.Sign(dist);
     }
 
-    void MakeHitEffect(float? accuracy) 
+    void MakeHitEffect(float? accuracy, bool precise = true) 
     {
         HitEffect hje = Instantiate(ChartPlayer.main.HitJudgeEffectSample, ChartPlayer.main.JudgeEffectCanvas);
         hje.Accuracy = accuracy;
         RectTransform rt = hje.GetComponent<RectTransform>();
-        Vector2 pos = ChartPlayer.main.MainCamera.WorldToScreenPoint(transform.position + Vector3.back * transform.position.z);
-        rt.position = new Vector2(pos.x, pos.y);
+        if (precise)
+        {
+            Vector2 pos = Vector2.Lerp(ScreenStart, ScreenEnd, .5f);
+            rt.position = new Vector2(pos.x, pos.y);
+        }
+        else
+        {
+            Vector2 pos = ChartPlayer.main.MainCamera.WorldToScreenPoint(transform.position);
+            rt.position = new Vector2(pos.x, pos.y);
+        }
     }
 }

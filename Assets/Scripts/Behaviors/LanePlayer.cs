@@ -14,6 +14,9 @@ public class LanePlayer : MonoBehaviour
     public float CurrentPos;
     public float CurrentTime;
 
+    [HideInInspector]
+    public bool Ready;
+
     public void SetLane (Lane lane) 
     {
         foreach (Timestamp ts in lane.Storyboard.Timestamps)
@@ -43,37 +46,77 @@ public class LanePlayer : MonoBehaviour
             Times.Add(nSec);
         }
         CurrentLane = (Lane)lane;
+        StartCoroutine(InitHitObjects());
+    }
 
-        foreach (HitObject hit in lane.Objects)
+    public IEnumerator InitHitObjects()
+    {
+        long time = System.DateTime.Now.Ticks;
+        Camera cam = ChartPlayer.main.MainCamera;
+
+        foreach (HitObject hit in CurrentLane.Objects)
         {
-            
             HitPlayer hp = Instantiate(hit.Type == HitObject.HitType.Catch ? ChartPlayer.main.CatchHitSample : ChartPlayer.main.NormalHitSample, Container);
+            float pos = hit.Offset;
             hp.SetHit(this, hit);
+
+            // Precalculate hit object positions
+            Chart c = (Chart)ChartPlayer.main.CurrentChart.Get(hit.Offset);
+            cam.transform.position = c.CameraPivot;
+            cam.transform.eulerAngles = c.CameraRotation;
+            cam.transform.Translate(Vector3.back * 10);
+
+            Lane l = (Lane)CurrentLane.Get(hit.Offset);
+            LaneStep s = l.GetLaneStep(pos, pos, ChartPlayer.main.Song.Timing);
+            Debug.Log(s.StartPos + " " + s.EndPos);
+            HitObject h = (HitObject)hit.Get(hit.Offset);
+
+            Vector3 start = Quaternion.Euler(l.OffsetRotation) * (Vector3)s.StartPos + l.Offset;
+            Vector3 end = Quaternion.Euler(l.OffsetRotation) * (Vector3)s.EndPos + l.Offset;
+
+            hp.ScreenStart = cam.WorldToScreenPoint(Vector3.Lerp(start, end, h.Position));
+            hp.ScreenEnd = cam.WorldToScreenPoint(Vector3.Lerp(start, end, h.Position + h.Length));
+            
+
+            long t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                cam.transform.position = ChartPlayer.main.CurrentChart.CameraPivot;
+                cam.transform.eulerAngles = ChartPlayer.main.CurrentChart.CameraRotation;
+                cam.transform.Translate(Vector3.back * 10);
+                yield return null;
+            }
         }
+
+        Ready = true;
     }
 
     public void Update()
     {
-        CurrentLane.Advance(ChartPlayer.main.CurrentTime);
-
-        transform.position = CurrentLane.Offset;
-        transform.eulerAngles = CurrentLane.OffsetRotation;
-
-        while (LaneMeshes.Count > 0) 
+        if (ChartPlayer.main.IsPlaying)
         {
-            float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
-            if (t < 1)
+            CurrentLane.Advance(ChartPlayer.main.CurrentTime);
+
+            transform.position = CurrentLane.Offset;
+            transform.eulerAngles = CurrentLane.OffsetRotation;
+
+            while (LaneMeshes.Count > 0) 
             {
-                CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);
-                if (t > 0) LaneMeshes[0].mesh = MakeLaneMesh(CurrentLane.LaneSteps[Index], CurrentLane.LaneSteps[Index + 1], Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, Mathf.Clamp01(t));
-                Container.localPosition = Vector3.forward * CurrentPos * -ChartPlayer.main.ScrollSpeed;
-                break;
-            }
-            else
-            {
-                Destroy(LaneMeshes[0].gameObject);
-                LaneMeshes.RemoveAt(0);
-                Index++;
+                float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
+                if (t < 1)
+                {
+                    CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);
+                    if (t > 0) LaneMeshes[0].mesh = MakeLaneMesh(CurrentLane.LaneSteps[Index], CurrentLane.LaneSteps[Index + 1], Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, Mathf.Clamp01(t));
+                    Container.localPosition = Vector3.forward * CurrentPos * -ChartPlayer.main.ScrollSpeed;
+                    break;
+                }
+                else
+                {
+                    Destroy(LaneMeshes[0].gameObject);
+                    LaneMeshes.RemoveAt(0);
+                    Index++;
+                }
             }
         }
     }
