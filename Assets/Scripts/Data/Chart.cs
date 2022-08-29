@@ -249,8 +249,15 @@ public class LaneStyle : IStoryboardable {
 
     public LaneStyle() 
     {
-        LaneMaterial = (Material)Resources.Load("Materials/Default Lane");
-        JudgeMaterial = (Material)Resources.Load("Materials/Default Judge");
+        try 
+        {
+            LaneMaterial = (Material)Resources.Load("Materials/Default Lane");
+            JudgeMaterial = (Material)Resources.Load("Materials/Default Judge");
+        }
+        catch (UnityException)
+        {
+            
+        }
     }
 
     public LaneStyle DeepClone()
@@ -404,8 +411,15 @@ public class HitStyle : IStoryboardable {
 
     public HitStyle() 
     {
-        MainMaterial = (Material)Resources.Load("Materials/Default Hit");
-        HoldTailMaterial = (Material)Resources.Load("Materials/Default Hold");
+        try 
+        {
+            MainMaterial = (Material)Resources.Load("Materials/Default Hit");
+            HoldTailMaterial = (Material)Resources.Load("Materials/Default Hold");
+        }
+        catch (UnityException)
+        {
+
+        }
     }
 
     public HitStyle DeepClone()

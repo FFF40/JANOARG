@@ -29,7 +29,9 @@ public class HitPlayer : MonoBehaviour
     public Vector2 ScreenStart;
     public Vector2 ScreenEnd;
 
-    bool isHit;
+    bool isHit, isPreHit;
+    static Dictionary<Touch, HitPlayer> RegisteredTouches = new Dictionary<Touch, HitPlayer>();
+    float railTime;
 
     public void SetHit(LanePlayer lane, HitObject hit)
     {
@@ -169,12 +171,60 @@ public class HitPlayer : MonoBehaviour
                     ChartPlayer.main.AddScore(0, false);
                     isHit = true;
                 }
+                else if (time > CurrentHit.Offset - .2f)
+                {
+                    Vector2 ScreenMid = (ScreenStart + ScreenEnd) / 2;
+                    float dist = Vector2.Distance(ScreenStart, ScreenEnd) + Screen.width / 20;
+                    if (CurrentHit.Type == HitObject.HitType.Catch) 
+                    {
+                        foreach (Touch touch in Input.touches) 
+                        {
+                            if (Vector2.Distance(touch.position, ScreenMid) <= dist) 
+                            {
+                                isPreHit = true;
+                            }
+                        }
+                        if (isPreHit && time > CurrentHit.Offset)
+                        {
+                            MakeHitEffect(null);
+                            ChartPlayer.main.AddScore(1, true);
+                            ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                            
+                            if (Ticks.Count == 0) 
+                            {
+                                Destroy(gameObject);
+                                Indicator.gameObject.SetActive(false);
+                            }
+                            else 
+                            {
+                                railTime = 1;
+                            }
+                            isHit = true;
+                        }
+                    }
+                }
             }
             else 
             {
                 UpdateIndicator(ChartPlayer.main.CurrentTime);
+
+                ScreenStart = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorLeft.position);
+                ScreenEnd = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorRight.position);
+                Vector2 ScreenMid = (ScreenStart + ScreenEnd) / 2;
+                float dist = Vector2.Distance(ScreenStart, ScreenEnd) + Screen.width / 20;
+
+                isPreHit = ChartPlayer.main.AutoPlay;
+                if (!isPreHit) foreach (Touch touch in Input.touches) 
+                {
+                    if (Vector2.Distance(touch.position, ScreenMid) <= dist) 
+                    {
+                        isPreHit = true;
+                        break;
+                    }
+                }
+                railTime = isPreHit ? 1 : railTime - Time.deltaTime * .2f;
                 
-                while (LaneMeshes.Count > 0) 
+                if (railTime > 0) while (LaneMeshes.Count > 0) 
                 {
                     float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
                     float m = Mathf.Min((Ticks[Ticks.Count - 1] - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
@@ -205,8 +255,15 @@ public class HitPlayer : MonoBehaviour
                         Indicator.gameObject.SetActive(false);
                     }
                     // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
-                    ChartPlayer.main.AddScore(1, true);
-                    MakeHitEffect(null, false);
+                    if (railTime > 0) 
+                    {
+                        ChartPlayer.main.AddScore(1, true);
+                        MakeHitEffect(null, false);
+                    }
+                    else 
+                    {
+                        ChartPlayer.main.AddScore(0, false);
+                    }
                 }
             }
         }
@@ -223,15 +280,7 @@ public class HitPlayer : MonoBehaviour
         HitEffect hje = Instantiate(ChartPlayer.main.HitJudgeEffectSample, ChartPlayer.main.JudgeEffectCanvas);
         hje.Accuracy = accuracy;
         RectTransform rt = hje.GetComponent<RectTransform>();
-        if (precise)
-        {
-            Vector2 pos = Vector2.Lerp(ScreenStart, ScreenEnd, .5f);
-            rt.position = new Vector2(pos.x, pos.y);
-        }
-        else
-        {
-            Vector2 pos = ChartPlayer.main.MainCamera.WorldToScreenPoint(transform.position);
-            rt.position = new Vector2(pos.x, pos.y);
-        }
+        Vector2 pos = Vector2.Lerp(ScreenStart, ScreenEnd, .5f);
+        rt.position = new Vector2(pos.x, pos.y);
     }
 }

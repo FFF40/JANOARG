@@ -38,7 +38,6 @@ public class LanePlayer : MonoBehaviour
             MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, Container);
             mf.mesh = MakeLaneMesh(prev, step, pos * ChartPlayer.main.ScrollSpeed, nPos * ChartPlayer.main.ScrollSpeed, 0);
             mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.LaneStyleManagers[lane.StyleIndex].LaneMaterial;
-            Debug.Log(ChartPlayer.main.LaneStyleManagers[lane.StyleIndex].LaneMaterial);
             pos = nPos;
             sec = nSec;
             LaneMeshes.Add(mf);
@@ -68,7 +67,6 @@ public class LanePlayer : MonoBehaviour
 
             Lane l = (Lane)CurrentLane.Get(hit.Offset);
             LaneStep s = l.GetLaneStep(pos, pos, ChartPlayer.main.Song.Timing);
-            Debug.Log(s.StartPos + " " + s.EndPos);
             HitObject h = (HitObject)hit.Get(hit.Offset);
 
             Vector3 start = Quaternion.Euler(l.OffsetRotation) * (Vector3)s.StartPos + l.Offset;
