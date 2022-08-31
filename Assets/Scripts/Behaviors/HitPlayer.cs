@@ -29,9 +29,10 @@ public class HitPlayer : MonoBehaviour
     public Vector2 ScreenStart;
     public Vector2 ScreenEnd;
 
-    bool isHit, isPreHit;
-    static Dictionary<Touch, HitPlayer> RegisteredTouches = new Dictionary<Touch, HitPlayer>();
-    float railTime;
+    [HideInInspector]
+    public bool isHit, isPreHit;
+    [HideInInspector]
+    public float railTime;
 
     public void SetHit(LanePlayer lane, HitObject hit)
     {
@@ -101,6 +102,11 @@ public class HitPlayer : MonoBehaviour
         ChartPlayer.main.TotalCombo += 1 + Ticks.Count;
         ChartPlayer.main.NoteCount += 1 + Ticks.Count;
 
+        if (hit.Type == HitObject.HitType.Catch)
+            ChartPlayer.main.CatchHits.Add(this);
+        else 
+            ChartPlayer.main.NormalHits.Add(this);
+
         CurrentLane = lane;
         CurrentHit = hit;
         UpdateIndicator(CurrentHit.Offset);
@@ -137,74 +143,7 @@ public class HitPlayer : MonoBehaviour
         if (ChartPlayer.main.IsPlaying)
         {
             float time = ChartPlayer.main.AudioPlayer.isPlaying ? ChartPlayer.main.AudioPlayer.time : ChartPlayer.main.CurrentTime;
-            if (!isHit) 
-            {
-                if (ChartPlayer.main.AutoPlay && time > CurrentHit.Offset)
-                {
-                    if (Ticks.Count == 0) 
-                    {
-                        Destroy(gameObject);
-                        Indicator.gameObject.SetActive(false);
-                    }
-                    if (CurrentHit.Type == HitObject.HitType.Normal) 
-                    {
-                        float acc = 0; //GetAccuracy(time - CurrentHit.Offset - Time.deltaTime / 2);
-                        MakeHitEffect(acc);
-                        ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
-                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
-                    }
-                    else if (CurrentHit.Type == HitObject.HitType.Catch) 
-                    {
-                        MakeHitEffect(null);
-                        ChartPlayer.main.AddScore(1, true);
-                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
-                    }
-                    isHit = true;
-                }
-                else if (time > CurrentHit.Offset + .2f)
-                {
-                    if (Ticks.Count == 0) 
-                    {
-                        Destroy(gameObject);
-                        Indicator.gameObject.SetActive(false);
-                    }
-                    ChartPlayer.main.AddScore(0, false);
-                    isHit = true;
-                }
-                else if (time > CurrentHit.Offset - .2f)
-                {
-                    Vector2 ScreenMid = (ScreenStart + ScreenEnd) / 2;
-                    float dist = Vector2.Distance(ScreenStart, ScreenEnd) + Screen.width / 20;
-                    if (CurrentHit.Type == HitObject.HitType.Catch) 
-                    {
-                        foreach (Touch touch in Input.touches) 
-                        {
-                            if (Vector2.Distance(touch.position, ScreenMid) <= dist) 
-                            {
-                                isPreHit = true;
-                            }
-                        }
-                        if (isPreHit && time > CurrentHit.Offset)
-                        {
-                            MakeHitEffect(null);
-                            ChartPlayer.main.AddScore(1, true);
-                            ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
-                            
-                            if (Ticks.Count == 0) 
-                            {
-                                Destroy(gameObject);
-                                Indicator.gameObject.SetActive(false);
-                            }
-                            else 
-                            {
-                                railTime = 1;
-                            }
-                            isHit = true;
-                        }
-                    }
-                }
-            }
-            else 
+            if (isHit)
             {
                 UpdateIndicator(ChartPlayer.main.CurrentTime);
 
@@ -269,13 +208,22 @@ public class HitPlayer : MonoBehaviour
         }
     }
 
-    float GetAccuracy(float dist) {
+    public void BeginHit() {
+        isHit = true;
+        if (Ticks.Count == 0) 
+        {
+            Destroy(gameObject);
+            Indicator.gameObject.SetActive(false);
+        }
+    }
+
+    public static float GetAccuracy(float dist) {
         float absDist = Mathf.Abs(dist) * 1000;
         if (absDist < 35) return 0;
         else return (absDist) / 200 * Mathf.Sign(dist);
     }
 
-    void MakeHitEffect(float? accuracy, bool precise = true) 
+    public void MakeHitEffect(float? accuracy, bool precise = true) 
     {
         HitEffect hje = Instantiate(ChartPlayer.main.HitJudgeEffectSample, ChartPlayer.main.JudgeEffectCanvas);
         hje.Accuracy = accuracy;

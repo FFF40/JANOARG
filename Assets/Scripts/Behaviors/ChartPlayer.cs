@@ -82,6 +82,11 @@ public class ChartPlayer : MonoBehaviour
     [HideInInspector]
     public List<HitStyleManager> HitStyleManagers = new List<HitStyleManager>();
 
+    
+    [HideInInspector]
+    public List<HitPlayer> NormalHits = new List<HitPlayer>();
+    public List<HitPlayer> CatchHits = new List<HitPlayer>();
+
     bool isAnimating;
 
     public void Awake()
@@ -120,11 +125,12 @@ public class ChartPlayer : MonoBehaviour
         SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
 
         long time = System.DateTime.Now.Ticks;
+        long t;
 
         foreach (Timestamp ts in CurrentChart.Storyboard.Timestamps)
         {
             NormalizeTimestamp(ts);
-            long t = System.DateTime.Now.Ticks;
+            t = System.DateTime.Now.Ticks;
             if (t - time > 33e4)
             {
                 time = t;
@@ -135,7 +141,7 @@ public class ChartPlayer : MonoBehaviour
         foreach (Timestamp ts in CurrentChart.Pallete.Storyboard.Timestamps)
         {
             NormalizeTimestamp(ts);
-            long t = System.DateTime.Now.Ticks;
+            t = System.DateTime.Now.Ticks;
             if (t - time > 33e4)
             {
                 time = t;
@@ -148,7 +154,7 @@ public class ChartPlayer : MonoBehaviour
             LaneStyleManagers.Add(new LaneStyleManager(style));
             foreach (Timestamp ts in style.Storyboard.Timestamps)
                 NormalizeTimestamp(ts);
-            long t = System.DateTime.Now.Ticks;
+            t = System.DateTime.Now.Ticks;
             if (t - time > 33e4)
             {
                 time = t;
@@ -161,7 +167,7 @@ public class ChartPlayer : MonoBehaviour
             HitStyleManagers.Add(new HitStyleManager(style));
             foreach (Timestamp ts in style.Storyboard.Timestamps)
                 NormalizeTimestamp(ts);
-            long t = System.DateTime.Now.Ticks;
+            t = System.DateTime.Now.Ticks;
             if (t - time > 33e4)
             {
                 time = t;
@@ -175,7 +181,7 @@ public class ChartPlayer : MonoBehaviour
             lp.SetLane(lane);
             if (lp.Ready) 
             {
-                long t = System.DateTime.Now.Ticks;
+                t = System.DateTime.Now.Ticks;
                 if (t - time > 33e4)
                 {
                     time = t;
@@ -187,6 +193,22 @@ public class ChartPlayer : MonoBehaviour
                 yield return new WaitUntil(() => lp.Ready);
             }
             SongProgressSlider.value += 1f / CurrentChart.Lanes.Count;
+        }
+        
+        NormalHits.Sort((x, y) => x.CurrentHit.Offset.CompareTo(y.CurrentHit.Offset));
+        t = System.DateTime.Now.Ticks;
+        if (t - time > 33e4)
+        {
+            time = t;
+            yield return null;
+        }
+        
+        CatchHits.Sort((x, y) => x.CurrentHit.Offset.CompareTo(y.CurrentHit.Offset));
+        t = System.DateTime.Now.Ticks;
+        if (t - time > 33e4)
+        {
+            time = t;
+            yield return null;
         }
 
         IsPlaying = true;
@@ -277,6 +299,118 @@ public class ChartPlayer : MonoBehaviour
             MainCamera.transform.position = CurrentChart.CameraPivot;
             MainCamera.transform.eulerAngles = CurrentChart.CameraRotation;
             MainCamera.transform.Translate(Vector3.back * 10);
+            
+            Dictionary<Touch, HitPlayer> Touches = new Dictionary<Touch, HitPlayer>();
+
+            if (!ChartPlayer.main.AutoPlay)
+            {
+                foreach (Touch touch in Input.touches)
+                {
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        Touches.Add(touch, null);
+                    }
+                }
+            }
+
+            float time = AudioPlayer.isPlaying ? AudioPlayer.time : CurrentTime;
+
+            foreach (HitPlayer obj in NormalHits)
+            {
+                if (obj.CurrentHit.Offset > time + .2f) break;
+                if (!obj.isHit) 
+                {
+                    if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
+                    {
+                        Debug.Log(time + " " + obj.CurrentHit.Offset);
+                        obj.MakeHitEffect(0);
+                        ChartPlayer.main.AddScore(3, true);
+                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                        obj.BeginHit();
+                        NormalHits.Remove(obj);
+                    }
+                    else if (time > obj.CurrentHit.Offset + .2f)
+                    {
+                        ChartPlayer.main.AddScore(0, false);
+                        obj.BeginHit();
+                        NormalHits.Remove(obj);
+                    }
+                    else if (time > obj.CurrentHit.Offset - .2f)
+                    {
+                        Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
+                        float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                        foreach (Touch touch in Touches.Keys) 
+                        {
+                            if (Vector2.Distance(touch.position, ScreenMid) <= dist 
+                                && (Touches[touch] == null
+                                || obj.CurrentHit.Offset < Touches[touch].CurrentHit.Offset)) 
+                            {
+                                Touches[touch] = obj;
+                                goto jumpEnd;
+                            }
+                        }
+                    }
+                }
+                jumpEnd:;
+            }
+
+            foreach (Touch touch in Touches.Keys)
+            {
+                if (Touches[touch] != null)
+                {
+                    HitPlayer obj = Touches[touch];
+                    float acc = HitPlayer.GetAccuracy(time - obj.CurrentHit.Offset);
+                    obj.MakeHitEffect(acc);
+                    ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
+                    ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                    obj.BeginHit();
+                    NormalHits.Remove(obj);
+                }
+            }
+
+            foreach (HitPlayer obj in CatchHits)
+            {
+                if (obj.CurrentHit.Offset > time + .2f) break;
+                if (!obj.isHit) 
+                {
+                    if (ChartPlayer.main.AutoPlay && time > obj.CurrentTime)
+                    {
+                        obj.MakeHitEffect(null);
+                        ChartPlayer.main.AddScore(1, true);
+                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                        obj.BeginHit();
+                        CatchHits.Remove(obj);
+                    }
+                    else if (time > obj.CurrentHit.Offset + .2f)
+                    {
+                        ChartPlayer.main.AddScore(0, false);
+                        obj.BeginHit();
+                        CatchHits.Remove(obj);
+                    }
+                    else if (time > obj.CurrentHit.Offset - .2f)
+                    {
+                        Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
+                        float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                        foreach (Touch touch in Input.touches) 
+                        {
+                            if (Vector2.Distance(touch.position, ScreenMid) <= dist) 
+                            {
+                                obj.isPreHit = true;
+                            }
+                        }
+                        if (obj.isPreHit && time > obj.CurrentHit.Offset)
+                        {
+                            obj.MakeHitEffect(null);
+                            ChartPlayer.main.AddScore(1, true);
+                            ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                            
+                            if (obj.Ticks.Count != 0) obj.railTime = 1;
+                            obj.BeginHit();
+                            CatchHits.Remove(obj);
+                        }
+                    }
+                }
+            }
         }
     }
 

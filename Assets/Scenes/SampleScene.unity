@@ -9948,7 +9948,7 @@ MonoBehaviour:
   Song: {fileID: 11400000, guid: f0cd95bf1b2cef94c88328a08751d627, type: 2}
   ChartPosition: 0
   IsPlaying: 0
-  AutoPlay: 1
+  AutoPlay: 0
   CurrentTime: -3
   Score: 0
   TotalScore: 0
@@ -10041,6 +10041,8 @@ MonoBehaviour:
       InterfaceColor: {r: 1, g: 1, b: 1, a: 1}
       LaneStyles: []
       HitStyles: []
+  NormalHits: []
+  CatchHits: []
 --- !u!4 &1633994384
 Transform:
   m_ObjectHideFlags: 0
