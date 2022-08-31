@@ -315,6 +315,8 @@ public class ChartPlayer : MonoBehaviour
 
             float time = AudioPlayer.isPlaying ? AudioPlayer.time : CurrentTime;
 
+            while (NormalHits.IndexOf(null) >= 0) NormalHits.Remove(null);
+
             foreach (HitPlayer obj in NormalHits)
             {
                 if (obj.CurrentHit.Offset > time + .2f) break;
@@ -327,13 +329,11 @@ public class ChartPlayer : MonoBehaviour
                         ChartPlayer.main.AddScore(3, true);
                         ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
                         obj.BeginHit();
-                        NormalHits.Remove(obj);
                     }
                     else if (time > obj.CurrentHit.Offset + .2f)
                     {
                         ChartPlayer.main.AddScore(0, false);
                         obj.BeginHit();
-                        NormalHits.Remove(obj);
                     }
                     else if (time > obj.CurrentHit.Offset - .2f)
                     {
@@ -364,28 +364,27 @@ public class ChartPlayer : MonoBehaviour
                     ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
                     ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
                     obj.BeginHit();
-                    NormalHits.Remove(obj);
                 }
             }
+
+            while (CatchHits.IndexOf(null) >= 0) CatchHits.Remove(null);
 
             foreach (HitPlayer obj in CatchHits)
             {
                 if (obj.CurrentHit.Offset > time + .2f) break;
                 if (!obj.isHit) 
                 {
-                    if (ChartPlayer.main.AutoPlay && time > obj.CurrentTime)
+                    if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(null);
                         ChartPlayer.main.AddScore(1, true);
                         ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                         obj.BeginHit();
-                        CatchHits.Remove(obj);
                     }
                     else if (time > obj.CurrentHit.Offset + .2f)
                     {
                         ChartPlayer.main.AddScore(0, false);
                         obj.BeginHit();
-                        CatchHits.Remove(obj);
                     }
                     else if (time > obj.CurrentHit.Offset - .2f)
                     {
