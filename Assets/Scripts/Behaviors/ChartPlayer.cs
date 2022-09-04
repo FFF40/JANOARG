@@ -18,6 +18,7 @@ public class ChartPlayer : MonoBehaviour
     public float CurrentTime;
     public float Score;
     public float TotalScore;
+    public float Gauge;
     public int Combo;
     public int MaxCombo;
     public int TotalCombo;
@@ -46,16 +47,20 @@ public class ChartPlayer : MonoBehaviour
     public GameObject SideObject;
     public GameObject CenterObject;
     public TMP_Text SongNameLabel;
-    public TMP_Text SongSeparatorLabel;
     public TMP_Text SongArtistLabel;
     public TMP_Text DifficultyNameLabel;
     public List<Image> DifficultyIndicators;
+    public Image DifficultyBox;
     public TMP_Text DifficultyLabel;
     public TMP_Text ScoreText;
     public List<TMP_Text> ScoreDigits;
     public TMP_Text ScoreUnitText;
     public Slider SongProgressSlider;
     public Image SongProgressFill;
+    public Image GaugeBox;
+    public TMP_Text GaugeText;
+    public Slider GaugeSlider;
+    public Image GaugeFill;
     public TMP_Text ComboLabel;
     public TMP_Text ComboText;
 
@@ -216,8 +221,9 @@ public class ChartPlayer : MonoBehaviour
 
     public void SetInterfaceColor(Color color)
     {
-        SongNameLabel.color = SongSeparatorLabel.color = SongArtistLabel.color = DifficultyNameLabel.color =
-        DifficultyLabel.color = ScoreText.color = ScoreUnitText.color = ComboLabel.color = ComboText.color = SongProgressFill.color = color;
+        SongNameLabel.color = SongArtistLabel.color = DifficultyNameLabel.color = DifficultyBox.color = DifficultyLabel.color = 
+        ScoreText.color = ScoreUnitText.color = GaugeBox.color = GaugeText.color = GaugeFill.color = ComboLabel.color = 
+        ComboText.color = SongProgressFill.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {
             DifficultyIndicators[a].gameObject.SetActive(CurrentChart.DifficultyIndex >= a);
@@ -232,6 +238,9 @@ public class ChartPlayer : MonoBehaviour
     void UpdateScore() 
     {
         ComboText.text = Combo.ToString("#", CultureInfo.InvariantCulture);
+
+        GaugeText.text = (Gauge * 10).ToString("F" + (Gauge == 1 ? "0" : "1"), CultureInfo.InvariantCulture);
+        GaugeSlider.value = Gauge;
 
         SideObject.SetActive(NoteCount > 0);
 
@@ -249,12 +258,15 @@ public class ChartPlayer : MonoBehaviour
         }
     }
 
-    public void AddScore(float weight, bool combo)
+    public void AddScore(float weight, float acc, bool combo)
     {
-        Score += weight;
+        Score += weight * acc;
         Combo = combo ? Combo + 1 : 0;
         MaxCombo = Mathf.Max(MaxCombo, Combo);
         NoteCount--;
+
+        if (combo) Gauge = Mathf.Min(1, Gauge + weight * acc / CurrentChart.ChartConstant / 35);
+        else Gauge = Mathf.Max(0, Gauge - weight / 35);
         
         StopCoroutine(ComboPop());
         if (combo)
@@ -326,13 +338,13 @@ public class ChartPlayer : MonoBehaviour
                     {
                         Debug.Log(time + " " + obj.CurrentHit.Offset);
                         obj.MakeHitEffect(0);
-                        ChartPlayer.main.AddScore(3, true);
+                        ChartPlayer.main.AddScore(3, 1, true);
                         ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + .2f)
                     {
-                        ChartPlayer.main.AddScore(0, false);
+                        ChartPlayer.main.AddScore(3, 0, false);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset - .2f)
@@ -361,7 +373,7 @@ public class ChartPlayer : MonoBehaviour
                     HitPlayer obj = Touches[touch];
                     float acc = HitPlayer.GetAccuracy(time - obj.CurrentHit.Offset);
                     obj.MakeHitEffect(acc);
-                    ChartPlayer.main.AddScore((1 - Mathf.Abs(acc)) * 3, true);
+                    ChartPlayer.main.AddScore(3, (1 - Mathf.Abs(acc)), true);
                     ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
                     obj.BeginHit();
                 }
@@ -377,13 +389,13 @@ public class ChartPlayer : MonoBehaviour
                     if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(null);
-                        ChartPlayer.main.AddScore(1, true);
+                        ChartPlayer.main.AddScore(1, 1, true);
                         ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + .2f)
                     {
-                        ChartPlayer.main.AddScore(0, false);
+                        ChartPlayer.main.AddScore(1, 0, false);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset - .2f)
@@ -400,7 +412,7 @@ public class ChartPlayer : MonoBehaviour
                         if (obj.isPreHit && time > obj.CurrentHit.Offset)
                         {
                             obj.MakeHitEffect(null);
-                            ChartPlayer.main.AddScore(1, true);
+                            ChartPlayer.main.AddScore(1, 1, true);
                             ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                             
                             if (obj.Ticks.Count != 0) obj.railTime = 1;

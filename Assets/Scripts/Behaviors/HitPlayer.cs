@@ -196,12 +196,12 @@ public class HitPlayer : MonoBehaviour
                     // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                     if (railTime > 0) 
                     {
-                        ChartPlayer.main.AddScore(1, true);
+                        ChartPlayer.main.AddScore(1, 1, true);
                         MakeHitEffect(null, false);
                     }
                     else 
                     {
-                        ChartPlayer.main.AddScore(0, false);
+                        ChartPlayer.main.AddScore(1, 0, false);
                     }
                 }
             }
