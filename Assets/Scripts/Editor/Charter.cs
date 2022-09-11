@@ -1936,7 +1936,7 @@ public class Charter : EditorWindow
 
     Vector2 scrollPos = Vector2.zero;
 
-    
+    long BPMTapStart, BPMTapEnd, BPMTapCount;
 
     public void Inspector(int id) {
         GUI.Label(new Rect(0, 0, 240, 24), "", "button");
@@ -2063,6 +2063,30 @@ public class Charter : EditorWindow
                 GUILayout.Label("Timing", "boldLabel");
                 thing.BPM = EditorGUILayout.FloatField("BPM", thing.BPM);
                 thing.Signature = EditorGUILayout.IntField("Signature", thing.Signature);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(
+                    BPMTapCount >= 4 ? "BPM = " + thing.BPM.ToString("F2", invariant) : 
+                    (BPMTapCount > 0 ? "Keep tapping... " + BPMTapCount.ToString(invariant) + " / 4" : "Tap BPM"),
+                    "button"
+                );
+                Event current = Event.current;
+                if (current.type == EventType.MouseDown && GUILayoutUtility.GetLastRect().Contains(current.mousePosition))
+                {
+                    BPMTapEnd = now;
+                    if (BPMTapCount <= 0) BPMTapStart = now;
+                    BPMTapCount++;
+                    if (BPMTapCount >= 4) 
+                    {
+                        thing.BPM = 6e8f / (BPMTapEnd - BPMTapStart) * (BPMTapCount - 1);
+                    }
+                    Repaint();
+                }
+                if (GUILayout.Button("Reset", GUILayout.Width(60))) 
+                {
+                    BPMTapStart = BPMTapEnd = BPMTapCount = 0;
+                }
+                GUILayout.EndHorizontal();
                 GUILayout.EndScrollView();
             }
             else if (TargetThing is Chart)

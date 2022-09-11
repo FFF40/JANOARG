@@ -61,6 +61,8 @@ public class ChartPlayer : MonoBehaviour
     public TMP_Text GaugeText;
     public Slider GaugeSlider;
     public Image GaugeFill;
+    public Image GaugeUpper;
+    public Image GaugeLower;
     public TMP_Text ComboLabel;
     public TMP_Text ComboText;
 
@@ -222,8 +224,8 @@ public class ChartPlayer : MonoBehaviour
     public void SetInterfaceColor(Color color)
     {
         SongNameLabel.color = SongArtistLabel.color = DifficultyNameLabel.color = DifficultyBox.color = DifficultyLabel.color = 
-        ScoreText.color = ScoreUnitText.color = GaugeBox.color = GaugeText.color = GaugeFill.color = ComboLabel.color = 
-        ComboText.color = SongProgressFill.color = color;
+        ScoreText.color = ScoreUnitText.color = GaugeBox.color = GaugeText.color = GaugeFill.color = GaugeUpper.color = GaugeLower.color =
+        ComboLabel.color = ComboText.color = SongProgressFill.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {
             DifficultyIndicators[a].gameObject.SetActive(CurrentChart.DifficultyIndex >= a);
