@@ -1,11 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine;
+using UnityEditor;
 
 public class Charter : EditorWindow
 {
@@ -1064,6 +1064,93 @@ public class Charter : EditorWindow
 
     #endregion
 
+    /////////////////
+    #region Functions
+    /////////////////
+
+    public void OpenInPlayMode()
+    {
+        if (TargetSong == null)
+        {
+            Debug.LogError("Please select a Chart first!");
+            return;
+        } 
+        ChartPlayer player = GameObject.FindObjectOfType<ChartPlayer>();
+        if (!player) 
+        {
+            Debug.LogError("Couldn't find any Chart Player in the scene. Please make sure the Scenes/Game scene in the Project window is opened.");
+            return;
+        }
+        player.Song = TargetSong;
+        player.ChartPosition = TargetSong.Charts.IndexOf(TargetChart);
+        EditorApplication.ExecuteMenuItem("Window/General/Game");
+        EditorApplication.isPlaying = true;
+        EditorApplication.Beep();
+    }
+
+    public void CopySelection() 
+    {
+        if (TargetThing is string) return;
+        ClipboardThing = TargetThing;
+    }
+
+    public void PasteSelection() 
+    {
+        if (ClipboardThing is BPMStop || ClipboardThing is List<BPMStop>)
+        {
+            if (timelineMode != "timing") return;
+
+            List<BPMStop> list = ClipboardThing is List<BPMStop> ? (List<BPMStop>)ClipboardThing :
+                new List<BPMStop>(new [] { (BPMStop)ClipboardThing });
+
+            float offset = pos - list[0].Offset;
+
+            foreach (BPMStop item in list)
+            {
+                BPMStop clone = item.DeepClone();
+                clone.Offset += offset;
+                TargetSong.Timing.Stops.Add(clone);
+            }
+            TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+        }
+        else if (ClipboardThing is Lane || ClipboardThing is List<Lane>)
+        {
+            if (timelineMode != "lane") return;
+
+            List<Lane> list = ClipboardThing is List<Lane> ? (List<Lane>)ClipboardThing :
+                new List<Lane>(new [] { (Lane)ClipboardThing });
+
+            float offset = pos - list[0].LaneSteps[0].Offset;
+
+            foreach (Lane item in list)
+            {
+                Lane clone = item.DeepClone();
+                foreach (LaneStep step in clone.LaneSteps) step.Offset += offset;
+                TargetChart.Lanes.Add(clone);
+            }
+            TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+        }
+        else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
+        {
+            if (timelineMode != "hit" || TargetLane == null) return;
+
+            List<HitObject> list = ClipboardThing is List<HitObject> ? (List<HitObject>)ClipboardThing :
+                new List<HitObject>(new [] { (HitObject)ClipboardThing });
+
+            float offset = pos - list[0].Offset;
+
+            foreach (HitObject item in list)
+            {
+                HitObject clone = item.DeepClone();
+                clone.Offset += offset;
+                TargetLane.Objects.Add(clone);
+            }
+            TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+        }
+    }
+
+    #endregion
+    
     ///////////////////
     #region Init Window
     ///////////////////
@@ -1181,8 +1268,19 @@ public class Charter : EditorWindow
         {
             GenericMenu menu = new GenericMenu();
             
+            // -------------------- File
+            if (TargetChart != null)
+            {
+                menu.AddItem(new GUIContent("File/Play Chart in Player"), false, OpenInPlayMode);
+            }
+            else 
+            {
+                menu.AddDisabledItem(new GUIContent("File/Play Chart in Player"));
+            }
+            menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Close Song and Return to Main Screen"), false, () => TargetSong = null);
 
+            // -------------------- Edit
             menu.AddItem(new GUIContent("Edit/Copy " + CharterSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
             if (ClipboardThing != null)
             {
@@ -1205,10 +1303,12 @@ public class Charter : EditorWindow
                 menu.AddDisabledItem(new GUIContent("Edit/Paste " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
             }
 
-            menu.AddItem(new GUIContent("Options/Charter Settings"), false, () => CharterSettings.Open());
+            // -------------------- Options
+            menu.AddItem(new GUIContent("Options/Charter Settings"), false, CharterSettings.Open);
             menu.AddItem(new GUIContent("Options/Show Keybindings " + CharterSettings.Keybinds["Misc./Show Keybindings"].ToUnityHotkeyString()), 
                 false, () => CharterSettings.Open(1));
 
+            // -------------------- Help
             menu.AddItem(new GUIContent("Help/Interactive Tutorial (closes song)"), false, () => { TargetSong = null; TutorialStage = 0; });
             menu.AddSeparator("Help/");
             menu.AddItem(new GUIContent("Help/Source Code on GitHub"), false, () => Application.OpenURL("https://github.com/ducdat0507/JANOARG"));
@@ -1304,66 +1404,6 @@ public class Charter : EditorWindow
         return TargetThing == thing || (TargetThing is IList && ((IList)TargetThing).Contains(thing));
     }
     
-    public void CopySelection() 
-    {
-        if (TargetThing is string) return;
-        ClipboardThing = TargetThing;
-    }
-
-    public void PasteSelection() 
-    {
-        if (ClipboardThing is BPMStop || ClipboardThing is List<BPMStop>)
-        {
-            if (timelineMode != "timing") return;
-
-            List<BPMStop> list = ClipboardThing is List<BPMStop> ? (List<BPMStop>)ClipboardThing :
-                new List<BPMStop>(new [] { (BPMStop)ClipboardThing });
-
-            float offset = pos - list[0].Offset;
-
-            foreach (BPMStop item in list)
-            {
-                BPMStop clone = item.DeepClone();
-                clone.Offset += offset;
-                TargetSong.Timing.Stops.Add(clone);
-            }
-            TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-        }
-        else if (ClipboardThing is Lane || ClipboardThing is List<Lane>)
-        {
-            if (timelineMode != "lane") return;
-
-            List<Lane> list = ClipboardThing is List<Lane> ? (List<Lane>)ClipboardThing :
-                new List<Lane>(new [] { (Lane)ClipboardThing });
-
-            float offset = pos - list[0].LaneSteps[0].Offset;
-
-            foreach (Lane item in list)
-            {
-                Lane clone = item.DeepClone();
-                foreach (LaneStep step in clone.LaneSteps) step.Offset += offset;
-                TargetChart.Lanes.Add(clone);
-            }
-            TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
-        }
-        else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
-        {
-            if (timelineMode != "hit" || TargetLane == null) return;
-
-            List<HitObject> list = ClipboardThing is List<HitObject> ? (List<HitObject>)ClipboardThing :
-                new List<HitObject>(new [] { (HitObject)ClipboardThing });
-
-            float offset = pos - list[0].Offset;
-
-            foreach (HitObject item in list)
-            {
-                HitObject clone = item.DeepClone();
-                clone.Offset += offset;
-                TargetLane.Objects.Add(clone);
-            }
-            TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-        }
-    }
 
     public void Timeline(int id) {
         float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
