@@ -120,7 +120,7 @@ public class Keybind
     public KeyCode KeyCode = KeyCode.Space;
     public EventModifiers Modifiers = EventModifiers.None;
 
-    public Keybind (KeyCode keyCode, EventModifiers modifiers)
+    public Keybind (KeyCode keyCode, EventModifiers modifiers = EventModifiers.None)
     {
         KeyCode = keyCode;
         Modifiers = modifiers;
@@ -166,11 +166,19 @@ public class Keybind
             case "LeftArrow": str = "←"; break;
             case "RightArrow": str = "→"; break;
         }
-
-        if ((Modifiers & EventModifiers.Shift) > 0) str = "Shift+" + str;
-        if ((Modifiers & EventModifiers.Alt) > 0) str = "Alt+" + str;
-        if ((Modifiers & EventModifiers.Control) > 0) str = "Ctrl+" + str;
-        if ((Modifiers & EventModifiers.Command) > 0) str = (Application.platform == RuntimePlatform.OSXEditor ? "Cmd+" : "Ctrl+") + str;
+        if (Application.platform == RuntimePlatform.OSXEditor)
+        {
+            if ((Modifiers & EventModifiers.Shift) > 0) str = "⇧" + str;
+            if ((Modifiers & EventModifiers.Alt) > 0) str = "⌥" + str;
+            if ((Modifiers & EventModifiers.Command) > 0) str = "⌘" + str;
+            if ((Modifiers & EventModifiers.Control) > 0) str = "⌃" + str;
+        }
+        else 
+        {
+            if ((Modifiers & EventModifiers.Shift) > 0) str = "Shift+" + str;
+            if ((Modifiers & EventModifiers.Alt) > 0) str = "Alt+" + str;
+            if ((Modifiers & (EventModifiers.Command | EventModifiers.Control)) > 0) str = "Ctrl+" + str;
+        }
         return str;
     }
 
@@ -211,19 +219,22 @@ public class CharterKeybinds
     {
         Values = new Dictionary<string, Keybind>();
 
-        Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P, EventModifiers.None);
+        Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P);
+        Values["General/Play Chart in Player"] = new Keybind(KeyCode.P, EventModifiers.Shift);
 
-        Values["Edit/Undo"] = new Keybind(KeyCode.X, EventModifiers.Command);
+        Values["Edit/Undo"] = new Keybind(KeyCode.Z, EventModifiers.Command);
         Values["Edit/Redo"] = new Keybind(KeyCode.Y, EventModifiers.Command);
         Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Command);
         Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Command);
 
-        Values["Picker/Cursor"] = new Keybind(KeyCode.A, EventModifiers.None);
-        Values["Picker/Select"] = new Keybind(KeyCode.S, EventModifiers.None);
-        Values["Picker/Delete"] = new Keybind(KeyCode.D, EventModifiers.None);
+        Values["Picker/Cursor"] = new Keybind(KeyCode.A);
+        Values["Picker/Select"] = new Keybind(KeyCode.S);
+        Values["Picker/Delete"] = new Keybind(KeyCode.D);
+        Values["Picker/1st Item"] = new Keybind(KeyCode.Q);
+        Values["Picker/2nd Item"] = new Keybind(KeyCode.W);
 
-        Values["Selection/Previous Item"] = new Keybind(KeyCode.LeftArrow, EventModifiers.None);
-        Values["Selection/Next Item"] = new Keybind(KeyCode.RightArrow, EventModifiers.None);
+        Values["Selection/Previous Item"] = new Keybind(KeyCode.LeftArrow);
+        Values["Selection/Next Item"] = new Keybind(KeyCode.RightArrow);
         Values["Selection/Previous Lane"] = new Keybind(KeyCode.LeftArrow, EventModifiers.Shift);
         Values["Selection/Next Lane"] = new Keybind(KeyCode.RightArrow, EventModifiers.Shift);
 

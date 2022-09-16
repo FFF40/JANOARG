@@ -3,8 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface IDeepClonable<T>
+{
+    public T DeepClone();
+}
+
 [System.Serializable]
-public class Chart : IStoryboardable
+public class Chart : IStoryboardable, IDeepClonable<Chart>
 {
     public string DifficultyName = "Normal";
     public string DifficultyLevel = "6";
@@ -14,12 +19,7 @@ public class Chart : IStoryboardable
     public List<LaneGroup> Groups = new List<LaneGroup>();
     public List<Lane> Lanes = new List<Lane>();
 
-    public Color BackgroundColor = Color.black;
-    public Color InterfaceColor = Color.white;
-    public Material LaneMaterial;
-    public Material HitMaterial;
-    public Material HoldMaterial;
-
+    // Might move this to a new class
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
 
@@ -86,6 +86,8 @@ public class Chart : IStoryboardable
             ChartConstant = ChartConstant,
             Pallete = Pallete.DeepClone(),
             Storyboard = Storyboard.DeepClone(),
+            CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
+            CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z),
         };
         foreach (LaneGroup group in Groups) clone.Groups.Add(group.DeepClone());
         foreach (Lane lane in Lanes) clone.Lanes.Add(lane.DeepClone());
@@ -95,7 +97,7 @@ public class Chart : IStoryboardable
 
 // Style 
 [System.Serializable]
-public class Pallete : IStoryboardable  {
+public class Pallete : IStoryboardable, IDeepClonable<Pallete>  {
 
     public Color BackgroundColor = Color.black;
     public Color InterfaceColor = Color.white;
@@ -177,7 +179,7 @@ public class Pallete : IStoryboardable  {
 }
 
 [System.Serializable]
-public class LaneStyle : IStoryboardable {
+public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle> {
 
     public Material LaneMaterial;
     public string LaneColorTarget = "_Color";
@@ -311,7 +313,7 @@ public class LaneStyleManager {
 }
 
 [System.Serializable]
-public class HitStyle : IStoryboardable {
+public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
 
     public Material MainMaterial;
     public string MainColorTarget = "_Color";
@@ -480,7 +482,7 @@ public class HitStyleManager {
 // Game
 
 [System.Serializable]
-public class LaneGroup : IStoryboardable 
+public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup> 
 {
     public string Name;
     public Vector3 Offset;
@@ -545,7 +547,7 @@ public class LaneGroup : IStoryboardable
 }
 
 [System.Serializable]
-public class Lane : IStoryboardable 
+public class Lane : IStoryboardable, IDeepClonable<Lane>
 {
     public List<HitObject> Objects = new List<HitObject>();
     public List<LaneStep> LaneSteps = new List<LaneStep>();
@@ -649,6 +651,27 @@ public class Lane : IStoryboardable
             Get = (x) => ((Lane)x).Offset.z,
             Set = (x, a) => { ((Lane)x).Offset.z = a; },
         },
+        new TimestampType
+        {
+            ID = "OffsetRotation_X",
+            Name = "Offset Rotation X",
+            Get = (x) => ((Lane)x).OffsetRotation.x,
+            Set = (x, a) => { ((Lane)x).OffsetRotation.x = a; },
+        },
+        new TimestampType
+        {
+            ID = "OffsetRotation_Y",
+            Name = "Offset Rotation Y",
+            Get = (x) => ((Lane)x).OffsetRotation.y,
+            Set = (x, a) => { ((Lane)x).OffsetRotation.y = a; },
+        },
+        new TimestampType
+        {
+            ID = "OffsetRotation_Z",
+            Name = "Offset Rotation Z",
+            Get = (x) => ((Lane)x).OffsetRotation.z,
+            Set = (x, a) => { ((Lane)x).OffsetRotation.z = a; },
+        },
     };
 
     public Lane DeepClone()
@@ -669,7 +692,7 @@ public class Lane : IStoryboardable
 }
 
 [System.Serializable]
-public class LaneStep : IStoryboardable 
+public class LaneStep : IStoryboardable, IDeepClonable<LaneStep> 
 {
     public float Offset;
     public Vector2 StartPos;
@@ -746,13 +769,15 @@ public class LaneStep : IStoryboardable
 }
 
 [System.Serializable]
-public class HitObject : IStoryboardable
+public class HitObject : IStoryboardable, IDeepClonable<HitObject>
 {
     public HitType Type;
     public float Offset = 0;
     public float Position;
     public float Length;
     public float HoldLength = 0;
+    public bool Flickable;
+    public float? FlickDirection;
 
     public int StyleIndex = 0;
     

@@ -48,6 +48,7 @@ public class Charter : EditorWindow
     public List<Mesh> Meshes = new List<Mesh>();
 
     CultureInfo invariant = CultureInfo.InvariantCulture;
+    public CharterHistory History = new CharterHistory();
 
     float ScrollSpeed = 121;
 
@@ -495,7 +496,10 @@ public class Charter : EditorWindow
             if ((TargetThing is PlayableSong && TargetThing != (object)TargetSong) || 
                 (TargetThing is Chart && TargetThing != (object)TargetChart)) 
                 TargetThing = null;
-            if (TargetSong.Charts.IndexOf(TargetChart) < 0) TargetChart = null;
+            if (TargetSong.Charts.IndexOf(TargetChart) < 0) 
+            {
+                TargetChart = TargetChart == null ? null : TargetSong.Charts.Find(x => x.DifficultyIndex == TargetChart.DifficultyIndex);
+            }
             if (TargetChart == null || TargetChart.Lanes.IndexOf(TargetLane) < 0) TargetLane = null;
 
             Rect bound = new Rect(45, 35, width - 320, height - 202);
@@ -996,7 +1000,7 @@ public class Charter : EditorWindow
     {
         if (Event.current.type == EventType.KeyDown) 
         {
-            // Time to commit YandereDev coding
+            // YandereDev intensifies
 
             if (Event.current == CharterSettings.Keybinds["General/Toggle Play/Pause"])
             {
@@ -1009,6 +1013,18 @@ public class Charter : EditorWindow
                     CurrentAudioSource.clip = TargetSong.Clip;
                     CurrentAudioSource.Play();
                 }
+            }
+            else if (Event.current == CharterSettings.Keybinds["General/Play Chart in Player"])
+            {
+                OpenInPlayMode();
+            }
+            else if (Event.current == CharterSettings.Keybinds["Edit/Undo"])
+            {
+                History.Undo();
+            }
+            else if (Event.current == CharterSettings.Keybinds["Edit/Redo"])
+            {
+                History.Redo();
             }
             else if (Event.current == CharterSettings.Keybinds["Edit/Copy"])
             {
@@ -1029,6 +1045,17 @@ public class Charter : EditorWindow
             else if (Event.current == CharterSettings.Keybinds["Picker/Delete"])
             {
                 pickermode = "delete";
+            }
+            else if (Event.current == CharterSettings.Keybinds["Picker/1st Item"])
+            {
+                if (timelineMode == "story") pickermode = "timestamp";
+                else if (timelineMode == "timing") pickermode = "bpmstop";
+                else if (timelineMode == "lane") pickermode = "lane";
+                else if (timelineMode == "hit") pickermode = "hit_normal";
+            }
+            else if (Event.current == CharterSettings.Keybinds["Picker/2nd Item"])
+            {
+                if (timelineMode == "hit") pickermode = "hit_catch";
             }
             else if (Event.current == CharterSettings.Keybinds["Selection/Previous Item"])
             {
@@ -1068,6 +1095,23 @@ public class Charter : EditorWindow
     #region Functions
     /////////////////
 
+    static public string GetItemName (object item)
+    {
+        string name = item.ToString();
+        if (item is Chart) name = "Chart";
+        else if (item is BPMStop) name = "BPM Stop";
+        else if (item is List<BPMStop>) name = ((IList)item).Count + " BPM Stops";
+        else if (item is HitStyle) name = "Hit Style";
+        else if (item is LaneStyle) name = "Lane Style";
+        else if (item is Lane) name = "Lane";
+        else if (item is List<Lane>) name = ((IList)item).Count + " Lanes";
+        else if (item is LaneStep) name = "Lane Step";
+        else if (item is List<LaneStep>) name = ((IList)item).Count + " Lane Steps";
+        else if (item is HitObject) name = "Hit Object";
+        else if (item is List<HitObject>) name = ((IList)item).Count + " Hit Objects";
+        return name;
+    }
+
     public void OpenInPlayMode()
     {
         if (TargetSong == null)
@@ -1088,6 +1132,29 @@ public class Charter : EditorWindow
         EditorApplication.Beep();
     }
 
+    public void HistoryAdd(IList list, object item) 
+    {
+        if (item is IList) foreach (object i in (IList)item) list.Add(i);
+        else list.Add(item);
+        History.ActionsBehind.Add(new CharterAddAction()
+        {
+            Target = list,
+            Item = item
+        });
+        History.ActionsAhead.Clear();
+    }
+    public void HistoryDelete(IList list, object item) 
+    {
+        if (item is IList) foreach (object i in (IList)item) list.Remove(i);
+        else list.Remove(item);
+        History.ActionsBehind.Add(new CharterDeleteAction()
+        {
+            Target = list,
+            Item = item
+        });
+        History.ActionsAhead.Clear();
+    }
+
     public void CopySelection() 
     {
         if (TargetThing is string) return;
@@ -1100,51 +1167,42 @@ public class Charter : EditorWindow
         {
             if (timelineMode != "timing") return;
 
-            List<BPMStop> list = ClipboardThing is List<BPMStop> ? (List<BPMStop>)ClipboardThing :
-                new List<BPMStop>(new [] { (BPMStop)ClipboardThing });
+            List<BPMStop> list = (ClipboardThing is List<BPMStop> ? (List<BPMStop>)ClipboardThing :
+                new List<BPMStop>(new [] { (BPMStop)ClipboardThing })).ConvertAll<BPMStop>(x => x.DeepClone());;
 
             float offset = pos - list[0].Offset;
 
-            foreach (BPMStop item in list)
-            {
-                BPMStop clone = item.DeepClone();
-                clone.Offset += offset;
-                TargetSong.Timing.Stops.Add(clone);
-            }
+            foreach (BPMStop item in list) item.Offset += offset;
+            HistoryAdd(TargetSong.Timing.Stops, list);
+
             TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
         else if (ClipboardThing is Lane || ClipboardThing is List<Lane>)
         {
             if (timelineMode != "lane") return;
 
-            List<Lane> list = ClipboardThing is List<Lane> ? (List<Lane>)ClipboardThing :
-                new List<Lane>(new [] { (Lane)ClipboardThing });
+            List<Lane> list = (ClipboardThing is List<Lane> ? (List<Lane>)ClipboardThing :
+                new List<Lane>(new [] { (Lane)ClipboardThing })).ConvertAll<Lane>(x => x.DeepClone());;
 
             float offset = pos - list[0].LaneSteps[0].Offset;
 
-            foreach (Lane item in list)
-            {
-                Lane clone = item.DeepClone();
-                foreach (LaneStep step in clone.LaneSteps) step.Offset += offset;
-                TargetChart.Lanes.Add(clone);
-            }
+            foreach (Lane item in list) foreach (LaneStep step in item.LaneSteps) step.Offset += offset;
+            HistoryAdd(TargetChart.Lanes, list);
+
             TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
         else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
         {
             if (timelineMode != "hit" || TargetLane == null) return;
 
-            List<HitObject> list = ClipboardThing is List<HitObject> ? (List<HitObject>)ClipboardThing :
-                new List<HitObject>(new [] { (HitObject)ClipboardThing });
+            List<HitObject> list = (ClipboardThing is List<HitObject> ? (List<HitObject>)ClipboardThing :
+                new List<HitObject>(new [] { (HitObject)ClipboardThing })).ConvertAll<HitObject>(x => x.DeepClone());
 
             float offset = pos - list[0].Offset;
 
-            foreach (HitObject item in list)
-            {
-                HitObject clone = item.DeepClone();
-                clone.Offset += offset;
-                TargetLane.Objects.Add(clone);
-            }
+            foreach (HitObject item in list) item.Offset += offset;
+            HistoryAdd(TargetLane.Objects, list);
+
             TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
     }
@@ -1270,38 +1328,24 @@ public class Charter : EditorWindow
             
             // -------------------- File
             if (TargetChart != null)
-            {
-                menu.AddItem(new GUIContent("File/Play Chart in Player"), false, OpenInPlayMode);
-            }
-            else 
-            {
-                menu.AddDisabledItem(new GUIContent("File/Play Chart in Player"));
-            }
+                menu.AddItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
+            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
             menu.AddSeparator("File/");
-            menu.AddItem(new GUIContent("File/Close Song and Return to Main Screen"), false, () => TargetSong = null);
+            menu.AddItem(new GUIContent("File/Close Song"), false, () => TargetSong = null);
 
             // -------------------- Edit
+            if (History.ActionsBehind.Count > 0) 
+                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + CharterSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false, () => History.Undo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + CharterSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false);
+            if (History.ActionsAhead.Count > 0) 
+                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + CharterSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false, () => History.Redo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + CharterSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false);
+            menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
+            menu.AddSeparator("Edit/");
             menu.AddItem(new GUIContent("Edit/Copy " + CharterSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
-            if (ClipboardThing != null)
-            {
-                string item = "";
-                if (ClipboardThing is Chart) item = "Chart";
-                else if (ClipboardThing is BPMStop) item = "BPM Stop";
-                else if (ClipboardThing is List<BPMStop>) item = ((IList)ClipboardThing).Count + " BPM Stops";
-                else if (ClipboardThing is HitStyle) item = "Hit Style";
-                else if (ClipboardThing is LaneStyle) item = "Lane Style";
-                else if (ClipboardThing is Lane) item = "Lane";
-                else if (ClipboardThing is List<Lane>) item = ((IList)ClipboardThing).Count + " Lanes";
-                else if (ClipboardThing is LaneStep) item = "Lane Step";
-                else if (ClipboardThing is List<LaneStep>) item = ((IList)ClipboardThing).Count + " Lane Steps";
-                else if (ClipboardThing is HitObject) item = "Hit Object";
-                else if (ClipboardThing is List<HitObject>) item = ((IList)ClipboardThing).Count + " Hit Objects";
-                menu.AddItem(new GUIContent("Edit/Paste " + item + " " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
-            }
-            else 
-            {
-                menu.AddDisabledItem(new GUIContent("Edit/Paste " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
-            }
+            if (ClipboardThing != null) 
+                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
+            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
 
             // -------------------- Options
             menu.AddItem(new GUIContent("Options/Charter Settings"), false, CharterSettings.Open);
@@ -1398,6 +1442,7 @@ public class Charter : EditorWindow
     public string timelineMode = "lane";
 
     public int verSeek = 0;
+    int mouseBtn = -1;
 
     public bool IsTargeted(object thing) 
     {  
@@ -1495,7 +1540,7 @@ public class Charter : EditorWindow
                 return Times.Count - 1;
             }
 
-            if (selectStart != null && selectEnd != null)
+            if (dragMode == "select" && selectStart != null && selectEnd != null)
             {
                 float posStart = ((float)selectStart - seekStart) / (seekEnd - seekStart) * width;
                 float posEnd = ((float)selectEnd - seekStart) / (seekEnd - seekStart) * width;
@@ -1594,7 +1639,7 @@ public class Charter : EditorWindow
                             {
                                 if (DeletingThing == stop)
                                 {
-                                    TargetSong.Timing.Stops.Remove(stop);
+                                    HistoryDelete(TargetSong.Timing.Stops, stop);
                                     TargetThing = null;
                                     break;
                                 }
@@ -1640,7 +1685,7 @@ public class Charter : EditorWindow
                                     {
                                         if (DeletingThing == lane.LaneSteps[x])
                                         {
-                                            lane.LaneSteps.Remove(lane.LaneSteps[x]);
+                                            HistoryDelete(lane.LaneSteps, lane.LaneSteps[x]);
                                             break;
                                         }
                                         else
@@ -1667,7 +1712,7 @@ public class Charter : EditorWindow
                                 {
                                     if (DeletingThing == lane)
                                     {
-                                        TargetChart.Lanes.Remove(lane);
+                                        HistoryDelete(TargetChart.Lanes, lane);
                                         TargetThing = TargetLane = null;
                                         break;
                                     }
@@ -1686,7 +1731,7 @@ public class Charter : EditorWindow
                     }
                     else 
                     {
-                        TargetChart.Lanes.Remove(lane);
+                        HistoryDelete(TargetChart.Lanes, lane);
                     }
                 }
             }
@@ -1730,7 +1775,7 @@ public class Charter : EditorWindow
                                 {
                                     if (DeletingThing == hit)
                                     {
-                                        TargetLane.Objects.Remove(hit);
+                                        HistoryDelete(TargetLane.Objects, hit);
                                         TargetThing = null;
                                         break;
                                     }
@@ -1776,9 +1821,10 @@ public class Charter : EditorWindow
 
         
         // Click events
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 0) 
+        if (Event.current.type == EventType.MouseDown && mouseBtn < 0) 
         {
             Vector2 mPos = Event.current.mousePosition;
+            mouseBtn = Event.current.button;
             if (mPos.x < width - 10) 
             {
                 float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
@@ -1790,7 +1836,7 @@ public class Charter : EditorWindow
                 }
                 else if (mPos.y > 0 && mPos.y < 100) 
                 {
-                    if (pickermode == "select") 
+                    if (pickermode == "select" || mouseBtn == 1) 
                     {
                         selectStart = sPos;
                         dragMode = "select";
@@ -1798,6 +1844,7 @@ public class Charter : EditorWindow
                     }
                     else 
                     {
+                        selectStart = Mathf.Round(sPos / sep) * sep;
                         CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
                         dragMode = "seeksnap";
                         Repaint();
@@ -1806,7 +1853,7 @@ public class Charter : EditorWindow
             }
             dragged = false;
         }
-        else if (Event.current.type == EventType.MouseDrag && Event.current.button == 0) 
+        else if (Event.current.type == EventType.MouseDrag) 
         {
             Vector2 mPos = Event.current.mousePosition;
             float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
@@ -1822,6 +1869,7 @@ public class Charter : EditorWindow
             }
             else if (dragMode == "seeksnap") 
             {
+                selectEnd = Mathf.Round(sPos / sep) * sep;
                 CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
                 Repaint();
             }
@@ -1842,7 +1890,7 @@ public class Charter : EditorWindow
             }
             dragged = true;
         }
-        else if (Event.current.type == EventType.MouseUp && Event.current.button == 0) 
+        else if (Event.current.type == EventType.MouseUp && Event.current.button == mouseBtn) 
         {
             if (dragMode == "select") 
             {
@@ -1889,63 +1937,96 @@ public class Charter : EditorWindow
                         else if (sel.Count > 1) TargetThing = sel;
                     }
                 }
-                selectStart = selectEnd = null;
                 Repaint();
             }
-
-            if (!dragged && !CurrentAudioSource.isPlaying) 
+            else if (!CurrentAudioSource.isPlaying)
             {
-                if (dragMode == "seeksnap" && pickermode == "bpmstop") 
+                if (dragged) 
                 {
-                    BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(CurrentAudioSource.time, out _).BPM, Mathf.Round(CurrentAudioSource.time * 1000) / 1000);
-                    TargetSong.Timing.Stops.Add(stop);
-                    TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                    Repaint();
-                }
-                else if (dragMode == "seeksnap" && pickermode == "lane") 
-                {
-                    Lane lane = new Lane();
-
-                    LaneStep step = new LaneStep();
-                    step.Offset = Mathf.Round(pos * 1000) / 1000;
-                    step.StartPos = new Vector2(-6, -3);
-                    step.EndPos = new Vector2(6, -3);
-                    lane.LaneSteps.Add(step);
-
-                    LaneStep next = new LaneStep();
-                    next.Offset = step.Offset + 1;
-                    next.StartPos = step.StartPos;
-                    next.EndPos = step.EndPos;
-                    lane.LaneSteps.Add(next);
-
-                    TargetChart.Lanes.Add(lane);
-                    TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
-                    TargetThing = TargetLane = lane;
-                    Repaint();
-                }
-                else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null) 
-                {
-                    HitObject hit = new HitObject();
-                    hit.Offset = Mathf.Round(pos * 1000) / 1000;
-                    hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
-                    if (TargetThing is HitObject)
+                    Vector2 mPos = Event.current.mousePosition;
+                    if (selectStart > selectEnd)
                     {
-                        HitObject thing = (HitObject)TargetThing;
-                        hit.Position = thing.Position;
-                        hit.Length = thing.Length;
+                        float? tmp = selectStart;
+                        selectStart = selectEnd;
+                        selectEnd = tmp;
                     }
-                    else 
+
+                    if (dragMode == "seeksnap" && pickermode == "timestamp" && TargetThing is IStoryboardable)
                     {
-                        hit.Length = 1;
+                        IStoryboardable thing = (IStoryboardable)TargetThing;
+                        TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
+                        int index = Mathf.FloorToInt(mPos.y / 22) + verSeek;
+                        Debug.Log(index + " " + selectStart + " " + selectEnd);
+                        TimestampType type = types[Mathf.Clamp(index, 0, types.Length - 1)];
+
+                        Timestamp ts = new Timestamp()
+                        {
+                            ID = type.ID,
+                            Time = (float)selectStart,
+                            Duration = (float)(selectEnd - selectStart)
+                        };
+
+                        HistoryAdd(thing.Storyboard.Timestamps, ts);
+                        thing.Storyboard.Timestamps.Sort((x, y) => x.Time.CompareTo(y.Time));
+                        TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                        TargetTimestamp = ts;
+                        Repaint();
                     }
-                    TargetLane.Objects.Add(hit);
-                    TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                    TargetThing = hit;
-                    Repaint();
+                }
+                else
+                {
+                    if (dragMode == "seeksnap" && pickermode == "bpmstop") 
+                    {
+                        BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(CurrentAudioSource.time, out _).BPM, Mathf.Round(CurrentAudioSource.time * 1000) / 1000);
+                        HistoryAdd(TargetSong.Timing.Stops, stop);
+                        TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                        Repaint();
+                    }
+                    else if (dragMode == "seeksnap" && pickermode == "lane") 
+                    {
+                        Lane lane = new Lane();
+
+                        LaneStep step = new LaneStep();
+                        step.Offset = Mathf.Round(pos * 1000) / 1000;
+                        step.StartPos = new Vector2(-6, -3);
+                        step.EndPos = new Vector2(6, -3);
+                        lane.LaneSteps.Add(step);
+
+                        LaneStep next = step.DeepClone();
+                        next.Offset = step.Offset + 1;
+                        lane.LaneSteps.Add(next);
+
+                        HistoryAdd(TargetChart.Lanes, lane);
+                        TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+                        TargetThing = TargetLane = lane;
+                        Repaint();
+                    }
+                    else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null) 
+                    {
+                        HitObject hit = new HitObject();
+                        hit.Offset = Mathf.Round(pos * 1000) / 1000;
+                        hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
+                        if (TargetThing is HitObject)
+                        {
+                            HitObject thing = (HitObject)TargetThing;
+                            hit.Position = thing.Position;
+                            hit.Length = thing.Length;
+                        }
+                        else 
+                        {
+                            hit.Length = 1;
+                        }
+                        HistoryAdd(TargetLane.Objects, hit);
+                        TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                        TargetThing = hit;
+                        Repaint();
+                    }
                 }
             }
 
             dragMode = "";
+            mouseBtn = -1;
+            selectStart = selectEnd = null;
         }
 
         if (seekTime >= seekStart && seekTime < seekEnd) {
@@ -2011,6 +2092,30 @@ public class Charter : EditorWindow
 
             GUILayout.EndScrollView();
         }
+        if (inspectMode == "history")
+        {
+            GUI.Label(new Rect(7, 2, 226, 20), "Edit History", "boldLabel");
+            GUILayout.Space(8);
+
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+
+            for (int i = 0; i < History.ActionsAhead.Count; i++)
+            {
+                ICharterAction action = History.ActionsAhead[i];
+                GUILayout.Button(action.GetName());
+            }
+
+            GUILayout.Toggle(true, "↑ Ahead  |  Behind ↓", "button");
+
+            for (int i = History.ActionsBehind.Count - 1; i >= 0; i--)
+            {
+                ICharterAction action = History.ActionsBehind[i];
+                GUILayout.Button(action.GetName());
+            }
+
+            GUILayout.EndScrollView();
+        }
         else if (TargetThing == null) 
         {
             GUI.Label(new Rect(7, 2, 226, 20), "No object selected", "boldLabel");
@@ -2042,6 +2147,7 @@ public class Charter : EditorWindow
             if (TargetThing is PlayableSong)
             {
                 PlayableSong thing = (PlayableSong)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUIStyle bStyle = new GUIStyle("textField");
                 bStyle.fontStyle = FontStyle.Bold;
@@ -2065,7 +2171,7 @@ public class Charter : EditorWindow
                     {
                         if (DeletingThing == chart) 
                         {
-                            TargetSong.Charts.Remove(chart);
+                            HistoryDelete(TargetSong.Charts, chart);
                             EditorUtility.SetDirty(TargetSong);
                             break;
                         }
@@ -2079,15 +2185,17 @@ public class Charter : EditorWindow
                 if (GUILayout.Button("Create New Chart"))
                 {
                     Chart chart = new Chart();
-                    TargetSong.Charts.Add(chart);
+                    HistoryAdd(TargetSong.Charts, chart);
                     TargetChart = chart;
                     EditorUtility.SetDirty(TargetSong);
                 }
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is BPMStop)
             {
                 BPMStop thing = (BPMStop)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
@@ -2128,10 +2236,12 @@ public class Charter : EditorWindow
                 }
                 GUILayout.EndHorizontal();
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is Chart)
             {
                 Chart thing = (Chart)TargetThing;
+                History.StartRecordItem(TargetThing);
                 
                 GUI.Label(new Rect(7, 2, 226, 20), "Chart Details", "boldLabel");
                 GUILayout.Space(8);
@@ -2145,18 +2255,13 @@ public class Charter : EditorWindow
                 GUILayout.Label("Layout", "boldLabel");
                 thing.CameraPivot = EditorGUILayout.Vector3Field("Camera Pivot", thing.CameraPivot);
                 thing.CameraRotation = EditorGUILayout.Vector3Field("Camera Rotation", thing.CameraRotation);
-                GUILayout.Space(8);
-                GUILayout.Label("Appearance (Legacy)", "boldLabel");
-                thing.BackgroundColor = EditorGUILayout.ColorField("Background Color", thing.BackgroundColor);
-                thing.InterfaceColor = EditorGUILayout.ColorField("Interface Color", thing.InterfaceColor);
-                thing.LaneMaterial = (Material)EditorGUILayout.ObjectField("Lane Material", thing.LaneMaterial, typeof(Material), false);
-                thing.HitMaterial = (Material)EditorGUILayout.ObjectField("Hit Material", thing.HitMaterial, typeof(Material), false);
-                thing.HoldMaterial = (Material)EditorGUILayout.ObjectField("Hold Material", thing.HoldMaterial, typeof(Material), false);
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             if (TargetThing is Pallete)
             {
                 Pallete thing = (Pallete)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Palette", "boldLabel");
                 GUILayout.Space(8);
@@ -2181,7 +2286,7 @@ public class Charter : EditorWindow
                     {
                         if (DeletingThing == style) 
                         {
-                            thing.LaneStyles.Remove(style);
+                            HistoryDelete(thing.LaneStyles, style);
                             break;
                         }
                         else 
@@ -2194,7 +2299,7 @@ public class Charter : EditorWindow
                 if (GUILayout.Button("Create New Style")) 
                 {
                     LaneStyle style = new LaneStyle();
-                    thing.LaneStyles.Add(style);
+                    HistoryAdd(thing.LaneStyles, style);
                     TargetThing = style;
                 }
 
@@ -2212,7 +2317,7 @@ public class Charter : EditorWindow
                     {
                         if (DeletingThing == style) 
                         {
-                            thing.HitStyles.Remove(style);
+                            HistoryDelete(thing.HitStyles, style);
                             break;
                         }
                         else 
@@ -2225,15 +2330,17 @@ public class Charter : EditorWindow
                 if (GUILayout.Button("Create New Style")) 
                 {
                     HitStyle style = new HitStyle();
-                    thing.HitStyles.Add(style);
+                    HistoryAdd(thing.HitStyles, style);
                     TargetThing = style;
                 }
 
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is LaneStyle)
             {
                 LaneStyle thing = (LaneStyle)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Lane Style", "boldLabel");
                 GUILayout.Space(8);
@@ -2251,10 +2358,12 @@ public class Charter : EditorWindow
                 thing.JudgeColor = EditorGUILayout.ColorField("Judge Color", thing.JudgeColor);
 
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is HitStyle)
             {
                 HitStyle thing = (HitStyle)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Lane Style", "boldLabel");
                 GUILayout.Space(8);
@@ -2273,10 +2382,12 @@ public class Charter : EditorWindow
                 thing.HoldTailColor = EditorGUILayout.ColorField("Hold Tail Color", thing.HoldTailColor);
 
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is Lane)
             {
                 Lane thing = (Lane)TargetThing;
+                History.StartRecordItem(TargetThing);
                 
                 GUI.Label(new Rect(7, 2, 226, 20), "Lane", "boldLabel");
                 GUILayout.Space(8);
@@ -2376,7 +2487,7 @@ public class Charter : EditorWindow
                     }
                     if (GUI.Button(new Rect(202, h + o + 2, 16, 48), "x", "buttonRight") && thing.LaneSteps.Count > 1)
                     {
-                        thing.LaneSteps.Remove(step);
+                        HistoryDelete(thing.LaneSteps, step);
                         break;
                     }
                     h += 50;
@@ -2388,10 +2499,11 @@ public class Charter : EditorWindow
                     step.Offset = Mathf.Round(pos * 1000) / 1000;
                     step.StartPos = thing.LaneSteps[thing.LaneSteps.Count - 1].StartPos;
                     step.EndPos = thing.LaneSteps[thing.LaneSteps.Count - 1].EndPos;
-                    thing.LaneSteps.Add(step);
+                    HistoryAdd(thing.LaneSteps, step);
                     thing.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                 }
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
                 
                 if (thing.LaneSteps[0].Offset != a) 
                 {
@@ -2401,6 +2513,7 @@ public class Charter : EditorWindow
             else if (TargetThing is LaneStep)
             {
                 LaneStep thing = (LaneStep)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
@@ -2462,10 +2575,12 @@ public class Charter : EditorWindow
                 thing.Speed = EditorGUILayout.FloatField("Speed", thing.Speed);
                 
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is HitObject)
             {
                 HitObject thing = (HitObject)TargetThing;
+                History.StartRecordItem(TargetThing);
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
@@ -2499,6 +2614,7 @@ public class Charter : EditorWindow
                 thing.StyleIndex = EditorGUILayout.IntField("Style Index", thing.StyleIndex);
 
                 GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
             }
         }
         else if (inspectMode == "storyboard") 
@@ -2550,7 +2666,7 @@ public class Charter : EditorWindow
 
                 int add = EditorGUI.Popup(new Rect(218, 2, 20, 20), -1, tst.ToArray(), "button");
                 if (add != -1) {
-                    sb.Timestamps.Add(new Timestamp {
+                    HistoryAdd(sb.Timestamps, new Timestamp {
                         ID = tso[add],
                         Time = pos,
                     });
@@ -2588,7 +2704,7 @@ public class Charter : EditorWindow
 
                     if (GUI.Button(new Rect(202, h + o + 2, 16, 33), "x", "buttonRight"))
                     {
-                        sb.Timestamps.Remove(ts);
+                        HistoryDelete(sb.Timestamps, ts);
                         break;
                     }
                     h += 35;
@@ -2622,7 +2738,11 @@ public class Charter : EditorWindow
         if (GUI.Toggle(new Rect(0, 32, 33, 33), pickermode == "select", EditorGUIUtility.IconContent("Selectable Icon", "Select"), "button")) pickermode = "select";
         if (GUI.Toggle(new Rect(0, 64, 33, 33), pickermode == "delete", EditorGUIUtility.IconContent("winbtn_win_close@2x", "Select"), "button")) pickermode = "delete";
 
-        if (timelineMode == "timing") 
+        if (timelineMode == "story") 
+        {
+            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "timestamp", new GUIContent("TMP", "Timestamp"), "button")) pickermode = "timestamp";
+        }
+        else if (timelineMode == "timing") 
         {
             if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "bpmstop", new GUIContent("STP", "BPM Stop"), "button")) pickermode = "bpmstop";
         }
