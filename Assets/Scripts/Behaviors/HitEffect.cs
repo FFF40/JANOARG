@@ -43,12 +43,12 @@ public class HitEffect : MonoBehaviour
             SmallSquare.gameObject.SetActive(false);
             LeftArc.fillClockwise = RightArc.fillClockwise = Accuracy < 0;
             LeftArc.fillAmount = RightArc.fillAmount = 1 - Mathf.Abs((float)Accuracy);
-            for (float a = 0; a < 1; a += Time.deltaTime / .5f) 
+            for (float a = 0; a < 1; a += Time.deltaTime / .4f) 
             {
-                Triangles.sizeDelta = JudgeArc.sizeDelta = Vector2.one * (80 * Mathf.Pow(a, .2f) + 40);
+                Triangles.sizeDelta = JudgeArc.sizeDelta = Vector2.one * (80 * Mathf.Pow(a, .1f) + 40);
                 Triangles.localEulerAngles = Vector3.forward * ((float)Accuracy * -180 * Mathf.Pow(a, .1f));
                 InnerCircle.rectTransform.sizeDelta = Vector2.one * (-32 * Mathf.Pow(a, .2f) + 40);
-                MainGroup.alpha = 1 - Mathf.Pow(a, 5);
+                MainGroup.alpha = Mathf.Pow(1 - a, 15) + (1 - a) * .1f;
                 yield return null;
             }
         }

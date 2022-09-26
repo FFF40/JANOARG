@@ -777,7 +777,7 @@ public class HitObject : IStoryboardable, IDeepClonable<HitObject>
     public float Length;
     public float HoldLength = 0;
     public bool Flickable;
-    public float? FlickDirection;
+    public float FlickDirection = -1;
 
     public int StyleIndex = 0;
     

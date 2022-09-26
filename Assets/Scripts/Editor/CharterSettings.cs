@@ -222,6 +222,8 @@ public class CharterKeybinds
         Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P);
         Values["General/Play Chart in Player"] = new Keybind(KeyCode.P, EventModifiers.Shift);
 
+        Values["File/Save"] = new Keybind(KeyCode.S, EventModifiers.Command);
+
         Values["Edit/Undo"] = new Keybind(KeyCode.Z, EventModifiers.Command);
         Values["Edit/Redo"] = new Keybind(KeyCode.Y, EventModifiers.Command);
         Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Command);

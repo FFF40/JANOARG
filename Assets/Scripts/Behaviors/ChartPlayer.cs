@@ -16,9 +16,15 @@ public class ChartPlayer : MonoBehaviour
     public bool IsPlaying;
     public bool AutoPlay;
     public float CurrentTime;
+    [Space]
     public float Score;
     public float TotalScore;
     public float Gauge;
+    [Space]
+    public int PerfectCount;
+    public int GoodCount;
+    public int BadCount;
+    [Space]
     public int Combo;
     public int MaxCombo;
     public int TotalCombo;
@@ -39,48 +45,64 @@ public class ChartPlayer : MonoBehaviour
     public Transform JudgeEffectCanvas;
 
     [Header("Sounds")]
+    public AudioSource AudioPlayer;
     public AudioClip NormalHitSound;
     public AudioClip CatchHitSound;
 
-    [Header("Interface")]
-    public AudioSource AudioPlayer;
+    [Header("Play Interface")]
+    public GameObject PlayInterfaceObject;
+    [Space]
     public GameObject SideObject;
     public GameObject CenterObject;
+    [Space]
     public TMP_Text SongNameLabel;
     public TMP_Text SongArtistLabel;
     public TMP_Text DifficultyNameLabel;
     public List<Image> DifficultyIndicators;
     public Image DifficultyBox;
     public TMP_Text DifficultyLabel;
+    [Space]
     public TMP_Text ScoreText;
     public List<TMP_Text> ScoreDigits;
     public TMP_Text ScoreUnitText;
+    [Space]
     public Slider SongProgressSlider;
     public Image SongProgressFill;
+    [Space]
     public Image GaugeBox;
     public TMP_Text GaugeText;
     public Slider GaugeSlider;
     public Image GaugeFill;
     public Image GaugeUpper;
     public Image GaugeLower;
+    [Space]
     public TMP_Text ComboLabel;
     public TMP_Text ComboText;
 
-    [Header("Result Screen")]
+    [Header("Result Interface")]
+    public GameObject ResultInterfaceObject;
+    [Space]
     public RectTransform SummaryBox;
     public TMP_Text PlayStateText;
+    [Space]
+    public RectTransform ResultSongBox;
+    public TMP_Text ResultSongNameText;
+    public TMP_Text ResultSongArtistText;
+    public TMP_Text ResultDifficultyLabel;
+    public List<Image> ResultDifficultyIndicators;
+    [Space]
+    public RectTransform ResultScoreBox;
+    public TMP_Text ResultScoreText;
+    [Space]
     public TMP_Text RecordLabelText;
     public TMP_Text RecordText;
     public TMP_Text RecordDifferenceText;
-    public RectTransform ResultScoreBox;
-    public TMP_Text ResultScoreText;
-    public RectTransform ResultSongBox;
-    public TMP_Text ResultSongNameText;
+    [Space]
     public RectTransform DetailsBox;
-    public List<TMP_Text> ResultBasicInfoLabelText;
-    public List<TMP_Text> ResultBasicInfoText;
-    public TMP_Text ResultComboLabelText;
-    public TMP_Text ResultComboInfoText;
+    public TMP_Text ResultPerfectText;
+    public TMP_Text ResultGoodText;
+    public TMP_Text ResultBadText;
+    public TMP_Text ResultComboText;
 
     [HideInInspector]
     public Chart CurrentChart;
@@ -92,7 +114,11 @@ public class ChartPlayer : MonoBehaviour
     
     [HideInInspector]
     public List<HitPlayer> NormalHits = new List<HitPlayer>();
+    [HideInInspector]
     public List<HitPlayer> CatchHits = new List<HitPlayer>();
+
+    [HideInInspector]
+    public float InitProgress = 0;
 
     bool isAnimating;
 
@@ -199,7 +225,7 @@ public class ChartPlayer : MonoBehaviour
             {
                 yield return new WaitUntil(() => lp.Ready);
             }
-            SongProgressSlider.value += 1f / CurrentChart.Lanes.Count;
+            SongProgressSlider.value += 1 / CurrentChart.Lanes.Count;
         }
         
         NormalHits.Sort((x, y) => x.CurrentHit.Offset.CompareTo(y.CurrentHit.Offset));
@@ -217,6 +243,9 @@ public class ChartPlayer : MonoBehaviour
             time = t;
             yield return null;
         }
+
+        PlayInterfaceObject.SetActive(true);
+        ResultInterfaceObject.SetActive(false);
 
         IsPlaying = true;
     }
@@ -244,8 +273,6 @@ public class ChartPlayer : MonoBehaviour
         GaugeText.text = (Gauge * 10).ToString("F" + (Gauge == 1 ? "0" : "1"), CultureInfo.InvariantCulture);
         GaugeSlider.value = Gauge;
 
-        SideObject.SetActive(NoteCount > 0);
-
         string score = ((int)(Score / Mathf.Max(TotalScore, 1) * 1e6)).ToString("D7", CultureInfo.InvariantCulture);
         bool d = false;
         for (int a = ScoreDigits.Count - 1; a >= 0; a--) 
@@ -267,13 +294,17 @@ public class ChartPlayer : MonoBehaviour
         MaxCombo = Mathf.Max(MaxCombo, Combo);
         NoteCount--;
 
-        if (combo) Gauge = Mathf.Min(1, Gauge + weight * acc / CurrentChart.ChartConstant / 35);
-        else Gauge = Mathf.Max(0, Gauge - weight / 35);
-        
-        StopCoroutine(ComboPop());
         if (combo)
         {
+            Gauge = Mathf.Min(1, Gauge + weight * acc / CurrentChart.ChartConstant / 35);
+            if (acc >= 1) PerfectCount++;
+            else GoodCount++;
             StartCoroutine(ComboPop());
+        }
+        else
+        {
+            BadCount++;
+            Gauge = Mathf.Max(0, Gauge - weight / 35);
         }
 
         if (NoteCount <= 0) StartCoroutine(SplashAnimation());
@@ -450,15 +481,21 @@ public class ChartPlayer : MonoBehaviour
     IEnumerator SplashAnimation () 
     {
         isAnimating = true;
-        if (Score >= TotalScore) PlayStateText.text = "TRACK MASTERED";
-        else if (Combo >= MaxCombo) PlayStateText.text = "FULL STREAK";
+        if (Score >= TotalScore) PlayStateText.text = "TRACK MASTERED!!";
+        else if (Combo >= MaxCombo) PlayStateText.text = "FULL STREAK!";
         else PlayStateText.text = "TRACK CLEARED";
 
+        PlayInterfaceObject.SetActive(false);
+        ResultInterfaceObject.SetActive(true);
+
+        SummaryBox.anchorMin = new Vector2(0, .5f);
+        SummaryBox.anchorMax = new Vector2(1, .5f);
+        SummaryBox.anchoredPosition = Vector2.zero;
         PlayStateText.rectTransform.anchorMin = PlayStateText.rectTransform.anchorMax = new Vector2(.5f, .5f);
         PlayStateText.rectTransform.anchoredPosition = Vector2.zero;
-        RecordLabelText.margin = RecordText.margin = RecordDifferenceText.margin = new Vector4(0, 50, 10, 0);
         ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 0);
         DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 0);
+
 
         ResultScoreBox.anchoredPosition = new Vector2(22500, 0);
 
@@ -480,13 +517,15 @@ public class ChartPlayer : MonoBehaviour
 
     IEnumerator ResultAnimation () 
     {
+
         ResultSongNameText.text = Song.SongName;
-        for (int x = 0; x < ResultBasicInfoText.Count; x++) 
-        {
-            ResultBasicInfoText[x].text = "0";
-        }
-        ResultBasicInfoText[2].text = TotalCombo.ToString("0", CultureInfo.InvariantCulture);
-        ResultComboInfoText.text = MaxCombo.ToString("0", CultureInfo.InvariantCulture) + " / " + TotalCombo.ToString("0", CultureInfo.InvariantCulture);
+        ResultSongArtistText.text = Song.SongArtist;
+        ResultDifficultyLabel.text = CurrentChart.DifficultyLevel;
+
+        ResultPerfectText.text = PerfectCount.ToString("0", CultureInfo.InvariantCulture);
+        ResultGoodText.text = GoodCount.ToString("0", CultureInfo.InvariantCulture);
+        ResultBadText.text = BadCount.ToString("0", CultureInfo.InvariantCulture);
+        ResultComboText.text = MaxCombo.ToString("0", CultureInfo.InvariantCulture) + " / " + TotalCombo.ToString("0", CultureInfo.InvariantCulture);
 
         void SetEase(float a) 
         {
@@ -505,13 +544,6 @@ public class ChartPlayer : MonoBehaviour
 
             ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * Ease.Get(Mathf.Clamp01(a / 2 - 1.5f), "Quintic", EaseMode.Out));
             DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * Ease.Get(Mathf.Clamp01(a / 2 - 1.5f), "Quintic", EaseMode.Out));
-            for (int x = 0; x < ResultBasicInfoText.Count; x++) 
-            {
-                ResultBasicInfoLabelText[x].margin = new Vector4(0, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3 + x * .1f)), "Quintic", EaseMode.Out)), 8, 0);
-                ResultBasicInfoText[x].margin = new Vector4(0, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3.05f + x * .1f)), "Quintic", EaseMode.Out)), 25, 0);
-            }
-            ResultComboLabelText.margin = new Vector4(25, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3.5f)), "Quintic", EaseMode.Out)), 8, 0);
-            ResultComboInfoText.margin = new Vector4(0, -60 * (1 - Ease.Get(Mathf.Clamp01(a - (3.55f)), "Quintic", EaseMode.Out)), 0, 0);
         }
         for (float a = 0; a < 1; a += Time.deltaTime / 6f)
         {

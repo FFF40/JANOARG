@@ -75,7 +75,6 @@ public class LanePlayer : MonoBehaviour
             hp.ScreenStart = cam.WorldToScreenPoint(Vector3.Lerp(start, end, h.Position));
             hp.ScreenEnd = cam.WorldToScreenPoint(Vector3.Lerp(start, end, h.Position + h.Length));
             
-
             long t = System.DateTime.Now.Ticks;
             if (t - time > 33e4)
             {

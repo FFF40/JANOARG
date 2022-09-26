@@ -9,6 +9,7 @@ public class Timestamp
     public float Time;
     public float Duration;
     public string ID;
+    public float From = float.NaN;
     public float Target;
     public string Easing = "Linear";
     public EaseMode EaseMode;
@@ -20,6 +21,7 @@ public class Timestamp
             Time = Time,
             Duration = Duration,
             ID = ID,
+            From = From,
             Target = Target,
             Easing = Easing,
             EaseMode = EaseMode,
@@ -160,6 +162,7 @@ public abstract class IStoryboardable
                 if (time >= ts.Time + ts.Duration) value = ts.Target;
                 else if (time > ts.Time) 
                 {
+                    if (!float.IsNaN(ts.From)) value = (float)ts.From;
                     Ease ease = Array.Find(Ease.Eases, (x) => x.ID == ts.Easing);
                     Func<float, float> func = ease.InOut;
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
@@ -197,6 +200,7 @@ public abstract class IStoryboardable
                 if (ts == null || (time < ts.Time && currentTime < ts.Time)) break;
                 else if (time < ts.Time + ts.Duration)
                 {
+                    if (!float.IsNaN(ts.From)) currentValues[tst.ID] = value = (float)ts.From;
                     Ease ease = Array.Find(Ease.Eases, (x) => x.ID == ts.Easing);
                     Func<float, float> func = ease.InOut;
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
