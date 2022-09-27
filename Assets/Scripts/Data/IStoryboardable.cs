@@ -70,9 +70,9 @@ public class Ease
 {
     public string ID;
     public string Name;
-    public Func<float, float> InOut;
     public Func<float, float> In;
     public Func<float, float> Out;
+    public Func<float, float> InOut;
 
     public static float Get(float x, string ease, EaseMode mode) 
     {
