@@ -814,6 +814,8 @@ public class HitObject : IStoryboardable, IDeepClonable<HitObject>
             Position = Position,
             Length = Length,
             HoldLength = HoldLength,
+            Flickable = Flickable,
+            FlickDirection = FlickDirection,
             StyleIndex = StyleIndex,
             Storyboard = Storyboard.DeepClone(),
         };

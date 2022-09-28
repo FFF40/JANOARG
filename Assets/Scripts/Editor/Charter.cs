@@ -1430,6 +1430,8 @@ public class Charter : EditorWindow
                 menu.AddItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
             else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
             menu.AddSeparator("File/");
+            menu.AddItem(new GUIContent("File/Save " + CharterSettings.Keybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
+            menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Close Song"), false, () => TargetSong = null);
 
             // -------------------- Edit
