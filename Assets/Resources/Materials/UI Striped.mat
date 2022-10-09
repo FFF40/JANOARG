@@ -77,7 +77,8 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
-    - _StripeVis: 0.0858
+    - _StripeSize: 20
+    - _StripeVis: 0.05
     - _StripeVisibility: 0.27
     - _UVSec: 0
     - _UseUIAlphaClip: 0

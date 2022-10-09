@@ -1254,7 +1254,7 @@ public class Charter : EditorWindow
     public void CopySelection()
     {
         if (TargetThing is string) return;
-        ClipboardThing = TargetThing;
+        ClipboardThing = TargetTimestamp ?? TargetThing;
     }
 
     public void PasteSelection()
@@ -1300,6 +1300,22 @@ public class Charter : EditorWindow
             HistoryAdd(TargetLane.Objects, list);
 
             TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+        }
+        else if (ClipboardThing is Timestamp || ClipboardThing is List<Timestamp>)
+        {
+            if (timelineMode != "story" || !(TargetThing is IStoryboardable)) return;
+
+            IStoryboardable sb = (IStoryboardable)TargetThing;
+
+            List<Timestamp> list = (ClipboardThing is List<Timestamp> ? (List<Timestamp>)ClipboardThing :
+                new List<Timestamp>(new[] { (Timestamp)ClipboardThing })).ConvertAll<Timestamp>(x => x.DeepClone());
+
+            float offset = pos - list[0].Time;
+
+            foreach (Timestamp item in list) item.Time += offset;
+            HistoryAdd(sb.Storyboard.Timestamps, list);
+
+            sb.Storyboard.Timestamps.Sort((x, y) => x.Time.CompareTo(y.Time));
         }
     }
 
@@ -1592,7 +1608,13 @@ public class Charter : EditorWindow
             seekEnd = Mathf.Min(width / 100, seekLimitEnd);
         }
 
-        // Category
+        if (CurrentAudioSource.isPlaying && FollowSeekLine)
+        {
+            float seekRange = seekEnd - seekStart;
+            seekStart = Mathf.Clamp(seekTime - seekRange / 2, seekLimitStart, seekLimitEnd - seekRange);
+            seekEnd = seekStart + seekRange;
+        }
+
 
         timelineSep = EditorGUI.IntField(new Rect(width - 41, 136, 40, 19), timelineSep);
 
@@ -2122,7 +2144,7 @@ public class Charter : EditorWindow
                         Lane lane = new Lane();
 
                         LaneStep step = new LaneStep();
-                        step.Offset = Mathf.Round(pos * 1e5f) / 1e5f;
+                        step.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
                         step.StartPos = new Vector2(-6, -3);
                         step.EndPos = new Vector2(6, -3);
                         lane.LaneSteps.Add(step);
@@ -2139,7 +2161,7 @@ public class Charter : EditorWindow
                     else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null)
                     {
                         HitObject hit = new HitObject();
-                        hit.Offset = Mathf.Round(pos * 1e5f) / 1e5f;
+                        hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
                         hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
                         if (TargetThing is HitObject)
                         {
@@ -2230,7 +2252,7 @@ public class Charter : EditorWindow
 
             GUILayout.EndScrollView();
         }
-        if (inspectMode == "history")
+        else if (inspectMode == "history")
         {
             GUI.Label(new Rect(7, 2, 226, 20), "Edit History", "boldLabel");
             GUILayout.Space(8);
@@ -2997,7 +3019,8 @@ public class Charter : EditorWindow
 
             PlayMetronome = GUI.Toggle(new Rect(5, 73, 145, 20), PlayMetronome, "Metronome", "buttonLeft");
             PlayHitsounds = GUI.Toggle(new Rect(150, 73, 145, 20), PlayHitsounds, "Hitsounds", "buttonRight");
-            SeparateUnits = GUI.Toggle(new Rect(5, 95, 290, 20), SeparateUnits, "Separate Units", "button");
+            SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
+            FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
         }
     }
 

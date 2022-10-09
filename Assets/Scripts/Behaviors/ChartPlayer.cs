@@ -116,9 +116,19 @@ public class ChartPlayer : MonoBehaviour
     public List<HitPlayer> NormalHits = new List<HitPlayer>();
     [HideInInspector]
     public List<HitPlayer> CatchHits = new List<HitPlayer>();
+    [HideInInspector]
+    public List<HitPlayer> RemovingHits = new List<HitPlayer>();
+    [HideInInspector]
+    public Dictionary<int, FlickHandle> FlickDirections = new Dictionary<int, FlickHandle>();
+
 
     [HideInInspector]
     public float InitProgress = 0;
+
+    [HideInInspector]
+    public Mesh FreeFlickEmblem;
+    [HideInInspector]
+    public Mesh DirectionalFlickEmblem;
 
     bool isAnimating;
 
@@ -156,6 +166,9 @@ public class ChartPlayer : MonoBehaviour
 
         RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
         SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
+
+        if (!FreeFlickEmblem) FreeFlickEmblem = MakeFreeFlickEmblem();
+        if (!DirectionalFlickEmblem) DirectionalFlickEmblem = MakeDirectionalFlickEmblem();
 
         long time = System.DateTime.Now.Ticks;
         long t;
@@ -355,12 +368,35 @@ public class ChartPlayer : MonoBehaviour
                     {
                         Touches.Add(touch, null);
                     }
+                    else if (touch.phase == TouchPhase.Moved)
+                    {
+                        if (Vector2.SqrMagnitude(touch.deltaPosition) < 100) continue;
+                        float dir = Mathf.Atan2(touch.deltaPosition.x, touch.deltaPosition.y) * Mathf.Rad2Deg;
+
+                        if (FlickDirections.ContainsKey(touch.fingerId)
+                            && FlickDirections[touch.fingerId].Handled
+                            && Mathf.DeltaAngle(FlickDirections[touch.fingerId].Direction, dir) < 60) continue;
+
+                        FlickDirections[touch.fingerId] = new FlickHandle()
+                        {
+                            Position = touch.position,
+                            Direction = dir,
+                        };
+                    }
+                    else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    {
+                        if (FlickDirections.ContainsKey(touch.fingerId)) FlickDirections.Remove(touch.fingerId);
+                    }
                 }
             }
 
             float time = AudioPlayer.isPlaying ? AudioPlayer.time : CurrentTime;
 
-            while (NormalHits.IndexOf(null) >= 0) NormalHits.Remove(null);
+            foreach (HitPlayer obj in RemovingHits)
+            {
+                if (obj.CurrentHit.Type == HitObject.HitType.Normal) NormalHits.Remove(obj);
+                else CatchHits.Remove(obj);
+            }
 
             foreach (HitPlayer obj in NormalHits)
             {
@@ -369,15 +405,14 @@ public class ChartPlayer : MonoBehaviour
                 {
                     if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
                     {
-                        Debug.Log(time + " " + obj.CurrentHit.Offset);
                         obj.MakeHitEffect(0);
-                        ChartPlayer.main.AddScore(3, 1, true);
+                        ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
                         ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + .2f)
                     {
-                        ChartPlayer.main.AddScore(3, 0, false);
+                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset - .2f)
@@ -391,12 +426,38 @@ public class ChartPlayer : MonoBehaviour
                                 || obj.CurrentHit.Offset < Touches[touch].CurrentHit.Offset)) 
                             {
                                 Touches[touch] = obj;
-                                goto jumpEnd;
+                                break;
                             }
                         }
                     }
                 }
-                jumpEnd:;
+                else if (!obj.isFlicked && obj.CurrentHit.Flickable)
+                {
+                    if (time > obj.CurrentHit.Offset + .2f)
+                    {
+                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
+                        obj.BeginHit();
+                    }
+                    else if (time > obj.CurrentHit.Offset - .2f)
+                    {
+                        foreach (FlickHandle flick in FlickDirections.Values) 
+                        {
+                            Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
+                            float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                            if (!flick.Handled && Vector2.Distance(flick.Position, ScreenMid) <= dist 
+                                && (obj.CurrentHit.FlickDirection < 0 || Mathf.DeltaAngle(flick.Direction, obj.CurrentHit.FlickDirection) < 40)) 
+                            {
+                                flick.Handled = true;
+                                obj.isFlicked = true;
+                                obj.MakeHitEffect(null);
+                                ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
+                                ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                                obj.BeginHit();
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             foreach (Touch touch in Touches.Keys)
@@ -404,15 +465,20 @@ public class ChartPlayer : MonoBehaviour
                 if (Touches[touch] != null)
                 {
                     HitPlayer obj = Touches[touch];
-                    float acc = HitPlayer.GetAccuracy(time - obj.CurrentHit.Offset);
-                    obj.MakeHitEffect(acc);
-                    ChartPlayer.main.AddScore(3, (1 - Mathf.Abs(acc)), true);
-                    ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
-                    obj.BeginHit();
+                    if (obj.CurrentHit.Flickable)
+                    {
+                        obj.isHit = true;
+                    }
+                    else 
+                    {
+                        float acc = HitPlayer.GetAccuracy(time - obj.CurrentHit.Offset);
+                        obj.MakeHitEffect(acc);
+                        ChartPlayer.main.AddScore(3, (1 - Mathf.Abs(acc)), true);
+                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                        obj.BeginHit();
+                    }
                 }
             }
-
-            while (CatchHits.IndexOf(null) >= 0) CatchHits.Remove(null);
 
             foreach (HitPlayer obj in CatchHits)
             {
@@ -422,13 +488,13 @@ public class ChartPlayer : MonoBehaviour
                     if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(null);
-                        ChartPlayer.main.AddScore(1, 1, true);
+                        ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
                         ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + .2f)
                     {
-                        ChartPlayer.main.AddScore(1, 0, false);
+                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset - .2f)
@@ -439,18 +505,56 @@ public class ChartPlayer : MonoBehaviour
                         {
                             if (Vector2.Distance(touch.position, ScreenMid) <= dist) 
                             {
-                                obj.isPreHit = true;
+                                if (obj.isFlicked) obj.isPreHit = true;
+                                else obj.isHit = true;
                             }
                         }
                         if (obj.isPreHit && time > obj.CurrentHit.Offset)
                         {
+                            if (obj.CurrentHit.Flickable) 
+                            {
+                                obj.isHit = true;
+                            }
+                            else 
+                            {
+                                obj.MakeHitEffect(null);
+                                ChartPlayer.main.AddScore(1, 1, true);
+                                ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                                
+                                if (obj.Ticks.Count != 0) obj.railTime = 1;
+                                obj.BeginHit();
+                            }
+                        }
+                    }
+                }
+                else if (!obj.isFlicked && obj.CurrentHit.Flickable)
+                {
+                    if (time > obj.CurrentHit.Offset + .2f)
+                    {
+                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
+                        obj.BeginHit();
+                    }
+                    else if (time > obj.CurrentHit.Offset - .2f)
+                    {
+                        foreach (FlickHandle flick in FlickDirections.Values) 
+                        {
+                            Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
+                            float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                            if (!flick.Handled && Vector2.Distance(flick.Position, ScreenMid) <= dist 
+                                && (obj.CurrentHit.FlickDirection < 0 || Mathf.DeltaAngle(flick.Direction, obj.CurrentHit.FlickDirection) < 40)) 
+                            {
+                                flick.Handled = true;
+                                obj.isPreHit = true;
+                                break;
+                            }
+                        }
+                        if (obj.isPreHit && time > obj.CurrentHit.Offset)
+                        {
+                            obj.isFlicked = true;
                             obj.MakeHitEffect(null);
-                            ChartPlayer.main.AddScore(1, 1, true);
+                            ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
                             ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
-                            
-                            if (obj.Ticks.Count != 0) obj.railTime = 1;
                             obj.BeginHit();
-                            CatchHits.Remove(obj);
                         }
                     }
                 }
@@ -482,7 +586,8 @@ public class ChartPlayer : MonoBehaviour
     {
         isAnimating = true;
         if (Score >= TotalScore) PlayStateText.text = "TRACK MASTERED!!";
-        else if (Combo >= MaxCombo) PlayStateText.text = "FULL STREAK!";
+        else if (Combo >= TotalCombo) PlayStateText.text = "FULL STREAK!";
+        else if (Score <= 0) PlayStateText.text = "TRACK CLEARED?";
         else PlayStateText.text = "TRACK CLEARED";
 
         PlayInterfaceObject.SetActive(false);
@@ -552,4 +657,85 @@ public class ChartPlayer : MonoBehaviour
         }
         SetEase(6);
     }
+    
+    public Mesh MakeFreeFlickEmblem()
+    {
+        Mesh mesh = new Mesh();
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
+        List<int> tris = new List<int>();
+
+        vertices.Add(new Vector3(0, 2));
+        vertices.Add(new Vector3(1, 0));
+        vertices.Add(new Vector3(0, -1));
+        vertices.Add(new Vector3(0, -2));
+        vertices.Add(new Vector3(-1, 0));
+        vertices.Add(new Vector3(0, 1));
+
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+
+        tris.Add(0);
+        tris.Add(1);
+        tris.Add(2);
+
+        tris.Add(3);
+        tris.Add(4);
+        tris.Add(5);
+
+        mesh.Clear();
+        mesh.vertices = vertices.ToArray();
+        mesh.uv = uvs.ToArray();
+        mesh.triangles = tris.ToArray();
+        mesh.RecalculateNormals();
+
+        return mesh;
+    }
+
+    public Mesh MakeDirectionalFlickEmblem()
+    {
+        Mesh mesh = new Mesh();
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
+        List<int> tris = new List<int>();
+
+        vertices.Add(new Vector3(0, 3));
+        vertices.Add(new Vector3(1, 0));
+        vertices.Add(new Vector3(0, -1));
+        vertices.Add(new Vector3(-1, 0));
+
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+        uvs.Add(Vector2.zero);
+
+        tris.Add(0);
+        tris.Add(2);
+        tris.Add(3);
+
+        tris.Add(0);
+        tris.Add(1);
+        tris.Add(2);
+
+        mesh.Clear();
+        mesh.vertices = vertices.ToArray();
+        mesh.uv = uvs.ToArray();
+        mesh.triangles = tris.ToArray();
+        mesh.RecalculateNormals();
+
+        return mesh;
+    }
+}
+
+public class FlickHandle 
+{
+    public bool Handled;
+    public Vector2 Position;
+    public float Direction;
 }

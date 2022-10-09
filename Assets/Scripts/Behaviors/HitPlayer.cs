@@ -16,6 +16,8 @@ public class HitPlayer : MonoBehaviour
     public float IndicatorSize;
     [Space]
     public List<MeshRenderer> IndicatorMeshes;
+    [Space]
+    public MeshFilter FlickEmblem;
 
     [Header("Hold")]
     public List<float> Ticks = new List<float>();
@@ -30,9 +32,12 @@ public class HitPlayer : MonoBehaviour
     public Vector2 ScreenEnd;
 
     [HideInInspector]
-    public bool isHit, isPreHit;
+    public bool isHit, isPreHit, isFlicked;
     [HideInInspector]
     public float railTime;
+
+    [HideInInspector]
+    public float NoteWeight;
 
     public void SetHit(LanePlayer lane, HitObject hit)
     {
@@ -82,6 +87,13 @@ public class HitPlayer : MonoBehaviour
             }
         }
         hit.Offset = ChartPlayer.main.Song.Timing.ToSeconds(hit.Offset);
+
+        if (hit.Flickable) 
+        {
+            FlickEmblem.gameObject.SetActive(true);
+            NoteWeight += hit.FlickDirection < 0 ? 1 : 2;
+            FlickEmblem.mesh = hit.FlickDirection < 0 ? ChartPlayer.main.FreeFlickEmblem : ChartPlayer.main.DirectionalFlickEmblem;
+        }
         
         foreach (Timestamp ts in hit.Storyboard.Timestamps)
         {
@@ -98,7 +110,8 @@ public class HitPlayer : MonoBehaviour
                 mr.material = ChartPlayer.main.HitStyleManagers[hit.StyleIndex].NormalMaterial;
         }
 
-        ChartPlayer.main.TotalScore += (hit.Type == HitObject.HitType.Catch ? 1 : 3) + Ticks.Count;
+        NoteWeight += hit.Type == HitObject.HitType.Catch ? 1 : 3;
+        ChartPlayer.main.TotalScore += NoteWeight + Ticks.Count;
         ChartPlayer.main.TotalCombo += 1 + Ticks.Count;
         ChartPlayer.main.NoteCount += 1 + Ticks.Count;
 
@@ -107,6 +120,7 @@ public class HitPlayer : MonoBehaviour
         else 
             ChartPlayer.main.NormalHits.Add(this);
 
+        isFlicked = !hit.Flickable;
         CurrentLane = lane;
         CurrentHit = hit;
         UpdateIndicator(CurrentHit.Offset);
@@ -142,9 +156,9 @@ public class HitPlayer : MonoBehaviour
     {
         if (ChartPlayer.main.IsPlaying)
         {
-            float time = ChartPlayer.main.AudioPlayer.isPlaying ? ChartPlayer.main.AudioPlayer.time : ChartPlayer.main.CurrentTime;
-            if (isHit)
+            if (isHit && isFlicked)
             {
+                float time = ChartPlayer.main.AudioPlayer.isPlaying ? ChartPlayer.main.AudioPlayer.time : ChartPlayer.main.CurrentTime;
                 UpdateIndicator(ChartPlayer.main.CurrentTime);
 
                 ScreenStart = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorLeft.position);
@@ -192,6 +206,7 @@ public class HitPlayer : MonoBehaviour
                     {
                         Destroy(gameObject);
                         Indicator.gameObject.SetActive(false);
+                        ChartPlayer.main.RemovingHits.Add(this);
                     }
                     // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                     if (railTime > 0) 
@@ -206,6 +221,14 @@ public class HitPlayer : MonoBehaviour
                 }
             }
         }
+        if (CurrentHit.Flickable)
+        {
+            FlickEmblem.transform.rotation = Quaternion.Euler(0, 0, 
+                CurrentHit.FlickDirection < 0 
+                ? transform.eulerAngles.z + 90
+                : -CurrentHit.FlickDirection
+            ) * ChartPlayer.main.MainCamera.transform.rotation;
+        }
     }
 
     public void BeginHit() {
@@ -214,6 +237,7 @@ public class HitPlayer : MonoBehaviour
         {
             Destroy(gameObject);
             Indicator.gameObject.SetActive(false);
+            ChartPlayer.main.RemovingHits.Add(this);
         }
     }
 

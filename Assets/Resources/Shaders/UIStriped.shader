@@ -7,7 +7,8 @@ Shader "UI/Striped"
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
 
-         _StripeVis ("Visibility", Range(0, 1)) = .05
+        _StripeVis ("Visibility", Range(0, 1)) = .05
+        _StripeSize ("Size", Float) = 20
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -85,6 +86,7 @@ Shader "UI/Striped"
             float4 _MainTex_ST;
 
             float _StripeVis;
+            float _StripeSize;
 
             v2f vert(appdata_t v)
             {
@@ -104,9 +106,9 @@ Shader "UI/Striped"
             {
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
-                float val = IN.worldPos.x - IN.worldPos.y + _Time.y * 10 + 10000;
+                float val = IN.worldPos.x * 2 - IN.worldPos.y + _Time.y * 10 + 10000;
     
-                if ((val / 20.0) % 1 < 0.5)
+                if (val % (_StripeSize * 2) < _StripeSize)
                 {
                     color.r = _StripeVis + color.r * (1 - _StripeVis * 2);
                     color.g = _StripeVis + color.g * (1 - _StripeVis * 2);

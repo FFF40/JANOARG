@@ -13,6 +13,7 @@ public class LanePlayer : MonoBehaviour
     public int Index;
     public float CurrentPos;
     public float CurrentTime;
+    public bool RenderLane;
 
     [HideInInspector]
     public bool Ready;
@@ -27,6 +28,7 @@ public class LanePlayer : MonoBehaviour
         }
         float sec = ChartPlayer.main.Song.Timing.ToSeconds(lane.LaneSteps[0].Offset);
         float pos = sec * lane.LaneSteps[0].Speed;
+        RenderLane = lane.StyleIndex >= 0 && lane.StyleIndex < ChartPlayer.main.LaneStyleManagers.Count;
         Positions.Add(pos);
         Times.Add(sec);
         for (int a = 1; a < lane.LaneSteps.Count; a++) 
@@ -35,12 +37,15 @@ public class LanePlayer : MonoBehaviour
             LaneStep step = lane.LaneSteps[a];
             float nSec = ChartPlayer.main.Song.Timing.ToSeconds(step.Offset);
             float nPos = pos + prev.Speed * (nSec - sec);
-            MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, Container);
-            mf.mesh = MakeLaneMesh(prev, step, pos * ChartPlayer.main.ScrollSpeed, nPos * ChartPlayer.main.ScrollSpeed, 0);
-            mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.LaneStyleManagers[lane.StyleIndex].LaneMaterial;
+            if (RenderLane) 
+            {
+                MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, Container);
+                mf.mesh = MakeLaneMesh(prev, step, pos * ChartPlayer.main.ScrollSpeed, nPos * ChartPlayer.main.ScrollSpeed, 0);
+                mf.GetComponent<MeshRenderer>().material = ChartPlayer.main.LaneStyleManagers[lane.StyleIndex].LaneMaterial;
+                LaneMeshes.Add(mf);
+            }
             pos = nPos;
             sec = nSec;
-            LaneMeshes.Add(mf);
             Positions.Add(pos);
             Times.Add(nSec);
         }
@@ -98,20 +103,30 @@ public class LanePlayer : MonoBehaviour
             transform.position = CurrentLane.Offset;
             transform.eulerAngles = CurrentLane.OffsetRotation;
 
-            while (LaneMeshes.Count > 0) 
+            if (ChartPlayer.main.CurrentTime < Times[0] && Times[0] != 0)
+            {
+                CurrentPos = Mathf.LerpUnclamped(0, Positions[0], ChartPlayer.main.CurrentTime / Times[0]);
+                Container.localPosition = Vector3.back * CurrentPos * ChartPlayer.main.ScrollSpeed;
+            }
+            else while (Index < Positions.Count - 1) 
             {
                 float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
-                if (t < 1)
+                if (t < 1)  
                 {
                     CurrentPos = Mathf.LerpUnclamped(Positions[Index], Positions[Index + 1], t);
-                    if (t > 0) LaneMeshes[0].mesh = MakeLaneMesh(CurrentLane.LaneSteps[Index], CurrentLane.LaneSteps[Index + 1], Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, Mathf.Clamp01(t));
-                    Container.localPosition = Vector3.forward * CurrentPos * -ChartPlayer.main.ScrollSpeed;
+                    if (RenderLane && t > 0) {
+                        LaneMeshes[0].mesh = MakeLaneMesh(CurrentLane.LaneSteps[Index], CurrentLane.LaneSteps[Index + 1], Positions[Index] * ChartPlayer.main.ScrollSpeed, Positions[Index + 1] * ChartPlayer.main.ScrollSpeed, Mathf.Clamp01(t));
+                    }
+                    Container.localPosition = Vector3.back * CurrentPos * ChartPlayer.main.ScrollSpeed;
                     break;
                 }
                 else
                 {
-                    Destroy(LaneMeshes[0].gameObject);
-                    LaneMeshes.RemoveAt(0);
+                    if (RenderLane)
+                    {
+                        Destroy(LaneMeshes[0].gameObject);
+                        LaneMeshes.RemoveAt(0);
+                    }
                     Index++;
                 }
             }

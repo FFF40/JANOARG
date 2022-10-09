@@ -82,6 +82,88 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 732186588832411688}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2538087630250391188
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8451518248987418346}
+  - component: {fileID: 2898256331598166210}
+  - component: {fileID: 1370773884459265041}
+  m_Layer: 0
+  m_Name: Flick Emblem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &8451518248987418346
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2538087630250391188}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_Children: []
+  m_Father: {fileID: 1390716354791312491}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &2898256331598166210
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2538087630250391188}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1370773884459265041
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2538087630250391188}
+  m_Mesh: {fileID: 0}
 --- !u!1 &4122999446294287331
 GameObject:
   m_ObjectHideFlags: 0
@@ -143,6 +225,7 @@ Transform:
   - {fileID: 1646596917482776795}
   - {fileID: 4619633413405395197}
   - {fileID: 3391571283799852639}
+  - {fileID: 8451518248987418346}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -167,6 +250,8 @@ MonoBehaviour:
     Position: 0
     Length: 0
     HoldLength: 0
+    Flickable: 0
+    FlickDirection: -1
     StyleIndex: 0
   Indicator: {fileID: 1646596917482776795}
   Thickness: 0.12
@@ -175,6 +260,8 @@ MonoBehaviour:
   IndicatorSize: 0
   IndicatorMeshes:
   - {fileID: 4162100578004014652}
+  - {fileID: 2898256331598166210}
+  FlickEmblem: {fileID: 1370773884459265041}
   Ticks: []
   LaneMeshes: []
   Positions: []
@@ -185,6 +272,11 @@ MonoBehaviour:
   CurrentTime: 0
   ScreenStart: {x: 0, y: 0}
   ScreenEnd: {x: 0, y: 0}
+  isHit: 0
+  isPreHit: 0
+  isFlicked: 0
+  railTime: 0
+  NoteWeight: 0
 --- !u!1 &7424388052202442312
 GameObject:
   m_ObjectHideFlags: 0
