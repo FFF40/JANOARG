@@ -36,6 +36,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Debug\FPSCounter.cs" />
      <Compile Include="Assets\Scripts\Data\PlayableSong.cs" />
      <Compile Include="Assets\Scripts\Data\Metronome.cs" />
      <Compile Include="Assets\Scripts\Behaviors\ChartPlayer.cs" />

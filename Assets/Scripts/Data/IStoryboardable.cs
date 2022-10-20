@@ -167,7 +167,7 @@ public abstract class IStoryboardable
                     Func<float, float> func = ease.InOut;
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
                     else if (ts.EaseMode == EaseMode.Out) func = ease.Out;
-                    value = Mathf.Lerp(value, ts.Target, func((time - ts.Time) / ts.Duration));
+                    value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Time) / ts.Duration));
                     break;
                 }
                 else break;
@@ -205,7 +205,7 @@ public abstract class IStoryboardable
                     Func<float, float> func = ease.InOut;
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
                     else if (ts.EaseMode == EaseMode.Out) func = ease.Out;
-                    value = Mathf.Lerp(value, ts.Target, func((time - ts.Time) / ts.Duration));
+                    value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Time) / ts.Duration));
                     break;
                 }
                 else

@@ -597,8 +597,8 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
                 {
                     return new LaneStep 
                     {
-                        StartPos = Vector2.Lerp(prev.StartPos, step.StartPos, p),
-                        EndPos = Vector2.Lerp(prev.EndPos, step.EndPos, p),
+                        StartPos = Vector2.LerpUnclamped(prev.StartPos, step.StartPos, p),
+                        EndPos = Vector2.LerpUnclamped(prev.EndPos, step.EndPos, p),
                         Offset = laneTime < time ? offset + (timeT - t) * step.Speed : float.NaN,
                     };
                 }
@@ -607,10 +607,10 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
                     
                     return new LaneStep 
                     {
-                        StartPos = new Vector2(Mathf.Lerp(prev.StartPos.x, step.StartPos.x, Ease.Get(p, step.StartEaseX, step.StartEaseXMode)),
-                            Mathf.Lerp(prev.StartPos.y, step.StartPos.y, Ease.Get(p, step.StartEaseY, step.StartEaseYMode))),
-                        EndPos = new Vector2(Mathf.Lerp(prev.EndPos.x, step.EndPos.x, Ease.Get(p, step.EndEaseX, step.EndEaseXMode)),
-                            Mathf.Lerp(prev.EndPos.y, step.EndPos.y, Ease.Get(p, step.EndEaseY, step.EndEaseYMode))),
+                        StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, Ease.Get(p, step.StartEaseX, step.StartEaseXMode)),
+                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, Ease.Get(p, step.StartEaseY, step.StartEaseYMode))),
+                        EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, Ease.Get(p, step.EndEaseX, step.EndEaseXMode)),
+                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, Ease.Get(p, step.EndEaseY, step.EndEaseYMode))),
                         Offset = laneTime < time ? offset + (timeT - t) * step.Speed : float.NaN,
                     };
                 }

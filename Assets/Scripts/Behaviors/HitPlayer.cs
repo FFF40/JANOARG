@@ -131,8 +131,8 @@ public class HitPlayer : MonoBehaviour
 
         CurrentLane.GetPosition(time, out Vector3 start, out Vector3 end);
 
-        Vector2 rStart = Vector2.Lerp(start, end, CurrentHit.Position);
-        Vector2 rEnd = Vector2.Lerp(start, end, CurrentHit.Position + CurrentHit.Length);
+        Vector2 rStart = Vector2.LerpUnclamped(start, end, CurrentHit.Position);
+        Vector2 rEnd = Vector2.LerpUnclamped(start, end, CurrentHit.Position + CurrentHit.Length);
 
         transform.localPosition = (Vector3)(rStart + rEnd) / 2 + Vector3.forward * start.z * ChartPlayer.main.ScrollSpeed;
         Indicator.localScale = new Vector3(Vector3.Distance(rStart, rEnd) - IndicatorSize, Thickness, Thickness);
@@ -158,7 +158,7 @@ public class HitPlayer : MonoBehaviour
         {
             if (isHit && isFlicked)
             {
-                float time = ChartPlayer.main.AudioPlayer.isPlaying ? ChartPlayer.main.AudioPlayer.time : ChartPlayer.main.CurrentTime;
+                float time = ChartPlayer.main.CurrentTime;
                 UpdateIndicator(ChartPlayer.main.CurrentTime);
 
                 ScreenStart = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorLeft.position);
@@ -242,9 +242,11 @@ public class HitPlayer : MonoBehaviour
     }
 
     public static float GetAccuracy(float dist) {
+        float perfect = ChartPlayer.main.PerfectHitWindow;
+        float good = ChartPlayer.main.GoodHitWindow;
         float absDist = Mathf.Abs(dist) * 1000;
-        if (absDist < 35) return 0;
-        else return (absDist) / 200 * Mathf.Sign(dist);
+        if (absDist < perfect) return 0;
+        return (absDist - perfect) / (good - perfect) * Mathf.Sign(dist);
     }
 
     public void MakeHitEffect(float? accuracy, bool precise = true) 
@@ -252,7 +254,7 @@ public class HitPlayer : MonoBehaviour
         HitEffect hje = Instantiate(ChartPlayer.main.HitJudgeEffectSample, ChartPlayer.main.JudgeEffectCanvas);
         hje.Accuracy = accuracy;
         RectTransform rt = hje.GetComponent<RectTransform>();
-        Vector2 pos = Vector2.Lerp(ScreenStart, ScreenEnd, .5f);
+        Vector2 pos = Vector2.LerpUnclamped(ScreenStart, ScreenEnd, .5f);
         rt.position = new Vector2(pos.x, pos.y);
     }
 }

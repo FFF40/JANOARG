@@ -33,6 +33,9 @@ public class ChartPlayer : MonoBehaviour
     [Header("Settings")]
     public float ScrollSpeed = 120;
     public float SyncThreshold = .05f;
+    [Space]
+    public float PerfectHitWindow = 35;
+    public float GoodHitWindow = 200;
 
     [Header("Objects")]
     public LanePlayer LanePlayerSample;
@@ -131,10 +134,15 @@ public class ChartPlayer : MonoBehaviour
     public Mesh DirectionalFlickEmblem;
 
     bool isAnimating;
+    float precTime;
 
     public void Awake()
     {
         main = this;
+        Application.targetFrameRate = 60;
+        var configuration = AudioSettings.GetConfiguration();
+        configuration.dspBufferSize = 2048;
+        AudioSettings.Reset(configuration);
     }
 
     public void NormalizeTimestamp(Timestamp ts)
@@ -330,15 +338,21 @@ public class ChartPlayer : MonoBehaviour
         if (IsPlaying)
         {
             CurrentTime += Time.deltaTime;
-            CurrentChart.Advance(CurrentTime);
             if (CurrentTime > 0 && CurrentTime < AudioPlayer.clip.length) 
             {
                 if (!AudioPlayer.isPlaying) AudioPlayer.Play();
+                float preciseTime = AudioPlayer.timeSamples / (float)Song.Clip.frequency;
                 if (Mathf.Abs(AudioPlayer.time - CurrentTime) > SyncThreshold) AudioPlayer.time = CurrentTime;
-                else CurrentTime = AudioPlayer.time;
+                else if (precTime != preciseTime) 
+                {
+                    CurrentTime = preciseTime;
+                    precTime = preciseTime;
+                } 
+                    
             }
             SongProgressSlider.value = CurrentTime / Song.Clip.length;
 
+            CurrentChart.Advance(CurrentTime);
             CurrentChart.Pallete.Advance(CurrentTime);
             RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
             SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
@@ -390,7 +404,7 @@ public class ChartPlayer : MonoBehaviour
                 }
             }
 
-            float time = AudioPlayer.isPlaying ? AudioPlayer.time : CurrentTime;
+            float time = CurrentTime;
 
             foreach (HitPlayer obj in RemovingHits)
             {

@@ -53,7 +53,7 @@ public class Charter : EditorWindow
 
     float ScrollSpeed = 121;
 
-    float width, height, pos, dec, beat, currentBeat, bar, min, sec, ms;
+    float width, height, pos, dec, beat, currentBeat, bar, min, sec, ms, preciseTime;
 
     public void OnDestroy()
     {
@@ -110,7 +110,7 @@ public class Charter : EditorWindow
             }
         }
 
-        float curtime = CurrentAudioSource.time;
+        float curtime = preciseTime;
 
         float lastP = 0;
 
@@ -127,7 +127,7 @@ public class Charter : EditorWindow
             Vector3 start = step.StartPos;
             Vector3 end = step.EndPos;
             float p = 0;
-            if (CurrentAudioSource.time > time)
+            if (preciseTime > time)
             {
                 if (a >= steps.Count - 1)
                 {
@@ -136,22 +136,22 @@ public class Charter : EditorWindow
                 }
                 LaneStep next = steps[a + 1];
                 float nexttime = TargetSong.Timing.ToSeconds(next.Offset);
-                if (CurrentAudioSource.time > nexttime)
+                if (preciseTime > nexttime)
                 {
                     lastP = 1;
                     continue;
                 }
                 p = (curtime - time) / (nexttime - time);
                 // Debug.Log("P " + a + " " + p);
-                start = new Vector2(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(p, next.StartEaseX, next.StartEaseXMode)),
-                    Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(p, next.StartEaseY, next.StartEaseYMode)));
-                end = new Vector2(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(p, next.EndEaseX, next.EndEaseXMode)),
-                    Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(p, next.EndEaseY, next.EndEaseYMode)));
+                start = new Vector2(Mathf.LerpUnclamped(step.StartPos.x, next.StartPos.x, Ease.Get(p, next.StartEaseX, next.StartEaseXMode)),
+                    Mathf.LerpUnclamped(step.StartPos.y, next.StartPos.y, Ease.Get(p, next.StartEaseY, next.StartEaseYMode)));
+                end = new Vector2(Mathf.LerpUnclamped(step.EndPos.x, next.EndPos.x, Ease.Get(p, next.EndEaseX, next.EndEaseXMode)),
+                    Mathf.LerpUnclamped(step.EndPos.y, next.EndPos.y, Ease.Get(p, next.EndEaseY, next.EndEaseYMode)));
             }
 
             float lPos = pos;
-            pos += step.Speed * ScrollSpeed * (Mathf.Max(time, CurrentAudioSource.time) - curtime);
-            curtime = Mathf.Max(time, CurrentAudioSource.time);
+            pos += step.Speed * ScrollSpeed * (Mathf.Max(time, preciseTime) - curtime);
+            curtime = Mathf.Max(time, preciseTime);
             if (a == 0)
             {
                 AddStep(new Vector3(start.x, start.y, pos), new Vector3(end.x, end.y, pos));
@@ -169,11 +169,11 @@ public class Charter : EditorWindow
                     // Debug.Log("T " + step.StartEaseX + " " + p);
                     for (float x = lastP; x <= 1; x = Mathf.Floor(x * 16 + 1.01f) / 16)
                     {
-                        float cPos = Mathf.Lerp(lPos, pos, (x - lastP) / (1 - lastP));
-                        start = new Vector3(Mathf.Lerp(prev.StartPos.x, step.StartPos.x, Ease.Get(x, step.StartEaseX, step.StartEaseXMode)),
-                            Mathf.Lerp(prev.StartPos.y, step.StartPos.y, Ease.Get(x, step.StartEaseY, step.StartEaseYMode)), cPos);
-                        end = new Vector3(Mathf.Lerp(prev.EndPos.x, step.EndPos.x, Ease.Get(x, step.EndEaseX, step.EndEaseXMode)),
-                            Mathf.Lerp(prev.EndPos.y, step.EndPos.y, Ease.Get(x, step.EndEaseY, step.EndEaseYMode)), cPos);
+                        float cPos = Mathf.LerpUnclamped(lPos, pos, (x - lastP) / (1 - lastP));
+                        start = new Vector3(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, Ease.Get(x, step.StartEaseX, step.StartEaseXMode)),
+                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, Ease.Get(x, step.StartEaseY, step.StartEaseYMode)), cPos);
+                        end = new Vector3(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, Ease.Get(x, step.EndEaseX, step.EndEaseXMode)),
+                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, Ease.Get(x, step.EndEaseY, step.EndEaseYMode)), cPos);
                         AddStep(start, end);
                     }
                 }
@@ -347,7 +347,7 @@ public class Charter : EditorWindow
         float startP = TargetSong.Timing.ToSeconds(hit.Offset);
         float endP = TargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength);
 
-        float curtime = CurrentAudioSource.time;
+        float curtime = preciseTime;
 
         List<LaneStep> steps = new List<LaneStep>();
 
@@ -383,28 +383,28 @@ public class Charter : EditorWindow
             {
                 if (next.StartEaseX == "Linear" && next.StartEaseY == "Linear" && next.EndEaseX == "Linear" && next.EndEaseY == "Linear")
                 {
-                    start = Vector2.Lerp(step.StartPos, next.StartPos, startPos);
-                    end = Vector2.Lerp(step.EndPos, next.EndPos, startPos);
+                    start = Vector2.LerpUnclamped(step.StartPos, next.StartPos, startPos);
+                    end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, startPos);
                 }
                 else
                 {
-                    start = new Vector3(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(Mathf.Clamp01(startPos), next.StartEaseX, next.StartEaseXMode)),
-                        Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(Mathf.Clamp01(startPos), next.StartEaseY, next.StartEaseYMode)));
-                    end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(Mathf.Clamp01(startPos), next.EndEaseX, next.EndEaseXMode)),
-                        Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(Mathf.Clamp01(startPos), next.EndEaseY, next.EndEaseYMode)));
+                    start = new Vector3(Mathf.LerpUnclamped(step.StartPos.x, next.StartPos.x, Ease.Get(Mathf.Clamp01(startPos), next.StartEaseX, next.StartEaseXMode)),
+                        Mathf.LerpUnclamped(step.StartPos.y, next.StartPos.y, Ease.Get(Mathf.Clamp01(startPos), next.StartEaseY, next.StartEaseYMode)));
+                    end = new Vector3(Mathf.LerpUnclamped(step.EndPos.x, next.EndPos.x, Ease.Get(Mathf.Clamp01(startPos), next.EndEaseX, next.EndEaseXMode)),
+                        Mathf.LerpUnclamped(step.EndPos.y, next.EndPos.y, Ease.Get(Mathf.Clamp01(startPos), next.EndEaseY, next.EndEaseYMode)));
                 }
-                Vector2 s = Vector2.Lerp(start, end, hit.Position);
-                Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
+                Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
                 float pp = p + ((nTime - sTime) * startPos - Math.Max(curtime - sTime, 0)) * step.Speed * ScrollSpeed;
                 AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
             }
             {
                 if (next.StartEaseX == "Linear" && next.StartEaseY == "Linear" && next.EndEaseX == "Linear" && next.EndEaseY == "Linear")
                 {
-                    start = Vector2.Lerp(step.StartPos, next.StartPos, endPos);
-                    end = Vector2.Lerp(step.EndPos, next.EndPos, endPos);
-                    Vector2 s = Vector2.Lerp(start, end, hit.Position);
-                    Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                    start = Vector2.LerpUnclamped(step.StartPos, next.StartPos, endPos);
+                    end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, endPos);
+                    Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
+                    Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
                     float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * ScrollSpeed;
                     AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                 }
@@ -413,12 +413,12 @@ public class Charter : EditorWindow
 
                     void Add(float pos)
                     {
-                        start = new Vector3(Mathf.Lerp(step.StartPos.x, next.StartPos.x, Ease.Get(pos, next.StartEaseX, next.StartEaseXMode)),
-                            Mathf.Lerp(step.StartPos.y, next.StartPos.y, Ease.Get(pos, next.StartEaseY, next.StartEaseYMode)));
-                        end = new Vector3(Mathf.Lerp(step.EndPos.x, next.EndPos.x, Ease.Get(pos, next.EndEaseX, next.EndEaseXMode)),
-                            Mathf.Lerp(step.EndPos.y, next.EndPos.y, Ease.Get(pos, next.EndEaseY, next.EndEaseYMode)));
-                        Vector2 s = Vector2.Lerp(start, end, hit.Position);
-                        Vector2 e = Vector2.Lerp(start, end, hit.Position + hit.Length);
+                        start = new Vector3(Mathf.LerpUnclamped(step.StartPos.x, next.StartPos.x, Ease.Get(pos, next.StartEaseX, next.StartEaseXMode)),
+                            Mathf.LerpUnclamped(step.StartPos.y, next.StartPos.y, Ease.Get(pos, next.StartEaseY, next.StartEaseYMode)));
+                        end = new Vector3(Mathf.LerpUnclamped(step.EndPos.x, next.EndPos.x, Ease.Get(pos, next.EndEaseX, next.EndEaseXMode)),
+                            Mathf.LerpUnclamped(step.EndPos.y, next.EndPos.y, Ease.Get(pos, next.EndEaseY, next.EndEaseYMode)));
+                        Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
+                        Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
                         float pp = p + ((nTime - sTime) * pos - Math.Max(curtime - sTime, 0)) * step.Speed * ScrollSpeed;
                         AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                     }
@@ -520,6 +520,8 @@ public class Charter : EditorWindow
     long delta, now, pass;
     string strain;
 
+    Color backgroundColor;
+
     public void OnGUI()
     {
         long strainNow = DateTime.Now.Ticks;
@@ -555,14 +557,15 @@ public class Charter : EditorWindow
 
         if (TargetSong)
         {
-            pos = TargetSong.Timing.ToBeat(CurrentAudioSource.time);
+            preciseTime = CurrentAudioSource.timeSamples / (float)TargetSong.Clip.frequency;
+            pos = TargetSong.Timing.ToBeat(preciseTime);
             dec = Mathf.Floor((pos % 1) * 1000);
-            beat = Mathf.Floor(TargetSong.Timing.ToDividedBeat(CurrentAudioSource.time));
-            bar = Mathf.Floor(TargetSong.Timing.ToBar(CurrentAudioSource.time));
+            beat = Mathf.Floor(TargetSong.Timing.ToDividedBeat(preciseTime));
+            bar = Mathf.Floor(TargetSong.Timing.ToBar(preciseTime));
 
-            min = Mathf.Floor(CurrentAudioSource.time / 60);
-            sec = Mathf.Floor(CurrentAudioSource.time % 60);
-            ms = Mathf.Floor((CurrentAudioSource.time % 1) * 1000);
+            min = Mathf.Floor(preciseTime / 60);
+            sec = Mathf.Floor(preciseTime % 60);
+            ms = Mathf.Floor((preciseTime % 1) * 1000);
 
             if ((TargetThing is PlayableSong && TargetThing != (object)TargetSong) ||
                 (TargetThing is Chart && TargetThing != (object)TargetChart))
@@ -605,7 +608,7 @@ public class Charter : EditorWindow
                 CurrentCamera.transform.eulerAngles = chart.CameraRotation;
                 CurrentCamera.transform.Translate(Vector3.back * 10);
                 CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
-                RenderSettings.fogColor = CurrentCamera.backgroundColor = pal.BackgroundColor;
+                backgroundColor = RenderSettings.fogColor = CurrentCamera.backgroundColor = pal.BackgroundColor;
                 CurrentCamera.Render();
 
                 for (int i = 0; i < pal.LaneStyles.Count; i++)
@@ -904,7 +907,7 @@ public class Charter : EditorWindow
                                 if (GizmoMode != "")
                                 {
                                     LaneStep step = TargetLane.GetLaneStep(hit.Offset, pos, TargetSong.Timing);
-                                    // Debug.Log("HO " + hit.Offset + " " + CurrentAudioSource.time + " " + step.Offset);
+                                    // Debug.Log("HO " + hit.Offset + " " + precTime + " " + step.Offset);
                                     float stop = 0;
                                     float stopDist = float.PositiveInfinity;
 
@@ -1124,6 +1127,10 @@ public class Charter : EditorWindow
             {
                 PasteSelection();
             }
+            else if (Event.current == CharterSettings.Keybinds["Edit/Delete"])
+            {
+                DeleteSelection();
+            }
             else if (Event.current == CharterSettings.Keybinds["Picker/Cursor"])
             {
                 pickermode = "cursor";
@@ -1287,6 +1294,20 @@ public class Charter : EditorWindow
 
             TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
+        else if (ClipboardThing is LaneStep || ClipboardThing is List<LaneStep>)
+        {
+            if (timelineMode != "step") return;
+
+            List<LaneStep> list = (ClipboardThing is List<LaneStep> ? (List<LaneStep>)ClipboardThing :
+                new List<LaneStep>(new[] { (LaneStep)ClipboardThing })).ConvertAll<LaneStep>(x => x.DeepClone()); ;
+
+            float offset = pos - list[0].Offset;
+
+            foreach (LaneStep item in list) item.Offset += offset;
+            HistoryAdd(TargetLane.LaneSteps, list);
+
+            TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+        }
         else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
         {
             if (timelineMode != "hit" || TargetLane == null) return;
@@ -1316,6 +1337,27 @@ public class Charter : EditorWindow
             HistoryAdd(sb.Storyboard.Timestamps, list);
 
             sb.Storyboard.Timestamps.Sort((x, y) => x.Time.CompareTo(y.Time));
+        }
+    }
+
+    public void DeleteSelection()
+    {
+        if (TargetThing is BPMStop || TargetThing is List<BPMStop>)
+        {
+            HistoryDelete(TargetSong.Timing.Stops, TargetThing);
+        }
+        else if (TargetThing is Lane || TargetThing is List<Lane>)
+        {
+            HistoryDelete(TargetChart.Lanes, TargetThing);
+        }
+        else if (TargetThing is HitObject || TargetThing is List<HitObject>)
+        {
+            HistoryDelete(TargetLane.Objects, TargetThing);
+        }
+        else if (TargetThing is Timestamp || TargetThing is List<Timestamp>)
+        {
+            IStoryboardable sb = (IStoryboardable)TargetThing;
+            HistoryDelete(sb.Storyboard.Timestamps, TargetThing);
         }
     }
 
@@ -1499,7 +1541,7 @@ public class Charter : EditorWindow
         counter.fontStyle = FontStyle.Italic;
         counter.fontSize = 14;
 
-        string ctText = SeparateUnits ? min.ToString("00", invariant) + ":" + sec.ToString("00", invariant) + "s" + ms.ToString("000", invariant) : CurrentAudioSource.time.ToString("0.000", invariant).Replace(".", "s");
+        string ctText = SeparateUnits ? min.ToString("00", invariant) + ":" + sec.ToString("00", invariant) + "s" + ms.ToString("000", invariant) : preciseTime.ToString("0.000", invariant).Replace(".", "s");
         float counterX = width - 84;
         for (int a = ctText.Length - 1; a >= 0; a--)
         {
@@ -1519,7 +1561,7 @@ public class Charter : EditorWindow
 
         // -------------------- Metronome thing
 
-        BPMStop bstop = TargetSong.Timing.GetStop(CurrentAudioSource.time, out int index);
+        BPMStop bstop = TargetSong.Timing.GetStop(preciseTime, out int index);
         Color color = Color.black;
         if (index <= 0)
         {
@@ -1527,12 +1569,12 @@ public class Charter : EditorWindow
         }
         else if (TargetSong.Timing.Stops[index - 1].BPM < bstop.BPM)
         {
-            float time = 1 - (CurrentAudioSource.time - bstop.Offset);
+            float time = 1 - (preciseTime - bstop.Offset);
             color = new Color(time * .8f, 0, 0);
         }
         else if (TargetSong.Timing.Stops[index - 1].BPM > bstop.BPM)
         {
-            float time = 1 - (CurrentAudioSource.time - bstop.Offset);
+            float time = 1 - (preciseTime - bstop.Offset);
             color = new Color(time * .1f, time * .1f, time);
         }
 
@@ -1555,16 +1597,30 @@ public class Charter : EditorWindow
 
     public void TimelineMode(int id)
     {
+        GUIStyle bgLabel = new GUIStyle("label");
+        bgLabel.alignment = TextAnchor.MiddleCenter;
+        bgLabel.normal.textColor = backgroundColor.grayscale < .5 ? Color.white : Color.black;
+
         if (GUI.Toggle(timelineMode == "story" ? new Rect(5, 3, 80, 25) : new Rect(5, 3, 80, 20), timelineMode == "story", "Storyboard", "button"))
             timelineMode = "story";
 
-        if (GUI.Toggle(timelineMode == "timing" ? new Rect(87, 3, 80, 25) : new Rect(87, 3, 80, 20), timelineMode == "timing", "Timing", "buttonLeft"))
+        GUI.Label(new Rect(85, 3, 12, 20), "|", bgLabel);
+
+        if (GUI.Toggle(timelineMode == "timing" ? new Rect(97, 3, 80, 25) : new Rect(97, 3, 80, 20), timelineMode == "timing", "Timing", "buttonLeft"))
             timelineMode = "timing";
-        if (GUI.Toggle(timelineMode == "lane" ? new Rect(168, 3, 80, 25) : new Rect(168, 3, 80, 20), timelineMode == "lane", "Lanes", "buttonRight"))
+        if (GUI.Toggle(timelineMode == "lane" ? new Rect(178, 3, 80, 25) : new Rect(178, 3, 80, 20), timelineMode == "lane", "Lanes", "buttonRight"))
             timelineMode = "lane";
 
-        if (TargetLane != null && (GUI.Toggle(timelineMode == "hit" ? new Rect(250, 3, 80, 25) : new Rect(250, 3, 80, 20), timelineMode == "hit", "Hits", "button")))
-            timelineMode = "hit";
+        if (TargetLane != null) 
+        {
+            GUI.Label(new Rect(259, 3, 21, 20), "▶", bgLabel);
+
+            if (GUI.Toggle(timelineMode == "step" ? new Rect(280, 3, 80, 25) : new Rect(280, 3, 80, 20), timelineMode == "step", "Steps", "buttonLeft"))
+                timelineMode = "step";
+            if (GUI.Toggle(timelineMode == "hit" ? new Rect(361, 3, 80, 25) : new Rect(361, 3, 80, 20), timelineMode == "hit", "Hits", "buttonRight"))
+                timelineMode = "hit";
+        }
+
 
         bool palleteSel = TargetChart != null && TargetThing == TargetChart.Pallete;
         if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
@@ -1602,7 +1658,7 @@ public class Charter : EditorWindow
     {
         float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
         float seekLimitEnd = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
-        float seekTime = TargetSong.Timing.ToBeat(CurrentAudioSource.time);
+        float seekTime = TargetSong.Timing.ToBeat(preciseTime);
         if (seekEnd == seekStart && seekStart == 0)
         {
             seekEnd = Mathf.Min(width / 100, seekLimitEnd);
@@ -1665,6 +1721,10 @@ public class Charter : EditorWindow
             EditorGUIUtility.isProSkin ? Color.white : Color.black);
         EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, 122, 1, 10),
             (EditorGUIUtility.isProSkin ^ (seekTime >= seekStart && seekTime < seekEnd)) ? new Color(.9f, .9f, .9f, .75f) : new Color(.2f, .2f, .2f, .75f));
+
+        GUIStyle itemStyle = new GUIStyle("button");
+        itemStyle.fontSize = 12;
+        itemStyle.padding = new RectOffset(1, 0, 0, 0);
 
         if (TargetChart != null)
         {
@@ -1745,7 +1805,7 @@ public class Charter : EditorWindow
 
                             float rpos = Mathf.Min(Mathf.Max((a - seekStart) / (seekEnd - seekStart) * width, 5), (b - seekStart) / (seekEnd - seekStart) * width);
                             if (TargetTimestamp == ts || IsTargeted(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "button");
-                            if (GUI.Button(new Rect(rpos - 1, 3 + time * 22, 6, 20), DeletingThing == ts ? "?" : " ", "button"))
+                            if (GUI.Button(new Rect(rpos - 1, 3 + time * 22, 6, 20), DeletingThing == ts ? "?" : "┃", itemStyle))
                             {
 
                                 if (pickermode == "delete")
@@ -1785,7 +1845,7 @@ public class Charter : EditorWindow
                     if (a > seekStart && a < seekEnd)
                     {
                         if (IsTargeted(stop)) GUI.Label(new Rect(pos - 30, 2 + time * 22, 62, 22), "", "button");
-                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), "button"))
+                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), itemStyle))
                         {
                             if (pickermode == "delete")
                             {
@@ -1832,7 +1892,7 @@ public class Charter : EditorWindow
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
                                 if (IsTargeted(lane.LaneSteps[x])) GUI.Label(new Rect(pos3 - 2, 2 + time * 22, 8, 22), "", "button");
-                                if (GUI.Button(new Rect(pos3 - 1, 3 + time * 22, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : "|", "button"))
+                                if (GUI.Button(new Rect(pos3 - 1, 3 + time * 22, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : "┃", itemStyle))
                                 {
                                     if (pickermode == "delete")
                                     {
@@ -1859,7 +1919,7 @@ public class Charter : EditorWindow
                         {
                             float rpos = Math.Min(Math.Max((a - seekStart) / (seekEnd - seekStart) * width, 13), (b - seekStart) / (seekEnd - seekStart) * width - 15);
                             if (IsTargeted(lane)) GUI.Label(new Rect(rpos - 10, 2 + time * 22, 22, 22), "", "button");
-                            if (GUI.Button(new Rect(rpos - 9, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "|", "button"))
+                            if (GUI.Button(new Rect(rpos - 9, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "┃", itemStyle))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -1886,6 +1946,62 @@ public class Charter : EditorWindow
                     {
                         HistoryDelete(TargetChart.Lanes, lane);
                     }
+                }
+            }
+            else if (timelineMode == "step")
+            {
+                if (TargetLane != null)
+                {
+                    float a = TargetLane.LaneSteps[0].Offset;
+                    float b = TargetLane.LaneSteps[TargetLane.LaneSteps.Count - 1].Offset;
+                    if (a > seekStart)
+                    {
+                        float pos = (a - seekStart) / (seekEnd - seekStart) * width;
+                        EditorGUI.DrawRect(new Rect(0, 0, pos + 2, 115), new Color(0, 0, 0, .25f));
+                    }
+                    if (b < seekEnd)
+                    {
+                        float pos = (b - seekStart) / (seekEnd - seekStart) * width;
+                        EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, 115), new Color(0, 0, 0, .25f));
+                    }
+                    foreach (LaneStep step in TargetLane.LaneSteps)
+                    {
+                        float x = step.Offset;
+                        float pos = (x - seekStart) / (seekEnd - seekStart) * width;
+
+                        if (step.Offset > seekStart && step.Offset < seekEnd)
+                        {
+                            if (IsTargeted(step)) GUI.Label(new Rect(pos - 2, 2, 8, 96), "", "button");
+                            if (GUI.Button(new Rect(pos - 1, 3, 6, 94), DeletingThing == step ? "?" : "┃", itemStyle))
+                            {
+                                if (pickermode == "delete")
+                                {
+                                    if (DeletingThing == step)
+                                    {
+                                        HistoryDelete(TargetLane.LaneSteps, step);
+                                        TargetThing = null;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        DeletingThing = step;
+                                    }
+                                }
+                                else
+                                {
+                                    TargetThing = step;
+                                    DeletingThing = null;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    GUIStyle center = new GUIStyle("label");
+                    center.alignment = TextAnchor.MiddleCenter;
+                    GUI.Label(new Rect(0, 0, width + 4, 115), "Please select a lane to start editing.", center);
                 }
             }
             else if (timelineMode == "hit")
@@ -1922,7 +2038,7 @@ public class Charter : EditorWindow
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
                         {
                             if (IsTargeted(hit)) GUI.Label(new Rect(pos - 10, 2 + time * 22, 22, 22), "", "button");
-                            if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == hit ? "?" : "|", "button"))
+                            if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == hit ? "?" : "┃", itemStyle))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -1958,15 +2074,23 @@ public class Charter : EditorWindow
             if (Times.Count > 5)
             {
                 verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 4f / Times.Count, 0, Times.Count - 4));
-
-                if (Event.current.type == EventType.ScrollWheel)
+            }
+            if (Event.current.type == EventType.ScrollWheel)
+            {
+                Vector2 mPos = Event.current.mousePosition;
+                if (mPos.y > 0 && mPos.y < 115)
                 {
-                    Vector2 mPos = Event.current.mousePosition;
-                    if (mPos.y > 0 && mPos.y < 115)
+                    if (Event.current.shift)
                     {
                         verSeek = verSeek + Math.Sign(Event.current.delta.y);
-                        Repaint();
                     }
+                    else 
+                    {
+                        float seekRange = seekEnd - seekStart;
+                        seekStart = Mathf.Clamp(seekStart + sep * Event.current.delta.y, seekLimitStart, seekLimitEnd - seekRange);
+                        seekEnd = seekStart + seekRange;
+                    }
+                    Repaint();
                 }
             }
             verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - 5), 0);
@@ -2084,6 +2208,15 @@ public class Charter : EditorWindow
                         if (sel.Count == 1) { TargetThing = TargetLane = sel[0]; }
                         else if (sel.Count > 1) { TargetThing = sel; TargetLane = null; }
                     }
+                    else if (timelineMode == "step")
+                    {
+                        List<LaneStep> sel = TargetLane.LaneSteps.FindAll(x =>
+                        {
+                            return x.Offset >= selectStart && x.Offset <= selectEnd;
+                        });
+                        if (sel.Count == 1) TargetThing = sel[0];
+                        else if (sel.Count > 1) TargetThing = sel;
+                    }
                     else if (timelineMode == "hit")
                     {
                         List<HitObject> sel = TargetLane.Objects.FindAll(x =>
@@ -2134,7 +2267,7 @@ public class Charter : EditorWindow
                 {
                     if (dragMode == "seeksnap" && pickermode == "bpmstop")
                     {
-                        BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(CurrentAudioSource.time, out _).BPM, Mathf.Round(CurrentAudioSource.time * 1000) / 1000);
+                        BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(preciseTime, out _).BPM, Mathf.Round(preciseTime * 1000) / 1000);
                         HistoryAdd(TargetSong.Timing.Stops, stop);
                         TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                         Repaint();
@@ -2142,11 +2275,12 @@ public class Charter : EditorWindow
                     else if (dragMode == "seeksnap" && pickermode == "lane")
                     {
                         Lane lane = new Lane();
+                        lane.Offset = new Vector3(0, -3);
 
                         LaneStep step = new LaneStep();
                         step.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
-                        step.StartPos = new Vector2(-6, -3);
-                        step.EndPos = new Vector2(6, -3);
+                        step.StartPos = new Vector2(-6, 0);
+                        step.EndPos = new Vector2(6, 0);
                         lane.LaneSteps.Add(step);
 
                         LaneStep next = step.DeepClone();
@@ -2156,6 +2290,21 @@ public class Charter : EditorWindow
                         HistoryAdd(TargetChart.Lanes, lane);
                         TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
                         TargetThing = TargetLane = lane;
+                        Repaint();
+                    }
+                    else if (dragMode == "seeksnap" && pickermode == "step" && TargetLane != null)
+                    {
+                        float p = (float)(Math.Ceiling(pos * 1e5) / 1e5);
+                        LaneStep cur = TargetLane.GetLaneStep(CurrentAudioSource.time, CurrentAudioSource.time, TargetSong.Timing);
+
+                        LaneStep step = new LaneStep();
+                        step.Offset = p;
+                        step.StartPos = cur.StartPos;
+                        step.EndPos = cur.EndPos;
+
+                        HistoryAdd(TargetLane.LaneSteps, step);
+                        TargetLane.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                        TargetThing = step;
                         Repaint();
                     }
                     else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null)
@@ -2981,11 +3130,15 @@ public class Charter : EditorWindow
         }
         else if (timelineMode == "timing")
         {
-            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "bpmstop", new GUIContent("STP", "BPM Stop"), "button")) pickermode = "bpmstop";
+            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "bpmstop", new GUIContent("BPM", "BPM Stop"), "button")) pickermode = "bpmstop";
         }
         else if (timelineMode == "lane")
         {
             if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "lane", new GUIContent("LNE", "Lane"), "button")) pickermode = "lane";
+        }
+        else if (timelineMode == "step")
+        {
+            if (GUI.Toggle(new Rect(0, 106, 33, 33), pickermode == "step", new GUIContent("STP", "Lane Step"), "button")) pickermode = "step";
         }
         else if (timelineMode == "hit")
         {
@@ -3361,8 +3514,8 @@ public class Charter : EditorWindow
             TutorialLerp += Time.deltaTime / 2;
             TutorialStep prev = TutorialSteps[TutorialStage - 1];
             float ease = Ease.Get(TutorialLerp, "Quadratic", EaseMode.Out);
-            TutorialPopupAnchor = Vector2.Lerp(prev.PopupAnchor, step.PopupAnchor, ease);
-            TutorialPopupPosition = Vector2.Lerp(prev.PopupPosition, step.PopupPosition, ease);
+            TutorialPopupAnchor = Vector2.LerpUnclamped(prev.PopupAnchor, step.PopupAnchor, ease);
+            TutorialPopupPosition = Vector2.LerpUnclamped(prev.PopupPosition, step.PopupPosition, ease);
             Repaint();
         }
         else

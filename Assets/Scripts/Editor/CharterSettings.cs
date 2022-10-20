@@ -228,6 +228,7 @@ public class CharterKeybinds
         Values["Edit/Redo"] = new Keybind(KeyCode.Y, EventModifiers.Command);
         Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Command);
         Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Command);
+        Values["Edit/Delete"] = new Keybind(KeyCode.Backspace, EventModifiers.None);
 
         Values["Picker/Cursor"] = new Keybind(KeyCode.A);
         Values["Picker/Select"] = new Keybind(KeyCode.S);
