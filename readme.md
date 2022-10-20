@@ -1,6 +1,6 @@
 <div style="text-align:center">
     <h2>J.A.N.O.A.R.G.</h2>
-    <i>(Just A Normal, Ordinary, Another Rhythm Game)</i><br/>
+    <i>(Just Another Normal, Ordinary, Acceptable Rhythm Game)</i><br/>
     A (currently hypothetical) rhythm game where everything can move.
     <br/><br/>
 </div>
