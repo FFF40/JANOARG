@@ -204,8 +204,7 @@ public class HitPlayer : MonoBehaviour
                     Ticks.RemoveAt(0);
                     if (Ticks.Count == 0)
                     {
-                        Destroy(gameObject);
-                        Indicator.gameObject.SetActive(false);
+                        gameObject.SetActive(false);
                         ChartPlayer.main.RemovingHits.Add(this);
                     }
                     // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
@@ -235,8 +234,7 @@ public class HitPlayer : MonoBehaviour
         isHit = true;
         if (Ticks.Count == 0) 
         {
-            Destroy(gameObject);
-            Indicator.gameObject.SetActive(false);
+            gameObject.SetActive(false);
             ChartPlayer.main.RemovingHits.Add(this);
         }
     }

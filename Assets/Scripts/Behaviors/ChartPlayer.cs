@@ -79,33 +79,11 @@ public class ChartPlayer : MonoBehaviour
     public Image GaugeUpper;
     public Image GaugeLower;
     [Space]
+    public CanvasGroup ComboGroup;
     public TMP_Text ComboLabel;
     public TMP_Text ComboText;
 
-    [Header("Result Interface")]
-    public GameObject ResultInterfaceObject;
-    [Space]
-    public RectTransform SummaryBox;
-    public TMP_Text PlayStateText;
-    [Space]
-    public RectTransform ResultSongBox;
-    public TMP_Text ResultSongNameText;
-    public TMP_Text ResultSongArtistText;
-    public TMP_Text ResultDifficultyLabel;
-    public List<Image> ResultDifficultyIndicators;
-    [Space]
-    public RectTransform ResultScoreBox;
-    public TMP_Text ResultScoreText;
-    [Space]
-    public TMP_Text RecordLabelText;
-    public TMP_Text RecordText;
-    public TMP_Text RecordDifferenceText;
-    [Space]
-    public RectTransform DetailsBox;
-    public TMP_Text ResultPerfectText;
-    public TMP_Text ResultGoodText;
-    public TMP_Text ResultBadText;
-    public TMP_Text ResultComboText;
+
 
     [HideInInspector]
     public Chart CurrentChart;
@@ -266,7 +244,8 @@ public class ChartPlayer : MonoBehaviour
         }
 
         PlayInterfaceObject.SetActive(true);
-        ResultInterfaceObject.SetActive(false);
+        Debug.Log(ResultScreen.main);
+        ResultScreen.main.ResultInterfaceObject.SetActive(false);
 
         IsPlaying = true;
     }
@@ -289,7 +268,6 @@ public class ChartPlayer : MonoBehaviour
 
     void UpdateScore() 
     {
-        ComboText.text = Combo.ToString("#", CultureInfo.InvariantCulture);
 
         GaugeText.text = (Gauge * 10).ToString("F" + (Gauge == 1 ? "0" : "1"), CultureInfo.InvariantCulture);
         GaugeSlider.value = Gauge;
@@ -311,6 +289,7 @@ public class ChartPlayer : MonoBehaviour
     public void AddScore(float weight, float acc, bool combo)
     {
         Score += weight * acc;
+        int LastCombo = Combo;
         Combo = combo ? Combo + 1 : 0;
         MaxCombo = Mathf.Max(MaxCombo, Combo);
         NoteCount--;
@@ -320,15 +299,16 @@ public class ChartPlayer : MonoBehaviour
             Gauge = Mathf.Min(1, Gauge + weight * acc / CurrentChart.ChartConstant / 35);
             if (acc >= 1) PerfectCount++;
             else GoodCount++;
-            StartCoroutine(ComboPop());
+            if (!isAnimating) StartCoroutine(ComboPop());
         }
         else
         {
             BadCount++;
-            Gauge = Mathf.Max(0, Gauge - weight / 35);
+            Gauge = Mathf.Max(0, Gauge - weight / 100);
+            if (!isAnimating && LastCombo > 0) StartCoroutine(ComboDrop());
         }
 
-        if (NoteCount <= 0) StartCoroutine(SplashAnimation());
+        if (NoteCount <= 0) StartCoroutine(ResultScreen.main.SplashAnimation());
         UpdateScore();
     }
 
@@ -410,7 +390,9 @@ public class ChartPlayer : MonoBehaviour
             {
                 if (obj.CurrentHit.Type == HitObject.HitType.Normal) NormalHits.Remove(obj);
                 else CatchHits.Remove(obj);
+                Destroy(obj.gameObject);
             }
+            RemovingHits.Clear();
 
             foreach (HitPlayer obj in NormalHits)
             {
@@ -578,12 +560,28 @@ public class ChartPlayer : MonoBehaviour
 
     IEnumerator ComboPop () 
     {
+        ComboGroup.alpha = 1;
+        ComboText.text = Combo.ToString("#", CultureInfo.InvariantCulture);
         for (float a = 0; a < 1; a += Time.deltaTime / .1f)
         {
             ComboText.rectTransform.anchoredPosition = Vector3.up * 5 * Mathf.Cos(a * Mathf.PI / 2);
             yield return null;
         }
         ComboText.rectTransform.anchoredPosition = Vector2.zero;
+    }
+
+    IEnumerator ComboDrop () 
+    {
+        isAnimating = true;
+        for (float a = 0; a < 1; a += Time.deltaTime / .2f)
+        {
+            ComboText.rectTransform.anchoredPosition = Vector3.down * 20 * a * a;
+            ComboGroup.alpha = 1 - a;
+            yield return null;
+        }
+        ComboGroup.alpha = 0;
+        if (Combo > 0) StartCoroutine(ComboPop());
+        isAnimating = false;
     }
 
     IEnumerator ScorePop (int digit) 
@@ -596,81 +594,6 @@ public class ChartPlayer : MonoBehaviour
         ScoreDigits[digit].rectTransform.anchoredPosition = new Vector2(ScoreDigits[digit].rectTransform.anchoredPosition.x, 0);
     }
 
-    IEnumerator SplashAnimation () 
-    {
-        isAnimating = true;
-        if (Score >= TotalScore) PlayStateText.text = "TRACK MASTERED!!";
-        else if (Combo >= TotalCombo) PlayStateText.text = "FULL STREAK!";
-        else if (Score <= 0) PlayStateText.text = "TRACK CLEARED?";
-        else PlayStateText.text = "TRACK CLEARED";
-
-        PlayInterfaceObject.SetActive(false);
-        ResultInterfaceObject.SetActive(true);
-
-        SummaryBox.anchorMin = new Vector2(0, .5f);
-        SummaryBox.anchorMax = new Vector2(1, .5f);
-        SummaryBox.anchoredPosition = Vector2.zero;
-        PlayStateText.rectTransform.anchorMin = PlayStateText.rectTransform.anchorMax = new Vector2(.5f, .5f);
-        PlayStateText.rectTransform.anchoredPosition = Vector2.zero;
-        ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 0);
-        DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 0);
-
-
-        ResultScoreBox.anchoredPosition = new Vector2(22500, 0);
-
-        for (float a = 0; a < 1; a += Time.deltaTime / 4f)
-        {
-            float ease = Ease.Get(a, "Circle", EaseMode.Out);
-            SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50 + (50 * (1 - ease)));
-            PlayStateText.fontSize = 32 + (15 / ease - 15);
-            PlayStateText.characterSpacing = 50 - (110 * (1 - ease));
-            yield return null;
-        }
-        SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50);
-        ComboText.fontSize = 120;
-        PlayStateText.fontSize = 32;
-        isAnimating = false;
-
-        StartCoroutine(ResultAnimation());
-    }
-
-    IEnumerator ResultAnimation () 
-    {
-
-        ResultSongNameText.text = Song.SongName;
-        ResultSongArtistText.text = Song.SongArtist;
-        ResultDifficultyLabel.text = CurrentChart.DifficultyLevel;
-
-        ResultPerfectText.text = PerfectCount.ToString("0", CultureInfo.InvariantCulture);
-        ResultGoodText.text = GoodCount.ToString("0", CultureInfo.InvariantCulture);
-        ResultBadText.text = BadCount.ToString("0", CultureInfo.InvariantCulture);
-        ResultComboText.text = MaxCombo.ToString("0", CultureInfo.InvariantCulture) + " / " + TotalCombo.ToString("0", CultureInfo.InvariantCulture);
-
-        void SetEase(float a) 
-        {
-            float ease = a < 1 ? Mathf.Pow(2 * Mathf.Clamp01(a / 2), 8) / 2 : 1 - Mathf.Pow(-2 * Mathf.Clamp01(a / 2) + 2, 8) / 2;
-            SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50 + (30 * ease));
-            PlayStateText.characterSpacing = 50 - (40 * ease);
-            PlayStateText.rectTransform.anchorMin = PlayStateText.rectTransform.anchorMax = new Vector2(.5f * (1 - ease), .5f);
-            PlayStateText.rectTransform.anchoredPosition = new Vector2(PlayStateText.preferredWidth / 2, 12) * ease;
-
-            RecordLabelText.margin = new Vector4(0, 50 * (1 - Ease.Get(Mathf.Clamp01(a - 1), "Quintic", EaseMode.Out)), 10, 0);
-            RecordText.margin = new Vector4(0, 50 * (1 - Ease.Get(Mathf.Clamp01(a - 1.1f), "Quintic", EaseMode.Out)), 10, 0);
-            RecordDifferenceText.margin = new Vector4(0, 50 * (1 - Ease.Get(Mathf.Clamp01(a - 1.2f), "Quintic", EaseMode.Out)), 10, 0);
-
-            ResultScoreBox.anchoredPosition = new Vector2((10 / Mathf.Clamp01(a - 1) - 10), 0);
-            ResultScoreText.text = ((int)(Score / Mathf.Max(TotalScore, 1) * 1e6 * (a > 3 ? 1 : 1 - Mathf.Pow(1e-7f, Mathf.Clamp01(a / 2 - .5f))))).ToString("D7", CultureInfo.InvariantCulture);
-
-            ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * Ease.Get(Mathf.Clamp01(a / 2 - 1.5f), "Quintic", EaseMode.Out));
-            DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * Ease.Get(Mathf.Clamp01(a / 2 - 1.5f), "Quintic", EaseMode.Out));
-        }
-        for (float a = 0; a < 1; a += Time.deltaTime / 6f)
-        {
-            SetEase(a * 6);
-            yield return null;
-        }
-        SetEase(6);
-    }
     
     public Mesh MakeFreeFlickEmblem()
     {
