@@ -43,6 +43,7 @@ public class Charter : EditorWindow
     public bool SeparateUnits;
     public bool PlayHitsounds;
     public bool FollowSeekLine;
+    public int WaveformMode;
 
     public List<LaneStyleManager> LaneStyleManagers = new List<LaneStyleManager>();
     public List<HitStyleManager> HitStyleManagers = new List<HitStyleManager>();
@@ -722,7 +723,7 @@ public class Charter : EditorWindow
                         LaneStep last = lane.LaneSteps[lane.LaneSteps.Count - 1];
                         if (last.Offset > pos)
                         {
-                            LaneStep dat = TargetLane.GetLaneStep(Mathf.Clamp(pos + 1e-5f, first.Offset, last.Offset), pos, TargetSong.Timing);
+                            LaneStep dat = TargetLane.GetLaneStep(Mathf.Clamp(pos * 1.00001f, first.Offset, last.Offset), pos, TargetSong.Timing);
                             float zPos = dat.Offset * ScrollSpeed;
                             Vector3 laneStart = Quaternion.Euler(lane.OffsetRotation) * ((Vector3)dat.StartPos + Vector3.forward * zPos) + lane.Offset;
                             Vector3 laneEnd = Quaternion.Euler(lane.OffsetRotation) * ((Vector3)dat.EndPos + Vector3.forward * zPos) + lane.Offset;
@@ -1005,6 +1006,7 @@ public class Charter : EditorWindow
             {
                 Rect rect = new Rect();
                 if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
+                if (extrasmode == "timeline_options") rect = new Rect(width - 304, height - 144, 300, 120);
 
                 GUIStyle exStyle = new GUIStyle("window");
                 exStyle.focused = exStyle.normal;
@@ -1342,22 +1344,32 @@ public class Charter : EditorWindow
 
     public void DeleteSelection()
     {
+        if (TargetTimestamp != null)
+        {
+            IStoryboardable sb = (IStoryboardable)TargetThing;
+            HistoryDelete(sb.Storyboard.Timestamps, TargetTimestamp);
+            TargetTimestamp = null;
+        }
         if (TargetThing is BPMStop || TargetThing is List<BPMStop>)
         {
             HistoryDelete(TargetSong.Timing.Stops, TargetThing);
+            TargetThing = null;
         }
         else if (TargetThing is Lane || TargetThing is List<Lane>)
         {
             HistoryDelete(TargetChart.Lanes, TargetThing);
+            TargetThing = null;
         }
         else if (TargetThing is HitObject || TargetThing is List<HitObject>)
         {
             HistoryDelete(TargetLane.Objects, TargetThing);
+            TargetThing = null;
         }
         else if (TargetThing is Timestamp || TargetThing is List<Timestamp>)
         {
             IStoryboardable sb = (IStoryboardable)TargetThing;
             HistoryDelete(sb.Storyboard.Timestamps, TargetThing);
+            TargetThing = null;
         }
     }
 
@@ -1671,8 +1683,13 @@ public class Charter : EditorWindow
             seekEnd = seekStart + seekRange;
         }
 
+        if (GUI.Toggle(new Rect(width - 20, 136, 19, 19), extrasmode == "timeline_options", EditorGUIUtility.IconContent("icon dropdown"),
+            new GUIStyle("buttonRight") { padding = new RectOffset(0, 0, 0, 0) }) ^ (extrasmode == "timeline_options"))
+        {
+            extrasmode = extrasmode == "timeline_options" ? "" : "timeline_options";
+        }
 
-        timelineSep = EditorGUI.IntField(new Rect(width - 41, 136, 40, 19), timelineSep);
+        timelineSep = EditorGUI.IntField(new Rect(width - 64, 136, 40, 19), timelineSep);
 
 
         GUIStyle label = new GUIStyle("miniLabel");
@@ -1682,6 +1699,28 @@ public class Charter : EditorWindow
         float sep = Mathf.Log(zoom / 20, timelineSep);
         float opa = ((sep % 1) + 1) % 1;
         sep = Mathf.Pow(timelineSep, Mathf.Floor(-sep));
+
+        float[] list = new float[32];
+        Color waveColor = EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .3f) : new Color(1, 1, 1, .3f);
+
+        if (Event.current.type == EventType.Repaint && WaveformMode >= (CurrentAudioSource.isPlaying ? 2 : 1)) 
+        {
+            for (int a = 0; a < width; a++) 
+            {
+                float time = TargetSong.Timing.ToSeconds(seekStart + a * (seekEnd - seekStart) / width);
+                if (time < 0) continue;
+
+                int samPos = (int)(time * TargetSong.Clip.frequency);
+                if (samPos >= TargetSong.Clip.samples - 32) break;
+
+                TargetSong.Clip.GetData(list, samPos);
+
+                float height = 0;
+                for (int i = 0; i < 32; i++) height += Math.Abs(list[i]);
+                height /= 32;
+                EditorGUI.DrawRect(new Rect(a + 2, 50 - height * 40, 1, height * 80), waveColor);
+            }
+        }
 
         EditorGUI.DrawRect(new Rect(0, 100, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
         for (float a = Mathf.Ceil(seekStart / sep) * sep; a < seekEnd; a += sep)
@@ -1700,11 +1739,11 @@ public class Charter : EditorWindow
 
             if (IsDivisible(TargetSong.Timing.ToBar(0, a), 1))
             {
-                EditorGUI.DrawRect(new Rect(pos + 1, 0, 1, 115), new Color(.6f, .6f, .4f, .5f * op));
+                EditorGUI.DrawRect(new Rect(pos + 1, 0, 1, 115), new Color(.6f, .6f, .4f, op));
             }
             else
             {
-                EditorGUI.DrawRect(new Rect(pos + 1.5f, 0, 1, 100), new Color(.5f, .5f, .5f, .5f * op));
+                EditorGUI.DrawRect(new Rect(pos + 1.5f, 0, 1, 100), new Color(.5f, .5f, .5f, .8f * op));
             }
 
             label.normal.textColor = new Color(label.normal.textColor.r, label.normal.textColor.g, label.normal.textColor.b, op2);
@@ -3174,6 +3213,13 @@ public class Charter : EditorWindow
             PlayHitsounds = GUI.Toggle(new Rect(150, 73, 145, 20), PlayHitsounds, "Hitsounds", "buttonRight");
             SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
             FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
+        }
+        else if (extrasmode == "timeline_options")
+        {
+            GUI.Label(new Rect(5, 6, 90, 18), "Waveform");
+            if (GUI.Toggle(new Rect(95, 6, 66, 18), WaveformMode == 0, "Off", "buttonLeft")) WaveformMode = 0;
+            if (GUI.Toggle(new Rect(162, 6, 66, 18), WaveformMode == 1, "Paused", "buttonMid")) WaveformMode = 1;
+            if (GUI.Toggle(new Rect(229, 6, 66, 18), WaveformMode == 2, "On", "buttonRight")) WaveformMode = 2;
         }
     }
 

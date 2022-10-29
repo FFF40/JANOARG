@@ -29,6 +29,11 @@ public class ChartPlayer : MonoBehaviour
     public int MaxCombo;
     public int TotalCombo;
     public int NoteCount;
+    [Space]
+    public float OffsetMean;
+    public float Deviation;
+    public int[] AccuracyValues = new int[23];
+    public int[] DiscreteValues = new int[2];
 
     [Header("Settings")]
     public float ScrollSpeed = 120;
@@ -36,6 +41,7 @@ public class ChartPlayer : MonoBehaviour
     [Space]
     public float PerfectHitWindow = 35;
     public float GoodHitWindow = 200;
+    public float BadHitWindow = 250;
 
     [Header("Objects")]
     public LanePlayer LanePlayerSample;
@@ -113,14 +119,12 @@ public class ChartPlayer : MonoBehaviour
 
     bool isAnimating;
     float precTime;
+    int normalHitCount;
 
     public void Awake()
     {
         main = this;
         Application.targetFrameRate = 60;
-        var configuration = AudioSettings.GetConfiguration();
-        configuration.dspBufferSize = 2048;
-        AudioSettings.Reset(configuration);
     }
 
     public void NormalizeTimestamp(Timestamp ts)
@@ -246,6 +250,7 @@ public class ChartPlayer : MonoBehaviour
         PlayInterfaceObject.SetActive(true);
         Debug.Log(ResultScreen.main);
         ResultScreen.main.ResultInterfaceObject.SetActive(false);
+        normalHitCount = NormalHits.Count;
 
         IsPlaying = true;
     }
@@ -308,8 +313,26 @@ public class ChartPlayer : MonoBehaviour
             if (!isAnimating && LastCombo > 0) StartCoroutine(ComboDrop());
         }
 
-        if (NoteCount <= 0) StartCoroutine(ResultScreen.main.SplashAnimation());
+        if (NoteCount <= 0) 
+        {
+            OffsetMean /= normalHitCount;
+            Deviation /= normalHitCount;
+            StartCoroutine(ResultScreen.main.SplashAnimation());
+        }
+
         UpdateScore();
+    }
+
+    public void AddAccuracy(float acc) 
+    {
+        int pos = (int)(Mathf.Ceil(Mathf.Abs(acc) * 10) * Mathf.Sign(acc)) + 11;
+        if (acc == -1) pos = 0;
+        else if (acc == 1) pos = 22;
+        AccuracyValues[pos]++;
+    }
+    public void AddDiscrete(bool hit) 
+    {
+        DiscreteValues[hit ? 0 : 1]++;
     }
 
     // Update is called once per frame
@@ -354,7 +377,7 @@ public class ChartPlayer : MonoBehaviour
             
             Dictionary<Touch, HitPlayer> Touches = new Dictionary<Touch, HitPlayer>();
 
-            if (!ChartPlayer.main.AutoPlay)
+            if (!AutoPlay)
             {
                 foreach (Touch touch in Input.touches)
                 {
@@ -396,25 +419,31 @@ public class ChartPlayer : MonoBehaviour
 
             foreach (HitPlayer obj in NormalHits)
             {
-                if (obj.CurrentHit.Offset > time + .2f) break;
+                if (obj.CurrentHit.Offset > time + BadHitWindow / 1000) break;
                 if (!obj.isHit) 
                 {
-                    if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
+                    if (AutoPlay && time > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(0);
-                        ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
-                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                        if (obj.isFlicked) AddAccuracy(0);
+                        else AddDiscrete(true);
+                        AddScore(obj.NoteWeight, 1, true);
+                        AudioPlayer.PlayOneShot(NormalHitSound);
+                        obj.isFlicked = true;
                         obj.BeginHit();
                     }
-                    else if (time > obj.CurrentHit.Offset + .2f)
+                    else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
                     {
-                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
+                        Deviation += GoodHitWindow / 1000;
+                        if (obj.isFlicked) AddAccuracy(1);
+                        else AddDiscrete(false);
+                        AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
                     }
-                    else if (time > obj.CurrentHit.Offset - .2f)
+                    else if (time > obj.CurrentHit.Offset - BadHitWindow / 1000)
                     {
                         Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
-                        float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                        float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) / 2 + Screen.width / 20;
                         foreach (Touch touch in Touches.Keys) 
                         {
                             if (Vector2.Distance(touch.position, ScreenMid) <= dist 
@@ -429,25 +458,27 @@ public class ChartPlayer : MonoBehaviour
                 }
                 else if (!obj.isFlicked && obj.CurrentHit.Flickable)
                 {
-                    if (time > obj.CurrentHit.Offset + .2f)
+                    if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
                     {
-                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
+                        AddDiscrete(false);
+                        AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
                     }
-                    else if (time > obj.CurrentHit.Offset - .2f)
+                    else if (time > obj.CurrentHit.Offset - GoodHitWindow / 1000)
                     {
                         foreach (FlickHandle flick in FlickDirections.Values) 
                         {
                             Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
-                            float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                            float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) / 2 + Screen.width / 20;
                             if (!flick.Handled && Vector2.Distance(flick.Position, ScreenMid) <= dist 
                                 && (obj.CurrentHit.FlickDirection < 0 || Mathf.DeltaAngle(flick.Direction, obj.CurrentHit.FlickDirection) < 40)) 
                             {
                                 flick.Handled = true;
                                 obj.isFlicked = true;
                                 obj.MakeHitEffect(null);
-                                ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
-                                ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
+                                AddDiscrete(true);
+                                AddScore(obj.NoteWeight, 1, true);
+                                AudioPlayer.PlayOneShot(NormalHitSound);
                                 obj.BeginHit();
                                 break;
                             }
@@ -456,53 +487,40 @@ public class ChartPlayer : MonoBehaviour
                 }
             }
 
-            foreach (Touch touch in Touches.Keys)
-            {
-                if (Touches[touch] != null)
-                {
-                    HitPlayer obj = Touches[touch];
-                    if (obj.CurrentHit.Flickable)
-                    {
-                        obj.isHit = true;
-                    }
-                    else 
-                    {
-                        float acc = HitPlayer.GetAccuracy(time - obj.CurrentHit.Offset);
-                        obj.MakeHitEffect(acc);
-                        ChartPlayer.main.AddScore(3, (1 - Mathf.Abs(acc)), true);
-                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.NormalHitSound);
-                        obj.BeginHit();
-                    }
-                }
-            }
-
             foreach (HitPlayer obj in CatchHits)
             {
-                if (obj.CurrentHit.Offset > time + .2f) break;
+                if (obj.CurrentHit.Offset > time + GoodHitWindow / 1000) break;
                 if (!obj.isHit) 
                 {
-                    if (ChartPlayer.main.AutoPlay && time > obj.CurrentHit.Offset)
+                    if (AutoPlay && time > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(null);
-                        ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
-                        ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                        AddDiscrete(true);
+                        AddScore(obj.NoteWeight, 1, true);
+                        AudioPlayer.PlayOneShot(CatchHitSound);
+                        obj.isFlicked = true;
                         obj.BeginHit();
                     }
-                    else if (time > obj.CurrentHit.Offset + .2f)
+                    else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
                     {
-                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
+                        AddDiscrete(false);
+                        AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
                     }
-                    else if (time > obj.CurrentHit.Offset - .2f)
+                    else if (time > obj.CurrentHit.Offset - GoodHitWindow / 1000)
                     {
                         Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
-                        float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                        float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) / 2 + Screen.width / 20;
                         foreach (Touch touch in Input.touches) 
                         {
                             if (Vector2.Distance(touch.position, ScreenMid) <= dist) 
                             {
                                 if (obj.isFlicked) obj.isPreHit = true;
                                 else obj.isHit = true;
+                            }
+                            if (Touches.ContainsKey(touch) && Touches[touch] != null && Touches[touch].CurrentHit.Offset > obj.CurrentHit.Offset)
+                            {
+                                Touches.Remove(touch);
                             }
                         }
                         if (obj.isPreHit && time > obj.CurrentHit.Offset)
@@ -514,8 +532,9 @@ public class ChartPlayer : MonoBehaviour
                             else 
                             {
                                 obj.MakeHitEffect(null);
-                                ChartPlayer.main.AddScore(1, 1, true);
-                                ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                                AddDiscrete(true);
+                                AddScore(1, 1, true);
+                                AudioPlayer.PlayOneShot(CatchHitSound);
                                 
                                 if (obj.Ticks.Count != 0) obj.railTime = 1;
                                 obj.BeginHit();
@@ -525,17 +544,17 @@ public class ChartPlayer : MonoBehaviour
                 }
                 else if (!obj.isFlicked && obj.CurrentHit.Flickable)
                 {
-                    if (time > obj.CurrentHit.Offset + .2f)
+                    if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
                     {
-                        ChartPlayer.main.AddScore(obj.NoteWeight, 0, false);
+                        AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
                     }
-                    else if (time > obj.CurrentHit.Offset - .2f)
+                    else if (time > obj.CurrentHit.Offset - GoodHitWindow / 1000)
                     {
                         foreach (FlickHandle flick in FlickDirections.Values) 
                         {
                             Vector2 ScreenMid = (obj.ScreenStart + obj.ScreenEnd) / 2;
-                            float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) + Screen.width / 20;
+                            float dist = Vector2.Distance(obj.ScreenStart, obj.ScreenEnd) / 2 + Screen.width / 20;
                             if (!flick.Handled && Vector2.Distance(flick.Position, ScreenMid) <= dist 
                                 && (obj.CurrentHit.FlickDirection < 0 || Mathf.DeltaAngle(flick.Direction, obj.CurrentHit.FlickDirection) < 40)) 
                             {
@@ -548,10 +567,39 @@ public class ChartPlayer : MonoBehaviour
                         {
                             obj.isFlicked = true;
                             obj.MakeHitEffect(null);
-                            ChartPlayer.main.AddScore(obj.NoteWeight, 1, true);
-                            ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+                            AddDiscrete(true);
+                            AddScore(obj.NoteWeight, 1, true);
+                            AudioPlayer.PlayOneShot(CatchHitSound);
                             obj.BeginHit();
                         }
+                    }
+                }
+            }
+
+            foreach (Touch touch in Touches.Keys)
+            {
+                if (Touches[touch] != null)
+                {
+                    HitPlayer obj = Touches[touch];
+                    float ofs = time - obj.CurrentHit.Offset;
+                    if (obj.CurrentHit.Flickable)
+                    {
+                        if (ofs >= -GoodHitWindow / 1000)
+                        {
+                            obj.isHit = true;
+                        }
+                    }
+                    else 
+                    {
+                        OffsetMean += ofs;
+                        Deviation += Mathf.Abs(ofs);
+                        float acc = ofs < -GoodHitWindow / 1000 ? -1 : HitPlayer.GetAccuracy(ofs);
+                        
+                        obj.MakeHitEffect(acc);
+                        AddAccuracy(acc);
+                        AddScore(3, (1 - Mathf.Abs(acc)), acc != -1);
+                        AudioPlayer.PlayOneShot(NormalHitSound);
+                        obj.BeginHit();
                     }
                 }
             }

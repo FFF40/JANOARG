@@ -574,13 +574,13 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
             offset += step.Speed * (Mathf.Max(t, laneTimeT) - curtime);
             curtime = Mathf.Max(t, laneTimeT);
 
-            if (step.Offset == time) return new LaneStep 
+            if (time == step.Offset) return new LaneStep 
             {
                 StartPos = step.StartPos,
                 EndPos = step.EndPos,
                 Offset = laneTime < time ? offset : float.NaN,
             };
-            else if (step.Offset > time) 
+            else if (time < step.Offset) 
             {
                 if (a == 0) return new LaneStep 
                 {

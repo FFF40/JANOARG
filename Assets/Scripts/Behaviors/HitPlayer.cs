@@ -164,7 +164,7 @@ public class HitPlayer : MonoBehaviour
                 ScreenStart = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorLeft.position);
                 ScreenEnd = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorRight.position);
                 Vector2 ScreenMid = (ScreenStart + ScreenEnd) / 2;
-                float dist = Vector2.Distance(ScreenStart, ScreenEnd) + Screen.width / 20;
+                float dist = Vector2.Distance(ScreenStart, ScreenEnd) / 2 + Screen.width / 20;
 
                 isPreHit = ChartPlayer.main.AutoPlay;
                 if (!isPreHit) foreach (Touch touch in Input.touches) 
@@ -210,11 +210,13 @@ public class HitPlayer : MonoBehaviour
                     // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
                     if (railTime > 0) 
                     {
+                        ChartPlayer.main.AddDiscrete(true);
                         ChartPlayer.main.AddScore(1, 1, true);
                         MakeHitEffect(null, false);
                     }
                     else 
                     {
+                        ChartPlayer.main.AddDiscrete(false);
                         ChartPlayer.main.AddScore(1, 0, false);
                     }
                 }

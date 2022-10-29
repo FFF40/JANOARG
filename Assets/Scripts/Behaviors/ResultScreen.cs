@@ -7,6 +7,7 @@ using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class ResultScreen : MonoBehaviour
 {
@@ -15,7 +16,10 @@ public class ResultScreen : MonoBehaviour
     
     public GameObject ResultInterfaceObject;
     [Space]
+    public bool ExtraDetailMode;
+    [Space]
     public RectTransform SummaryBox;
+    public Image SummaryImage;
     public TMP_Text PlayStateText;
     [Space]
     public RectTransform ResultSongBox;
@@ -41,10 +45,29 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text RecordDifferenceText;
     [Space]
     public RectTransform DetailsBox;
+    public RectTransform SimpleDetailBox;
     public TMP_Text ResultPerfectText;
     public TMP_Text ResultGoodText;
     public TMP_Text ResultBadText;
     public TMP_Text ResultComboText;
+    [Space]
+    public RectTransform ExtraDetailBox;
+    public TMP_Text ResultAccuracyTooEarlyText;
+    public TMP_Text ResultAccuracyEarlyText;
+    public TMP_Text ResultAccuracyPerfectText;
+    public TMP_Text ResultAccuracyLateText;
+    public TMP_Text ResultAccuracyTooLateText;
+    public TMP_Text ResultDiscretePassText;
+    public TMP_Text ResultDiscreteFailText;
+    public TMP_Text ResultTimingAverageText;
+    public TMP_Text ResultTimingDeviationText;
+    public RectTransform ResultGraphBox;
+    public List<Image> ResultGraphBars;
+    public Image ResultBarSample;
+    public Color PerfectBarColor;
+    public Color HighGoodBarColor;
+    public Color LowGoodBarColor;
+    public Color BadBarColor;
 
     RankLetter currentRank;
 
@@ -115,17 +138,63 @@ public class ResultScreen : MonoBehaviour
 
     public IEnumerator ResultAnimation () 
     {
+        isAnimating = true;
+
         ChartPlayer cp = ChartPlayer.main;
+
+        SimpleDetailBox.anchoredPosition = new Vector2(0, 0);
+        ExtraDetailBox.anchoredPosition = new Vector2(0, -40);
 
         ResultSongNameText.text = cp.Song.SongName;
         ResultSongArtistText.text = cp.Song.SongArtist;
         ResultDifficultyLabel.text = cp.CurrentChart.DifficultyLevel;
+        for (int a = 0; a < ResultDifficultyIndicators.Count; a++) 
+        {
+            ResultDifficultyIndicators[a].gameObject.SetActive(cp.CurrentChart.DifficultyIndex >= a);
+        }
 
         ResultPerfectText.text = cp.PerfectCount.ToString("0", CultureInfo.InvariantCulture);
         ResultGoodText.text = cp.GoodCount.ToString("0", CultureInfo.InvariantCulture);
         ResultBadText.text = cp.BadCount.ToString("0", CultureInfo.InvariantCulture);
         ResultComboText.text = cp.MaxCombo.ToString("0", CultureInfo.InvariantCulture) + " / " + cp.TotalCombo.ToString("0", CultureInfo.InvariantCulture);
+        
+        ResultAccuracyTooEarlyText.text = cp.AccuracyValues[0].ToString("0", CultureInfo.InvariantCulture);
+        int early = 0;
+        for (int i = 1; i <= 10; i++) early += cp.AccuracyValues[i];
+        ResultAccuracyEarlyText.text = early.ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyPerfectText.text = cp.AccuracyValues[11].ToString("0", CultureInfo.InvariantCulture);
+        int late = 0;
+        for (int i = 12; i <= 21; i++) late += cp.AccuracyValues[i];
+        ResultAccuracyLateText.text = late.ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyTooLateText.text = cp.AccuracyValues[22].ToString("0", CultureInfo.InvariantCulture);
 
+        ResultDiscretePassText.text = cp.DiscreteValues[0].ToString("0", CultureInfo.InvariantCulture);
+        ResultDiscreteFailText.text = cp.DiscreteValues[1].ToString("0", CultureInfo.InvariantCulture);
+
+        ResultTimingAverageText.text = (cp.OffsetMean < 0 ? "−" : "+") + Mathf.Abs(cp.OffsetMean * 1e3f).ToString("0.00", CultureInfo.InvariantCulture) + "ms";
+        ResultTimingDeviationText.text = (cp.Deviation * 1e3f).ToString("0.00", CultureInfo.InvariantCulture) + "ms";
+
+        float max = Mathf.Max(cp.AccuracyValues);
+        for (int a = 0; a < 23; a++) 
+        {
+            Image bar = Instantiate(ResultBarSample, ResultGraphBox);
+            int dist = Mathf.Abs(a - 11);
+            bar.color = dist == 0 ? PerfectBarColor : dist == 11 ? BadBarColor : Color.Lerp(HighGoodBarColor, LowGoodBarColor, (dist - 1) / 10f);
+            bar.rectTransform.anchorMin = new Vector2(.035f * a, 0);
+            bar.rectTransform.anchorMax = new Vector2(.035f * a + .03f, cp.AccuracyValues[a] / max);
+            bar.rectTransform.sizeDelta = Vector2.zero;
+        }
+
+        max = Mathf.Max(cp.DiscreteValues);
+        for (int a = 0; a < 2; a++) 
+        {
+            Image bar = Instantiate(ResultBarSample, ResultGraphBox);
+            bar.color = a == 0 ? PerfectBarColor : BadBarColor;
+            bar.rectTransform.anchorMin = new Vector2(.035f * a + .935f, 0);
+            bar.rectTransform.anchorMax = new Vector2(.035f * a + .965f, cp.DiscreteValues[a] / max);
+            bar.rectTransform.sizeDelta = Vector2.zero;
+        }
+        
         foreach (RankLetter rank in Ranks) 
         {
             if (cp.Score / Mathf.Max(cp.TotalScore, 1) * 1e6 >= rank.Threshold) currentRank = rank;
@@ -220,6 +289,65 @@ public class ResultScreen : MonoBehaviour
             yield return null;
         }
         SetEase(1);
+        RankExplosion.rectTransform.sizeDelta = Vector2.zero;
+
+        isAnimating = false;
+    }
+
+    public void ToggleExtraDetailMode()
+    {
+        Debug.Log(isAnimating + " " + ExtraDetailMode);
+        if (!isAnimating)
+        {
+            ExtraDetailMode = !ExtraDetailMode;
+            StartCoroutine(ExtraDetailMode ? ExtraDetailEnter() : ExtraDetailExit());
+        }
+    }
+
+    void ExtraDetailEase(float ease)
+    {
+        SummaryBox.anchorMin = new Vector2(0, .5f - .35f * ease);
+        SummaryBox.anchorMax = new Vector2(1, .5f + .35f * ease);
+        SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 80 - 190 * ease);
+        SummaryBox.anchoredPosition = new Vector2(0, 5 * ease);
+        SummaryImage.color = Color.Lerp(Color.white, Color.black, ease);
+        PlayStateText.color = ResultScoreText.color = ResultScoreLabel.color = Color.Lerp(Color.black, new Color(1, 1, 1, .2f), ease);
+        ResultScoreBox.anchoredPosition = new Vector2(-340 + 115 * ease, 0);
+        RankBox.anchoredPosition = new Vector2(-25 + 1000 * ease, 0);
+
+        ResultSongBox.anchoredPosition = new Vector2(0, -60 + 10 * ease);
+
+        DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 + 10 * ease);
+        SimpleDetailBox.anchoredPosition = new Vector2(0, 40 * ease);
+        ExtraDetailBox.anchoredPosition = new Vector2(0, -40 * (1 - ease));
+
+        ResultGraphBox.anchorMax = new Vector2(1, ease);
+    }
+
+    IEnumerator ExtraDetailEnter()
+    {
+        isAnimating = true;
+        for (float a = 0; a < 1; a += Time.deltaTime / .6f)
+        {
+            float ease = Ease.Get(a, "Quintic", EaseMode.InOut);
+            ExtraDetailEase(ease);
+            yield return null;
+        }
+        ExtraDetailEase(1);
+        isAnimating = false;
+    }
+
+    IEnumerator ExtraDetailExit()
+    {
+        isAnimating = true;
+        for (float a = 0; a < 1; a += Time.deltaTime / .6f)
+        {
+            float ease = Ease.Get(a, "Quintic", EaseMode.InOut);
+            ExtraDetailEase(1 - ease);
+            yield return null;
+        }
+        ExtraDetailEase(0);
+        isAnimating = false;
     }
 }
 
