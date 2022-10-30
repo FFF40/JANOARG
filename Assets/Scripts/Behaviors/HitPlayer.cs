@@ -175,9 +175,9 @@ public class HitPlayer : MonoBehaviour
                         break;
                     }
                 }
-                railTime = isPreHit ? 1 : railTime - Time.deltaTime * .2f;
+                railTime = isPreHit ? 1 : railTime - Time.deltaTime * ChartPlayer.main.GoodHitWindow / 1000;
                 
-                if (railTime > 0) while (LaneMeshes.Count > 0) 
+                if (isPreHit) while (LaneMeshes.Count > 0) 
                 {
                     float t = Mathf.Min((ChartPlayer.main.CurrentTime - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
                     float m = Mathf.Min((Ticks[Ticks.Count - 1] - Times[Index]) / (Times[Index + 1] - Times[Index]), 1);
@@ -205,9 +205,12 @@ public class HitPlayer : MonoBehaviour
                     if (Ticks.Count == 0)
                     {
                         gameObject.SetActive(false);
+                        foreach (MeshFilter mesh in LaneMeshes) Destroy(mesh.gameObject);
                         ChartPlayer.main.RemovingHits.Add(this);
                     }
+
                     // ChartPlayer.main.AudioPlayer.PlayOneShot(ChartPlayer.main.CatchHitSound);
+
                     if (railTime > 0) 
                     {
                         ChartPlayer.main.AddDiscrete(true);
@@ -233,7 +236,7 @@ public class HitPlayer : MonoBehaviour
     }
 
     public void BeginHit() {
-        isHit = true;
+        isFlicked = isHit = true;
         if (Ticks.Count == 0) 
         {
             gameObject.SetActive(false);

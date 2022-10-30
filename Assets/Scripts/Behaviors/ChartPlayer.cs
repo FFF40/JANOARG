@@ -429,7 +429,6 @@ public class ChartPlayer : MonoBehaviour
                         else AddDiscrete(true);
                         AddScore(obj.NoteWeight, 1, true);
                         AudioPlayer.PlayOneShot(NormalHitSound);
-                        obj.isFlicked = true;
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
@@ -498,7 +497,6 @@ public class ChartPlayer : MonoBehaviour
                         AddDiscrete(true);
                         AddScore(obj.NoteWeight, 1, true);
                         AudioPlayer.PlayOneShot(CatchHitSound);
-                        obj.isFlicked = true;
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
@@ -565,7 +563,6 @@ public class ChartPlayer : MonoBehaviour
                         }
                         if (obj.isPreHit && time > obj.CurrentHit.Offset)
                         {
-                            obj.isFlicked = true;
                             obj.MakeHitEffect(null);
                             AddDiscrete(true);
                             AddScore(obj.NoteWeight, 1, true);
