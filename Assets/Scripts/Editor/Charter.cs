@@ -1306,7 +1306,7 @@ public class Charter : EditorWindow
         ChartPlayer player = GameObject.FindObjectOfType<ChartPlayer>();
         if (!player)
         {
-            Debug.LogError("Couldn't find any Chart Player in the scene. Please make sure the Scenes/Game scene in the Project window is opened.");
+            Debug.LogError("Couldn't find any Chart Player in the scene. Please make sure the Scenes/Player scene in the Project window is opened.");
             return;
         }
         string path = AssetDatabase.GetAssetPath(TargetSong);
