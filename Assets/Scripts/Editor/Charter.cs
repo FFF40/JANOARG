@@ -1025,8 +1025,10 @@ public class Charter : EditorWindow
             {
                 Rect rect = new Rect();
                 if (extrasmode == "migrate_charts") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
-                if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
-                if (extrasmode == "timeline_options") rect = new Rect(width - 304, height - 144, 300, 120);
+                else if (extrasmode == "chart_create") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
+                else if (extrasmode == "chart_delete") rect = new Rect(width / 2 - 200, height / 2 - 60, 400, 120);
+                else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
+                else if (extrasmode == "timeline_options") rect = new Rect(width - 304, height - 144, 300, 120);
 
                 GUIStyle exStyle = new GUIStyle("window");
                 exStyle.focused = exStyle.normal;
@@ -1220,14 +1222,55 @@ public class Charter : EditorWindow
 
     public void LoadChart(ExternalChartMeta data)
     {
-        Debug.Log(AssetDatabase.GetAssetPath(TargetSong));
 
         string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(TargetSong)).Replace('\\', '/') + "/" + data.Target;
         int resIndex = path.IndexOf("Resources/");
         if (resIndex >= 0) path = path.Substring(resIndex + 10);
-        Debug.Log(path);
         TargetChart = Resources.Load<ExternalChart>(path);
-        Debug.Log(TargetChart);
+
+        History = new CharterHistory();
+    }
+
+    public void CreateChart(ExternalChartMeta data)
+    {
+        string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(TargetSong)).Replace('\\', '/');
+        path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + data.Target);
+        data.Target = Path.GetFileNameWithoutExtension(path);
+
+        ExternalChart chart = ScriptableObject.CreateInstance<ExternalChart>();
+        chart.Data = new Chart() {
+            DifficultyIndex = data.DifficultyIndex,
+            DifficultyName = data.DifficultyName,
+            DifficultyLevel = data.DifficultyLevel,
+            ChartConstant = data.ChartConstant,
+        };
+
+        AssetDatabase.CreateAsset(chart, path + ".asset");
+        AssetDatabase.SaveAssets();
+
+        TargetSong.Charts.Add(data);
+        TargetChartMeta = data;
+        TargetChart = chart;
+    }
+
+    public void DeleteChart(ExternalChartMeta data)
+    {
+        string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(TargetSong)).Replace('\\', '/') + "/" + data.Target + ".asset";
+
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.SaveAssets();
+
+        TargetSong.Charts.Remove(data);
+        if (TargetChartMeta == data)
+        {
+            TargetChartMeta = null;
+            TargetSong = null;
+            History = new CharterHistory();
+        }
+        if (!(TargetThing is PlayableSong))
+        {
+            TargetThing = null;
+        }
     }
 
     static public string GetItemName(object item)
@@ -2356,7 +2399,6 @@ public class Charter : EditorWindow
                         IStoryboardable thing = (IStoryboardable)TargetThing;
                         TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
                         int index = Mathf.FloorToInt(mPos.y / 22) + verSeek;
-                        Debug.Log(index + " " + selectStart + " " + selectEnd);
                         TimestampType type = types[Mathf.Clamp(index, 0, types.Length - 1)];
 
                         Timestamp ts = new Timestamp()
@@ -2633,9 +2675,9 @@ public class Charter : EditorWindow
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Metadata", "boldLabel");
                 thing.SongName = EditorGUILayout.TextField("Song Name", thing.SongName, bStyle);
-                thing.AltSongName = EditorGUILayout.TextField("Alt Song Name", thing.AltSongName, bStyle);
+                thing.AltSongName = EditorGUILayout.TextField("Alt Name", thing.AltSongName, bStyle);
                 thing.SongArtist = EditorGUILayout.TextField("Song Artist", thing.SongArtist);
-                thing.AltSongArtist = EditorGUILayout.TextField("Alt Song Artist", thing.AltSongArtist);
+                thing.AltSongArtist = EditorGUILayout.TextField("Alt Artist", thing.AltSongArtist);
                 thing.Location = EditorGUILayout.TextField("Location", thing.Location);
                 thing.Genre = EditorGUILayout.TextField("Genre", thing.Genre);
                 GUILayout.Space(8);
@@ -2650,13 +2692,15 @@ public class Charter : EditorWindow
                     }
                     if (GUILayout.Button(DeletingThing == chart ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)) && TargetChartMeta != chart)
                     {
-                        
+                        DeletingThing = TempChartMeta = chart;
+                        extrasmode = "chart_delete";
                     }
                     GUILayout.EndHorizontal();
                 }
                 if (GUILayout.Button("Create New Chart"))
                 {
-
+                    TempChartMeta = new ExternalChartMeta();
+                    extrasmode = "chart_create";
                 }
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
@@ -3256,6 +3300,8 @@ public class Charter : EditorWindow
     public string extrasmode = "";
     public string mainmenutab = "file";
 
+    ExternalChartMeta TempChartMeta;
+
     public void Extras(int id)
     {
         if (extrasmode == "migrate_charts")
@@ -3273,6 +3319,55 @@ public class Charter : EditorWindow
             if (GUI.Button(new Rect(200, 195, 195, 20), "Migrate Now", "buttonRight")) 
             {
                 MigrateCharts();
+                extrasmode = "";
+            }
+        }
+        if (extrasmode == "chart_create")
+        {
+            GUIStyle title = new GUIStyle("boldLabel");
+            title.alignment = TextAnchor.MiddleCenter;
+
+            GUIStyle placeholder = new GUIStyle("label");
+            Color x = placeholder.normal.textColor;
+            placeholder.normal.textColor = new Color(x.r, x.g, x.b, .5f);
+
+            GUI.Label(new Rect(5, 6, 390, 18), "Create New Chart", title);
+
+            GUI.Label(new Rect(5, 30, 120, 18), "Target");
+            TempChartMeta.Target = EditorGUI.TextField(new Rect(125, 30, 270, 18), TempChartMeta.Target);
+            if (string.IsNullOrWhiteSpace(TempChartMeta.Target)) GUI.Label(new Rect(126, 30, 270, 18), TempChartMeta.DifficultyName + " " + TempChartMeta.DifficultyLevel, placeholder);
+            
+            GUI.Label(new Rect(5, 55, 120, 18), "Difficulty Index");
+            TempChartMeta.DifficultyIndex = EditorGUI.IntField(new Rect(125, 55, 270, 18), TempChartMeta.DifficultyIndex);
+            GUI.Label(new Rect(5, 75, 120, 18), "Difficulty Name");
+            TempChartMeta.DifficultyName = EditorGUI.TextField(new Rect(125, 75, 270, 18), TempChartMeta.DifficultyName);
+            GUI.Label(new Rect(5, 95, 120, 18), "Difficulty Level");
+            TempChartMeta.DifficultyLevel = EditorGUI.TextField(new Rect(125, 95, 270, 18), TempChartMeta.DifficultyLevel);
+            GUI.Label(new Rect(5, 115, 120, 18), "Chart Constant");
+            TempChartMeta.ChartConstant = EditorGUI.IntField(new Rect(125, 115, 270, 18), TempChartMeta.ChartConstant);
+
+
+            if (GUI.Button(new Rect(5, 195, 195, 20), "Cancel", "buttonLeft")) extrasmode = "";
+            if (GUI.Button(new Rect(200, 195, 195, 20), "Create", "buttonRight")) 
+            {
+                TempChartMeta.Target = string.IsNullOrWhiteSpace(TempChartMeta.Target) ? TempChartMeta.DifficultyName + " " + TempChartMeta.DifficultyLevel : TempChartMeta.Target;
+                CreateChart(TempChartMeta);
+                extrasmode = "";
+            }
+        }
+        if (extrasmode == "chart_delete")
+        {
+            GUIStyle midStyle = new GUIStyle("label");
+            midStyle.wordWrap = true;
+            midStyle.alignment = TextAnchor.MiddleCenter;
+            
+            GUI.Label(new Rect(20, 0, 360, 100), 
+                "Delete " + TempChartMeta.DifficultyName + " " + TempChartMeta.DifficultyLevel + "? This will also delete the chart file in the project folder! You won't be able to undo this!", midStyle);
+
+            if (GUI.Button(new Rect(5, 95, 195, 20), "Cancel", "buttonLeft")) extrasmode = "";
+            if (GUI.Button(new Rect(200, 95, 195, 20), "Delete", "buttonRight")) 
+            {
+                DeleteChart(TempChartMeta);
                 extrasmode = "";
             }
         }
