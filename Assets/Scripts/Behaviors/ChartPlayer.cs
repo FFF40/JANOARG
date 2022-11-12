@@ -10,6 +10,8 @@ public class ChartPlayer : MonoBehaviour
     public static ChartPlayer main;
 
     [Header("Data")]
+    public string SongPath;
+    [HideInInspector]
     public PlayableSong Song;
     public int ChartPosition;
     [Space]
@@ -146,7 +148,23 @@ public class ChartPlayer : MonoBehaviour
 
     public IEnumerator InitChart()
     {
-        CurrentChart = Instantiate(Song).Charts[ChartPosition];
+        long time = System.DateTime.Now.Ticks;
+        long t;
+
+        Song = Resources.Load<PlayableSong>(SongPath);
+        t = System.DateTime.Now.Ticks;
+        if (t - time > 33e4)
+        {
+            time = t;
+            yield return null;
+        }
+        CurrentChart = Instantiate(Resources.Load<ExternalChart>(System.IO.Path.GetDirectoryName(SongPath).Replace('\\', '/') + "/" + Song.Charts[ChartPosition].Target)).Data;
+        t = System.DateTime.Now.Ticks;
+        if (t - time > 33e4)
+        {
+            time = t;
+            yield return null;
+        }
 
         SongNameLabel.text = Song.SongName;
         SongArtistLabel.text = Song.SongArtist;
@@ -159,9 +177,6 @@ public class ChartPlayer : MonoBehaviour
 
         if (!FreeFlickEmblem) FreeFlickEmblem = MakeFreeFlickEmblem();
         if (!DirectionalFlickEmblem) DirectionalFlickEmblem = MakeDirectionalFlickEmblem();
-
-        long time = System.DateTime.Now.Ticks;
-        long t;
 
         foreach (Timestamp ts in CurrentChart.Storyboard.Timestamps)
         {

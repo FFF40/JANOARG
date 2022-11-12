@@ -36,6 +36,7 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Editor\GizmoIconUtility.cs" />
      <Compile Include="Assets\Scripts\Editor\Charter.cs" />
      <Compile Include="Assets\Scripts\Editor\CharterHistory.cs" />
      <Compile Include="Assets\Scripts\Editor\CharterSettings.cs" />

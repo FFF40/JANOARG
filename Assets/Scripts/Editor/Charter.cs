@@ -26,7 +26,8 @@ public class Charter : EditorWindow
     }
 
     public PlayableSong TargetSong;
-    public Chart TargetChart;
+    public ExternalChartMeta TargetChartMeta;
+    public ExternalChart TargetChart;
     public Lane TargetLane;
     public object TargetThing;
     public object DeletingThing;
@@ -571,14 +572,21 @@ public class Charter : EditorWindow
             if ((TargetThing is PlayableSong && TargetThing != (object)TargetSong) ||
                 (TargetThing is Chart && TargetThing != (object)TargetChart))
                 TargetThing = null;
-            if (TargetSong.Charts.IndexOf(TargetChart) < 0)
+
+            if (TargetChartMeta != null && TargetSong.Charts.IndexOf(TargetChartMeta) < 0) 
             {
-                TargetChart = TargetChart == null ? null : TargetSong.Charts.Find(x => x.DifficultyIndex == TargetChart.DifficultyIndex);
+                TargetChartMeta = TargetSong.Charts.Find(x => x.DifficultyIndex == TargetChartMeta.DifficultyIndex);
+                if (TargetChartMeta == null) TargetChart = null;
             }
-            if (TargetChart == null || TargetChart.Lanes.IndexOf(TargetLane) < 0) TargetLane = null;
+
+            if (TargetChart == null || TargetChart.Data.Lanes.IndexOf(TargetLane) < 0) TargetLane = null;
+
             if (TargetThing == null || !(TargetThing is IStoryboardable) || 
                 ((IStoryboardable)TargetThing).Storyboard.Timestamps.IndexOf(TargetTimestamp) < 0) 
                 TargetTimestamp = null;
+
+            if (TargetSong.ChartsOld != null && TargetSong.ChartsOld.Count > 0)
+                extrasmode = "migrate_charts";
 
             Rect bound = new Rect(45, 35, width - 320, height - 222);
             if (bound.width / bound.height > 3 / 2f)
@@ -600,9 +608,9 @@ public class Charter : EditorWindow
             int ncount = 0, ccount = 0;
             Vector3 startPos = Vector3.zero, endPos = Vector3.zero;
 
-            if (TargetChart != null)
+            if (TargetChartMeta != null && TargetChart != null)
             {
-                Chart chart = (Chart)TargetChart.Get(pos);
+                Chart chart = (Chart)TargetChart.Data.Get(pos);
                 Pallete pal = (Pallete)chart.Pallete.Get(pos);
 
                 CurrentCamera.transform.position = chart.CameraPivot;
@@ -982,6 +990,17 @@ public class Charter : EditorWindow
                     }
                 }
             }
+            else
+            {
+                foreach (ExternalChartMeta meta in TargetSong.Charts)
+                {
+                    if (meta.Target == "")
+                    {
+                        TargetSong.Charts.Remove(meta);
+                        break;
+                    }
+                }
+            }
 
             if (NormalCount > ncount && PlayHitsounds && CurrentAudioSource.isPlaying)
             {
@@ -1005,6 +1024,7 @@ public class Charter : EditorWindow
             if (extrasmode != "")
             {
                 Rect rect = new Rect();
+                if (extrasmode == "migrate_charts") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
                 if (extrasmode == "timeline_options") rect = new Rect(width - 304, height - 144, 300, 120);
 
@@ -1035,6 +1055,10 @@ public class Charter : EditorWindow
         }
         else
         {
+            TargetChartMeta = null;
+            TargetChart = null;
+            TargetThing = null;
+            TargetTimestamp = null;
             GUI.Window(1, new Rect(width / 2 - 250, height / 2 - 110, 500, 220), CharterInit, "");
         }
 
@@ -1159,26 +1183,26 @@ public class Charter : EditorWindow
             else if (Event.current == CharterSettings.Keybinds["Selection/Previous Item"])
             {
                 if (TargetThing is Lane) TargetThing =
-                    TargetChart.Lanes[Math.Max(TargetChart.Lanes.IndexOf((Lane)TargetThing) - 1, 0)];
+                    TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) - 1, 0)];
                 else if (TargetThing is HitObject) TargetThing =
                     TargetLane.Objects[Math.Max(TargetLane.Objects.IndexOf((HitObject)TargetThing) - 1, 0)];
             }
             else if (Event.current == CharterSettings.Keybinds["Selection/Next Item"])
             {
                 if (TargetThing is Lane) TargetThing =
-                    TargetChart.Lanes[Math.Min(TargetChart.Lanes.IndexOf((Lane)TargetThing) + 1, TargetChart.Lanes.Count - 1)];
+                    TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) + 1, TargetChart.Data.Lanes.Count - 1)];
                 else if (TargetThing is HitObject) TargetThing =
                     TargetLane.Objects[Math.Min(TargetLane.Objects.IndexOf((HitObject)TargetThing) + 1, TargetLane.Objects.Count - 1)];
             }
             else if (Event.current == CharterSettings.Keybinds["Selection/Previous Lane"])
             {
                 if (TargetLane != null) TargetThing = TargetLane =
-                    TargetChart.Lanes[Math.Max(TargetChart.Lanes.IndexOf(TargetLane) - 1, 0)];
+                    TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf(TargetLane) - 1, 0)];
             }
             else if (Event.current == CharterSettings.Keybinds["Selection/Next Lane"])
             {
                 if (TargetLane != null) TargetThing = TargetLane =
-                    TargetChart.Lanes[Math.Min(TargetChart.Lanes.IndexOf(TargetLane) + 1, TargetChart.Lanes.Count - 1)];
+                    TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf(TargetLane) + 1, TargetChart.Data.Lanes.Count - 1)];
             }
             else if (Event.current == CharterSettings.Keybinds["Misc./Show Keybindings"])
             {
@@ -1193,6 +1217,18 @@ public class Charter : EditorWindow
     /////////////////
     #region Functions
     /////////////////
+
+    public void LoadChart(ExternalChartMeta data)
+    {
+        Debug.Log(AssetDatabase.GetAssetPath(TargetSong));
+
+        string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(TargetSong)).Replace('\\', '/') + "/" + data.Target;
+        int resIndex = path.IndexOf("Resources/");
+        if (resIndex >= 0) path = path.Substring(resIndex + 10);
+        Debug.Log(path);
+        TargetChart = Resources.Load<ExternalChart>(path);
+        Debug.Log(TargetChart);
+    }
 
     static public string GetItemName(object item)
     {
@@ -1230,8 +1266,12 @@ public class Charter : EditorWindow
             Debug.LogError("Couldn't find any Chart Player in the scene. Please make sure the Scenes/Game scene in the Project window is opened.");
             return;
         }
-        player.Song = TargetSong;
-        player.ChartPosition = TargetSong.Charts.IndexOf(TargetChart);
+        string path = AssetDatabase.GetAssetPath(TargetSong);
+        path = path.Remove(path.Length - 6);
+        int resIndex = path.IndexOf("Resources/");
+        if (resIndex >= 0) path = path.Substring(resIndex + 10);
+        player.SongPath = path;
+        player.ChartPosition = TargetSong.Charts.FindIndex(x => x.Target == TargetChart.name);
         EditorApplication.ExecuteMenuItem("Window/General/Game");
         EditorApplication.isPlaying = true;
         EditorApplication.Beep();
@@ -1292,9 +1332,9 @@ public class Charter : EditorWindow
             float offset = pos - list[0].LaneSteps[0].Offset;
 
             foreach (Lane item in list) foreach (LaneStep step in item.LaneSteps) step.Offset += offset;
-            HistoryAdd(TargetChart.Lanes, list);
+            HistoryAdd(TargetChart.Data.Lanes, list);
 
-            TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+            TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
         else if (ClipboardThing is LaneStep || ClipboardThing is List<LaneStep>)
         {
@@ -1308,7 +1348,7 @@ public class Charter : EditorWindow
             foreach (LaneStep item in list) item.Offset += offset;
             HistoryAdd(TargetLane.LaneSteps, list);
 
-            TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+            TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
         else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
         {
@@ -1357,7 +1397,7 @@ public class Charter : EditorWindow
         }
         else if (TargetThing is Lane || TargetThing is List<Lane>)
         {
-            HistoryDelete(TargetChart.Lanes, TargetThing);
+            HistoryDelete(TargetChart.Data.Lanes, TargetThing);
             TargetThing = null;
         }
         else if (TargetThing is HitObject || TargetThing is List<HitObject>)
@@ -1371,6 +1411,33 @@ public class Charter : EditorWindow
             HistoryDelete(sb.Storyboard.Timestamps, TargetThing);
             TargetThing = null;
         }
+    }
+
+    public void MigrateCharts()
+    {
+        foreach (Chart chart in TargetSong.ChartsOld)
+        {
+            string path = AssetDatabase.GetAssetPath(TargetSong);
+            if (!Directory.Exists(path)) path = Path.GetDirectoryName(path);
+            path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + chart.DifficultyName + " " + chart.DifficultyLevel + ".asset");
+
+            ExternalChartMeta meta = new ExternalChartMeta()
+            {
+                Target = Path.GetFileNameWithoutExtension(path),
+                DifficultyName = chart.DifficultyName,
+                DifficultyLevel = chart.DifficultyLevel,
+                DifficultyIndex = chart.DifficultyIndex,
+                ChartConstant = chart.ChartConstant,
+            };
+
+            ExternalChart exchart = ScriptableObject.CreateInstance<ExternalChart>();
+            exchart.Data = chart;
+
+            AssetDatabase.CreateAsset(exchart, path);
+            TargetSong.Charts.Add(meta);
+        }
+        TargetSong.ChartsOld = null;
+        AssetDatabase.SaveAssets();
     }
 
     #endregion
@@ -1422,7 +1489,7 @@ public class Charter : EditorWindow
             song.Clip = initClip;
 
             string path = AssetDatabase.GetAssetPath(initClip);
-            if (!System.IO.Directory.Exists(path)) path = System.IO.Path.GetDirectoryName(path);
+            if (!Directory.Exists(path)) path = Path.GetDirectoryName(path);
 
             AssetDatabase.CreateAsset(song, AssetDatabase.GenerateUniqueAssetPath(path + "/" + initName + " - " + initArtist + ".asset"));
             AssetDatabase.SaveAssets();
@@ -1457,7 +1524,7 @@ public class Charter : EditorWindow
         // -------------------- Chart selection
 
         List<string> sels = new List<string>();
-        foreach (Chart chart in TargetSong.Charts) sels.Add(chart.DifficultyName + " " + chart.DifficultyLevel);
+        foreach (ExternalChartMeta chart in TargetSong.Charts) sels.Add(chart.DifficultyName + " " + chart.DifficultyLevel);
         int sel = TargetChart != null ? EditorGUI.Popup(new Rect(309, 5, 18, 20), -1, sels.ToArray(), "buttonRight") :
             EditorGUI.Popup(new Rect(179, 5, 148, 20), -1, sels.ToArray(), "button");
         if (TargetChart == null)
@@ -1466,9 +1533,13 @@ public class Charter : EditorWindow
             style.alignment = TextAnchor.MiddleCenter;
             GUI.Label(new Rect(179, 5, 148, 20), "Select Chart...", style);
         }
-        if (sel >= 0) TargetChart = TargetSong.Charts[sel];
+        if (sel >= 0 && TargetChartMeta != TargetSong.Charts[sel]) 
+        {
+            TargetChartMeta = TargetSong.Charts[sel];
+            LoadChart(TargetSong.Charts[sel]);
+        }
 
-        if (TargetChart != null && GUI.Toggle(new Rect(179, 5, 130, 20), TargetThing == (object)TargetChart, TargetChart.DifficultyName + " " + TargetChart.DifficultyLevel, "buttonLeft") && TargetThing != (object)TargetChart)
+        if (TargetChart != null && GUI.Toggle(new Rect(179, 5, 130, 20), TargetThing == (object)TargetChart, TargetChart.Data.DifficultyName + " " + TargetChart.Data.DifficultyLevel, "buttonLeft") && TargetThing != (object)TargetChart)
         {
             TargetThing = TargetChart;
         }
@@ -1496,7 +1567,7 @@ public class Charter : EditorWindow
             GenericMenu menu = new GenericMenu();
 
             // -------------------- File
-            if (TargetChart != null)
+            if (TargetChartMeta != null && TargetChart != null)
                 menu.AddItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
             else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
             menu.AddSeparator("File/");
@@ -1634,10 +1705,10 @@ public class Charter : EditorWindow
         }
 
 
-        bool palleteSel = TargetChart != null && TargetThing == TargetChart.Pallete;
+        bool palleteSel = TargetChart != null && TargetThing == TargetChart.Data.Pallete;
         if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
-            && TargetChart != null && TargetThing != TargetChart.Pallete)
-            TargetThing = TargetChart.Pallete;
+            && TargetChart != null && TargetThing != TargetChart.Data.Pallete)
+            TargetThing = TargetChart.Data.Pallete;
     }
 
     #endregion
@@ -1765,7 +1836,7 @@ public class Charter : EditorWindow
         itemStyle.fontSize = 12;
         itemStyle.padding = new RectOffset(1, 0, 0, 0);
 
-        if (TargetChart != null)
+        if (TargetChartMeta != null && TargetChart != null)
         {
 
             List<float> Times = new List<float>();
@@ -1910,7 +1981,7 @@ public class Charter : EditorWindow
             }
             else if (timelineMode == "lane")
             {
-                foreach (Lane lane in TargetChart.Lanes)
+                foreach (Lane lane in TargetChart.Data.Lanes)
                 {
                     if (lane.LaneSteps.Count > 0)
                     {
@@ -1964,7 +2035,7 @@ public class Charter : EditorWindow
                                 {
                                     if (DeletingThing == lane)
                                     {
-                                        HistoryDelete(TargetChart.Lanes, lane);
+                                        HistoryDelete(TargetChart.Data.Lanes, lane);
                                         TargetThing = TargetLane = null;
                                         break;
                                     }
@@ -1983,7 +2054,7 @@ public class Charter : EditorWindow
                     }
                     else
                     {
-                        HistoryDelete(TargetChart.Lanes, lane);
+                        HistoryDelete(TargetChart.Data.Lanes, lane);
                     }
                 }
             }
@@ -2240,7 +2311,7 @@ public class Charter : EditorWindow
                     }
                     else if (timelineMode == "lane")
                     {
-                        List<Lane> sel = TargetChart.Lanes.FindAll(x =>
+                        List<Lane> sel = TargetChart.Data.Lanes.FindAll(x =>
                         {
                             return x.LaneSteps[0].Offset >= selectStart && x.LaneSteps[0].Offset <= selectEnd;
                         });
@@ -2326,8 +2397,8 @@ public class Charter : EditorWindow
                         next.Offset = step.Offset + 1;
                         lane.LaneSteps.Add(next);
 
-                        HistoryAdd(TargetChart.Lanes, lane);
-                        TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+                        HistoryAdd(TargetChart.Data.Lanes, lane);
+                        TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
                         TargetThing = TargetLane = lane;
                         Repaint();
                     }
@@ -2517,7 +2588,7 @@ public class Charter : EditorWindow
 
                 List<string> est = new List<string>();
                 List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases)
+                foreach (Ease ease in Ease.Eases.Values)
                 {
                     eso.Add(ease.ID);
                     est.Add(ease.Name);
@@ -2562,37 +2633,30 @@ public class Charter : EditorWindow
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Metadata", "boldLabel");
                 thing.SongName = EditorGUILayout.TextField("Song Name", thing.SongName, bStyle);
+                thing.AltSongName = EditorGUILayout.TextField("Alt Song Name", thing.AltSongName, bStyle);
                 thing.SongArtist = EditorGUILayout.TextField("Song Artist", thing.SongArtist);
+                thing.AltSongArtist = EditorGUILayout.TextField("Alt Song Artist", thing.AltSongArtist);
+                thing.Location = EditorGUILayout.TextField("Location", thing.Location);
+                thing.Genre = EditorGUILayout.TextField("Genre", thing.Genre);
                 GUILayout.Space(8);
                 GUILayout.Label("Charts", "boldLabel");
-                foreach (Chart chart in TargetSong.Charts)
+                foreach (ExternalChartMeta chart in TargetSong.Charts)
                 {
                     GUILayout.BeginHorizontal();
-                    if (GUILayout.Toggle(TargetChart == chart, chart.DifficultyName + " " + chart.DifficultyLevel, "ButtonLeft"))
+                    if (GUILayout.Toggle(TargetChartMeta == chart, chart.DifficultyName + " " + chart.DifficultyLevel, "ButtonLeft") && TargetChartMeta != chart)
                     {
-                        TargetChart = chart;
+                        TargetChartMeta = chart;
+                        LoadChart(chart);
                     }
-                    if (GUILayout.Button(DeletingThing == chart ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)) && TargetChart != chart)
+                    if (GUILayout.Button(DeletingThing == chart ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)) && TargetChartMeta != chart)
                     {
-                        if (DeletingThing == chart)
-                        {
-                            HistoryDelete(TargetSong.Charts, chart);
-                            EditorUtility.SetDirty(TargetSong);
-                            break;
-                        }
-                        else
-                        {
-                            DeletingThing = chart;
-                        }
+                        
                     }
                     GUILayout.EndHorizontal();
                 }
                 if (GUILayout.Button("Create New Chart"))
                 {
-                    Chart chart = new Chart();
-                    HistoryAdd(TargetSong.Charts, chart);
-                    TargetChart = chart;
-                    EditorUtility.SetDirty(TargetSong);
+
                 }
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
@@ -2643,23 +2707,20 @@ public class Charter : EditorWindow
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }
-            else if (TargetThing is Chart)
+            else if (TargetThing is ExternalChart)
             {
-                Chart thing = (Chart)TargetThing;
+                Chart thing = TargetChart.Data;
                 History.StartRecordItem(TargetThing);
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Chart Details", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Difficulty", "boldLabel");
-                thing.DifficultyIndex = EditorGUILayout.IntField("Index", thing.DifficultyIndex);
-                thing.DifficultyName = EditorGUILayout.TextField("Name", thing.DifficultyName);
-                thing.DifficultyLevel = EditorGUILayout.TextField("Level", thing.DifficultyLevel);
-                thing.ChartConstant = EditorGUILayout.IntField("Constant", thing.ChartConstant);
+                TargetChartMeta.DifficultyIndex = thing.DifficultyIndex = EditorGUILayout.IntField("Index", thing.DifficultyIndex);
+                TargetChartMeta.DifficultyName = thing.DifficultyName = EditorGUILayout.TextField("Name", thing.DifficultyName);
+                TargetChartMeta.DifficultyLevel = thing.DifficultyLevel = EditorGUILayout.TextField("Level", thing.DifficultyLevel);
+                TargetChartMeta.ChartConstant = thing.ChartConstant = EditorGUILayout.IntField("Constant", thing.ChartConstant);
                 GUILayout.Space(8);
-                GUILayout.Label("Layout", "boldLabel");
-                thing.CameraPivot = EditorGUILayout.Vector3Field("Camera Pivot", thing.CameraPivot);
-                thing.CameraRotation = EditorGUILayout.Vector3Field("Camera Rotation", thing.CameraRotation);
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }
@@ -2839,7 +2900,7 @@ public class Charter : EditorWindow
 
                 List<string> est = new List<string>();
                 List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases)
+                foreach (Ease ease in Ease.Eases.Values)
                 {
                     eso.Add(ease.ID);
                     est.Add(ease.Name);
@@ -2916,7 +2977,7 @@ public class Charter : EditorWindow
 
                 if (thing.LaneSteps[0].Offset != a)
                 {
-                    TargetChart.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+                    TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
                 }
             }
             else if (TargetThing is LaneStep)
@@ -2931,7 +2992,7 @@ public class Charter : EditorWindow
 
                 List<string> est = new List<string>();
                 List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases)
+                foreach (Ease ease in Ease.Eases.Values)
                 {
                     eso.Add(ease.ID);
                     est.Add(ease.Name);
@@ -3078,7 +3139,7 @@ public class Charter : EditorWindow
 
                 List<string> est = new List<string>();
                 List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases)
+                foreach (Ease ease in Ease.Eases.Values)
                 {
                     eso.Add(ease.ID);
                     est.Add(ease.Name);
@@ -3197,6 +3258,24 @@ public class Charter : EditorWindow
 
     public void Extras(int id)
     {
+        if (extrasmode == "migrate_charts")
+        {
+            GUIStyle midStyle = new GUIStyle("label");
+            midStyle.wordWrap = true;
+            midStyle.alignment = TextAnchor.MiddleLeft;
+            
+            GUI.Label(new Rect(20, 0, 360, 200), 
+                "Old charts format detected: The editor found " + TargetSong.ChartsOld.Count + " legacy chart(s) in the playable song file, which is deprecated and need to be migrated to the newer chart format in order to be used again.\n\n"
+                + "This will create chart files within the folder containing the playable song file and should not modify the contents of the charts in any ways.\n\n"
+                + "You can choose to do the migration now or later by closing the song in case you have something to do first before proceeding.", midStyle);
+        
+            if (GUI.Button(new Rect(5, 195, 195, 20), "Close Song", "buttonLeft")) TargetSong = null;
+            if (GUI.Button(new Rect(200, 195, 195, 20), "Migrate Now", "buttonRight")) 
+            {
+                MigrateCharts();
+                extrasmode = "";
+            }
+        }
         if (extrasmode == "play_options")
         {
             GUI.Label(new Rect(5, 6, 90, 18), "Play Speed");

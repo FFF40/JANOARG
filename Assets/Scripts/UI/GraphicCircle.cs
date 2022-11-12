@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[ExecuteInEditMode]
+[ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
 public class GraphicCircle : Graphic
 {
     public int Resolution = 90;
