@@ -1376,7 +1376,11 @@ public class Charter : EditorWindow
 
             float offset = pos - list[0].LaneSteps[0].Offset;
 
-            foreach (Lane item in list) foreach (LaneStep step in item.LaneSteps) step.Offset += offset;
+            foreach (Lane item in list) { 
+							foreach (LaneStep step in item.LaneSteps) step.Offset += offset;
+							foreach (HitObject hit in item.Objects) hit.Offset += offset;
+							foreach (Timestamp ts in item.Storyboard.Timestamps) ts.Time += offset;
+			}
             HistoryAdd(TargetChart.Data.Lanes, list);
 
             TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
