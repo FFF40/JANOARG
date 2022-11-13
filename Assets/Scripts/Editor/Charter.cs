@@ -570,7 +570,7 @@ public class Charter : EditorWindow
             ms = Mathf.Floor((preciseTime % 1) * 1000);
 
             if ((TargetThing is PlayableSong && TargetThing != (object)TargetSong) ||
-                (TargetThing is Chart && TargetThing != (object)TargetChart))
+                (TargetThing is Chart && TargetThing != (object)TargetChart?.Data))
                 TargetThing = null;
 
             if (TargetChartMeta != null && TargetSong.Charts.IndexOf(TargetChartMeta) < 0) 
@@ -1294,6 +1294,8 @@ public class Charter : EditorWindow
     {
         EditorUtility.SetDirty(TargetSong);
         AssetDatabase.SaveAssetIfDirty(TargetSong);
+        EditorUtility.SetDirty(TargetChart);
+        AssetDatabase.SaveAssetIfDirty(TargetChart);
     }
 
     public void OpenInPlayMode()
@@ -1582,9 +1584,9 @@ public class Charter : EditorWindow
             LoadChart(TargetSong.Charts[sel]);
         }
 
-        if (TargetChart != null && GUI.Toggle(new Rect(179, 5, 130, 20), TargetThing == (object)TargetChart, TargetChart.Data.DifficultyName + " " + TargetChart.Data.DifficultyLevel, "buttonLeft") && TargetThing != (object)TargetChart)
+        if (TargetChart != null && GUI.Toggle(new Rect(179, 5, 130, 20), TargetThing == (object)TargetChart.Data, TargetChart.Data.DifficultyName + " " + TargetChart.Data.DifficultyLevel, "buttonLeft") && TargetThing != (object)TargetChart.Data)
         {
-            TargetThing = TargetChart;
+            TargetThing = TargetChart.Data;
         }
 
         // -------------------- Player
@@ -2751,7 +2753,7 @@ public class Charter : EditorWindow
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }
-            else if (TargetThing is ExternalChart)
+            else if (TargetThing is Chart)
             {
                 Chart thing = TargetChart.Data;
                 History.StartRecordItem(TargetThing);
