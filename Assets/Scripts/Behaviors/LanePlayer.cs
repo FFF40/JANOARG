@@ -145,35 +145,23 @@ public class LanePlayer : MonoBehaviour
 
             vertices.Add(start);
             vertices.Add(end);
-            vertices.Add(start);
-            vertices.Add(end);
 
-            uvs.Add(Vector2.zero);
-            uvs.Add(Vector2.zero);
             uvs.Add(Vector2.zero);
             uvs.Add(Vector2.zero);
             
-            if (vertices.Count >= 8) 
+            if (vertices.Count >= 4) 
             {
                 tris.Add(vertices.Count - 1);
-                tris.Add(vertices.Count - 5);
-                tris.Add(vertices.Count - 6);
-                
-                tris.Add(vertices.Count - 6);
-                tris.Add(vertices.Count - 2);
-                tris.Add(vertices.Count - 1);
-
-                tris.Add(vertices.Count - 8);
-                tris.Add(vertices.Count - 7);
-                tris.Add(vertices.Count - 3);
-                
                 tris.Add(vertices.Count - 3);
                 tris.Add(vertices.Count - 4);
-                tris.Add(vertices.Count - 8);
+                
+                tris.Add(vertices.Count - 4);
+                tris.Add(vertices.Count - 2);
+                tris.Add(vertices.Count - 1);
             }
         }
 
-        if (cur.StartEaseX == "Linear" && cur.StartEaseY == "Linear" && cur.EndEaseX == "Linear" && cur.EndEaseY == "Linear")
+        if (cur.IsLinear)
         {
             AddStep(Vector3.LerpUnclamped((Vector3)pre.StartPos + Vector3.forward * prePos, (Vector3)cur.StartPos + Vector3.forward * curPos, pos), 
                 Vector3.LerpUnclamped((Vector3)pre.EndPos + Vector3.forward * prePos, (Vector3)cur.EndPos + Vector3.forward * curPos, pos));
@@ -241,7 +229,7 @@ public class LanePlayer : MonoBehaviour
             }
         }
 
-        if (cur.StartEaseX == "Linear" && cur.StartEaseY == "Linear" && cur.EndEaseX == "Linear" && cur.EndEaseY == "Linear")
+        if (cur.IsLinear)
         {
             Vector3 start = Vector3.LerpUnclamped((Vector3)pre.StartPos + Vector3.forward * prePos, (Vector3)cur.StartPos + Vector3.forward * curPos, minPos);
             Vector3 end = Vector3.LerpUnclamped((Vector3)pre.EndPos + Vector3.forward * prePos, (Vector3)cur.EndPos + Vector3.forward * curPos, minPos);
@@ -302,7 +290,7 @@ public class LanePlayer : MonoBehaviour
             float pos = Mathf.LerpUnclamped(Positions[index - 1], Positions[index], t);
             var pre = CurrentLane.LaneSteps[index - 1];
             var cur = CurrentLane.LaneSteps[index];
-            if (cur.StartEaseX == "Linear" && cur.StartEaseY == "Linear" && cur.EndEaseX == "Linear" && cur.EndEaseY == "Linear")
+            if (cur.IsLinear)
             {
                 start = Vector3.LerpUnclamped(pre.StartPos, cur.StartPos, t) + Vector3.forward * pos;
                 end = Vector3.LerpUnclamped(pre.EndPos, cur.EndPos, t) + Vector3.forward * pos;

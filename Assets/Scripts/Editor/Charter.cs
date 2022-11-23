@@ -52,10 +52,13 @@ public class Charter : EditorWindow
 
     CultureInfo invariant = CultureInfo.InvariantCulture;
     public CharterHistory History = new CharterHistory();
+    public ChartManager Manager;
 
     float ScrollSpeed = 121;
 
     float width, height, pos, dec, beat, currentBeat, bar, min, sec, ms, preciseTime;
+
+    Dictionary<Lane, LaneManager> LaneManagers = new Dictionary<Lane, LaneManager>();
 
     public void OnDestroy()
     {
@@ -161,8 +164,7 @@ public class Charter : EditorWindow
             else
             {
                 LaneStep prev = steps[a - 1];
-                if (lastP >= 1 || (step.StartEaseX == "Linear" && step.StartEaseY == "Linear" &&
-                    step.EndEaseX == "Linear" && step.EndEaseY == "Linear"))
+                if (lastP >= 1 || step.IsLinear)
                 {
                     AddStep(new Vector3(start.x, start.y, pos), new Vector3(end.x, end.y, pos));
                 }
@@ -383,7 +385,7 @@ public class Charter : EditorWindow
 
             if (vertices.Count == 0)
             {
-                if (next.StartEaseX == "Linear" && next.StartEaseY == "Linear" && next.EndEaseX == "Linear" && next.EndEaseY == "Linear")
+                if (next.IsLinear)
                 {
                     start = Vector2.LerpUnclamped(step.StartPos, next.StartPos, startPos);
                     end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, startPos);
@@ -401,7 +403,7 @@ public class Charter : EditorWindow
                 AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
             }
             {
-                if (next.StartEaseX == "Linear" && next.StartEaseY == "Linear" && next.EndEaseX == "Linear" && next.EndEaseY == "Linear")
+                if (next.IsLinear)
                 {
                     start = Vector2.LerpUnclamped(step.StartPos, next.StartPos, endPos);
                     end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, endPos);
@@ -644,24 +646,33 @@ public class Charter : EditorWindow
                     HitStyleManagers.RemoveAt(pal.HitStyles.Count);
                 }
 
-                foreach (Lane l in chart.Lanes)
+            
+                if (Manager == null) 
                 {
-                    Lane lane = (Lane)(l.Get(pos));
+                    Manager = new ChartManager(TargetSong, TargetChart.Data, ScrollSpeed, preciseTime, pos);
+                }
+                if (Event.current.type == EventType.Repaint)
+                {
+                    Manager.CurrentSpeed = ScrollSpeed;
+                    Manager.Update(preciseTime, pos);
+                }
+
+                foreach (LaneManager l in Manager.Lanes)
+                {
+                    Lane lane = l.CurrentLane;
+
                     if (Event.current.type == EventType.Repaint && lane.StyleIndex >= 0 && lane.StyleIndex < LaneStyleManagers.Count)
                     {
                         if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                         {
-                            Mesh mesh = MakeLaneMesh(lane);
-                            if (mesh != null)
-                            {
-                                Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
-                                Meshes.Add(mesh);
-                            }
+                            Quaternion rot = Quaternion.Euler(lane.OffsetRotation);
+                            Vector3 pos = lane.Offset + rot * Vector3.back * l.CurrentDistance;
+                            Graphics.DrawMesh(l.CurrentMesh, pos, rot, LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
                         }
                     }
-                    foreach (HitObject h in lane.Objects)
+                    foreach (HitObjectManager h in l.Objects)
                     {
-                        HitObject hit = (HitObject)(h.Get(pos));
+                        HitObject hit = h.CurrentHit;
                         bool valid = Event.current.type == EventType.Repaint && hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count;
                         if (hit.Offset > pos)
                         {
@@ -679,8 +690,7 @@ public class Charter : EditorWindow
                                     }
                                     if (mesh != null)
                                     {
-                                        Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), mat, 0, CurrentCamera);
-                                        Meshes.Add(mesh);
+                                        Graphics.DrawMesh(h.CurrentMesh, h.Position, h.Rotation, mat, 0, CurrentCamera);
                                     }
                                     if (hit.Flickable)
                                     {
@@ -1229,6 +1239,7 @@ public class Charter : EditorWindow
         TargetChart = Resources.Load<ExternalChart>(path);
 
         History = new CharterHistory();
+        Refresh();
     }
 
     public void CreateChart(ExternalChartMeta data)
@@ -1251,6 +1262,8 @@ public class Charter : EditorWindow
         TargetSong.Charts.Add(data);
         TargetChartMeta = data;
         TargetChart = chart;
+
+        SaveSong();
     }
 
     public void DeleteChart(ExternalChartMeta data)
@@ -1271,6 +1284,18 @@ public class Charter : EditorWindow
         {
             TargetThing = null;
         }
+        
+        SaveSong();
+    }
+
+    public void Refresh()
+    {
+        if (Manager != null) Manager.Dispose();
+        Manager = new ChartManager(TargetSong, TargetChart.Data, ScrollSpeed, preciseTime, pos);
+        if (LaneStyleManagers != null) foreach (LaneStyleManager style in LaneStyleManagers) style.Dispose();
+        LaneStyleManagers = new List<LaneStyleManager>();
+        if (HitStyleManagers != null) foreach (HitStyleManager style in HitStyleManagers) style.Dispose();
+        HitStyleManagers = new List<HitStyleManager>();
     }
 
     static public string GetItemName(object item)
@@ -1487,6 +1512,8 @@ public class Charter : EditorWindow
         }
         TargetSong.ChartsOld = null;
         AssetDatabase.SaveAssets();
+
+        SaveSong();
     }
 
     #endregion
@@ -1622,6 +1649,7 @@ public class Charter : EditorWindow
             menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Save " + CharterSettings.Keybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
             menu.AddSeparator("File/");
+            menu.AddItem(new GUIContent("File/Refresh"), false, Refresh);
             menu.AddItem(new GUIContent("File/Close Song"), false, () => TargetSong = null);
 
             // -------------------- Edit
@@ -2771,6 +2799,9 @@ public class Charter : EditorWindow
                 TargetChartMeta.DifficultyLevel = thing.DifficultyLevel = EditorGUILayout.TextField("Level", thing.DifficultyLevel);
                 TargetChartMeta.ChartConstant = thing.ChartConstant = EditorGUILayout.IntField("Constant", thing.ChartConstant);
                 GUILayout.Space(8);
+                GUILayout.Label("Camera", "boldLabel");
+                thing.CameraPivot = EditorGUILayout.Vector3Field("Pivot", thing.CameraPivot);
+                thing.CameraRotation =EditorGUILayout.Vector3Field("Rotation", thing.CameraRotation);
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }
