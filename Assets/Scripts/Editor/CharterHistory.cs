@@ -188,3 +188,59 @@ public class CharterModifyAction : ICharterAction
         Item.GetType().GetField(Keyword).SetValue(Item, To);
     }
 }
+
+public class CharterMoveLaneAction : ICharterAction 
+{
+    public Lane Item;
+    public Vector3 Offset;
+
+    public string GetName()
+    {
+        return "Move Lane";
+    }
+
+    public void Undo() 
+    {
+        Item.Offset -= Offset;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "Position_X")
+            {
+                ts.From -= Offset.x;
+                ts.Target -= Offset.x;
+            }
+            if (ts.ID == "Position_Y")
+            {
+                ts.From -= Offset.y;
+                ts.Target -= Offset.y;
+            }
+            if (ts.ID == "Position_Z")
+            {
+                ts.From -= Offset.z;
+                ts.Target -= Offset.z;
+            }
+        }
+    }
+    public void Redo() 
+    {
+        Item.Offset += Offset;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "Position_X")
+            {
+                ts.From += Offset.x;
+                ts.Target += Offset.x;
+            }
+            if (ts.ID == "Position_Y")
+            {
+                ts.From += Offset.y;
+                ts.Target += Offset.y;
+            }
+            if (ts.ID == "Position_Z")
+            {
+                ts.From += Offset.z;
+                ts.Target += Offset.z;
+            }
+        }
+    }
+}

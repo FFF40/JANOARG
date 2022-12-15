@@ -736,9 +736,12 @@ public class LaneManager
     public List<LaneStepManager> Steps = new List<LaneStepManager>();
     public List<HitObjectManager> Objects = new List<HitObjectManager>();
     public Mesh CurrentMesh = new Mesh();
-    public float CurrentSpeed;
 
+    public float CurrentSpeed;
     public float CurrentDistance;
+
+    public Vector3 StartPos;
+    public Vector3 EndPos;
 
     float lastStepCount;
 
@@ -865,6 +868,11 @@ public class LaneManager
             CurrentMesh.SetVertices(verts);
             CurrentMesh.SetTriangles(tris, 0);
         }
+        
+        StartPos = verts[stepCount * 2 - 2] - Vector3.forward * CurrentDistance;
+        StartPos = Quaternion.Euler(CurrentLane.OffsetRotation) * StartPos + CurrentLane.Offset;
+        EndPos = verts[stepCount * 2 - 1] - Vector3.forward * CurrentDistance;
+        EndPos = Quaternion.Euler(CurrentLane.OffsetRotation) * EndPos + CurrentLane.Offset;
 
         for (int a = 0; a < CurrentLane.Objects.Count; a++)
         {
@@ -880,7 +888,7 @@ public class LaneManager
 
     public LaneStep GetLaneStep(float sec, float speed = 1)
     {
-        if (sec < Steps[0].Offset)
+        if (sec < Steps[0].Offset || Steps.Count <= 1)
         {
             return new LaneStep()
             {
@@ -1192,12 +1200,12 @@ public class HitMeshManager
             if (addTris && vertices.Count >= 8)
             {
                 tris.Add(vertices.Count - 8);
-                tris.Add(vertices.Count - 7);
                 tris.Add(vertices.Count - 3);
+                tris.Add(vertices.Count - 7);
 
                 tris.Add(vertices.Count - 3);
-                tris.Add(vertices.Count - 4);
                 tris.Add(vertices.Count - 8);
+                tris.Add(vertices.Count - 4);
             }
         }
         if (type == HitObject.HitType.Normal)
@@ -1223,27 +1231,6 @@ public class HitMeshManager
         }
         else if (type == HitObject.HitType.Catch)
         {
-            /*vertices.Add((Vector3)startPos + fwd);
-            uvs.Add(Vector2.zero);
-            vertices.Add((Vector3)endPos + fwd);
-            uvs.Add(Vector2.zero);
-            for (float ang = 45; ang <= 405; ang += 90) 
-            {
-                Vector3 ofs = Quaternion.Euler(0, 0, -angle) 
-                    * new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad)) 
-                    * .3f;
-                vertices.Add((Vector3)(startPos + endPos) / 2 + ofs + fwd);
-                uvs.Add(Vector2.zero);
-            }
-            for (int a = 0; a < 4; a++) 
-            {
-                tris.Add(0);
-                tris.Add(2 + (a % 4));
-                tris.Add(2 + ((a + 1) % 4));
-                tris.Add(1);
-                tris.Add(2 + ((a + 1) % 4));
-                tris.Add(2 + (a % 4));
-            }*/
             for (float ang = 45; ang <= 405; ang += 90)
             {
                 Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
@@ -1268,7 +1255,10 @@ public class HitObjectManager
 
     public Vector3 Position;
     public Quaternion Rotation;
+    
+    public Vector3 StartPos;
     public Vector3 EndPos;
+
     public Mesh CurrentMesh = new Mesh();
 
     public HitObjectManager(HitObject data, float time, LaneManager lane, ChartManager main)
@@ -1281,19 +1271,19 @@ public class HitObjectManager
         CurrentHit = data;
         float offset = main.Song.Timing.ToSeconds(data.Offset);
 
-        if (time <= offset && time >= offset - 10)
+        if (time <= offset)
         {
             LaneStep step = lane.GetLaneStep(offset, main.CurrentSpeed);
 
             Vector3 fwd = Vector3.forward * (step.Offset - lane.CurrentDistance);
-            Vector3 startPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position) + fwd;
-            Vector3 endPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position + data.Length) + fwd;
+            StartPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position) + fwd;
+            EndPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position + data.Length) + fwd;
 
             Quaternion laneRot = Quaternion.Euler(lane.CurrentLane.OffsetRotation);
-            Position = laneRot * ((startPos + endPos) / 2) + lane.CurrentLane.Offset;
-            Rotation = laneRot * (Quaternion.LookRotation(endPos - startPos) * Quaternion.Euler(0, 90, 0));
+            Position = laneRot * ((StartPos + EndPos) / 2) + lane.CurrentLane.Offset;
+            Rotation = laneRot * (Quaternion.LookRotation(EndPos - StartPos) * Quaternion.Euler(0, 90, 0));
 
-            CurrentMesh = main.HitMeshManager.GetMesh(data.Type, Vector3.Distance(startPos, endPos));
+            CurrentMesh = main.HitMeshManager.GetMesh(data.Type, Vector3.Distance(StartPos, EndPos));
         }
         else
         {

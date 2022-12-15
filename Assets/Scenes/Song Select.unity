@@ -15,7 +15,7 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 0
-  m_FogColor: {r: 0, g: 0, b: 0, a: 1}
+  m_FogColor: {r: 0.04777, g: 0.053225584, b: 0.085, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.01
   m_LinearFogStart: 0
@@ -1401,7 +1401,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'RETURN TO
 
-    STAR MAP'
+    WORLD SELECTION'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8ab617d4154d67b4db84b2b52fa348e8, type: 2}
   m_sharedMaterial: {fileID: -4314389113359939109, guid: 8ab617d4154d67b4db84b2b52fa348e8, type: 2}
@@ -2822,8 +2822,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Selected Song
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: eeb455cf639f0a5498e8de9f8b091a2a, type: 2}
-  m_sharedMaterial: {fileID: -6954525552735352244, guid: eeb455cf639f0a5498e8de9f8b091a2a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4719076c77f184640b45cc189f0d1f5e, type: 2}
+  m_sharedMaterial: {fileID: 6949179962977730163, guid: 4719076c77f184640b45cc189f0d1f5e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

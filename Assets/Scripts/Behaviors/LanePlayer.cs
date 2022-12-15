@@ -267,8 +267,16 @@ public class LanePlayer : MonoBehaviour
 
     public void GetPosition(float time, out Vector3 start, out Vector3 end)
     {
-        int index = Times.FindIndex((x) => x > time);
 
+        if (Times.Count <= 1) {
+            float t = (time - Times[0]) / (Times[0]);
+            float pos = Positions[0] * t;
+            start = (Vector3)CurrentLane.LaneSteps[0].StartPos + Vector3.forward * pos;
+            end = (Vector3)CurrentLane.LaneSteps[0].EndPos + Vector3.forward * pos;
+            return;
+        }
+
+        int index = Times.FindIndex((x) => x > time);
         if (index == 0) {
             index = 1;
             float t = (time - Times[0]) / (Times[1] - Times[0]);
