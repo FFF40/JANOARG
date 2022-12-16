@@ -524,7 +524,7 @@ public class Charter : EditorWindow
     long delta, now, pass;
     string strain;
 
-    Vector3? gizmoAnchor;
+    Vector3? gizmoAnchor, gizmoAnchorDrag;
 
     Color backgroundColor, interfaceColor;
 
@@ -767,11 +767,24 @@ public class Charter : EditorWindow
                             Vector2 startPosScr = WorldToScreen(startPos);
                             Vector2 endPosScr = WorldToScreen(endPos);
                             Vector2 midPosScr = WorldToScreen(midPos);
-
-                            DrawGrid(Event.current.mousePosition, Vector3.forward * midPos.z, Quaternion.identity);
-
-
+                            
+                            Vector2 targetPosScr = 
+                                GizmoMode == "start" ? startPosScr : 
+                                GizmoMode == "mid" ? midPosScr : 
+                                GizmoMode == "end" ? endPosScr :
+                                Vector2.zero;
+                                
                             Vector2 fwd = Vector3.Normalize(endPosScr - startPosScr);
+                            
+                            bool startPosHover = Vector3.Distance(Event.current.mousePosition, startPosScr) < 6;
+                            bool midPosHover = Vector3.Distance(Event.current.mousePosition, midPosScr) < 8;
+                            bool endPosHover = Vector3.Distance(Event.current.mousePosition, endPosScr) < 6;
+
+
+                            if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, Vector3.forward * midPos.z, Quaternion.identity);
+                            else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, thing.Offset, Quaternion.Euler(thing.OffsetRotation));
+                            else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, thing.Offset, Quaternion.Euler(thing.OffsetRotation));
+
 
                             Handles.color = Color.black;
                             if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosScr, Vector3.back, fwd, 360 * 59 / 4, 8);
@@ -782,48 +795,62 @@ public class Charter : EditorWindow
                             {
                                 Vector2 newPosScr = WorldToScreen(gizmoAnchor ?? Vector3.zero);
                                 Handles.color = Color.black;
-                                Handles.DrawLine((Vector3)midPosScr + Vector3.back, (Vector3)newPosScr + Vector3.back, 3);
+                                Handles.DrawLine((Vector3)targetPosScr + Vector3.back, (Vector3)newPosScr + Vector3.back, 3);
                                 Handles.DrawSolidArc(newPosScr, Vector3.back, fwd, 360, 4);
                                 Handles.color = Color.yellow;
-                                Handles.DrawLine(midPosScr, newPosScr, 1);
+                                Handles.DrawLine(targetPosScr, newPosScr, 1);
                                 Handles.DrawSolidArc(newPosScr, Vector3.back, fwd, 360, 3);
                             }
 
-                            bool startPosHover = Vector3.Distance(Event.current.mousePosition, startPosScr) < 6;
                             Handles.color = startPosHover || GizmoMode == "start" ? Color.yellow : Color.white;
                             if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosScr, Vector3.back, fwd, 360 * 59 / 4, 6);
-                            bool midPosHover = Vector3.Distance(Event.current.mousePosition, midPosScr) < 8;
                             Handles.color = midPosHover || GizmoMode == "mid" ? Color.yellow : Color.white;
                             if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosScr, Vector3.back, Vector3.up, 360, 8);
-                            bool endPosHover = Vector3.Distance(Event.current.mousePosition, endPosScr) < 6;
                             Handles.color = endPosHover || GizmoMode == "end" ? Color.yellow : Color.white;
                             if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosScr, Vector3.back, fwd, 360 * 59 / 3, 6);
 
                             if (Event.current.type == EventType.MouseDown)
                             {
-                                if (midPosHover) 
+                                if (startPosHover) 
+                                {
+                                    GizmoMode = "start";
+                                    gizmoAnchor = startPos;
+                                }
+                                else if (midPosHover) 
                                 {
                                     GizmoMode = "mid";
                                     gizmoAnchor = midPos;
+                                }
+                                else if (endPosHover) 
+                                {
+                                    GizmoMode = "end";
+                                    gizmoAnchor = endPos;
                                 }
                                 
                                 Repaint();
                             }
                             else if (Event.current.type == EventType.MouseDrag)
                             {
-                                if (GizmoMode == "mid")
+                                Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(thing.OffsetRotation)) * (x - thing.Offset);
+
+                                if (GizmoMode != "")
                                 {
-                                    Vector3? dragPos = RaycastScreenToPlane(Event.current.mousePosition, Vector3.forward * midPos.z, Quaternion.identity);
+                                    Vector3? dragPos = GizmoMode == "mid" ? 
+                                        RaycastScreenToPlane(Event.current.mousePosition, Vector3.forward * midPos.z, Quaternion.identity) :
+                                        RaycastScreenToPlane(Event.current.mousePosition, thing.Offset, Quaternion.Euler(thing.OffsetRotation));
                                     if (dragPos != null)
                                     {
-                                        if (Event.current.shift) dragPos = new Vector3(Mathf.Round(dragPos?.x ?? 0), Mathf.Round(dragPos?.y ?? 0), dragPos?.z ?? 0);
-                                        
-                                        MoveLane(thing, (Vector3)(dragPos - midPos));
+                                        if (GizmoMode == "start" || GizmoMode == "end") dragPos = inv((Vector3)dragPos);
+                                        if (Event.current.shift) dragPos = new Vector3(Mathf.Round(dragPos?.x ?? 0), Mathf.Round(dragPos?.y ?? 0), Mathf.Round(dragPos?.z ?? 0));
                                     }
                                     else
                                     {
-                                        MoveLane(thing, (Vector3)(gizmoAnchor - midPos));
+                                        dragPos = gizmoAnchor;
                                     }
+                                
+                                    if (GizmoMode == "start") DoMove<CharterMoveLaneStartAction, Lane>(thing, (Vector3)dragPos - inv(startPos));
+                                    else if (GizmoMode == "mid") DoMove<CharterMoveLaneAction, Lane>(thing, (Vector3)dragPos - midPos);
+                                    else if (GizmoMode == "end") DoMove<CharterMoveLaneEndAction, Lane>(thing, (Vector3)dragPos - inv(endPos));
                                 }
                                 Repaint();
                             }
@@ -1385,19 +1412,19 @@ public class Charter : EditorWindow
         wantsMouseMove = true;
     }
 
-    public void MoveLane(Lane lane, Vector3 offset)
+    public void DoMove<TAction, TTarget>(TTarget item, Vector3 offset) where TAction : CharterMoveAction<TTarget>, new()
     {
-        CharterMoveLaneAction action = null;
-        if (History.ActionsBehind.Count > 0 && History.ActionsBehind[History.ActionsBehind.Count - 1] is CharterMoveLaneAction)
+        TAction action = null;
+        if (History.ActionsBehind.Count > 0 && History.ActionsBehind[History.ActionsBehind.Count - 1] is TAction)
         {
-            action = (CharterMoveLaneAction)History.ActionsBehind[History.ActionsBehind.Count - 1];
-            if (action.Item != lane) action = null;
+            action = (TAction)History.ActionsBehind[History.ActionsBehind.Count - 1];
+            if (!action.Item.Equals(item)) action = null;
         }
 
         if (action == null)
         {
-            action = new CharterMoveLaneAction();
-            action.Item = lane;
+            action = new TAction();
+            action.Item = item;
             History.ActionsBehind.Add(action);
         }
         History.ActionsAhead.Clear();
@@ -1824,7 +1851,7 @@ public class Charter : EditorWindow
                 float height = 0;
                 for (int i = 0; i < 32; i++) height += Math.Abs(list[i]);
                 height /= 32;
-                EditorGUI.DrawRect(new Rect(a + 2, 50 - height * 40, 1, height * 80), waveColor);
+                EditorGUI.DrawRect(new Rect(a + 2, 50 - height * 50, 1, height * 100), waveColor);
             }
         }
 
@@ -3379,10 +3406,8 @@ public class Charter : EditorWindow
             spd = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(252, 28, 43, 18), spd), .5f, 20) / .5f) * .5f;
             ScrollSpeed = spd * spd;
 
-            PlayMetronome = GUI.Toggle(new Rect(5, 73, 145, 20), PlayMetronome, "Metronome", "buttonLeft");
-            PlayHitsounds = GUI.Toggle(new Rect(150, 73, 145, 20), PlayHitsounds, "Hitsounds", "buttonRight");
-            SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
-            FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
+            PlayMetronome = GUI.Toggle(new Rect(5, 95, 145, 20), PlayMetronome, "Metronome", "buttonLeft");
+            PlayHitsounds = GUI.Toggle(new Rect(150, 95, 145, 20), PlayHitsounds, "Hitsounds", "buttonRight");
         }
         else if (extrasmode == "timeline_options")
         {
@@ -3390,6 +3415,9 @@ public class Charter : EditorWindow
             if (GUI.Toggle(new Rect(95, 6, 66, 18), WaveformMode == 0, "Off", "buttonLeft")) WaveformMode = 0;
             if (GUI.Toggle(new Rect(162, 6, 66, 18), WaveformMode == 1, "Paused", "buttonMid")) WaveformMode = 1;
             if (GUI.Toggle(new Rect(229, 6, 66, 18), WaveformMode == 2, "On", "buttonRight")) WaveformMode = 2;
+
+            SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
+            FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
         }
     }
 
