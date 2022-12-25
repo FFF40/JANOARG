@@ -240,7 +240,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        isDragging = true;
+        isDragging = isScrolling || !isAnimating;
     }
 
     public void OnDrag(PointerEventData eventData)
