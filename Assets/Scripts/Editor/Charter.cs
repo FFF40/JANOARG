@@ -782,10 +782,14 @@ public class Charter : EditorWindow
                                 bool midPosHover = Vector3.Distance(Event.current.mousePosition, midPosScr) < 8;
                                 bool endPosHover = Vector3.Distance(Event.current.mousePosition, endPosScr) < 6;
 
+                                Handles.color = Color.black;
+                                Handles.DrawLine((Vector3)startPosScr + Vector3.back, (Vector3)endPosScr + Vector3.back, 4);
+                                Handles.color = Color.white;
+                                Handles.DrawLine(startPosScr, endPosScr, 2);
 
                                 if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, Vector3.forward * midPos.z, Quaternion.identity);
-                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, thing.Offset, Quaternion.Euler(thing.OffsetRotation));
-                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, thing.Offset, Quaternion.Euler(thing.OffsetRotation));
+                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, man.CurrentLane.Offset, Quaternion.Euler(man.CurrentLane.OffsetRotation));
+                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, man.CurrentLane.Offset, Quaternion.Euler(man.CurrentLane.OffsetRotation));
 
 
                                 Handles.color = Color.black;
@@ -833,13 +837,13 @@ public class Charter : EditorWindow
                                 }
                                 else if (Event.current.type == EventType.MouseDrag)
                                 {
-                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(thing.OffsetRotation)) * (x - thing.Offset);
+                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(man.CurrentLane.OffsetRotation)) * (x - man.CurrentLane.Offset);
 
                                     if (GizmoMode != "")
                                     {
                                         Vector3? dragPos = GizmoMode == "mid" ? 
                                             RaycastScreenToPlane(Event.current.mousePosition, Vector3.forward * midPos.z, Quaternion.identity) :
-                                            RaycastScreenToPlane(Event.current.mousePosition, thing.Offset, Quaternion.Euler(thing.OffsetRotation));
+                                            RaycastScreenToPlane(Event.current.mousePosition, man.CurrentLane.Offset, Quaternion.Euler(man.CurrentLane.OffsetRotation));
                                         if (dragPos != null)
                                         {
                                             if (GizmoMode == "start" || GizmoMode == "end") dragPos = inv((Vector3)dragPos);
@@ -853,6 +857,124 @@ public class Charter : EditorWindow
                                         if (GizmoMode == "start") DoMove<CharterMoveLaneStartAction, Lane>(thing, (Vector3)dragPos - inv(startPos));
                                         else if (GizmoMode == "mid") DoMove<CharterMoveLaneAction, Lane>(thing, (Vector3)dragPos - midPos);
                                         else if (GizmoMode == "end") DoMove<CharterMoveLaneEndAction, Lane>(thing, (Vector3)dragPos - inv(endPos));
+                                    }
+                                    Repaint();
+                                }
+                                else if (Event.current.type == EventType.MouseUp)
+                                {
+                                    GizmoMode = "";
+                                    gizmoAnchor = null;
+                                    Repaint();
+                                }
+
+                                wantsMouseMove = true;
+                                if (Event.current.type == EventType.MouseMove)
+                                    Repaint();
+                            }
+                        }
+                        if (TargetThing is LaneStep)
+                        {
+                            LaneStep thing = (LaneStep)TargetThing;
+                            if (thing.Offset >= pos)
+                            {
+                                LaneManager lman = Manager.Lanes[TargetChart.Data.Lanes.IndexOf(TargetLane)];
+                                LaneStepManager man = lman.Steps[TargetLane.LaneSteps.IndexOf(thing)];
+
+                                Vector3 distOffset = Quaternion.Euler(lman.CurrentLane.OffsetRotation) * (Vector3.forward * (man.Distance - lman.CurrentDistance));
+
+                                Vector3 startPos = Quaternion.Euler(lman.CurrentLane.OffsetRotation) * (Vector3)man.CurrentStep.StartPos  + distOffset + lman.CurrentLane.Offset;
+                                Vector3 endPos = Quaternion.Euler(lman.CurrentLane.OffsetRotation) * (Vector3)man.CurrentStep.EndPos + distOffset + lman.CurrentLane.Offset;
+                                Vector3 midPos = (startPos + endPos) / 2;
+
+                                Vector2 startPosScr = WorldToScreen(startPos);
+                                Vector2 endPosScr = WorldToScreen(endPos);
+                                Vector2 midPosScr = WorldToScreen(midPos);
+                                
+                                Vector2 targetPosScr = 
+                                    GizmoMode == "start" ? startPosScr : 
+                                    GizmoMode == "mid" ? midPosScr : 
+                                    GizmoMode == "end" ? endPosScr :
+                                    Vector2.zero;
+                                    
+                                Vector2 fwd = Vector3.Normalize(endPosScr - startPosScr);
+                                
+                                bool startPosHover = Vector3.Distance(Event.current.mousePosition, startPosScr) < 6;
+                                bool midPosHover = Vector3.Distance(Event.current.mousePosition, midPosScr) < 8;
+                                bool endPosHover = Vector3.Distance(Event.current.mousePosition, endPosScr) < 6;
+
+                                Handles.color = Color.black;
+                                Handles.DrawLine((Vector3)startPosScr + Vector3.back, (Vector3)endPosScr + Vector3.back, 4);
+                                Handles.color = Color.white;
+                                Handles.DrawLine(startPosScr, endPosScr, 2);
+
+                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
+                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
+                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
+
+
+                                Handles.color = Color.black;
+                                if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosScr, Vector3.back, fwd, 360 * 59 / 4, 8);
+                                if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosScr, Vector3.back, Vector3.up, 360, 10);
+                                if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosScr, Vector3.back, fwd, 360 * 59 / 3, 9);
+
+                                if (gizmoAnchor != null)
+                                {
+                                    Vector2 newPosScr = WorldToScreen(gizmoAnchor ?? Vector3.zero);
+                                    Handles.color = Color.black;
+                                    Handles.DrawLine((Vector3)targetPosScr + Vector3.back, (Vector3)newPosScr + Vector3.back, 3);
+                                    Handles.DrawSolidArc(newPosScr, Vector3.back, fwd, 360, 4);
+                                    Handles.color = Color.yellow;
+                                    Handles.DrawLine(targetPosScr, newPosScr, 1);
+                                    Handles.DrawSolidArc(newPosScr, Vector3.back, fwd, 360, 3);
+                                }
+
+                                Handles.color = startPosHover || GizmoMode == "start" ? Color.yellow : Color.white;
+                                if (GizmoMode == "" || GizmoMode == "start") Handles.DrawSolidArc(startPosScr, Vector3.back, fwd, 360 * 59 / 4, 6);
+                                Handles.color = midPosHover || GizmoMode == "mid" ? Color.yellow : Color.white;
+                                if (GizmoMode == "" || GizmoMode == "mid") Handles.DrawSolidArc(midPosScr, Vector3.back, Vector3.up, 360, 8);
+                                Handles.color = endPosHover || GizmoMode == "end" ? Color.yellow : Color.white;
+                                if (GizmoMode == "" || GizmoMode == "end") Handles.DrawSolidArc(endPosScr, Vector3.back, fwd, 360 * 59 / 3, 6);
+
+                                if (Event.current.type == EventType.MouseDown)
+                                {
+                                    if (startPosHover) 
+                                    {
+                                        GizmoMode = "start";
+                                        gizmoAnchor = startPos;
+                                    }
+                                    else if (midPosHover) 
+                                    {
+                                        GizmoMode = "mid";
+                                        gizmoAnchor = midPos;
+                                    }
+                                    else if (endPosHover) 
+                                    {
+                                        GizmoMode = "end";
+                                        gizmoAnchor = endPos;
+                                    }
+                                    
+                                    Repaint();
+                                }
+                                else if (Event.current.type == EventType.MouseDrag)
+                                {
+                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(lman.CurrentLane.OffsetRotation)) * (x - lman.CurrentLane.Offset);
+
+                                    if (GizmoMode != "")
+                                    {
+                                        Vector3? dragPos = RaycastScreenToPlane(Event.current.mousePosition, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
+                                        if (dragPos != null)
+                                        {
+                                            dragPos = inv((Vector3)dragPos);
+                                            if (Event.current.shift) dragPos = new Vector3(Mathf.Round(dragPos?.x ?? 0), Mathf.Round(dragPos?.y ?? 0), Mathf.Round(dragPos?.z ?? 0));
+                                        }
+                                        else
+                                        {
+                                            dragPos = gizmoAnchor;
+                                        }
+                                    
+                                        if (GizmoMode == "start") DoMove<CharterMoveLaneStepStartAction, LaneStep>(thing, (Vector3)dragPos - inv(startPos));
+                                        else if (GizmoMode == "mid") DoMove<CharterMoveLaneStepAction, LaneStep>(thing, (Vector3)dragPos - inv(midPos));
+                                        else if (GizmoMode == "end") DoMove<CharterMoveLaneStepEndAction, LaneStep>(thing, (Vector3)dragPos - inv(endPos));
                                     }
                                     Repaint();
                                 }

@@ -222,17 +222,17 @@ public class CharterMoveLaneAction : CharterMoveAction<Lane>
         Item.Offset += offset;
         foreach (Timestamp ts in Item.Storyboard.Timestamps)
         {
-            if (ts.ID == "Position_X")
+            if (ts.ID == "Offset_X")
             {
                 ts.From += offset.x;
                 ts.Target += offset.x;
             }
-            if (ts.ID == "Position_Y")
+            if (ts.ID == "Offset_Y")
             {
                 ts.From += offset.y;
                 ts.Target += offset.y;
             }
-            if (ts.ID == "Position_Z")
+            if (ts.ID == "Offset_Z")
             {
                 ts.From += offset.z;
                 ts.Target += offset.z;
@@ -296,6 +296,88 @@ public class CharterMoveLaneEndAction : CharterMoveAction<Lane>
                     ts.From += offset.y;
                     ts.Target += offset.y;
                 }
+            }
+        }
+    }
+}
+
+public class CharterMoveLaneStepAction : CharterMoveAction<LaneStep>
+{
+
+    public override string GetName()
+    {
+        return "Move Lane Step";
+    }
+
+    public override void Do(Vector3 offset) 
+    {
+        Item.StartPos += (Vector2)offset;
+        Item.EndPos += (Vector2)offset;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "StartPos_X" && ts.ID == "EndPos_X")
+            {
+                ts.From += offset.x;
+                ts.Target += offset.x;
+            }
+            if (ts.ID == "StartPos_Y" && ts.ID == "EndPos_Y")
+            {
+                ts.From += offset.y;
+                ts.Target += offset.y;
+            }
+        }
+    }
+}
+
+public class CharterMoveLaneStepStartAction : CharterMoveAction<LaneStep>
+{
+
+    public override string GetName()
+    {
+        return "Move Lane Step Start";
+    }
+
+    public override void Do(Vector3 offset) 
+    {
+        Item.StartPos += (Vector2)offset;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "StartPos_X")
+            {
+                ts.From += offset.x;
+                ts.Target += offset.x;
+            }
+            if (ts.ID == "StartPos_Y")
+            {
+                ts.From += offset.y;
+                ts.Target += offset.y;
+            }
+        }
+    }
+}
+
+public class CharterMoveLaneStepEndAction : CharterMoveAction<LaneStep>
+{
+
+    public override string GetName()
+    {
+        return "Move Lane Step End";
+    }
+
+    public override void Do(Vector3 offset) 
+    {
+        Item.EndPos += (Vector2)offset;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "EndPos_X")
+            {
+                ts.From += offset.x;
+                ts.Target += offset.x;
+            }
+            if (ts.ID == "EndPos_Y")
+            {
+                ts.From += offset.y;
+                ts.Target += offset.y;
             }
         }
     }
