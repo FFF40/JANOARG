@@ -37,19 +37,20 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Data\Playlist.cs" />
-     <Compile Include="Assets\Scripts\Behaviors\PlaylistScroll.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Song Select\PlaylistScroll.cs" />
      <Compile Include="Assets\Scripts\Debug\FPSCounter.cs" />
      <Compile Include="Assets\Scripts\Data\PlayableSong.cs" />
      <Compile Include="Assets\Scripts\UI\GraphicCircle.cs" />
      <Compile Include="Assets\Scripts\UI\PlaylistScrollItem.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Common\ProfileBar.cs" />
      <Compile Include="Assets\Scripts\Data\Metronome.cs" />
-     <Compile Include="Assets\Scripts\Behaviors\ChartPlayer.cs" />
-     <Compile Include="Assets\Scripts\Behaviors\HitPlayer.cs" />
-     <Compile Include="Assets\Scripts\Behaviors\ResultScreen.cs" />
-     <Compile Include="Assets\Scripts\Behaviors\LanePlayer.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Player\ChartPlayer.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Player\HitPlayer.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Player\ResultScreen.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Player\LanePlayer.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
      <Compile Include="Assets\Scripts\UI\SafeAreaManager.cs" />
-     <Compile Include="Assets\Scripts\Behaviors\HitEffect.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Player\HitEffect.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <Compile Include="Assets\Scripts\Data\ExternalChart.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

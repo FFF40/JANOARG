@@ -2537,7 +2537,7 @@ GameObject:
   - component: {fileID: 1712290308}
   - component: {fileID: 1712290307}
   m_Layer: 5
-  m_Name: Multiplier
+  m_Name: Essence
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2671,6 +2671,7 @@ GameObject:
   - component: {fileID: 1752704533}
   - component: {fileID: 1752704532}
   - component: {fileID: 1752704534}
+  - component: {fileID: 1752704535}
   m_Layer: 5
   m_Name: Profile
   m_TagString: Untagged
@@ -2763,6 +2764,24 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1752704535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1752704530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b2e24f6164899340ba46b933fed6d6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CoinCount: 0
+  OrbCount: 0
+  EssenceCount: 0
+  CoinLabel: {fileID: 126952830}
+  OrbLabel: {fileID: 278705379}
+  EssenceLabel: {fileID: 1712290307}
 --- !u!1 &1758898524
 GameObject:
   m_ObjectHideFlags: 0
