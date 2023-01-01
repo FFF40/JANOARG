@@ -229,6 +229,7 @@ MonoBehaviour:
   SongNameLabel: {fileID: 216273716187927559}
   ArtistNameLabel: {fileID: 216273718043394673}
   CoverImage: {fileID: 216273717689697767}
+  Song: {fileID: 0}
   DataText: 
 --- !u!1 &216273717689697765
 GameObject:
@@ -407,7 +408,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 2048
   m_textAlignment: 65535
-  m_characterSpacing: -3
+  m_characterSpacing: 0
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

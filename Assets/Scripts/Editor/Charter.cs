@@ -2847,6 +2847,10 @@ public class Charter : EditorWindow
                     TempChartMeta = new ExternalChartMeta();
                     extrasmode = "chart_create";
                 }
+                if (GUILayout.Button("Rearrange Charts by Index"))
+                {
+                    TargetSong.Charts.Sort((x, y) => x.DifficultyIndex.CompareTo(y.DifficultyIndex));
+                }
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }

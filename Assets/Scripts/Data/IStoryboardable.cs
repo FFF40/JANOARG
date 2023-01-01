@@ -80,7 +80,7 @@ public class Ease
         var func = _ease.InOut;
         if (mode == EaseMode.In) func = _ease.In;
         if (mode == EaseMode.Out) func = _ease.Out;
-        return func(x);
+        return func(Mathf.Clamp01(x));
     }
 
     public static Dictionary<string, Ease> Eases = new Dictionary<string, Ease>() {

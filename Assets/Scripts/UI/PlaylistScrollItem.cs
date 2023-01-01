@@ -13,13 +13,20 @@ public class PlaylistScrollItem : MonoBehaviour
     public TMP_Text ArtistNameLabel;
     public Image CoverImage;
 
+    public PlayableSong Song;
+    public string Path;
+
     public string DataText;
 
-    public void SetSong(PlayableSong song)
+    public void SetSong(PlayableSong song, string path)
     {
+        Path = path;
         SongNameLabel.text = song.SongName;
         ArtistNameLabel.text = song.SongArtist;
-        DataText = song.Location.ToUpper() + " • " + song.Genre.ToUpper() + " • " + FormatBPM(song.Timing) + " • " + FormatDuration(song.Clip.length);
+        DataText = song.Location.ToUpper() + " • " + song.Genre.ToUpper() + 
+            " • " + FormatBPM(song.Timing) + " • " + FormatDuration(song.Clip.length);
+        
+        Song = song;
     }
 
     string FormatBPM(Metronome timing)

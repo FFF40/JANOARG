@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
-using System;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
+    public static PlaylistScroll main;
+
     public float Offset;
     public int ListOffset;
     public float Velocity;
 
     public Playlist Playlist;
     public PlaylistScrollItem ItemSample;
+    public Dictionary<string, PlayableSong> Songs;
     public List<PlaylistScrollItem> Items;
     public int ListPadding = 10;
     public float ItemSize = 52;
@@ -24,13 +28,21 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     float oldTime;
 
     public RectTransform MainCanvas;
+    public RectTransform SafeArea;
     public RectTransform SelectedSongBox;
+    public Button SelectedSongButton;
     public TMP_Text SongNameLabel;
     public TMP_Text ArtistNameLabel;
     public TMP_Text DataLabel;
-    
+
     public RectTransform ProfileBar;
-    public RectTransform ActionBar;
+    public RectTransform ListActionBar;
+    public RectTransform SongActionBar;
+
+    public RectTransform DifficultyHolder;
+    public LayoutGroup DifficultyHolderLayout;
+    public List<DifficultyItem> DifficultyItems;
+    public DifficultyItem DifficultySample;
 
     bool isScrolling = false;
     bool isSelectionShown = false;
@@ -38,10 +50,38 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     PlaylistScrollItem SelectedItem;
     int SelectedIndex = 0;
 
-    // Start is called before the first frame update
+    public bool isSelected;
+    public int SelectedDifficultyIndex;
+    public DifficultyItem SelectedDifficulty;
+    public List<Color> DifficultyColors;
+
+    public bool isLaunching;
+    public RectTransform ChartDetail;
+    public CanvasGroup ChartDetailGroup;
+
+    void Awake()
+    {
+        main = this;
+    }
+    
     void Start()
     {
         self = GetComponent<RectTransform>();
+
+        StartCoroutine(GetSong());
+    }
+
+    IEnumerator GetSong()
+    {
+        Songs = new Dictionary<string, PlayableSong>();
+        foreach (string path in Playlist.ItemPaths)
+        {
+            ResourceRequest req = Resources.LoadAsync(path);
+            yield return new WaitUntil(() => req.isDone);
+            Debug.Log(path + " " + req.asset);
+            Songs.Add(path, (PlayableSong)req.asset);
+        }
+
         InitItems();
     }
 
@@ -51,7 +91,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         for (int a = -ListPadding; a <= ListPadding; a++)
         {
             PlaylistScrollItem item = Instantiate(ItemSample, transform);
-            item.SetSong(Playlist.Items[Modulo(a, Playlist.Items.Count)]);
+            string path = Playlist.ItemPaths[Modulo(a, Playlist.ItemPaths.Count)];
+            item.SetSong(Songs[path], path);
             Items.Add(item);
         }
     }
@@ -61,94 +102,103 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     {
         if (isDragging)
         {
-            if (Offset == oldOffset && Velocity == oldVelocity) 
+            if (Offset == oldOffset && Velocity == oldVelocity)
             {
                 oldTime += Time.deltaTime;
                 if (oldTime > .1f) Velocity = 0;
             }
-            else 
+            else
             {
                 oldTime = 0;
             }
         }
-        else 
+        else
         {
-            if (Mathf.Abs(Velocity) < 10) 
+            if (Mathf.Abs(Velocity) < 10)
             {
                 Velocity = 0;
                 Offset += (Mathf.Round(Offset / ItemSize) * ItemSize - Offset) * (1 - Mathf.Pow(.001f, Time.deltaTime));
                 isScrolling = false;
             }
-            else 
+            else
             {
                 Velocity *= Mathf.Pow(.3f * Mathf.Min(Mathf.Abs(Velocity / 100), 1), Time.deltaTime);
                 Offset += Velocity * Time.deltaTime;
             }
         }
 
-        
-        if (oldOffset != Offset)
+        if (Items.Count > 0)
         {
-            int pos = -Mathf.RoundToInt(Offset / ItemSize);
-
-            while (ListOffset < pos)
+            if (oldOffset != Offset)
             {
-                PlaylistScrollItem item = Items[0];
-                Items.RemoveAt(0);
-                Items.Add(item);
-                ListOffset++;
-                item.SetSong(Playlist.Items[Modulo(ListOffset + ListPadding, Playlist.Items.Count)]);
-                isScrolling = true;
-            }
-            while (ListOffset > pos)
-            {
-                PlaylistScrollItem item = Items[Items.Count - 1];
-                Items.RemoveAt(Items.Count - 1);
-                Items.Insert(0, item);
-                ListOffset--;
-                item.SetSong(Playlist.Items[Modulo(ListOffset - ListPadding, Playlist.Items.Count)]);
-                isScrolling = true;
+                int pos = -Mathf.RoundToInt(Offset / ItemSize);
+
+                while (ListOffset < pos)
+                {
+                    PlaylistScrollItem item = Items[0];
+                    Items.RemoveAt(0);
+                    Items.Add(item);
+                    ListOffset++;
+                    string path = Playlist.ItemPaths[Modulo(ListOffset + ListPadding, Playlist.ItemPaths.Count)];
+                    item.SetSong(Songs[path], path);
+                    isScrolling = true;
+                }
+                while (ListOffset > pos)
+                {
+                    PlaylistScrollItem item = Items[Items.Count - 1];
+                    Items.RemoveAt(Items.Count - 1);
+                    Items.Insert(0, item);
+                    ListOffset--;
+                    string path = Playlist.ItemPaths[Modulo(ListOffset - ListPadding, Playlist.ItemPaths.Count)];
+                    item.SetSong(Songs[path], path);
+                    isScrolling = true;
+                }
+
+                Offset = Modulo(Offset, ItemSize * Songs.Count);
+                ListOffset = pos = -Mathf.RoundToInt(Offset / ItemSize);
+
+                float ofs = Offset + (pos - ListPadding) * ItemSize;
+                foreach (PlaylistScrollItem item in Items)
+                {
+                    RectTransform rt = (RectTransform)item.transform;
+                    float realOfs = (ofs + Mathf.Clamp(ofs * .6f, -32, 32)) * Mathf.Min(Mathf.Abs(ofs) / ItemSize * 2 + .1f, 1);
+                    rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), "Circle", EaseMode.In) * self.rect.width / 2, -realOfs);
+                    ofs += ItemSize;
+                }
+
+                if (isSelectionShown == true && isAnimating == false)
+                {
+                    SelectedSongBox.anchoredPosition = GetSelectionOffset();
+                }
             }
 
-            Offset = Modulo(Offset, ItemSize * Playlist.Items.Count);
-            ListOffset = pos = -Mathf.RoundToInt(Offset / ItemSize);
-
-            float ofs = Offset + (pos - ListPadding) * ItemSize;
-            foreach (PlaylistScrollItem item in Items) 
+            if (isSelectionShown == false && isScrolling == false)
             {
-                RectTransform rt = (RectTransform)item.transform;
-                float realOfs = (ofs + Mathf.Clamp(ofs * .6f, -32, 32)) * Mathf.Min(Mathf.Abs(ofs) / ItemSize * 2 + .1f, 1);
-                rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), "Circle", EaseMode.In) * self.rect.width / 2, -realOfs);
-                ofs += ItemSize;
+                ShowSelection();
             }
-
-            if (isSelectionShown == true && isAnimating == false)
+            else if (isSelectionShown == true && isScrolling == true)
             {
-                SelectedSongBox.anchoredPosition = GetSelectionOffset();
+                HideSelection();
             }
+            isSelectionShown = !isScrolling;
+
+            oldOffset = Offset;
+            oldVelocity = Velocity;
         }
-
-        if (isSelectionShown == false && isScrolling == false)
-        {
-            if (!isAnimating) StartCoroutine(ShowSelection());
-        }
-        else if (isSelectionShown == true && isScrolling == true)
-        {
-            if (!isAnimating) StartCoroutine(HideSelection());
-        }
-        isSelectionShown = !isScrolling;
-
-        oldOffset = Offset;
-        oldVelocity = Velocity;
     }
 
     Vector2 GetSelectionOffset()
     {
         float y = ((RectTransform)SelectedItem.transform).anchoredPosition.y;
-        return Vector2.up * (y * Mathf.Abs(y) / ItemSize / 2);
+        return Vector2.up * (y * Mathf.Min(Mathf.Abs(y) / ItemSize / 2, 1));
     }
 
-    IEnumerator ShowSelection()
+    public void ShowSelection()
+    {
+        if (!isAnimating) StartCoroutine(ShowSelectionAnim());
+    }
+
+    IEnumerator ShowSelectionAnim()
     {
         SelectedIndex = -Mathf.RoundToInt(Offset / ItemSize);
         SelectedItem = Items[ListPadding];
@@ -179,10 +229,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(101 - 50 * ease2, ArtistNameLabel.rectTransform.anchoredPosition.y);
             DataLabel.rectTransform.anchoredPosition = new Vector2(102 - 50 * ease2, DataLabel.rectTransform.anchoredPosition.y);
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = ease2;
-            
+
             float ease3 = Ease.Get(value, "Quintic", EaseMode.Out);
             ProfileBar.anchoredPosition = new Vector2(0, -40 * ease3);
-            ActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .6f)
@@ -193,10 +243,15 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         LerpSelection(1);
 
         isAnimating = false;
-        if (isScrolling == true) StartCoroutine(HideSelection());
+        if (isScrolling == true) StartCoroutine(HideSelectionAnim());
     }
 
-    IEnumerator HideSelection()
+    public void HideSelection()
+    {
+        if (!isAnimating) StartCoroutine(HideSelectionAnim());
+    }
+
+    IEnumerator HideSelectionAnim()
     {
         isAnimating = true;
 
@@ -219,36 +274,249 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(51 - 100 * ease2, ArtistNameLabel.rectTransform.anchoredPosition.y);
             DataLabel.rectTransform.anchoredPosition = new Vector2(52 - 100 * ease2, DataLabel.rectTransform.anchoredPosition.y);
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = 1 - ease2;
-            
+
             float ease3 = 1 - Ease.Get(value, "Quintic", EaseMode.Out);
             ProfileBar.anchoredPosition = new Vector2(0, -40 * ease3);
-            ActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .3f)
         {
             LerpSelection(a);
-            if (Math.Abs(SelectedIndex + Offset / ItemSize) > ListPadding) break;
+            if (Mathf.Abs(SelectedIndex + Offset / ItemSize) > ListPadding) break;
             yield return null;
         }
+        LerpSelection(1);
 
         SelectedSongBox.gameObject.SetActive(false);
         SelectedItem.CoverImage.gameObject.SetActive(true);
         isAnimating = false;
-        if (isScrolling == false) StartCoroutine(ShowSelection());
+        if (isScrolling == false) StartCoroutine(ShowSelectionAnim());
+    }
+
+    public void SelectSong()
+    {
+        if (!isAnimating) StartCoroutine(SelectSongAnim());
+    }
+
+    public IEnumerator SelectSongAnim() 
+    {
+        isAnimating = true;
+        isSelected = true;
+
+        SelectedSongButton.interactable = false;
+
+        foreach (DifficultyItem diff in DifficultyItems)
+        {
+            Destroy(diff.gameObject);
+        }
+        DifficultyItems.Clear();
+        SelectedDifficulty = null;
+        foreach (ExternalChartMeta chart in SelectedItem.Song.Charts)
+        {
+            DifficultyItem item = Instantiate(DifficultySample, DifficultyHolder);
+            item.SetChart(chart);
+            DifficultyItems.Add(item);
+            if (SelectedDifficulty == null || Mathf.Abs(chart.DifficultyIndex - SelectedDifficultyIndex) < Mathf.Abs(SelectedDifficulty.Chart.DifficultyIndex - SelectedDifficultyIndex))
+                SelectedDifficulty = item;
+        }
+        StartCoroutine(SelectedDifficulty.SelectAnim());
+
+        void LerpSelection(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.In);
+            self.sizeDelta = Vector2.one * (1800 + 1800 * ease);
+
+            float ease2 = Ease.Get(value, "Quintic", EaseMode.InOut);
+            SelectedSongBox.sizeDelta = new Vector2(0, 100 + 60 * ease2);
+
+            SongNameLabel.rectTransform.anchoredPosition = new Vector2(SongNameLabel.rectTransform.anchoredPosition.x, -29 + 24 * ease2);
+            ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(ArtistNameLabel.rectTransform.anchoredPosition.x, 5 + 24 * ease2);
+            DataLabel.rectTransform.anchoredPosition = new Vector2(DataLabel.rectTransform.anchoredPosition.x, 27 + 24 * ease2);
+            DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, -52 + 70 * ease2);
+
+            float ease3 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+
+            float ease4 = Ease.Get(value * 2 - 1, "Quintic", EaseMode.Out);
+            SongActionBar.anchoredPosition = new Vector2(0, 40 * ease4);
+        }
+
+        for (float a = 0; a < 1; a += Time.deltaTime / .8f)
+        {
+            LerpSelection(a);
+            oldOffset += 1e-5f;
+            yield return null;
+        }
+        LerpSelection(1);
+
+        isAnimating = false;
+    }
+
+    public void DeselectSong()
+    {
+        if (!isAnimating) StartCoroutine(DeselectSongAnim());
+    }
+
+    public IEnumerator DeselectSongAnim() 
+    {
+        isAnimating = true;
+        isSelected = false;
+
+        void LerpSelection(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.Out);
+            self.sizeDelta = Vector2.one * (1800 * ease);
+
+            float ease2 = Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            SelectedSongBox.sizeDelta = new Vector2(0, 160 - 60 * ease2);
+
+            SongNameLabel.rectTransform.anchoredPosition = new Vector2(SongNameLabel.rectTransform.anchoredPosition.x, -5 - 24 * ease2);
+            ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(ArtistNameLabel.rectTransform.anchoredPosition.x, 29 - 24 * ease2);
+            DataLabel.rectTransform.anchoredPosition = new Vector2(DataLabel.rectTransform.anchoredPosition.x, 51 - 24 * ease2);
+            DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, 18 - 70 * ease2);
+            
+            float ease3 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            SongActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+
+            float ease4 = Ease.Get(value * 2 - 1, "Quintic", EaseMode.Out);
+            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease4);
+        }
+
+        for (float a = 0; a < 1; a += Time.deltaTime / .8f)
+        {
+            LerpSelection(a);
+            oldOffset += 1e-5f;
+            yield return null;
+        }
+        LerpSelection(1);
+        
+        SelectedSongButton.interactable = true;
+
+        isAnimating = false;
+    }
+
+    public void Launch()
+    {
+        if (!isAnimating) StartCoroutine(LaunchAnim());
+    }
+
+    public IEnumerator LaunchAnim() 
+    {
+        isAnimating = true;
+        isLaunching = true;
+
+        DifficultyHolderLayout.enabled = false;
+        SelectedDifficulty.transform.SetAsLastSibling();
+        float scale = MainCanvas.transform.localScale.x;
+        foreach (DifficultyItem item in DifficultyItems) 
+        {
+            if (item != SelectedDifficulty)
+            {
+                Rigidbody2D rb = item.gameObject.AddComponent<Rigidbody2D>();
+                RectTransform rt = rb.GetComponent<RectTransform>();
+
+                rt.pivot = Vector2.one * .5f;
+                rt.anchoredPosition += rt.rect.size / 2;
+
+
+                rb.gravityScale = 50 * scale;
+                Vector2 force = Random.insideUnitCircle * 100 * scale;
+                force.y = Mathf.Abs(force.y) + 100 * scale;
+                rb.velocity = force;
+                rb.angularVelocity = Random.value * 20 - 10;
+            }
+        }
+        
+        RectTransform sdr = SelectedDifficulty.GetComponent<RectTransform>();
+        float sdrX = sdr.anchoredPosition.x;
+
+        void LerpSelection(float value)
+        {
+            float ease = Ease.Get(value, "Quintic", EaseMode.Out);
+            SelectedSongBox.sizeDelta = new Vector2((-100 + SafeArea.sizeDelta.x) * ease, 160 - 20 * ease);
+
+            float posX = Mathf.Lerp(50, 20, ease);
+            SongNameLabel.rectTransform.anchoredPosition = new Vector2(posX, -5 + 10 * ease);
+            ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(posX + 1, 29 + 10 * ease);
+            DataLabel.rectTransform.anchoredPosition = new Vector2(posX + 2, 51 + 30 * ease);
+            DifficultyHolder.anchoredPosition = new Vector2(posX, 18);
+
+            float ease2 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            ProfileBar.anchoredPosition = new Vector2(0, -40 * ease2);
+            SongActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+        }
+
+        void LerpSelection2(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.InOut);
+            float ease2 = Ease.Get(value * 2, "Exponential", EaseMode.Out);
+            sdr.anchoredPosition = new Vector3((sdrX + 100 * ease2) * (1 - ease), sdr.anchoredPosition.y);
+            ChartDetail.anchoredPosition = new Vector3(235 + (sdrX + 200) * (1 - ease), ChartDetail.anchoredPosition.y);
+            
+            float ease3 = Ease.Get(value * 2 - 1, "Exponential", EaseMode.Out);
+            ChartDetailGroup.alpha = ease3;
+        }
+
+        for (float a = 0; a < 1; a += Time.deltaTime / .8f)
+        {
+            LerpSelection(a);
+            LerpSelection2(a / 3);
+            yield return null;
+        }
+        LerpSelection(1);
+
+        for (float a = 0; a < 2; a += Time.deltaTime / .8f)
+        {
+            LerpSelection2((a + 1) / 3);
+            yield return null;
+        }
+        LerpSelection2(1);
+
+        ChartPlayer.MetaSongPath = SelectedItem.Path;
+        ChartPlayer.MetaChartPosition = SelectedItem.Song.Charts.IndexOf(SelectedDifficulty.Chart);
+
+
+        AsyncOperation op = SceneManager.LoadSceneAsync("Player", LoadSceneMode.Additive);
+        yield return new WaitUntil(() => op.isDone);
+        yield return new WaitUntil(() => ChartPlayer.main.IsPlaying);
+        
+        void LerpSelection3(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.In);
+            SelectedSongBox.localScale = Vector3.one * (1 - ease);
+        }
+
+        for (float a = 0; a < 2; a += Time.deltaTime / .8f)
+        {
+            LerpSelection3(a);
+            yield return null;
+        }
+        LerpSelection3(1);
+
+        SceneManager.UnloadSceneAsync("Song Select");
+        
+        
+        isAnimating = false;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        isDragging = isScrolling || !isAnimating;
+        if (!isSelected)
+        {
+            isDragging = isScrolling || !isAnimating;
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (isDragging)
+        if (!isSelected)
         {
-            Offset -= eventData.delta.y;
-            Velocity = -eventData.delta.y / Time.deltaTime;
+            if (isDragging)
+            {
+                Offset -= eventData.delta.y;
+                Velocity = -eventData.delta.y / Time.deltaTime;
+            }
         }
     }
 

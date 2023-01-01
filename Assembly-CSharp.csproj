@@ -44,11 +44,13 @@
      <Compile Include="Assets\Scripts\UI\PlaylistScrollItem.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Common\ProfileBar.cs" />
      <Compile Include="Assets\Scripts\Data\Metronome.cs" />
+     <Compile Include="Assets\Scripts\Data\Helper.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\ChartPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\HitPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\ResultScreen.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\LanePlayer.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
+     <Compile Include="Assets\Scripts\UI\DifficultyItem.cs" />
      <Compile Include="Assets\Scripts\UI\SafeAreaManager.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\HitEffect.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />

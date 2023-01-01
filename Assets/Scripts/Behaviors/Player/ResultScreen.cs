@@ -28,7 +28,6 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text ResultDifficultyLabel;
     public List<Image> ResultDifficultyIndicators;
     [Space]
-    public List<RankLetter> Ranks;
     public RectTransform RankBox;
     public Image RankBackground;
     public List<GraphicCircle> RankFill;
@@ -96,7 +95,7 @@ public class ResultScreen : MonoBehaviour
         ChartPlayer cp = ChartPlayer.main;
 
         isAnimating = true;
-        if (cp.Score >= cp.TotalScore) PlayStateText.text = "TRACK MASTERED!!";
+        if (cp.Score >= cp.TotalScore) PlayStateText.text = "FLAWLESS MASTER!!";
         else if (cp.Combo >= cp.TotalCombo) PlayStateText.text = "FULL STREAK!";
         else if (cp.Score <= 0) PlayStateText.text = "TRACK CLEARED?";
         else PlayStateText.text = "TRACK CLEARED";
@@ -195,12 +194,7 @@ public class ResultScreen : MonoBehaviour
             bar.rectTransform.sizeDelta = Vector2.zero;
         }
         
-        foreach (RankLetter rank in Ranks) 
-        {
-            if (cp.Score / Mathf.Max(cp.TotalScore, 1) * 1e6 >= rank.Threshold) currentRank = rank;
-            else break;
-        }
-        RankLabel.text = currentRank.Letter;
+        RankLabel.text = Helper.GetRank(cp.Score / Mathf.Max(cp.TotalScore, 1) * 1e6f);
 
         for (float a = 0; a < 1; a += Time.deltaTime)
         {

@@ -9,6 +9,9 @@ public class ChartPlayer : MonoBehaviour
 {
     public static ChartPlayer main;
 
+    public static string MetaSongPath;
+    public static int MetaChartPosition;
+
     [Header("Data")]
     public string SongPath;
     [HideInInspector]
@@ -138,6 +141,12 @@ public class ChartPlayer : MonoBehaviour
 
     public void Start()
     {
+        if (SongPath == "")
+        {
+            SongPath = MetaSongPath;
+            ChartPosition = MetaChartPosition;
+        }
+
         StartCoroutine(InitChart());
 
         float camRatio = Mathf.Min(1, (3f * Screen.width) / (2f * Screen.height));
@@ -150,21 +159,15 @@ public class ChartPlayer : MonoBehaviour
     {
         long time = System.DateTime.Now.Ticks;
         long t;
+        ResourceRequest req;
 
-        Song = Resources.Load<PlayableSong>(SongPath);
-        t = System.DateTime.Now.Ticks;
-        if (t - time > 33e4)
-        {
-            time = t;
-            yield return null;
-        }
-        CurrentChart = Instantiate(Resources.Load<ExternalChart>(System.IO.Path.GetDirectoryName(SongPath).Replace('\\', '/') + "/" + Song.Charts[ChartPosition].Target)).Data;
-        t = System.DateTime.Now.Ticks;
-        if (t - time > 33e4)
-        {
-            time = t;
-            yield return null;
-        }
+        req = Resources.LoadAsync(SongPath);
+        yield return new WaitUntil(() => req.isDone);
+        Song = (PlayableSong)req.asset;
+
+        req = Resources.LoadAsync((System.IO.Path.GetDirectoryName(SongPath).Replace('\\', '/') + "/" + Song.Charts[ChartPosition].Target));
+        yield return new WaitUntil(() => req.isDone);
+        CurrentChart = ((ExternalChart)req.asset).Data;
 
         SongNameLabel.text = Song.SongName;
         SongArtistLabel.text = Song.SongArtist;
