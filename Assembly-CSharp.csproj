@@ -55,6 +55,7 @@
      <Compile Include="Assets\Scripts\Behaviors\Player\HitEffect.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <Compile Include="Assets\Scripts\Data\ExternalChart.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Common\CommonScene.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

@@ -129,7 +129,13 @@ public class ChartPlayer : MonoBehaviour
     public void Awake()
     {
         main = this;
+        CommonScene.Load();
         Application.targetFrameRate = 60;
+    }
+
+    void OnDestroy()
+    {
+        main = main == this ? null : main;
     }
 
     public void NormalizeTimestamp(Timestamp ts)
@@ -141,6 +147,8 @@ public class ChartPlayer : MonoBehaviour
 
     public void Start()
     {
+        if (!MainCamera) MainCamera = Camera.main;
+
         if (SongPath == "")
         {
             SongPath = MetaSongPath;

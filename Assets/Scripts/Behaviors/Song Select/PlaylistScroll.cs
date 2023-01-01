@@ -62,6 +62,12 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     void Awake()
     {
         main = this;
+        CommonScene.Load();
+    }
+
+    void OnDestroy()
+    {
+        main = main == this ? null : main;
     }
     
     void Start()
