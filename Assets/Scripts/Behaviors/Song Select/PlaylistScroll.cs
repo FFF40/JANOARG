@@ -482,10 +482,13 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         ChartPlayer.MetaSongPath = SelectedItem.Path;
         ChartPlayer.MetaChartPosition = SelectedItem.Song.Charts.IndexOf(SelectedDifficulty.Chart);
 
+        LoadingBar.main.Show();
 
         AsyncOperation op = SceneManager.LoadSceneAsync("Player", LoadSceneMode.Additive);
         yield return new WaitUntil(() => op.isDone);
         yield return new WaitUntil(() => ChartPlayer.main.IsPlaying);
+        
+        LoadingBar.main.Hide();
         
         void LerpSelection3(float value)
         {
