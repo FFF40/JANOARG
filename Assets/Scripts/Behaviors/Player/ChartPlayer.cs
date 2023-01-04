@@ -149,7 +149,7 @@ public class ChartPlayer : MonoBehaviour
     {
         if (!MainCamera) MainCamera = Camera.main;
 
-        if (SongPath == "")
+        if (!string.IsNullOrWhiteSpace(MetaSongPath))
         {
             SongPath = MetaSongPath;
             ChartPosition = MetaChartPosition;

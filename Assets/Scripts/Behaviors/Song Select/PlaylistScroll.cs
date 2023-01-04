@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
     public static PlaylistScroll main;
+    public bool IsReady { get; private set; }
 
     public float Offset;
     public int ListOffset;
@@ -35,7 +36,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     public TMP_Text ArtistNameLabel;
     public TMP_Text DataLabel;
 
-    public RectTransform ProfileBar;
+    public ProfileBar ProfileBar;
     public RectTransform ListActionBar;
     public RectTransform SongActionBar;
 
@@ -73,7 +74,9 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     void Start()
     {
         self = GetComponent<RectTransform>();
+        if (!ProfileBar) ProfileBar = ProfileBar.main;
 
+        IsReady = false;
         StartCoroutine(GetSong());
     }
 
@@ -101,6 +104,9 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             item.SetSong(Songs[path], path);
             Items.Add(item);
         }
+
+        IsReady = true;
+        StartCoroutine(IntroAnim());
     }
 
     // Update is called once per frame
@@ -168,6 +174,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                 {
                     RectTransform rt = (RectTransform)item.transform;
                     float realOfs = (ofs + Mathf.Clamp(ofs * .6f, -32, 32)) * Mathf.Min(Mathf.Abs(ofs) / ItemSize * 2 + .1f, 1);
+
                     rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), "Circle", EaseMode.In) * self.rect.width / 2, -realOfs);
                     ofs += ItemSize;
                 }
@@ -198,6 +205,60 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         float y = ((RectTransform)SelectedItem.transform).anchoredPosition.y;
         return Vector2.up * (y * Mathf.Min(Mathf.Abs(y) / ItemSize / 2, 1));
     }
+
+    public IEnumerator IntroAnim() 
+    {
+        isAnimating = true;
+
+        SelectedIndex = -Mathf.RoundToInt(Offset / ItemSize);
+        SelectedItem = Items[ListPadding];
+        SongNameLabel.text = SelectedItem.SongNameLabel.text;
+        ArtistNameLabel.text = SelectedItem.ArtistNameLabel.text;
+        DataLabel.text = SelectedItem.DataText;
+
+        SelectedSongBox.gameObject.SetActive(true);
+        SelectedItem.CoverImage.gameObject.SetActive(false);
+
+        void LerpSelection(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.Out);
+            self.sizeDelta = Vector2.one * (1800 * ease);
+
+            float ease2 = Ease.Get(value * 2 - 1, "Quintic", EaseMode.Out);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
+            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+        }
+
+        void LerpSelection2(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.InOut);
+            Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
+            Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
+
+            SelectedSongBox.sizeDelta = Vector2.Lerp(coverRect.size, new Vector2(0, 100), ease);
+            SelectedSongBox.anchorMin = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(0, .5f), ease);
+            SelectedSongBox.anchorMax = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(1, .5f), ease);
+            SelectedSongBox.anchoredPosition = Vector2.Lerp(coverPos, GetSelectionOffset(), ease);
+            SelectedItem.SongNameLabel.rectTransform.anchoredPosition = new Vector2(9 + 200 * ease, SelectedItem.SongNameLabel.rectTransform.anchoredPosition.y);
+            SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(10 + 200 * ease, SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition.y);
+            SelectedItem.SongNameLabel.alpha = SelectedItem.ArtistNameLabel.alpha = 1 - ease;
+        }
+
+        for (float a = 0; a < 1; a += Time.deltaTime / 1.2f)
+        {
+            LerpSelection(a * 1.5f);
+            LerpSelection2(a * 1.5f - .5f);
+            oldOffset += 1e-5f;
+            yield return null;
+        }
+        LerpSelection(1);
+        LerpSelection(2);
+        
+        SelectedSongButton.interactable = true;
+
+        isAnimating = false;
+    }
+
 
     public void ShowSelection()
     {
@@ -237,7 +298,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = ease2;
 
             float ease3 = Ease.Get(value, "Quintic", EaseMode.Out);
-            ProfileBar.anchoredPosition = new Vector2(0, -40 * ease3);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
         }
 
@@ -282,7 +343,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = 1 - ease2;
 
             float ease3 = 1 - Ease.Get(value, "Quintic", EaseMode.Out);
-            ProfileBar.anchoredPosition = new Vector2(0, -40 * ease3);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
         }
 
@@ -449,7 +510,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DifficultyHolder.anchoredPosition = new Vector2(posX, 18);
 
             float ease2 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
-            ProfileBar.anchoredPosition = new Vector2(0, -40 * ease2);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
             SongActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
         }
 
@@ -504,6 +565,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         LerpSelection3(1);
 
         SceneManager.UnloadSceneAsync("Song Select");
+        Resources.UnloadUnusedAssets();
         
         
         isAnimating = false;

@@ -17,13 +17,13 @@ public class LoadingBar : MonoBehaviour
 
     RectTransform self;
 
-    public static readonly FlavorTextEntry[] FlavorTextEntries = new [] {
+    public static readonly FlavorTextEntry[] FlavorTextEntries = new[] {
 
         // Rhythm tips
         new FlavorTextEntry("Remember: Everything in JANOARG can move!"),
         new FlavorTextEntry("JANOARG sequences are erratic, but some sequences are more erratic than others."),
         new FlavorTextEntry("Keep an eye on the sequences in white, they are more unpredictable than regular ones! They even have their own custom names!"),
-        
+
         new FlavorTextEntry("The highest performance score you can get will always be 1000000ppm, regardless of the complexity."),
         new FlavorTextEntry("Flick and Catch notes will always give you their maximum point value as long as you hit them!"),
         new FlavorTextEntry("You can hold overlapping hold notes with just one finger! Just make sure you hit them all first."),
@@ -58,18 +58,25 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("Disclaimer: The loading bar is not guaranteed to always give you actually useful in-game tips"),
         new FlavorTextEntry("Loading bar is the new news ticker"),
         new FlavorTextEntry("Look ma, I'm in a rhythm game's loading screen!"),
-        
-        new FlavorTextEntry("This loading text will never appear in the loading bar, isn't that weird?", 
+
+        new FlavorTextEntry("This loading text will never appear in the loading bar, isn't that weird?",
             () => false),
 
     };
-    
-    public static readonly string[] CompletedStatuses = new [] {
-        "LOADING COMPLETED",
-        "LOADING SUCCESS",
-        "APPROACHING DESTINATION",
-        "HERE WE GO",
-        "LET'S GO"
+
+    public static readonly FlavorTextEntry[] CompletedStatuses = new[] {
+
+        // Always shown
+        new FlavorTextEntry("LOADING COMPLETED"),
+        new FlavorTextEntry("LOADING SUCCESS"),
+        new FlavorTextEntry("APPROACHING DESTINATION"),
+
+        // When starting a song
+        new FlavorTextEntry("HERE WE GO", () => ChartPlayer.main?.CurrentTime < 0),
+        new FlavorTextEntry("LET'S GO", () => ChartPlayer.main?.CurrentTime < 0),
+        new FlavorTextEntry("GET READY", () => ChartPlayer.main?.CurrentTime < 0),
+        new FlavorTextEntry("MUSIC START", () => ChartPlayer.main?.CurrentTime < 0),
+        
     };
 
     public void Awake()
@@ -81,8 +88,7 @@ public class LoadingBar : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
-        FlavorTextEntry entry = FlavorTextEntry.GetRandom(FlavorTextEntries);
-        FlavorText.text = entry.Message;
+        FlavorText.text = FlavorTextEntry.GetRandom(FlavorTextEntries).Message;
         StopCoroutine(HideAnim());
         StartCoroutine(ShowAnim());
     }
@@ -116,7 +122,7 @@ public class LoadingBar : MonoBehaviour
 
     public IEnumerator HideAnim()
     {
-        StatusText.text = CompletedStatuses[UnityEngine.Random.Range(0, CompletedStatuses.Length)];
+        StatusText.text = FlavorTextEntry.GetRandom(CompletedStatuses).Message;
         ProgressBar.value = 1;
 
         void LerpSelection(float value)
@@ -134,7 +140,7 @@ public class LoadingBar : MonoBehaviour
             yield return null;
         }
         LerpSelection(1);
-        
+
         void LerpSelection2(float value)
         {
             float ease = 1 - Ease.Get(value, "Exponential", EaseMode.In);
@@ -152,7 +158,7 @@ public class LoadingBar : MonoBehaviour
     }
 }
 
-public class FlavorTextEntry 
+public class FlavorTextEntry
 {
     public string Message;
     public Func<bool> Condition = () => true;

@@ -8,12 +8,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using UnityEngine.SceneManagement;
 
 public class ResultScreen : MonoBehaviour
 {
 
     public static ResultScreen main;
     
+    public RectTransform Canvas;
     public GameObject ResultInterfaceObject;
     [Space]
     public bool ExtraDetailMode;
@@ -67,6 +69,8 @@ public class ResultScreen : MonoBehaviour
     public Color HighGoodBarColor;
     public Color LowGoodBarColor;
     public Color BadBarColor;
+    [Space]
+    public RectTransform ActionBar;
 
     RankLetter currentRank;
 
@@ -275,6 +279,10 @@ public class ResultScreen : MonoBehaviour
 
             ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * ease);
             DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * ease);
+
+            float ease2 = Ease.Get(a * 5 - 4, "Quintic", EaseMode.Out);
+            ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
+            ActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / 2f)
@@ -342,6 +350,53 @@ public class ResultScreen : MonoBehaviour
         }
         ExtraDetailEase(0);
         isAnimating = false;
+    }
+
+    public void Continue()
+    {
+        StartCoroutine(ContinueAnim());
+    }
+
+    IEnumerator ContinueAnim()
+    {
+        void Lerp(float value)
+        {
+            float ease = Ease.Get(value, "Exponential", EaseMode.In);
+            float ease2 = 1 - Ease.Get(value * 4, "Quintic", EaseMode.Out);
+
+            ExtraDetailEase(ExtraDetailMode ? ease2 : 0);
+
+            SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, SummaryBox.sizeDelta.y * (1 - ease));
+            PlayStateText.rectTransform.anchoredPosition -= new Vector2(PlayStateText.preferredWidth / 2 - (Canvas.rect.width + 100) * ease, 12);
+            ResultScoreBox.anchoredPosition -= new Vector2((Canvas.rect.width + 100) * ease, 0);
+            RankBox.anchoredPosition -= new Vector2((Canvas.rect.width + 100) * ease, 0);
+
+            ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
+            ActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+            ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * ease2);
+            DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, (ExtraDetailMode ? 50 : 40) * ease2);
+        }
+
+        for (float a = 0; a < 1; a += Time.deltaTime / 1.2f)
+        {
+            Lerp(a);
+            yield return null;
+        }
+        Lerp(1);
+
+        ChartPlayer.MetaSongPath = "";
+
+        LoadingBar.main.Show();
+
+        AsyncOperation op = SceneManager.LoadSceneAsync("Song Select", LoadSceneMode.Additive);
+        yield return new WaitUntil(() => op.isDone);
+        yield return new WaitUntil(() => PlaylistScroll.main.IsReady);
+        
+        LoadingBar.main.Hide();
+        
+        SceneManager.UnloadSceneAsync("Player");
+        Resources.UnloadUnusedAssets();
+
     }
 }
 

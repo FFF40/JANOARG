@@ -17,5 +17,4 @@ public class Common : MonoBehaviour
     {
         main = main == this ? null : main;
     }
-
 }
