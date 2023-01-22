@@ -33,8 +33,9 @@ public class DifficultyItem : MonoBehaviour
     public void SetChart(ExternalChartMeta meta)
     {
         DifficultyNameText.text = meta.DifficultyName;
-        if (Random.value < .5f)
+        if (false)
         {
+            /* TODO: Implement high score saving
             float score = Random.Range(800000, 1000000);
             DifficultyRecordText.text = "<b><i>FS</i></b> " + score.ToString("0000000", CultureInfo.InvariantCulture) + "<size=9>ppm";
             RankText.text = Helper.GetRank(score);
@@ -44,6 +45,7 @@ public class DifficultyItem : MonoBehaviour
                 bar.value = score;
                 score = score * 10 - 9;
             }
+            */
         }
         else
         {

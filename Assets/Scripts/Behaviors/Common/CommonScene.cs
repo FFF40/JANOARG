@@ -14,4 +14,13 @@ public class CommonScene
             isLoaded = true;
         }
     }
+
+    public static void LoadAlt (string targetScene)
+    {
+        if (!isLoaded)
+        {
+            SceneManager.LoadScene(targetScene, LoadSceneMode.Additive);
+            isLoaded = true;
+        }
+    }
 }

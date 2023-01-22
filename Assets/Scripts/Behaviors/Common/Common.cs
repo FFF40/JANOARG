@@ -11,6 +11,7 @@ public class Common : MonoBehaviour
     public void Awake()
     {
         main = this;
+        CommonScene.LoadAlt("Song Select");
     }
 
     void OnDestroy()
