@@ -528,6 +528,15 @@ public class Charter : EditorWindow
 
     Color backgroundColor, interfaceColor;
 
+    public void OnFocus() 
+    {
+        CurrentCamera?.gameObject.SetActive(true);
+    }
+    public void OnLostFocus() 
+    {
+        CurrentCamera?.gameObject.SetActive(false);
+    }
+
     public void OnGUI()
     {
         long strainNow = DateTime.Now.Ticks;
@@ -537,13 +546,13 @@ public class Charter : EditorWindow
         {
             CurrentCamera = new GameObject("Charter Camera").AddComponent<Camera>();
             CurrentCamera.clearFlags = CameraClearFlags.SolidColor;
-            CurrentCamera.targetDisplay = 8;
-            CurrentCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            CurrentCamera.targetDisplay = 7;
+            CurrentCamera.gameObject.hideFlags = HideFlags.DontSave;
         }
         if (!CurrentAudioSource)
         {
             CurrentAudioSource = new GameObject("Charter Audio").AddComponent<AudioSource>();
-            CurrentAudioSource.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            CurrentAudioSource.gameObject.hideFlags = HideFlags.DontSave;
         }
         if (!MetronomeSound)
         {
@@ -607,7 +616,7 @@ public class Charter : EditorWindow
             }
 
             float camLeft = (bound.center.x - (width - bound.center.x));
-            float camRatio = (bound.height / (height - 184));
+            float camRatio = (bound.height / (height - 177));
 
             int ncount = 0, ccount = 0;
 
@@ -620,8 +629,11 @@ public class Charter : EditorWindow
                 CurrentCamera.transform.eulerAngles = chart.CameraRotation;
                 CurrentCamera.transform.Translate(Vector3.back * 10);
                 CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
+                CurrentCamera.aspect = (width + camLeft) / (height - 177);
+                CurrentCamera.ResetAspect();
                 backgroundColor = RenderSettings.fogColor = CurrentCamera.backgroundColor = pal.BackgroundColor;
                 interfaceColor = pal.BackgroundColor.grayscale > .5f ? Color.black : Color.white;
+                
                 CurrentCamera.Render();
 
                 for (int i = 0; i < pal.LaneStyles.Count; i++)
@@ -719,9 +731,11 @@ public class Charter : EditorWindow
                         }
                     }
                 }
-                EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
+                
+
+                //EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
                 Handles.DrawGizmos(CurrentCamera);
-                Handles.DrawCamera(new Rect(0, 26, width + camLeft, height - 184), CurrentCamera);
+                Handles.DrawCamera(new Rect(0, 0, width + camLeft, height - 177), CurrentCamera);
                 Handles.color = pal.InterfaceColor;
                 Handles.DrawAAPolyLine(4, new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y),
                     new Vector2(bound.x + bound.width, bound.y + bound.height), new Vector2(bound.x, bound.y + bound.height),

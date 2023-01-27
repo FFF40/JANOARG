@@ -342,6 +342,15 @@
     <Reference Include="Newtonsoft.Json">
         <HintPath>E:\Documents\JANOARG\Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Android.Types">
+        <HintPath>E:\Unity\2022.2.2f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Android.Gradle">
+        <HintPath>E:\Unity\2022.2.2f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Gradle.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Android.GradleProject">
+        <HintPath>E:\Unity\2022.2.2f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.GradleProject.dll</HintPath>
+    </Reference>
     <Reference Include="netstandard">
         <HintPath>E:\Unity\2022.2.2f1\Editor\Data\NetStandard\ref\2.1.0\netstandard.dll</HintPath>
     </Reference>

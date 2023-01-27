@@ -171,11 +171,11 @@ public class ChartPlayer : MonoBehaviour
 
         req = Resources.LoadAsync(SongPath);
         yield return new WaitUntil(() => req.isDone);
-        Song = (PlayableSong)req.asset;
+        Song = Instantiate((PlayableSong)req.asset);
 
         req = Resources.LoadAsync((System.IO.Path.GetDirectoryName(SongPath).Replace('\\', '/') + "/" + Song.Charts[ChartPosition].Target));
         yield return new WaitUntil(() => req.isDone);
-        CurrentChart = ((ExternalChart)req.asset).Data;
+        CurrentChart = Instantiate(((ExternalChart)req.asset)).Data;
 
         SongNameLabel.text = Song.SongName;
         SongArtistLabel.text = Song.SongArtist;
