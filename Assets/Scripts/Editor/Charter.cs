@@ -3690,7 +3690,7 @@ public class Charter : EditorWindow
         {
             Content = "The first thing we should do when creating a chart is to make sure everything is synced!\n\n"
                 + "Click on the Timing tab here to open the BPM editor.",
-            PopupPosition = new Vector2(180, -120),
+            PopupPosition = new Vector2(180, -280),
             PopupAnchor = new Vector2(0, 1),
             RequirementText = "Open the Timing tab",
             RequirementFunction = x => x.timelineMode == "timing",
@@ -3704,7 +3704,7 @@ public class Charter : EditorWindow
         },
         new TutorialStep()
         {
-            Content = "You might also noticed the Picker now showing an item called \"STP\".\n\n"
+            Content = "You might also noticed the Picker now showing an item called \"BPM\".\n\n"
                 + "You can create another BPM stop by selecting it and placing it in the Timeline, in case you song has BPM changes. That should work for anything that'll be displayed here too.",
             PopupPosition = new Vector2(215, -80),
             PopupAnchor = new Vector2(0, .5f),
@@ -3750,7 +3750,7 @@ public class Charter : EditorWindow
         {
             Content = "Now that's we synced the music, let's populate the chart!\n\n"
                 + "J.A.N.O.A.R.G. charts are made from lanes that can move, rotate, and resize, and notes are placed on them. Let's create one!",
-            PopupPosition = new Vector2(180, -120),
+            PopupPosition = new Vector2(180, -280),
             PopupAnchor = new Vector2(0, 1),
             RequirementText = "Click the Lane tab to open the Lane editor.",
             RequirementFunction = x => x.timelineMode == "lane",
@@ -3800,7 +3800,7 @@ public class Charter : EditorWindow
         {
             Content = "Now the lanes are completed, let's add some gameplay!\n\n"
                 + "Here notes are called \"hit objects\" or just simply \"hits\" and these are instructions for players to hit them, just like other rhythm games. Use the Hits tab to create some of them, which just showed up because you selected a Lane.",
-            PopupPosition = new Vector2(180, -120),
+            PopupPosition = new Vector2(180, -280),
             PopupAnchor = new Vector2(0, 1),
             RequirementText = "Click the Hits tab to open the Hit editor.",
             RequirementFunction = x => x.timelineMode == "hit",
@@ -3840,7 +3840,7 @@ public class Charter : EditorWindow
         {
             Content = "Let's take a tour on the more complex data of the chart.\n\n"
                 + "Click on the \"Pallete\" button to open the Pallete.",
-            PopupPosition = new Vector2(-175, -120),
+            PopupPosition = new Vector2(-175, -280),
             PopupAnchor = new Vector2(1, 1),
             RequirementText = "Open the Pallete",
             RequirementFunction = x => x.TargetThing is Pallete,
@@ -3881,7 +3881,7 @@ public class Charter : EditorWindow
         {
             Content = "...or by using the dedicated Storyboard tab on the Timeline.\n\n"
                 + "Either way, they will display the Timestamp controlled by the item that you selected earlier, so make sure you select an item first!",
-            PopupPosition = new Vector2(180, -120),
+            PopupPosition = new Vector2(180, -280),
             PopupAnchor = new Vector2(0, 1),
         },
         new TutorialStep()
