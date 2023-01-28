@@ -1936,9 +1936,32 @@ public class Charter : EditorWindow
 
     public void Timeline(int id)
     {
+        EditorGUI.DrawRect(new Rect(0, 100, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
+        EditorGUI.DrawRect(new Rect(0, 115, width + 4, 18), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
+
+
+        // Fail-safe check
+        if (TargetSong.Timing.Stops.Count == 0) 
+        {
+            EditorGUI.DrawRect(new Rect(0, 0, width + 4, 160), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
+
+            GUIStyle midLabel = new GUIStyle("label") { alignment = TextAnchor.MiddleCenter };
+            GUI.Label(new Rect(width / 2 - 302, 40, 600, 40), 
+                "Timing validation failed - Your song doesn't contain any BPM Stops.\n" + 
+                "The Timeline and features associated with it will not work until the Timing list is revalidated.", midLabel);
+
+            if (GUI.Button(new Rect(width / 2 - 141, 80, 140, 20), "Undo Previous Action"))
+                History.Undo();
+            if (GUI.Button(new Rect(width / 2 + 3, 80, 140, 20), "Restore Timing List"))
+                HistoryAdd(TargetSong.Timing.Stops, new BPMStop(140, 0));
+
+            return;
+        }
+
         float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
         float seekLimitEnd = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
         float seekTime = TargetSong.Timing.ToBeat(preciseTime);
+
         if (seekEnd == seekStart && seekStart == 0)
         {
             seekEnd = Mathf.Min(width / 100, seekLimitEnd);
@@ -1950,6 +1973,9 @@ public class Charter : EditorWindow
             seekStart = Mathf.Clamp(seekTime - seekRange / 2, seekLimitStart, seekLimitEnd - seekRange);
             seekEnd = seekStart + seekRange;
         }
+
+        if (!float.IsFinite(seekStart)) seekStart = seekLimitStart;
+        if (!float.IsFinite(seekEnd)) seekEnd = seekLimitEnd;
 
         GUIStyle iconButton = new GUIStyle("button") { padding = new RectOffset(0, 0, 0, 0) };
         GUIStyle iconButtonMid = new GUIStyle("buttonMid") { padding = new RectOffset(0, 0, 0, 0) };
@@ -2006,7 +2032,6 @@ public class Charter : EditorWindow
             }
         }
 
-        EditorGUI.DrawRect(new Rect(0, 100, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
         for (float a = Mathf.Ceil(seekStart / sep) * sep; a < seekEnd; a += sep)
         {
             // Infinite loop handler
@@ -2037,7 +2062,6 @@ public class Charter : EditorWindow
             //GUI.Label(new Rect(pos - 48, 100, 100, 15), , label);
         }
 
-        EditorGUI.DrawRect(new Rect(0, 115, width + 4, 18), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
         EditorGUI.MinMaxSlider(new Rect(2, 118, width, 15), ref seekStart, ref seekEnd, seekLimitStart, seekLimitEnd);
 
         EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, 116, 1, 14),
