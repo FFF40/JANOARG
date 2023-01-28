@@ -28,6 +28,7 @@ public class Charter : EditorWindow
     public ExternalChartMeta TargetChartMeta;
     public ExternalChart TargetChart;
     public Lane TargetLane;
+    public object LastTargetThing;
     public object TargetThing;
     public object DeletingThing;
     public object ClipboardThing;
@@ -2718,6 +2719,13 @@ public class Charter : EditorWindow
     {
         GUI.Label(new Rect(0, 0, 240, 24), "", "button");
         EditorGUIUtility.labelWidth = 80;
+
+        if (LastTargetThing != TargetThing)
+        {
+            GUI.FocusControl("Nothing");
+            LastTargetThing = TargetThing;
+        }
+
         if (inspectMode == "debug")
         {
             GUI.Label(new Rect(7, 2, 226, 20), "Debug Stats", "boldLabel");
