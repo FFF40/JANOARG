@@ -785,6 +785,7 @@ public class LaneManager
 
         int index = 0;
         Vector3[] verts = new Vector3[stepCount * 2];
+        Vector2[] uvs = new Vector2[stepCount * 2];
         LaneStepManager next = null;
         CurrentDistance = float.NaN;
         if (verts.Length > 0) for (int a = Steps.Count - 1; a >= 0; a--)
@@ -853,11 +854,17 @@ public class LaneManager
         {
             CurrentDistance = Steps[0].Distance + Steps[0].CurrentStep.Speed * CurrentSpeed * (time - Steps[0].Offset);
         }
-        
+
+        for (int a = 0; a < verts.Length; a++)
+        {
+            uvs[a] = new Vector2(a % 2, verts[a].z);
+        }
+
         if (stepCount != lastStepCount) 
         {
             CurrentMesh.Clear();
             CurrentMesh.SetVertices(verts);
+            CurrentMesh.SetUVs(0, uvs);
             RemakeMesh(stepCount);
             lastStepCount = stepCount;
         }
@@ -866,6 +873,7 @@ public class LaneManager
             int[] tris = CurrentMesh.triangles;
             CurrentMesh.Clear();
             CurrentMesh.SetVertices(verts);
+            CurrentMesh.SetUVs(0, uvs);
             CurrentMesh.SetTriangles(tris, 0);
         }
         
