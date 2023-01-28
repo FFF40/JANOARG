@@ -62,8 +62,9 @@ public class Charter : EditorWindow
 
     public void OnDestroy()
     {
-        DestroyImmediate(CurrentAudioSource);
-        DestroyImmediate(CurrentCamera);
+        DestroyImmediate(CurrentAudioSource.gameObject);
+        DestroyImmediate(CurrentCamera.gameObject);
+        DestroyImmediate(CurrentRenderTexture);
     }
 
     ///////////////////////
