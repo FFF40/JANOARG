@@ -30,7 +30,7 @@ public class GizmoIconUtility
             ExternalChart item = (ExternalChart)obj;
 			EditorGUI.DrawRect(rect, Color.white);
 
-            GUIStyle diffStyle = new GUIStyle("text");
+            GUIStyle diffStyle = new GUIStyle("label");
             diffStyle.alignment = TextAnchor.MiddleCenter;
             diffStyle.normal.textColor = Color.black;
             diffStyle.fontSize = Mathf.RoundToInt(rect.height / 2);
