@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEditor;
 
@@ -34,6 +33,7 @@ public class Charter : EditorWindow
     public object ClipboardThing;
     public Timestamp TargetTimestamp;
 
+    public RenderTexture CurrentRenderTexture;
     public AudioSource CurrentAudioSource;
     public Camera CurrentCamera;
     public AudioClip MetronomeSound;
@@ -542,11 +542,15 @@ public class Charter : EditorWindow
         long strainNow = DateTime.Now.Ticks;
 
         CharterSettings.InitSettings();
+
+        if (!CurrentRenderTexture)
+        {
+            CurrentRenderTexture = new RenderTexture(0, 0, 0, RenderTextureFormat.ARGB32);
+        }
         if (!CurrentCamera)
         {
             CurrentCamera = new GameObject("Charter Camera").AddComponent<Camera>();
             CurrentCamera.clearFlags = CameraClearFlags.SolidColor;
-            CurrentCamera.targetDisplay = 7;
             CurrentCamera.gameObject.hideFlags = HideFlags.DontSave;
         }
         if (!CurrentAudioSource)
@@ -616,7 +620,8 @@ public class Charter : EditorWindow
             }
 
             float camLeft = (bound.center.x - (width - bound.center.x));
-            float camRatio = (bound.height / (height - 177));
+            float camRatio = (bound.height / (height - 152));
+            Rect camRect = new Rect(0, 0, width + camLeft, height - 152);
 
             int ncount = 0, ccount = 0;
 
@@ -625,12 +630,18 @@ public class Charter : EditorWindow
                 Chart chart = (Chart)TargetChart.Data.Get(pos);
                 Pallete pal = (Pallete)chart.Pallete.Get(pos);
 
+                CurrentCamera.targetTexture = null;
+                DestroyImmediate(CurrentRenderTexture);
+                CurrentRenderTexture = new RenderTexture((int)width, (int)height, 0, RenderTextureFormat.ARGB32);
+                CurrentRenderTexture.Create();
+                CurrentCamera.targetTexture = CurrentRenderTexture;
+
                 CurrentCamera.transform.position = chart.CameraPivot;
                 CurrentCamera.transform.eulerAngles = chart.CameraRotation;
                 CurrentCamera.transform.Translate(Vector3.back * 10);
                 CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
-                CurrentCamera.aspect = (width + camLeft) / (height - 177);
-                CurrentCamera.ResetAspect();
+                CurrentCamera.pixelRect = new Rect(camRect.x, camRect.y + height - camRect.height, camRect.width, camRect.height);
+
                 backgroundColor = RenderSettings.fogColor = CurrentCamera.backgroundColor = pal.BackgroundColor;
                 interfaceColor = pal.BackgroundColor.grayscale > .5f ? Color.black : Color.white;
                 
@@ -733,11 +744,11 @@ public class Charter : EditorWindow
                 }
                 
 
-                EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
-                Handles.DrawGizmos(CurrentCamera);
-                Handles.DrawCamera(new Rect(0, 0, width + camLeft, height - 177), CurrentCamera);
+                // EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
+                CurrentCamera.Render();
+                GUI.DrawTexture(new Rect(0, 0, width, height), CurrentRenderTexture);
                 Handles.color = pal.InterfaceColor;
-                Handles.DrawAAPolyLine(4, new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y),
+                Handles.DrawAAPolyLine(2, new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y),
                     new Vector2(bound.x + bound.width, bound.y + bound.height), new Vector2(bound.x, bound.y + bound.height),
                     new Vector2(bound.x, bound.y));
 
