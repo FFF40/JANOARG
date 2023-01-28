@@ -15,6 +15,7 @@ public class Metronome
     }
 
     public float ToBeat(float seconds) {
+        if (Stops.Count == 0) return float.NaN;
         float beat = 0;
         for (int a = 0; a < Stops.Count; a++) 
         {
@@ -34,6 +35,7 @@ public class Metronome
     }
 
     public float ToSeconds(float beat) {
+        if (Stops.Count == 0) return float.NaN;
         for (int a = 0; a < Stops.Count; a++) 
         {
             BPMStop stop = Stops[a];
@@ -53,6 +55,7 @@ public class Metronome
     }
 
     public float ToBar(float seconds, float beat = 0) {
+        if (Stops.Count == 0) return float.NaN;
         float bar = 0;
         for (int a = 0; a < Stops.Count; a++) 
         {
@@ -72,6 +75,7 @@ public class Metronome
     }
 
     public float ToDividedBeat(float seconds, float beat = 0) {
+        if (Stops.Count == 0) return float.NaN;
         for (int a = 0; a < Stops.Count; a++) 
         {
             float b = (seconds - Stops[a].Offset) / (60 / Stops[a].BPM) + beat;
@@ -91,6 +95,7 @@ public class Metronome
 
     public BPMStop GetStop(float seconds, out int tag) {
         tag = 0;
+        if (Stops.Count == 0) return null;
         while (tag < Stops.Count - 1 && Stops[tag + 1].Offset < seconds) tag++;
         return Stops[tag];
     }
