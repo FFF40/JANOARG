@@ -1922,6 +1922,7 @@ public class Charter : EditorWindow
     public bool dragged = false;
 
     public int verSeek = 0;
+    int lastTimesCount = 0;
     int mouseBtn = -1;
     int timelineSep = 2;
 
@@ -2090,6 +2091,11 @@ public class Charter : EditorWindow
                 }
                 Times.Add(pos + size);
                 return Times.Count - 1;
+            }
+            
+            if (lastTimesCount > 5)
+            {
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 5f / lastTimesCount, 0, lastTimesCount - 4));
             }
 
             if (dragMode == "select" && selectStart != null && selectEnd != null)
@@ -2422,8 +2428,9 @@ public class Charter : EditorWindow
 
             if (Times.Count > 5)
             {
-                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 4f / Times.Count, 0, Times.Count - 4));
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 5f / Times.Count, 0, Times.Count - 4));
             }
+            lastTimesCount = Times.Count;
             if (Event.current.type == EventType.ScrollWheel)
             {
                 Vector2 mPos = Event.current.mousePosition;
