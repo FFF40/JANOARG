@@ -745,7 +745,7 @@ public class Charter : EditorWindow
                 }
                 
 
-                // EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
+                EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
                 CurrentCamera.Render();
                 GUI.DrawTexture(new Rect(0, 0, width, height), CurrentRenderTexture);
                 Handles.color = pal.InterfaceColor;
