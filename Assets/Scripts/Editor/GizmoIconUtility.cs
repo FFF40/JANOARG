@@ -23,7 +23,6 @@ public class GizmoIconUtility
 
 		if (obj is PlayableSong)
 		{
-            Debug.Log(rect);
 			EditorGUI.DrawRect(rect, Color.black);
 		}
 		else if (obj is ExternalChart)
