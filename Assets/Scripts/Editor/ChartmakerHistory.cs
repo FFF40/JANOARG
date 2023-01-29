@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 
-public class CharterHistory {
-    public List<ICharterAction> ActionsBehind = new List<ICharterAction>();
-    public List<ICharterAction> ActionsAhead = new List<ICharterAction>();
+public class ChartmakerHistory {
+    public List<IChartmakerAction> ActionsBehind = new List<IChartmakerAction>();
+    public List<IChartmakerAction> ActionsAhead = new List<IChartmakerAction>();
 
     public void Undo(int count = 1)
     {
@@ -57,14 +57,14 @@ public class CharterHistory {
             {
                 int count = ActionsBehind.Count - 1;
                 if (ActionsBehind.Count > 0 &&
-                    ActionsBehind[count] is CharterModifyAction && 
-                    ((CharterModifyAction)ActionsBehind[count]).Item == item &&
-                    ((CharterModifyAction)ActionsBehind[count]).Keyword == field.Name)
+                    ActionsBehind[count] is ChartmakerModifyAction && 
+                    ((ChartmakerModifyAction)ActionsBehind[count]).Item == item &&
+                    ((ChartmakerModifyAction)ActionsBehind[count]).Keyword == field.Name)
                 {
-                    ((CharterModifyAction)ActionsBehind[count]).To = field.GetValue(item);
+                    ((ChartmakerModifyAction)ActionsBehind[count]).To = field.GetValue(item);
                 }
                 else {
-                    CharterModifyAction action = new CharterModifyAction()
+                    ChartmakerModifyAction action = new ChartmakerModifyAction()
                     {
                         Item = item,
                         Keyword = field.Name,
@@ -81,20 +81,20 @@ public class CharterHistory {
     }
 }
 
-public interface ICharterAction {
+public interface IChartmakerAction {
     public string GetName();
     public void Undo();
     public void Redo();
 }
 
-public class CharterAddAction : ICharterAction 
+public class ChartmakerAddAction : IChartmakerAction 
 {
     public IList Target;
     public object Item;
 
     public string GetName()
     {
-        return "Add " + Charter.GetItemName(Item);
+        return "Add " + Chartmaker.GetItemName(Item);
     }
 
     public void Undo() 
@@ -127,14 +127,14 @@ public class CharterAddAction : ICharterAction
     }
 }
 
-public class CharterDeleteAction : ICharterAction 
+public class ChartmakerDeleteAction : IChartmakerAction 
 {
     public IList Target;
     public object Item;
 
     public string GetName()
     {
-        return "Delete " + Charter.GetItemName(Item);
+        return "Delete " + Chartmaker.GetItemName(Item);
     }
 
     public void Undo() 
@@ -167,7 +167,7 @@ public class CharterDeleteAction : ICharterAction
     }
 }
 
-public class CharterModifyAction : ICharterAction 
+public class ChartmakerModifyAction : IChartmakerAction 
 {
     public object Item;
     public string Keyword;
@@ -176,7 +176,7 @@ public class CharterModifyAction : ICharterAction
 
     public string GetName()
     {
-        return "Set " + Charter.GetItemName(Item) + " " + Keyword;
+        return "Set " + Chartmaker.GetItemName(Item) + " " + Keyword;
     }
 
     public void Undo() 
@@ -189,7 +189,7 @@ public class CharterModifyAction : ICharterAction
     }
 }
 
-public class CharterMoveAction<T> : ICharterAction 
+public class ChartmakerMoveAction<T> : IChartmakerAction 
 {
     public T Item;
     public Vector3 Offset;
@@ -209,7 +209,7 @@ public class CharterMoveAction<T> : ICharterAction
 
 }
 
-public class CharterMoveLaneAction : CharterMoveAction<Lane>
+public class ChartmakerMoveLaneAction : ChartmakerMoveAction<Lane>
 {
 
     public override string GetName()
@@ -241,7 +241,7 @@ public class CharterMoveLaneAction : CharterMoveAction<Lane>
     }
 }
 
-public class CharterMoveLaneStartAction : CharterMoveAction<Lane>
+public class ChartmakerMoveLaneStartAction : ChartmakerMoveAction<Lane>
 {
 
     public override string GetName()
@@ -271,7 +271,7 @@ public class CharterMoveLaneStartAction : CharterMoveAction<Lane>
     }
 }
 
-public class CharterMoveLaneEndAction : CharterMoveAction<Lane>
+public class ChartmakerMoveLaneEndAction : ChartmakerMoveAction<Lane>
 {
 
     public override string GetName()
@@ -301,7 +301,7 @@ public class CharterMoveLaneEndAction : CharterMoveAction<Lane>
     }
 }
 
-public class CharterMoveLaneStepAction : CharterMoveAction<LaneStep>
+public class ChartmakerMoveLaneStepAction : ChartmakerMoveAction<LaneStep>
 {
 
     public override string GetName()
@@ -329,7 +329,7 @@ public class CharterMoveLaneStepAction : CharterMoveAction<LaneStep>
     }
 }
 
-public class CharterMoveLaneStepStartAction : CharterMoveAction<LaneStep>
+public class ChartmakerMoveLaneStepStartAction : ChartmakerMoveAction<LaneStep>
 {
 
     public override string GetName()
@@ -356,7 +356,7 @@ public class CharterMoveLaneStepStartAction : CharterMoveAction<LaneStep>
     }
 }
 
-public class CharterMoveLaneStepEndAction : CharterMoveAction<LaneStep>
+public class ChartmakerMoveLaneStepEndAction : ChartmakerMoveAction<LaneStep>
 {
 
     public override string GetName()

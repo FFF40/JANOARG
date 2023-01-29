@@ -6,20 +6,20 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class Charter : EditorWindow
+public class Chartmaker : EditorWindow
 {
-    [MenuItem("J.A.N.O.A.R.G./Open Charter", false, 0)]
+    [MenuItem("J.A.N.O.A.R.G./Chartmaker", false, 0)]
     public static void Open()
     {
-        Charter wnd = GetWindow<Charter>();
-        wnd.titleContent = new GUIContent("Charter");
+        Chartmaker wnd = GetWindow<Chartmaker>();
+        wnd.titleContent = new GUIContent("Chartmaker");
         wnd.minSize = new Vector2(960, 600);
     }
 
     public static void Open(PlayableSong target)
     {
-        Charter wnd = GetWindow<Charter>();
-        wnd.titleContent = new GUIContent("Charter");
+        Chartmaker wnd = GetWindow<Chartmaker>();
+        wnd.titleContent = new GUIContent("Chartmaker");
         wnd.minSize = new Vector2(960, 600);
         wnd.TargetSong = target;
     }
@@ -52,7 +52,7 @@ public class Charter : EditorWindow
     public List<Mesh> Meshes = new List<Mesh>();
 
     CultureInfo invariant = CultureInfo.InvariantCulture;
-    public CharterHistory History = new CharterHistory();
+    public ChartmakerHistory History = new ChartmakerHistory();
     public ChartManager Manager;
 
     float ScrollSpeed = 121;
@@ -543,7 +543,7 @@ public class Charter : EditorWindow
     {
         long strainNow = DateTime.Now.Ticks;
 
-        CharterSettings.InitSettings();
+        JAEditorSettings.InitSettings();
 
         if (!CurrentRenderTexture)
         {
@@ -551,13 +551,13 @@ public class Charter : EditorWindow
         }
         if (!CurrentCamera)
         {
-            CurrentCamera = new GameObject("Charter Camera").AddComponent<Camera>();
+            CurrentCamera = new GameObject("Chartmaker Camera").AddComponent<Camera>();
             CurrentCamera.clearFlags = CameraClearFlags.SolidColor;
             CurrentCamera.gameObject.hideFlags = HideFlags.DontSave;
         }
         if (!CurrentAudioSource)
         {
-            CurrentAudioSource = new GameObject("Charter Audio").AddComponent<AudioSource>();
+            CurrentAudioSource = new GameObject("Chartmaker Audio").AddComponent<AudioSource>();
             CurrentAudioSource.gameObject.hideFlags = HideFlags.DontSave;
         }
         if (!MetronomeSound)
@@ -884,9 +884,9 @@ public class Charter : EditorWindow
                                             dragPos = gizmoAnchor;
                                         }
                                     
-                                        if (GizmoMode == "start") DoMove<CharterMoveLaneStartAction, Lane>(thing, (Vector3)dragPos - inv(startPos));
-                                        else if (GizmoMode == "mid") DoMove<CharterMoveLaneAction, Lane>(thing, (Vector3)dragPos - midPos);
-                                        else if (GizmoMode == "end") DoMove<CharterMoveLaneEndAction, Lane>(thing, (Vector3)dragPos - inv(endPos));
+                                        if (GizmoMode == "start") DoMove<ChartmakerMoveLaneStartAction, Lane>(thing, (Vector3)dragPos - inv(startPos));
+                                        else if (GizmoMode == "mid") DoMove<ChartmakerMoveLaneAction, Lane>(thing, (Vector3)dragPos - midPos);
+                                        else if (GizmoMode == "end") DoMove<ChartmakerMoveLaneEndAction, Lane>(thing, (Vector3)dragPos - inv(endPos));
                                     }
                                     Repaint();
                                 }
@@ -1002,9 +1002,9 @@ public class Charter : EditorWindow
                                             dragPos = gizmoAnchor;
                                         }
                                     
-                                        if (GizmoMode == "start") DoMove<CharterMoveLaneStepStartAction, LaneStep>(thing, (Vector3)dragPos - inv(startPos));
-                                        else if (GizmoMode == "mid") DoMove<CharterMoveLaneStepAction, LaneStep>(thing, (Vector3)dragPos - inv(midPos));
-                                        else if (GizmoMode == "end") DoMove<CharterMoveLaneStepEndAction, LaneStep>(thing, (Vector3)dragPos - inv(endPos));
+                                        if (GizmoMode == "start") DoMove<ChartmakerMoveLaneStepStartAction, LaneStep>(thing, (Vector3)dragPos - inv(startPos));
+                                        else if (GizmoMode == "mid") DoMove<ChartmakerMoveLaneStepAction, LaneStep>(thing, (Vector3)dragPos - inv(midPos));
+                                        else if (GizmoMode == "end") DoMove<ChartmakerMoveLaneStepEndAction, LaneStep>(thing, (Vector3)dragPos - inv(endPos));
                                     }
                                     Repaint();
                                 }
@@ -1094,7 +1094,7 @@ public class Charter : EditorWindow
             TargetChart = null;
             TargetThing = null;
             TargetTimestamp = null;
-            GUI.Window(1, new Rect(width / 2 - 250, height / 2 - 110, 500, 220), CharterInit, "");
+            GUI.Window(1, new Rect(width / 2 - 250, height / 2 - 110, 500, 220), ChartmakerInit, "");
         }
 
         if (TutorialStage >= 0)
@@ -1152,7 +1152,7 @@ public class Charter : EditorWindow
         {
             // YandereDev intensifies
 
-            if (Event.current == CharterSettings.Keybinds["General/Toggle Play/Pause"])
+            if (Event.current == JAEditorSettings.Keybinds["General/Toggle Play/Pause"])
             {
                 if (CurrentAudioSource.isPlaying)
                 {
@@ -1164,84 +1164,84 @@ public class Charter : EditorWindow
                     CurrentAudioSource.Play();
                 }
             }
-            else if (Event.current == CharterSettings.Keybinds["General/Play Chart in Player"])
+            else if (Event.current == JAEditorSettings.Keybinds["General/Play Chart in Player"])
             {
                 OpenInPlayMode();
             }
-            else if (Event.current == CharterSettings.Keybinds["File/Save"])
+            else if (Event.current == JAEditorSettings.Keybinds["File/Save"])
             {
                 SaveSong();
             }
-            else if (Event.current == CharterSettings.Keybinds["Edit/Undo"])
+            else if (Event.current == JAEditorSettings.Keybinds["Edit/Undo"])
             {
                 History.Undo();
             }
-            else if (Event.current == CharterSettings.Keybinds["Edit/Redo"])
+            else if (Event.current == JAEditorSettings.Keybinds["Edit/Redo"])
             {
                 History.Redo();
             }
-            else if (Event.current == CharterSettings.Keybinds["Edit/Copy"])
+            else if (Event.current == JAEditorSettings.Keybinds["Edit/Copy"])
             {
                 CopySelection();
             }
-            else if (Event.current == CharterSettings.Keybinds["Edit/Paste"])
+            else if (Event.current == JAEditorSettings.Keybinds["Edit/Paste"])
             {
                 PasteSelection();
             }
-            else if (Event.current == CharterSettings.Keybinds["Edit/Delete"])
+            else if (Event.current == JAEditorSettings.Keybinds["Edit/Delete"])
             {
                 DeleteSelection();
             }
-            else if (Event.current == CharterSettings.Keybinds["Picker/Cursor"])
+            else if (Event.current == JAEditorSettings.Keybinds["Picker/Cursor"])
             {
                 pickermode = "cursor";
             }
-            else if (Event.current == CharterSettings.Keybinds["Picker/Select"])
+            else if (Event.current == JAEditorSettings.Keybinds["Picker/Select"])
             {
                 pickermode = "select";
             }
-            else if (Event.current == CharterSettings.Keybinds["Picker/Delete"])
+            else if (Event.current == JAEditorSettings.Keybinds["Picker/Delete"])
             {
                 pickermode = "delete";
             }
-            else if (Event.current == CharterSettings.Keybinds["Picker/1st Item"])
+            else if (Event.current == JAEditorSettings.Keybinds["Picker/1st Item"])
             {
                 if (timelineMode == "story") pickermode = "timestamp";
                 else if (timelineMode == "timing") pickermode = "bpmstop";
                 else if (timelineMode == "lane") pickermode = "lane";
                 else if (timelineMode == "hit") pickermode = "hit_normal";
             }
-            else if (Event.current == CharterSettings.Keybinds["Picker/2nd Item"])
+            else if (Event.current == JAEditorSettings.Keybinds["Picker/2nd Item"])
             {
                 if (timelineMode == "hit") pickermode = "hit_catch";
             }
-            else if (Event.current == CharterSettings.Keybinds["Selection/Previous Item"])
+            else if (Event.current == JAEditorSettings.Keybinds["Selection/Previous Item"])
             {
                 if (TargetThing is Lane) TargetThing =
                     TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) - 1, 0)];
                 else if (TargetThing is HitObject) TargetThing =
                     TargetLane.Objects[Math.Max(TargetLane.Objects.IndexOf((HitObject)TargetThing) - 1, 0)];
             }
-            else if (Event.current == CharterSettings.Keybinds["Selection/Next Item"])
+            else if (Event.current == JAEditorSettings.Keybinds["Selection/Next Item"])
             {
                 if (TargetThing is Lane) TargetThing =
                     TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) + 1, TargetChart.Data.Lanes.Count - 1)];
                 else if (TargetThing is HitObject) TargetThing =
                     TargetLane.Objects[Math.Min(TargetLane.Objects.IndexOf((HitObject)TargetThing) + 1, TargetLane.Objects.Count - 1)];
             }
-            else if (Event.current == CharterSettings.Keybinds["Selection/Previous Lane"])
+            else if (Event.current == JAEditorSettings.Keybinds["Selection/Previous Lane"])
             {
                 if (TargetLane != null) TargetThing = TargetLane =
                     TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf(TargetLane) - 1, 0)];
             }
-            else if (Event.current == CharterSettings.Keybinds["Selection/Next Lane"])
+            else if (Event.current == JAEditorSettings.Keybinds["Selection/Next Lane"])
             {
                 if (TargetLane != null) TargetThing = TargetLane =
                     TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf(TargetLane) + 1, TargetChart.Data.Lanes.Count - 1)];
             }
-            else if (Event.current == CharterSettings.Keybinds["Misc./Show Keybindings"])
+            else if (Event.current == JAEditorSettings.Keybinds["Misc./Show Keybindings"])
             {
-                CharterSettings.Open(1);
+                JAEditorSettings.Open(1);
             }
             Event.current.Use();
         }
@@ -1261,7 +1261,7 @@ public class Charter : EditorWindow
         if (resIndex >= 0) path = path.Substring(resIndex + 10);
         TargetChart = Resources.Load<ExternalChart>(path);
 
-        History = new CharterHistory();
+        History = new ChartmakerHistory();
         Refresh();
     }
 
@@ -1302,7 +1302,7 @@ public class Charter : EditorWindow
         {
             TargetChartMeta = null;
             TargetSong = null;
-            History = new CharterHistory();
+            History = new ChartmakerHistory();
         }
         if (!(TargetThing is PlayableSong))
         {
@@ -1313,8 +1313,9 @@ public class Charter : EditorWindow
     }
 
     public void Refresh()
-    {
+    {;
         if (Manager != null) Manager.Dispose();
+        if (!TargetSong || !TargetChart) return;
         Manager = new ChartManager(TargetSong, TargetChart.Data, ScrollSpeed, preciseTime, pos);
         if (LaneStyleManagers != null) foreach (LaneStyleManager style in LaneStyleManagers) style.Dispose();
         LaneStyleManagers = new List<LaneStyleManager>();
@@ -1387,7 +1388,7 @@ public class Charter : EditorWindow
     {
         if (item is IList) foreach (object i in (IList)item) list.Add(i);
         else list.Add(item);
-        History.ActionsBehind.Add(new CharterAddAction()
+        History.ActionsBehind.Add(new ChartmakerAddAction()
         {
             Target = list,
             Item = item
@@ -1398,7 +1399,7 @@ public class Charter : EditorWindow
     {
         if (item is IList) foreach (object i in (IList)item) list.Remove(i);
         else list.Remove(item);
-        History.ActionsBehind.Add(new CharterDeleteAction()
+        History.ActionsBehind.Add(new ChartmakerDeleteAction()
         {
             Target = list,
             Item = item
@@ -1579,7 +1580,7 @@ public class Charter : EditorWindow
         wantsMouseMove = true;
     }
 
-    public void DoMove<TAction, TTarget>(TTarget item, Vector3 offset) where TAction : CharterMoveAction<TTarget>, new()
+    public void DoMove<TAction, TTarget>(TTarget item, Vector3 offset) where TAction : ChartmakerMoveAction<TTarget>, new()
     {
         TAction action = null;
         if (History.ActionsBehind.Count > 0 && History.ActionsBehind[History.ActionsBehind.Count - 1] is TAction)
@@ -1639,14 +1640,14 @@ public class Charter : EditorWindow
     string initName, initArtist;
     AudioClip initClip;
 
-    public void CharterInit(int id)
+    public void ChartmakerInit(int id)
     {
 
         GUIStyle title = new GUIStyle(EditorStyles.largeLabel);
         title.fontSize = 20;
         title.alignment = TextAnchor.MiddleCenter;
         title.fontStyle = FontStyle.Bold;
-        GUI.Label(new Rect(0, 5, 500, 40), "Welcome to J.A.N.O.A.R.G. Charter Engine", title);
+        GUI.Label(new Rect(0, 5, 500, 40), "Welcome to J.A.N.O.A.R.G. Chartmaker Engine", title);
 
         EditorGUIUtility.labelWidth = 50;
 
@@ -1759,11 +1760,11 @@ public class Charter : EditorWindow
 
             // -------------------- File
             if (TargetChartMeta != null && TargetChart != null)
-                menu.AddItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
-            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + CharterSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
+                menu.AddItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
+            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
 
             menu.AddSeparator("File/");
-            menu.AddItem(new GUIContent("File/Save " + CharterSettings.Keybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
+            menu.AddItem(new GUIContent("File/Save " + JAEditorSettings.Keybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
 
             menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Refresh"), false, Refresh);
@@ -1771,32 +1772,32 @@ public class Charter : EditorWindow
 
             // -------------------- Edit
             if (History.ActionsBehind.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + CharterSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false, () => History.Undo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + CharterSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + JAEditorSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false, () => History.Undo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + JAEditorSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false);
             if (History.ActionsAhead.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + CharterSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false, () => History.Redo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + CharterSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + JAEditorSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false, () => History.Redo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + JAEditorSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false);
             menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
 
             menu.AddSeparator("Edit/");
             if (TargetThing != null)
             {
-                menu.AddItem(new GUIContent("Edit/Cut " + CharterSettings.Keybinds["Edit/Cut"].ToUnityHotkeyString()), false, CutSelection);
-                menu.AddItem(new GUIContent("Edit/Copy " + CharterSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
+                menu.AddItem(new GUIContent("Edit/Cut " + JAEditorSettings.Keybinds["Edit/Cut"].ToUnityHotkeyString()), false, CutSelection);
+                menu.AddItem(new GUIContent("Edit/Copy " + JAEditorSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
             }
             else
             {
-                menu.AddDisabledItem(new GUIContent("Edit/Cut " + CharterSettings.Keybinds["Edit/Cut"].ToUnityHotkeyString()), false);
-                menu.AddDisabledItem(new GUIContent("Edit/Copy " + CharterSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false);
+                menu.AddDisabledItem(new GUIContent("Edit/Cut " + JAEditorSettings.Keybinds["Edit/Cut"].ToUnityHotkeyString()), false);
+                menu.AddDisabledItem(new GUIContent("Edit/Copy " + JAEditorSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false);
             }
             if (ClipboardThing != null)
-                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
-            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + CharterSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + JAEditorSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
+            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + JAEditorSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
 
             // -------------------- Options
-            menu.AddItem(new GUIContent("Options/Charter Settings"), false, CharterSettings.Open);
-            menu.AddItem(new GUIContent("Options/Show Keybindings " + CharterSettings.Keybinds["Misc./Show Keybindings"].ToUnityHotkeyString()),
-                false, () => CharterSettings.Open(1));
+            menu.AddItem(new GUIContent("Options/Chartmaker Settings"), false, JAEditorSettings.Open);
+            menu.AddItem(new GUIContent("Options/Show Keybindings " + JAEditorSettings.Keybinds["Misc./Show Keybindings"].ToUnityHotkeyString()),
+                false, () => JAEditorSettings.Open(1));
 
             // -------------------- Help
             menu.AddItem(new GUIContent("Help/Interactive Tutorial (closes song)"), false, () => { TargetSong = null; TutorialStage = 0; });
@@ -2789,7 +2790,7 @@ public class Charter : EditorWindow
 
             for (int i = 0; i < History.ActionsAhead.Count; i++)
             {
-                ICharterAction action = History.ActionsAhead[i];
+                IChartmakerAction action = History.ActionsAhead[i];
                 GUILayout.Button(action.GetName());
             }
 
@@ -2797,7 +2798,7 @@ public class Charter : EditorWindow
 
             for (int i = History.ActionsBehind.Count - 1; i >= 0; i--)
             {
-                ICharterAction action = History.ActionsBehind[i];
+                IChartmakerAction action = History.ActionsBehind[i];
                 GUILayout.Button(action.GetName());
             }
 
@@ -3646,7 +3647,7 @@ public class Charter : EditorWindow
     {
         public string Content;
         public string RequirementText;
-        public Func<Charter, bool> RequirementFunction;
+        public Func<Chartmaker, bool> RequirementFunction;
         public Vector2 PopupAnchor = new Vector2(.5f, .5f);
         public Vector2 PopupPosition = Vector2.zero;
     }
@@ -3654,7 +3655,7 @@ public class Charter : EditorWindow
     public TutorialStep[] TutorialSteps = new TutorialStep[] {
         new TutorialStep()
         {
-            Content = "Welcome to J.A.N.O.A.R.G. Charter Engine's Interactive Tutorial! This window will introduce and guide you to the basics of creating J.A.N.O.A.R.G. charts.\n\n"
+            Content = "Welcome to J.A.N.O.A.R.G. Chartmaker Engine's Interactive Tutorial! This window will introduce and guide you to the basics of creating J.A.N.O.A.R.G. charts.\n\n"
                 + "If you ever decided to skip this at any point in the future, you can access the tutorial again in the playable song selection screen, which uhh... is this one.",
         },
         new TutorialStep()

@@ -3,29 +3,29 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class CharterSettings : EditorWindow
+public class JAEditorSettings : EditorWindow
 {
-    public static CharterKeybinds Keybinds;
+    public static ChartmakerKeybinds Keybinds;
 
     public static void InitSettings ()
     {
         if (Keybinds == null)
         {
-            Keybinds = new CharterKeybinds();
+            Keybinds = new ChartmakerKeybinds();
         }
     }
 
-    [MenuItem("J.A.N.O.A.R.G./Charter Settings", false, 1)]
+    [MenuItem("J.A.N.O.A.R.G./Editor Settings", false, 100)]
     public static void Open()
     {
-        CharterSettings wnd = GetWindow<CharterSettings>();
-        wnd.titleContent = new GUIContent("Charter Settings");
+        JAEditorSettings wnd = GetWindow<JAEditorSettings>();
+        wnd.titleContent = new GUIContent("Editor Settings");
         wnd.minSize = new Vector2(720, 400);
     }
     public static void Open(int tab)
     {
-        CharterSettings wnd = GetWindow<CharterSettings>();
-        wnd.titleContent = new GUIContent("Charter Settings");
+        JAEditorSettings wnd = GetWindow<JAEditorSettings>();
+        wnd.titleContent = new GUIContent("Editor Settings");
         wnd.minSize = new Vector2(720, 400);
         wnd.currentTab = tab;
     }
@@ -36,7 +36,7 @@ public class CharterSettings : EditorWindow
 
     void OnGUI () 
     {
-        CharterSettings.InitSettings();
+        JAEditorSettings.InitSettings();
 
         GUIStyle title = new GUIStyle("label");
         title.fontSize = 20;
@@ -204,7 +204,7 @@ public class Keybind
 }
 
 [System.Serializable]
-public class CharterKeybinds
+public class ChartmakerKeybinds
 {
     public Dictionary<string, Keybind> Values;
 
@@ -215,7 +215,7 @@ public class CharterKeybinds
         }
     }
 
-    public CharterKeybinds()
+    public ChartmakerKeybinds()
     {
         Values = new Dictionary<string, Keybind>();
 
