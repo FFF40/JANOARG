@@ -110,7 +110,7 @@ public class CharterSettings : EditorWindow
         }
         EditorGUILayout.EndScrollView();
 
-        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.EndHorizontal();
     }
 }
 
