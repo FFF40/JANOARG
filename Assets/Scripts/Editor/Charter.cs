@@ -745,10 +745,13 @@ public class Charter : EditorWindow
                     }
                 }
                 
+                if (Event.current.type == EventType.Repaint)
+                {
+                    EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
+                    CurrentCamera.Render();
+                    GUI.DrawTexture(new Rect(0, 0, width, height), CurrentRenderTexture);
+                }
 
-                EditorGUI.DrawRect(new Rect(0, 0, width, height), CurrentCamera.backgroundColor);
-                CurrentCamera.Render();
-                GUI.DrawTexture(new Rect(0, 0, width, height), CurrentRenderTexture);
                 Handles.color = pal.InterfaceColor;
                 Handles.DrawAAPolyLine(2, new Vector2(bound.x, bound.y), new Vector2(bound.x + bound.width, bound.y),
                     new Vector2(bound.x + bound.width, bound.y + bound.height), new Vector2(bound.x, bound.y + bound.height),
@@ -1885,7 +1888,7 @@ public class Charter : EditorWindow
     {
         GUIStyle bgLabel = new GUIStyle("label");
         bgLabel.alignment = TextAnchor.MiddleCenter;
-        bgLabel.normal.textColor = backgroundColor.grayscale < .5 ? Color.white : Color.black;
+        bgLabel.hover.textColor = bgLabel.normal.textColor = backgroundColor.grayscale < .5 ? Color.white : Color.black;
 
 
         string oldMode = timelineMode;
@@ -2070,7 +2073,7 @@ public class Charter : EditorWindow
                 EditorGUI.DrawRect(new Rect(pos + 1.5f, 0, 1, 100), new Color(.5f, .5f, .5f, .8f * op));
             }
 
-            label.normal.textColor = new Color(label.normal.textColor.r, label.normal.textColor.g, label.normal.textColor.b, op2);
+            label.hover.textColor = label.normal.textColor = new Color(label.normal.textColor.r, label.normal.textColor.g, label.normal.textColor.b, op2);
             if (op2 > 0) GUI.Label(new Rect(pos - 48, 100, 100, 15),
                 SeparateUnits ? Mathf.Floor(TargetSong.Timing.ToBar(0, a)).ToString("0", invariant) + ":" +
                 Mathf.Abs(TargetSong.Timing.ToDividedBeat(0, a)).ToString("00.###", invariant) : a.ToString("0.###", invariant), label);
@@ -2148,7 +2151,7 @@ public class Charter : EditorWindow
                     GUIStyle right = new GUIStyle("label") { alignment = TextAnchor.MiddleRight };
 
                     GUIStyle inv = new GUIStyle("label");
-                    inv.normal.textColor = EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f);
+                    inv.hover.textColor = inv.normal.textColor = EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f);
 
                     for (int a = verSeek; a < Math.Min(tst.Count, verSeek + 5); a++)
                     {
@@ -2839,7 +2842,7 @@ public class Charter : EditorWindow
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
 
@@ -2939,7 +2942,7 @@ public class Charter : EditorWindow
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
                 GUI.Label(new Rect(7, 2, 226, 20), "BPM Stop", "boldLabel");
@@ -3139,7 +3142,7 @@ public class Charter : EditorWindow
 
                 GUIStyle rightStyle = new GUIStyle(labelStyle);
                 rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
                 GUIStyle fieldStyle = new GUIStyle("textField");
@@ -3261,7 +3264,7 @@ public class Charter : EditorWindow
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
                 List<string> est = new List<string>();
@@ -3329,7 +3332,7 @@ public class Charter : EditorWindow
 
                 GUIStyle rightStyle = new GUIStyle("label");
                 rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Hit Object", "boldLabel");
@@ -3386,7 +3389,7 @@ public class Charter : EditorWindow
 
                 GUIStyle rightStyle = new GUIStyle(labelStyle);
                 rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
                 GUIStyle fieldStyle = new GUIStyle("textField");
@@ -3559,7 +3562,7 @@ public class Charter : EditorWindow
 
             GUIStyle placeholder = new GUIStyle("label");
             Color x = placeholder.normal.textColor;
-            placeholder.normal.textColor = new Color(x.r, x.g, x.b, .5f);
+            placeholder.hover.textColor = placeholder.normal.textColor = new Color(x.r, x.g, x.b, .5f);
 
             GUI.Label(new Rect(5, 6, 390, 18), "Create New Chart", title);
 
