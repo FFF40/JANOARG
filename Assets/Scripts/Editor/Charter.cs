@@ -3624,7 +3624,7 @@ public class Charter : EditorWindow
             GUI.Label(new Rect(5, 6, 90, 18), "Waveform");
             if (GUI.Toggle(new Rect(95, 6, 66, 18), WaveformMode == 0, "Off", "buttonLeft")) WaveformMode = 0;
             if (GUI.Toggle(new Rect(162, 6, 66, 18), WaveformMode == 1, "Paused", "buttonMid")) WaveformMode = 1;
-            if (GUI.Toggle(new Rect(229, 6, 66, 18), WaveformMode == 2, "On", "buttonRight")) WaveformMode = 2;
+            if (GUI.Toggle(new Rect(229, 6, 66, 18), WaveformMode == 2, "Always", "buttonRight")) WaveformMode = 2;
 
             SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
             FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
