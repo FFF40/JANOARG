@@ -1346,23 +1346,35 @@ public class Charter : EditorWindow
 
     public void OpenInPlayMode()
     {
-        if (TargetSong == null)
+        if (TargetSong == null || TargetChart == null)
         {
             Debug.LogError("Please select a Chart first!");
             return;
         }
+
         ChartPlayer player = GameObject.FindObjectOfType<ChartPlayer>();
         if (!player)
         {
             Debug.LogError("Couldn't find any Chart Player in the scene. Please make sure the Scenes/Player scene in the Project window is opened.");
             return;
         }
+
         string path = AssetDatabase.GetAssetPath(TargetSong);
         path = path.Remove(path.Length - 6);
         int resIndex = path.IndexOf("Resources/");
-        if (resIndex >= 0) path = path.Substring(resIndex + 10);
+        if (resIndex >= 0) 
+        {
+            path = path.Substring(resIndex + 10);
+        }
+        else 
+        {
+            Debug.LogError("Your song folder path needs to contain a folder named \"Resources\" in order for the song to be played in Player view.");
+            return;
+        }
+
         player.SongPath = path;
         player.ChartPosition = TargetSong.Charts.FindIndex(x => x.Target == TargetChart.name);
+
         EditorApplication.ExecuteMenuItem("Window/General/Game");
         EditorApplication.isPlaying = true;
         EditorApplication.Beep();
