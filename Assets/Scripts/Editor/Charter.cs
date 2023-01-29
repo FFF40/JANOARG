@@ -1702,6 +1702,7 @@ public class Charter : EditorWindow
         // -------------------- Song selection
 
         TargetSong = (PlayableSong)EditorGUI.ObjectField(new Rect(155, 5, 21, 20), TargetSong, typeof(PlayableSong), false);
+        if (!TargetSong) return;
 
         if (GUI.Toggle(new Rect(27, 5, 130, 20), TargetThing == (object)TargetSong, TargetSong.SongName, "buttonLeft") && TargetThing != (object)TargetSong)
         {
