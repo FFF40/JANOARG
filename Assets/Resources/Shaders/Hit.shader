@@ -1,4 +1,4 @@
-Shader "J.A.N.O.A.R.G./Styles/Default - Hit"
+Shader "JANOARG/Styles/Default - Hit"
 {
     Properties
     {

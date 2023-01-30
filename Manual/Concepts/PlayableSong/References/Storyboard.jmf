@@ -1,0 +1,8 @@
+# Playable Song - Storyboard
+
+<b>Storyboard</b> is the most powerful feature of the game. It can animate properties that are
+marked as <i>Storyboardable</i> in the manual.
+
+## Sub-objects
+
+- <b>Timestamps</b> <i>(List of Timestamps)</i>: List of Timestamps of the Storyboardable object.

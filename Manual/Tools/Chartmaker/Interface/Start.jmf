@@ -1,0 +1,19 @@
+# Chartmaker - Start
+
+The <b>Start</b> window is shown when you open the Chartmaker window, asking you to either create
+or open a song to edit. There are some things you can do while this window is shown:
+
+- <b>Create a Playable Song</b>: To create a Playable Song, enter the details of the song and
+click <i>Create Playable Song</i>. A Playable Song file will be created in the same folder the
+audio file is in, therefore it is recommended to organize the project by making separate folders
+for each song in the project.
+
+- <b>Open a Playable Song</b>: Select a Playable Song from the dropdown menu or drag and drop the
+Playable Song file from the Unity Project window to open that song.
+
+- <b>Interactive Tutorial</b>: Start the interactive tutorial by clicking the <i>Open Interactive
+Tutorial</i> button. The tutorial will guide you through the basics features of the Chartmaker.\
+
+When a Playable Song is selected or created, you will be redirected to the Editor screen. To go
+back to this screen, close the song by pressing the Menu button on the Topbar and click File >
+Close Song or set the Playable Song to <i>None</i> on the Playable Song selection list.

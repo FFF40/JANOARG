@@ -1,0 +1,39 @@
+# Playable Song
+
+Each song in the game is represented in a Playable Song file. The Playable Song file contains
+details about the song such as the song's name/artist and also paths to each Chart file. Each Chart
+file corresponds to a difficulty of that song and contains all information about that difficulty
+like the name, its rating number, and objects that will be appear inside when the song is played
+with that difficulty selected.
+
+Here is a flow chart summarizing JANOARG's Playable Song structure:
+
+```
+
+                                         +--- Playable Song (file) ---+                                             +------ Storyboardable ------+    
+                                         | - Song data                |                                             |  (special components that  |
+   +-------- Metronome ---------+        | (Name, Artist, File, etc.) |                                             |    are marked with [A])    |
+   | - List of BPM Stops ---+   | <--------- Metronome                |       +------- Chart (file) ---[A]-+        | - List of Timestamps ---+  |
+   +------------------------|---+        | - List of Charts ----------+---->  | - Chart data               |        +-------------------------|--+
+                            V            +----------------------------+       |   (Name, Difficulty, etc.) |                                  V
+   +--------- BPM Stop ---------+                                             |[A]Camera controls          |        +--------- Timestamp --------+
+   | - Offset time              |        +--------- Pallete ------[A]-+       | - List of Lanes ---+       |        |  (used on fields that are  |
+   | - Beats per minute         |        |[A]Global colors            | <-------- The Pallete      |       |        |       marked with [A])     |
+   | - Song signature           |        | - List of Styles ----+     |       +--------------------|-------+        | - Target                   |
+   +----------------------------+        +----------------------|-----+                            V                | - Duration                 |
+                                                                V             +----------- Lane -------[A]-+        | - Begin/Ending value       |
+                                         +---------- Style -------[A]-+       |[A]Offset position/rotation |        | - Easings                  |
+                                         | - Unity Materials          | <-------- Lane style               |        +----------------------------+
+                                         | - Material Targets         | <--+  | - List of Lane Steps --------------------+
+                                         |[A]Base Colors              |    |  | - List of Hit Objects --+  |             |
+                                         +----------------------------+    |  +-------------------------|--+             |
+                                                                           |                            V                V
+                                                                           |  +-------- Hit Object ----[A]-+        +--------- Lane Step ----[A]-+
+                                                                           |  | - Time                     |        | - Time                     |
+                                                                           |  |[A]Position                 |        |[A]Scroll speed multiplier  |
+                                                                           |  |[A]Length                   |        |[A]Begin/Ending position    |
+                                                                           |  | - Hold Duration            |        | - Easings                  |
+                                                                           +----- Hit style                |        +----------------------------+
+                                                                              +----------------------------+
+
+```

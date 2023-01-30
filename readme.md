@@ -1,5 +1,5 @@
 <div style="text-align:center">
-    <h2>J.A.N.O.A.R.G.</h2>
+    <h2>JANOARG</h2>
     <i>(Just Another Normal, Ordinary, Acceptable Rhythm Game)</i><br/>
     A rhythm game where everything can move.
     <br/><br/>
@@ -20,7 +20,7 @@
 * Open the root folder using the Unity Editor.
 * If you want to make charts:
     * Put your music into the project. It is recommended to organize your charts by putting songs into separate folders inside `Assets/Resources/Songs` so the songs don't get included in commits (we currently do not accept song submissions through git).
-    * Open the chartmaker: On the menu bar, click J.A.N.O.A.R.G. > Chartmaker
+    * Open the chartmaker: On the menu bar, click JANOARG > Chartmaker
     * Enter your song's information in the fields below the "or create a new one" label.
     * Click the "Create New Chart" button. A file will be created inside the folder that the song is currently in.
     * Click the song name in the top left corner and press the "Create New Chart" button to make a new chart. You can create as many charts as you'd like.

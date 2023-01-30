@@ -8,7 +8,7 @@ using UnityEditor;
 
 public class Chartmaker : EditorWindow
 {
-    [MenuItem("J.A.N.O.A.R.G./Chartmaker", false, 0)]
+    [MenuItem("JANOARG/Chartmaker", false, 0)]
     public static void Open()
     {
         Chartmaker wnd = GetWindow<Chartmaker>();
@@ -1152,7 +1152,7 @@ public class Chartmaker : EditorWindow
         {
             // YandereDev intensifies
 
-            if (Event.current == JAEditorSettings.Keybinds["General/Toggle Play/Pause"])
+            if (Event.current == JAEditorSettings.ChartmakerKeybinds["General/Toggle Play/Pause"])
             {
                 if (CurrentAudioSource.isPlaying)
                 {
@@ -1164,82 +1164,82 @@ public class Chartmaker : EditorWindow
                     CurrentAudioSource.Play();
                 }
             }
-            else if (Event.current == JAEditorSettings.Keybinds["General/Play Chart in Player"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["General/Play Chart in Player"])
             {
                 OpenInPlayMode();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["File/Save"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["File/Save"])
             {
                 SaveSong();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Edit/Undo"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Undo"])
             {
                 History.Undo();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Edit/Redo"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Redo"])
             {
                 History.Redo();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Edit/Copy"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Copy"])
             {
                 CopySelection();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Edit/Paste"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Paste"])
             {
                 PasteSelection();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Edit/Delete"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Delete"])
             {
                 DeleteSelection();
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Picker/Cursor"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/Cursor"])
             {
                 pickermode = "cursor";
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Picker/Select"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/Select"])
             {
                 pickermode = "select";
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Picker/Delete"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/Delete"])
             {
                 pickermode = "delete";
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Picker/1st Item"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/1st Item"])
             {
                 if (timelineMode == "story") pickermode = "timestamp";
                 else if (timelineMode == "timing") pickermode = "bpmstop";
                 else if (timelineMode == "lane") pickermode = "lane";
                 else if (timelineMode == "hit") pickermode = "hit_normal";
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Picker/2nd Item"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/2nd Item"])
             {
                 if (timelineMode == "hit") pickermode = "hit_catch";
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Selection/Previous Item"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Previous Item"])
             {
                 if (TargetThing is Lane) TargetThing =
                     TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) - 1, 0)];
                 else if (TargetThing is HitObject) TargetThing =
                     TargetLane.Objects[Math.Max(TargetLane.Objects.IndexOf((HitObject)TargetThing) - 1, 0)];
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Selection/Next Item"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Next Item"])
             {
                 if (TargetThing is Lane) TargetThing =
                     TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) + 1, TargetChart.Data.Lanes.Count - 1)];
                 else if (TargetThing is HitObject) TargetThing =
                     TargetLane.Objects[Math.Min(TargetLane.Objects.IndexOf((HitObject)TargetThing) + 1, TargetLane.Objects.Count - 1)];
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Selection/Previous Lane"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Previous Lane"])
             {
                 if (TargetLane != null) TargetThing = TargetLane =
                     TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf(TargetLane) - 1, 0)];
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Selection/Next Lane"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Next Lane"])
             {
                 if (TargetLane != null) TargetThing = TargetLane =
                     TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf(TargetLane) + 1, TargetChart.Data.Lanes.Count - 1)];
             }
-            else if (Event.current == JAEditorSettings.Keybinds["Misc./Show Keybindings"])
+            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Misc./Show Keybindings"])
             {
                 JAEditorSettings.Open(1);
             }
@@ -1647,7 +1647,7 @@ public class Chartmaker : EditorWindow
         title.fontSize = 20;
         title.alignment = TextAnchor.MiddleCenter;
         title.fontStyle = FontStyle.Bold;
-        GUI.Label(new Rect(0, 5, 500, 40), "Welcome to J.A.N.O.A.R.G. Chartmaker Engine", title);
+        GUI.Label(new Rect(0, 5, 500, 40), "Welcome to JANOARG Chartmaker Engine", title);
 
         EditorGUIUtility.labelWidth = 50;
 
@@ -1692,7 +1692,7 @@ public class Chartmaker : EditorWindow
         label.alignment = TextAnchor.MiddleCenter;
         label.wordWrap = true;
         label.fontStyle = FontStyle.Italic;
-        GUI.Label(new Rect(0, 190, 500, 20), "J.A.N.O.A.R.G.    © 2022-2022    by FFF40 Studios", label);
+        GUI.Label(new Rect(0, 190, 500, 20), "JANOARG    © 2022-2022    by FFF40 Studios", label);
     }
 
     #endregion
@@ -1760,11 +1760,11 @@ public class Chartmaker : EditorWindow
 
             // -------------------- File
             if (TargetChartMeta != null && TargetChart != null)
-                menu.AddItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
-            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.Keybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
+                menu.AddItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.ChartmakerKeybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
+            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.ChartmakerKeybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
 
             menu.AddSeparator("File/");
-            menu.AddItem(new GUIContent("File/Save " + JAEditorSettings.Keybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
+            menu.AddItem(new GUIContent("File/Save " + JAEditorSettings.ChartmakerKeybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
 
             menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Refresh"), false, Refresh);
@@ -1772,31 +1772,31 @@ public class Chartmaker : EditorWindow
 
             // -------------------- Edit
             if (History.ActionsBehind.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + JAEditorSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false, () => History.Undo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + JAEditorSettings.Keybinds["Edit/Undo"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + JAEditorSettings.ChartmakerKeybinds["Edit/Undo"].ToUnityHotkeyString()), false, () => History.Undo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + JAEditorSettings.ChartmakerKeybinds["Edit/Undo"].ToUnityHotkeyString()), false);
             if (History.ActionsAhead.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + JAEditorSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false, () => History.Redo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + JAEditorSettings.Keybinds["Edit/Redo"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + JAEditorSettings.ChartmakerKeybinds["Edit/Redo"].ToUnityHotkeyString()), false, () => History.Redo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + JAEditorSettings.ChartmakerKeybinds["Edit/Redo"].ToUnityHotkeyString()), false);
             menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
 
             menu.AddSeparator("Edit/");
             if (TargetThing != null)
             {
-                menu.AddItem(new GUIContent("Edit/Cut " + JAEditorSettings.Keybinds["Edit/Cut"].ToUnityHotkeyString()), false, CutSelection);
-                menu.AddItem(new GUIContent("Edit/Copy " + JAEditorSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
+                menu.AddItem(new GUIContent("Edit/Cut " + JAEditorSettings.ChartmakerKeybinds["Edit/Cut"].ToUnityHotkeyString()), false, CutSelection);
+                menu.AddItem(new GUIContent("Edit/Copy " + JAEditorSettings.ChartmakerKeybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
             }
             else
             {
-                menu.AddDisabledItem(new GUIContent("Edit/Cut " + JAEditorSettings.Keybinds["Edit/Cut"].ToUnityHotkeyString()), false);
-                menu.AddDisabledItem(new GUIContent("Edit/Copy " + JAEditorSettings.Keybinds["Edit/Copy"].ToUnityHotkeyString()), false);
+                menu.AddDisabledItem(new GUIContent("Edit/Cut " + JAEditorSettings.ChartmakerKeybinds["Edit/Cut"].ToUnityHotkeyString()), false);
+                menu.AddDisabledItem(new GUIContent("Edit/Copy " + JAEditorSettings.ChartmakerKeybinds["Edit/Copy"].ToUnityHotkeyString()), false);
             }
             if (ClipboardThing != null)
-                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + JAEditorSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
-            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + JAEditorSettings.Keybinds["Edit/Paste"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + JAEditorSettings.ChartmakerKeybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
+            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + JAEditorSettings.ChartmakerKeybinds["Edit/Paste"].ToUnityHotkeyString()), false);
 
             // -------------------- Options
             menu.AddItem(new GUIContent("Options/Chartmaker Settings"), false, JAEditorSettings.Open);
-            menu.AddItem(new GUIContent("Options/Show Keybindings " + JAEditorSettings.Keybinds["Misc./Show Keybindings"].ToUnityHotkeyString()),
+            menu.AddItem(new GUIContent("Options/Show Keybindings " + JAEditorSettings.ChartmakerKeybinds["Misc./Show Keybindings"].ToUnityHotkeyString()),
                 false, () => JAEditorSettings.Open(1));
 
             // -------------------- Help
@@ -2994,7 +2994,7 @@ public class Chartmaker : EditorWindow
                 TargetChartMeta.DifficultyIndex = thing.DifficultyIndex = EditorGUILayout.IntField("Index", thing.DifficultyIndex);
                 TargetChartMeta.DifficultyName = thing.DifficultyName = EditorGUILayout.TextField("Name", thing.DifficultyName);
                 TargetChartMeta.DifficultyLevel = thing.DifficultyLevel = EditorGUILayout.TextField("Level", thing.DifficultyLevel);
-                TargetChartMeta.ChartConstant = thing.ChartConstant = EditorGUILayout.IntField("Constant", thing.ChartConstant);
+                TargetChartMeta.ChartConstant = thing.ChartConstant = EditorGUILayout.FloatField("Constant", thing.ChartConstant);
                 GUILayout.Space(8);
                 GUILayout.Label("Camera", "boldLabel");
                 thing.CameraPivot = EditorGUILayout.Vector3Field("Pivot", thing.CameraPivot);
@@ -3578,8 +3578,7 @@ public class Chartmaker : EditorWindow
             GUI.Label(new Rect(5, 95, 120, 18), "Difficulty Level");
             TempChartMeta.DifficultyLevel = EditorGUI.TextField(new Rect(125, 95, 270, 18), TempChartMeta.DifficultyLevel);
             GUI.Label(new Rect(5, 115, 120, 18), "Chart Constant");
-            TempChartMeta.ChartConstant = EditorGUI.IntField(new Rect(125, 115, 270, 18), TempChartMeta.ChartConstant);
-
+            TempChartMeta.ChartConstant = EditorGUI.FloatField(new Rect(125, 115, 270, 18), TempChartMeta.ChartConstant);
 
             if (GUI.Button(new Rect(5, 195, 195, 20), "Cancel", "buttonLeft")) extrasmode = "";
             if (GUI.Button(new Rect(200, 195, 195, 20), "Create", "buttonRight"))
@@ -3655,13 +3654,13 @@ public class Chartmaker : EditorWindow
     public TutorialStep[] TutorialSteps = new TutorialStep[] {
         new TutorialStep()
         {
-            Content = "Welcome to J.A.N.O.A.R.G. Chartmaker Engine's Interactive Tutorial! This window will introduce and guide you to the basics of creating J.A.N.O.A.R.G. charts.\n\n"
+            Content = "Welcome to JANOARG Chartmaker Engine's Interactive Tutorial! This window will introduce and guide you to the basics of creating JANOARG charts.\n\n"
                 + "If you ever decided to skip this at any point in the future, you can access the tutorial again in the playable song selection screen, which uhh... is this one.",
         },
         new TutorialStep()
         {
-            Content = "Before you can chart, you need to know that J.A.N.O.A.R.G. stores charts of each song inside a file called a \"Playable Song\". To be able to chart, you'll need to create one first.\n\n"
-                + "J.A.N.O.A.R.G. charts/playable songs do not have special folder/file name requirements, but it is recommended that you create a folder for each song for ease of access.",
+            Content = "Before you can chart, you need to know that JANOARG stores charts of each song inside a file called a \"Playable Song\". To be able to chart, you'll need to create one first.\n\n"
+                + "JANOARG charts/playable songs do not have special folder/file name requirements, but it is recommended that you create a folder for each song for ease of access.",
         },
         new TutorialStep()
         {
@@ -3817,7 +3816,7 @@ public class Chartmaker : EditorWindow
         new TutorialStep()
         {
             Content = "Now that's we synced the music, let's populate the chart!\n\n"
-                + "J.A.N.O.A.R.G. charts are made from lanes that can move, rotate, and resize, and notes are placed on them. Let's create one!",
+                + "JANOARG charts are made from lanes that can move, rotate, and resize, and notes are placed on them. Let's create one!",
             PopupPosition = new Vector2(180, -280),
             PopupAnchor = new Vector2(0, 1),
             RequirementText = "Click the Lane tab to open the Lane editor.",

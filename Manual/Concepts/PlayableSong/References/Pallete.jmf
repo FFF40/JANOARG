@@ -1,0 +1,14 @@
+# Playable Song - Pallete
+
+The <b>Pallete</b> defines how the chart will look like.
+
+## Properties
+
+- <b>Background Color</b> <i>(Storyboardable, Color)</i>: The color used for the chart's background.
+
+- <b>Interface Color</b> <i>(Storyboardable, Color)</i>: The color used for the user interface.
+
+## Sub-objects
+
+- <b>Styles</b> <i>(Styles)</i>: A list of Lane and Hit Styles that will be used by Lanes and Hit
+Objects to define ther looks. See Styles for more info.

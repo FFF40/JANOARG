@@ -1,0 +1,15 @@
+# Chartmaker - Picker
+
+The <b>Picker</b> lets you select actions or items to be placed on the Timeline. Items on the
+Picker may vary based on the current tab selected on the Timeline but these three actions will
+always be available on all tabs:
+
+- <b>Cursor</b>: Click on an item to select it on the Inspector, and drag the background to seek.
+If you drag the item view part of the background, the seek will snap into the ruler, otherwise, if
+you drag the ruler part of the background, the seek will not snap.
+
+- <b>Select</b>: Same as Cursor, but dragging the background will multi-select items instead. Note
+that you can also right-drag to multi-select items in Cursor mode.
+
+- <b>Delete</b>: Click on an item to delete it. The editor will ask you to confirm by showing a
+question mark (?) on the item you want to delete before proceeding.

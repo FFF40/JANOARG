@@ -1,0 +1,39 @@
+# Playable Song - Chart
+
+The <b>Chart</b> is the playable part of the rhythm game. Each Chart of a song represents a
+difficulty of that song.
+
+## Properties
+
+- <b>Difficulty Index</b> <i>(Integer)</i>: The structural position of the chart in the game.
+Conventionally this would be a number from 0-3 for normal charts, with 0 being the easiest chart
+and increasing the difficulty up to 3 being the hardest chart. There may be special charts, which
+starts at -1 and decreasing in index for each subsequent chart.
+
+- <b>Difficulty Name</b> <i>(String)</i>: The name of the chart. The normal naming scheme for
+charts is: 0=Simple, 1=Normal, 2=Complex, 3=Overdrive. Special charts may have their own difficulty
+names.
+
+- <b>Difficulty Constant</b> <i>(Float)</i>: The difficulty number rating of the chart, used in
+internal calculations. A higher difficulty constant means a harder chart that requires more skill
+to play. Sometimes a difficulty constant of 0 is used for charts that are non-serious / unfair to
+play / very gimmicky and should not be included in anything that involves player progression.
+
+- <b>Difficulty Level</b> <i>(String)</i>: The visible difficulty number rating of the chart, 
+visible to the player. Normally this would just be the difficulty constant, with an asterisk (*)
+placed after the number for charts that are designed to be played using 3 or more fingers. For some
+special occasions however, this field will be obstructed to give players a sense of mystery (e.g.
+Overdrive ɑ or April Fool's ??)
+
+- <b>Camera Pivot</b> <i>(Storyboardable, Vector3)</i>: The pivot position of the camera, in game
+units.
+
+- <b>Camera Rotation</b> <i>(Storyboardable, Vector3)</i>: The pivot rotation of the camera, in
+degrees.
+
+## Sub-objects
+
+- <b>Pallete</b> <i>(Pallete)</i>: The chart's pallete.
+
+- <b>Lanes</b> <i>(List of Lanes)</i>: A list of lanes that appears inside the chart.
+

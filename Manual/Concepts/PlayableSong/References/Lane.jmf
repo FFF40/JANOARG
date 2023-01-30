@@ -1,0 +1,22 @@
+# Playable Song - Lane
+
+The <b>Lane</b> is a type of object inside the game. Lanes scroll Hit Objects contained within
+them and judges them when they reach the edge of the lane. Lanes can bend, move, rotate and change
+color using the Pallete feature.
+
+## Properties
+
+- <b>Offset</b> <i>(Storyboardable, Vector3)</i>: The offset position of the lane, in game units.
+
+- <b>Rotation</b> <i>(Storyboardable, Vector3)</i>: The offset rotation of the lane, in degrees.
+
+- <b>Style Index</b> <i>(Integer)</i>: The index of the Lane Style inside the Pallete that the lane
+will use.
+
+## Sub-objects
+
+- <b>Lane Steps</b> <i>(List of Lane Steps)</i>: A list of Lane Steps that will define the shape
+of the lane.
+
+- <b>Hit Objects</b> <i>(List of Hit Objects)</i>: A list of Hit Objects that will define actions
+need for the player to take.

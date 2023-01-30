@@ -1,0 +1,26 @@
+# Chartmaker - Toolbar
+
+The <b>Toolbar</b> contains some basic information and actions about the song. From left to right
+are:
+
+- <b>Menu button</b>: Click the "⋮" button to open the menu, in which you can do some actions on
+the Playable Song.
+
+- <b>Playable Song Selection</b>: Click on the song name to select the Playable Song in the
+Inspector, or click the circle next to it to select another song.
+
+- <b>Chart Selection</b>: Click on the chart name to select the Chart in the Inspector, or click
+the button next to it to select another chart.
+
+- <b>File action</b>: Click on <i>Save</i> button to manually save the song and chart data into
+the disk.
+
+- <b>Play/Pause button</b>: Click on the Play/Pause button to play/pause the song.
+
+- <b>Play Options</b>: Click on the dropdown button to open the Play Options panel.
+
+- <b>Timers</b>: Show the current time of the song in song time (measures) and global time
+(seconds).
+
+- <b>Visualization</b>: Shows a small visualization based on the song's Timing. The white rectangle
+flashes on the start of each beat and moves based on the beat's position in a bar.

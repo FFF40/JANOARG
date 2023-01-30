@@ -1,0 +1,32 @@
+# Playable Song - Styles
+
+A <b>Style</b> defines how a certain object or objects looks and feel. There are three main
+property type of a Style:
+
+- <b>Materials</b> <i>(Material)</i>: The Unity Materials that make up the object.
+
+- <b>Color Targets</b> <i>(String)</i>: The variable pointer name of the material that the game
+will set the colors to.
+
+- <b>Colors</b> <i>(Storyboardable, Color)</i>: The colors of the object that will be set to
+the variables defined in Color Targets.
+
+## Style Table
+
+References that derivate from the Style reference will use this Style Table format, like this:
+```
+    
+    +----- Material -----+--- Color Target ---+---- Color Name ----+----------------- Description ----------------+    
+    | Material           | Color Target       | Color Name         | Insert desciptions here . . .                |
+    |                    |                    | Another Color Name | Insert desciptions here . . .                |
+    |                    |--------------------+--------------------+----------------------------------------------|
+    |                    | Color Target 2     | Color Name 2.1     | Insert desciptions here . . .                |
+    |--------------------+--------------------+--------------------+----------------------------------------------|
+    | Another Material   | Color Target 2.1   | Color Name 2.1.1   | Insert desciptions here . . .                |
+    +--------------------+--------------------+--------------------+----------------------------------------------+
+
+```
+
+## List of Style Objects
+
+$SUBITEMS

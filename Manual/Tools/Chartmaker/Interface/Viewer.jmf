@@ -1,0 +1,8 @@
+# Chartmaker - Viewer
+
+The <b>Viewer</b> lets you preview what would happen when the song is played in the game. You can
+also edit some items directly on this view when it is selected on the Inspector.
+
+- <b>Edit Items</b>: If an object is visible on the screen (like a Lane or a Hit Object), you can
+drag the round (Center) knob to move it, or the square <Start> and triangular |End> knob to move
+one of its ends. You can also hold Shift to make them snap into the background grid.

@@ -1,0 +1,7 @@
+# Playable Song - Metronome
+
+The <b>Metronome</b> contains timing informations about the song.
+
+## Sub-objects
+
+- <b>Timestamps</b> <i>(List of Timestamps)</i>: A list of Timestamps.

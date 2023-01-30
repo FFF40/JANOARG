@@ -1,0 +1,10 @@
+# Chartmaker - Inspector
+
+The <b>Inspector</b> shows details of the item you've selected. There are two modes of the
+Inspector:
+
+- <b>Properties</b>: Show the properties of the selected items. For items that have a time
+position, the time is displayed on the title bar or the panel.
+
+- <b>Storyboard</b>: If the item supports storyboarding, shows a list of Timestamps on that
+item. It is recommended to select Storyboard items using the Timeline instead.

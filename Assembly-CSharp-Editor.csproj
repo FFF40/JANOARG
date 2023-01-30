@@ -40,9 +40,10 @@
     <Analyzer Include="E:\Unity\2022.2.2f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Editor\Common\JAEditorSettings.cs" />
      <Compile Include="Assets\Scripts\Editor\Chartmaker\Chartmaker.cs" />
      <Compile Include="Assets\Scripts\Editor\Chartmaker\ChartmakerHistory.cs" />
-     <Compile Include="Assets\Scripts\Editor\JAEditorSettings.cs" />
+     <Compile Include="Assets\Scripts\Editor\Common\JAEditorManual.cs" />
      <Compile Include="Assets\Scripts\Editor\GizmoIconUtility.cs" />
     <Reference Include="UnityEngine">
         <HintPath>E:\Unity\2022.2.2f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

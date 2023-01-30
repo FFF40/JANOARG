@@ -5,17 +5,42 @@ using UnityEngine;
 
 public class JAEditorSettings : EditorWindow
 {
-    public static ChartmakerKeybinds Keybinds;
+    public static Keybinds ChartmakerKeybinds;
 
     public static void InitSettings ()
     {
-        if (Keybinds == null)
+        if (ChartmakerKeybinds == null)
         {
-            Keybinds = new ChartmakerKeybinds();
+            ChartmakerKeybinds = new Keybinds(new Dictionary<string, Keybind> {
+                { "General/Toggle Play/Pause", new Keybind(KeyCode.P) },
+                { "General/Play Chart in Player", new Keybind(KeyCode.P, EventModifiers.Shift) },
+
+                { "File/Save", new Keybind(KeyCode.S, EventModifiers.Command) },
+
+                { "Edit/Undo", new Keybind(KeyCode.Z, EventModifiers.Command) },
+                { "Edit/Redo", new Keybind(KeyCode.Y, EventModifiers.Command) },
+                { "Edit/Cut", new Keybind(KeyCode.X, EventModifiers.Command) },
+                { "Edit/Copy", new Keybind(KeyCode.C, EventModifiers.Command) },
+                { "Edit/Paste", new Keybind(KeyCode.V, EventModifiers.Command) },
+                { "Edit/Delete", new Keybind(KeyCode.Backspace, EventModifiers.None) },
+
+                { "Picker/Cursor", new Keybind(KeyCode.A) },
+                { "Picker/Select", new Keybind(KeyCode.S) },
+                { "Picker/Delete", new Keybind(KeyCode.D) },
+                { "Picker/1st Item", new Keybind(KeyCode.Q) },
+                { "Picker/2nd Item", new Keybind(KeyCode.W) },
+
+                { "Selection/Previous Item", new Keybind(KeyCode.LeftArrow) },
+                { "Selection/Next Item", new Keybind(KeyCode.RightArrow) },
+                { "Selection/Previous Lane", new Keybind(KeyCode.LeftArrow, EventModifiers.Shift) },
+                { "Selection/Next Lane", new Keybind(KeyCode.RightArrow, EventModifiers.Shift) },
+
+                { "Misc./Show Keybindings", new Keybind(KeyCode.Slash, EventModifiers.Shift) },
+            });
         }
     }
 
-    [MenuItem("J.A.N.O.A.R.G./Editor Settings", false, 100)]
+    [MenuItem("JANOARG/Editor Settings", false, 100)]
     public static void Open()
     {
         JAEditorSettings wnd = GetWindow<JAEditorSettings>();
@@ -30,6 +55,7 @@ public class JAEditorSettings : EditorWindow
         wnd.currentTab = tab;
     }
 
+    Vector2 tabScrollPos = Vector2.zero;
     Vector2 scrollPos = Vector2.zero;
 
     int currentTab = 0;
@@ -49,7 +75,7 @@ public class JAEditorSettings : EditorWindow
         GUIStyle tab = new GUIStyle("toolbarButton");
         tab.padding = new RectOffset(12, 12, 0, 2);
         tab.fixedHeight = 32;
-        tab.fixedWidth = 150;
+        tab.fixedWidth = 180;
         tab.fontSize = 14;
         tab.alignment = TextAnchor.MiddleLeft;
 
@@ -58,8 +84,8 @@ public class JAEditorSettings : EditorWindow
         
         EditorGUILayout.BeginHorizontal();
 
-        GUI.Label(new Rect(0, 0, 149, Screen.height), "", bg);
-        EditorGUILayout.BeginScrollView(scrollPos, GUILayout.MinWidth(150), GUILayout.MaxWidth(150));
+        GUI.Label(new Rect(0, 0, 179, Screen.height), "", bg);
+        tabScrollPos = EditorGUILayout.BeginScrollView(tabScrollPos, GUILayout.MinWidth(180), GUILayout.MaxWidth(180));
         if (GUILayout.Toggle(currentTab == 0, "Preferences", tab)) currentTab = 0;
         if (GUILayout.Toggle(currentTab == 1, "Keybindings", tab)) currentTab = 1;
         EditorGUILayout.EndScrollView();
@@ -75,17 +101,19 @@ public class JAEditorSettings : EditorWindow
         }
         else if (currentTab == 1)
         {
-            GUILayout.Label("Keybindings", title, GUILayout.MinWidth(Screen.width - 180));
+            GUILayout.Label("Keybindings", title, GUILayout.MinWidth(Screen.width - 210));
             GUILayout.Space(8);
             GUILayout.Label("(These can't be modified yet, for now use this as a reference)");
             string curCat = "";
             
-            int rows = Mathf.Max((int)(Screen.width - 180) / 220, 1);
+            int rows = Mathf.Max((int)(Screen.width - 210) / 220, 1);
             int crow = 0;
-            float w = (Screen.width - 180) / rows;
+            float w = (Screen.width - 210) / rows;
             float[] hs = new float[rows];
 
-            foreach (KeyValuePair<string, Keybind> kb in Keybinds.Values)
+            Keybinds list = ChartmakerKeybinds;
+
+            foreach (KeyValuePair<string, Keybind> kb in list.Values)
             {
                 string cat = kb.Key.Remove(kb.Key.IndexOf("/"));
                 string name = kb.Key.Substring(kb.Key.IndexOf("/") + 1);
@@ -204,7 +232,7 @@ public class Keybind
 }
 
 [System.Serializable]
-public class ChartmakerKeybinds
+public class Keybinds
 {
     public Dictionary<string, Keybind> Values;
 
@@ -215,7 +243,12 @@ public class ChartmakerKeybinds
         }
     }
 
-    public ChartmakerKeybinds()
+    public Keybinds(Dictionary<string, Keybind> values)
+    {
+        Values = values;
+    }
+
+    public Keybinds()
     {
         Values = new Dictionary<string, Keybind>();
 
