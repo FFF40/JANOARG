@@ -14,6 +14,8 @@ public class HitPlayer : MonoBehaviour
     public Transform IndicatorLeft;
     public Transform IndicatorRight;
     public float IndicatorSize;
+    public float IndicatorOffset;
+    public float IndicatorThickness;
     [Space]
     public List<MeshRenderer> IndicatorMeshes;
     [Space]
@@ -135,19 +137,19 @@ public class HitPlayer : MonoBehaviour
         Vector2 rEnd = Vector2.LerpUnclamped(start, end, CurrentHit.Position + CurrentHit.Length);
 
         transform.localPosition = (Vector3)(rStart + rEnd) / 2 + Vector3.forward * start.z * ChartPlayer.main.ScrollSpeed;
-        Indicator.localScale = new Vector3(Vector3.Distance(rStart, rEnd) - IndicatorSize, Thickness, Thickness);
+        Indicator.localScale = new Vector3(Vector3.Distance(rStart, rEnd) - (IndicatorSize + IndicatorOffset) * 2, Thickness, Thickness);
         Indicator.localRotation = Quaternion.Euler(Vector3.forward * Vector2.SignedAngle(Vector2.right, rEnd - rStart));
         if (IndicatorLeft) 
         {
-            IndicatorLeft.localPosition = Indicator.localRotation * Vector3.left * (Indicator.localScale.x / 2 + .2f);
+            IndicatorLeft.localPosition = Indicator.localRotation * Vector3.left * ((Indicator.localScale.x + IndicatorSize) / 2 + IndicatorOffset);
             IndicatorLeft.localRotation = Indicator.localRotation;
-            IndicatorLeft.localScale = new Vector3(.1f, Thickness, Thickness);
+            IndicatorLeft.localScale = new Vector3(IndicatorSize, IndicatorThickness, IndicatorThickness);
         }
         if (IndicatorRight) 
         {
-            IndicatorRight.localPosition = Indicator.localRotation * Vector3.right * (Indicator.localScale.x / 2 + .2f);
+            IndicatorRight.localPosition = Indicator.localRotation * Vector3.right * ((Indicator.localScale.x + IndicatorSize) / 2 + IndicatorOffset);
             IndicatorRight.localRotation = Indicator.localRotation;
-            IndicatorRight.localScale = new Vector3(.1f, Thickness, Thickness);
+            IndicatorRight.localScale = new Vector3(IndicatorSize, IndicatorThickness, IndicatorThickness);
         }
     }
 

@@ -1242,8 +1242,20 @@ public class HitMeshManager
             for (float ang = 45; ang <= 405; ang += 90)
             {
                 Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
-                    * .12f;
-                AddStep((Vector3)startPos + ofs, (Vector3)endPos + ofs);
+                    * .1f;
+                AddStep((Vector3)startPos + Vector3.right * .1f + ofs, (Vector3)endPos - Vector3.right * .1f + ofs);
+            }
+            for (float ang = 45; ang <= 405; ang += 90)
+            {
+                Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
+                    * .2f;
+                AddStep((Vector3)startPos + ofs, (Vector3)startPos + Vector3.right * .1f + ofs, ang != 45);
+            }
+            for (float ang = 45; ang <= 405; ang += 90)
+            {
+                Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
+                    * .2f;
+                AddStep((Vector3)endPos - Vector3.right * .1f + ofs, (Vector3)endPos + ofs, ang != 45);
             }
         }
 
