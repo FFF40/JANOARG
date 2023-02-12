@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public interface IDeepClonable<T>
 {
@@ -591,9 +592,10 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 {
     public List<HitObject> Objects = new List<HitObject>();
     public List<LaneStep> LaneSteps = new List<LaneStep>();
-    public bool ExpandToInfinity = true;
-    public Vector3 Offset;
-    public Vector3 OffsetRotation;
+    [FormerlySerializedAs("Offset")]
+    public Vector3 Position;
+    [FormerlySerializedAs("OffsetRotation")]
+    public Vector3 Rotation;
     public string Group;
 
     public int StyleIndex = 0;
@@ -672,44 +674,44 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
         new TimestampType
         {
             ID = "Offset_X",
-            Name = "Offset X",
-            Get = (x) => ((Lane)x).Offset.x,
-            Set = (x, a) => { ((Lane)x).Offset.x = a; },
+            Name = "Position X",
+            Get = (x) => ((Lane)x).Position.x,
+            Set = (x, a) => { ((Lane)x).Position.x = a; },
         },
         new TimestampType
         {
             ID = "Offset_Y",
-            Name = "Offset Y",
-            Get = (x) => ((Lane)x).Offset.y,
-            Set = (x, a) => { ((Lane)x).Offset.y = a; },
+            Name = "Position Y",
+            Get = (x) => ((Lane)x).Position.y,
+            Set = (x, a) => { ((Lane)x).Position.y = a; },
         },
         new TimestampType
         {
             ID = "Offset_Z",
-            Name = "Offset Z",
-            Get = (x) => ((Lane)x).Offset.z,
-            Set = (x, a) => { ((Lane)x).Offset.z = a; },
+            Name = "Position Z",
+            Get = (x) => ((Lane)x).Position.z,
+            Set = (x, a) => { ((Lane)x).Position.z = a; },
         },
         new TimestampType
         {
             ID = "OffsetRotation_X",
-            Name = "Offset Rotation X",
-            Get = (x) => ((Lane)x).OffsetRotation.x,
-            Set = (x, a) => { ((Lane)x).OffsetRotation.x = a; },
+            Name = "Rotation X",
+            Get = (x) => ((Lane)x).Rotation.x,
+            Set = (x, a) => { ((Lane)x).Rotation.x = a; },
         },
         new TimestampType
         {
             ID = "OffsetRotation_Y",
-            Name = "Offset Rotation Y",
-            Get = (x) => ((Lane)x).OffsetRotation.y,
-            Set = (x, a) => { ((Lane)x).OffsetRotation.y = a; },
+            Name = "Rotation Y",
+            Get = (x) => ((Lane)x).Rotation.y,
+            Set = (x, a) => { ((Lane)x).Rotation.y = a; },
         },
         new TimestampType
         {
             ID = "OffsetRotation_Z",
-            Name = "Offset Rotation Z",
-            Get = (x) => ((Lane)x).OffsetRotation.z,
-            Set = (x, a) => { ((Lane)x).OffsetRotation.z = a; },
+            Name = "Rotation Z",
+            Get = (x) => ((Lane)x).Rotation.z,
+            Set = (x, a) => { ((Lane)x).Rotation.z = a; },
         },
     };
 
@@ -717,9 +719,8 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
     {
         Lane clone = new Lane()
         {
-            ExpandToInfinity = ExpandToInfinity,
-            Offset = new Vector3(Offset.x, Offset.y, Offset.z),
-            OffsetRotation = new Vector3(OffsetRotation.x, OffsetRotation.y, OffsetRotation.z),
+            Position = new Vector3(Position.x, Position.y, Position.z),
+            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
             Group = Group,
             StyleIndex = StyleIndex,
             Storyboard = Storyboard.DeepClone(),
@@ -878,9 +879,9 @@ public class LaneManager
         }
         
         StartPos = verts[stepCount * 2 - 2] - Vector3.forward * CurrentDistance;
-        StartPos = Quaternion.Euler(CurrentLane.OffsetRotation) * StartPos + CurrentLane.Offset;
+        StartPos = Quaternion.Euler(CurrentLane.Rotation) * StartPos + CurrentLane.Position;
         EndPos = verts[stepCount * 2 - 1] - Vector3.forward * CurrentDistance;
-        EndPos = Quaternion.Euler(CurrentLane.OffsetRotation) * EndPos + CurrentLane.Offset;
+        EndPos = Quaternion.Euler(CurrentLane.Rotation) * EndPos + CurrentLane.Position;
 
         for (int a = 0; a < CurrentLane.Objects.Count; a++)
         {
@@ -1299,8 +1300,8 @@ public class HitObjectManager
             StartPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position) + fwd;
             EndPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position + data.Length) + fwd;
 
-            Quaternion laneRot = Quaternion.Euler(lane.CurrentLane.OffsetRotation);
-            Position = laneRot * ((StartPos + EndPos) / 2) + lane.CurrentLane.Offset;
+            Quaternion laneRot = Quaternion.Euler(lane.CurrentLane.Rotation);
+            Position = laneRot * ((StartPos + EndPos) / 2) + lane.CurrentLane.Position;
             Rotation = laneRot * (Quaternion.LookRotation(EndPos - StartPos) * Quaternion.Euler(0, 90, 0));
 
             CurrentMesh = main.HitMeshManager.GetMesh(data.Type, Vector3.Distance(StartPos, EndPos));

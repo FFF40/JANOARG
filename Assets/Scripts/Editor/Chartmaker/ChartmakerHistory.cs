@@ -219,7 +219,7 @@ public class ChartmakerMoveLaneAction : ChartmakerMoveAction<Lane>
 
     public override void Do(Vector3 offset) 
     {
-        Item.Offset += offset;
+        Item.Position += offset;
         foreach (Timestamp ts in Item.Storyboard.Timestamps)
         {
             if (ts.ID == "Offset_X")
@@ -380,5 +380,34 @@ public class ChartmakerMoveLaneStepEndAction : ChartmakerMoveAction<LaneStep>
                 ts.Target += offset.y;
             }
         }
+    }
+}
+
+public class ChartmakerMultiEditActionItem
+{
+    public object Target;
+    public object From;
+    public object To;
+}
+
+public class ChartmakerMultiEditAction: IChartmakerAction
+{
+    public List<ChartmakerMultiEditActionItem> Targets = new List<ChartmakerMultiEditActionItem>();
+    public string Keyword;
+
+    public string GetName()
+    {
+        return "Multi Edit " + Chartmaker.GetItemName(Targets[0].Target) + " " + Keyword;
+    }
+
+    public void Undo() 
+    {
+        foreach (ChartmakerMultiEditActionItem item in Targets)
+            item.Target.GetType().GetField(Keyword).SetValue(item.Target, item.From);
+    }
+    public void Redo() 
+    {
+        foreach (ChartmakerMultiEditActionItem item in Targets)
+            item.Target.GetType().GetField(Keyword).SetValue(item.Target, item.To);
     }
 }

@@ -55,6 +55,8 @@ public class Chartmaker : EditorWindow
     public ChartmakerHistory History = new ChartmakerHistory();
     public ChartManager Manager;
 
+    public ChartmakerMultiManager MultiManager;
+
     float ScrollSpeed = 121;
 
     float width, height, pos, dec, beat, currentBeat, bar, min, sec, ms, preciseTime;
@@ -532,11 +534,11 @@ public class Chartmaker : EditorWindow
 
     public void OnFocus() 
     {
-        CurrentCamera?.gameObject.SetActive(true);
+        if (CurrentCamera) CurrentCamera.gameObject.SetActive(true);
     }
     public void OnLostFocus() 
     {
-        CurrentCamera?.gameObject.SetActive(false);
+        if (CurrentCamera) CurrentCamera.gameObject.SetActive(false);
     }
 
     public void OnGUI()
@@ -695,8 +697,8 @@ public class Chartmaker : EditorWindow
                         {
                             if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                             {
-                                Quaternion rot = Quaternion.Euler(lane.OffsetRotation);
-                                Vector3 pos = lane.Offset + rot * Vector3.back * l.CurrentDistance;
+                                Quaternion rot = Quaternion.Euler(lane.Rotation);
+                                Vector3 pos = lane.Position + rot * Vector3.back * l.CurrentDistance;
                                 Graphics.DrawMesh(l.CurrentMesh, pos, rot, LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
                             }
                         }
@@ -735,7 +737,7 @@ public class Chartmaker : EditorWindow
                                 Mesh mesh = MakeHoldMesh(hit, lane);
                                 if (mesh != null)
                                 {
-                                    Graphics.DrawMesh(mesh, lane.Offset, Quaternion.Euler(lane.OffsetRotation), HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
+                                    Graphics.DrawMesh(mesh, lane.Position, Quaternion.Euler(lane.Rotation), HitStyleManagers[hit.StyleIndex].HoldTailMaterial, 0, CurrentCamera);
                                     Meshes.Add(mesh);
                                 }
                             }
@@ -790,7 +792,14 @@ public class Chartmaker : EditorWindow
                             Lane thing = (Lane)TargetThing;
                             if (thing.LaneSteps.Count > 0 && thing.LaneSteps[thing.LaneSteps.Count - 1].Offset >= pos)
                             {
-                                LaneManager man = Manager.Lanes[TargetChart.Data.Lanes.IndexOf(thing)];
+                                int index = TargetChart.Data.Lanes.IndexOf(thing);
+                                if (index < 0)
+                                {
+                                    TargetThing = null;
+                                    Repaint();
+                                    return;
+                                }
+                                LaneManager man = Manager.Lanes[index];
 
                                 Vector3 startPos = man.StartPos;
                                 Vector3 endPos = man.EndPos;
@@ -818,8 +827,8 @@ public class Chartmaker : EditorWindow
                                 Handles.DrawLine(startPosScr, endPosScr, 2);
 
                                 if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, Vector3.forward * midPos.z, Quaternion.identity);
-                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, man.CurrentLane.Offset, Quaternion.Euler(man.CurrentLane.OffsetRotation));
-                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, man.CurrentLane.Offset, Quaternion.Euler(man.CurrentLane.OffsetRotation));
+                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation));
+                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation));
 
 
                                 Handles.color = Color.black;
@@ -867,13 +876,13 @@ public class Chartmaker : EditorWindow
                                 }
                                 else if (Event.current.type == EventType.MouseDrag)
                                 {
-                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(man.CurrentLane.OffsetRotation)) * (x - man.CurrentLane.Offset);
+                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(man.CurrentLane.Rotation)) * (x - man.CurrentLane.Position);
 
                                     if (GizmoMode != "")
                                     {
                                         Vector3? dragPos = GizmoMode == "mid" ? 
                                             RaycastScreenToPlane(Event.current.mousePosition, Vector3.forward * midPos.z, Quaternion.identity) :
-                                            RaycastScreenToPlane(Event.current.mousePosition, man.CurrentLane.Offset, Quaternion.Euler(man.CurrentLane.OffsetRotation));
+                                            RaycastScreenToPlane(Event.current.mousePosition, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation));
                                         if (dragPos != null)
                                         {
                                             if (GizmoMode == "start" || GizmoMode == "end") dragPos = inv((Vector3)dragPos);
@@ -910,10 +919,10 @@ public class Chartmaker : EditorWindow
                                 LaneManager lman = Manager.Lanes[TargetChart.Data.Lanes.IndexOf(TargetLane)];
                                 LaneStepManager man = lman.Steps[TargetLane.LaneSteps.IndexOf(thing)];
 
-                                Vector3 distOffset = Quaternion.Euler(lman.CurrentLane.OffsetRotation) * (Vector3.forward * (man.Distance - lman.CurrentDistance));
+                                Vector3 distOffset = Quaternion.Euler(lman.CurrentLane.Rotation) * (Vector3.forward * (man.Distance - lman.CurrentDistance));
 
-                                Vector3 startPos = Quaternion.Euler(lman.CurrentLane.OffsetRotation) * (Vector3)man.CurrentStep.StartPos  + distOffset + lman.CurrentLane.Offset;
-                                Vector3 endPos = Quaternion.Euler(lman.CurrentLane.OffsetRotation) * (Vector3)man.CurrentStep.EndPos + distOffset + lman.CurrentLane.Offset;
+                                Vector3 startPos = Quaternion.Euler(lman.CurrentLane.Rotation) * (Vector3)man.CurrentStep.StartPos  + distOffset + lman.CurrentLane.Position;
+                                Vector3 endPos = Quaternion.Euler(lman.CurrentLane.Rotation) * (Vector3)man.CurrentStep.EndPos + distOffset + lman.CurrentLane.Position;
                                 Vector3 midPos = (startPos + endPos) / 2;
 
                                 Vector2 startPosScr = WorldToScreen(startPos);
@@ -937,9 +946,9 @@ public class Chartmaker : EditorWindow
                                 Handles.color = Color.white;
                                 Handles.DrawLine(startPosScr, endPosScr, 2);
 
-                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
-                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
-                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
+                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
+                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
+                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
 
 
                                 Handles.color = Color.black;
@@ -987,11 +996,11 @@ public class Chartmaker : EditorWindow
                                 }
                                 else if (Event.current.type == EventType.MouseDrag)
                                 {
-                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(lman.CurrentLane.OffsetRotation)) * (x - lman.CurrentLane.Offset);
+                                    Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(lman.CurrentLane.Rotation)) * (x - lman.CurrentLane.Position);
 
                                     if (GizmoMode != "")
                                     {
-                                        Vector3? dragPos = RaycastScreenToPlane(Event.current.mousePosition, lman.CurrentLane.Offset + distOffset, Quaternion.Euler(lman.CurrentLane.OffsetRotation));
+                                        Vector3? dragPos = RaycastScreenToPlane(Event.current.mousePosition, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
                                         if (dragPos != null)
                                         {
                                             dragPos = inv((Vector3)dragPos);
@@ -2647,7 +2656,7 @@ public class Chartmaker : EditorWindow
                     else if (dragMode == "seeksnap" && pickermode == "lane")
                     {
                         Lane lane = new Lane();
-                        lane.Offset = new Vector3(0, -3);
+                        lane.Position = new Vector3(0, -3);
 
                         LaneStep step = new LaneStep();
                         step.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
@@ -2816,9 +2825,6 @@ public class Chartmaker : EditorWindow
             {
                 IList thing = (IList)TargetThing;
 
-                GUIStyle bStyle = new GUIStyle("textField");
-                bStyle.fontStyle = FontStyle.Bold;
-
                 GUI.Label(new Rect(7, 2, 226, 20), "Multi-select", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -2829,6 +2835,48 @@ public class Chartmaker : EditorWindow
                 else if (thing is List<LaneStep>) name = "Lane Steps";
                 else if (thing is List<HitObject>) name = "Hit Objects";
                 GUILayout.Label(thing.Count + " " + name, "boldLabel");
+
+                GUILayout.Space(8);
+                GUILayout.Label("Multi-edit", "boldLabel");
+
+                Type type = thing.GetType().GetGenericArguments()[0];
+                if (MultiManager?.target != type) MultiManager = new ChartmakerMultiManager(type);
+
+                int target = EditorGUILayout.Popup("Target", MultiManager.CurrentFieldIndex, MultiManager.AvailableFields.ConvertAll<string>(x => x.Name).ToArray());
+
+                if (MultiManager.CurrentFieldIndex != target) MultiManager.SetTarget(target);
+
+                GUILayout.Space(8);
+
+                bool isSupported = true;
+
+                if (MultiManager.Handler == null)
+                {
+                    GUILayout.Label("Target is null, how ");
+                    isSupported = false;
+                }
+                else if (MultiManager.Handler is ChartmakerMultiHandlerBoolean)
+                {
+                    ChartmakerMultiHandlerBoolean handler = MultiManager.Handler as ChartmakerMultiHandlerBoolean;
+                    List<bool?> values = new List<bool?>{true, false, null};
+                    string[] names = {"True", "False", "Toggle"};
+                    int index = values.IndexOf(handler.To);
+                    handler.To = values[EditorGUILayout.Popup("To", index, names)];
+                }
+                else 
+                {
+                    GUILayout.Label(
+                        "The current target type " + MultiManager.Handler?.ToString() + " is currently not supported.", 
+                        new GUIStyle("Label") { wordWrap = true }
+                    );
+                    isSupported = false;
+                }
+
+                if (isSupported)
+                {
+                    GUILayout.Space(8);
+                    if (GUILayout.Button("Execute")) MultiManager.Execute(TargetThing as IList, History);
+                }
 
                 GUILayout.EndScrollView();
             }
@@ -3161,8 +3209,8 @@ public class Chartmaker : EditorWindow
                 bStyle.fontStyle = FontStyle.Bold;
 
                 GUILayout.Label("Transform", "boldLabel");
-                thing.Offset = EditorGUILayout.Vector3Field("Offset", thing.Offset);
-                thing.OffsetRotation = EditorGUILayout.Vector3Field("Rotation", thing.OffsetRotation);
+                thing.Position = EditorGUILayout.Vector3Field("Position", thing.Position);
+                thing.Rotation = EditorGUILayout.Vector3Field("Rotation", thing.Rotation);
 
                 GUILayout.Space(8);
                 GUILayout.Label("Appearance", "boldLabel");

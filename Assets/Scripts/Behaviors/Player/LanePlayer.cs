@@ -74,8 +74,8 @@ public class LanePlayer : MonoBehaviour
             LaneStep s = l.GetLaneStep(pos, pos, ChartPlayer.main.Song.Timing);
             HitObject h = (HitObject)hit.Get(hit.Offset);
 
-            Vector3 start = Quaternion.Euler(l.OffsetRotation) * (Vector3)s.StartPos + l.Offset;
-            Vector3 end = Quaternion.Euler(l.OffsetRotation) * (Vector3)s.EndPos + l.Offset;
+            Vector3 start = Quaternion.Euler(l.Rotation) * (Vector3)s.StartPos + l.Position;
+            Vector3 end = Quaternion.Euler(l.Rotation) * (Vector3)s.EndPos + l.Position;
 
             hp.ScreenStart = cam.WorldToScreenPoint(Vector3.LerpUnclamped(start, end, h.Position));
             hp.ScreenEnd = cam.WorldToScreenPoint(Vector3.LerpUnclamped(start, end, h.Position + h.Length));
@@ -100,8 +100,8 @@ public class LanePlayer : MonoBehaviour
         {
             CurrentLane.Advance(ChartPlayer.main.CurrentTime);
 
-            transform.position = CurrentLane.Offset;
-            transform.eulerAngles = CurrentLane.OffsetRotation;
+            transform.position = CurrentLane.Position;
+            transform.eulerAngles = CurrentLane.Rotation;
 
             if (ChartPlayer.main.CurrentTime < Times[0] && Times[0] != 0)
             {
