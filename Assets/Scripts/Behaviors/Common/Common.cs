@@ -12,6 +12,8 @@ public class Common : MonoBehaviour
     {
         main = this;
         CommonScene.LoadAlt("Song Select");
+        
+        Application.targetFrameRate = 60;
     }
 
     void OnDestroy()

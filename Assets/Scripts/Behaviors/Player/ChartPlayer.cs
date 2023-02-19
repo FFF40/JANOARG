@@ -130,7 +130,6 @@ public class ChartPlayer : MonoBehaviour
     {
         main = this;
         CommonScene.Load();
-        Application.targetFrameRate = 60;
     }
 
     void OnDestroy()

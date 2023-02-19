@@ -64,7 +64,7 @@ public class Metronome
             {
                 float c = ((Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM) + beat) / Stops[a].Signature;
                 if (b <= c) return bar + b;
-                bar += Mathf.Ceil(c);
+                bar += c;
             }
             else 
             {
@@ -79,7 +79,7 @@ public class Metronome
         for (int a = 0; a < Stops.Count; a++) 
         {
             float b = (seconds - Stops[a].Offset) / (60 / Stops[a].BPM) + beat;
-            float bb = b % Stops[a].Signature;
+            float bb = ((b % Stops[a].Signature) + Stops[a].Signature) % Stops[a].Signature;
             if (a + 1 < Stops.Count) 
             {
                 float c = (Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM) + beat;

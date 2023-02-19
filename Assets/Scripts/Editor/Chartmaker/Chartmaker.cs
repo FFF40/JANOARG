@@ -1277,7 +1277,7 @@ public class Chartmaker : EditorWindow
     public void CreateChart(ExternalChartMeta data)
     {
         string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(TargetSong)).Replace('\\', '/');
-        path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + data.Target);
+        path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + GetFileName(data.Target));
         data.Target = Path.GetFileNameWithoutExtension(path);
 
         ExternalChart chart = ScriptableObject.CreateInstance<ExternalChart>();
@@ -1617,7 +1617,7 @@ public class Chartmaker : EditorWindow
         {
             string path = AssetDatabase.GetAssetPath(TargetSong);
             if (!Directory.Exists(path)) path = Path.GetDirectoryName(path);
-            path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + chart.DifficultyName + " " + chart.DifficultyLevel + ".asset");
+            path = AssetDatabase.GenerateUniqueAssetPath(path + "/" + GetFileName(chart.DifficultyName) + " " + GetFileName(chart.DifficultyLevel) + ".asset");
 
             ExternalChartMeta meta = new ExternalChartMeta()
             {
@@ -1648,6 +1648,14 @@ public class Chartmaker : EditorWindow
 
     string initName, initArtist;
     AudioClip initClip;
+
+    public string GetFileName(string input) {
+        foreach (char ch in Path.GetInvalidFileNameChars()) 
+        {
+            input = input.Replace(ch, '_');
+        }
+        return input;
+    }
 
     public void ChartmakerInit(int id)
     {
@@ -1691,7 +1699,7 @@ public class Chartmaker : EditorWindow
             string path = AssetDatabase.GetAssetPath(initClip);
             if (!Directory.Exists(path)) path = Path.GetDirectoryName(path);
 
-            AssetDatabase.CreateAsset(song, AssetDatabase.GenerateUniqueAssetPath(path + "/" + initName + " - " + initArtist + ".asset"));
+            AssetDatabase.CreateAsset(song, AssetDatabase.GenerateUniqueAssetPath(path + "/" + GetFileName(initName) + " - " + GetFileName(initArtist) + ".asset"));
             AssetDatabase.SaveAssets();
 
             TargetSong = song;
@@ -1957,9 +1965,9 @@ public class Chartmaker : EditorWindow
         return TargetThing == thing || (TargetThing is IList && ((IList)TargetThing).Contains(thing));
     }
 
-    bool IsDivisible(float a, float b)
+    bool IsDivisible(float a, float b, float tol = 1e5f)
     {
-        return a == 0 || Math.Abs(a - Mathf.Round(a / b) * b) <= Math.Abs(a / 1e5);
+        return a == 0 || Math.Abs(a - Mathf.Round(a / b) * b) <= Math.Abs(a / tol);
     }
 
     public void Timeline(int id)
@@ -1986,8 +1994,8 @@ public class Chartmaker : EditorWindow
             return;
         }
 
-        float seekLimitStart = TargetSong.Timing.ToBeat(0) - 4;
-        float seekLimitEnd = TargetSong.Timing.ToBeat(TargetSong.Clip.length) + 4;
+        float seekLimitStart = Mathf.Min(TargetSong.Timing.ToBeat(0), Mathf.Min(TargetChart?.Data.Lanes.ConvertAll(x => x.LaneSteps[0].Offset).ToArray() ?? new []{0f})) - 4;
+        float seekLimitEnd = Mathf.Max(TargetSong.Timing.ToBeat(TargetSong.Clip.length), Mathf.Max(TargetChart?.Data.Lanes.ConvertAll(x => x.LaneSteps[x.LaneSteps.Count - 1].Offset).ToArray() ?? new []{0f})) + 4;
         float seekTime = TargetSong.Timing.ToBeat(preciseTime);
 
         if (seekEnd == seekStart && seekStart == 0)
@@ -2059,7 +2067,7 @@ public class Chartmaker : EditorWindow
                 EditorGUI.DrawRect(new Rect(a + 2, 50 - height * 50, 1, height * 100), waveColor);
             }
         }
-
+        
         for (float a = Mathf.Ceil(seekStart / sep) * sep; a < seekEnd; a += sep)
         {
             // Infinite loop handler
@@ -2074,9 +2082,11 @@ public class Chartmaker : EditorWindow
             if (!IsDivisible(a, sep * timelineSep * 4)) op2 = 0;
             else if (!IsDivisible(a, sep * timelineSep * 8)) op2 *= opa;
 
-            if (IsDivisible(TargetSong.Timing.ToBar(0, a), 1))
+            float bar = TargetSong.Timing.ToBar(TargetSong.Timing.Stops[0].Offset, a);
+            float beat = TargetSong.Timing.ToDividedBeat(TargetSong.Timing.Stops[0].Offset, a);
+            if (IsDivisible(bar, 1))
             {
-                EditorGUI.DrawRect(new Rect(pos + 1, 0, 1, 115), new Color(.6f, .6f, .4f, op));
+                EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, 100), new Color(.6f, .6f, .4f, op));
             }
             else
             {
@@ -2084,9 +2094,9 @@ public class Chartmaker : EditorWindow
             }
 
             label.hover.textColor = label.normal.textColor = new Color(label.normal.textColor.r, label.normal.textColor.g, label.normal.textColor.b, op2);
-            if (op2 > 0) GUI.Label(new Rect(pos - 48, 100, 100, 15),
-                SeparateUnits ? Mathf.Floor(TargetSong.Timing.ToBar(0, a)).ToString("0", invariant) + ":" +
-                Mathf.Abs(TargetSong.Timing.ToDividedBeat(0, a)).ToString("00.###", invariant) : a.ToString("0.###", invariant), label);
+            if (op2 > 0) GUI.Label(new Rect(pos - 48, 100, 100, 15), SeparateUnits 
+                ? Mathf.Floor(bar).ToString("0", invariant) + ":" + Mathf.Abs(beat).ToString("00.###", invariant) 
+                : a.ToString("0.###", invariant), label);
             //GUI.Label(new Rect(pos - 48, 100, 100, 15), , label);
         }
 
@@ -2860,8 +2870,14 @@ public class Chartmaker : EditorWindow
                     ChartmakerMultiHandlerBoolean handler = MultiManager.Handler as ChartmakerMultiHandlerBoolean;
                     List<bool?> values = new List<bool?>{true, false, null};
                     string[] names = {"True", "False", "Toggle"};
-                    int index = values.IndexOf(handler.To);
+                    int index = values.IndexOf((bool?)handler.To);
                     handler.To = values[EditorGUILayout.Popup("To", index, names)];
+                }
+                else if (MultiManager.Handler.GetType().GetGenericArguments()[0]?.IsEnum == true)
+                {
+                    IChartmakerMultiHandler handler = MultiManager.Handler as IChartmakerMultiHandler;
+                    if (handler.To == null) handler.To = handler.GetType().GetGenericArguments()[0].GetEnumValues().GetValue(0);
+                    handler.To = EditorGUILayout.EnumPopup("To", handler.To as Enum);
                 }
                 else 
                 {
@@ -3617,7 +3633,7 @@ public class Chartmaker : EditorWindow
 
             GUI.Label(new Rect(5, 30, 120, 18), "Target");
             TempChartMeta.Target = EditorGUI.TextField(new Rect(125, 30, 270, 18), TempChartMeta.Target);
-            if (string.IsNullOrWhiteSpace(TempChartMeta.Target)) GUI.Label(new Rect(126, 30, 270, 18), TempChartMeta.DifficultyName + " " + TempChartMeta.DifficultyLevel, placeholder);
+            if (string.IsNullOrWhiteSpace(TempChartMeta.Target)) GUI.Label(new Rect(126, 30, 270, 18), TempChartMeta.DifficultyName, placeholder);
 
             GUI.Label(new Rect(5, 55, 120, 18), "Difficulty Index");
             TempChartMeta.DifficultyIndex = EditorGUI.IntField(new Rect(125, 55, 270, 18), TempChartMeta.DifficultyIndex);
@@ -3631,7 +3647,7 @@ public class Chartmaker : EditorWindow
             if (GUI.Button(new Rect(5, 195, 195, 20), "Cancel", "buttonLeft")) extrasmode = "";
             if (GUI.Button(new Rect(200, 195, 195, 20), "Create", "buttonRight"))
             {
-                TempChartMeta.Target = string.IsNullOrWhiteSpace(TempChartMeta.Target) ? TempChartMeta.DifficultyName + " " + TempChartMeta.DifficultyLevel : TempChartMeta.Target;
+                TempChartMeta.Target = string.IsNullOrWhiteSpace(TempChartMeta.Target) ? TempChartMeta.DifficultyName : TempChartMeta.Target;
                 CreateChart(TempChartMeta);
                 extrasmode = "";
             }

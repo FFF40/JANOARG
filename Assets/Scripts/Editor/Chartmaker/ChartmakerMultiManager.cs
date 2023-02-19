@@ -22,7 +22,8 @@ public class ChartmakerMultiManager
         foreach (FieldInfo field in type.GetFields()) 
         {
             if (typeof(IEnumerable).IsAssignableFrom(field.FieldType)
-                || typeof(Storyboard) == field.FieldType) 
+                || typeof(Storyboard) == field.FieldType
+                || field.IsStatic || field.IsLiteral || !field.IsPublic) 
             {
                 continue;
             }
@@ -55,35 +56,38 @@ public class ChartmakerMultiManager
             ChartmakerMultiEditActionItem item = new ChartmakerMultiEditActionItem
             {
                 Target = obj,
-                From = obj.GetType().GetField(currentField.Name).GetValue(obj),
+                From = currentField.GetValue(obj),
             };
             item.To = Handler.Get(item.From);
             action.Targets.Add(item);
         }
-
         action.Redo();
         history.ActionsBehind.Add(action);
         history.ActionsAhead.Clear();
     }
 }
 
-public interface IChartmakerMultiHandler
+public class IChartmakerMultiHandler
 {
+    public object To;
+    
     public object Get(object from) {
-        throw new NotSupportedException();
+        return To;
     }
 }
 
 public class ChartmakerMultiHandler<T>: IChartmakerMultiHandler
 {
-    public T To;
+    public new T To;
     
-    public object Get(object from) {
+    public new object Get(object from) {
         return Get((T)from);
     }
+    
     public virtual T Get(T from) {
         return To;
     }
+    
 }
 
 public class ChartmakerMultiHandlerBoolean: ChartmakerMultiHandler<bool>
