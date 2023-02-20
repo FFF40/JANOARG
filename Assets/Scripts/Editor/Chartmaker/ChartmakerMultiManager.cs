@@ -89,7 +89,7 @@ public class ChartmakerMultiManager
     }
 }
 
-public abstract class ChartmakerMultiHandler
+public class ChartmakerMultiHandler
 {
     public object To;
     
@@ -97,20 +97,19 @@ public abstract class ChartmakerMultiHandler
         return To;
     }
 
-    public abstract Type TargetType { get; }
+    public virtual Type TargetType { get; }
 
 }
 
 public class ChartmakerMultiHandler<T>: ChartmakerMultiHandler
 {
-    public new T To;
     
     public override object Get(object from, object src) {
         return Get((T)from, src);
     }
     
     public virtual T Get(T from, object src) {
-        return To;
+        return (T)To;
     }
     
     public override Type TargetType { get { return typeof(T); } }

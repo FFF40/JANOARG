@@ -3050,7 +3050,13 @@ public class Chartmaker : EditorWindow
                     handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
 
                 }
-                else if (MultiManager.Handler.GetType().GetGenericArguments()[0]?.IsEnum == true)
+                else if (MultiManager.Handler.TargetType == typeof(int))
+                {
+                    ChartmakerMultiHandler handler = MultiManager.Handler as ChartmakerMultiHandler;
+
+                    handler.To = EditorGUILayout.IntField("To", handler.To as int? ?? 0);
+                }
+                else if (MultiManager.Handler.TargetType.IsEnum == true)
                 {
                     ChartmakerMultiHandler handler = MultiManager.Handler as ChartmakerMultiHandler;
 

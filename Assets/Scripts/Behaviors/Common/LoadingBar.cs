@@ -30,7 +30,6 @@ public class LoadingBar : MonoBehaviour
 
         new FlavorTextEntry("An asterisk (*) on a complexity rating indicates that the sequence requires using at least 3 or more fingers at the same time to clear."),
         new FlavorTextEntry("Sequences' complexity should be rated by their rating numbers, not by their names."),
-        new FlavorTextEntry("Sequences = Charts/Beatmaps, Complexity = Difficulty, Flawless Master = All Perfect."),
         
         // Resources tips
         /* TODO: Uncomment this when resources and objects are implemented
@@ -49,6 +48,7 @@ public class LoadingBar : MonoBehaviour
         // Meta
         new FlavorTextEntry("Free, no ads, no pay-to-get songs... is this a rhythm game heaven?"),
         new FlavorTextEntry("JANOARG - Developing at snail speed"),
+        new FlavorTextEntry("haha System.Func go brrrrrrrrrrr"),
 
         // References
         new FlavorTextEntry("Colors of the world are determined by what our sequencers feel like that day."),
