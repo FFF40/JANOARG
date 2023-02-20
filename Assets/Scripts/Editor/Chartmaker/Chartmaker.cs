@@ -8,20 +8,22 @@ using UnityEditor;
 
 public class Chartmaker : EditorWindow
 {
+    public static Chartmaker current;
+
     [MenuItem("JANOARG/Chartmaker", false, 0)]
     public static void Open()
     {
-        Chartmaker wnd = GetWindow<Chartmaker>();
-        wnd.titleContent = new GUIContent("Chartmaker");
-        wnd.minSize = new Vector2(960, 600);
+        current = GetWindow<Chartmaker>();
+        current.titleContent = new GUIContent("Chartmaker");
+        current.minSize = new Vector2(960, 600);
     }
 
     public static void Open(PlayableSong target)
     {
-        Chartmaker wnd = GetWindow<Chartmaker>();
-        wnd.titleContent = new GUIContent("Chartmaker");
-        wnd.minSize = new Vector2(960, 600);
-        wnd.TargetSong = target;
+        current = GetWindow<Chartmaker>();
+        current.titleContent = new GUIContent("Chartmaker");
+        current.minSize = new Vector2(960, 600);
+        current.TargetSong = target;
     }
 
     public PlayableSong TargetSong;
@@ -547,6 +549,10 @@ public class Chartmaker : EditorWindow
 
         JAEditorSettings.InitSettings();
 
+        if (!current)
+        {
+            current = this;
+        }
         if (!CurrentRenderTexture)
         {
             CurrentRenderTexture = new RenderTexture(0, 0, 0, RenderTextureFormat.ARGB32);
@@ -1155,104 +1161,225 @@ public class Chartmaker : EditorWindow
     #region Keybindings
     ///////////////////
 
-    void HandleKeybinds()
-    {
-        if (Event.current.type == EventType.KeyDown)
-        {
-            // YandereDev intensifies
+    bool menuOpen = false;
 
-            if (Event.current == JAEditorSettings.ChartmakerKeybinds["General/Toggle Play/Pause"])
-            {
-                if (CurrentAudioSource.isPlaying)
+    public static KeybindActionList KeybindActions = new KeybindActionList {
+        {"g_play", new KeybindAction {
+            Category = "General",
+            Name = "Toggle Play/Pause",
+            Keybind = new Keybind(KeyCode.Space),
+            Invoke = () => {
+                if (current.CurrentAudioSource.isPlaying)
                 {
-                    CurrentAudioSource.Pause();
+                    current.CurrentAudioSource.Pause();
                 }
                 else
                 {
-                    CurrentAudioSource.clip = TargetSong.Clip;
-                    CurrentAudioSource.Play();
+                    current.CurrentAudioSource.clip = current.TargetSong.Clip;
+                    current.CurrentAudioSource.Play();
                 }
             }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["General/Play Chart in Player"])
-            {
-                OpenInPlayMode();
+        }},
+        {"g_player", new KeybindAction {
+            Category = "General",
+            Name = "Play Chart in Player",
+            Keybind = new Keybind(KeyCode.Space, EventModifiers.Shift),
+            Invoke = () => current.OpenInPlayMode(),
+        }},
+        {"g_menu", new KeybindAction {
+            Category = "General",
+            Name = "Open Menu",
+            Keybind = new Keybind(KeyCode.Menu),
+            Invoke = () => {
+                current.menuOpen = true;
+                current.Repaint();
+            },
+        }},
+        {"f_save", new KeybindAction {
+            Category = "File",
+            Name = "Save",
+            Keybind = new Keybind(KeyCode.S, EventModifiers.Command),
+            Invoke = () => current.SaveSong(),
+        }},
+        {"e_undo", new KeybindAction {
+            Category = "Edit",
+            Name = "Undo",
+            Keybind = new Keybind(KeyCode.Z, EventModifiers.Command),
+            Invoke = () => current.History.Undo(),
+        }},
+        {"e_redo", new KeybindAction {
+            Category = "Edit",
+            Name = "Redo",
+            Keybind = new Keybind(KeyCode.Y, EventModifiers.Command),
+            Invoke = () => current.History.Redo(),
+        }},
+        {"e_cut", new KeybindAction {
+            Category = "Edit",
+            Name = "Cut",
+            Keybind = new Keybind(KeyCode.X, EventModifiers.Command),
+            Invoke = () => current.CutSelection(),
+        }},
+        {"e_copy", new KeybindAction {
+            Category = "Edit",
+            Name = "Copy",
+            Keybind = new Keybind(KeyCode.C, EventModifiers.Command),
+            Invoke = () => current.CopySelection(),
+        }},
+        {"e_paste", new KeybindAction {
+            Category = "Edit",
+            Name = "Paste",
+            Keybind = new Keybind(KeyCode.V, EventModifiers.Command),
+            Invoke = () => current.PasteSelection(),
+        }},
+        {"e_remove", new KeybindAction {
+            Category = "Edit",
+            Name = "Delete",
+            Keybind = new Keybind(KeyCode.Delete),
+            Invoke = () => current.DeleteSelection(),
+        }},
+        {"p_cursor", new KeybindAction {
+            Category = "Picker",
+            Name = "Select Cursor",
+            Keybind = new Keybind(KeyCode.A),
+            Invoke = () => current.pickermode = "cursor",
+        }},
+        {"p_select", new KeybindAction {
+            Category = "Picker",
+            Name = "Select Select",
+            Keybind = new Keybind(KeyCode.S),
+            Invoke = () => current.pickermode = "select",
+        }},
+        {"p_delete", new KeybindAction {
+            Category = "Picker",
+            Name = "Select Delete",
+            Keybind = new Keybind(KeyCode.D),
+            Invoke = () => current.pickermode = "delete",
+        }},
+        {"p_item1", new KeybindAction {
+            Category = "Picker",
+            Name = "Select 1st Item",
+            Keybind = new Keybind(KeyCode.F),
+            Invoke = () => {
+                     if (current.timelineMode == "story") current.pickermode = "timestamp";
+                else if (current.timelineMode == "timing") current.pickermode = "bpmstop";
+                else if (current.timelineMode == "lane") current.pickermode = "lane";
+                else if (current.timelineMode == "step") current.pickermode = "step";
+                else if (current.timelineMode == "hit") current.pickermode = "hit_normal";
+            },
+        }},
+        {"p_item2", new KeybindAction {
+            Category = "Picker",
+            Name = "Select 2nd Item",
+            Keybind = new Keybind(KeyCode.G),
+            Invoke = () => {
+                        if (current.timelineMode == "hit") current.pickermode = "hit_catch";
+            },
+        }},
+        {"t_story", new KeybindAction {
+            Category = "Timeline",
+            Name = "Select Storyboard",
+            Keybind = new Keybind(KeyCode.Alpha1),
+            Invoke = () => current.timelineMode = "story",
+        }},
+        {"t_timing", new KeybindAction {
+            Category = "Timeline",
+            Name = "Select Timing",
+            Keybind = new Keybind(KeyCode.Alpha2),
+            Invoke = () => current.timelineMode = "timing",
+        }},
+        {"t_lane", new KeybindAction {
+            Category = "Timeline",
+            Name = "Select Lanes",
+            Keybind = new Keybind(KeyCode.Alpha3),
+            Invoke = () => current.timelineMode = "lane",
+        }},
+        {"t_step", new KeybindAction {
+            Category = "Timeline",
+            Name = "Select Lane Steps",
+            Keybind = new Keybind(KeyCode.Alpha4),
+            Invoke = () => {
+                if (current.TargetLane != null) current.timelineMode = "step";
             }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["File/Save"])
-            {
-                SaveSong();
+        }},
+        {"t_hit", new KeybindAction {
+            Category = "Timeline",
+            Name = "Select Hit Objects",
+            Keybind = new Keybind(KeyCode.Alpha5),
+            Invoke = () => {
+                if (current.TargetLane != null) current.timelineMode = "hit";
             }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Undo"])
-            {
-                History.Undo();
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Redo"])
-            {
-                History.Redo();
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Copy"])
-            {
-                CopySelection();
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Paste"])
-            {
-                PasteSelection();
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Edit/Delete"])
-            {
-                DeleteSelection();
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/Cursor"])
-            {
-                pickermode = "cursor";
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/Select"])
-            {
-                pickermode = "select";
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/Delete"])
-            {
-                pickermode = "delete";
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/1st Item"])
-            {
-                if (timelineMode == "story") pickermode = "timestamp";
-                else if (timelineMode == "timing") pickermode = "bpmstop";
-                else if (timelineMode == "lane") pickermode = "lane";
-                else if (timelineMode == "hit") pickermode = "hit_normal";
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Picker/2nd Item"])
-            {
-                if (timelineMode == "hit") pickermode = "hit_catch";
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Previous Item"])
-            {
-                if (TargetThing is Lane) TargetThing =
-                    TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) - 1, 0)];
-                else if (TargetThing is HitObject) TargetThing =
-                    TargetLane.Objects[Math.Max(TargetLane.Objects.IndexOf((HitObject)TargetThing) - 1, 0)];
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Next Item"])
-            {
-                if (TargetThing is Lane) TargetThing =
-                    TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf((Lane)TargetThing) + 1, TargetChart.Data.Lanes.Count - 1)];
-                else if (TargetThing is HitObject) TargetThing =
-                    TargetLane.Objects[Math.Min(TargetLane.Objects.IndexOf((HitObject)TargetThing) + 1, TargetLane.Objects.Count - 1)];
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Previous Lane"])
-            {
-                if (TargetLane != null) TargetThing = TargetLane =
-                    TargetChart.Data.Lanes[Math.Max(TargetChart.Data.Lanes.IndexOf(TargetLane) - 1, 0)];
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Selection/Next Lane"])
-            {
-                if (TargetLane != null) TargetThing = TargetLane =
-                    TargetChart.Data.Lanes[Math.Min(TargetChart.Data.Lanes.IndexOf(TargetLane) + 1, TargetChart.Data.Lanes.Count - 1)];
-            }
-            else if (Event.current == JAEditorSettings.ChartmakerKeybinds["Misc./Show Keybindings"])
-            {
-                JAEditorSettings.Open(1);
-            }
-            Event.current.Use();
+        }},
+        {"s_song", new KeybindAction {
+            Category = "Selection",
+            Name = "Select Song",
+            Keybind = new Keybind(KeyCode.Escape, EventModifiers.Shift),
+            Invoke = () => current.TargetThing = current.TargetSong,
+        }},
+        {"s_chart", new KeybindAction {
+            Category = "Selection",
+            Name = "Select Chart",
+            Keybind = new Keybind(KeyCode.Escape),
+            Invoke = () => current.TargetThing = current.TargetChart.Data,
+        }},
+        {"s_pallete", new KeybindAction {
+            Category = "Selection",
+            Name = "Select Pallete",
+            Keybind = new Keybind(KeyCode.Alpha0),
+            Invoke = () => current.TargetThing = current.TargetChart.Data.Pallete,
+        }},
+        {"s_previtem", new KeybindAction {
+            Category = "Selection",
+            Name = "Previous Item",
+            Keybind = new Keybind(KeyCode.LeftArrow),
+            Invoke = () => {
+                if (current.TargetThing is Lane) current.TargetThing =
+                    current.TargetChart.Data.Lanes[Math.Max(current.TargetChart.Data.Lanes.IndexOf((Lane)current.TargetThing) - 1, 0)];
+                else if (current.TargetThing is HitObject) current.TargetThing =
+                    current.TargetLane.Objects[Math.Max(current.TargetLane.Objects.IndexOf((HitObject)current.TargetThing) - 1, 0)];
+            },
+        }},
+        {"s_nextitem", new KeybindAction {
+            Category = "Selection",
+            Name = "Next Item",
+            Keybind = new Keybind(KeyCode.RightArrow),
+            Invoke = () => {
+                if (current.TargetThing is Lane) current.TargetThing =
+                    current.TargetChart.Data.Lanes[Math.Min(current.TargetChart.Data.Lanes.IndexOf((Lane)current.TargetThing) + 1, current.TargetChart.Data.Lanes.Count - 1)];
+                else if (current.TargetThing is HitObject) current.TargetThing =
+                    current.TargetLane.Objects[Math.Min(current.TargetLane.Objects.IndexOf((HitObject)current.TargetThing) + 1, current.TargetLane.Objects.Count - 1)];
+            },
+        }},
+        {"s_prevlane", new KeybindAction {
+            Category = "Selection",
+            Name = "Previous Lane",
+            Keybind = new Keybind(KeyCode.UpArrow),
+            Invoke = () => {
+                if (current.TargetLane != null) current.TargetThing = current.TargetLane =
+                    current.TargetChart.Data.Lanes[Math.Max(current.TargetChart.Data.Lanes.IndexOf(current.TargetLane) - 1, 0)];
+            },
+        }},
+        {"s_nextlane", new KeybindAction {
+            Category = "Selection",
+            Name = "Next Lane",
+            Keybind = new Keybind(KeyCode.DownArrow),
+            Invoke = () => {
+                if (current.TargetLane != null) current.TargetThing = current.TargetLane =
+                    current.TargetChart.Data.Lanes[Math.Min(current.TargetChart.Data.Lanes.IndexOf(current.TargetLane) + 1, current.TargetChart.Data.Lanes.Count - 1)];
+            },
+        }},
+        {"m_keybinds", new KeybindAction {
+            Category = "Miscellaneous",
+            Name = "Show Keybindings",
+            Keybind = new Keybind(KeyCode.Slash, EventModifiers.Shift),
+            Invoke = () => JAEditorSettings.Open(1),
+        }},
+    };
+
+    public void HandleKeybinds()
+    {
+        if (Event.current.type == EventType.KeyDown)
+        {
+            KeybindActions.HandleEvent(Event.current);
         }
     }
 
@@ -1771,17 +1898,18 @@ public class Chartmaker : EditorWindow
         // -------------------- Menu
 
         if (GUI.Button(new Rect(5, 5, 20, 20), EditorGUIUtility.IconContent("_Menu"),
-            new GUIStyle("button") { padding = new RectOffset(0, 0, 0, 0) }))
+            new GUIStyle("button") { padding = new RectOffset(0, 0, 0, 0) }) || menuOpen)
         {
+            menuOpen = false;
             GenericMenu menu = new GenericMenu();
 
             // -------------------- File
             if (TargetChartMeta != null && TargetChart != null)
-                menu.AddItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.ChartmakerKeybinds["General/Play Chart in Player"].ToUnityHotkeyString()), false, OpenInPlayMode);
-            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + JAEditorSettings.ChartmakerKeybinds["General/Play Chart in Player"].ToUnityHotkeyString()));
+                menu.AddItem(new GUIContent("File/Play Chart in Player " + KeybindActions["g_player"].Keybind.ToUnityHotkeyString()), false, OpenInPlayMode);
+            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + KeybindActions["g_player"].Keybind.ToUnityHotkeyString()));
 
             menu.AddSeparator("File/");
-            menu.AddItem(new GUIContent("File/Save " + JAEditorSettings.ChartmakerKeybinds["File/Save"].ToUnityHotkeyString()), false, SaveSong);
+            menu.AddItem(new GUIContent("File/Save " + KeybindActions["f_save"].Keybind.ToUnityHotkeyString()), false, SaveSong);
 
             menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Refresh"), false, Refresh);
@@ -1789,31 +1917,31 @@ public class Chartmaker : EditorWindow
 
             // -------------------- Edit
             if (History.ActionsBehind.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + JAEditorSettings.ChartmakerKeybinds["Edit/Undo"].ToUnityHotkeyString()), false, () => History.Undo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + JAEditorSettings.ChartmakerKeybinds["Edit/Undo"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false, () => History.Undo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false);
             if (History.ActionsAhead.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + JAEditorSettings.ChartmakerKeybinds["Edit/Redo"].ToUnityHotkeyString()), false, () => History.Redo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + JAEditorSettings.ChartmakerKeybinds["Edit/Redo"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false, () => History.Redo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false);
             menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
 
             menu.AddSeparator("Edit/");
             if (TargetThing != null)
             {
-                menu.AddItem(new GUIContent("Edit/Cut " + JAEditorSettings.ChartmakerKeybinds["Edit/Cut"].ToUnityHotkeyString()), false, CutSelection);
-                menu.AddItem(new GUIContent("Edit/Copy " + JAEditorSettings.ChartmakerKeybinds["Edit/Copy"].ToUnityHotkeyString()), false, CopySelection);
+                menu.AddItem(new GUIContent("Edit/Cut " + KeybindActions["e_cut"].Keybind.ToUnityHotkeyString()), false, CutSelection);
+                menu.AddItem(new GUIContent("Edit/Copy " + KeybindActions["e_copy"].Keybind.ToUnityHotkeyString()), false, CopySelection);
             }
             else
             {
-                menu.AddDisabledItem(new GUIContent("Edit/Cut " + JAEditorSettings.ChartmakerKeybinds["Edit/Cut"].ToUnityHotkeyString()), false);
-                menu.AddDisabledItem(new GUIContent("Edit/Copy " + JAEditorSettings.ChartmakerKeybinds["Edit/Copy"].ToUnityHotkeyString()), false);
+                menu.AddDisabledItem(new GUIContent("Edit/Cut " + KeybindActions["e_cut"].Keybind.ToUnityHotkeyString()), false);
+                menu.AddDisabledItem(new GUIContent("Edit/Copy " + KeybindActions["e_copy"].Keybind.ToUnityHotkeyString()), false);
             }
             if (ClipboardThing != null)
-                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + JAEditorSettings.ChartmakerKeybinds["Edit/Paste"].ToUnityHotkeyString()), false, PasteSelection);
-            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + JAEditorSettings.ChartmakerKeybinds["Edit/Paste"].ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false, PasteSelection);
+            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false);
 
             // -------------------- Options
             menu.AddItem(new GUIContent("Options/Chartmaker Settings"), false, JAEditorSettings.Open);
-            menu.AddItem(new GUIContent("Options/Show Keybindings " + JAEditorSettings.ChartmakerKeybinds["Misc./Show Keybindings"].ToUnityHotkeyString()),
+            menu.AddItem(new GUIContent("Options/Show Keybindings " + KeybindActions["m_keybinds"].Keybind.ToUnityHotkeyString()),
                 false, () => JAEditorSettings.Open(1));
 
             // -------------------- Help
@@ -1826,7 +1954,7 @@ public class Chartmaker : EditorWindow
             menu.AddSeparator("Help/");
             menu.AddItem(new GUIContent("Help/Debug Stats"), false, () => inspectMode = "debug");
 
-            menu.ShowAsContext();
+            menu.DropDown(new Rect(5, 5, 20, 20));
         }
 
         // -------------------- Options
@@ -1911,23 +2039,23 @@ public class Chartmaker : EditorWindow
 
         string oldMode = timelineMode;
 
-        if (GUI.Toggle(timelineMode == "story" ? new Rect(5, 3, 80, 25) : new Rect(5, 3, 80, 20), timelineMode == "story", "Storyboard", "button"))
+        if (GUI.Toggle(timelineMode == "story" ? new Rect(5, 3, 90, 25) : new Rect(5, 3, 90, 20), timelineMode == "story", "Storyboard", "button"))
             timelineMode = "story";
 
-        GUI.Label(new Rect(85, 3, 12, 20), "|", bgLabel);
+        GUI.Label(new Rect(95, 3, 12, 20), "|", bgLabel);
 
-        if (GUI.Toggle(timelineMode == "timing" ? new Rect(97, 3, 80, 25) : new Rect(97, 3, 80, 20), timelineMode == "timing", "Timing", "buttonLeft"))
+        if (GUI.Toggle(timelineMode == "timing" ? new Rect(107, 3, 90, 25) : new Rect(107, 3, 90, 20), timelineMode == "timing", "Timing", "buttonLeft"))
             timelineMode = "timing";
-        if (GUI.Toggle(timelineMode == "lane" ? new Rect(178, 3, 80, 25) : new Rect(178, 3, 80, 20), timelineMode == "lane", "Lanes", "buttonRight"))
+        if (GUI.Toggle(timelineMode == "lane" ? new Rect(198, 3, 90, 25) : new Rect(198, 3, 90, 20), timelineMode == "lane", "Lanes", "buttonRight"))
             timelineMode = "lane";
 
         if (TargetLane != null)
         {
-            GUI.Label(new Rect(259, 3, 21, 20), "▶", bgLabel);
+            GUI.Label(new Rect(289, 3, 21, 20), "▶", bgLabel);
 
-            if (GUI.Toggle(timelineMode == "step" ? new Rect(280, 3, 80, 25) : new Rect(280, 3, 80, 20), timelineMode == "step", "Steps", "buttonLeft"))
+            if (GUI.Toggle(timelineMode == "step" ? new Rect(310, 3, 90, 25) : new Rect(310, 3, 90, 20), timelineMode == "step", "Lane Steps", "buttonLeft"))
                 timelineMode = "step";
-            if (GUI.Toggle(timelineMode == "hit" ? new Rect(361, 3, 80, 25) : new Rect(361, 3, 80, 20), timelineMode == "hit", "Hits", "buttonRight"))
+            if (GUI.Toggle(timelineMode == "hit" ? new Rect(401, 3, 90, 25) : new Rect(401, 3, 90, 20), timelineMode == "hit", "Hit Objects", "buttonRight"))
                 timelineMode = "hit";
         }
 
@@ -2835,18 +2963,17 @@ public class Chartmaker : EditorWindow
             {
                 IList thing = (IList)TargetThing;
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Multi-select", "boldLabel");
-                GUILayout.Space(8);
-                scrollPos = GUILayout.BeginScrollView(scrollPos);
                 string name = "items";
                 if (thing is List<Timestamp>) name = "Timestamps";
                 else if (thing is List<BPMStop>) name = "BPM Stops";
                 else if (thing is List<Lane>) name = "Lanes";
                 else if (thing is List<LaneStep>) name = "Lane Steps";
                 else if (thing is List<HitObject>) name = "Hit Objects";
-                GUILayout.Label(thing.Count + " " + name, "boldLabel");
 
+                GUI.Label(new Rect(7, 2, 226, 20), thing.Count + " " + name, "boldLabel");
                 GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+
                 GUILayout.Label("Multi-edit", "boldLabel");
 
                 Type type = thing.GetType().GetGenericArguments()[0];
@@ -2868,14 +2995,65 @@ public class Chartmaker : EditorWindow
                 else if (MultiManager.Handler is ChartmakerMultiHandlerBoolean)
                 {
                     ChartmakerMultiHandlerBoolean handler = MultiManager.Handler as ChartmakerMultiHandlerBoolean;
+
                     List<bool?> values = new List<bool?>{true, false, null};
                     string[] names = {"True", "False", "Toggle"};
-                    int index = values.IndexOf((bool?)handler.To);
+                    int index = values.IndexOf(handler.To);
                     handler.To = values[EditorGUILayout.Popup("To", index, names)];
+                }
+                else if (MultiManager.Handler is ChartmakerMultiHandlerFloat)
+                {
+                    ChartmakerMultiHandlerFloat handler = MultiManager.Handler as ChartmakerMultiHandlerFloat;
+
+                    handler.From = EditorGUILayout.FloatField("From", handler.From);
+                    handler.To = EditorGUILayout.FloatField("To", handler.To);
+                    
+                    GUILayout.Space(8);
+                    handler.Operation = (ChartmakerMultiHandlerFloat.FloatOperation)EditorGUILayout.EnumPopup("Operation", handler.Operation);
+                    
+                    GUILayout.Space(8);
+                    
+                    List<string> sso = new List<string>();
+                    foreach (System.Reflection.FieldInfo field in MultiManager.AvailableFields)
+                    {
+                        if (field.FieldType == typeof(float)) sso.Add(field.Name);
+                    }
+
+                    int src = sso.IndexOf(handler.LerpSource);
+                    int newSrc = EditorGUILayout.Popup("Lerp Source", src, sso.ToArray());
+                    if (newSrc != src) 
+                    {
+                        handler.LerpSource = sso[newSrc];
+                        handler.SetLerp(TargetThing as IList);
+                    }
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("", GUILayout.Width(80));
+                    GUILayout.Label(handler.LerpFrom.ToString("0.###", invariant));
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("~");
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label(handler.LerpTo.ToString("0.###", invariant));
+                    GUILayout.EndHorizontal();
+                    
+                    List<string> est = new List<string>();
+                    List<string> eso = new List<string>();
+                    foreach (Ease ease in Ease.Eases.Values)
+                    {
+                        eso.Add(ease.ID);
+                        est.Add(ease.Name);
+                    }
+                    
+                    int eas = eso.IndexOf(handler.LerpEasing);
+                    int newEas = EditorGUILayout.Popup("Lerp Easing", eas, est.ToArray());
+                    if (newEas != eas) handler.LerpEasing = eso[newEas];
+                    handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
+
                 }
                 else if (MultiManager.Handler.GetType().GetGenericArguments()[0]?.IsEnum == true)
                 {
-                    IChartmakerMultiHandler handler = MultiManager.Handler as IChartmakerMultiHandler;
+                    ChartmakerMultiHandler handler = MultiManager.Handler as ChartmakerMultiHandler;
+
                     if (handler.To == null) handler.To = handler.GetType().GetGenericArguments()[0].GetEnumValues().GetValue(0);
                     handler.To = EditorGUILayout.EnumPopup("To", handler.To as Enum);
                 }

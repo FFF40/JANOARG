@@ -5,39 +5,8 @@ using UnityEngine;
 
 public class JAEditorSettings : EditorWindow
 {
-    public static Keybinds ChartmakerKeybinds;
-
     public static void InitSettings ()
     {
-        if (ChartmakerKeybinds == null)
-        {
-            ChartmakerKeybinds = new Keybinds(new Dictionary<string, Keybind> {
-                { "General/Toggle Play/Pause", new Keybind(KeyCode.P) },
-                { "General/Play Chart in Player", new Keybind(KeyCode.P, EventModifiers.Shift) },
-
-                { "File/Save", new Keybind(KeyCode.S, EventModifiers.Command) },
-
-                { "Edit/Undo", new Keybind(KeyCode.Z, EventModifiers.Command) },
-                { "Edit/Redo", new Keybind(KeyCode.Y, EventModifiers.Command) },
-                { "Edit/Cut", new Keybind(KeyCode.X, EventModifiers.Command) },
-                { "Edit/Copy", new Keybind(KeyCode.C, EventModifiers.Command) },
-                { "Edit/Paste", new Keybind(KeyCode.V, EventModifiers.Command) },
-                { "Edit/Delete", new Keybind(KeyCode.Backspace, EventModifiers.None) },
-
-                { "Picker/Cursor", new Keybind(KeyCode.A) },
-                { "Picker/Select", new Keybind(KeyCode.S) },
-                { "Picker/Delete", new Keybind(KeyCode.D) },
-                { "Picker/1st Item", new Keybind(KeyCode.Q) },
-                { "Picker/2nd Item", new Keybind(KeyCode.W) },
-
-                { "Selection/Previous Item", new Keybind(KeyCode.LeftArrow) },
-                { "Selection/Next Item", new Keybind(KeyCode.RightArrow) },
-                { "Selection/Previous Lane", new Keybind(KeyCode.LeftArrow, EventModifiers.Shift) },
-                { "Selection/Next Lane", new Keybind(KeyCode.RightArrow, EventModifiers.Shift) },
-
-                { "Misc./Show Keybindings", new Keybind(KeyCode.Slash, EventModifiers.Shift) },
-            });
-        }
     }
 
     [MenuItem("JANOARG/Editor Settings", false, 100)]
@@ -104,37 +73,37 @@ public class JAEditorSettings : EditorWindow
             GUILayout.Label("Keybindings", title, GUILayout.MinWidth(Screen.width - 210));
             GUILayout.Space(8);
             GUILayout.Label("(These can't be modified yet, for now use this as a reference)");
-            string curCat = "";
+
+            GUIStyle miniTextField = "miniTextField";
+            miniTextField.fontSize = EditorStyles.miniLabel.fontSize;
             
-            int rows = Mathf.Max((int)(Screen.width - 210) / 220, 1);
+            int rows = Mathf.Max((int)(Screen.width - 200) / 200, 1);
             int crow = 0;
-            float w = (Screen.width - 210) / rows;
+            float w = (Screen.width - 200) / rows;
             float[] hs = new float[rows];
 
-            Keybinds list = ChartmakerKeybinds;
+            Dictionary<string, List<KeybindAction>> cats = Chartmaker.KeybindActions.MakeCategoryGroups();
 
-            foreach (KeyValuePair<string, Keybind> kb in list.Values)
+            foreach (KeyValuePair<string, List<KeybindAction>> cat in cats)
             {
-                string cat = kb.Key.Remove(kb.Key.IndexOf("/"));
-                string name = kb.Key.Substring(kb.Key.IndexOf("/") + 1);
+                crow = 0;
+                for (int a = 1; a < rows; a++) if (hs[a] < hs[crow]) crow = a;
+                GUI.Label(new Rect(w * crow + 5, hs[crow] + 68, w - 2, 27 + 18 * cat.Value.Count), "", "HelpBox");
+                GUI.Label(new Rect(w * crow + 5, hs[crow] + 68, w - 2, 22), cat.Key, "button");
+                hs[crow] += 30;
 
-                if (curCat != cat) 
+                foreach (KeybindAction action in cat.Value)
                 {
-                    crow = 0;
-                    for (int a = 1; a < rows; a++) if (hs[a] < hs[crow]) crow = a;
-                    GUI.Label(new Rect(w * crow + 4, hs[crow] + 68, w - 5, 24), cat, title2);
-                    hs[crow] += 32;
-                    curCat = cat;
-                }
 
-                GUI.Label(new Rect(w * crow + 4, hs[crow] + 59, 120, 20), name);
-                GUI.Button(new Rect(w * crow + 130, hs[crow] + 60, w - 132, 20), kb.Value.ToString(), EditorStyles.textField);
-                hs[crow] += 22;
+                    GUI.Label(new Rect(w * crow + 8, hs[crow] + 63, 108, 16), action.Name, "miniLabel");
+                    GUI.Button(new Rect(w * crow + 123, hs[crow] + 63, w - 124, 16), action.Keybind.ToString(), miniTextField);
+                    hs[crow] += 18;
+                }
             }
             
             crow = 0;
             for (int a = 1; a < rows; a++) if (hs[a] > hs[crow]) crow = a;
-            GUILayout.Space(hs[crow]);
+            GUILayout.Space(hs[crow] + 12);
         }
         EditorGUILayout.EndScrollView();
 
@@ -185,14 +154,17 @@ public class Keybind
     public override string ToString() 
     {
         string str = KeyCode.ToString();
-        switch (str)
+        switch (KeyCode)
         {
-            case "Slash": str = "/"; break;
-            case "Backslash": str = "\\"; break;
-            case "UpArrow": str = "↑"; break;
-            case "DownArrow": str = "↓"; break;
-            case "LeftArrow": str = "←"; break;
-            case "RightArrow": str = "→"; break;
+            case >= KeyCode.Alpha0 and <= KeyCode.Alpha9: str = ((int)KeyCode - 48).ToString(); break;
+
+            case KeyCode.Slash: str = "/"; break;
+            case KeyCode.Backslash: str = "\\"; break;
+
+            case KeyCode.UpArrow: str = "↑"; break;
+            case KeyCode.DownArrow: str = "↓"; break;
+            case KeyCode.LeftArrow: str = "←"; break;
+            case KeyCode.RightArrow: str = "→"; break;
         }
         if (Application.platform == RuntimePlatform.OSXEditor)
         {
@@ -231,50 +203,40 @@ public class Keybind
     }
 }
 
-[System.Serializable]
-public class Keybinds
+public class KeybindAction
 {
-    public Dictionary<string, Keybind> Values;
+    public string Name;
+    public string Category;
+    public Keybind Keybind;
+    public System.Action Invoke;
+}
 
-    public Keybind this[string index]
+public class KeybindActionList: Dictionary<string, KeybindAction>
+{
+    public void HandleEvent(Event ev)
     {
-        get {
-            return Values[index]; 
+        foreach (KeybindAction action in this.Values) 
+        {
+            if (action.Keybind.Matches(ev)) 
+            {
+                action.Invoke();
+                ev.Use();
+                break;
+            }
         }
     }
 
-    public Keybinds(Dictionary<string, Keybind> values)
+    public Dictionary<string, List<KeybindAction>> MakeCategoryGroups()
     {
-        Values = values;
-    }
-
-    public Keybinds()
-    {
-        Values = new Dictionary<string, Keybind>();
-
-        Values["General/Toggle Play/Pause"] = new Keybind(KeyCode.P);
-        Values["General/Play Chart in Player"] = new Keybind(KeyCode.P, EventModifiers.Shift);
-
-        Values["File/Save"] = new Keybind(KeyCode.S, EventModifiers.Command);
-
-        Values["Edit/Undo"] = new Keybind(KeyCode.Z, EventModifiers.Command);
-        Values["Edit/Redo"] = new Keybind(KeyCode.Y, EventModifiers.Command);
-        Values["Edit/Cut"] = new Keybind(KeyCode.X, EventModifiers.Command);
-        Values["Edit/Copy"] = new Keybind(KeyCode.C, EventModifiers.Command);
-        Values["Edit/Paste"] = new Keybind(KeyCode.V, EventModifiers.Command);
-        Values["Edit/Delete"] = new Keybind(KeyCode.Backspace, EventModifiers.None);
-
-        Values["Picker/Cursor"] = new Keybind(KeyCode.A);
-        Values["Picker/Select"] = new Keybind(KeyCode.S);
-        Values["Picker/Delete"] = new Keybind(KeyCode.D);
-        Values["Picker/1st Item"] = new Keybind(KeyCode.Q);
-        Values["Picker/2nd Item"] = new Keybind(KeyCode.W);
-
-        Values["Selection/Previous Item"] = new Keybind(KeyCode.LeftArrow);
-        Values["Selection/Next Item"] = new Keybind(KeyCode.RightArrow);
-        Values["Selection/Previous Lane"] = new Keybind(KeyCode.LeftArrow, EventModifiers.Shift);
-        Values["Selection/Next Lane"] = new Keybind(KeyCode.RightArrow, EventModifiers.Shift);
-
-        Values["Misc./Show Keybindings"] = new Keybind(KeyCode.Slash, EventModifiers.Shift);
+        Dictionary<string, List<KeybindAction>> dict = new Dictionary<string, List<KeybindAction>>();
+        foreach (KeybindAction action in this.Values) 
+        {
+            if (!dict.ContainsKey(action.Category))
+            {
+                dict.Add(action.Category, new List<KeybindAction>());
+            }
+            dict[action.Category].Add(action);
+        }
+        return dict;
     }
 }
