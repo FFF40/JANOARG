@@ -2575,7 +2575,7 @@ public class Chartmaker : EditorWindow
 
                         if (x != y)
                         {
-                            GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "button");
+                            GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "helpBox");
                         }
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
                         {
