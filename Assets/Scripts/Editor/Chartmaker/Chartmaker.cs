@@ -584,6 +584,8 @@ public class Chartmaker : EditorWindow
 
         width = position.width;
         height = position.height;
+            
+        float tHeight = 22 * timelineHeight;
 
         if (TargetSong)
         {
@@ -616,7 +618,7 @@ public class Chartmaker : EditorWindow
             if (TargetSong.ChartsOld != null && TargetSong.ChartsOld.Count > 0)
                 extrasmode = "migrate_charts";
 
-            Rect bound = new Rect(45, 35, width - 320, height - 222);
+            Rect bound = new Rect(45, 35, width - 320, height - tHeight - 112);
             if (bound.width / bound.height > 3 / 2f)
             {
                 float width = (bound.height * 3 / 2);
@@ -631,8 +633,8 @@ public class Chartmaker : EditorWindow
             }
 
             float camLeft = (bound.center.x - (width - bound.center.x));
-            float camRatio = (bound.height / (height - 152));
-            Rect camRect = new Rect(0, 0, width + camLeft, height - 152);
+            float camRatio = (bound.height / (height - tHeight - 42));
+            Rect camRect = new Rect(0, 0, width + camLeft, height - tHeight - 42);
 
             int ncount = 0, ccount = 0;
 
@@ -1088,21 +1090,22 @@ public class Chartmaker : EditorWindow
                     extrasmode = "";
                     Repaint();
                 }
+                else GUI.BringWindowToFront(10);
             }
 
             GUI.Button(new Rect(0, 0, width, 30), "", "toolbar");
             GUI.Button(new Rect(0, 6, width, 30), "", "toolbar");
             GUI.Window(1, new Rect(-2, -2, width + 4, 30), Toolbar, "", "toolbar");
 
-            GUI.Window(2, new Rect(0, height - 184, width, 26), TimelineMode, "", new GUIStyle("button"));
+            GUI.Window(2, new Rect(0, height - tHeight - 74, width, 26), TimelineMode, "", new GUIStyle("button"));
             GUI.BringWindowToBack(2);
-            GUI.Window(3, new Rect(-2, height - 158, width + 4, 160), Timeline, "");
+            GUI.Window(3, new Rect(-2, height -  tHeight - 48, width + 4, tHeight + 50), Timeline, "");
 
-            GUI.Window(4, new Rect(width - 270, 36, height - 204, height - 224), InspectMode, "", new GUIStyle("button"));
+            GUI.Window(4, new Rect(width - 270, 36, height - 204, height - tHeight - 114), InspectMode, "", new GUIStyle("button"));
             GUI.BringWindowToBack(4);
-            GUI.Window(5, new Rect(width - 245, 32, 240, height - 216), Inspector, "");
+            GUI.Window(5, new Rect(width - 245, 32, 240, height - tHeight - 106), Inspector, "");
 
-            GUI.Window(6, new Rect(5, 32, 32, height - 216), Picker, "");
+            GUI.Window(6, new Rect(5, 32, 32, height - tHeight - 106), Picker, "");
         }
         else
         {
@@ -2037,7 +2040,6 @@ public class Chartmaker : EditorWindow
         bgLabel.alignment = TextAnchor.MiddleCenter;
         bgLabel.hover.textColor = bgLabel.normal.textColor = backgroundColor.grayscale < .5 ? Color.white : Color.black;
 
-
         string oldMode = timelineMode;
 
         if (GUI.Toggle(timelineMode == "story" ? new Rect(5, 3, 90, 25) : new Rect(5, 3, 90, 20), timelineMode == "story", "Storyboard", "button"))
@@ -2070,6 +2072,15 @@ public class Chartmaker : EditorWindow
         if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
             && TargetChart != null && TargetThing != TargetChart.Data.Pallete)
             TargetThing = TargetChart.Data.Pallete;
+
+        int tResize = Mathf.RoundToInt(GUI.VerticalSlider(new Rect(width - 275, -97, 25, 220), 0, 5, -5, "label", "label"));
+        GUI.Label(new Rect(width - 275, 0, 25, 28), "☰", new GUIStyle("textField") { alignment = TextAnchor.MiddleCenter, padding = new RectOffset(2, 0, 0, 2) });
+        if (tResize != 0)
+        {
+            timelineHeight += tResize;
+            Repaint();
+        }
+        timelineHeight = Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
     }
 
     #endregion
@@ -2089,6 +2100,8 @@ public class Chartmaker : EditorWindow
     int mouseBtn = -1;
     int timelineSep = 2;
 
+    int timelineHeight = 5;
+
     public bool IsTargeted(object thing)
     {
         return TargetThing == thing || (TargetThing is IList && ((IList)TargetThing).Contains(thing));
@@ -2101,23 +2114,24 @@ public class Chartmaker : EditorWindow
 
     public void Timeline(int id)
     {
-        EditorGUI.DrawRect(new Rect(0, 100, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
-        EditorGUI.DrawRect(new Rect(0, 115, width + 4, 18), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
+        float tHeight = 22 * timelineHeight;
 
+        EditorGUI.DrawRect(new Rect(0, tHeight - 10, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
+        EditorGUI.DrawRect(new Rect(0, tHeight + 5, width + 4, 18), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
 
         // Fail-safe check
         if (TargetSong.Timing.Stops.Count == 0) 
         {
-            EditorGUI.DrawRect(new Rect(0, 0, width + 4, 160), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
+            EditorGUI.DrawRect(new Rect(0, 0, width + 4, tHeight + 50), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
 
             GUIStyle midLabel = new GUIStyle("label") { alignment = TextAnchor.MiddleCenter };
-            GUI.Label(new Rect(width / 2 - 302, 40, 600, 40), 
+            GUI.Label(new Rect(width / 2 - 302, tHeight / 2 - 15, 600, 40), 
                 "Timing validation failed - Your song doesn't contain any BPM Stops.\n" + 
                 "The Timeline and features associated with it will not work until the Timing list is revalidated.", midLabel);
 
-            if (GUI.Button(new Rect(width / 2 - 141, 80, 140, 20), "Undo Previous Action"))
+            if (GUI.Button(new Rect(width / 2 - 141, tHeight + 25, 140, 20), "Undo Previous Action"))
                 History.Undo();
-            if (GUI.Button(new Rect(width / 2 + 3, 80, 140, 20), "Restore Timing List"))
+            if (GUI.Button(new Rect(width / 2 + 3, tHeight + 25, 140, 20), "Restore Timing List"))
                 HistoryAdd(TargetSong.Timing.Stops, new BPMStop(140, 0));
 
             return;
@@ -2148,23 +2162,23 @@ public class Chartmaker : EditorWindow
         GUIStyle iconButtonRight = new GUIStyle("buttonRight") { padding = new RectOffset(0, 0, 0, 0) };
         GUIStyle leftButton = new GUIStyle("button") { alignment = TextAnchor.MiddleLeft };
 
-        if (GUI.Button(new Rect(5, 136, 46, 19), "Undo", iconButtonLeft))
+        if (GUI.Button(new Rect(5, tHeight + 26, 46, 19), "Undo", iconButtonLeft))
             History.Undo();
-        if (GUI.Button(new Rect(52, 136, 44, 19), "Redo", iconButtonRight))
+        if (GUI.Button(new Rect(52, tHeight + 26, 44, 19), "Redo", iconButtonRight))
             History.Redo();
 
-        if (GUI.Button(new Rect(99, 136, 46, 19), "Cut", iconButtonLeft))
+        if (GUI.Button(new Rect(99, tHeight + 26, 46, 19), "Cut", iconButtonLeft))
             CutSelection();
-        if (GUI.Button(new Rect(146, 136, 44, 19), "Copy", iconButtonMid))
+        if (GUI.Button(new Rect(146, tHeight + 26, 44, 19), "Copy", iconButtonMid))
             CopySelection();
-        if (GUI.Button(new Rect(191, 136, 44, 19), "Paste", iconButtonRight))
+        if (GUI.Button(new Rect(191, tHeight + 26, 44, 19), "Paste", iconButtonRight))
             PasteSelection();
 
-        if (GUI.Toggle(new Rect(width - 22, 136, 21, 19), extrasmode == "timeline_options", EditorGUIUtility.IconContent("icon dropdown"), iconButton) ^ (extrasmode == "timeline_options"))
+        if (GUI.Toggle(new Rect(width - 22, tHeight + 26, 21, 19), extrasmode == "timeline_options", EditorGUIUtility.IconContent("icon dropdown"), iconButton) ^ (extrasmode == "timeline_options"))
             extrasmode = extrasmode == "timeline_options" ? "" : "timeline_options";
 
-        GUI.Label(new Rect(width - 101, 136, 40, 19), "sep", leftButton);
-        timelineSep = EditorGUI.IntField(new Rect(width - 71, 136, 46, 19), timelineSep);
+        GUI.Label(new Rect(width - 101, tHeight + 26, 40, 19), "sep", leftButton);
+        timelineSep = EditorGUI.IntField(new Rect(width - 71, tHeight + 26, 46, 19), timelineSep);
 
 
         GUIStyle label = new GUIStyle("miniLabel");
@@ -2193,7 +2207,7 @@ public class Chartmaker : EditorWindow
                 float height = 0;
                 for (int i = 0; i < 32; i++) height += Math.Abs(list[i]);
                 height /= 32;
-                EditorGUI.DrawRect(new Rect(a + 2, 50 - height * 50, 1, height * 100), waveColor);
+                EditorGUI.DrawRect(new Rect(a + 2, (1 - height) * (tHeight - 10) / 2, 1, height * (tHeight - 10)), waveColor);
             }
         }
         
@@ -2215,29 +2229,29 @@ public class Chartmaker : EditorWindow
             float beat = TargetSong.Timing.ToDividedBeat(TargetSong.Timing.Stops[0].Offset, a);
             if (IsDivisible(bar, 1))
             {
-                EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, 100), new Color(.6f, .6f, .4f, op));
+                EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, tHeight - 10), new Color(.6f, .6f, .4f, op));
             }
             else if (IsDivisible(beat, 1))
             {
-                EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, 100), new Color(.5f, .5f, .5f, .8f * op));
+                EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, tHeight - 10), new Color(.5f, .5f, .5f, .8f * op));
             }
             else
             {
-                EditorGUI.DrawRect(new Rect(pos + 1.5f, 0, 1, 100), new Color(.5f, .5f, .5f, .8f * op));
+                EditorGUI.DrawRect(new Rect(pos + 1.5f, 0, 1, tHeight - 10), new Color(.5f, .5f, .5f, .8f * op));
             }
 
             label.hover.textColor = label.normal.textColor = new Color(label.normal.textColor.r, label.normal.textColor.g, label.normal.textColor.b, op2);
-            if (op2 > 0) GUI.Label(new Rect(pos - 48, 100, 100, 15), SeparateUnits 
+            if (op2 > 0) GUI.Label(new Rect(pos - 48, tHeight - 10, 100, 15), SeparateUnits 
                 ? Mathf.Floor(bar).ToString("0", invariant) + ":" + Mathf.Abs(beat).ToString("00.###", invariant) 
                 : a.ToString("0.###", invariant), label);
             //GUI.Label(new Rect(pos - 48, 100, 100, 15), , label);
         }
 
-        EditorGUI.MinMaxSlider(new Rect(2, 118, width, 15), ref seekStart, ref seekEnd, seekLimitStart, seekLimitEnd);
+        EditorGUI.MinMaxSlider(new Rect(2, tHeight + 8, width, 15), ref seekStart, ref seekEnd, seekLimitStart, seekLimitEnd);
 
-        EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, 116, 1, 14),
+        EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, tHeight + 6, 1, 14),
             EditorGUIUtility.isProSkin ? Color.white : Color.black);
-        EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, 122, 1, 10),
+        EditorGUI.DrawRect(new Rect((seekTime - seekLimitStart) / (seekLimitEnd - seekLimitStart) * (width - 12) + 7, tHeight + 12, 1, 10),
             (EditorGUIUtility.isProSkin ^ (seekTime >= seekStart && seekTime < seekEnd)) ? new Color(.9f, .9f, .9f, .75f) : new Color(.2f, .2f, .2f, .75f));
 
         GUIStyle itemStyle = new GUIStyle("button");
@@ -2262,9 +2276,9 @@ public class Chartmaker : EditorWindow
                 return Times.Count - 1;
             }
             
-            if (lastTimesCount > 5)
+            if (lastTimesCount > timelineHeight)
             {
-                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 5f / lastTimesCount, 0, lastTimesCount - 4));
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + 5), verSeek, 5f / lastTimesCount, 0, lastTimesCount - 4));
             }
 
             if (dragMode == "select" && selectStart != null && selectEnd != null)
@@ -2278,10 +2292,10 @@ public class Chartmaker : EditorWindow
                     posEnd = tmp;
                 }
 
-                EditorGUI.DrawRect(new Rect(posStart + 2, 0, posEnd - posStart, 115), new Color(.5f, .5f, 1, .2f));
+                EditorGUI.DrawRect(new Rect(posStart + 2, 0, posEnd - posStart, tHeight + 5), new Color(.5f, .5f, 1, .2f));
                 Color color = EditorGUIUtility.isProSkin ? new Color(.5f, .5f, 1) : new Color(.3f, .3f, .6f);
-                EditorGUI.DrawRect(new Rect(posStart + 1, 0, 2, 115), color);
-                EditorGUI.DrawRect(new Rect(posEnd + 1, 0, 2, 115), color);
+                EditorGUI.DrawRect(new Rect(posStart + 1, 0, 2, tHeight + 5), color);
+                EditorGUI.DrawRect(new Rect(posEnd + 1, 0, 2, tHeight + 5), color);
             }
 
             if (timelineMode == "story")
@@ -2306,7 +2320,7 @@ public class Chartmaker : EditorWindow
                     GUIStyle inv = new GUIStyle("label");
                     inv.hover.textColor = inv.normal.textColor = EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f);
 
-                    for (int a = verSeek; a < Math.Min(tst.Count, verSeek + 5); a++)
+                    for (int a = verSeek; a < Math.Min(tst.Count, verSeek + timelineHeight); a++)
                     {
                         GUI.Label(new Rect(9, 4 + (a - verSeek) * 22, 120, 20), tst[a], inv);
                         GUI.Label(new Rect(8, 3 + (a - verSeek) * 22, 120, 20), tst[a]);
@@ -2320,7 +2334,7 @@ public class Chartmaker : EditorWindow
                         float pos2 = (b - seekStart) / (seekEnd - seekStart) * width;
 
                         float time = tso.IndexOf(ts.ID) - verSeek;
-                        if (time < 0 || time >= 5) continue;
+                        if (time < 0 || time >= timelineHeight) continue;
 
                         if (b > seekStart && a < seekEnd)
                         {
@@ -2350,10 +2364,10 @@ public class Chartmaker : EditorWindow
                 }
                 else
                 {
-                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, tHeight + 5), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
                     GUIStyle center = new GUIStyle("label");
                     center.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(0, 0, width + 4, 115), TargetThing == null ? "Please select an object to start editing." :
+                    GUI.Label(new Rect(0, 0, width + 4, tHeight + 5), TargetThing == null ? "Please select an object to start editing." :
                         (TargetThing is IList ? "Can not edit storyboard of multiple objects" : "This object is not storyboardable."), center);
                 }
             }
@@ -2364,7 +2378,7 @@ public class Chartmaker : EditorWindow
                     float a = TargetSong.Timing.ToBeat(stop.Offset);
                     float pos = (a - seekStart) / (seekEnd - seekStart) * width;
                     int time = AddTime(pos, 61) - verSeek;
-                    if (time < 0 || time >= 5) continue;
+                    if (time < 0 || time >= timelineHeight) continue;
                     if (a > seekStart && a < seekEnd)
                     {
                         if (IsTargeted(stop)) GUI.Label(new Rect(pos - 29, 2 + time * 22, 62, 22), "", "button");
@@ -2403,7 +2417,7 @@ public class Chartmaker : EditorWindow
                         float b = lane.LaneSteps[lane.LaneSteps.Count - 1].Offset;
                         float pos2 = (b - seekStart) / (seekEnd - seekStart) * width;
                         int time = AddTime(pos, Mathf.Max(pos2 - pos + 14, 21)) - verSeek;
-                        if (time < 0 || time >= 5) continue;
+                        if (time < 0 || time >= timelineHeight) continue;
                         if (b > seekStart && a < seekEnd)
                         {
                             EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), TargetLane == lane ? new Color(1, 1, 0, .2f) : new Color(0, 1, 0, .2f));
@@ -2481,19 +2495,19 @@ public class Chartmaker : EditorWindow
                     if (a > seekStart)
                     {
                         float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                        EditorGUI.DrawRect(new Rect(0, 0, pos + 2, 115), new Color(0, 0, 0, .25f));
+                        EditorGUI.DrawRect(new Rect(0, 0, pos + 2, tHeight + 5), new Color(0, 0, 0, .25f));
                     }
                     if (b < seekEnd)
                     {
                         float pos = (b - seekStart) / (seekEnd - seekStart) * width;
-                        EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, 115), new Color(0, 0, 0, .25f));
+                        EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, tHeight + 5), new Color(0, 0, 0, .25f));
                     }
                     foreach (LaneStep step in TargetLane.LaneSteps)
                     {
                         float x = step.Offset;
                         float pos = (x - seekStart) / (seekEnd - seekStart) * width;
                         int time = AddTime(pos, 21) - verSeek;
-                        if (time < 0 || time >= 5) continue;
+                        if (time < 0 || time >= timelineHeight) continue;
 
                         if (step.Offset > seekStart && step.Offset < seekEnd)
                         {
@@ -2524,10 +2538,10 @@ public class Chartmaker : EditorWindow
                 }
                 else
                 {
-                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, tHeight + 5), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
                     GUIStyle center = new GUIStyle("label");
                     center.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(0, 0, width + 4, 115), "Please select a lane to start editing.", center);
+                    GUI.Label(new Rect(0, 0, width + 4, tHeight + 5), "Please select a lane to start editing.", center);
                 }
             }
             else if (timelineMode == "hit")
@@ -2539,12 +2553,12 @@ public class Chartmaker : EditorWindow
                     if (a > seekStart)
                     {
                         float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                        EditorGUI.DrawRect(new Rect(0, 0, pos + 2, 115), new Color(0, 0, 0, .25f));
+                        EditorGUI.DrawRect(new Rect(0, 0, pos + 2, tHeight + 5), new Color(0, 0, 0, .25f));
                     }
                     if (b < seekEnd)
                     {
                         float pos = (b - seekStart) / (seekEnd - seekStart) * width;
-                        EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, 115), new Color(0, 0, 0, .25f));
+                        EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, tHeight + 5), new Color(0, 0, 0, .25f));
                     }
                     GUIStyle style = new GUIStyle(itemStyle);
                     foreach (HitObject hit in TargetLane.Objects)
@@ -2558,14 +2572,14 @@ public class Chartmaker : EditorWindow
                         if (HitViewMode == 1) 
                         {
                             int time = AddTime(pos, Mathf.Max(pos2 - pos + 14, 21)) - verSeek;
-                            if (time < 0 || time >= 5) continue;
+                            if (time < 0 || time >= timelineHeight) continue;
                             rect = new Rect(pos - 8, 3 + time * 22, 20, 20);
                         }
                         else 
                         {
                             float ps = Mathf.Clamp01(hit.Position);
                             float ln = Mathf.Min(hit.Length, 1 - ps);
-                            rect = new Rect(pos - 1, ps * 100, 6, ln * 100);
+                            rect = new Rect(pos - 1, ps * (tHeight - 10), 6, ln * (tHeight - 10));
                         }
                         HitStyleManager hsm = hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count ? HitStyleManagers[hit.StyleIndex] : null;
                         style.normal.textColor = style.hover.textColor = style.active.textColor = (
@@ -2606,22 +2620,22 @@ public class Chartmaker : EditorWindow
                 }
                 else
                 {
-                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, 115), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, tHeight + 5), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
                     GUIStyle center = new GUIStyle("label");
                     center.alignment = TextAnchor.MiddleCenter;
-                    GUI.Label(new Rect(0, 0, width + 4, 115), "Please select a lane to start editing.", center);
+                    GUI.Label(new Rect(0, 0, width + 4, tHeight + 5), "Please select a lane to start editing.", center);
                 }
             }
 
-            if (Times.Count > 5)
+            if (Times.Count > timelineHeight)
             {
-                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, 115), verSeek, 5f / Times.Count, 0, Times.Count - 4));
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + 5), verSeek, 5f / Times.Count, 0, Times.Count - 4));
             }
             lastTimesCount = Times.Count;
             if (Event.current.type == EventType.ScrollWheel)
             {
                 Vector2 mPos = Event.current.mousePosition;
-                if (mPos.y > 0 && mPos.y < 115)
+                if (mPos.y > 0 && mPos.y < tHeight + 5)
                 {
                     if (Event.current.shift)
                     {
@@ -2648,13 +2662,13 @@ public class Chartmaker : EditorWindow
             if (mPos.x < width - 10)
             {
                 float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
-                if (mPos.y > 100 && mPos.y < 115)
+                if (mPos.y > tHeight - 10 && mPos.y < tHeight + 5)
                 {
                     CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
                     dragMode = "seek";
                     Repaint();
                 }
-                else if (mPos.y > 0 && mPos.y < 100)
+                else if (mPos.y > 0 && mPos.y < tHeight - 10)
                 {
                     if (pickermode == "select" || mouseBtn == 1)
                     {
@@ -2880,7 +2894,7 @@ public class Chartmaker : EditorWindow
         if (seekTime >= seekStart && seekTime < seekEnd)
         {
             float pos = (seekTime - seekStart) / (seekEnd - seekStart) * width;
-            EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, 115), EditorGUIUtility.isProSkin ? Color.white : Color.black);
+            EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, tHeight + 5), EditorGUIUtility.isProSkin ? Color.white : Color.black);
         }
     }
 
@@ -2894,7 +2908,7 @@ public class Chartmaker : EditorWindow
 
     public void InspectMode(int id)
     {
-        GUIUtility.RotateAroundPivot(-90, Vector2.one * (height / 2 - 102));
+        GUIUtility.RotateAroundPivot(-90, Vector2.one * (height / 2 - 11 * timelineHeight - 46));
         if (GUI.Toggle(new Rect(27, 0, 80, 28), inspectMode == "properties", "Properties", "button")) inspectMode = "properties";
         if (GUI.Toggle(new Rect(109, 0, 80, 28), inspectMode == "storyboard", "Storyboard", "button")) inspectMode = "storyboard";
     }
