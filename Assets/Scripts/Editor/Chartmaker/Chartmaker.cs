@@ -48,6 +48,7 @@ public class Chartmaker : EditorWindow
     public bool PlayHitsounds;
     public bool FollowSeekLine;
     public int WaveformMode;
+    public int HitViewMode;
 
     public List<LaneStyleManager> LaneStyleManagers = new List<LaneStyleManager>();
     public List<HitStyleManager> HitStyleManagers = new List<HitStyleManager>();
@@ -2216,6 +2217,10 @@ public class Chartmaker : EditorWindow
             {
                 EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, 100), new Color(.6f, .6f, .4f, op));
             }
+            else if (IsDivisible(beat, 1))
+            {
+                EditorGUI.DrawRect(new Rect(pos + 1, 0, 2, 100), new Color(.5f, .5f, .5f, .8f * op));
+            }
             else
             {
                 EditorGUI.DrawRect(new Rect(pos + 1.5f, 0, 1, 100), new Color(.5f, .5f, .5f, .8f * op));
@@ -2362,8 +2367,8 @@ public class Chartmaker : EditorWindow
                     if (time < 0 || time >= 5) continue;
                     if (a > seekStart && a < seekEnd)
                     {
-                        if (IsTargeted(stop)) GUI.Label(new Rect(pos - 30, 2 + time * 22, 62, 22), "", "button");
-                        if (GUI.Button(new Rect(pos - 29, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), itemStyle))
+                        if (IsTargeted(stop)) GUI.Label(new Rect(pos - 29, 2 + time * 22, 62, 22), "", "button");
+                        if (GUI.Button(new Rect(pos - 28, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), itemStyle))
                         {
                             if (pickermode == "delete")
                             {
@@ -2437,8 +2442,8 @@ public class Chartmaker : EditorWindow
                         {
                             float rpos = (a - seekStart) / (seekEnd - seekStart) * width;
                             rpos = Math.Min(Math.Max(rpos, 13), Math.Max(rpos, (b - seekStart) / (seekEnd - seekStart) * width - 15));
-                            if (IsTargeted(lane)) GUI.Label(new Rect(rpos - 10, 2 + time * 22, 22, 22), "", "button");
-                            if (GUI.Button(new Rect(rpos - 9, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "┃", itemStyle))
+                            if (IsTargeted(lane)) GUI.Label(new Rect(rpos - 9, 2 + time * 22, 22, 22), "", "button");
+                            if (GUI.Button(new Rect(rpos - 8, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "┃", itemStyle))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -2487,11 +2492,13 @@ public class Chartmaker : EditorWindow
                     {
                         float x = step.Offset;
                         float pos = (x - seekStart) / (seekEnd - seekStart) * width;
+                        int time = AddTime(pos, 21) - verSeek;
+                        if (time < 0 || time >= 5) continue;
 
                         if (step.Offset > seekStart && step.Offset < seekEnd)
                         {
-                            if (IsTargeted(step)) GUI.Label(new Rect(pos - 2, 2, 8, 96), "", "button");
-                            if (GUI.Button(new Rect(pos - 1, 3, 6, 94), DeletingThing == step ? "?" : "┃", itemStyle))
+                            if (IsTargeted(step)) GUI.Label(new Rect(pos - 9, 2 + time * 22, 22, 22), "", "button");
+                            if (GUI.Button(new Rect(pos - 8, 3 + time * 22, 20, 20), DeletingThing == step ? "?" : "┃", itemStyle))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -2539,6 +2546,7 @@ public class Chartmaker : EditorWindow
                         float pos = (b - seekStart) / (seekEnd - seekStart) * width;
                         EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, 115), new Color(0, 0, 0, .25f));
                     }
+                    GUIStyle style = new GUIStyle(itemStyle);
                     foreach (HitObject hit in TargetLane.Objects)
                     {
                         float x = hit.Offset;
@@ -2546,18 +2554,33 @@ public class Chartmaker : EditorWindow
                         float y = hit.Offset + hit.HoldLength;
                         float pos2 = (y - seekStart) / (seekEnd - seekStart) * width;
 
-                        int time = AddTime(pos, Mathf.Max(pos2 - pos + 14, 21)) - verSeek;
-                        if (time < 0 || time >= 5) continue;
-
+                        Rect rect = new Rect();
+                        if (HitViewMode == 1) 
+                        {
+                            int time = AddTime(pos, Mathf.Max(pos2 - pos + 14, 21)) - verSeek;
+                            if (time < 0 || time >= 5) continue;
+                            rect = new Rect(pos - 8, 3 + time * 22, 20, 20);
+                        }
+                        else 
+                        {
+                            float ps = Mathf.Clamp01(hit.Position);
+                            float ln = Mathf.Min(hit.Length, 1 - ps);
+                            rect = new Rect(pos - 1, ps * 100, 6, ln * 100);
+                        }
+                        HitStyleManager hsm = hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count ? HitStyleManagers[hit.StyleIndex] : null;
+                        style.normal.textColor = style.hover.textColor = style.active.textColor = (
+                            hit.Type == HitObject.HitType.Normal ? hsm?.NormalMaterial.color :
+                            hit.Type == HitObject.HitType.Catch ? hsm?.CatchMaterial.color : null 
+                        ) ?? style.normal.textColor;
 
                         if (x != y)
                         {
-                            GUI.Label(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), "", "button");
+                            GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "button");
                         }
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
                         {
-                            if (IsTargeted(hit)) GUI.Label(new Rect(pos - 10, 2 + time * 22, 22, 22), "", "button");
-                            if (GUI.Button(new Rect(pos - 9, 3 + time * 22, 20, 20), DeletingThing == hit ? "?" : "┃", itemStyle))
+                            if (IsTargeted(hit)) GUI.Label(new Rect(rect.position - Vector2.one, rect.size + Vector2.one * 2), "", "button");
+                            if (GUI.Button(rect, DeletingThing == hit ? "?" : "┃", style))
                             {
                                 if (pickermode == "delete")
                                 {
@@ -3870,9 +3893,14 @@ public class Chartmaker : EditorWindow
         else if (extrasmode == "timeline_options")
         {
             GUI.Label(new Rect(5, 6, 90, 18), "Waveform");
-            if (GUI.Toggle(new Rect(95, 6, 66, 18), WaveformMode == 0, "Off", "buttonLeft")) WaveformMode = 0;
-            if (GUI.Toggle(new Rect(162, 6, 66, 18), WaveformMode == 1, "Paused", "buttonMid")) WaveformMode = 1;
+            if (GUI.Toggle(new Rect(95, 6, 66, 18), WaveformMode == 0, "Disabled", "buttonLeft")) WaveformMode = 0;
+            if (GUI.Toggle(new Rect(162, 6, 66, 18), WaveformMode == 1, "On Pause", "buttonMid")) WaveformMode = 1;
             if (GUI.Toggle(new Rect(229, 6, 66, 18), WaveformMode == 2, "Always", "buttonRight")) WaveformMode = 2;
+
+            GUI.Label(new Rect(5, 26, 90, 18), "View Mode");
+            GUI.Label(new Rect(95, 26, 30, 18), "Hits");
+            if (GUI.Toggle(new Rect(125, 26, 40, 18), HitViewMode == 0, "Def", "buttonLeft")) HitViewMode = 0;
+            if (GUI.Toggle(new Rect(166, 26, 40, 18), HitViewMode == 1, "Alt", "buttonRight")) HitViewMode = 1;
 
             SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
             FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
