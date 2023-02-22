@@ -185,20 +185,21 @@ public class Keybind
     public string ToUnityHotkeyString() 
     {
         string str = KeyCode.ToString();
-        switch (str)
+        switch (KeyCode)
         {
-            case "Slash": str = "/"; break;
-            case "Backslash": str = "\\"; break;
-            case "UpArrow": str = "UP"; break;
-            case "DownArrow": str = "DOWN"; break;
-            case "LeftArrow": str = "LEFT"; break;
-            case "RightArrow": str = "RIGHT"; break;
+            case KeyCode.Slash: str = "/"; break;
+            case KeyCode.Backslash: str = "\\"; break;
+            case KeyCode.UpArrow: str = "UP"; break;
+            case KeyCode.DownArrow: str = "DOWN"; break;
+            case KeyCode.LeftArrow: str = "LEFT"; break;
+            case KeyCode.RightArrow: str = "RIGHT"; break;
         }
 
         if ((Modifiers & EventModifiers.Shift) > 0) str = "#" + str;
         if ((Modifiers & EventModifiers.Alt) > 0) str = "&" + str;
         if ((Modifiers & EventModifiers.Control) > 0) str = "^" + str;
         if ((Modifiers & EventModifiers.Command) > 0) str = "%" + str;
+        if (Modifiers == 0) str = "_" + str;
         return str;
     }
 }

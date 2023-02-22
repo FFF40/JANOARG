@@ -1235,7 +1235,7 @@ public class Chartmaker : EditorWindow
             Keybind = new Keybind(KeyCode.V, EventModifiers.Command),
             Invoke = () => current.PasteSelection(),
         }},
-        {"e_remove", new KeybindAction {
+        {"e_delete", new KeybindAction {
             Category = "Edit",
             Name = "Delete",
             Keybind = new Keybind(KeyCode.Delete),
@@ -1907,6 +1907,12 @@ public class Chartmaker : EditorWindow
             menuOpen = false;
             GenericMenu menu = new GenericMenu();
 
+            void AddConditionalItem(bool condition, GUIContent content, bool on, GenericMenu.MenuFunction func)
+            {
+                if (condition) menu.AddItem(content, on, func);
+                else menu.AddDisabledItem(content, on);
+            }
+
             // -------------------- File
             if (TargetChartMeta != null && TargetChart != null)
                 menu.AddItem(new GUIContent("File/Play Chart in Player " + KeybindActions["g_player"].Keybind.ToUnityHotkeyString()), false, OpenInPlayMode);
@@ -1929,19 +1935,13 @@ public class Chartmaker : EditorWindow
             menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
 
             menu.AddSeparator("Edit/");
-            if (TargetThing != null)
-            {
-                menu.AddItem(new GUIContent("Edit/Cut " + KeybindActions["e_cut"].Keybind.ToUnityHotkeyString()), false, CutSelection);
-                menu.AddItem(new GUIContent("Edit/Copy " + KeybindActions["e_copy"].Keybind.ToUnityHotkeyString()), false, CopySelection);
-            }
-            else
-            {
-                menu.AddDisabledItem(new GUIContent("Edit/Cut " + KeybindActions["e_cut"].Keybind.ToUnityHotkeyString()), false);
-                menu.AddDisabledItem(new GUIContent("Edit/Copy " + KeybindActions["e_copy"].Keybind.ToUnityHotkeyString()), false);
-            }
-            if (ClipboardThing != null)
-                menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false, PasteSelection);
+            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Cut " + KeybindActions["e_cut"].Keybind.ToUnityHotkeyString()), false, CutSelection);
+            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Copy " + KeybindActions["e_copy"].Keybind.ToUnityHotkeyString()), false, CopySelection);
+            
+            if (ClipboardThing != null) menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false, PasteSelection);
             else menu.AddDisabledItem(new GUIContent("Edit/Paste " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false);
+            
+            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Delete " + KeybindActions["e_delete"].Keybind.ToUnityHotkeyString()), false, DeleteSelection);
 
             // -------------------- Options
             menu.AddItem(new GUIContent("Options/Chartmaker Settings"), false, JAEditorSettings.Open);
@@ -1950,6 +1950,7 @@ public class Chartmaker : EditorWindow
 
             // -------------------- Help
             menu.AddItem(new GUIContent("Help/Interactive Tutorial (closes song)"), false, () => { TargetSong = null; TutorialStage = 0; });
+            menu.AddItem(new GUIContent("Help/Editor's Manual"), false, () => { JAEditorManual.Open(); });
 
             menu.AddSeparator("Help/");
             menu.AddItem(new GUIContent("Help/Source Code on GitHub"), false, () => Application.OpenURL("https://github.com/ducdat0507/JANOARG"));
@@ -3108,6 +3109,8 @@ public class Chartmaker : EditorWindow
                     );
                     isSupported = false;
                 }
+                
+                GUILayout.EndScrollView();
 
                 if (isSupported)
                 {
@@ -3115,7 +3118,6 @@ public class Chartmaker : EditorWindow
                     if (GUILayout.Button("Execute")) MultiManager.Execute(TargetThing as IList, History);
                 }
 
-                GUILayout.EndScrollView();
             }
             else if (TargetTimestamp != null)
             {
@@ -3209,6 +3211,9 @@ public class Chartmaker : EditorWindow
                     }
                     GUILayout.EndHorizontal();
                 }
+
+                GUILayout.EndScrollView();
+                
                 if (GUILayout.Button("Create New Chart"))
                 {
                     TempChartMeta = new ExternalChartMeta();
@@ -3218,7 +3223,7 @@ public class Chartmaker : EditorWindow
                 {
                     TargetSong.Charts.Sort((x, y) => x.DifficultyIndex.CompareTo(y.DifficultyIndex));
                 }
-                GUILayout.EndScrollView();
+
                 History.EndRecordItem(TargetThing);
             }
             else if (TargetThing is BPMStop)
@@ -3527,6 +3532,7 @@ public class Chartmaker : EditorWindow
                     h += 50;
                 }
                 GUILayout.Space(h);
+                GUILayout.EndScrollView();
                 if (GUILayout.Button("Create New Step"))
                 {
                     LaneStep step = new LaneStep();
@@ -3536,7 +3542,6 @@ public class Chartmaker : EditorWindow
                     HistoryAdd(thing.LaneSteps, step);
                     thing.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                 }
-                GUILayout.EndScrollView();
 
                 if (thing.LaneSteps[0].Offset != a)
                 {
