@@ -779,7 +779,7 @@ public class LaneManager
             Steps[a].CurrentStep = step;
 
             stepCount += float.IsNaN(offset) ? 1 : 
-                Mathf.CeilToInt(Mathf.Clamp01((time - Steps[a].Offset) / (offset - Steps[a].Offset)) * (step.IsLinear ? 1 : 16));
+                Mathf.CeilToInt((offset == Steps[a].Offset ? (Steps[a].Offset > time ? 1 : 0) : Mathf.Clamp01((time - Steps[a].Offset) / (offset - Steps[a].Offset))) * (step.IsLinear ? 1 : 16));
             offset = Steps[a].Offset;
         }
         while (Steps.Count > CurrentLane.LaneSteps.Count) Steps.RemoveAt(CurrentLane.LaneSteps.Count);
@@ -807,7 +807,7 @@ public class LaneManager
             }
             else if (next.CurrentStep.IsLinear)
             {
-                float p = Mathf.Clamp01((time - curr.Offset) / (next.Offset - curr.Offset));
+                float p = curr.Offset == next.Offset ? (curr.Offset < time ? 1 : 0) : Mathf.Clamp01((time - curr.Offset) / (next.Offset - curr.Offset));
                 float dist = Mathf.Lerp(curr.Distance, next.Distance, p);
                 verts[index] = Vector3.Lerp(curr.CurrentStep.StartPos, next.CurrentStep.StartPos, p) + Vector3.forward * dist;
                 verts[index + 1] = Vector3.Lerp(curr.CurrentStep.EndPos, next.CurrentStep.EndPos, p) + Vector3.forward * dist;
@@ -826,7 +826,7 @@ public class LaneManager
             }
             else
             {
-                float p = Mathf.Clamp01((time - curr.Offset) / (next.Offset - curr.Offset));
+                float p = curr.Offset == next.Offset ? (curr.Offset < time ? 1 : 0) : Mathf.Clamp01((time - curr.Offset) / (next.Offset - curr.Offset));
                 float dist = 0;
                 for (int i = 15; i >= 0; i--)
                 {
