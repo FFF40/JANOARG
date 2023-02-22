@@ -82,6 +82,8 @@ public class ChartPlayer : MonoBehaviour
     [Space]
     public Slider SongProgressSlider;
     public Image SongProgressFill;
+    public Image SongProgressUpper;
+    public Image SongProgressLower;
     [Space]
     public Image GaugeBox;
     public TMP_Text GaugeText;
@@ -284,7 +286,7 @@ public class ChartPlayer : MonoBehaviour
     {
         SongNameLabel.color = SongArtistLabel.color = DifficultyNameLabel.color = DifficultyBox.color = DifficultyLabel.color = 
         ScoreText.color = ScoreUnitText.color = GaugeBox.color = GaugeText.color = GaugeFill.color = GaugeUpper.color = GaugeLower.color =
-        ComboLabel.color = ComboText.color = SongProgressFill.color = color;
+        ComboLabel.color = ComboText.color = SongProgressFill.color = SongProgressUpper.color = SongProgressLower.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {
             DifficultyIndicators[a].gameObject.SetActive(CurrentChart.DifficultyIndex >= a);

@@ -15,7 +15,7 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 1, g: 0.9882353, b: 0.8156863, a: 1}
+  m_FogColor: {r: 1, g: 1, b: 1, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 0
@@ -183,8 +183,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Look ma, I'm in a rhythm game loading bar!
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 29efb340d53467c4f9ba8540588187ab, type: 2}
-  m_sharedMaterial: {fileID: 4467093486821682912, guid: 29efb340d53467c4f9ba8540588187ab, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: d1650a487afba3d44b9305420893e7ee, type: 2}
+  m_sharedMaterial: {fileID: -232478446105978092, guid: d1650a487afba3d44b9305420893e7ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -410,8 +410,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Player Name
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: eeb455cf639f0a5498e8de9f8b091a2a, type: 2}
-  m_sharedMaterial: {fileID: -6954525552735352244, guid: eeb455cf639f0a5498e8de9f8b091a2a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 736bc6ada3492d549a25e18d09489a28, type: 2}
+  m_sharedMaterial: {fileID: 6767016998725404733, guid: 736bc6ada3492d549a25e18d09489a28, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
