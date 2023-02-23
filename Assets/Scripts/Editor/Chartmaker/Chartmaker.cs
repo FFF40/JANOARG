@@ -1336,7 +1336,7 @@ public class Chartmaker : EditorWindow
             Name = "Previous Item",
             Keybind = new Keybind(KeyCode.LeftArrow),
             Invoke = () => {
-                if (current.TargetThing is Lane) current.TargetThing =
+                if (current.TargetThing is Lane) current.TargetThing = current.TargetLane =
                     current.TargetChart.Data.Lanes[Math.Max(current.TargetChart.Data.Lanes.IndexOf((Lane)current.TargetThing) - 1, 0)];
                 else if (current.TargetThing is HitObject) current.TargetThing =
                     current.TargetLane.Objects[Math.Max(current.TargetLane.Objects.IndexOf((HitObject)current.TargetThing) - 1, 0)];
@@ -1347,7 +1347,7 @@ public class Chartmaker : EditorWindow
             Name = "Next Item",
             Keybind = new Keybind(KeyCode.RightArrow),
             Invoke = () => {
-                if (current.TargetThing is Lane) current.TargetThing =
+                if (current.TargetThing is Lane) current.TargetThing = current.TargetLane =
                     current.TargetChart.Data.Lanes[Math.Min(current.TargetChart.Data.Lanes.IndexOf((Lane)current.TargetThing) + 1, current.TargetChart.Data.Lanes.Count - 1)];
                 else if (current.TargetThing is HitObject) current.TargetThing =
                     current.TargetLane.Objects[Math.Min(current.TargetLane.Objects.IndexOf((HitObject)current.TargetThing) + 1, current.TargetLane.Objects.Count - 1)];
