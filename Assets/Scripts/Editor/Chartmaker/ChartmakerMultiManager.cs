@@ -56,6 +56,22 @@ public class ChartmakerMultiManager
                 handler.SetLerp(Chartmaker.current.TargetThing as IList);
                 Handler = handler;
             }
+            else if (currentField.FieldType == typeof(Vector2)) 
+            {
+                ChartmakerMultiHandlerVector2 handler = Handlers.ContainsKey(currentField.FieldType)
+                    ? Handlers[currentField.FieldType] as ChartmakerMultiHandlerVector2 
+                    : new ChartmakerMultiHandlerVector2();
+                handler.SetLerp(Chartmaker.current.TargetThing as IList);
+                Handler = handler;
+            }
+            else if (currentField.FieldType == typeof(Vector3)) 
+            {
+                ChartmakerMultiHandlerVector3 handler = Handlers.ContainsKey(currentField.FieldType)
+                    ? Handlers[currentField.FieldType] as ChartmakerMultiHandlerVector3 
+                    : new ChartmakerMultiHandlerVector3();
+                handler.SetLerp(Chartmaker.current.TargetThing as IList);
+                Handler = handler;
+            }
             else 
             {
                 Handler = Handlers.ContainsKey(currentField.FieldType) 
@@ -162,11 +178,88 @@ public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
         Set, Add, Multiply, Min, Max
     }
 
-    public Dictionary<FloatOperation, Func<float, float, float>> FloatOperations = new Dictionary<FloatOperation, Func<float, float, float>> {
+    public static Dictionary<FloatOperation, Func<float, float, float>> FloatOperations = new Dictionary<FloatOperation, Func<float, float, float>> {
         { FloatOperation.Set,      (from, to) => to },
         { FloatOperation.Add,      (from, to) => from + to },
         { FloatOperation.Multiply, (from, to) => from * to },
         { FloatOperation.Min,      (from, to) => Mathf.Min(from, to) },
         { FloatOperation.Max,      (from, to) => Mathf.Max(from, to) },
     };
+}
+
+
+public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
+{
+    public int Axis = 0;
+    public float From;
+    public new float To;
+
+    public ChartmakerMultiHandlerFloat.FloatOperation Operation;
+
+    public string LerpSource = "Offset";
+    FieldInfo LerpField;
+    public string LerpEasing = "Linear";
+    public EaseMode LerpEaseMode = EaseMode.In;
+
+    public float LerpFrom;
+    public float LerpTo;
+
+    public void SetLerp(IList list)
+    {
+        LerpFrom = float.PositiveInfinity;
+        LerpTo = float.NegativeInfinity;
+        LerpField = list.GetType().GetGenericArguments()[0].GetField(LerpSource);
+        foreach (object item in list)
+        {
+            float value = (float)LerpField.GetValue(item);
+            LerpFrom = Mathf.Min(LerpFrom, value);
+            LerpTo = Mathf.Max(LerpTo, value);
+        }
+    }
+
+    public override Vector2 Get(Vector2 from, object src) {
+        float to = Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
+        from = new Vector2(from.x, from.y);
+        from[Axis] = ChartmakerMultiHandlerFloat.FloatOperations[Operation](from[Axis], to);
+        return from;
+    }
+}
+
+public class ChartmakerMultiHandlerVector3: ChartmakerMultiHandler<Vector3>
+{
+    public int Axis = 0;
+    public float From;
+    public new float To;
+
+    public ChartmakerMultiHandlerFloat.FloatOperation Operation;
+
+    public string LerpSource = "Offset";
+    FieldInfo LerpField;
+    public string LerpEasing = "Linear";
+    public EaseMode LerpEaseMode = EaseMode.In;
+
+    public float LerpFrom;
+    public float LerpTo;
+
+    public void SetLerp(IList list)
+    {
+        LerpFrom = float.PositiveInfinity;
+        LerpTo = float.NegativeInfinity;
+        LerpField = list.GetType().GetGenericArguments()[0].GetField(LerpSource);
+        foreach (object item in list)
+        {
+            float value = (float)LerpField.GetValue(item);
+            LerpFrom = Mathf.Min(LerpFrom, value);
+            LerpTo = Mathf.Max(LerpTo, value);
+        }
+    }
+
+    public override Vector3 Get(Vector3 from, object src) {
+        float to = Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
+        from = new Vector3(from.x, from.y, from.z);
+        from[Axis] = ChartmakerMultiHandlerFloat.FloatOperations[Operation](from[Axis], to);
+        return from;
+    }
 }

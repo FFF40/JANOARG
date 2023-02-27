@@ -10,8 +10,6 @@ public class HitEffect : MonoBehaviour
     [Space]
     public Image InnerCircle;
     [Space]
-    public Image SmallSquare;
-    [Space]
     public RectTransform JudgeArc;
     public GraphicCircle FullArc;
     public GraphicCircle LeftArc;
@@ -28,11 +26,13 @@ public class HitEffect : MonoBehaviour
         SetColor();
         if (Accuracy == null)
         {
-            JudgeArc.gameObject.SetActive(false);
             Triangles.gameObject.SetActive(false);
+            FullArc.Resolution = LeftArc.Resolution = RightArc.Resolution = 4;
+            LeftArc.FillAmount = RightArc.FillAmount = .5f;
             for (float a = 0; a < 1; a += Time.deltaTime / .4f) 
             {
-                SmallSquare.rectTransform.sizeDelta = Vector2.one * (40 * Mathf.Pow(a, .2f) + 20);
+                Triangles.sizeDelta = JudgeArc.sizeDelta = Vector2.one * (75 * Mathf.Pow(a, .1f) + 75);
+                LeftArc.InsideRadius = RightArc.InsideRadius = FullArc.InsideRadius = 1 - Mathf.Pow(1 - a, 15) - (1 - a) * .05f;
                 InnerCircle.rectTransform.sizeDelta = Vector2.one * (-12 * Mathf.Pow(a, .2f) + 20);
                 MainGroup.alpha = 1 - Mathf.Pow(a, 5);
                 yield return null;
@@ -40,17 +40,15 @@ public class HitEffect : MonoBehaviour
         }
         else 
         {
-            SmallSquare.gameObject.SetActive(false);
-
             LeftArc.rectTransform.eulerAngles = Vector3.back * Mathf.Max(0, (float)Accuracy * 180);
             RightArc.rectTransform.eulerAngles = LeftArc.rectTransform.eulerAngles + Vector3.forward * 180;
             LeftArc.FillAmount = RightArc.FillAmount = (1 - Mathf.Abs((float)Accuracy)) * .5f;
             for (float a = 0; a < 1; a += Time.deltaTime / .4f) 
             {
-                Triangles.sizeDelta = JudgeArc.sizeDelta = Vector2.one * (80 * Mathf.Pow(a, .1f) + 40);
+                Triangles.sizeDelta = JudgeArc.sizeDelta = Vector2.one * (100 * Mathf.Pow(a, .1f) + 100);
                 Triangles.localEulerAngles = Vector3.forward * ((float)Accuracy * -180 * Mathf.Pow(a, .1f));
                 InnerCircle.rectTransform.sizeDelta = Vector2.one * (-32 * Mathf.Pow(a, .2f) + 40);
-                LeftArc.InsideRadius = RightArc.InsideRadius = FullArc.InsideRadius = 1 - Mathf.Pow(1 - a, 15) - (1 - a) * .1f;
+                LeftArc.InsideRadius = RightArc.InsideRadius = FullArc.InsideRadius = 1 - Mathf.Pow(1 - a, 15) - (1 - a) * .05f;
                 MainGroup.alpha = 1 - Mathf.Pow(a, 5);
                 yield return null;
             }
@@ -61,6 +59,6 @@ public class HitEffect : MonoBehaviour
     void SetColor() 
     {
         InnerCircle.color = FullArc.color = LeftArc.color = RightArc.color = TopTriangle.color = BottomTriangle.color = 
-            SmallSquare.color = ChartPlayer.main.CurrentChart.Pallete.InterfaceColor;
+            ChartPlayer.main.CurrentChart.Pallete.InterfaceColor;
     }
 }

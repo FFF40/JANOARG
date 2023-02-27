@@ -73,7 +73,6 @@ public class ChartPlayer : MonoBehaviour
     public TMP_Text SongArtistLabel;
     public TMP_Text DifficultyNameLabel;
     public List<Image> DifficultyIndicators;
-    public Image DifficultyBox;
     public TMP_Text DifficultyLabel;
     [Space]
     public TMP_Text ScoreText;
@@ -85,7 +84,6 @@ public class ChartPlayer : MonoBehaviour
     public Image SongProgressUpper;
     public Image SongProgressLower;
     [Space]
-    public Image GaugeBox;
     public TMP_Text GaugeText;
     public Slider GaugeSlider;
     public Image GaugeFill;
@@ -182,6 +180,8 @@ public class ChartPlayer : MonoBehaviour
         SongArtistLabel.text = Song.SongArtist;
         DifficultyNameLabel.text = CurrentChart.DifficultyName;
         DifficultyLabel.text = CurrentChart.DifficultyLevel;
+        if (DifficultyLabel.text.EndsWith("*")) DifficultyLabel.text = 
+            DifficultyLabel.text.Remove(DifficultyLabel.text.Length - 1) + "<sup>*";
         AudioPlayer.clip = Song.Clip;
 
         RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
@@ -284,8 +284,8 @@ public class ChartPlayer : MonoBehaviour
 
     public void SetInterfaceColor(Color color)
     {
-        SongNameLabel.color = SongArtistLabel.color = DifficultyNameLabel.color = DifficultyBox.color = DifficultyLabel.color = 
-        ScoreText.color = ScoreUnitText.color = GaugeBox.color = GaugeText.color = GaugeFill.color = GaugeUpper.color = GaugeLower.color =
+        SongNameLabel.color = SongArtistLabel.color = DifficultyNameLabel.color = DifficultyLabel.color = 
+        ScoreText.color = ScoreUnitText.color = GaugeText.color = GaugeFill.color = GaugeUpper.color = GaugeLower.color =
         ComboLabel.color = ComboText.color = SongProgressFill.color = SongProgressUpper.color = SongProgressLower.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {

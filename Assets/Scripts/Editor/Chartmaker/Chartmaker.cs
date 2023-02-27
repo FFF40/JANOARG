@@ -3088,6 +3088,110 @@ public class Chartmaker : EditorWindow
                     handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
 
                 }
+                else if (MultiManager.Handler is ChartmakerMultiHandlerVector2)
+                {
+                    ChartmakerMultiHandlerVector2 handler = MultiManager.Handler as ChartmakerMultiHandlerVector2;
+
+                    handler.Axis = EditorGUILayout.Popup("Axis", handler.Axis, new [] {"X", "Y"});
+
+                    GUILayout.Space(8);
+                    handler.From = EditorGUILayout.FloatField("From", handler.From);
+                    handler.To = EditorGUILayout.FloatField("To", handler.To);
+                    
+                    GUILayout.Space(8);
+                    handler.Operation = (ChartmakerMultiHandlerFloat.FloatOperation)EditorGUILayout.EnumPopup("Operation", handler.Operation);
+                    
+                    GUILayout.Space(8);
+                    
+                    List<string> sso = new List<string>();
+                    foreach (System.Reflection.FieldInfo field in MultiManager.AvailableFields)
+                    {
+                        if (field.FieldType == typeof(float)) sso.Add(field.Name);
+                    }
+
+                    int src = sso.IndexOf(handler.LerpSource);
+                    int newSrc = EditorGUILayout.Popup("Lerp Source", src, sso.ToArray());
+                    if (newSrc != src) 
+                    {
+                        handler.LerpSource = sso[newSrc];
+                        handler.SetLerp(TargetThing as IList);
+                    }
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("", GUILayout.Width(80));
+                    GUILayout.Label(handler.LerpFrom.ToString("0.###", invariant));
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("~");
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label(handler.LerpTo.ToString("0.###", invariant));
+                    GUILayout.EndHorizontal();
+                    
+                    List<string> est = new List<string>();
+                    List<string> eso = new List<string>();
+                    foreach (Ease ease in Ease.Eases.Values)
+                    {
+                        eso.Add(ease.ID);
+                        est.Add(ease.Name);
+                    }
+                    
+                    int eas = eso.IndexOf(handler.LerpEasing);
+                    int newEas = EditorGUILayout.Popup("Lerp Easing", eas, est.ToArray());
+                    if (newEas != eas) handler.LerpEasing = eso[newEas];
+                    handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
+
+                }
+                else if (MultiManager.Handler is ChartmakerMultiHandlerVector3)
+                {
+                    ChartmakerMultiHandlerVector3 handler = MultiManager.Handler as ChartmakerMultiHandlerVector3;
+
+                    handler.Axis = EditorGUILayout.Popup("Axis", handler.Axis, new [] {"X", "Y", "Z"});
+
+                    GUILayout.Space(8);
+                    handler.From = EditorGUILayout.FloatField("From", handler.From);
+                    handler.To = EditorGUILayout.FloatField("To", handler.To);
+                    
+                    GUILayout.Space(8);
+                    handler.Operation = (ChartmakerMultiHandlerFloat.FloatOperation)EditorGUILayout.EnumPopup("Operation", handler.Operation);
+                    
+                    GUILayout.Space(8);
+                    
+                    List<string> sso = new List<string>();
+                    foreach (System.Reflection.FieldInfo field in MultiManager.AvailableFields)
+                    {
+                        if (field.FieldType == typeof(float)) sso.Add(field.Name);
+                    }
+
+                    int src = sso.IndexOf(handler.LerpSource);
+                    int newSrc = EditorGUILayout.Popup("Lerp Source", src, sso.ToArray());
+                    if (newSrc != src) 
+                    {
+                        handler.LerpSource = sso[newSrc];
+                        handler.SetLerp(TargetThing as IList);
+                    }
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("", GUILayout.Width(80));
+                    GUILayout.Label(handler.LerpFrom.ToString("0.###", invariant));
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("~");
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label(handler.LerpTo.ToString("0.###", invariant));
+                    GUILayout.EndHorizontal();
+                    
+                    List<string> est = new List<string>();
+                    List<string> eso = new List<string>();
+                    foreach (Ease ease in Ease.Eases.Values)
+                    {
+                        eso.Add(ease.ID);
+                        est.Add(ease.Name);
+                    }
+                    
+                    int eas = eso.IndexOf(handler.LerpEasing);
+                    int newEas = EditorGUILayout.Popup("Lerp Easing", eas, est.ToArray());
+                    if (newEas != eas) handler.LerpEasing = eso[newEas];
+                    handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
+
+                }
                 else if (MultiManager.Handler.TargetType == typeof(int))
                 {
                     ChartmakerMultiHandler handler = MultiManager.Handler as ChartmakerMultiHandler;
