@@ -123,7 +123,7 @@ public class ResultScreen : MonoBehaviour
 
         for (float a = 0; a < 1; a += Time.deltaTime / 4f)
         {
-            float ease = Ease.Get(a, "Circle", EaseMode.Out);
+            float ease = Ease.Get(a, EaseFunction.Circle, EaseMode.Out);
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50 + (50 * (1 - ease)));
             PlayStateText.fontSize = 32 + (15 / ease - 15);
             PlayStateText.characterSpacing = 50 - (110 * (1 - ease));
@@ -200,7 +200,7 @@ public class ResultScreen : MonoBehaviour
 
         for (float a = 0; a < 1; a += Time.deltaTime)
         {
-            float ease = Ease.Get(a, "Circle", EaseMode.In);
+            float ease = Ease.Get(a, EaseFunction.Circle, EaseMode.In);
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 50 + (50 * ease));
             PlayStateText.fontSize = 32 * (1 - ease);
             PlayStateText.characterSpacing = 50 / Mathf.Pow(1 - ease, 1.5f);
@@ -228,11 +228,11 @@ public class ResultScreen : MonoBehaviour
         }
         for (float a = 0; a < 1; a += Time.deltaTime / 2f)
         {
-            float ease = Ease.Get(a, "Circle", EaseMode.In);
-            float height = 100 + 80 * Ease.Get(a, "Circle", EaseMode.Out);
+            float ease = Ease.Get(a, EaseFunction.Circle, EaseMode.In);
+            float height = 100 + 80 * Ease.Get(a, EaseFunction.Circle, EaseMode.Out);
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, height);
             
-            float ease2 = Ease.Get(a, "Exponential", EaseMode.In);
+            float ease2 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
             ResultScoreBox.anchorMin = ResultScoreBox.anchorMax = ResultScoreBox.pivot = new Vector2(.5f + .5f * ease2, .5f);
             ResultScoreBox.anchoredPosition = new Vector2(-340 * ease2, 0);
             
@@ -266,7 +266,7 @@ public class ResultScreen : MonoBehaviour
 
         void SetEase(float a) 
         {
-            float ease = Ease.Get(a, "Quintic", EaseMode.Out);
+            float ease = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 180 - (100 * ease));
             RankLabel.color = new Color(1 - a, 1 - a, 1 - a);
             RankExplosion.rectTransform.sizeDelta = Vector2.one * (1000 * ease);
@@ -278,7 +278,7 @@ public class ResultScreen : MonoBehaviour
             ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * ease);
             DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * ease);
 
-            float ease2 = Ease.Get(a * 5 - 4, "Quintic", EaseMode.Out);
+            float ease2 = Ease.Get(a * 5 - 4, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
             ActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
         }
@@ -329,7 +329,7 @@ public class ResultScreen : MonoBehaviour
         isAnimating = true;
         for (float a = 0; a < 1; a += Time.deltaTime / .6f)
         {
-            float ease = Ease.Get(a, "Quintic", EaseMode.InOut);
+            float ease = Ease.Get(a, EaseFunction.Quintic, EaseMode.InOut);
             ExtraDetailEase(ease);
             yield return null;
         }
@@ -342,7 +342,7 @@ public class ResultScreen : MonoBehaviour
         isAnimating = true;
         for (float a = 0; a < 1; a += Time.deltaTime / .6f)
         {
-            float ease = Ease.Get(a, "Quintic", EaseMode.InOut);
+            float ease = Ease.Get(a, EaseFunction.Quintic, EaseMode.InOut);
             ExtraDetailEase(1 - ease);
             yield return null;
         }
@@ -359,8 +359,8 @@ public class ResultScreen : MonoBehaviour
     {
         void Lerp(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.In);
-            float ease2 = 1 - Ease.Get(value * 4, "Quintic", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
+            float ease2 = 1 - Ease.Get(value * 4, EaseFunction.Quintic, EaseMode.Out);
 
             ExtraDetailEase(ExtraDetailMode ? ease2 : 0);
 

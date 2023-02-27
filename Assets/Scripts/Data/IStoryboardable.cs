@@ -11,7 +11,7 @@ public class Timestamp
     public string ID;
     public float From = float.NaN;
     public float Target;
-    public string Easing = "Linear";
+    public EaseFunction Easing = EaseFunction.Linear;
     public EaseMode EaseMode;
 
     public Timestamp DeepClone()
@@ -66,15 +66,26 @@ public enum EaseMode
 }
 
 [Serializable]
+public enum EaseFunction
+{
+    Linear,
+    Sine,
+    Quadratic,
+    Cubic,
+    Quartic,
+    Quintic,
+    Exponential,
+    Circle
+}
+
+[Serializable]
 public class Ease 
 {
-    public string ID;
-    public string Name;
     public Func<float, float> In;
     public Func<float, float> Out;
     public Func<float, float> InOut;
 
-    public static float Get(float x, string ease, EaseMode mode) 
+    public static float Get(float x, EaseFunction ease, EaseMode mode) 
     {
         Ease _ease = Eases[ease];
         var func = _ease.InOut;
@@ -83,59 +94,43 @@ public class Ease
         return func(Mathf.Clamp01(x));
     }
 
-    public static Dictionary<string, Ease> Eases = new Dictionary<string, Ease>() {
-        {"Linear", new Ease {
-            ID = "Linear",
-            Name = "Linear",
+    public static Dictionary<EaseFunction, Ease> Eases = new Dictionary<EaseFunction, Ease>() {
+        {EaseFunction.Linear, new Ease {
             In = (x) => x,
             Out = (x) => x,
             InOut = (x) => x,
         }},
-        {"Sine", new Ease {
-            ID = "Sine",
-            Name = "Sine",
+        {EaseFunction.Sine, new Ease {
             In = (x) => 1 - Mathf.Cos((x * Mathf.PI) / 2),
             Out = (x) => Mathf.Sin((x * Mathf.PI) / 2),
             InOut = (x) => (1 - Mathf.Cos(x * Mathf.PI)) / 2,
         }},
-        {"Quadratic", new Ease {
-            ID = "Quadratic",
-            Name = "Quadratic",
+        {EaseFunction.Quadratic, new Ease {
             In = (x) => x * x,
             Out = (x) => 1 - Mathf.Pow(1 - x, 2),
             InOut = (x) => x < 0.5f ? 2 * x * x : 1 - Mathf.Pow(-2 * x + 2, 2) / 2,
         }},
-        {"Cubic", new Ease {
-            ID = "Cubic",
-            Name = "Cubic",
+        {EaseFunction.Cubic, new Ease {
             In = (x) => x * x * x,
             Out = (x) => 1 - Mathf.Pow(1 - x, 3),
             InOut = (x) => x < 0.5f ? 4 * x * x * x : 1 - Mathf.Pow(-2 * x + 2, 3) / 2,
         }},
-        {"Quartic", new Ease {
-            ID = "Quartic",
-            Name = "Quartic",
+        {EaseFunction.Quartic, new Ease {
             In = (x) => x * x * x * x,
             Out = (x) => 1 - Mathf.Pow(1 - x, 4),
             InOut = (x) => x < 0.5f ? 8 * x * x * x * x : 1 - Mathf.Pow(-2 * x + 2, 4) / 2,
         }},
-        {"Quintic", new Ease {
-            ID = "Quintic",
-            Name = "Quintic",
+        {EaseFunction.Quintic, new Ease {
             In = (x) => x * x * x * x * x,
             Out = (x) => 1 - Mathf.Pow(1 - x, 5),
             InOut = (x) => x < 0.5f ? 16 * x * x * x * x * x : 1 - Mathf.Pow(-2 * x + 2, 5) / 2,
         }},
-        {"Exponential", new Ease {
-            ID = "Exponential",
-            Name = "Exponential",
+        {EaseFunction.Exponential, new Ease {
             In = (x) => x == 0 ? 0 : Mathf.Pow(2, 10 * x - 10),
             Out = (x) => x == 1 ? 1 : 1 - Mathf.Pow(2, -10 * x),
             InOut = (x) => x == 0 ? 0 : x == 1 ? 1 : x < 0.5 ? Mathf.Pow(2, 20 * x - 10) / 2 : (2 - Mathf.Pow(2, -20 * x + 10)) / 2,
         }},
-        {"Circle", new Ease {
-            ID = "Circle",
-            Name = "Circle",
+        {EaseFunction.Circle, new Ease {
             In = (x) => 1 - Mathf.Sqrt(1 - Mathf.Pow(x, 2)),
             Out = (x) => Mathf.Sqrt(1 - Mathf.Pow(x - 1, 2)),
             InOut = (x) => x < 0.5 ? (1 - Mathf.Sqrt(1 - Mathf.Pow(2 * x, 2))) / 2 : (Mathf.Sqrt(1 - Mathf.Pow(-2 * x + 2, 2)) + 1) / 2,

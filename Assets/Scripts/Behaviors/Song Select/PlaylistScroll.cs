@@ -175,7 +175,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                     RectTransform rt = (RectTransform)item.transform;
                     float realOfs = (ofs + Mathf.Clamp(ofs * .6f, -32, 32)) * Mathf.Min(Mathf.Abs(ofs) / ItemSize * 2 + .1f, 1);
 
-                    rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), "Circle", EaseMode.In) * self.rect.width / 2, -realOfs);
+                    rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), EaseFunction.Circle, EaseMode.In) * self.rect.width / 2, -realOfs);
                     ofs += ItemSize;
                 }
 
@@ -221,17 +221,17 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
             self.sizeDelta = Vector2.one * (1800 * ease);
 
-            float ease2 = Ease.Get(value * 2 - 1, "Quintic", EaseMode.Out);
+            float ease2 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
         }
 
         void LerpSelection2(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.InOut);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.InOut);
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
 
@@ -279,7 +279,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.InOut);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.InOut);
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
 
@@ -291,13 +291,13 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(10 + 200 * ease, SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition.y);
             SelectedItem.SongNameLabel.alpha = SelectedItem.ArtistNameLabel.alpha = 1 - ease;
 
-            float ease2 = Ease.Get(Mathf.Max(value * 2 - 1, 0), "Quadratic", EaseMode.Out);
+            float ease2 = Ease.Get(Mathf.Max(value * 2 - 1, 0), EaseFunction.Quadratic, EaseMode.Out);
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(100 - 50 * ease2, SongNameLabel.rectTransform.anchoredPosition.y);
             ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(101 - 50 * ease2, ArtistNameLabel.rectTransform.anchoredPosition.y);
             DataLabel.rectTransform.anchoredPosition = new Vector2(102 - 50 * ease2, DataLabel.rectTransform.anchoredPosition.y);
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = ease2;
 
-            float ease3 = Ease.Get(value, "Quintic", EaseMode.Out);
+            float ease3 = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
         }
@@ -324,7 +324,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
 
@@ -336,13 +336,13 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(210 - 200 * ease, SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition.y);
             SelectedItem.SongNameLabel.alpha = SelectedItem.ArtistNameLabel.alpha = ease;
 
-            float ease2 = Ease.Get(value, "Quadratic", EaseMode.Out);
+            float ease2 = Ease.Get(value, EaseFunction.Quadratic, EaseMode.Out);
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(50 - 100 * ease2, SongNameLabel.rectTransform.anchoredPosition.y);
             ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(51 - 100 * ease2, ArtistNameLabel.rectTransform.anchoredPosition.y);
             DataLabel.rectTransform.anchoredPosition = new Vector2(52 - 100 * ease2, DataLabel.rectTransform.anchoredPosition.y);
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = 1 - ease2;
 
-            float ease3 = 1 - Ease.Get(value, "Quintic", EaseMode.Out);
+            float ease3 = 1 - Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
         }
@@ -391,10 +391,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.In);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
             self.sizeDelta = Vector2.one * (1800 + 1800 * ease);
 
-            float ease2 = Ease.Get(value, "Quintic", EaseMode.InOut);
+            float ease2 = Ease.Get(value, EaseFunction.Quintic, EaseMode.InOut);
             SelectedSongBox.sizeDelta = new Vector2(0, 100 + 60 * ease2);
 
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(SongNameLabel.rectTransform.anchoredPosition.x, -29 + 24 * ease2);
@@ -402,10 +402,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DataLabel.rectTransform.anchoredPosition = new Vector2(DataLabel.rectTransform.anchoredPosition.x, 27 + 24 * ease2);
             DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, -52 + 70 * ease2);
 
-            float ease3 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            float ease3 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
 
-            float ease4 = Ease.Get(value * 2 - 1, "Quintic", EaseMode.Out);
+            float ease4 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
             SongActionBar.anchoredPosition = new Vector2(0, 40 * ease4);
         }
 
@@ -432,10 +432,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
             self.sizeDelta = Vector2.one * (1800 * ease);
 
-            float ease2 = Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            float ease2 = Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             SelectedSongBox.sizeDelta = new Vector2(0, 160 - 60 * ease2);
 
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(SongNameLabel.rectTransform.anchoredPosition.x, -5 - 24 * ease2);
@@ -443,10 +443,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DataLabel.rectTransform.anchoredPosition = new Vector2(DataLabel.rectTransform.anchoredPosition.x, 51 - 24 * ease2);
             DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, 18 - 70 * ease2);
             
-            float ease3 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            float ease3 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             SongActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
 
-            float ease4 = Ease.Get(value * 2 - 1, "Quintic", EaseMode.Out);
+            float ease4 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease4);
         }
 
@@ -500,7 +500,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Quintic", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
             SelectedSongBox.sizeDelta = new Vector2((-100 + SafeArea.sizeDelta.x) * ease, 160 - 20 * ease);
 
             float posX = Mathf.Lerp(50, 20, ease);
@@ -509,19 +509,19 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DataLabel.rectTransform.anchoredPosition = new Vector2(posX + 2, 51 + 30 * ease);
             DifficultyHolder.anchoredPosition = new Vector2(posX, 18);
 
-            float ease2 = 1 - Ease.Get(value * 2, "Quintic", EaseMode.Out);
+            float ease2 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
             SongActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
         }
 
         void LerpSelection2(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.InOut);
-            float ease2 = Ease.Get(value * 2, "Exponential", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.InOut);
+            float ease2 = Ease.Get(value * 2, EaseFunction.Exponential, EaseMode.Out);
             sdr.anchoredPosition = new Vector3((sdrX + 100 * ease2) * (1 - ease), sdr.anchoredPosition.y);
             ChartDetail.anchoredPosition = new Vector3(235 + (sdrX + 200) * (1 - ease), ChartDetail.anchoredPosition.y);
             
-            float ease3 = Ease.Get(value * 2 - 1, "Exponential", EaseMode.Out);
+            float ease3 = Ease.Get(value * 2 - 1, EaseFunction.Exponential, EaseMode.Out);
             ChartDetailGroup.alpha = ease3;
         }
 
@@ -553,7 +553,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         
         void LerpSelection3(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.In);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
             SelectedSongBox.localScale = Vector3.one * (1 - ease);
         }
 

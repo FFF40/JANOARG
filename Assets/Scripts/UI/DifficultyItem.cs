@@ -73,7 +73,7 @@ public class DifficultyItem : MonoBehaviour
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Quartic", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
             self.sizeDelta = new Vector2(40 + 160 * ease, self.sizeDelta.y);
             DifficultyNameText.color = DifficultyRecordText.color = DifficultyLevelText.color = Color.Lerp(Color.black, Accent, ease);
             RankText.color = Accent * new Color(1, 1, 1, ease * .25f);
@@ -104,7 +104,7 @@ public class DifficultyItem : MonoBehaviour
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Quartic", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
             self.sizeDelta = new Vector2(200 - 160 * ease, self.sizeDelta.y);
             DifficultyNameText.color = DifficultyRecordText.color = DifficultyLevelText.color = Color.Lerp(Accent, Color.black, ease);
             RankText.color = Accent * new Color(1, 1, 1, (1 - ease) * .25f);

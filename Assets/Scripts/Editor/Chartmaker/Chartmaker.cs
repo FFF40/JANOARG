@@ -3074,17 +3074,7 @@ public class Chartmaker : EditorWindow
                     GUILayout.Label(handler.LerpTo.ToString("0.###", invariant));
                     GUILayout.EndHorizontal();
                     
-                    List<string> est = new List<string>();
-                    List<string> eso = new List<string>();
-                    foreach (Ease ease in Ease.Eases.Values)
-                    {
-                        eso.Add(ease.ID);
-                        est.Add(ease.Name);
-                    }
-                    
-                    int eas = eso.IndexOf(handler.LerpEasing);
-                    int newEas = EditorGUILayout.Popup("Lerp Easing", eas, est.ToArray());
-                    if (newEas != eas) handler.LerpEasing = eso[newEas];
+                    handler.LerpEasing = (EaseFunction)EditorGUILayout.EnumPopup("Lerp Easing", handler.LerpEasing);
                     handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
 
                 }
@@ -3126,17 +3116,7 @@ public class Chartmaker : EditorWindow
                     GUILayout.Label(handler.LerpTo.ToString("0.###", invariant));
                     GUILayout.EndHorizontal();
                     
-                    List<string> est = new List<string>();
-                    List<string> eso = new List<string>();
-                    foreach (Ease ease in Ease.Eases.Values)
-                    {
-                        eso.Add(ease.ID);
-                        est.Add(ease.Name);
-                    }
-                    
-                    int eas = eso.IndexOf(handler.LerpEasing);
-                    int newEas = EditorGUILayout.Popup("Lerp Easing", eas, est.ToArray());
-                    if (newEas != eas) handler.LerpEasing = eso[newEas];
+                    handler.LerpEasing = (EaseFunction)EditorGUILayout.EnumPopup("Lerp Easing", handler.LerpEasing);
                     handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
 
                 }
@@ -3178,17 +3158,7 @@ public class Chartmaker : EditorWindow
                     GUILayout.Label(handler.LerpTo.ToString("0.###", invariant));
                     GUILayout.EndHorizontal();
                     
-                    List<string> est = new List<string>();
-                    List<string> eso = new List<string>();
-                    foreach (Ease ease in Ease.Eases.Values)
-                    {
-                        eso.Add(ease.ID);
-                        est.Add(ease.Name);
-                    }
-                    
-                    int eas = eso.IndexOf(handler.LerpEasing);
-                    int newEas = EditorGUILayout.Popup("Lerp Easing", eas, est.ToArray());
-                    if (newEas != eas) handler.LerpEasing = eso[newEas];
+                    handler.LerpEasing = (EaseFunction)EditorGUILayout.EnumPopup("Lerp Easing", handler.LerpEasing);
                     handler.LerpEaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", handler.LerpEaseMode);
 
                 }
@@ -3246,14 +3216,6 @@ public class Chartmaker : EditorWindow
                     tst.Add(t.Name);
                 }
 
-                List<string> est = new List<string>();
-                List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases.Values)
-                {
-                    eso.Add(ease.ID);
-                    est.Add(ease.Name);
-                }
-
                 GUI.Label(new Rect(7, 2, 226, 20), "Timestamp", "boldLabel");
                 GUILayout.Space(8);
                 ts.Time = EditorGUI.FloatField(new Rect(163, 2, 75, 20), ts.Time);
@@ -3272,9 +3234,7 @@ public class Chartmaker : EditorWindow
                     : float.NaN;
                 ts.Target = EditorGUILayout.FloatField("To", ts.Target);
 
-                int eas = eso.IndexOf(ts.Easing);
-                int newEas = EditorGUILayout.Popup("Easing", eas, est.ToArray());
-                if (newEas != eas) ts.Easing = eso[newEas];
+                ts.Easing = (EaseFunction)EditorGUILayout.EnumPopup("Lerp Easing", ts.Easing);
                 ts.EaseMode = (EaseMode)EditorGUILayout.EnumPopup(" ", ts.EaseMode);
 
                 GUILayout.EndScrollView();
@@ -3570,14 +3530,6 @@ public class Chartmaker : EditorWindow
                 float o = GUILayoutUtility.GetLastRect().yMax;
                 float a = thing.LaneSteps[0].Offset;
 
-                List<string> est = new List<string>();
-                List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases.Values)
-                {
-                    eso.Add(ease.ID);
-                    est.Add(ease.Name);
-                }
-
                 foreach (LaneStep step in thing.LaneSteps)
                 {
                     History.StartRecordItem(step);
@@ -3591,36 +3543,24 @@ public class Chartmaker : EditorWindow
                     {
                         step.StartPos.x = EditorGUI.FloatField(new Rect(20, h + o + 19, 40, 14), step.StartPos.x, fieldStyle);
                         GUI.Label(new Rect(20, h + o + 19, 40, 14), "x0", rightStyle);
-                        int easeX = eso.IndexOf(step.StartEaseX);
                         step.StartEaseXMode = (EaseMode)EditorGUI.EnumPopup(new Rect(61, h + o + 19, 17, 14), step.StartEaseXMode, buttonStyle);
-                        GUI.Button(new Rect(61, h + o + 19, 17, 14), new[] { "I", "O", "IO" }[(int)step.StartEaseXMode], buttonStyle);
-                        int newEaseX = EditorGUI.Popup(new Rect(79, h + o + 19, 30, 14), easeX, est.ToArray(), buttonLeftStyle);
-                        if (newEaseX != easeX) step.StartEaseX = eso[newEaseX];
+                        step.StartEaseX = (EaseFunction)EditorGUI.EnumPopup(new Rect(79, h + o + 19, 30, 14), step.StartEaseX, buttonLeftStyle);
 
                         step.StartPos.y = EditorGUI.FloatField(new Rect(110, h + o + 19, 40, 14), step.StartPos.y, fieldStyle);
                         GUI.Label(new Rect(110, h + o + 19, 40, 14), "y0", rightStyle);
-                        int easeY = eso.IndexOf(step.StartEaseY);
                         step.StartEaseYMode = (EaseMode)EditorGUI.EnumPopup(new Rect(151, h + o + 19, 17, 14), step.StartEaseYMode, buttonStyle);
-                        GUI.Button(new Rect(151, h + o + 19, 17, 14), new[] { "I", "O", "IO" }[(int)step.StartEaseYMode], buttonStyle);
-                        int newEaseY = EditorGUI.Popup(new Rect(169, h + o + 19, 30, 14), easeY, est.ToArray(), buttonLeftStyle);
-                        if (newEaseY != easeY) step.StartEaseY = eso[newEaseY];
+                        step.StartEaseY = (EaseFunction)EditorGUI.EnumPopup(new Rect(169, h + o + 19, 30, 14), step.StartEaseY, buttonLeftStyle);
                     }
                     {
                         step.EndPos.x = EditorGUI.FloatField(new Rect(20, h + o + 34, 40, 14), step.EndPos.x, fieldStyle);
                         GUI.Label(new Rect(20, h + o + 34, 40, 14), "x1", rightStyle);
-                        int easeX = eso.IndexOf(step.EndEaseX);
                         step.EndEaseXMode = (EaseMode)EditorGUI.EnumPopup(new Rect(61, h + o + 34, 17, 14), step.EndEaseXMode, buttonStyle);
-                        GUI.Button(new Rect(61, h + o + 34, 17, 14), new[] { "I", "O", "IO" }[(int)step.EndEaseXMode], buttonStyle);
-                        int newEaseX = EditorGUI.Popup(new Rect(79, h + o + 34, 30, 14), easeX, est.ToArray(), buttonLeftStyle);
-                        if (newEaseX != easeX) step.EndEaseX = eso[newEaseX];
+                        step.EndEaseX = (EaseFunction)EditorGUI.EnumPopup(new Rect(79, h + o + 34, 30, 14), step.EndEaseX, buttonLeftStyle);
 
                         step.EndPos.y = EditorGUI.FloatField(new Rect(110, h + o + 34, 40, 14), step.EndPos.y, fieldStyle);
                         GUI.Label(new Rect(110, h + o + 34, 40, 14), "y1", rightStyle);
-                        int easeY = eso.IndexOf(step.EndEaseY);
                         step.EndEaseYMode = (EaseMode)EditorGUI.EnumPopup(new Rect(151, h + o + 34, 17, 14), step.EndEaseYMode, buttonStyle);
-                        GUI.Button(new Rect(151, h + o + 34, 17, 14), new[] { "I", "O", "IO" }[(int)step.EndEaseYMode], buttonStyle);
-                        int newEaseY = EditorGUI.Popup(new Rect(169, h + o + 34, 30, 14), easeY, est.ToArray(), buttonLeftStyle);
-                        if (newEaseY != easeY) step.EndEaseY = eso[newEaseY];
+                        step.EndEaseY = (EaseFunction)EditorGUI.EnumPopup(new Rect(169, h + o + 34, 30, 14), step.EndEaseY, buttonLeftStyle);
                     }
 
                     if (GUI.Button(new Rect(3, h + o + 2, 16, 48), "⋮", "buttonLeft"))
@@ -3662,14 +3602,6 @@ public class Chartmaker : EditorWindow
                 rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
                     rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
 
-                List<string> est = new List<string>();
-                List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases.Values)
-                {
-                    eso.Add(ease.ID);
-                    est.Add(ease.Name);
-                }
-
                 GUI.Label(new Rect(7, 2, 226, 20), "Lane Step", "boldLabel");
                 thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset);
                 GUI.Label(new Rect(163, 2, 75, 20), "b", rightStyle);
@@ -3681,12 +3613,8 @@ public class Chartmaker : EditorWindow
                     thing.StartPos = EditorGUILayout.Vector2Field("Start Position", thing.StartPos);
                     GUILayout.BeginHorizontal();
                     GUILayout.Space(17);
-                    int easeX = eso.IndexOf(thing.StartEaseX);
-                    int newEaseX = EditorGUILayout.Popup(easeX, est.ToArray());
-                    if (newEaseX != easeX) thing.StartEaseX = eso[newEaseX];
-                    int easeY = eso.IndexOf(thing.StartEaseY);
-                    int newEaseY = EditorGUILayout.Popup(easeY, est.ToArray());
-                    if (newEaseY != easeX) thing.StartEaseY = eso[newEaseY];
+                    thing.StartEaseX = (EaseFunction)EditorGUILayout.EnumPopup(thing.StartEaseX);
+                    thing.StartEaseY = (EaseFunction)EditorGUILayout.EnumPopup(thing.StartEaseY);
                     GUILayout.Space(1);
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal();
@@ -3700,12 +3628,8 @@ public class Chartmaker : EditorWindow
                     thing.EndPos = EditorGUILayout.Vector2Field("End Position", thing.EndPos);
                     GUILayout.BeginHorizontal();
                     GUILayout.Space(17);
-                    int easeX = eso.IndexOf(thing.EndEaseX);
-                    int newEaseX = EditorGUILayout.Popup(easeX, est.ToArray());
-                    if (newEaseX != easeX) thing.EndEaseX = eso[newEaseX];
-                    int easeY = eso.IndexOf(thing.EndEaseY);
-                    int newEaseY = EditorGUILayout.Popup(easeY, est.ToArray());
-                    if (newEaseY != easeX) thing.EndEaseY = eso[newEaseY];
+                    thing.EndEaseX = (EaseFunction)EditorGUILayout.EnumPopup(thing.EndEaseX);
+                    thing.EndEaseY = (EaseFunction)EditorGUILayout.EnumPopup(thing.EndEaseY);
                     GUILayout.Space(1);
                     GUILayout.EndHorizontal();
                     GUILayout.BeginHorizontal();
@@ -3809,14 +3733,6 @@ public class Chartmaker : EditorWindow
                     tst.Add(type.Name);
                 }
 
-                List<string> est = new List<string>();
-                List<string> eso = new List<string>();
-                foreach (Ease ease in Ease.Eases.Values)
-                {
-                    eso.Add(ease.ID);
-                    est.Add(ease.Name);
-                }
-
 
                 int add = EditorGUI.Popup(new Rect(218, 2, 20, 20), -1, tst.ToArray(), "button");
                 if (add != -1)
@@ -3855,9 +3771,7 @@ public class Chartmaker : EditorWindow
 
                     ts.EaseMode = (EaseMode)EditorGUI.EnumPopup(new Rect(75, h + o + 19, 40, 14), ts.EaseMode, buttonStyle);
 
-                    int ease = eso.IndexOf(ts.Easing);
-                    int newEase = EditorGUI.Popup(new Rect(116, h + o + 19, 83, 14), ease, est.ToArray(), buttonLeftStyle);
-                    if (newEase != ease) ts.Easing = eso[newEase];
+                    ts.Easing = (EaseFunction)EditorGUI.EnumPopup(new Rect(116, h + o + 19, 83, 14), ts.Easing, buttonLeftStyle);
 
                     if (GUI.Button(new Rect(202, h + o + 2, 16, 33), "x", "buttonRight"))
                     {
@@ -4366,7 +4280,7 @@ public class Chartmaker : EditorWindow
         {
             TutorialLerp += Time.deltaTime / 2;
             TutorialStep prev = TutorialSteps[TutorialStage - 1];
-            float ease = Ease.Get(TutorialLerp, "Quadratic", EaseMode.Out);
+            float ease = Ease.Get(TutorialLerp, EaseFunction.Quadratic, EaseMode.Out);
             TutorialPopupAnchor = Vector2.LerpUnclamped(prev.PopupAnchor, step.PopupAnchor, ease);
             TutorialPopupPosition = Vector2.LerpUnclamped(prev.PopupPosition, step.PopupPosition, ease);
             Repaint();

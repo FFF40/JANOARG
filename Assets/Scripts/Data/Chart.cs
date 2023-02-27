@@ -980,18 +980,18 @@ public class LaneStep : IStoryboardable, IDeepClonable<LaneStep>
 {
     public float Offset;
     public Vector2 StartPos;
-    public string StartEaseX = "Linear";
+    public EaseFunction StartEaseX = EaseFunction.Linear;
     public EaseMode StartEaseXMode;
-    public string StartEaseY = "Linear";
+    public EaseFunction StartEaseY = EaseFunction.Linear;
     public EaseMode StartEaseYMode;
     public Vector2 EndPos;
-    public string EndEaseX = "Linear";
+    public EaseFunction EndEaseX = EaseFunction.Linear;
     public EaseMode EndEaseXMode;
-    public string EndEaseY = "Linear";
+    public EaseFunction EndEaseY = EaseFunction.Linear;
     public EaseMode EndEaseYMode;
     public float Speed = 1;
 
-    public bool IsLinear => StartEaseX == "Linear" && StartEaseY == "Linear" && EndEaseX == "Linear" && EndEaseY == "Linear";
+    public bool IsLinear => StartEaseX == EaseFunction.Linear && StartEaseY == EaseFunction.Linear && EndEaseX == EaseFunction.Linear && EndEaseY == EaseFunction.Linear;
 
     public new static TimestampType[] TimestampTypes = 
     {

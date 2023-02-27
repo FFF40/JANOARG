@@ -102,7 +102,7 @@ public class LoadingBar : MonoBehaviour
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Quintic", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
             self.anchoredPosition = new Vector2(0, 40 * ease);
         }
 
@@ -127,7 +127,7 @@ public class LoadingBar : MonoBehaviour
 
         void LerpSelection(float value)
         {
-            float ease = Ease.Get(value, "Exponential", EaseMode.Out);
+            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
             StatusText.color = Color.Lerp(Color.white, Color.black, ease);
             FlavorText.color = Color.Lerp(Color.white, Color.clear, ease);
             ProgressBarHolder.sizeDelta = new Vector2(ProgressBarHolder.sizeDelta.x, -38 * (1 - ease));
@@ -143,7 +143,7 @@ public class LoadingBar : MonoBehaviour
 
         void LerpSelection2(float value)
         {
-            float ease = 1 - Ease.Get(value, "Exponential", EaseMode.In);
+            float ease = 1 - Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
             self.anchoredPosition = new Vector2(0, 40 * ease);
         }
 

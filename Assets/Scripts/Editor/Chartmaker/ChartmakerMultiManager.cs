@@ -149,7 +149,7 @@ public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
 
     public string LerpSource = "Offset";
     FieldInfo LerpField;
-    public string LerpEasing = "Linear";
+    public EaseFunction LerpEasing = EaseFunction.Linear;
     public EaseMode LerpEaseMode = EaseMode.In;
 
     public float LerpFrom;
@@ -198,7 +198,7 @@ public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
 
     public string LerpSource = "Offset";
     FieldInfo LerpField;
-    public string LerpEasing = "Linear";
+    public EaseFunction LerpEasing = EaseFunction.Linear;
     public EaseMode LerpEaseMode = EaseMode.In;
 
     public float LerpFrom;
@@ -236,7 +236,7 @@ public class ChartmakerMultiHandlerVector3: ChartmakerMultiHandler<Vector3>
 
     public string LerpSource = "Offset";
     FieldInfo LerpField;
-    public string LerpEasing = "Linear";
+    public EaseFunction LerpEasing = EaseFunction.Linear;
     public EaseMode LerpEaseMode = EaseMode.In;
 
     public float LerpFrom;
