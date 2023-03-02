@@ -39,6 +39,7 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text ResultScoreText;
     public TMP_Text ResultScoreLabel;
     [Space]
+    public RectTransform RecordBox;
     public TMP_Text RecordLabelText;
     public TMP_Text RecordText;
     public TMP_Text RecordDifferenceText;
@@ -97,9 +98,10 @@ public class ResultScreen : MonoBehaviour
         ChartPlayer cp = ChartPlayer.main;
 
         isAnimating = true;
-        if (cp.Score >= cp.TotalScore) PlayStateText.text = "FLAWLESS MASTER!!";
+        if (cp.Score >= cp.TotalScore) PlayStateText.text = "ALL FLAWLESS!!!";
         else if (cp.Combo >= cp.TotalCombo) PlayStateText.text = "FULL STREAK!";
-        else if (cp.Score <= 0) PlayStateText.text = "TRACK CLEARED?";
+        else if (cp.GoodCount >= cp.TotalCombo) PlayStateText.text = "ALL MISALIGNED...!?";
+        else if (cp.Score <= 0) PlayStateText.text = "ALL BROKEN...?";
         else PlayStateText.text = "TRACK CLEARED";
 
         cp.PlayInterfaceObject.SetActive(false);
@@ -112,6 +114,7 @@ public class ResultScreen : MonoBehaviour
         PlayStateText.rectTransform.anchoredPosition = Vector2.zero;
         ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 0);
         DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 0);
+        PlayStateText.alpha = 1;
 
         RankBackground.color = RankLabel.color = Color.clear;
         foreach (GraphicCircle fill in RankFill)
@@ -119,7 +122,7 @@ public class ResultScreen : MonoBehaviour
             fill.color = Color.clear;
         }
 
-        ResultScoreBox.anchoredPosition = new Vector2(22500, 0);
+        ResultScoreBox.anchoredPosition = RecordBox.anchoredPosition = new Vector2(22500, 0);
 
         for (float a = 0; a < 1; a += Time.deltaTime / 4f)
         {
@@ -143,6 +146,8 @@ public class ResultScreen : MonoBehaviour
 
         ChartPlayer cp = ChartPlayer.main;
 
+        // ---- Information
+
         SimpleDetailBox.anchoredPosition = new Vector2(0, 0);
         ExtraDetailBox.anchoredPosition = new Vector2(0, -40);
 
@@ -159,42 +164,49 @@ public class ResultScreen : MonoBehaviour
         ResultBadText.text = cp.BadCount.ToString("0", CultureInfo.InvariantCulture);
         ResultComboText.text = cp.MaxCombo.ToString("0", CultureInfo.InvariantCulture) + " / " + cp.TotalCombo.ToString("0", CultureInfo.InvariantCulture);
         
-        ResultAccuracyTooEarlyText.text = cp.AccuracyValues[0].ToString("0", CultureInfo.InvariantCulture);
-        int early = 0;
-        for (int i = 1; i <= 10; i++) early += cp.AccuracyValues[i];
-        ResultAccuracyEarlyText.text = early.ToString("0", CultureInfo.InvariantCulture);
-        ResultAccuracyPerfectText.text = cp.AccuracyValues[11].ToString("0", CultureInfo.InvariantCulture);
-        int late = 0;
-        for (int i = 12; i <= 21; i++) late += cp.AccuracyValues[i];
-        ResultAccuracyLateText.text = late.ToString("0", CultureInfo.InvariantCulture);
-        ResultAccuracyTooLateText.text = cp.AccuracyValues[22].ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyTooEarlyText.text = cp.AccuracyCounts[0].ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyEarlyText.text = cp.AccuracyCounts[1].ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyPerfectText.text = cp.AccuracyCounts[2].ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyLateText.text = cp.AccuracyCounts[3].ToString("0", CultureInfo.InvariantCulture);
+        ResultAccuracyTooLateText.text = cp.AccuracyCounts[4].ToString("0", CultureInfo.InvariantCulture);
 
-        ResultDiscretePassText.text = cp.DiscreteValues[0].ToString("0", CultureInfo.InvariantCulture);
-        ResultDiscreteFailText.text = cp.DiscreteValues[1].ToString("0", CultureInfo.InvariantCulture);
+        ResultDiscretePassText.text = cp.DiscreteCounts[0].ToString("0", CultureInfo.InvariantCulture);
+        ResultDiscreteFailText.text = cp.DiscreteCounts[1].ToString("0", CultureInfo.InvariantCulture);
 
         ResultTimingAverageText.text = (cp.OffsetMean < 0 ? "−" : "+") + Mathf.Abs(cp.OffsetMean * 1e3f).ToString("0.00", CultureInfo.InvariantCulture) + "ms";
         ResultTimingDeviationText.text = (cp.Deviation * 1e3f).ToString("0.00", CultureInfo.InvariantCulture) + "ms";
 
+        // ---- Bars
+
         float max = Mathf.Max(cp.AccuracyValues);
-        for (int a = 0; a < 23; a++) 
+        for (int a = 0; a < cp.AccuracyValues.Length; a++) 
         {
             Image bar = Instantiate(ResultBarSample, ResultGraphBox);
-            int dist = Mathf.Abs(a - 11);
-            bar.color = dist == 0 ? PerfectBarColor : dist == 11 ? BadBarColor : Color.Lerp(HighGoodBarColor, LowGoodBarColor, (dist - 1) / 10f);
-            bar.rectTransform.anchorMin = new Vector2(.035f * a, 0);
-            bar.rectTransform.anchorMax = new Vector2(.035f * a + .03f, cp.AccuracyValues[a] / max);
-            bar.rectTransform.sizeDelta = Vector2.zero;
+            float dist = Mathf.Abs(a - cp.AccuracyValues.Length / 2) * cp.GoodHitWindow / (cp.AccuracyValues.Length / 2);
+            Debug.Log(a + " " + dist + " " + cp.PerfectHitWindow);
+            bar.color = dist < cp.PerfectHitWindow ? PerfectBarColor : 
+                Color.Lerp(HighGoodBarColor, LowGoodBarColor, (dist - cp.PerfectHitWindow) / (cp.GoodHitWindow - cp.PerfectHitWindow));
+            bar.rectTransform.pivot = new Vector2(a / (cp.AccuracyValues.Length - 1f), .5f);
+            bar.rectTransform.anchorMin = new Vector2(a / (cp.AccuracyValues.Length - 1f), 0);
+            bar.rectTransform.anchorMax = new Vector2(a / (cp.AccuracyValues.Length - 1f), cp.AccuracyValues[a] / max);
+            bar.rectTransform.sizeDelta = new Vector2(4, 0);
         }
 
-        max = Mathf.Max(cp.DiscreteValues);
+        max = cp.DiscreteCounts[0] + cp.DiscreteCounts[1];
+        float sum = 0;
         for (int a = 0; a < 2; a++) 
         {
             Image bar = Instantiate(ResultBarSample, ResultGraphBox);
             bar.color = a == 0 ? PerfectBarColor : BadBarColor;
-            bar.rectTransform.anchorMin = new Vector2(.035f * a + .935f, 0);
-            bar.rectTransform.anchorMax = new Vector2(.035f * a + .965f, cp.DiscreteValues[a] / max);
-            bar.rectTransform.sizeDelta = Vector2.zero;
+            bar.rectTransform.pivot = new Vector2(0, 1);
+            bar.rectTransform.anchorMin = new Vector2(sum, 0);
+            bar.rectTransform.anchorMax = new Vector2(sum + cp.DiscreteCounts[a] / max, 0);
+            bar.rectTransform.sizeDelta = new Vector2(0, 4);
+            bar.rectTransform.anchoredPosition = new Vector3(0, -4);
+            sum = bar.rectTransform.anchorMax.x;
         }
+
+        // ---- Animation
         
         RankLabel.text = Helper.GetRank(cp.Score / Mathf.Max(cp.TotalScore, 1) * 1e6f);
 
@@ -206,20 +218,14 @@ public class ResultScreen : MonoBehaviour
             PlayStateText.characterSpacing = 50 / Mathf.Pow(1 - ease, 1.5f);
             yield return null;
         }
-        PlayStateText.fontSize = 0;
-
         
-        ResultScoreBox.anchorMin = ResultScoreBox.anchorMax = ResultScoreBox.pivot = new Vector2(.5f, .5f);
-        ResultScoreBox.anchoredPosition = new Vector2(0, 0);
-        ResultScoreBox.sizeDelta = new Vector2(ResultScoreLayout.preferredWidth, 0);
-
-        ResultScoreBox.anchorMin = ResultScoreBox.anchorMax = ResultScoreBox.pivot = new Vector2(1, .5f);
-        ResultScoreBox.anchoredPosition = new Vector2(-340, 0);
+        PlayStateText.rectTransform.anchoredPosition = new Vector2(0, 200);
 
         void SetScore(float a) 
         {
-            float score = cp.Score / Mathf.Max(cp.TotalScore, 1) * a;
-            ResultScoreText.text = ((int)(score * 1e6)).ToString("D7", CultureInfo.InvariantCulture);
+            float score = cp.Score / Mathf.Max(cp.TotalScore, 1) * a * 1e6f;
+            ResultScoreText.text = ((int)(score)).ToString("D7", CultureInfo.InvariantCulture);
+            RecordDifferenceText.text = "+" + ((int)(score)).ToString("D7", CultureInfo.InvariantCulture);
             for (int i = 0; i < RankFill.Count; i++) 
             {
                 RankFill[i].FillAmount = score;
@@ -232,51 +238,54 @@ public class ResultScreen : MonoBehaviour
             float height = 100 + 80 * Ease.Get(a, EaseFunction.Circle, EaseMode.Out);
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, height);
             
-            float ease2 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
-            ResultScoreBox.anchorMin = ResultScoreBox.anchorMax = ResultScoreBox.pivot = new Vector2(.5f + .5f * ease2, .5f);
-            ResultScoreBox.anchoredPosition = new Vector2(-340 * ease2, 0);
+            float ease2 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+            ResultScoreBox.anchoredPosition = new Vector2(-800 * (1 - ease2) - 50, 0);
+            RecordBox.anchoredPosition = new Vector2(800 * (1 - ease2) + 50, 0);
             
             SetScore(1 - Mathf.Pow(1e-7f, a));
-            ResultScoreBox.localScale = Vector3.one / Mathf.Max(1 - Mathf.Pow(1 - a, 5), 1e-7f);
             for (int i = 0; i < RankFill.Count; i++) 
             {
-                float prg = Mathf.Max(1 - Mathf.Pow(1 - (a * (1 + .1f * i) - .1f * i), 5), 1e-7f);
-                float size = ((1000 + 30 * i) / prg * (1 - Mathf.Pow(1e-2f, (1 - a) * (1 + .5f * i))) - 4);
+                float prg = Mathf.Max(1 - Mathf.Pow(1 - (a * (1 + .1f * i) - .1f * i), 15), 1e-7f);
+                float size = ((750 + 10 * i) / prg * (1 - Mathf.Pow(1e-2f, (1 - a) * (1 + .5f * i))) - 4);
                 RankFill[i].rectTransform.sizeDelta = Vector2.one * size;
-                RankFill[i].InsideRadius = (size + 95) / (size + 100);
-                RankFill[i].color = new Color(1 - ease2, 1 - ease2, 1 - ease2, prg);
+                RankFill[i].InsideRadius = (size + 112) / (size + 120);
+                RankFill[i].color = cp.CurrentChart.Pallete.InterfaceColor * new Color(1 - ease, 1 - ease, 1 - ease, prg);
             }
             yield return null;
         }
-        ResultScoreBox.anchorMin = ResultScoreBox.anchorMax = ResultScoreBox.pivot = new Vector2(1, .5f);
-        ResultScoreBox.anchoredPosition = new Vector2(-340, 0);
+
+        ResultScoreBox.anchoredPosition = new Vector2(-80, 0);
+        RecordBox.anchoredPosition = new Vector2(80, 0);
         SetScore(1);
+
         for (int i = 0; i < RankFill.Count; i++) 
         {
             RankFill[i].rectTransform.sizeDelta = Vector2.one * -4;
             RankFill[i].color = new Color(0, 0, 0, (i + 1f) / RankFill.Count);
-            RankFill[i].InsideRadius = 89 / 94f;
+            RankFill[i].InsideRadius = 106 / 114f;
         }
-        ResultScoreBox.localScale = Vector3.one;
         RankBackground.color = RankLabel.color = Color.white;
 
-        PlayStateText.fontSize = 32;
+        PlayStateText.fontSize = 48;
         PlayStateText.characterSpacing = 10;
-        PlayStateText.rectTransform.anchorMin = PlayStateText.rectTransform.anchorMax = new Vector2(0, .5f);
+        PlayStateText.alpha = .2f;
 
         void SetEase(float a) 
         {
             float ease = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 180 - (100 * ease));
             RankLabel.color = new Color(1 - a, 1 - a, 1 - a);
-            RankExplosion.rectTransform.sizeDelta = Vector2.one * (1000 * ease);
+            RankExplosion.rectTransform.sizeDelta = Vector2.one * (750 * ease);
             RankExplosion.InsideRadius = ease;
-            RankExplosion.color = new Color(1, 1, 1, 1 - a);
+            RankExplosion.color = cp.CurrentChart.Pallete.InterfaceColor * new Color(1, 1, 1, 1 - a);
 
-            PlayStateText.rectTransform.anchoredPosition = new Vector2(PlayStateText.preferredWidth / 2 - 400 * (1 - ease), 12);
+            PlayStateText.rectTransform.anchoredPosition = new Vector2(0, 200 * (1 - ease));
 
             ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * ease);
             DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * ease);
+
+            ResultScoreBox.anchoredPosition = new Vector2(-30 * ease - 50, 0);
+            RecordBox.anchoredPosition = new Vector2(30 * ease + 50, 0);
 
             float ease2 = Ease.Get(a * 5 - 4, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
@@ -311,9 +320,18 @@ public class ResultScreen : MonoBehaviour
         SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, 80 - 190 * ease);
         SummaryBox.anchoredPosition = new Vector2(0, 5 * ease);
         SummaryImage.color = Color.Lerp(Color.white, Color.black, ease);
-        PlayStateText.color = ResultScoreText.color = ResultScoreLabel.color = Color.Lerp(Color.black, new Color(1, 1, 1, .2f), ease);
-        ResultScoreBox.anchoredPosition = new Vector2(-340 + 115 * ease, 0);
-        RankBox.anchoredPosition = new Vector2(-25 + 1000 * ease, 0);
+        PlayStateText.color = Color.Lerp(new Color(0, 0, 0, .2f), new Color(1, 1, 1, .2f), ease);
+        ResultScoreBox.anchoredPosition = new Vector2(-80 - 1000 * ease, 0);
+        RecordBox.anchoredPosition = new Vector2(80 + 1000 * ease, 0);
+
+        RankBox.sizeDelta = Vector2.one * (120 + 680 * ease);
+        RankLabel.rectTransform.anchoredPosition = new Vector2(0, (Canvas.rect.height / 2 + 100) * ease);
+        RankBackground.color = new Color(1, 1, 1, 1 - ease);
+        for (int i = 0; i < RankFill.Count; i++) 
+        {
+            RankFill[i].color = Color.Lerp(Color.black, new Color(1, 1, 1, .2f), ease);
+            RankFill[i].InsideRadius = (RankBox.sizeDelta.x - 12) / (RankBox.sizeDelta.x - 4);
+        }
 
         ResultSongBox.anchoredPosition = new Vector2(0, -60 + 10 * ease);
 
@@ -321,6 +339,7 @@ public class ResultScreen : MonoBehaviour
         SimpleDetailBox.anchoredPosition = new Vector2(0, 40 * ease);
         ExtraDetailBox.anchoredPosition = new Vector2(0, -40 * (1 - ease));
 
+        ResultGraphBox.anchoredPosition = new Vector2(0, 12 * ease);
         ResultGraphBox.anchorMax = new Vector2(1, ease);
     }
 
@@ -360,14 +379,14 @@ public class ResultScreen : MonoBehaviour
         void Lerp(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
-            float ease2 = 1 - Ease.Get(value * 4, EaseFunction.Quintic, EaseMode.Out);
+            float ease2 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
 
             ExtraDetailEase(ExtraDetailMode ? ease2 : 0);
 
             SummaryBox.sizeDelta = new Vector2(SummaryBox.sizeDelta.x, SummaryBox.sizeDelta.y * (1 - ease));
-            PlayStateText.rectTransform.anchoredPosition -= new Vector2(PlayStateText.preferredWidth / 2 - (Canvas.rect.width + 100) * ease, 12);
             ResultScoreBox.anchoredPosition -= new Vector2((Canvas.rect.width + 100) * ease, 0);
-            RankBox.anchoredPosition -= new Vector2((Canvas.rect.width + 100) * ease, 0);
+            RecordBox.anchoredPosition -= new Vector2((Canvas.rect.width + 100) * ease, 0);
+            RankBox.anchoredPosition = new Vector2((Canvas.rect.width + 100) * ease * 2, 0);
 
             ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
             ActionBar.anchoredPosition = new Vector2(0, 40 * ease2);

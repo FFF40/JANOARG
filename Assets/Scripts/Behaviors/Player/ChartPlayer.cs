@@ -29,6 +29,8 @@ public class ChartPlayer : MonoBehaviour
     public int PerfectCount;
     public int GoodCount;
     public int BadCount;
+    public int[] AccuracyCounts = new int[5];
+    public int[] DiscreteCounts = new int[2];
     [Space]
     public int Combo;
     public int MaxCombo;
@@ -37,8 +39,7 @@ public class ChartPlayer : MonoBehaviour
     [Space]
     public float OffsetMean;
     public float Deviation;
-    public int[] AccuracyValues = new int[23];
-    public int[] DiscreteValues = new int[2];
+    public int[] AccuracyValues = new int[65];
 
     [Header("Settings")]
     public float ScrollSpeed = 120;
@@ -350,16 +351,25 @@ public class ChartPlayer : MonoBehaviour
         UpdateScore();
     }
 
-    public void AddAccuracy(float acc) 
+    public void AddAccuracy(float time) 
     {
-        int pos = (int)(Mathf.Ceil(Mathf.Abs(acc) * 10) * Mathf.Sign(acc)) + 11;
-        if (acc == -1) pos = 0;
-        else if (acc == 1) pos = 22;
-        AccuracyValues[pos]++;
+        Debug.Log(time);
+
+        if (Mathf.Abs(time) <= GoodHitWindow / 1000) 
+        {
+            int center = AccuracyValues.Length / 2;
+            int pos = Mathf.RoundToInt(time / GoodHitWindow * 1000 * center) + center;
+            AccuracyValues[Mathf.Clamp(pos, 0, AccuracyValues.Length - 1)]++;
+        }
+
+        if (Mathf.Abs(time) <= PerfectHitWindow / 1000) AccuracyCounts[2]++;
+        else if (Mathf.Abs(time) <= GoodHitWindow / 1000) AccuracyCounts[time < 0 ? 1 : 3]++;
+        else AccuracyCounts[time < 0 ? 0 : 4]++;
+        
     }
     public void AddDiscrete(bool hit) 
     {
-        DiscreteValues[hit ? 0 : 1]++;
+        DiscreteCounts[hit ? 0 : 1]++;
     }
 
     // Update is called once per frame
@@ -452,7 +462,7 @@ public class ChartPlayer : MonoBehaviour
                     if (AutoPlay && time > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(0);
-                        if (obj.isFlicked) AddAccuracy(0);
+                        if (!obj.CurrentHit.Flickable) AddAccuracy(0);
                         else AddDiscrete(true);
                         AddScore(obj.NoteWeight, 1, true);
                         AudioPlayer.PlayOneShot(NormalHitSound);
@@ -461,7 +471,7 @@ public class ChartPlayer : MonoBehaviour
                     else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
                     {
                         Deviation += GoodHitWindow / 1000;
-                        if (obj.isFlicked) AddAccuracy(1);
+                        if (!obj.CurrentHit.Flickable) AddAccuracy(float.PositiveInfinity);
                         else AddDiscrete(false);
                         AddScore(obj.NoteWeight, 0, false);
                         obj.BeginHit();
@@ -620,7 +630,7 @@ public class ChartPlayer : MonoBehaviour
                         float acc = ofs < -GoodHitWindow / 1000 ? -1 : HitPlayer.GetAccuracy(ofs);
                         
                         obj.MakeHitEffect(acc);
-                        AddAccuracy(acc);
+                        if (acc > -1) AddAccuracy(ofs);
                         AddScore(3, (1 - Mathf.Abs(acc)), acc != -1);
                         AudioPlayer.PlayOneShot(NormalHitSound);
                         obj.BeginHit();

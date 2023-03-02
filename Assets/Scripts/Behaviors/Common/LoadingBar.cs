@@ -21,15 +21,15 @@ public class LoadingBar : MonoBehaviour
 
         // Rhythm tips
         new FlavorTextEntry("Remember: Everything in JANOARG can move!"),
-        new FlavorTextEntry("JANOARG sequences are erratic, but some sequences are more erratic than others."),
-        new FlavorTextEntry("Keep an eye on the sequences in white, they are more unpredictable than regular ones! They even have their own custom names!"),
+        new FlavorTextEntry("JANOARG is erratic, but sometimes it is more erratic than others."),
+        new FlavorTextEntry("Beware of difficulties in white! They even have their own custom names!"),
 
-        new FlavorTextEntry("The highest performance score you can get will always be 1000000ppm, regardless of the complexity."),
+        new FlavorTextEntry("The highest performance score you can get will always be 1000000ppm."),
         new FlavorTextEntry("Flick and Catch notes will always give you their maximum point value as long as you hit them!"),
         new FlavorTextEntry("You can hold overlapping hold notes with just one finger! Just make sure you hit them all first."),
 
-        new FlavorTextEntry("An asterisk (*) on a complexity rating indicates that the sequence requires using at least 3 or more fingers at the same time to clear."),
-        new FlavorTextEntry("Sequences' complexity should be rated by their rating numbers, not by their names."),
+        new FlavorTextEntry("An asterisk (*) on a difficulty rating indicates that the sequence requires using at least 3 or more fingers at the same time to clear."),
+        new FlavorTextEntry("Sequences' difficulty should be rated by their rating numbers, not by their names."),
         
         // Resources tips
         /* TODO: Uncomment this when resources and objects are implemented
@@ -46,12 +46,11 @@ public class LoadingBar : MonoBehaviour
         */
 
         // Meta
-        new FlavorTextEntry("Free, no ads, no pay-to-get songs... is this a rhythm game heaven?"),
         new FlavorTextEntry("JANOARG - Developing at snail speed"),
         new FlavorTextEntry("haha System.Func go brrrrrrrrrrr"),
 
         // References
-        new FlavorTextEntry("Colors of the world are determined by what our sequencers feel like that day."),
+        new FlavorTextEntry("Colors of the world are determined by what our world designers feel like that day."),
         new FlavorTextEntry("Gyroscope support? Maybe later..."),
 
         // Loading bar
