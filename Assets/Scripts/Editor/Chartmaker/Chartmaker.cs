@@ -585,7 +585,7 @@ public class Chartmaker : EditorWindow
         width = position.width;
         height = position.height;
             
-        float tHeight = 22 * timelineHeight;
+        float tHeight = Mathf.Max(22 * timelineHeight, 10);
 
         if (TargetSong)
         {
@@ -1079,7 +1079,7 @@ public class Chartmaker : EditorWindow
                 else if (extrasmode == "chart_create") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_delete") rect = new Rect(width / 2 - 200, height / 2 - 60, 400, 120);
                 else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
-                else if (extrasmode == "timeline_options") rect = new Rect(width - 304, height - 144, 300, 120);
+                else if (extrasmode == "timeline_options") rect = new Rect(width - 334, height - 144, 330, 120);
 
                 GUIStyle exStyle = new GUIStyle("window");
                 exStyle.focused = exStyle.normal;
@@ -1100,12 +1100,14 @@ public class Chartmaker : EditorWindow
             GUI.Window(2, new Rect(0, height - tHeight - 74, width, 26), TimelineMode, "", new GUIStyle("button"));
             GUI.BringWindowToBack(2);
             GUI.Window(3, new Rect(-2, height -  tHeight - 48, width + 4, tHeight + 50), Timeline, "");
+            GUI.Window(4, new Rect(0, height - tHeight - 51, width, 6), TimelineResize, "", new GUIStyle("button"));
+            GUI.BringWindowToFront(4);
 
-            GUI.Window(4, new Rect(width - 270, 36, height - 204, height - tHeight - 114), InspectMode, "", new GUIStyle("button"));
-            GUI.BringWindowToBack(4);
-            GUI.Window(5, new Rect(width - 245, 32, 240, height - tHeight - 106), Inspector, "");
+            GUI.Window(5, new Rect(width - 270, 36, height - 204, height - tHeight - 114), InspectMode, "", new GUIStyle("button"));
+            GUI.BringWindowToBack(5);
+            GUI.Window(6, new Rect(width - 245, 32, 240, height - tHeight - 106), Inspector, "");
 
-            GUI.Window(6, new Rect(5, 32, 32, height - tHeight - 106), Picker, "");
+            GUI.Window(7, new Rect(5, 32, 32, height - tHeight - 106), Picker, "");
         }
         else
         {
@@ -2073,15 +2075,6 @@ public class Chartmaker : EditorWindow
         if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
             && TargetChart != null && TargetThing != TargetChart.Data.Pallete)
             TargetThing = TargetChart.Data.Pallete;
-
-        int tResize = Mathf.RoundToInt(GUI.VerticalSlider(new Rect(width - 275, -97, 25, 220), 0, 5, -5, "label", "label"));
-        GUI.Label(new Rect(width - 275, 0, 25, 28), "☰", new GUIStyle("textField") { alignment = TextAnchor.MiddleCenter, padding = new RectOffset(2, 0, 0, 2) });
-        if (tResize != 0)
-        {
-            timelineHeight += tResize;
-            Repaint();
-        }
-        timelineHeight = Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
     }
 
     #endregion
@@ -2112,10 +2105,22 @@ public class Chartmaker : EditorWindow
     {
         return a == 0 || Math.Abs(a - Mathf.Round(a / b) * b) <= Math.Abs(a / tol);
     }
+    
+    public void TimelineResize(int id)
+    {
+        EditorGUIUtility.AddCursorRect(new Rect(0, -108, width, 220), MouseCursor.ResizeVertical);
+        int tResize = Mathf.RoundToInt(GUI.VerticalSlider(new Rect(0, -107, width, 220), 0, 5, -5, "label", "label"));
+        if (tResize != 0)
+        {
+            timelineHeight += tResize;
+            Repaint();
+        }
+        timelineHeight = timelineHeight < 2 ? 0 : Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
+    }
 
     public void Timeline(int id)
     {
-        float tHeight = 22 * timelineHeight;
+        float tHeight = Mathf.Max(22 * timelineHeight, 10);
 
         EditorGUI.DrawRect(new Rect(0, tHeight - 10, width + 4, 1), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
         EditorGUI.DrawRect(new Rect(0, tHeight + 5, width + 4, 18), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .5f) : new Color(1, 1, 1, .5f));
@@ -2259,7 +2264,7 @@ public class Chartmaker : EditorWindow
         itemStyle.fontSize = 12;
         itemStyle.padding = new RectOffset(1, 0, 0, 0);
 
-        if (TargetChartMeta != null && TargetChart != null)
+        if (timelineHeight > 0 && TargetChartMeta != null && TargetChart != null)
         {
 
             List<float> Times = new List<float>();
@@ -2277,7 +2282,7 @@ public class Chartmaker : EditorWindow
                 return Times.Count - 1;
             }
             
-            if (lastTimesCount > timelineHeight)
+            if (timelineHeight > 0 &&lastTimesCount > timelineHeight)
             {
                 verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + timelineHeight), verSeek, (float)timelineHeight / lastTimesCount, 0, lastTimesCount - timelineHeight + 1));
             }
@@ -2909,7 +2914,7 @@ public class Chartmaker : EditorWindow
 
     public void InspectMode(int id)
     {
-        GUIUtility.RotateAroundPivot(-90, Vector2.one * (height / 2 - 11 * timelineHeight - 46));
+        GUIUtility.RotateAroundPivot(-90, Vector2.one * (height / 2 - Mathf.Max(11 * timelineHeight, 5) - 46));
         if (GUI.Toggle(new Rect(27, 0, 80, 28), inspectMode == "properties", "Properties", "button")) inspectMode = "properties";
         if (GUI.Toggle(new Rect(109, 0, 80, 28), inspectMode == "storyboard", "Storyboard", "button")) inspectMode = "storyboard";
     }
@@ -3930,17 +3935,23 @@ public class Chartmaker : EditorWindow
         else if (extrasmode == "timeline_options")
         {
             GUI.Label(new Rect(5, 6, 90, 18), "Waveform");
-            if (GUI.Toggle(new Rect(95, 6, 66, 18), WaveformMode == 0, "Disabled", "buttonLeft")) WaveformMode = 0;
-            if (GUI.Toggle(new Rect(162, 6, 66, 18), WaveformMode == 1, "On Pause", "buttonMid")) WaveformMode = 1;
-            if (GUI.Toggle(new Rect(229, 6, 66, 18), WaveformMode == 2, "Always", "buttonRight")) WaveformMode = 2;
+            if (GUI.Toggle(new Rect(95, 6, 76, 18), WaveformMode == 0, "Disabled", "buttonLeft")) WaveformMode = 0;
+            if (GUI.Toggle(new Rect(172, 6, 76, 18), WaveformMode == 1, "On Pause", "buttonMid")) WaveformMode = 1;
+            if (GUI.Toggle(new Rect(249, 6, 76, 18), WaveformMode == 2, "Always", "buttonRight")) WaveformMode = 2;
 
             GUI.Label(new Rect(5, 26, 90, 18), "View Mode");
             GUI.Label(new Rect(95, 26, 30, 18), "Hits");
-            if (GUI.Toggle(new Rect(125, 26, 40, 18), HitViewMode == 0, "Def", "buttonLeft")) HitViewMode = 0;
-            if (GUI.Toggle(new Rect(166, 26, 40, 18), HitViewMode == 1, "Alt", "buttonRight")) HitViewMode = 1;
+            if (GUI.Toggle(new Rect(125, 26, 35, 18), HitViewMode == 0, "", "buttonLeft")) HitViewMode = 0;
+            GUI.Label(new Rect(133, 29, 4, 12), "", "helpBox");
+            GUI.Label(new Rect(138, 29, 4, 12), "", "helpBox");
+            GUI.Label(new Rect(143, 29, 4, 12), "", "helpBox");
+            GUI.Label(new Rect(148, 29, 4, 12), "", "helpBox");
+            if (GUI.Toggle(new Rect(161, 26, 35, 18), HitViewMode == 1, "", "buttonRight")) HitViewMode = 1;
+            GUI.Label(new Rect(165, 29, 12, 12), "", "helpBox");
+            GUI.Label(new Rect(178, 29, 12, 12), "", "helpBox");
 
-            SeparateUnits = GUI.Toggle(new Rect(5, 95, 145, 20), SeparateUnits, "Separate Units", "buttonLeft");
-            FollowSeekLine = GUI.Toggle(new Rect(150, 95, 145, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
+            SeparateUnits = GUI.Toggle(new Rect(5, 95, 160, 20), SeparateUnits, "Separate Units", "buttonLeft");
+            FollowSeekLine = GUI.Toggle(new Rect(165, 95, 160, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
         }
     }
 
