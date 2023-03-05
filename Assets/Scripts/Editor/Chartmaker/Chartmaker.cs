@@ -2279,7 +2279,7 @@ public class Chartmaker : EditorWindow
             
             if (lastTimesCount > timelineHeight)
             {
-                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + 5), verSeek, 5f / lastTimesCount, 0, lastTimesCount - 4));
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + timelineHeight), verSeek, (float)timelineHeight / lastTimesCount, 0, lastTimesCount - timelineHeight + 1));
             }
 
             if (dragMode == "select" && selectStart != null && selectEnd != null)
@@ -2630,7 +2630,7 @@ public class Chartmaker : EditorWindow
 
             if (Times.Count > timelineHeight)
             {
-                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + 5), verSeek, 5f / Times.Count, 0, Times.Count - 4));
+                verSeek = Mathf.RoundToInt(GUI.VerticalScrollbar(new Rect(width - 8, 0, 10, tHeight + timelineHeight), verSeek, (float)timelineHeight / Times.Count, 0, Times.Count - timelineHeight + 1));
             }
             lastTimesCount = Times.Count;
             if (Event.current.type == EventType.ScrollWheel)
@@ -2651,7 +2651,7 @@ public class Chartmaker : EditorWindow
                     Repaint();
                 }
             }
-            verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - 5), 0);
+            verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - timelineHeight), 0);
         }
 
 
