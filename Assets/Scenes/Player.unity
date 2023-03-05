@@ -15,7 +15,7 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 1, g: 1, b: 1, a: 1}
+  m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 0
@@ -15584,9 +15584,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SongPath: Songs/Package Transfer Final/Packet Transfer Final - mrcool909090
   Song: {fileID: 11400000, guid: 99ebee8463d30ae4b8f934d225e3bce8, type: 2}
-  ChartPosition: 1
+  ChartPosition: 0
   IsPlaying: 0
-  AutoPlay: 0
+  AutoPlay: 1
   CurrentTime: -5
   Score: 0
   TotalScore: 0
