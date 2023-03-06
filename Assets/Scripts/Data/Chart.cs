@@ -100,6 +100,7 @@ public class ChartManager
 {
     public PlayableSong Song;
     public Chart CurrentChart;
+    public Dictionary<string, LaneGroupManager> Groups = new Dictionary<string, LaneGroupManager>();
     public List<LaneManager> Lanes = new List<LaneManager>();
     public HitMeshManager HitMeshManager = new HitMeshManager();
     public float CurrentSpeed;
@@ -115,6 +116,18 @@ public class ChartManager
 
     public void Update(float time, float pos)
     {
+        for (int a = 0; a < CurrentChart.Groups.Count; a++)
+        {
+            LaneGroup group = (LaneGroup)CurrentChart.Groups[a].Get(pos);
+            if (Groups.ContainsKey(group.Name)) Groups[group.Name].Update(group, pos, this);
+            else Groups.Add(group.Name, new LaneGroupManager(group, pos, this));
+        }
+        foreach (KeyValuePair<string, LaneGroupManager> pair in new Dictionary<string, LaneGroupManager>(Groups))
+        {
+            if (pair.Value.isDirty) pair.Value.UpdatePosition(this);
+            else Groups.Remove(pair.Key);
+        }
+
         for (int a = 0; a < CurrentChart.Lanes.Count; a++)
         {
             Lane lane = (Lane)CurrentChart.Lanes[a].Get(pos);
@@ -520,36 +533,35 @@ public class HitStyleManager {
     }
 }
 
-// Game
-
 [System.Serializable]
 public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup> 
 {
     public string Name;
-    public Vector3 Offset;
+    public Vector3 Position;
     public Vector3 Rotation;
+    public string Group;
 
     public new static TimestampType[] TimestampTypes = {
         new TimestampType
         {
-            ID = "Offset_X",
-            Name = "Offset X",
-            Get = (x) => ((LaneGroup)x).Offset.x,
-            Set = (x, a) => { ((LaneGroup)x).Offset.x = a; },
+            ID = "Position_X",
+            Name = "Position X",
+            Get = (x) => ((LaneGroup)x).Position.x,
+            Set = (x, a) => { ((LaneGroup)x).Position.x = a; },
         },
         new TimestampType
         {
-            ID = "Offset_Y",
-            Name = "Offset Y",
-            Get = (x) => ((LaneGroup)x).Offset.y,
-            Set = (x, a) => { ((LaneGroup)x).Offset.y = a; },
+            ID = "Position_Y",
+            Name = "Position Y",
+            Get = (x) => ((LaneGroup)x).Position.y,
+            Set = (x, a) => { ((LaneGroup)x).Position.y = a; },
         },
         new TimestampType
         {
-            ID = "Offset_Z",
-            Name = "Offset Z",
-            Get = (x) => ((LaneGroup)x).Offset.z,
-            Set = (x, a) => { ((LaneGroup)x).Offset.z = a; },
+            ID = "Position_Z",
+            Name = "Position Z",
+            Get = (x) => ((LaneGroup)x).Position.z,
+            Set = (x, a) => { ((LaneGroup)x).Position.z = a; },
         },
         new TimestampType
         {
@@ -579,11 +591,58 @@ public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup>
         LaneGroup clone = new LaneGroup()
         {
             Name = Name,
-            Offset = new Vector3(Offset.x, Offset.y, Offset.z),
+            Position = new Vector3(Position.x, Position.y, Position.z),
             Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
             Storyboard = Storyboard.DeepClone(),
         };
         return clone;
+    }
+}
+
+public class LaneGroupManager
+{
+    public LaneGroup CurrentGroup;
+    public Vector3 FinalPosition;
+    public Quaternion FinalRotation;
+    public bool isDirty;
+
+    public LaneGroupManager(LaneGroup init, float pos, ChartManager main)
+    {
+        Update(init, pos, main);
+    }
+
+    public void Update(LaneGroup data, float pos, ChartManager main)
+    {
+        CurrentGroup = data;
+        isDirty = true;
+    }
+
+    public void Get(ref Vector3 pos, ref Quaternion rot)
+    {
+        pos = FinalRotation * pos + FinalPosition;
+        rot = FinalRotation * rot;
+    }
+
+    public void UpdatePosition(ChartManager main, string original = null)
+    {
+        FinalPosition = CurrentGroup.Position;
+        FinalRotation = Quaternion.Euler(CurrentGroup.Rotation);
+        if (original == null) original = CurrentGroup.Group;
+        if (!string.IsNullOrEmpty(CurrentGroup.Group) && main.Groups.ContainsKey(CurrentGroup.Group))
+        {
+            LaneGroupManager group = main.Groups[CurrentGroup.Group];
+            if (group.CurrentGroup.Name == CurrentGroup.Group)
+            {
+                Debug.LogError("Infinite group reference loop detected: " + original);
+            }
+            else 
+            {
+                if (group.isDirty) group.UpdatePosition(main, original);
+                FinalPosition = group.FinalRotation * FinalPosition + group.FinalPosition;
+                FinalRotation = group.FinalRotation * FinalRotation;
+            }
+        }
+        isDirty = false;
     }
 }
 
@@ -744,6 +803,9 @@ public class LaneManager
     public Vector3 StartPos;
     public Vector3 EndPos;
 
+    public Vector3 FinalPosition;
+    public Quaternion FinalRotation;
+
     float lastStepCount;
 
     public LaneManager(Lane init, float time, float pos, ChartManager main)
@@ -877,11 +939,18 @@ public class LaneManager
             CurrentMesh.SetUVs(0, uvs);
             CurrentMesh.SetTriangles(tris, 0);
         }
+
+        FinalPosition = CurrentLane.Position;
+        FinalRotation = Quaternion.Euler(CurrentLane.Rotation);
+        if (!string.IsNullOrEmpty(CurrentLane.Group) && main.Groups.ContainsKey(CurrentLane.Group))
+            main.Groups[CurrentLane.Group].Get(ref FinalPosition, ref FinalRotation);
         
         StartPos = verts[stepCount * 2 - 2] - Vector3.forward * CurrentDistance;
-        StartPos = Quaternion.Euler(CurrentLane.Rotation) * StartPos + CurrentLane.Position;
+        StartPos = FinalRotation * StartPos + FinalPosition;
         EndPos = verts[stepCount * 2 - 1] - Vector3.forward * CurrentDistance;
-        EndPos = Quaternion.Euler(CurrentLane.Rotation) * EndPos + CurrentLane.Position;
+        EndPos = FinalRotation * EndPos + FinalPosition;
+
+
 
         for (int a = 0; a < CurrentLane.Objects.Count; a++)
         {
@@ -1300,9 +1369,8 @@ public class HitObjectManager
             StartPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position) + fwd;
             EndPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position + data.Length) + fwd;
 
-            Quaternion laneRot = Quaternion.Euler(lane.CurrentLane.Rotation);
-            Position = laneRot * ((StartPos + EndPos) / 2) + lane.CurrentLane.Position;
-            Rotation = laneRot * (Quaternion.LookRotation(EndPos - StartPos) * Quaternion.Euler(0, 90, 0));
+            Position = lane.FinalRotation * ((StartPos + EndPos) / 2) + lane.FinalPosition;
+            Rotation = lane.FinalRotation * (Quaternion.LookRotation(EndPos - StartPos) * Quaternion.Euler(0, 90, 0));
 
             CurrentMesh = main.HitMeshManager.GetMesh(data.Type, Vector3.Distance(StartPos, EndPos));
         }

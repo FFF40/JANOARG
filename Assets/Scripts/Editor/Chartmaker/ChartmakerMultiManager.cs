@@ -100,7 +100,7 @@ public class ChartmakerMultiManager
             action.Targets.Add(item);
         }
         action.Redo();
-        history.ActionsBehind.Add(action);
+        history.ActionsBehind.Push(action);
         history.ActionsAhead.Clear();
     }
 }
@@ -160,6 +160,7 @@ public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
         LerpFrom = float.PositiveInfinity;
         LerpTo = float.NegativeInfinity;
         LerpField = list.GetType().GetGenericArguments()[0].GetField(LerpSource);
+        if (LerpField == null) return;
         foreach (object item in list)
         {
             float value = (float)LerpField.GetValue(item);
@@ -169,7 +170,7 @@ public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
     }
 
     public override float Get(float from, object src) {
-        float to = Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
         to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
         return FloatOperations[Operation](from, to);
     }
@@ -209,6 +210,7 @@ public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
         LerpFrom = float.PositiveInfinity;
         LerpTo = float.NegativeInfinity;
         LerpField = list.GetType().GetGenericArguments()[0].GetField(LerpSource);
+        if (LerpField == null) return;
         foreach (object item in list)
         {
             float value = (float)LerpField.GetValue(item);
@@ -218,7 +220,7 @@ public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
     }
 
     public override Vector2 Get(Vector2 from, object src) {
-        float to = Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
         to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
         from = new Vector2(from.x, from.y);
         from[Axis] = ChartmakerMultiHandlerFloat.FloatOperations[Operation](from[Axis], to);
@@ -247,6 +249,7 @@ public class ChartmakerMultiHandlerVector3: ChartmakerMultiHandler<Vector3>
         LerpFrom = float.PositiveInfinity;
         LerpTo = float.NegativeInfinity;
         LerpField = list.GetType().GetGenericArguments()[0].GetField(LerpSource);
+        if (LerpField == null) return;
         foreach (object item in list)
         {
             float value = (float)LerpField.GetValue(item);
@@ -256,7 +259,7 @@ public class ChartmakerMultiHandlerVector3: ChartmakerMultiHandler<Vector3>
     }
 
     public override Vector3 Get(Vector3 from, object src) {
-        float to = Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
         to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
         from = new Vector3(from.x, from.y, from.z);
         from[Axis] = ChartmakerMultiHandlerFloat.FloatOperations[Operation](from[Axis], to);

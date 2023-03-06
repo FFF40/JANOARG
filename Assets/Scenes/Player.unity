@@ -15,7 +15,7 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0, g: 0, b: 0, a: 1}
+  m_FogColor: {r: 1, g: 1, b: 1, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 0
@@ -5970,7 +5970,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &112615891
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9338,7 +9338,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &672995156
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9444,7 +9444,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &728170964
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10514,7 +10514,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &832726629
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13430,7 +13430,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1326589174
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14683,7 +14683,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1519212751
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14977,7 +14977,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1537315681
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15582,7 +15582,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8acfd40c056295442b18325aad94ed6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SongPath: Songs/Package Transfer Final/Packet Transfer Final - mrcool909090
+  SongPath: Songs/playground/Nothing - Nobody
   Song: {fileID: 11400000, guid: 99ebee8463d30ae4b8f934d225e3bce8, type: 2}
   ChartPosition: 0
   IsPlaying: 0

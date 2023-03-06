@@ -5,6 +5,7 @@ using UnityEngine;
 public class LanePlayer : MonoBehaviour
 {
     public Lane CurrentLane;
+    public LaneGroupPlayer ParentGroup;
     public Transform Container;
 
     public List<MeshFilter> LaneMeshes;
@@ -49,7 +50,7 @@ public class LanePlayer : MonoBehaviour
             Positions.Add(pos);
             Times.Add(nSec);
         }
-        CurrentLane = (Lane)lane;
+        CurrentLane = lane;
         StartCoroutine(InitHitObjects());
     }
 
@@ -77,6 +78,16 @@ public class LanePlayer : MonoBehaviour
             Vector3 start = Quaternion.Euler(l.Rotation) * (Vector3)s.StartPos + l.Position;
             Vector3 end = Quaternion.Euler(l.Rotation) * (Vector3)s.EndPos + l.Position;
 
+            LaneGroupPlayer gp = ParentGroup;
+            while (gp)
+            {
+                LaneGroup g = (LaneGroup)gp.CurrentGroup.Get(hit.Offset);
+                start = Quaternion.Euler(g.Rotation) * start + g.Position;
+                end = Quaternion.Euler(g.Rotation) * end + g.Position;
+                gp = gp.ParentGroup;
+                if (gp?.name == ParentGroup.name) throw new System.Exception("Error: Group reference loop detected: " + ParentGroup.name);
+            }
+
             hp.ScreenStart = cam.WorldToScreenPoint(Vector3.LerpUnclamped(start, end, h.Position));
             hp.ScreenEnd = cam.WorldToScreenPoint(Vector3.LerpUnclamped(start, end, h.Position + h.Length));
             
@@ -100,8 +111,8 @@ public class LanePlayer : MonoBehaviour
         {
             CurrentLane.Advance(ChartPlayer.main.CurrentTime);
 
-            transform.position = CurrentLane.Position;
-            transform.eulerAngles = CurrentLane.Rotation;
+            transform.localPosition = CurrentLane.Position;
+            transform.localEulerAngles = CurrentLane.Rotation;
 
             if (ChartPlayer.main.CurrentTime < Times[0] && Times[0] != 0)
             {

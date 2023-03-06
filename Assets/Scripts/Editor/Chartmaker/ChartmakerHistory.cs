@@ -6,26 +6,30 @@ using UnityEditor;
 using System.Reflection;
 
 public class ChartmakerHistory {
-    public List<IChartmakerAction> ActionsBehind = new List<IChartmakerAction>();
-    public List<IChartmakerAction> ActionsAhead = new List<IChartmakerAction>();
+    public Stack<IChartmakerAction> ActionsBehind = new Stack<IChartmakerAction>();
+    public Stack<IChartmakerAction> ActionsAhead = new Stack<IChartmakerAction>();
 
     public void Undo(int count = 1)
     {
-        if (ActionsBehind.Count <= 0) return;
-        ActionsBehind[ActionsBehind.Count - 1].Undo();
-        ActionsAhead.Add(ActionsBehind[ActionsBehind.Count - 1]);
-        ActionsBehind.RemoveAt(ActionsBehind.Count - 1);
-        count--;
-        if (count > 0) Undo(count - 1);
+        while (count > 0)
+        {
+            if (ActionsBehind.Count <= 0) return;
+            ActionsBehind.Peek().Undo();
+            ActionsAhead.Push(ActionsBehind.Peek());
+            ActionsBehind.Pop();
+            count--;
+        }
     }
     public void Redo(int count = 1)
     {
-        if (ActionsAhead.Count <= 0) return;
-        ActionsAhead[ActionsAhead.Count - 1].Redo();
-        ActionsBehind.Add(ActionsAhead[ActionsAhead.Count - 1]);
-        ActionsAhead.RemoveAt(ActionsAhead.Count - 1);
-        count--;
-        if (count > 0) Redo(count - 1);
+        while (count > 0)
+        {
+            if (ActionsAhead.Count <= 0) return;
+            ActionsAhead.Peek().Redo();
+            ActionsBehind.Push(ActionsAhead.Peek());
+            ActionsAhead.Pop();
+            count--;   
+        }
     }
 
     object RecordingItem;
@@ -55,13 +59,12 @@ public class ChartmakerHistory {
                 (((field.GetValue(item) == null) ^ (field.GetValue(RecordingItem) == null)) ||
                 (field.GetValue(item) != null && !field.GetValue(item).Equals(field.GetValue(RecordingItem)))))
             {
-                int count = ActionsBehind.Count - 1;
                 if (ActionsBehind.Count > 0 &&
-                    ActionsBehind[count] is ChartmakerModifyAction && 
-                    ((ChartmakerModifyAction)ActionsBehind[count]).Item == item &&
-                    ((ChartmakerModifyAction)ActionsBehind[count]).Keyword == field.Name)
+                    ActionsBehind.Peek() is ChartmakerModifyAction && 
+                    ((ChartmakerModifyAction)ActionsBehind.Peek()).Item == item &&
+                    ((ChartmakerModifyAction)ActionsBehind.Peek()).Keyword == field.Name)
                 {
-                    ((ChartmakerModifyAction)ActionsBehind[count]).To = field.GetValue(item);
+                    ((ChartmakerModifyAction)ActionsBehind.Peek()).To = field.GetValue(item);
                 }
                 else {
                     ChartmakerModifyAction action = new ChartmakerModifyAction()
@@ -71,7 +74,7 @@ public class ChartmakerHistory {
                         From = field.GetValue(RecordingItem),
                         To = field.GetValue(item),
                     };
-                    ActionsBehind.Add(action);
+                    ActionsBehind.Push(action);
                 }
                 ActionsAhead.Clear();
             }
@@ -380,6 +383,42 @@ public class ChartmakerMoveLaneStepEndAction : ChartmakerMoveAction<LaneStep>
                 ts.Target += offset.y;
             }
         }
+    }
+}
+
+public class ChartmakerGroupRenameAction: IChartmakerAction
+{
+    public Chart Target;
+    public string From;
+    public string To;
+
+    public string GetName()
+    {
+        return "Rename Group";
+    }
+
+    public void Do(string from, string to) 
+    {
+        foreach (LaneGroup group in Target.Groups)
+        {
+            if (group.Name == from) group.Name = to;
+            if (group.Group == from) group.Group = to;
+        }
+        foreach (Lane lane in Target.Lanes)
+        {
+            if (lane.Group == from) lane.Group = to;
+        }
+    }
+
+
+    public void Redo() 
+    {
+        Do(From, To);
+    }
+    
+    public void Undo() 
+    {
+        Do(To, From);
     }
 }
 

@@ -706,8 +706,8 @@ public class Chartmaker : EditorWindow
                         {
                             if (LaneStyleManagers[lane.StyleIndex].LaneMaterial)
                             {
-                                Quaternion rot = Quaternion.Euler(lane.Rotation);
-                                Vector3 pos = lane.Position + rot * Vector3.back * l.CurrentDistance;
+                                Quaternion rot = l.FinalRotation;
+                                Vector3 pos = l.FinalPosition + rot * Vector3.back * l.CurrentDistance;
                                 Graphics.DrawMesh(l.CurrentMesh, pos, rot, LaneStyleManagers[lane.StyleIndex].LaneMaterial, 0, CurrentCamera);
                             }
                         }
@@ -1468,18 +1468,37 @@ public class Chartmaker : EditorWindow
     static public string GetItemName(object item)
     {
         string name = item.ToString();
-        if (item is Chart) name = "Chart";
-        else if (item is BPMStop) name = "BPM Stop";
-        else if (item is List<BPMStop>) name = ((IList)item).Count + " BPM Stops";
-        else if (item is HitStyle) name = "Hit Style";
-        else if (item is LaneStyle) name = "Lane Style";
-        else if (item is Lane) name = "Lane";
-        else if (item is List<Lane>) name = ((IList)item).Count + " Lanes";
-        else if (item is LaneStep) name = "Lane Step";
-        else if (item is List<LaneStep>) name = ((IList)item).Count + " Lane Steps";
-        else if (item is HitObject) name = "Hit Object";
-        else if (item is List<HitObject>) name = ((IList)item).Count + " Hit Objects";
+        if (item is Chart)                      name = "Chart";
+        else if (item is BPMStop)               name = "BPM Stop";
+        else if (item is List<BPMStop>)         name = ((IList)item).Count + " BPM Stops";
+        else if (item is HitStyle)              name = "Hit Style";
+        else if (item is LaneStyle)             name = "Lane Style";
+        else if (item is LaneGroup)             name = "Lane Group";
+        else if (item is List<LaneGroup>)       name = ((IList)item).Count + " Lane Groups";
+        else if (item is Lane)                  name = "Lane";
+        else if (item is List<Lane>)            name = ((IList)item).Count + " Lanes";
+        else if (item is LaneStep)              name = "Lane Step";
+        else if (item is List<LaneStep>)        name = ((IList)item).Count + " Lane Steps";
+        else if (item is HitObject)             name = "Hit Object";
+        else if (item is List<HitObject>)       name = ((IList)item).Count + " Hit Objects";
         return name;
+    }
+
+    public string IncrementGroupName(string prev)
+    {
+        var stack = new Stack<char>();
+        while (prev.Length > 0)
+        {
+            if (!char.IsNumber(prev[^1])) break;
+            stack.Push(prev[^1]);
+            prev = prev[0..^1];
+        }
+
+        int number = 1;
+        int.TryParse(new String(stack.ToArray()), out number);
+        while (TargetChart.Data.Groups.FindIndex(x => x.Name == prev + number) >= 0) number++;
+
+        return prev + number;
     }
 
     public void SaveSong()
@@ -1530,7 +1549,7 @@ public class Chartmaker : EditorWindow
     {
         if (item is IList) foreach (object i in (IList)item) list.Add(i);
         else list.Add(item);
-        History.ActionsBehind.Add(new ChartmakerAddAction()
+        History.ActionsBehind.Push(new ChartmakerAddAction()
         {
             Target = list,
             Item = item
@@ -1541,7 +1560,7 @@ public class Chartmaker : EditorWindow
     {
         if (item is IList) foreach (object i in (IList)item) list.Remove(i);
         else list.Remove(item);
-        History.ActionsBehind.Add(new ChartmakerDeleteAction()
+        History.ActionsBehind.Push(new ChartmakerDeleteAction()
         {
             Target = list,
             Item = item
@@ -1725,9 +1744,9 @@ public class Chartmaker : EditorWindow
     public void DoMove<TAction, TTarget>(TTarget item, Vector3 offset) where TAction : ChartmakerMoveAction<TTarget>, new()
     {
         TAction action = null;
-        if (History.ActionsBehind.Count > 0 && History.ActionsBehind[History.ActionsBehind.Count - 1] is TAction)
+        if (History.ActionsBehind.Count > 0 && History.ActionsBehind.Peek() is TAction)
         {
-            action = (TAction)History.ActionsBehind[History.ActionsBehind.Count - 1];
+            action = (TAction)History.ActionsBehind.Peek();
             if (!action.Item.Equals(item)) action = null;
         }
 
@@ -1735,12 +1754,24 @@ public class Chartmaker : EditorWindow
         {
             action = new TAction();
             action.Item = item;
-            History.ActionsBehind.Add(action);
+            History.ActionsBehind.Push(action);
         }
         History.ActionsAhead.Clear();
 
         action.Undo();
         action.Offset += offset;
+        action.Redo();
+    }
+
+    public void RenameGroup(string from, string to)
+    {
+        ChartmakerGroupRenameAction action = new ChartmakerGroupRenameAction();
+        action.Target = TargetChart.Data;
+        action.From = from;
+        action.To = to;
+
+        History.ActionsAhead.Clear();
+        History.ActionsBehind.Push(action);
         action.Redo();
     }
 
@@ -1929,10 +1960,10 @@ public class Chartmaker : EditorWindow
 
             // -------------------- Edit
             if (History.ActionsBehind.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind[History.ActionsBehind.Count - 1].GetName() + " " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false, () => History.Undo());
+                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind.Peek().GetName() + " " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false, () => History.Undo());
             else menu.AddDisabledItem(new GUIContent("Edit/Undo " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false);
             if (History.ActionsAhead.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead[History.ActionsAhead.Count - 1].GetName() + " " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false, () => History.Redo());
+                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead.Peek().GetName() + " " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false, () => History.Redo());
             else menu.AddDisabledItem(new GUIContent("Edit/Redo " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false);
             menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
 
@@ -2072,8 +2103,12 @@ public class Chartmaker : EditorWindow
         }
 
         bool palleteSel = TargetChart != null && TargetThing == TargetChart.Data.Pallete;
-        if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
-            && TargetChart != null && TargetThing != TargetChart.Data.Pallete)
+        bool groupSel = TargetChart != null && TargetThing == TargetChart.Data.Groups;
+        if (GUI.Toggle(groupSel ? new Rect(width - 165, -2, 80, 25) : new Rect(width - 165, 3, 80, 20), groupSel, "Groups", "buttonLeft")
+            && TargetThing != TargetChart?.Data.Groups)
+            TargetThing = TargetChart.Data.Groups;
+        else if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
+            && TargetThing != TargetChart?.Data.Pallete)
             TargetThing = TargetChart.Data.Pallete;
     }
 
@@ -2928,6 +2963,7 @@ public class Chartmaker : EditorWindow
     Vector2 scrollPos = Vector2.zero;
 
     long BPMTapStart, BPMTapEnd, BPMTapCount;
+    string RenameTarget;
 
     public void Inspector(int id)
     {
@@ -2977,19 +3013,20 @@ public class Chartmaker : EditorWindow
 
             scrollPos = GUILayout.BeginScrollView(scrollPos);
 
-
-            for (int i = 0; i < History.ActionsAhead.Count; i++)
+            IChartmakerAction[] ahead = History.ActionsAhead.ToArray();
+            for (int i = History.ActionsAhead.Count - 1; i >= 0; i--)
             {
-                IChartmakerAction action = History.ActionsAhead[i];
-                GUILayout.Button(action.GetName());
+                IChartmakerAction action = ahead[i];
+                if (GUILayout.Button(action.GetName())) History.Redo(i + 1);
             }
 
             GUILayout.Toggle(true, "↑ Ahead  |  Behind ↓", "button");
 
-            for (int i = History.ActionsBehind.Count - 1; i >= 0; i--)
+            IChartmakerAction[] behind = History.ActionsBehind.ToArray();
+            for (int i = 0; i < History.ActionsBehind.Count; i++)
             {
-                IChartmakerAction action = History.ActionsBehind[i];
-                GUILayout.Button(action.GetName());
+                IChartmakerAction action = behind[i];
+                if (GUILayout.Button(action.GetName())) History.Undo(i + 1);
             }
 
             GUILayout.EndScrollView();
@@ -3002,7 +3039,7 @@ public class Chartmaker : EditorWindow
         }
         else if (inspectMode == "properties")
         {
-            if (TargetThing is IList)
+            if (TargetThing != TargetChart?.Data.Groups && TargetThing is IList)
             {
                 IList thing = (IList)TargetThing;
 
@@ -3010,6 +3047,7 @@ public class Chartmaker : EditorWindow
                 if (thing is List<Timestamp>) name = "Timestamps";
                 else if (thing is List<BPMStop>) name = "BPM Stops";
                 else if (thing is List<Lane>) name = "Lanes";
+                else if (thing is List<LaneGroup>) name = "Lane Groups";
                 else if (thing is List<LaneStep>) name = "Lane Steps";
                 else if (thing is List<HitObject>) name = "Hit Objects";
 
@@ -3487,6 +3525,79 @@ public class Chartmaker : EditorWindow
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }
+            else if (TargetThing == TargetChart.Data.Groups)
+            {
+                List<LaneGroup> thing = (List<LaneGroup>)TargetThing;
+                History.StartRecordItem(TargetThing);
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Lane Groups", "boldLabel");
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+                GUIStyle leftStyle = new GUIStyle("ButtonLeft") { alignment = TextAnchor.MiddleLeft };
+
+                for (int i = 0; i < thing.Count; i++)
+                {
+                    LaneGroup group = thing[i];
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button(group.Name, leftStyle))
+                    {
+                        TargetThing = group;
+                        RenameTarget = group.Name;
+                    }
+                    if (GUILayout.Button(DeletingThing == group ? "?" : "x", "ButtonRight", GUILayout.MaxWidth(18)))
+                    {
+                        if (DeletingThing == group)
+                        {
+                            HistoryDelete(thing, group);
+                            break;
+                        }
+                        else
+                        {
+                            DeletingThing = group;
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+
+                GUILayout.EndScrollView();
+                if (GUILayout.Button("Create New Group"))
+                {
+                    LaneGroup group = new LaneGroup();
+                    group.Name = thing.Count >= 1 ? IncrementGroupName(thing[^1].Name) : "Group 1";
+                    HistoryAdd(thing, group);
+                    TargetThing = group;
+                }
+                History.EndRecordItem(TargetThing);
+            }
+            else if (TargetThing is LaneGroup)
+            {
+                LaneGroup thing = (LaneGroup)TargetThing;
+                History.StartRecordItem(TargetThing);
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Lane Group", "boldLabel");
+                GUILayout.Space(8);
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+                GUILayout.Label("Reference Name", "boldLabel");
+                RenameTarget = EditorGUILayout.TextField(RenameTarget);
+                if (RenameTarget != thing.Name)
+                {
+                    if (GUILayout.Button("Confirm Rename"))
+                    {
+                        RenameGroup(thing.Name, RenameTarget);
+                    }
+                }
+                GUILayout.Space(8);
+
+                GUILayout.Label("Transform", "boldLabel");
+                thing.Group = EditorGUILayout.TextField("Parent", thing.Group);
+                thing.Position = EditorGUILayout.Vector3Field("Position", thing.Position);
+                thing.Rotation = EditorGUILayout.Vector3Field("Rotation", thing.Rotation);
+
+                GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
+            }
             else if (TargetThing is Lane)
             {
                 Lane thing = (Lane)TargetThing;
@@ -3520,6 +3631,7 @@ public class Chartmaker : EditorWindow
                 bStyle.fontStyle = FontStyle.Bold;
 
                 GUILayout.Label("Transform", "boldLabel");
+                thing.Group = EditorGUILayout.TextField("Parent", thing.Group);
                 thing.Position = EditorGUILayout.Vector3Field("Position", thing.Position);
                 thing.Rotation = EditorGUILayout.Vector3Field("Rotation", thing.Rotation);
 

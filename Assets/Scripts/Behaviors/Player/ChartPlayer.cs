@@ -240,8 +240,44 @@ public class ChartPlayer : MonoBehaviour
         }
 
         SongProgressSlider.value = 0;
+        Dictionary<string, LaneGroupPlayer> groups = new Dictionary<string, LaneGroupPlayer>();
+        foreach (LaneGroup group in CurrentChart.Groups) {
+            LaneGroupPlayer gp = new GameObject(group.Name).AddComponent<LaneGroupPlayer>();
+            gp.SetGroup(group);
+            groups.Add(group.Name, gp);
+            t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                yield return null;
+            }
+            SongProgressSlider.value += 1 / CurrentChart.Groups.Count;
+        }
+        foreach (KeyValuePair<string, LaneGroupPlayer> pair in groups) {
+            string parent = pair.Value.CurrentGroup.Group;
+            if (!string.IsNullOrEmpty(parent))
+            {
+                pair.Value.transform.SetParent(groups[parent].transform);
+                pair.Value.ParentGroup = groups[parent];
+            }
+            t = System.DateTime.Now.Ticks;
+            if (t - time > 33e4)
+            {
+                time = t;
+                yield return null;
+            }
+        }
+
+        Debug.Log(string.Join(", ", groups.Keys));
+
+        SongProgressSlider.value = 0;
         foreach (Lane lane in CurrentChart.Lanes) {
             LanePlayer lp = Instantiate(LanePlayerSample, transform);
+            if (!string.IsNullOrEmpty(lane.Group))
+            {
+                lp.transform.SetParent(groups[lane.Group].transform);
+                lp.ParentGroup = groups[lane.Group];
+            }
             lp.SetLane(lane);
             if (lp.Ready) 
             {
