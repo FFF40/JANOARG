@@ -21,6 +21,7 @@ public class Chart : IStoryboardable, IDeepClonable<Chart>
     public List<Lane> Lanes = new List<Lane>();
 
     // Might move this to a new class
+    public CameraController Camera;
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
 
@@ -85,6 +86,7 @@ public class Chart : IStoryboardable, IDeepClonable<Chart>
             DifficultyLevel = DifficultyLevel,
             DifficultyIndex = DifficultyIndex,
             ChartConstant = ChartConstant,
+            Camera = Camera.DeepClone(),
             Pallete = Pallete.DeepClone(),
             Storyboard = Storyboard.DeepClone(),
             CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
@@ -146,6 +148,69 @@ public class ChartManager
     {
         foreach (LaneManager lane in Lanes) lane.Dispose();
         HitMeshManager.Dispose();
+    }
+}
+
+[System.Serializable]
+public class CameraController : IStoryboardable, IDeepClonable<CameraController> {
+    public Vector3 CameraPivot;
+    public Vector3 CameraRotation;
+    
+    public new static TimestampType[] TimestampTypes = 
+    {
+        new TimestampType
+        {
+            ID = "CameraPivot_X",
+            Name = "Camera Pivot X",
+            Get = (x) => ((CameraController)x).CameraPivot.x,
+            Set = (x, a) => { ((CameraController)x).CameraPivot.x = a; },
+        },
+        new TimestampType
+        {
+            ID = "CameraPivot_Y",
+            Name = "Camera Pivot Y",
+            Get = (x) => ((CameraController)x).CameraPivot.y,
+            Set = (x, a) => { ((CameraController)x).CameraPivot.y = a; },
+        },
+        new TimestampType
+        {
+            ID = "CameraPivot_Z",
+            Name = "Camera Pivot Z",
+            Get = (x) => ((CameraController)x).CameraPivot.z,
+            Set = (x, a) => { ((CameraController)x).CameraPivot.z = a; },
+        },
+        new TimestampType
+        {
+            ID = "CameraRotation_X",
+            Name = "Camera Rotation X",
+            Get = (x) => ((CameraController)x).CameraRotation.x,
+            Set = (x, a) => { ((CameraController)x).CameraRotation.x = a; },
+        },
+        new TimestampType
+        {
+            ID = "CameraRotation_Y",
+            Name = "Camera Rotation Y",
+            Get = (x) => ((CameraController)x).CameraRotation.y,
+            Set = (x, a) => { ((CameraController)x).CameraRotation.y = a; },
+        },
+        new TimestampType
+        {
+            ID = "CameraRotation_Z",
+            Name = "Camera Rotation Z",
+            Get = (x) => ((CameraController)x).CameraRotation.z,
+            Set = (x, a) => { ((CameraController)x).CameraRotation.z = a; },
+        },
+    };
+    
+    public CameraController DeepClone()
+    {
+        CameraController clone = new CameraController()
+        {
+            Storyboard = Storyboard.DeepClone(),
+            CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
+            CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z),
+        };
+        return clone;
     }
 }
 

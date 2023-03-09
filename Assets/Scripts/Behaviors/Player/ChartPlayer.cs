@@ -140,9 +140,9 @@ public class ChartPlayer : MonoBehaviour
 
     public void NormalizeTimestamp(Timestamp ts)
     {
-        ts.Duration = Song.Timing.ToSeconds(ts.Time + ts.Duration);
-        ts.Time = Song.Timing.ToSeconds(ts.Time);
-        ts.Duration -= ts.Time;
+        ts.Duration = Song.Timing.ToSeconds(ts.Offset + ts.Duration);
+        ts.Offset = Song.Timing.ToSeconds(ts.Offset);
+        ts.Duration -= ts.Offset;
     }
 
     public void Start()
@@ -428,7 +428,7 @@ public class ChartPlayer : MonoBehaviour
             }
             SongProgressSlider.value = CurrentTime / Song.Clip.length;
 
-            CurrentChart.Advance(CurrentTime);
+            CurrentChart.Camera.Advance(CurrentTime);
             CurrentChart.Pallete.Advance(CurrentTime);
             RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
             SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
@@ -444,8 +444,8 @@ public class ChartPlayer : MonoBehaviour
                 HitStyleManagers[a].Update(CurrentChart.Pallete.HitStyles[a]);
             }
             
-            MainCamera.transform.position = CurrentChart.CameraPivot;
-            MainCamera.transform.eulerAngles = CurrentChart.CameraRotation;
+            MainCamera.transform.position = CurrentChart.Camera.CameraPivot;
+            MainCamera.transform.eulerAngles = CurrentChart.Camera.CameraRotation;
             MainCamera.transform.Translate(Vector3.back * 10);
             
             Dictionary<Touch, HitPlayer> Touches = new Dictionary<Touch, HitPlayer>();

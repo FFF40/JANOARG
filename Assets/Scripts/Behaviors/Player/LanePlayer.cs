@@ -23,9 +23,9 @@ public class LanePlayer : MonoBehaviour
     {
         foreach (Timestamp ts in lane.Storyboard.Timestamps)
         {
-            ts.Duration = ChartPlayer.main.Song.Timing.ToSeconds(ts.Time + ts.Duration);
-            ts.Time = ChartPlayer.main.Song.Timing.ToSeconds(ts.Time);
-            ts.Duration -= ts.Time;
+            ts.Duration = ChartPlayer.main.Song.Timing.ToSeconds(ts.Offset + ts.Duration);
+            ts.Offset = ChartPlayer.main.Song.Timing.ToSeconds(ts.Offset);
+            ts.Duration -= ts.Offset;
         }
         float sec = ChartPlayer.main.Song.Timing.ToSeconds(lane.LaneSteps[0].Offset);
         float pos = sec * lane.LaneSteps[0].Speed;
@@ -66,7 +66,7 @@ public class LanePlayer : MonoBehaviour
             hp.SetHit(this, hit);
 
             // Precalculate hit object positions
-            Chart c = (Chart)ChartPlayer.main.CurrentChart.Get(hit.Offset);
+            CameraController c = (CameraController)ChartPlayer.main.CurrentChart.Camera.Get(hit.Offset);
             cam.transform.position = c.CameraPivot;
             cam.transform.eulerAngles = c.CameraRotation;
             cam.transform.Translate(Vector3.back * 10);
@@ -95,8 +95,8 @@ public class LanePlayer : MonoBehaviour
             if (t - time > 33e4)
             {
                 time = t;
-                cam.transform.position = ChartPlayer.main.CurrentChart.CameraPivot;
-                cam.transform.eulerAngles = ChartPlayer.main.CurrentChart.CameraRotation;
+                cam.transform.position = ChartPlayer.main.CurrentChart.Camera.CameraPivot;
+                cam.transform.eulerAngles = ChartPlayer.main.CurrentChart.Camera.CameraRotation;
                 cam.transform.Translate(Vector3.back * 10);
                 yield return null;
             }

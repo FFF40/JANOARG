@@ -586,6 +586,7 @@ public class Chartmaker : EditorWindow
         height = position.height;
             
         float tHeight = Mathf.Max(22 * timelineHeight, 10);
+        if (tHeight <= 10) tHeight -= 25;
 
         if (TargetSong)
         {
@@ -600,7 +601,12 @@ public class Chartmaker : EditorWindow
             ms = Mathf.Floor((preciseTime % 1) * 1000);
 
             if ((TargetThing is PlayableSong && TargetThing != (object)TargetSong) ||
-                (TargetThing is Chart && TargetThing != (object)TargetChart?.Data))
+                (TargetThing is Chart && TargetThing != (object)TargetChart?.Data) ||
+                (TargetThing is CameraController && TargetThing != (object)TargetChart?.Data.Camera) ||
+                (TargetThing is Pallete && TargetThing != (object)TargetChart?.Data.Pallete) ||
+                (TargetThing is LaneStyle && (TargetChart?.Data.Pallete.LaneStyles.IndexOf((LaneStyle)TargetThing) ?? -1) < 0) ||
+                (TargetThing is HitStyle && (TargetChart?.Data.Pallete.HitStyles.IndexOf((HitStyle)TargetThing) ?? -1) < 0) ||
+                (TargetThing is Lane && (TargetChart?.Data.Lanes.IndexOf((Lane)TargetThing) ?? -1) < 0))
                 TargetThing = null;
 
             if (TargetChartMeta != null && TargetSong.Charts.IndexOf(TargetChartMeta) < 0)
@@ -618,7 +624,10 @@ public class Chartmaker : EditorWindow
             if (TargetSong.ChartsOld != null && TargetSong.ChartsOld.Count > 0)
                 extrasmode = "migrate_charts";
 
-            Rect bound = new Rect(45, 35, width - 320, height - tHeight - 112);
+            Rect bound = new Rect(6, 35, width - 12, height - tHeight - 112);
+            if (inspectorVisible) bound.width -= 271;
+            if (pickerVisible) bound.xMin += 38; 
+
             if (bound.width / bound.height > 3 / 2f)
             {
                 float width = (bound.height * 3 / 2);
@@ -634,23 +643,38 @@ public class Chartmaker : EditorWindow
 
             float camLeft = (bound.center.x - (width - bound.center.x));
             float camRatio = (bound.height / (height - tHeight - 42));
-            Rect camRect = new Rect(0, 0, width + camLeft, height - tHeight - 42);
+            Rect camRect = new Rect(Math.Max(bound.center.x - width / 2, 0), 0, width + camLeft, height - tHeight - 42);
 
             int ncount = 0, ccount = 0;
 
             if (TargetChartMeta != null && TargetChart != null)
             {
-                Chart chart = (Chart)TargetChart.Data.Get(pos);
-                Pallete pal = (Pallete)chart.Pallete.Get(pos);
+                if (TargetChart.Data.CameraPivot != Vector3.zero || TargetChart.Data.CameraRotation != Vector3.zero || TargetChart.Data.Storyboard.Timestamps.Count > 0)
+                {
+                    TargetChart.Data.Camera = new CameraController
+                    {
+                        CameraPivot = TargetChart.Data.CameraPivot,
+                        CameraRotation = TargetChart.Data.CameraRotation,
+                        Storyboard = TargetChart.Data.Storyboard
+                    };
+                    TargetChart.Data.CameraPivot = TargetChart.Data.CameraRotation = Vector3.zero;
+                    TargetChart.Data.Storyboard = new Storyboard();
+                }
 
-                CurrentCamera.targetTexture = null;
-                DestroyImmediate(CurrentRenderTexture);
-                CurrentRenderTexture = new RenderTexture((int)width, (int)height, 0, RenderTextureFormat.ARGB32);
-                CurrentRenderTexture.Create();
-                CurrentCamera.targetTexture = CurrentRenderTexture;
+                CameraController cam = (CameraController)TargetChart.Data.Camera.Get(pos);
+                Pallete pal = (Pallete)TargetChart.Data.Pallete.Get(pos);
 
-                CurrentCamera.transform.position = chart.CameraPivot;
-                CurrentCamera.transform.eulerAngles = chart.CameraRotation;
+                if (!CurrentCamera.targetTexture || CurrentRenderTexture?.width != width || CurrentRenderTexture?.height != height)
+                {
+                    CurrentCamera.targetTexture = null;
+                    DestroyImmediate(CurrentRenderTexture);
+                    CurrentRenderTexture = new RenderTexture((int)width, (int)height, 0, RenderTextureFormat.ARGB32);
+                    CurrentRenderTexture.Create();
+                    CurrentCamera.targetTexture = CurrentRenderTexture;
+                }
+
+                CurrentCamera.transform.position = cam.CameraPivot;
+                CurrentCamera.transform.eulerAngles = cam.CameraRotation;
                 CurrentCamera.transform.Translate(Vector3.back * 10);
                 CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
                 CurrentCamera.pixelRect = new Rect(camRect.x, camRect.y + height - camRect.height, camRect.width, camRect.height);
@@ -1099,15 +1123,21 @@ public class Chartmaker : EditorWindow
 
             GUI.Window(2, new Rect(0, height - tHeight - 74, width, 26), TimelineMode, "", new GUIStyle("button"));
             GUI.BringWindowToBack(2);
-            GUI.Window(3, new Rect(-2, height -  tHeight - 48, width + 4, tHeight + 50), Timeline, "");
+            GUI.Window(3, new Rect(-2, height - tHeight - 48, width + 4, tHeight + 50), Timeline, "");
             GUI.Window(4, new Rect(0, height - tHeight - 51, width, 6), TimelineResize, "", new GUIStyle("button"));
             GUI.BringWindowToFront(4);
 
-            GUI.Window(5, new Rect(width - 270, 36, height - 204, height - tHeight - 114), InspectMode, "", new GUIStyle("button"));
-            GUI.BringWindowToBack(5);
-            GUI.Window(6, new Rect(width - 245, 32, 240, height - tHeight - 106), Inspector, "");
+            if (inspectorVisible)
+            {
+                GUI.Window(5, new Rect(width - 270, 36, height - 204, height - tHeight - 114), InspectMode, "", new GUIStyle("button"));
+                GUI.BringWindowToBack(5);
+                GUI.Window(6, new Rect(width - 245, 32, 240, height - tHeight - 106), Inspector, "");
+            }
 
-            GUI.Window(7, new Rect(5, 32, 32, height - tHeight - 106), Picker, "");
+            if (pickerVisible)
+            {
+                GUI.Window(7, new Rect(5, 32, 32, height - tHeight - 106), Picker, "");
+            }
         }
         else
         {
@@ -1609,7 +1639,7 @@ public class Chartmaker : EditorWindow
             {
                 foreach (LaneStep step in item.LaneSteps) step.Offset += offset;
                 foreach (HitObject hit in item.Objects) hit.Offset += offset;
-                foreach (Timestamp ts in item.Storyboard.Timestamps) ts.Time += offset;
+                foreach (Timestamp ts in item.Storyboard.Timestamps) ts.Offset += offset;
             }
             HistoryAdd(TargetChart.Data.Lanes, list);
 
@@ -1652,12 +1682,12 @@ public class Chartmaker : EditorWindow
             List<Timestamp> list = (ClipboardThing is List<Timestamp> ? (List<Timestamp>)ClipboardThing :
                 new List<Timestamp>(new[] { (Timestamp)ClipboardThing })).ConvertAll<Timestamp>(x => x.DeepClone());
 
-            float offset = pos - list[0].Time;
+            float offset = pos - list[0].Offset;
 
-            foreach (Timestamp item in list) item.Time += offset;
+            foreach (Timestamp item in list) item.Offset += offset;
             HistoryAdd(sb.Storyboard.Timestamps, list);
 
-            sb.Storyboard.Timestamps.Sort((x, y) => x.Time.CompareTo(y.Time));
+            sb.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
     }
 
@@ -2074,42 +2104,62 @@ public class Chartmaker : EditorWindow
         bgLabel.alignment = TextAnchor.MiddleCenter;
         bgLabel.hover.textColor = bgLabel.normal.textColor = backgroundColor.grayscale < .5 ? Color.white : Color.black;
 
+        GUIStyle iconButton = new GUIStyle("button");
+        iconButton.padding = new RectOffset();
+
+        if (GUI.Button(new Rect(4, 3, 21, 20), EditorGUIUtility.IconContent(pickerVisible ? "Profiler.PrevFrame" : "Profiler.NextFrame"), iconButton))
+            pickerVisible = !pickerVisible;
+
         string oldMode = timelineMode;
+        bool active;
 
-        if (GUI.Toggle(timelineMode == "story" ? new Rect(5, 3, 90, 25) : new Rect(5, 3, 90, 20), timelineMode == "story", "Storyboard", "button"))
-            timelineMode = "story";
+        active = timelineMode == "story" && timelineHeight > 0;
+        if (GUI.Toggle(active ? new Rect(29, 3, 80, 25) : new Rect(29, 3, 80, 20), active, "Storyboard", "button") ^ active)
+             { timelineMode = "story"; timelineHeight = Mathf.Max(timelineHeight, 4); }
 
-        GUI.Label(new Rect(95, 3, 12, 20), "|", bgLabel);
+        GUI.Label(new Rect(109, 3, 12, 20), "|", bgLabel);
 
-        if (GUI.Toggle(timelineMode == "timing" ? new Rect(107, 3, 90, 25) : new Rect(107, 3, 90, 20), timelineMode == "timing", "Timing", "buttonLeft"))
-            timelineMode = "timing";
-        if (GUI.Toggle(timelineMode == "lane" ? new Rect(198, 3, 90, 25) : new Rect(198, 3, 90, 20), timelineMode == "lane", "Lanes", "buttonRight"))
-            timelineMode = "lane";
+        active = timelineMode == "timing" && timelineHeight > 0;
+        if (GUI.Toggle(active ? new Rect(121, 3, 70, 25) : new Rect(121, 3, 70, 20), active, "Timing", "buttonLeft") ^ active)
+             { timelineMode = "timing"; timelineHeight = Mathf.Max(timelineHeight, 4); }
+        active = timelineMode == "lane" && timelineHeight > 0;
+        if (GUI.Toggle(active ? new Rect(192, 3, 70, 25) : new Rect(192, 3, 70, 20), active, "Lanes", "buttonRight") ^ active)
+             { timelineMode = "lane"; timelineHeight = Mathf.Max(timelineHeight, 4); }
 
         if (TargetLane != null)
         {
-            GUI.Label(new Rect(289, 3, 21, 20), "▶", bgLabel);
+            GUI.Label(new Rect(263, 3, 21, 20), "▶", bgLabel);
 
-            if (GUI.Toggle(timelineMode == "step" ? new Rect(310, 3, 90, 25) : new Rect(310, 3, 90, 20), timelineMode == "step", "Lane Steps", "buttonLeft"))
-                timelineMode = "step";
-            if (GUI.Toggle(timelineMode == "hit" ? new Rect(401, 3, 90, 25) : new Rect(401, 3, 90, 20), timelineMode == "hit", "Hit Objects", "buttonRight"))
-                timelineMode = "hit";
+            active = timelineMode == "step" && timelineHeight > 0;
+            if (GUI.Toggle(active ? new Rect(284, 3, 70, 25) : new Rect(284, 3, 70, 20), active, "Steps", "buttonLeft") ^ active)
+                 { timelineMode = "step"; timelineHeight = Mathf.Max(timelineHeight, 4); }
+            active = timelineMode == "hit" && timelineHeight > 0;
+            if (GUI.Toggle(active ? new Rect(355, 3, 70, 25) : new Rect(355, 3, 70, 20), active, "Objects", "buttonRight") ^ active)
+                 { timelineMode = "hit"; timelineHeight = Mathf.Max(timelineHeight, 4); }
         }
 
         if (timelineMode != oldMode)
         {
             if (pickermode != "cursor" && pickermode != "select" && pickermode != "delete")
                 pickermode = "cursor";
+            
         }
 
-        bool palleteSel = TargetChart != null && TargetThing == TargetChart.Data.Pallete;
-        bool groupSel = TargetChart != null && TargetThing == TargetChart.Data.Groups;
-        if (GUI.Toggle(groupSel ? new Rect(width - 165, -2, 80, 25) : new Rect(width - 165, 3, 80, 20), groupSel, "Groups", "buttonLeft")
-            && TargetThing != TargetChart?.Data.Groups)
-            TargetThing = TargetChart.Data.Groups;
-        else if (GUI.Toggle(palleteSel ? new Rect(width - 84, -2, 80, 25) : new Rect(width - 84, 3, 80, 20), palleteSel, "Palette", "buttonRight")
-            && TargetThing != TargetChart?.Data.Pallete)
-            TargetThing = TargetChart.Data.Pallete;
+        bool cameraSel = TargetChart != null && TargetThing == TargetChart.Data.Camera && inspectorVisible;
+        bool groupSel = TargetChart != null && TargetThing == TargetChart.Data.Groups && inspectorVisible;
+        bool palleteSel = TargetChart != null && TargetThing == TargetChart.Data.Pallete && inspectorVisible;
+        if ((GUI.Toggle(cameraSel ? new Rect(width - 240, -2, 70, 25) : new Rect(width - 240, 3, 70, 20), cameraSel, "Camera", "buttonLeft")
+            ^ cameraSel) && TargetChart != null)
+            { TargetThing = TargetChart.Data.Camera; inspectorVisible = true; }
+        else if ((GUI.Toggle(groupSel ? new Rect(width - 169, -2, 70, 25) : new Rect(width - 169, 3, 70, 20), groupSel, "Groups", "buttonMid")
+            ^ groupSel) && TargetChart != null)
+            { TargetThing = TargetChart.Data.Groups; inspectorVisible = true; }
+        else if ((GUI.Toggle(palleteSel ? new Rect(width - 98, -2, 70, 25) : new Rect(width - 98, 3, 70, 20), palleteSel, "Palette", "buttonRight")
+            ^ palleteSel) && TargetChart != null)
+            { TargetThing = TargetChart.Data.Pallete; inspectorVisible = true; }
+
+        if (GUI.Button(new Rect(width - 25, 3, 21, 20), EditorGUIUtility.IconContent(inspectorVisible ? "Profiler.NextFrame" : "Profiler.PrevFrame"), iconButton))
+            inspectorVisible = !inspectorVisible;
     }
 
     #endregion
@@ -2150,7 +2200,7 @@ public class Chartmaker : EditorWindow
             timelineHeight += tResize;
             Repaint();
         }
-        timelineHeight = timelineHeight < 2 ? 0 : Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
+        timelineHeight = timelineHeight < 1 ? -1 : Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
     }
 
     public void Timeline(int id)
@@ -2341,7 +2391,14 @@ public class Chartmaker : EditorWindow
 
             if (timelineMode == "story")
             {
-                if (TargetThing is IStoryboardable)
+                if (TargetThing == TargetChart.Data)
+                {
+                    EditorGUI.DrawRect(new Rect(0, 0, width + 4, tHeight + 5), EditorGUIUtility.isProSkin ? new Color(0, 0, 0, .4f) : new Color(1, 1, 1, .4f));
+                    GUIStyle center = new GUIStyle("label");
+                    center.alignment = TextAnchor.MiddleCenter;
+                    GUI.Label(new Rect(0, 0, width + 4, tHeight + 5), "Camera controls have been moved to a designated Camera controller below the Inspector.", center);
+                }
+                else if (TargetThing is IStoryboardable)
                 {
                     IStoryboardable thing = (IStoryboardable)TargetThing;
                     Storyboard sb = thing.Storyboard;
@@ -2369,9 +2426,9 @@ public class Chartmaker : EditorWindow
 
                     foreach (Timestamp ts in sb.Timestamps)
                     {
-                        float a = ts.Time;
+                        float a = ts.Offset;
                         float pos = (a - seekStart) / (seekEnd - seekStart) * width;
-                        float b = ts.Time + ts.Duration;
+                        float b = ts.Offset + ts.Duration;
                         float pos2 = (b - seekStart) / (seekEnd - seekStart) * width;
 
                         float time = tso.IndexOf(ts.ID) - verSeek;
@@ -2782,7 +2839,7 @@ public class Chartmaker : EditorWindow
                     {
                         List<Timestamp> sel = ((IStoryboardable)TargetThing).Storyboard.Timestamps.FindAll(x =>
                         {
-                            return x.Time >= selectStart && x.Time <= selectEnd;
+                            return x.Offset >= selectStart && x.Offset <= selectEnd;
                         });
                         if (sel.Count == 1) TargetTimestamp = sel[0];
                         else if (sel.Count > 1) TargetThing = sel;
@@ -2849,12 +2906,12 @@ public class Chartmaker : EditorWindow
                         Timestamp ts = new Timestamp()
                         {
                             ID = type.ID,
-                            Time = (float)selectStart,
+                            Offset = (float)selectStart,
                             Duration = (float)(selectEnd - selectStart)
                         };
 
                         HistoryAdd(thing.Storyboard.Timestamps, ts);
-                        thing.Storyboard.Timestamps.Sort((x, y) => x.Time.CompareTo(y.Time));
+                        thing.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                         TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                         TargetTimestamp = ts;
                         Repaint();
@@ -2961,6 +3018,8 @@ public class Chartmaker : EditorWindow
     ////////////////////////
 
     Vector2 scrollPos = Vector2.zero;
+
+    bool inspectorVisible = true;
 
     long BPMTapStart, BPMTapEnd, BPMTapCount;
     string RenameTarget;
@@ -3261,7 +3320,7 @@ public class Chartmaker : EditorWindow
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Timestamp", "boldLabel");
                 GUILayout.Space(8);
-                ts.Time = EditorGUI.FloatField(new Rect(163, 2, 75, 20), ts.Time);
+                ts.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), ts.Offset);
                 GUI.Label(new Rect(163, 2, 75, 20), "b", rightStyle);
 
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -3392,8 +3451,18 @@ public class Chartmaker : EditorWindow
                 TargetChartMeta.DifficultyName = thing.DifficultyName = EditorGUILayout.TextField("Name", thing.DifficultyName);
                 TargetChartMeta.DifficultyLevel = thing.DifficultyLevel = EditorGUILayout.TextField("Level", thing.DifficultyLevel);
                 TargetChartMeta.ChartConstant = thing.ChartConstant = EditorGUILayout.FloatField("Constant", thing.ChartConstant);
+                GUILayout.EndScrollView();
+                History.EndRecordItem(TargetThing);
+            }
+            else if (TargetThing is CameraController)
+            {
+                CameraController thing = TargetChart.Data.Camera;
+                History.StartRecordItem(TargetThing);
+
+                GUI.Label(new Rect(7, 2, 226, 20), "Camera Controller", "boldLabel");
                 GUILayout.Space(8);
-                GUILayout.Label("Camera", "boldLabel");
+                scrollPos = GUILayout.BeginScrollView(scrollPos);
+                GUILayout.Label("Transform", "boldLabel");
                 thing.CameraPivot = EditorGUILayout.Vector3Field("Pivot", thing.CameraPivot);
                 thing.CameraRotation = EditorGUILayout.Vector3Field("Rotation", thing.CameraRotation);
                 GUILayout.EndScrollView();
@@ -3814,7 +3883,11 @@ public class Chartmaker : EditorWindow
         {
             GUI.Label(new Rect(7, 2, 226, 20), "Storyboard", "boldLabel");
             GUILayout.Space(8);
-            if (TargetThing is IStoryboardable)
+            if (TargetThing == TargetChart.Data)
+            {
+                GUILayout.Label("Camera controls have been moved to a\ndesignated Camera controller below\nthe Inspector.");
+            }
+            else if (TargetThing is IStoryboardable)
             {
                 IStoryboardable thing = (IStoryboardable)TargetThing;
                 Storyboard sb = thing.Storyboard;
@@ -3857,7 +3930,7 @@ public class Chartmaker : EditorWindow
                     HistoryAdd(sb.Timestamps, new Timestamp
                     {
                         ID = tso[add],
-                        Time = pos,
+                        Offset = pos,
                     });
                 }
                 GUI.Button(new Rect(218, 2, 20, 20), "+");
@@ -3872,7 +3945,7 @@ public class Chartmaker : EditorWindow
                     History.StartRecordItem(ts);
                     GUI.Label(new Rect(3, h + o + 2, 203, 33), "", "buttonLeft");
 
-                    ts.Time = EditorGUI.FloatField(new Rect(5, h + o + 4, 40, 14), ts.Time, bStyle);
+                    ts.Offset = EditorGUI.FloatField(new Rect(5, h + o + 4, 40, 14), ts.Offset, bStyle);
                     GUI.Label(new Rect(5, h + o + 4, 40, 14), "b", rightStyle);
                     GUI.Label(new Rect(45, h + o + 4, 30, 14), "time", labelStyle);
 
@@ -3920,6 +3993,8 @@ public class Chartmaker : EditorWindow
     /////////////////////
 
     public string pickermode = "cursor";
+
+    public bool pickerVisible = true;
 
     public void Picker(int id)
     {

@@ -17,9 +17,9 @@ public class LaneGroupPlayer : MonoBehaviour
     {
         foreach (Timestamp ts in group.Storyboard.Timestamps)
         {
-            ts.Duration = ChartPlayer.main.Song.Timing.ToSeconds(ts.Time + ts.Duration);
-            ts.Time = ChartPlayer.main.Song.Timing.ToSeconds(ts.Time);
-            ts.Duration -= ts.Time;
+            ts.Duration = ChartPlayer.main.Song.Timing.ToSeconds(ts.Offset + ts.Duration);
+            ts.Offset = ChartPlayer.main.Song.Timing.ToSeconds(ts.Offset);
+            ts.Duration -= ts.Offset;
         }
 
         CurrentGroup = group;

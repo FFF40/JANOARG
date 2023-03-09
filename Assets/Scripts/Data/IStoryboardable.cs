@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.Serialization;
 
 [Serializable]
 public class Timestamp 
 {
-    public float Time;
+    [FormerlySerializedAs("Time")]
+    public float Offset;
     public float Duration;
     public string ID;
     public float From = float.NaN;
@@ -18,7 +20,7 @@ public class Timestamp
     {
         Timestamp clone = new Timestamp() 
         {
-            Time = Time,
+            Offset = Offset,
             Duration = Duration,
             ID = ID,
             From = From,
@@ -44,7 +46,7 @@ public class Storyboard
 
     public void Add(Timestamp timestamp) {
         Timestamps.Add(timestamp);
-        Timestamps.Sort((x, y) => x.Time.CompareTo(y.Time));
+        Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
     }
 
     public List<Timestamp> FromType(string type) {
@@ -154,15 +156,15 @@ public abstract class IStoryboardable
             float value = tst.Get(this);
             foreach (Timestamp ts in sb) 
             {
-                if (time >= ts.Time + ts.Duration) value = ts.Target;
-                else if (time > ts.Time) 
+                if (time >= ts.Offset + ts.Duration) value = ts.Target;
+                else if (time > ts.Offset) 
                 {
                     if (!float.IsNaN(ts.From)) value = (float)ts.From;
                     Ease ease = Ease.Eases[ts.Easing];
                     Func<float, float> func = ease.InOut;
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
                     else if (ts.EaseMode == EaseMode.Out) func = ease.Out;
-                    value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Time) / ts.Duration));
+                    value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Offset) / ts.Duration));
                     break;
                 }
                 else break;
@@ -192,15 +194,15 @@ public abstract class IStoryboardable
             while (true) 
             {
                 Timestamp ts = Storyboard.Timestamps.Find(x => x.ID == tst.ID);
-                if (ts == null || (time < ts.Time && currentTime < ts.Time)) break;
-                else if (time < ts.Time + ts.Duration)
+                if (ts == null || (time < ts.Offset && currentTime < ts.Offset)) break;
+                else if (time < ts.Offset + ts.Duration)
                 {
                     if (!float.IsNaN(ts.From)) currentValues[tst.ID] = value = (float)ts.From;
                     Ease ease = Ease.Eases[ts.Easing];
                     Func<float, float> func = ease.InOut;
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
                     else if (ts.EaseMode == EaseMode.Out) func = ease.Out;
-                    value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Time) / ts.Duration));
+                    value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Offset) / ts.Duration));
                     break;
                 }
                 else
