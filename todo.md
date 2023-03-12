@@ -1,1 +1,3 @@
-- Lane groups
+- Saving system
+- Currency system
+- Settings page

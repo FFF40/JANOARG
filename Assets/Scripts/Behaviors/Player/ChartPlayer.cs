@@ -446,7 +446,7 @@ public class ChartPlayer : MonoBehaviour
             
             MainCamera.transform.position = CurrentChart.Camera.CameraPivot;
             MainCamera.transform.eulerAngles = CurrentChart.Camera.CameraRotation;
-            MainCamera.transform.Translate(Vector3.back * 10);
+            MainCamera.transform.Translate(Vector3.back * CurrentChart.Camera.PivotDistance);
             
             Dictionary<Touch, HitPlayer> Touches = new Dictionary<Touch, HitPlayer>();
 

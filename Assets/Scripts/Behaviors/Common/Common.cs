@@ -7,13 +7,21 @@ public class Common : MonoBehaviour
     public static Common main;
 
     public LoadingBar LoadingBar;
+    public Storage Storage;
 
     public void Awake()
     {
         main = this;
+
+        Storage = new Storage("save");
+        Storage.Set("Count", Storage.Get("Count", 0) + 1);
+        Debug.Log(Storage.Get("Count", 0));
+        Storage.Save();
+
+        Application.targetFrameRate = 60;
+
         CommonScene.LoadAlt("Song Select");
         
-        Application.targetFrameRate = 60;
     }
 
     void OnDestroy()

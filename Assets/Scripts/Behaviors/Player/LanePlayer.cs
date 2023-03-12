@@ -69,7 +69,7 @@ public class LanePlayer : MonoBehaviour
             CameraController c = (CameraController)ChartPlayer.main.CurrentChart.Camera.Get(hit.Offset);
             cam.transform.position = c.CameraPivot;
             cam.transform.eulerAngles = c.CameraRotation;
-            cam.transform.Translate(Vector3.back * 10);
+            cam.transform.Translate(Vector3.back * c.PivotDistance);
 
             Lane l = (Lane)CurrentLane.Get(hit.Offset);
             LaneStep s = l.GetLaneStep(pos, pos, ChartPlayer.main.Song.Timing);

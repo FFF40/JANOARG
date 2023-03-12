@@ -154,6 +154,7 @@ public class ChartManager
 [System.Serializable]
 public class CameraController : IStoryboardable, IDeepClonable<CameraController> {
     public Vector3 CameraPivot;
+    public float PivotDistance = 10;
     public Vector3 CameraRotation;
     
     public new static TimestampType[] TimestampTypes = 
@@ -178,6 +179,13 @@ public class CameraController : IStoryboardable, IDeepClonable<CameraController>
             Name = "Camera Pivot Z",
             Get = (x) => ((CameraController)x).CameraPivot.z,
             Set = (x, a) => { ((CameraController)x).CameraPivot.z = a; },
+        },
+        new TimestampType
+        {
+            ID = "PivotDistance",
+            Name = "Pivot Distance",
+            Get = (x) => ((CameraController)x).PivotDistance,
+            Set = (x, a) => { ((CameraController)x).PivotDistance = a; },
         },
         new TimestampType
         {

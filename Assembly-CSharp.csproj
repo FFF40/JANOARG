@@ -54,6 +54,7 @@
      <Compile Include="Assets\Scripts\Data\ExternalChart.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\LaneGroupPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\HitEffect.cs" />
+     <Compile Include="Assets\Scripts\Data\Storage.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\HitPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Common\LoadingBar.cs" />
      <Compile Include="Assets\Scripts\Data\PlayableSong.cs" />

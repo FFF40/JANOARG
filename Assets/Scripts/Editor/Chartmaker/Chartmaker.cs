@@ -675,7 +675,7 @@ public class Chartmaker : EditorWindow
 
                 CurrentCamera.transform.position = cam.CameraPivot;
                 CurrentCamera.transform.eulerAngles = cam.CameraRotation;
-                CurrentCamera.transform.Translate(Vector3.back * 10);
+                CurrentCamera.transform.Translate(Vector3.back * cam.PivotDistance);
                 CurrentCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
                 CurrentCamera.pixelRect = new Rect(camRect.x, camRect.y + height - camRect.height, camRect.width, camRect.height);
 
@@ -803,18 +803,22 @@ public class Chartmaker : EditorWindow
 
                     if (TargetLane != null && TargetLane.LaneSteps.Count > 0 && TargetLane.LaneSteps[TargetLane.LaneSteps.Count - 1].Offset >= pos)
                     {
-                        LaneManager man = Manager.Lanes[TargetChart.Data.Lanes.IndexOf(TargetLane)];
+                        int index = TargetChart.Data.Lanes.IndexOf(TargetLane);
+                        if (index >= 0 && index < Manager.Lanes.Count)
+                        {
+                            LaneManager man = Manager.Lanes[index];
 
-                        Vector3 startPos = man.StartPos;
-                        Vector3 endPos = man.EndPos;
+                            Vector3 startPos = man.StartPos;
+                            Vector3 endPos = man.EndPos;
 
-                        Vector3 startPosScr = WorldToScreen(startPos);
-                        Vector3 endPosScr = WorldToScreen(endPos);
+                            Vector3 startPosScr = WorldToScreen(startPos);
+                            Vector3 endPosScr = WorldToScreen(endPos);
 
-                        Handles.color = Color.black;
-                        Handles.DrawLine(startPosScr + Vector3.back, endPosScr + Vector3.back, 3);
-                        Handles.color = Color.white;
-                        Handles.DrawLine(startPosScr, endPosScr, 1);
+                            Handles.color = Color.black;
+                            Handles.DrawLine(startPosScr + Vector3.back, endPosScr + Vector3.back, 3);
+                            Handles.color = Color.white;
+                            Handles.DrawLine(startPosScr, endPosScr, 1);
+                        }
                     }
 
 
