@@ -11,7 +11,7 @@
 
 ### You'll need the following:
 * A personal computer (Windows/Mac/Linux, the editor isn't available on mobile, sorry)
-* A copy of Unity Editor (preferably version 2021.1)
+* A copy of Unity Editor (preferably version 2022.2.2)
 * A code editor (any text editor should work)
 * A copy of Git/Github Desktop is recommended so you can update/submit code easily
 
