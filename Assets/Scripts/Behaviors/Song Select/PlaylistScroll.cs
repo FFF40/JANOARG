@@ -51,6 +51,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     PlaylistScrollItem SelectedItem;
     int SelectedIndex = 0;
 
+    float SelectionOffset = 0;
+
     public bool isSelected;
     public int SelectedDifficultyIndex;
     public DifficultyItem SelectedDifficulty;
@@ -60,6 +62,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     public RectTransform ChartDetail;
     public CanvasGroup ChartDetailGroup;
 
+    int AltLevel;
+
     void Awake()
     {
         main = this;
@@ -68,7 +72,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
     void OnDestroy()
     {
-        main = main == this ? null : main;
+        Common.main?.Storage?.OnSave.RemoveListener(OnSave);
     }
     
     void Start()
@@ -77,7 +81,22 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         if (!ProfileBar) ProfileBar = ProfileBar.main;
 
         IsReady = false;
+        AltLevel = Common.main.Storage.Get("PREF:AltName", 0);
+        Common.main.Storage.OnSave.AddListener(OnSave);
         StartCoroutine(GetSong());
+    }
+
+    void OnSave()
+    {
+        AltLevel = Common.main.Storage.Get("PREF:AltName", 0);
+        
+        foreach (PlaylistScrollItem item in Items)
+        {
+            item.SetSong(item.Song, item.Path, AltLevel);
+        }
+        
+        SongNameLabel.text = SelectedItem.SongNameLabel.text;
+        ArtistNameLabel.text = SelectedItem.ArtistNameLabel.text;
     }
 
     IEnumerator GetSong()
@@ -101,7 +120,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         {
             PlaylistScrollItem item = Instantiate(ItemSample, transform);
             string path = Playlist.ItemPaths[Modulo(a, Playlist.ItemPaths.Count)];
-            item.SetSong(Songs[path], path);
+            item.SetSong(Songs[path], path, AltLevel);
             Items.Add(item);
         }
 
@@ -141,7 +160,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         if (Items.Count > 0)
         {
-            if (oldOffset != Offset)
+            if (oldOffset != Offset || SelectionOffset != 0 || isAnimating)
             {
                 int pos = -Mathf.RoundToInt(Offset / ItemSize);
 
@@ -152,7 +171,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                     Items.Add(item);
                     ListOffset++;
                     string path = Playlist.ItemPaths[Modulo(ListOffset + ListPadding, Playlist.ItemPaths.Count)];
-                    item.SetSong(Songs[path], path);
+                    item.SetSong(Songs[path], path, AltLevel);
+                    SelectionOffset = ItemSize * .4f;
                     isScrolling = true;
                 }
                 while (ListOffset > pos)
@@ -162,7 +182,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                     Items.Insert(0, item);
                     ListOffset--;
                     string path = Playlist.ItemPaths[Modulo(ListOffset - ListPadding, Playlist.ItemPaths.Count)];
-                    item.SetSong(Songs[path], path);
+                    item.SetSong(Songs[path], path, AltLevel);
+                    SelectionOffset = -ItemSize * .4f;
                     isScrolling = true;
                 }
 
@@ -170,12 +191,22 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                 ListOffset = pos = -Mathf.RoundToInt(Offset / ItemSize);
 
                 float ofs = Offset + (pos - ListPadding) * ItemSize;
+                bool isMaximized = !isSelectionShown || isScrolling || isAnimating;
                 foreach (PlaylistScrollItem item in Items)
                 {
                     RectTransform rt = (RectTransform)item.transform;
-                    float realOfs = (ofs + Mathf.Clamp(ofs * .6f, -32, 32)) * Mathf.Min(Mathf.Abs(ofs) / ItemSize * 2 + .1f, 1);
+                    bool isSel = (Mathf.Abs(ofs) < ItemSize / 2 || ofs == ItemSize / 2);
+                    bool isPreSel = (Mathf.Sign(ofs) == -Mathf.Sign(SelectionOffset) && Mathf.Abs(ofs) < ItemSize * 3 / 2);
+
+                    float realOfs = isMaximized && isSel
+                        ? SelectionOffset
+                        : ofs + Mathf.Clamp(ofs * (isMaximized ? 80 : 40) / ItemSize, -40, 40) + (isPreSel ? SelectionOffset : 0);
 
                     rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), EaseFunction.Circle, EaseMode.In) * self.rect.width / 2, -realOfs);
+                    rt.sizeDelta = Vector2.one * (isMaximized && isSel ? 64 : 40);
+
+                    item.CoverImage.rectTransform.localEulerAngles = isSel || isPreSel ? Vector3.forward * SelectionOffset / ItemSize * 5 : Vector3.zero;
+                    
                     ofs += ItemSize;
                 }
 
@@ -183,6 +214,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                 {
                     SelectedSongBox.anchoredPosition = GetSelectionOffset();
                 }
+
+                
+                if (Mathf.Abs(SelectionOffset) < 1e-4f) SelectionOffset = 0;
+                else SelectionOffset *= Mathf.Pow(1e-6f / Mathf.Abs(Velocity + 1), Time.deltaTime);
             }
 
             if (isSelectionShown == false && isScrolling == false)
@@ -235,13 +270,19 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
 
-            SelectedSongBox.sizeDelta = Vector2.Lerp(coverRect.size, new Vector2(0, 100), ease);
+            SelectedSongBox.sizeDelta = Vector2.Lerp(coverRect.size, new Vector2(0, 120), ease);
             SelectedSongBox.anchorMin = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(0, .5f), ease);
             SelectedSongBox.anchorMax = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(1, .5f), ease);
             SelectedSongBox.anchoredPosition = Vector2.Lerp(coverPos, GetSelectionOffset(), ease);
             SelectedItem.SongNameLabel.rectTransform.anchoredPosition = new Vector2(9 + 200 * ease, SelectedItem.SongNameLabel.rectTransform.anchoredPosition.y);
             SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(10 + 200 * ease, SelectedItem.ArtistNameLabel.rectTransform.anchoredPosition.y);
             SelectedItem.SongNameLabel.alpha = SelectedItem.ArtistNameLabel.alpha = 1 - ease;
+
+            float ease2 = Ease.Get(Mathf.Max(value * 2 - 1, 0), EaseFunction.Quadratic, EaseMode.Out);
+            SongNameLabel.rectTransform.anchoredPosition = new Vector2(100 - 50 * ease2, SongNameLabel.rectTransform.anchoredPosition.y);
+            ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(101 - 50 * ease2, ArtistNameLabel.rectTransform.anchoredPosition.y);
+            DataLabel.rectTransform.anchoredPosition = new Vector2(102 - 50 * ease2, DataLabel.rectTransform.anchoredPosition.y);
+            SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = ease2;
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / 1.2f)
@@ -283,7 +324,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
 
-            SelectedSongBox.sizeDelta = Vector2.Lerp(coverRect.size, new Vector2(0, 100), ease);
+            SelectedSongBox.sizeDelta = Vector2.Lerp(coverRect.size, new Vector2(0, 120), ease);
             SelectedSongBox.anchorMin = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(0, .5f), ease);
             SelectedSongBox.anchorMax = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(1, .5f), ease);
             SelectedSongBox.anchoredPosition = Vector2.Lerp(coverPos, GetSelectionOffset(), ease);
@@ -328,7 +369,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
 
-            SelectedSongBox.sizeDelta = Vector2.Lerp(new Vector2(0, 100), coverRect.size, ease);
+            SelectedSongBox.sizeDelta = Vector2.Lerp(new Vector2(0, 120), coverRect.size, ease);
             SelectedSongBox.anchorMin = Vector2.Lerp(new Vector2(0, .5f), new Vector2(.5f, .5f), ease);
             SelectedSongBox.anchorMax = Vector2.Lerp(new Vector2(1, .5f), new Vector2(.5f, .5f), ease);
             SelectedSongBox.anchoredPosition = Vector2.Lerp(GetSelectionOffset(), coverPos, ease);
@@ -395,12 +436,12 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             self.sizeDelta = Vector2.one * (1800 + 1800 * ease);
 
             float ease2 = Ease.Get(value, EaseFunction.Quintic, EaseMode.InOut);
-            SelectedSongBox.sizeDelta = new Vector2(0, 100 + 60 * ease2);
+            SelectedSongBox.sizeDelta = new Vector2(0, 120 + 60 * ease2);
 
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(SongNameLabel.rectTransform.anchoredPosition.x, -29 + 24 * ease2);
             ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(ArtistNameLabel.rectTransform.anchoredPosition.x, 5 + 24 * ease2);
             DataLabel.rectTransform.anchoredPosition = new Vector2(DataLabel.rectTransform.anchoredPosition.x, 27 + 24 * ease2);
-            DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, -52 + 70 * ease2);
+            DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, -52 + 80 * ease2);
 
             float ease3 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
@@ -436,12 +477,12 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             self.sizeDelta = Vector2.one * (1800 * ease);
 
             float ease2 = Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
-            SelectedSongBox.sizeDelta = new Vector2(0, 160 - 60 * ease2);
+            SelectedSongBox.sizeDelta = new Vector2(0, 180 - 60 * ease2);
 
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(SongNameLabel.rectTransform.anchoredPosition.x, -5 - 24 * ease2);
             ArtistNameLabel.rectTransform.anchoredPosition = new Vector2(ArtistNameLabel.rectTransform.anchoredPosition.x, 29 - 24 * ease2);
             DataLabel.rectTransform.anchoredPosition = new Vector2(DataLabel.rectTransform.anchoredPosition.x, 51 - 24 * ease2);
-            DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, 18 - 70 * ease2);
+            DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, 28 - 70 * ease2);
             
             float ease3 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             SongActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
@@ -501,7 +542,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
-            SelectedSongBox.sizeDelta = new Vector2((-100 + SafeArea.sizeDelta.x) * ease, 160 - 20 * ease);
+            SelectedSongBox.sizeDelta = new Vector2((-100 + SafeArea.sizeDelta.x) * ease, 180 - 40 * ease);
 
             float posX = Mathf.Lerp(50, 20, ease);
             SongNameLabel.rectTransform.anchoredPosition = new Vector2(posX, -5 + 10 * ease);
@@ -576,6 +617,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         if (!isSelected)
         {
             isDragging = isScrolling || !isAnimating;
+            Velocity = 0;
         }
     }
 
@@ -598,4 +640,9 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
     public int Modulo(int a, int b) => ((a % b) + b) % b;
     public float Modulo(float a, float b) => ((a % b) + b) % b;
+
+    public void ShowSettings()
+    {
+        SceneManager.LoadSceneAsync("Settings", LoadSceneMode.Additive);
+    }
 }

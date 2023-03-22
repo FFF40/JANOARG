@@ -68,7 +68,9 @@ public class ChartPlayer : MonoBehaviour
     public GameObject PlayInterfaceObject;
     [Space]
     public GameObject SideObject;
+    public CanvasGroup SideGroup;
     public GameObject CenterObject;
+    public CanvasGroup CenterGroup;
     [Space]
     public TMP_Text SongNameLabel;
     public TMP_Text SongArtistLabel;
@@ -94,7 +96,13 @@ public class ChartPlayer : MonoBehaviour
     public CanvasGroup ComboGroup;
     public TMP_Text ComboLabel;
     public TMP_Text ComboText;
-
+    [Space]
+    public float AudioOffset;
+    public float VisualOffset;
+    public float[] HitVolume;
+    public float[] HitSize;
+    public float[] HitEffectAlpha;
+    public float[] HitEffectSize;
 
 
     [HideInInspector]
@@ -169,6 +177,24 @@ public class ChartPlayer : MonoBehaviour
         long t;
         ResourceRequest req;
 
+        AudioOffset = Common.main.Storage.Get("PREF:AudioOffset", 0f) / 1000;
+        VisualOffset = Common.main.Storage.Get("PREF:VisualOffset", 0f) / 1000;
+        AudioPlayer.volume = Common.main.Storage.Get("PREF:MusicVolume", 100f) / 100;
+        SideGroup.alpha = Common.main.Storage.Get("PREF:PlayerSideAlpha", 100f) / 100;
+        CenterGroup.alpha = Common.main.Storage.Get("PREF:PlayerCenterAlpha", 50f) / 100;
+
+        HitSize = Common.main.Storage.Get("PREF:NoteSize", new [] { 1f });
+        if (HitSize.Length < 2) HitSize = new []{ HitSize[0], HitSize[0] };
+
+        HitVolume = Common.main.Storage.Get("PREF:HitVolume", new [] { 80f });
+        if (HitVolume.Length < 3) HitVolume = new []{ HitVolume[0], HitVolume[0], HitVolume[0] };
+        for (int a = 0; a < HitVolume.Length; a++) HitVolume[a] /= 100;
+        HitEffectAlpha = Common.main.Storage.Get("PREF:PlayerHitAlpha", new [] { 100f });
+        if (HitEffectAlpha.Length < 3) HitEffectAlpha = new []{ HitEffectAlpha[0], HitEffectAlpha[0], HitEffectAlpha[0] };
+        for (int a = 0; a < HitEffectAlpha.Length; a++) HitEffectAlpha[a] /= 100;
+        HitEffectSize = Common.main.Storage.Get("PREF:PlayerHitFactor", new [] { 1f });
+        if (HitEffectSize.Length < 3) HitEffectSize = new []{ HitEffectSize[0], HitEffectSize[0], HitEffectSize[0] };
+
         req = Resources.LoadAsync(SongPath);
         yield return new WaitUntil(() => req.isDone);
         Song = Instantiate((PlayableSong)req.asset);
@@ -191,7 +217,7 @@ public class ChartPlayer : MonoBehaviour
         if (!FreeFlickEmblem) FreeFlickEmblem = MakeFreeFlickEmblem();
         if (!DirectionalFlickEmblem) DirectionalFlickEmblem = MakeDirectionalFlickEmblem();
 
-        foreach (Timestamp ts in CurrentChart.Storyboard.Timestamps)
+        foreach (Timestamp ts in CurrentChart.Camera.Storyboard.Timestamps)
         {
             NormalizeTimestamp(ts);
             t = System.DateTime.Now.Ticks;
@@ -435,12 +461,12 @@ public class ChartPlayer : MonoBehaviour
 
             for (int a = 0; a < LaneStyleManagers.Count; a++)
             {
-                CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime);
+                CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime + VisualOffset);
                 LaneStyleManagers[a].Update(CurrentChart.Pallete.LaneStyles[a]);
             }
             for (int a = 0; a < HitStyleManagers.Count; a++)
             {
-                CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime);
+                CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime + VisualOffset);
                 HitStyleManagers[a].Update(CurrentChart.Pallete.HitStyles[a]);
             }
             
@@ -480,7 +506,7 @@ public class ChartPlayer : MonoBehaviour
                 }
             }
 
-            float time = CurrentTime;
+            float time = CurrentTime + AudioOffset;
 
             foreach (HitPlayer obj in RemovingHits)
             {
@@ -495,13 +521,13 @@ public class ChartPlayer : MonoBehaviour
                 if (obj.CurrentHit.Offset > time + BadHitWindow / 1000) break;
                 if (!obj.isHit) 
                 {
-                    if (AutoPlay && time > obj.CurrentHit.Offset)
+                    if (AutoPlay && time - AudioOffset > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(0);
                         if (!obj.CurrentHit.Flickable) AddAccuracy(0);
                         else AddDiscrete(true);
                         AddScore(obj.NoteWeight, 1, true);
-                        AudioPlayer.PlayOneShot(NormalHitSound);
+                        AudioPlayer.PlayOneShot(NormalHitSound, HitVolume[0]);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
@@ -550,7 +576,7 @@ public class ChartPlayer : MonoBehaviour
                                 obj.MakeHitEffect(null);
                                 AddDiscrete(true);
                                 AddScore(obj.NoteWeight, 1, true);
-                                AudioPlayer.PlayOneShot(NormalHitSound);
+                                AudioPlayer.PlayOneShot(NormalHitSound, HitVolume[0]);
                                 obj.BeginHit();
                                 break;
                             }
@@ -564,12 +590,12 @@ public class ChartPlayer : MonoBehaviour
                 if (obj.CurrentHit.Offset > time + GoodHitWindow / 1000) break;
                 if (!obj.isHit) 
                 {
-                    if (AutoPlay && time > obj.CurrentHit.Offset)
+                    if (AutoPlay && time - AudioOffset > obj.CurrentHit.Offset)
                     {
                         obj.MakeHitEffect(null);
                         AddDiscrete(true);
                         AddScore(obj.NoteWeight, 1, true);
-                        AudioPlayer.PlayOneShot(CatchHitSound);
+                        AudioPlayer.PlayOneShot(CatchHitSound, HitVolume[0]);
                         obj.BeginHit();
                     }
                     else if (time > obj.CurrentHit.Offset + GoodHitWindow / 1000)
@@ -605,7 +631,7 @@ public class ChartPlayer : MonoBehaviour
                                 obj.MakeHitEffect(null);
                                 AddDiscrete(true);
                                 AddScore(1, 1, true);
-                                AudioPlayer.PlayOneShot(CatchHitSound);
+                                AudioPlayer.PlayOneShot(CatchHitSound, HitVolume[0]);
                                 
                                 if (obj.Ticks.Count != 0) obj.railTime = 1;
                                 obj.BeginHit();
@@ -639,7 +665,7 @@ public class ChartPlayer : MonoBehaviour
                             obj.MakeHitEffect(null);
                             AddDiscrete(true);
                             AddScore(obj.NoteWeight, 1, true);
-                            AudioPlayer.PlayOneShot(CatchHitSound);
+                            AudioPlayer.PlayOneShot(CatchHitSound, HitVolume[0]);
                             obj.BeginHit();
                         }
                     }
@@ -667,8 +693,9 @@ public class ChartPlayer : MonoBehaviour
                         
                         obj.MakeHitEffect(acc);
                         if (acc > -1) AddAccuracy(ofs);
-                        AddScore(3, (1 - Mathf.Abs(acc)), acc != -1);
-                        AudioPlayer.PlayOneShot(NormalHitSound);
+                        acc = Mathf.Abs(acc);
+                        AddScore(3, (1 - acc), acc < 1);
+                        AudioPlayer.PlayOneShot(NormalHitSound, acc == 0 ? HitVolume[0] : acc < 1 ? HitVolume[1] : HitVolume[2]);
                         obj.BeginHit();
                     }
                 }

@@ -136,20 +136,24 @@ public class HitPlayer : MonoBehaviour
         Vector2 rStart = Vector2.LerpUnclamped(start, end, CurrentHit.Position);
         Vector2 rEnd = Vector2.LerpUnclamped(start, end, CurrentHit.Position + CurrentHit.Length);
 
+        float scale = ChartPlayer.main.HitSize[(int)CurrentHit.Type];
+
+        FlickEmblem.transform.localScale = Vector3.one * scale;
+
         transform.localPosition = (Vector3)(rStart + rEnd) / 2 + Vector3.forward * start.z * ChartPlayer.main.ScrollSpeed;
-        Indicator.localScale = new Vector3(Vector3.Distance(rStart, rEnd) - (IndicatorSize + IndicatorOffset) * 2, Thickness, Thickness);
+        Indicator.localScale = new Vector3(Vector3.Distance(rStart, rEnd) - (IndicatorSize + IndicatorOffset) * 2 * scale, Thickness * scale, Thickness * scale);
         Indicator.localRotation = Quaternion.Euler(Vector3.forward * Vector2.SignedAngle(Vector2.right, rEnd - rStart));
         if (IndicatorLeft) 
         {
-            IndicatorLeft.localPosition = Indicator.localRotation * Vector3.left * ((Indicator.localScale.x + IndicatorSize) / 2 + IndicatorOffset);
+            IndicatorLeft.localPosition = Indicator.localRotation * Vector3.left * ((Indicator.localScale.x + IndicatorSize * scale) / 2 + IndicatorOffset * scale);
             IndicatorLeft.localRotation = Indicator.localRotation;
-            IndicatorLeft.localScale = new Vector3(IndicatorSize, IndicatorThickness, IndicatorThickness);
+            IndicatorLeft.localScale = new Vector3(IndicatorSize, IndicatorThickness, IndicatorThickness) * scale;
         }
         if (IndicatorRight) 
         {
-            IndicatorRight.localPosition = Indicator.localRotation * Vector3.right * ((Indicator.localScale.x + IndicatorSize) / 2 + IndicatorOffset);
+            IndicatorRight.localPosition = Indicator.localRotation * Vector3.right * ((Indicator.localScale.x + IndicatorSize * scale) / 2 + IndicatorOffset * scale);
             IndicatorRight.localRotation = Indicator.localRotation;
-            IndicatorRight.localScale = new Vector3(IndicatorSize, IndicatorThickness, IndicatorThickness);
+            IndicatorRight.localScale = new Vector3(IndicatorSize, IndicatorThickness, IndicatorThickness) * scale;
         }
     }
 
@@ -160,8 +164,8 @@ public class HitPlayer : MonoBehaviour
         {
             if (isHit && isFlicked)
             {
-                float time = ChartPlayer.main.CurrentTime;
-                UpdateIndicator(ChartPlayer.main.CurrentTime);
+                float time = ChartPlayer.main.CurrentTime + ChartPlayer.main.VisualOffset;
+                UpdateIndicator(time);
 
                 ScreenStart = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorLeft.position);
                 ScreenEnd = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorRight.position);

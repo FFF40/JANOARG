@@ -18,11 +18,11 @@ public class PlaylistScrollItem : MonoBehaviour
 
     public string DataText;
 
-    public void SetSong(PlayableSong song, string path)
+    public void SetSong(PlayableSong song, string path, int altLevel)
     {
         Path = path;
-        SongNameLabel.text = song.SongName;
-        ArtistNameLabel.text = song.SongArtist;
+        SongNameLabel.text = (altLevel >= 1 && !string.IsNullOrWhiteSpace(song.AltSongName)) ? song.AltSongName : song.SongName;
+        ArtistNameLabel.text = (altLevel >= 2 && !string.IsNullOrWhiteSpace(song.AltSongArtist)) ? song.AltSongArtist : song.SongArtist;
         DataText = song.Location.ToUpper() + " • " + song.Genre.ToUpper() + 
             " • " + FormatBPM(song.Timing) + " • " + FormatDuration(song.Clip.length);
         

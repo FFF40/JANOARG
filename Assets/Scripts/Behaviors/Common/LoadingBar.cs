@@ -75,6 +75,7 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("LET'S GO", () => ChartPlayer.main?.CurrentTime < 0),
         new FlavorTextEntry("GET READY", () => ChartPlayer.main?.CurrentTime < 0),
         new FlavorTextEntry("MUSIC START", () => ChartPlayer.main?.CurrentTime < 0),
+        new FlavorTextEntry("CONNECTION ESTABLISHED", () => ChartPlayer.main?.CurrentTime < 0),
         
     };
 

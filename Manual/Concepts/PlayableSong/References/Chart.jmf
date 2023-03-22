@@ -5,6 +5,8 @@ difficulty of that song.
 
 ## Properties
 
+- <b>Target</b> <i>(String)</i>: The chart's relative path compared to the Playable Song file.
+
 - <b>Difficulty Index</b> <i>(Integer)</i>: The structural position of the chart in the game.
 Conventionally this would be a number from 0-3 for normal charts, with 0 being the easiest chart
 and increasing the difficulty up to 3 being the hardest chart. There may be special charts, which
@@ -25,15 +27,11 @@ placed after the number for charts that are designed to be played using 3 or mor
 special occasions however, this field will be obstructed to give players a sense of mystery (e.g.
 Overdrive ɑ or April Fool's ??)
 
-- <b>Camera Pivot</b> <i>(Storyboardable, Vector3)</i>: The pivot position of the camera, in game
-units.
-
-- <b>Camera Rotation</b> <i>(Storyboardable, Vector3)</i>: The pivot rotation of the camera, in
-degrees.
-
 ## Sub-objects
 
 - <b>Pallete</b> <i>(Pallete)</i>: The chart's pallete.
+
+- <b>Camera</b> <i>(Camera Controller)</i>: The chart's camera controller.
 
 - <b>Lanes</b> <i>(List of Lanes)</i>: A list of lanes that appears inside the chart.
 

@@ -495,7 +495,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7974384004869445937}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -511,6 +511,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dc686b05bd30334898ac4cbb1ab4d20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AccIndex: 0
   InnerCircle: {fileID: 1983049878683931632}
   JudgeArc: {fileID: 5547425904363066682}
   FullArc: {fileID: 8329057765790512254}

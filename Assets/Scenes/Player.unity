@@ -13424,6 +13424,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1326589174}
+  - component: {fileID: 1326589175}
   m_Layer: 5
   m_Name: Side
   m_TagString: Untagged
@@ -13453,6 +13454,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &1326589175
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1326589173}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1333640617
 GameObject:
   m_ObjectHideFlags: 0
@@ -15586,7 +15599,7 @@ MonoBehaviour:
   Song: {fileID: 11400000, guid: 99ebee8463d30ae4b8f934d225e3bce8, type: 2}
   ChartPosition: 0
   IsPlaying: 0
-  AutoPlay: 1
+  AutoPlay: 0
   CurrentTime: -5
   Score: 0
   TotalScore: 0
@@ -15620,7 +15633,9 @@ MonoBehaviour:
   CatchHitSound: {fileID: 8300000, guid: d68bd3e4706d98743a96de5b314d4921, type: 3}
   PlayInterfaceObject: {fileID: 391129163}
   SideObject: {fileID: 1326589173}
+  SideGroup: {fileID: 1326589175}
   CenterObject: {fileID: 832726628}
+  CenterGroup: {fileID: 832726630}
   SongNameLabel: {fileID: 2127960960}
   SongArtistLabel: {fileID: 2122555631}
   DifficultyNameLabel: {fileID: 1262684259}
@@ -15652,6 +15667,12 @@ MonoBehaviour:
   ComboGroup: {fileID: 819958332}
   ComboLabel: {fileID: 81546203}
   ComboText: {fileID: 1273094594}
+  AudioOffset: 0
+  VisualOffset: 0
+  HitVolume: []
+  HitSize: []
+  HitEffectAlpha: []
+  HitEffectSize: []
   CurrentChart:
     Storyboard:
       Timestamps: []
@@ -15661,6 +15682,12 @@ MonoBehaviour:
     ChartConstant: 6
     Groups: []
     Lanes: []
+    Camera:
+      Storyboard:
+        Timestamps: []
+      CameraPivot: {x: 0, y: 0, z: 0}
+      PivotDistance: 10
+      CameraRotation: {x: 0, y: 0, z: 0}
     CameraPivot: {x: 0, y: 0, z: 0}
     CameraRotation: {x: 0, y: 0, z: 0}
     Pallete:

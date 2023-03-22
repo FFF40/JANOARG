@@ -5,7 +5,7 @@ in time.
 
 ## Properties
 
-- <b>Offset</b> <i>(Float)</i>: The time position when the aniamtion start, in game beats.
+- <b>Offset</b> <i>(Float)</i>: The time position when the animation start, in game beats.
 
 - <b>Type</b> <i>(Enum)</i>: The property to animate.
 

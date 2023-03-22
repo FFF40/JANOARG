@@ -4,6 +4,8 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.Events;
+using System.Linq;
 
 public class Storage 
 {
@@ -18,31 +20,80 @@ public class Storage
 
     public T Get<T>(string key, T fallback)
     {
-        if (values.ContainsKey(key)) return (T)values[key];
+        if (values.ContainsKey(key)) 
+        {
+            return (T)values[key];
+        }
         else return fallback;
     }
+    public T[] Get<T>(string key, T[] fallback)
+    {
+        if (values.ContainsKey(key)) 
+        {
+            if (values[key] is object[]) return ((object[])values[key]).OfType<T>().ToArray();
+            return (T[])values[key];
+        }
+        else return fallback;
+    }
+
     public void Set(string key, object value)
     {
         values[key] = value;
     }
+
+    public UnityEvent OnSave = new UnityEvent();
+
+    public UnityEvent OnLoad = new UnityEvent();
 
     public class SerializeProxy
     {
         [XmlAttribute]
         public string Key;
         public object Value;
-
         public static implicit operator SerializeProxy(KeyValuePair<string, object> item)
         {
-            return new SerializeProxy
+            SerializeProxy proxy = new SerializeProxy
             {
                 Key = item.Key,
                 Value = item.Value,
             };
+            if (proxy.Value is Array) proxy.Value = new CollectionProxy(proxy.Value as Array);
+            return proxy;
+        }
+
+        public static implicit operator KeyValuePair<string, object>(SerializeProxy item)
+        {
+            object value = item.Value;
+            if (value is CollectionProxy) value = ((CollectionProxy)value).Value;
+            KeyValuePair<string, object> pair = new KeyValuePair<string, object>(item.Key, value);
+            return pair;
+        }
+
+        public void AddPair(Dictionary<string, object> dict)
+        {
+            KeyValuePair<string, object> pair = this;
+            dict.TryAdd(pair.Key, pair.Value);
+        }
+    }
+
+    public class CollectionProxy
+    {
+        [XmlElement("Item")]
+        public object[] Value;
+
+        public CollectionProxy()
+        {
+        }
+
+        public CollectionProxy(Array array)
+        {
+            Value = new object[array.Length];
+            for (int a = 0; a < array.Length; a++) Value[a] = array.GetValue(a);
         }
     }
 
     [XmlRoot("ItemList")]
+    [XmlInclude(typeof(CollectionProxy))]
     public class SerializeProxyList
     {
         [XmlElement("Item")]
@@ -52,7 +103,7 @@ public class Storage
     public void Save()
     {
         SerializeProxyList list = new SerializeProxyList();
-        foreach (KeyValuePair<string, object> pair in values) list.Items.Add(pair);
+        foreach (KeyValuePair<string, object> pair in values) if (pair.Value != null) list.Items.Add(pair);
 
         XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
         FileStream fs;
@@ -63,6 +114,8 @@ public class Storage
         fs = new FileStream(Application.persistentDataPath + "/" + SaveName + ".backup.jas", FileMode.Create);
         serializer.Serialize(fs, list);
         fs.Close();
+
+        OnSave.Invoke();
     }
 
     public void Load()
@@ -94,6 +147,8 @@ public class Storage
             }
         }
 
-        foreach (SerializeProxy pair in list.Items) values.TryAdd(pair.Key, pair.Value);
+        foreach (SerializeProxy pair in list.Items) pair.AddPair(values);
+
+        OnLoad.Invoke();
     }
 }
