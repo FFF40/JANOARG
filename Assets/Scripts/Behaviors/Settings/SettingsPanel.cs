@@ -44,6 +44,7 @@ public class SettingsPanel : MonoBehaviour
         yield return new WaitForSeconds(.3f);
         
         SceneManager.UnloadSceneAsync("Settings");
+        PlaylistScroll.main?.ShowSelection();
     }
 
 

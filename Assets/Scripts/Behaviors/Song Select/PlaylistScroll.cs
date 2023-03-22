@@ -64,6 +64,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
     int AltLevel;
 
+    public bool HoldSelection;
+
     void Awake()
     {
         main = this;
@@ -89,7 +91,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     void OnSave()
     {
         AltLevel = Common.main.Storage.Get("PREF:AltName", 0);
-        
+
         foreach (PlaylistScrollItem item in Items)
         {
             item.SetSong(item.Song, item.Path, AltLevel);
@@ -131,7 +133,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     // Update is called once per frame
     void Update()
     {
-        if (isDragging)
+        if (!HoldSelection && isDragging)
         {
             if (Offset == oldOffset && Velocity == oldVelocity)
             {
@@ -220,15 +222,18 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                 else SelectionOffset *= Mathf.Pow(1e-6f / Mathf.Abs(Velocity + 1), Time.deltaTime);
             }
 
-            if (isSelectionShown == false && isScrolling == false)
+            if (!HoldSelection)
             {
-                ShowSelection();
+                if (isSelectionShown == false && isScrolling == false)
+                {
+                    ShowSelection();
+                }
+                else if (isSelectionShown == true && isScrolling == true)
+                {
+                    HideSelection();
+                }
+                isSelectionShown = !isScrolling;
             }
-            else if (isSelectionShown == true && isScrolling == true)
-            {
-                HideSelection();
-            }
-            isSelectionShown = !isScrolling;
 
             oldOffset = Offset;
             oldVelocity = Velocity;
@@ -303,6 +308,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
     public void ShowSelection()
     {
+        HoldSelection = false;
         if (!isAnimating) StartCoroutine(ShowSelectionAnim());
     }
 
@@ -351,11 +357,12 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         LerpSelection(1);
 
         isAnimating = false;
-        if (isScrolling == true) StartCoroutine(HideSelectionAnim());
+        if (!HoldSelection && isScrolling == true) StartCoroutine(HideSelectionAnim());
     }
 
-    public void HideSelection()
+    public void HideSelection(bool hold = false)
     {
+        HoldSelection |= hold;
         if (!isAnimating) StartCoroutine(HideSelectionAnim());
     }
 
@@ -399,7 +406,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         SelectedSongBox.gameObject.SetActive(false);
         SelectedItem.CoverImage.gameObject.SetActive(true);
         isAnimating = false;
-        if (isScrolling == false) StartCoroutine(ShowSelectionAnim());
+        if (!HoldSelection && isScrolling == false) StartCoroutine(ShowSelectionAnim());
     }
 
     public void SelectSong()
@@ -643,6 +650,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
     public void ShowSettings()
     {
-        SceneManager.LoadSceneAsync("Settings", LoadSceneMode.Additive);
+        if (!isAnimating)
+        {
+            SceneManager.LoadSceneAsync("Settings", LoadSceneMode.Additive);
+            HideSelection(true);
+        }
     }
 }
