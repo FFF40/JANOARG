@@ -33,6 +33,8 @@ public class ResultScreen : MonoBehaviour
     public List<GraphicCircle> RankFill;
     public GraphicCircle RankExplosion;
     public TMP_Text RankLabel;
+    public RectTransform RankPlayStateBox;
+    public TMP_Text RankPlayStateText;
     [Space]
     public RectTransform ResultScoreBox;
     public LayoutGroup ResultScoreLayout;
@@ -98,11 +100,16 @@ public class ResultScreen : MonoBehaviour
         ChartPlayer cp = ChartPlayer.main;
 
         isAnimating = true;
-        if (cp.Score >= cp.TotalScore) PlayStateText.text = "ALL FLAWLESS!!!";
-        else if (cp.Combo >= cp.TotalCombo) PlayStateText.text = "FULL STREAK!";
-        else if (cp.GoodCount >= cp.TotalCombo) PlayStateText.text = "ALL MISALIGNED...!?";
-        else if (cp.Score <= 0) PlayStateText.text = "ALL BROKEN...?";
-        else PlayStateText.text = "TRACK CLEARED";
+
+        RankPlayStateText.text = "";
+
+        if (cp.Score >= cp.TotalScore)             RankPlayStateText.text = PlayStateText.text = "ALL FLAWLESS!!!";
+        else if (cp.GoodCount >= cp.TotalCombo)    RankPlayStateText.text = PlayStateText.text = "ALL MISALIGNED...!?";
+        else if (cp.Combo >= cp.TotalCombo)        RankPlayStateText.text = PlayStateText.text = "FULL STREAK!";
+        else if (cp.Score <= 0)                    RankPlayStateText.text = PlayStateText.text = "ALL BROKEN...?";
+        else                                                                PlayStateText.text = "TRACK CLEARED";
+        
+        RankPlayStateBox.sizeDelta = new Vector2(0, RankPlayStateBox.sizeDelta.y);
 
         cp.PlayInterfaceObject.SetActive(false);
         ResultInterfaceObject.SetActive(true);
@@ -228,8 +235,8 @@ public class ResultScreen : MonoBehaviour
             RecordDifferenceText.text = "+" + ((int)(score)).ToString("D7", CultureInfo.InvariantCulture);
             for (int i = 0; i < RankFill.Count; i++) 
             {
-                RankFill[i].FillAmount = score;
-                score = 10 * score - 9;
+                RankFill[i].FillAmount = score / 1e6f;
+                score = (score - 9e5f) * 10;
             }
         }
         for (float a = 0; a < 1; a += Time.deltaTime / 2f)
@@ -265,10 +272,8 @@ public class ResultScreen : MonoBehaviour
             RankFill[i].InsideRadius = 106 / 114f;
         }
         RankBackground.color = RankLabel.color = Color.white;
-
-        PlayStateText.fontSize = 48;
-        PlayStateText.characterSpacing = 10;
-        PlayStateText.alpha = .2f;
+    
+        RankPlayStateBox.anchoredPosition = new Vector2(-RankPlayStateText.preferredWidth / 2, RankPlayStateBox.anchoredPosition.y);
 
         void SetEase(float a) 
         {
@@ -279,10 +284,10 @@ public class ResultScreen : MonoBehaviour
             RankExplosion.InsideRadius = ease;
             RankExplosion.color = cp.CurrentChart.Pallete.InterfaceColor * new Color(1, 1, 1, 1 - a);
 
-            PlayStateText.rectTransform.anchoredPosition = new Vector2(0, 200 * (1 - ease));
-
             ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * ease);
             DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, 40 * ease);
+        
+            RankPlayStateBox.sizeDelta = new Vector2(RankPlayStateText.preferredWidth * ease, RankPlayStateBox.sizeDelta.y);
 
             ResultScoreBox.anchoredPosition = new Vector2(-30 * ease - 50, 0);
             RecordBox.anchoredPosition = new Vector2(30 * ease + 50, 0);
@@ -329,9 +334,10 @@ public class ResultScreen : MonoBehaviour
         RankBackground.color = new Color(1, 1, 1, 1 - ease);
         for (int i = 0; i < RankFill.Count; i++) 
         {
-            RankFill[i].color = Color.Lerp(Color.black, new Color(1, 1, 1, .2f), ease);
+            RankFill[i].color = Color.Lerp(new Color(0, 0, 0, (i + 1f) / RankFill.Count), new Color(1, 1, 1, .2f), ease);
             RankFill[i].InsideRadius = (RankBox.sizeDelta.x - 12) / (RankBox.sizeDelta.x - 4);
         }
+        RankPlayStateBox.anchoredPosition = new Vector2(RankPlayStateBox.anchoredPosition.x, -(Canvas.rect.height / 2 + 100) * ease);
 
         ResultSongBox.anchoredPosition = new Vector2(0, -60 + 10 * ease);
 

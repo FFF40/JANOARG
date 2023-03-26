@@ -4,6 +4,7 @@ using System.Globalization;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class ChartPlayer : MonoBehaviour
 {
@@ -66,6 +67,7 @@ public class ChartPlayer : MonoBehaviour
 
     [Header("Play Interface")]
     public GameObject PlayInterfaceObject;
+    public CanvasGroup PlayInterfaceGroup;
     [Space]
     public GameObject SideObject;
     public CanvasGroup SideGroup;
@@ -96,6 +98,11 @@ public class ChartPlayer : MonoBehaviour
     public CanvasGroup ComboGroup;
     public TMP_Text ComboLabel;
     public TMP_Text ComboText;
+    [Space]
+    public Sidebar PauseSidebar;
+    public TMP_Text PauseLabel;
+    [Space]
+    public Image AbortBackground;
     [Space]
     public float AudioOffset;
     public float VisualOffset;
@@ -134,6 +141,8 @@ public class ChartPlayer : MonoBehaviour
     bool isAnimating;
     float precTime;
     int normalHitCount;
+
+    float PauseTime;
 
     public void Awake()
     {
@@ -269,6 +278,7 @@ public class ChartPlayer : MonoBehaviour
         Dictionary<string, LaneGroupPlayer> groups = new Dictionary<string, LaneGroupPlayer>();
         foreach (LaneGroup group in CurrentChart.Groups) {
             LaneGroupPlayer gp = new GameObject(group.Name).AddComponent<LaneGroupPlayer>();
+            gp.transform.parent = transform;
             gp.SetGroup(group);
             groups.Add(group.Name, gp);
             t = System.DateTime.Now.Ticks;
@@ -342,6 +352,10 @@ public class ChartPlayer : MonoBehaviour
         ResultScreen.main.ResultInterfaceObject.SetActive(false);
         normalHitCount = NormalHits.Count;
 
+        UpdateScore();
+        AbortBackground.color = Color.clear;
+        PlayInterfaceGroup.alpha = 1;
+
         IsPlaying = true;
     }
 
@@ -349,7 +363,8 @@ public class ChartPlayer : MonoBehaviour
     {
         SongNameLabel.color = SongArtistLabel.color = DifficultyNameLabel.color = DifficultyLabel.color = 
         ScoreText.color = ScoreUnitText.color = GaugeText.color = GaugeFill.color = GaugeUpper.color = GaugeLower.color =
-        ComboLabel.color = ComboText.color = SongProgressFill.color = SongProgressUpper.color = SongProgressLower.color = color;
+        ComboLabel.color = ComboText.color = SongProgressFill.color = SongProgressUpper.color = SongProgressLower.color = 
+        PauseLabel.color = color;
         for (int a = 0; a < DifficultyIndicators.Count; a++) 
         {
             DifficultyIndicators[a].gameObject.SetActive(CurrentChart.DifficultyIndex >= a);
@@ -510,6 +525,7 @@ public class ChartPlayer : MonoBehaviour
 
             foreach (HitPlayer obj in RemovingHits)
             {
+                if (!obj) continue;
                 if (obj.CurrentHit.Type == HitObject.HitType.Normal) NormalHits.Remove(obj);
                 else CatchHits.Remove(obj);
                 Destroy(obj.gameObject);
@@ -739,6 +755,150 @@ public class ChartPlayer : MonoBehaviour
         ScoreDigits[digit].rectTransform.anchoredPosition = new Vector2(ScoreDigits[digit].rectTransform.anchoredPosition.x, 0);
     }
 
+    public void Pause()
+    {
+        if (PauseTime < CurrentTime)
+        {
+            if (CurrentTime - PauseTime < .2f)
+            {
+                IsPlaying = false;
+                AudioPlayer.Pause();
+                PauseSidebar.Show();
+            }
+            PauseTime = CurrentTime;
+        }
+    }
+
+    public void Continue()
+    {
+        if (!isAnimating && !PauseSidebar.isAnimating)
+        {
+            StartCoroutine(ContinueAnimation());
+        }
+    }
+
+    public IEnumerator ContinueAnimation()
+    {
+        isAnimating = true;
+
+        PauseSidebar.Hide();
+
+        float time = AudioPlayer.time;
+        float vol = AudioPlayer.volume;
+
+        for (float timer = 3.6f; timer > 0; timer -= Time.deltaTime)
+        {
+            if (!AudioPlayer.isPlaying && time - timer >= 0)
+            {
+                AudioPlayer.Play();
+                AudioPlayer.time = time - timer;
+            }
+            AudioPlayer.volume = (1 - timer / 3.6f) * vol;
+            yield return null;
+        }
+
+        AudioPlayer.volume = vol;
+
+        IsPlaying = true;
+        isAnimating = false;
+    } 
+
+    public void Restart()
+    {
+        if (!isAnimating && !PauseSidebar.isAnimating)
+        {
+            StartCoroutine(RestartAnimation());
+        }
+    }
+
+    public void LerpAbort(float value)
+    {
+        float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
+
+        MainCamera.transform.position = CurrentChart.Camera.CameraPivot + MainCamera.transform.rotation * Vector3.back * (ease * 100 + CurrentChart.Camera.PivotDistance);
+        SideGroup.alpha = Common.main.Storage.Get("PREF:PlayerSideAlpha", 100f) / 100;
+        CenterGroup.alpha = Common.main.Storage.Get("PREF:PlayerCenterAlpha", 50f) / 100;
+        
+        float ease2 = Ease.Get(value, EaseFunction.Cubic, EaseMode.In);
+
+        AbortBackground.color = CurrentChart.Pallete.BackgroundColor * new Color(1, 1, 1, ease2);
+        
+        float ease3 = Ease.Get(value / .4f, EaseFunction.Cubic, EaseMode.Out);
+
+        PlayInterfaceGroup.alpha = 1 - ease3;
+    }
+
+    public IEnumerator RestartAnimation()
+    {
+        isAnimating = true;
+
+        PauseSidebar.Hide();
+
+        for (float a = 0; a < 1; a += Time.deltaTime) 
+        {
+            LerpAbort(a);
+            yield return null;
+        }
+        LerpAbort(1);
+
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        
+        CurrentTime = -5;
+        Score = TotalScore = Gauge = OffsetMean = Deviation = PauseTime = 
+            Combo = MaxCombo = TotalCombo = NoteCount = PerfectCount = GoodCount = BadCount = 0;
+            
+        AccuracyCounts = new int[AccuracyCounts.Length];
+        DiscreteCounts = new int[DiscreteCounts.Length];
+        AccuracyValues = new int[AccuracyValues.Length];
+        
+        foreach (LaneStyleManager man in LaneStyleManagers) man.Dispose();
+        LaneStyleManagers = new List<LaneStyleManager>();
+        foreach (HitStyleManager man in HitStyleManagers) man.Dispose();
+        HitStyleManagers = new List<HitStyleManager>();
+
+        NormalHits = new List<HitPlayer>();
+        CatchHits = new List<HitPlayer>();
+
+        StartCoroutine(InitChart());
+
+        isAnimating = false;
+    } 
+
+    public void Abort()
+    {
+        if (!isAnimating && !PauseSidebar.isAnimating)
+        {
+            StartCoroutine(AbortAnimation());
+        }
+    }
+
+
+    public IEnumerator AbortAnimation()
+    {
+        isAnimating = true;
+
+        PauseSidebar.Hide();
+
+        for (float a = 0; a < 1; a += Time.deltaTime) 
+        {
+            LerpAbort(a);
+            yield return null;
+        }
+        LerpAbort(1);
+
+        AsyncOperation op = SceneManager.LoadSceneAsync("Song Select", LoadSceneMode.Additive);
+        yield return new WaitUntil(() => op.isDone);
+        yield return new WaitUntil(() => PlaylistScroll.main.IsReady);
+        
+        SceneManager.UnloadSceneAsync("Player");
+        Resources.UnloadUnusedAssets();
+
+        isAnimating = false;
+    } 
     
     public Mesh MakeFreeFlickEmblem()
     {

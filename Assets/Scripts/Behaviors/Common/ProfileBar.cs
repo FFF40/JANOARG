@@ -36,7 +36,7 @@ public class ProfileBar : MonoBehaviour
     {
         CoinLabel.text = Common.main.Storage.Get("CURR:Coins", 0L).ToString(CultureInfo.InvariantCulture);
         OrbLabel.text = Common.main.Storage.Get("CURR:Orbs", 0L).ToString(CultureInfo.InvariantCulture);
-        EssenceLabel.text = Common.main.Storage.Get("CURR:Essence", 0L).ToString(CultureInfo.InvariantCulture);
+        EssenceLabel.text = Common.main.Storage.Get("CURR:Essence", 100L).ToString(CultureInfo.InvariantCulture);
     }
 
     // Start is called before the first frame update

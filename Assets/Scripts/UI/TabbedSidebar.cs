@@ -4,9 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TabbedSidebar : MonoBehaviour
+public class TabbedSidebar : Sidebar
 {
-    public RectTransform SafeArea;
 
     public ScrollRect ScrollView;
     public RectTransform ScrollHolder;
@@ -22,9 +21,6 @@ public class TabbedSidebar : MonoBehaviour
     public TMP_Text TabLabel;
 
     public int CurrentTab;
-
-    bool isAnimating;
-
     void Awake()
     {
         for (int x = 0; x < Tabs.Count; x++)
@@ -49,44 +45,6 @@ public class TabbedSidebar : MonoBehaviour
     void Update()
     {
         
-    }
-
-    public IEnumerator ShowAnimation()
-    {
-        RectTransform rt = GetComponent<RectTransform>();
-
-        void LerpContent(float value)
-        {
-            float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
-
-            rt.anchoredPosition = Vector3.left * (2000 + (750 - SafeArea.sizeDelta.y / 2) * (1 - ease));
-        }
-        
-        for (float a = 0; a < 1; a += Time.deltaTime / .4f) 
-        {
-            LerpContent(a);
-            yield return null;
-        }
-        LerpContent(1);
-    }
-
-    public IEnumerator HideAnimation()
-    {
-        RectTransform rt = GetComponent<RectTransform>();
-
-        void LerpContent(float value)
-        {
-            float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.In);
-
-            rt.anchoredPosition = Vector3.left * (2000 + (750 - SafeArea.sizeDelta.y / 2) * ease);
-        }
-        
-        for (float a = 0; a < 1; a += Time.deltaTime / .3f) 
-        {
-            LerpContent(a);
-            yield return null;
-        }
-        LerpContent(1);
     }
 
     public void SetTab(int index)

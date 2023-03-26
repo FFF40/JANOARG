@@ -63,6 +63,7 @@
      <Compile Include="Assets\Scripts\Behaviors\Player\HitEffect.cs" />
      <Compile Include="Assets\Scripts\Data\Storage.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Settings\SettingTypes\InputSetting.cs" />
+     <Compile Include="Assets\Scripts\UI\Sidebar.cs" />
      <Compile Include="Assets\Scripts\UI\TabbedSidebar.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Player\HitPlayer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Common\LoadingBar.cs" />

@@ -1,3 +1,1 @@
-- Saving system
 - Currency system
-- Settings page
