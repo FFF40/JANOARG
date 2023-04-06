@@ -34,7 +34,7 @@ public class Chartmaker : EditorWindow
     public object TargetThing;
     public object DeletingThing;
     public object ClipboardThing;
-    public Timestamp TargetTimestamp;
+    public List<Timestamp> TargetTimestamp = new List<Timestamp>();
 
     public RenderTexture CurrentRenderTexture;
     public AudioSource CurrentAudioSource;
@@ -380,7 +380,7 @@ public class Chartmaker : EditorWindow
             float startPos = (Math.Max(curtime, startP) - sTime) / (nTime - sTime);
             float endPos = (endP - sTime) / (nTime - sTime);
 
-            float nextP = p + Mathf.Max(nTime - Mathf.Max(sTime, curtime), 0) * step.Speed * ScrollSpeed;
+            float nextP = p + Mathf.Max(nTime - Mathf.Max(sTime, curtime), 0) * next.Speed * ScrollSpeed;
 
             if (startPos >= 1)
             {
@@ -406,7 +406,7 @@ public class Chartmaker : EditorWindow
                 }
                 Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
                 Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
-                float pp = p + ((nTime - sTime) * startPos - Math.Max(curtime - sTime, 0)) * step.Speed * ScrollSpeed;
+                float pp = p + ((nTime - sTime) * startPos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
                 AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
             }
             {
@@ -416,7 +416,7 @@ public class Chartmaker : EditorWindow
                     end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, endPos);
                     Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
                     Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
-                    float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * step.Speed * ScrollSpeed;
+                    float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
                     AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                 }
                 else
@@ -430,7 +430,7 @@ public class Chartmaker : EditorWindow
                             Mathf.LerpUnclamped(step.EndPos.y, next.EndPos.y, Ease.Get(pos, next.EndEaseY, next.EndEaseYMode)));
                         Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
                         Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
-                        float pp = p + ((nTime - sTime) * pos - Math.Max(curtime - sTime, 0)) * step.Speed * ScrollSpeed;
+                        float pp = p + ((nTime - sTime) * pos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
                         AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                     }
                     for (float x = Mathf.Floor(Mathf.Clamp01(startPos) * 16 + 1.01f) / 16; x < Mathf.Clamp01(endPos); x = Mathf.Floor(x * 16 + 1.01f) / 16) Add(x);
@@ -618,8 +618,8 @@ public class Chartmaker : EditorWindow
             if (TargetChart == null || TargetChart.Data.Lanes.IndexOf(TargetLane) < 0) TargetLane = null;
 
             if (TargetThing == null || !(TargetThing is IStoryboardable) ||
-                ((IStoryboardable)TargetThing).Storyboard.Timestamps.IndexOf(TargetTimestamp) < 0)
-                TargetTimestamp = null;
+                (TargetTimestamp.Count > 0 && ((IStoryboardable)TargetThing).Storyboard.Timestamps.IndexOf(TargetTimestamp[0]) < 0))
+                TargetTimestamp = new List<Timestamp>();
 
             if (TargetSong.ChartsOld != null && TargetSong.ChartsOld.Count > 0)
                 extrasmode = "migrate_charts";
@@ -951,7 +951,8 @@ public class Chartmaker : EditorWindow
                         if (TargetThing is LaneStep)
                         {
                             LaneStep thing = (LaneStep)TargetThing;
-                            if (thing.Offset >= pos)
+                            if (TargetLane?.LaneSteps.Contains(thing) != true) TargetThing = null;
+                            else if (thing.Offset >= pos)
                             {
                                 LaneManager lman = Manager.Lanes[TargetChart.Data.Lanes.IndexOf(TargetLane)];
                                 LaneStepManager man = lman.Steps[TargetLane.LaneSteps.IndexOf(thing)];
@@ -1148,7 +1149,7 @@ public class Chartmaker : EditorWindow
             TargetChartMeta = null;
             TargetChart = null;
             TargetThing = null;
-            TargetTimestamp = null;
+            TargetTimestamp = new List<Timestamp>();
             GUI.Window(1, new Rect(width / 2 - 250, height / 2 - 110, 500, 220), ChartmakerInit, "");
         }
 
@@ -1627,6 +1628,8 @@ public class Chartmaker : EditorWindow
 
             foreach (BPMStop item in list) item.Offset += offset;
             HistoryAdd(TargetSong.Timing.Stops, list);
+            
+            TargetThing = list.Count <= 1 ? list[0] : list;
 
             TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
@@ -1646,6 +1649,8 @@ public class Chartmaker : EditorWindow
                 foreach (Timestamp ts in item.Storyboard.Timestamps) ts.Offset += offset;
             }
             HistoryAdd(TargetChart.Data.Lanes, list);
+            
+            TargetThing = list.Count <= 1 ? list[0] : list;
 
             TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
@@ -1660,6 +1665,8 @@ public class Chartmaker : EditorWindow
 
             foreach (LaneStep item in list) item.Offset += offset;
             HistoryAdd(TargetLane.LaneSteps, list);
+            
+            TargetThing = list.Count <= 1 ? list[0] : list;
 
             TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
@@ -1674,6 +1681,8 @@ public class Chartmaker : EditorWindow
 
             foreach (HitObject item in list) item.Offset += offset;
             HistoryAdd(TargetLane.Objects, list);
+
+            TargetThing = list.Count <= 1 ? list[0] : list;
 
             TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
@@ -1691,6 +1700,8 @@ public class Chartmaker : EditorWindow
             foreach (Timestamp item in list) item.Offset += offset;
             HistoryAdd(sb.Storyboard.Timestamps, list);
 
+            TargetTimestamp = list;
+
             sb.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
     }
@@ -1703,11 +1714,11 @@ public class Chartmaker : EditorWindow
 
     public void DeleteSelection()
     {
-        if (TargetTimestamp != null)
+        if (TargetTimestamp.Count > 0)
         {
             IStoryboardable sb = (IStoryboardable)TargetThing;
             HistoryDelete(sb.Storyboard.Timestamps, TargetTimestamp);
-            TargetTimestamp = null;
+            TargetTimestamp = new List<Timestamp>();
         }
         else if (TargetThing is BPMStop || TargetThing is List<BPMStop>)
         {
@@ -2185,6 +2196,8 @@ public class Chartmaker : EditorWindow
 
     int timelineHeight = 5;
 
+    public object DraggingThing;
+
     public bool IsTargeted(object thing)
     {
         return TargetThing == thing || (TargetThing is IList && ((IList)TargetThing).Contains(thing));
@@ -2205,6 +2218,27 @@ public class Chartmaker : EditorWindow
             Repaint();
         }
         timelineHeight = timelineHeight < 1 ? -1 : Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
+    }
+
+    public void TimelineSelect(object item)
+    {
+        DraggingThing = item;
+        DeletingThing = null;
+    }
+
+    public bool TimelineDelete<T>(List<T> list, T item)
+    {
+        if (DeletingThing == (object)item)
+        {
+            HistoryDelete(list, item);
+            TargetThing = null;
+            return true;
+        }
+        else
+        {
+            DeletingThing = item;
+            return false;
+        }
     }
 
     public void Timeline(int id)
@@ -2443,20 +2477,26 @@ public class Chartmaker : EditorWindow
                             EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .2f));
 
                             float rpos = Mathf.Min(Mathf.Max((a - seekStart) / (seekEnd - seekStart) * width, 5), (b - seekStart) / (seekEnd - seekStart) * width);
-                            if (TargetTimestamp == ts || IsTargeted(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "button");
-                            if (GUI.Button(new Rect(rpos - 1, 3 + time * 22, 6, 20), DeletingThing == ts ? "?" : "┃", itemStyle))
+                            if (TargetTimestamp.Contains(ts) || IsTargeted(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "button");
+                            
+                            Rect rect = new Rect(rpos - 1, 3 + time * 22, 6, 20);
+                            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
 
                                 if (pickermode == "delete")
                                 {
-
+                                    Event.current.Use();
+                                    if (TimelineDelete(sb.Timestamps, ts)) break;
                                 }
                                 else
                                 {
-                                    TargetTimestamp = ts;
+                                    TargetTimestamp = new List<Timestamp>(new [] {ts});
                                     DeletingThing = null;
                                 }
                             }
+                            else if (Event.current.type == EventType.Repaint) 
+                                GUI.Toggle(rect, DraggingThing == ts, DeletingThing == ts ? "?" : "┃", itemStyle);
+
                             if (!float.IsNaN(ts.From)) GUI.Label(new Rect(rpos + 6, 2 + time * 22, 60, 22), ts.From.ToString(invariant), left);
 
                             float epos = Mathf.Min(Mathf.Max(rpos, width - 8), (b - seekStart) / (seekEnd - seekStart) * width);
@@ -2484,27 +2524,22 @@ public class Chartmaker : EditorWindow
                     if (a > seekStart && a < seekEnd)
                     {
                         if (IsTargeted(stop)) GUI.Label(new Rect(pos - 29, 2 + time * 22, 62, 22), "", "button");
-                        if (GUI.Button(new Rect(pos - 28, 3 + time * 22, 60, 20), DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), itemStyle))
+                        
+                        Rect rect = new Rect(pos - 28, 3 + time * 22, 60, 20);
+                        if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                         {
                             if (pickermode == "delete")
                             {
-                                if (DeletingThing == stop)
-                                {
-                                    HistoryDelete(TargetSong.Timing.Stops, stop);
-                                    TargetThing = null;
-                                    break;
-                                }
-                                else
-                                {
-                                    DeletingThing = stop;
-                                }
+                                Event.current.Use();
+                                if (TimelineDelete(TargetSong.Timing.Stops, stop)) break;
                             }
                             else
                             {
-                                TargetThing = stop;
-                                DeletingThing = null;
+                                TimelineSelect(stop);
                             }
                         }
+                        else if (Event.current.type == EventType.Repaint) 
+                            GUI.Toggle(rect, DraggingThing == stop, DeletingThing == stop ? "?" : stop.BPM.ToString("F2", invariant), itemStyle);
                     }
                 }
             }
@@ -2531,55 +2566,47 @@ public class Chartmaker : EditorWindow
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
                                 if (IsTargeted(lane.LaneSteps[x])) GUI.Label(new Rect(pos3 - 2, 2 + time * 22, 8, 22), "", "button");
-                                if (GUI.Button(new Rect(pos3 - 1, 3 + time * 22, 6, 20), DeletingThing == lane.LaneSteps[x] ? "?" : "┃", itemStyle))
+                                
+                                Rect rect = new Rect(pos3 - 1, 3 + time * 22, 6, 20);
+                                if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                                 {
                                     if (pickermode == "delete")
                                     {
-                                        if (DeletingThing == lane.LaneSteps[x])
-                                        {
-                                            HistoryDelete(lane.LaneSteps, lane.LaneSteps[x]);
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            DeletingThing = lane.LaneSteps[x];
-                                        }
+                                        Event.current.Use();
+                                        if (TimelineDelete(lane.LaneSteps, lane.LaneSteps[x])) break;
                                     }
                                     else
                                     {
                                         TargetLane = lane;
-                                        TargetThing = lane.LaneSteps[x];
-                                        DeletingThing = null;
+                                        TimelineSelect(lane.LaneSteps[x]);
                                     }
                                 }
+                                else if (Event.current.type == EventType.Repaint) 
+                                    GUI.Toggle(rect, DraggingThing == lane.LaneSteps[x], DeletingThing == lane.LaneSteps[x] ? "?" : "┃", itemStyle);
                             }
                         }
                         if (b > seekStart && a < seekEnd)
                         {
                             float rpos = (a - seekStart) / (seekEnd - seekStart) * width;
                             rpos = Math.Min(Math.Max(rpos, 13), Math.Max(rpos, (b - seekStart) / (seekEnd - seekStart) * width - 15));
+                            
                             if (IsTargeted(lane)) GUI.Label(new Rect(rpos - 9, 2 + time * 22, 22, 22), "", "button");
-                            if (GUI.Button(new Rect(rpos - 8, 3 + time * 22, 20, 20), DeletingThing == lane ? "?" : "┃", itemStyle))
+                            
+                            Rect rect = new Rect(rpos - 8, 3 + time * 22, 20, 20);
+                            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
                                 if (pickermode == "delete")
                                 {
-                                    if (DeletingThing == lane)
-                                    {
-                                        HistoryDelete(TargetChart.Data.Lanes, lane);
-                                        TargetThing = TargetLane = null;
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        DeletingThing = lane;
-                                    }
+                                    Event.current.Use();
+                                    if (TimelineDelete(TargetChart.Data.Lanes, lane)) break;
                                 }
                                 else
                                 {
-                                    TargetThing = TargetLane = lane;
-                                    DeletingThing = null;
+                                    TimelineSelect(lane);
                                 }
                             }
+                            else if (Event.current.type == EventType.Repaint) 
+                                GUI.Toggle(rect, DraggingThing == lane, DeletingThing == lane ? "?" : "┃", itemStyle);
                         }
                     }
                     else
@@ -2614,27 +2641,22 @@ public class Chartmaker : EditorWindow
                         if (step.Offset > seekStart && step.Offset < seekEnd)
                         {
                             if (IsTargeted(step)) GUI.Label(new Rect(pos - 9, 2 + time * 22, 22, 22), "", "button");
-                            if (GUI.Button(new Rect(pos - 8, 3 + time * 22, 20, 20), DeletingThing == step ? "?" : "┃", itemStyle))
+                            
+                            Rect rect = new Rect(pos - 8, 3 + time * 22, 20, 20);
+                            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
                                 if (pickermode == "delete")
                                 {
-                                    if (DeletingThing == step)
-                                    {
-                                        HistoryDelete(TargetLane.LaneSteps, step);
-                                        TargetThing = null;
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        DeletingThing = step;
-                                    }
+                                    Event.current.Use();
+                                    if (TimelineDelete(TargetLane.LaneSteps, step)) break;
                                 }
                                 else
                                 {
-                                    TargetThing = step;
-                                    DeletingThing = null;
+                                    TimelineSelect(step);
                                 }
                             }
+                            else if (Event.current.type == EventType.Repaint) 
+                                GUI.Toggle(rect, DraggingThing == step, DeletingThing == step ? "?" : "┃", itemStyle);
                         }
                     }
                 }
@@ -2696,27 +2718,21 @@ public class Chartmaker : EditorWindow
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
                         {
                             if (IsTargeted(hit)) GUI.Label(new Rect(rect.position - Vector2.one, rect.size + Vector2.one * 2), "", "button");
-                            if (GUI.Button(rect, DeletingThing == hit ? "?" : "┃", style))
+                            
+                            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
                                 if (pickermode == "delete")
                                 {
-                                    if (DeletingThing == hit)
-                                    {
-                                        HistoryDelete(TargetLane.Objects, hit);
-                                        TargetThing = null;
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        DeletingThing = hit;
-                                    }
+                                    Event.current.Use();
+                                    if (TimelineDelete(TargetLane.Objects, hit)) break;
                                 }
                                 else
                                 {
-                                    TargetThing = hit;
-                                    DeletingThing = null;
+                                    TimelineSelect(hit);
                                 }
                             }
+                            else if (Event.current.type == EventType.Repaint) 
+                                GUI.Toggle(rect, DraggingThing == hit, DeletingThing == hit ? "?" : "┃", style);
                         }
                     }
                 }
@@ -2755,45 +2771,86 @@ public class Chartmaker : EditorWindow
             verSeek = Mathf.Max(Mathf.Min(verSeek, Times.Count - timelineHeight), 0);
         }
 
-
         // Click events
         if (Event.current.type == EventType.MouseDown && mouseBtn < 0)
         {
             Vector2 mPos = Event.current.mousePosition;
             mouseBtn = Event.current.button;
-            if (mPos.x < width - 10)
+
+            if (DraggingThing == null)
             {
-                float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
-                if (mPos.y > tHeight - 10 && mPos.y < tHeight + 5)
+                if (mPos.x < width - 10)
                 {
-                    CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
-                    dragMode = "seek";
-                    Repaint();
-                }
-                else if (mPos.y > 0 && mPos.y < tHeight - 10)
-                {
-                    if (pickermode == "select" || mouseBtn == 1)
+                    float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
+                    if (mPos.y > tHeight - 10 && mPos.y < tHeight + 5)
                     {
-                        selectStart = sPos;
-                        dragMode = "select";
-                        Repaint();
+                        CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
+                        dragMode = "seek";
                     }
-                    else
+                    else if (mPos.y > 0 && mPos.y < tHeight - 10)
                     {
-                        selectStart = Mathf.Round(sPos / sep) * sep;
-                        CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
-                        dragMode = "seeksnap";
-                        Repaint();
+                        if (pickermode == "select" || mouseBtn == 1)
+                        {
+                            selectStart = sPos;
+                            dragMode = "select";
+                        }
+                        else
+                        {
+                            selectStart = Mathf.Round(sPos / sep) * sep;
+                            CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
+                            dragMode = "seeksnap";
+                        }
                     }
                 }
             }
             dragged = false;
+            Repaint();
         }
         else if (Event.current.type == EventType.MouseDrag)
         {
             Vector2 mPos = Event.current.mousePosition;
             float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
-            if (dragMode == "select")
+            if (DraggingThing != null)
+            {
+                if (!dragged)
+                {
+                    if (DraggingThing is Timestamp)
+                    {
+                        if (!TargetTimestamp.Contains((Timestamp)DraggingThing))
+                        {
+                            TargetTimestamp = new List<Timestamp>(new [] {(Timestamp)DraggingThing});
+                        }
+                    }
+                    else
+                    {
+                        if (TargetThing is not IList || !((IList)TargetThing).Contains(DraggingThing))
+                        {
+                            TargetThing = DraggingThing;
+                            if (TargetThing is Lane) TargetLane = (Lane)TargetThing;
+                        }
+                    }
+                }
+
+                object thing = TargetTimestamp.Count >= 1 ? TargetTimestamp : TargetThing;
+
+                if (thing is IList)
+                {
+
+                }
+                else if (thing is not BPMStop)
+                {
+                    System.Reflection.FieldInfo field = thing.GetType().GetField("Offset");
+                    sPos = Mathf.Round(sPos / sep) * sep;
+                    if (field != null && sPos != (float)field.GetValue(thing)) 
+                    {
+                        History.StartRecordItem(thing);
+                        field.SetValue(thing, sPos);
+                        History.EndRecordItem(thing);
+                    }
+                }
+                Repaint();
+            }
+            else if (dragMode == "select")
             {
                 selectEnd = sPos;
                 Repaint();
@@ -2828,6 +2885,30 @@ public class Chartmaker : EditorWindow
         }
         else if (Event.current.type == EventType.MouseUp && Event.current.button == mouseBtn)
         {
+            Debug.Log(DraggingThing);
+            if (DraggingThing != null)
+            {
+                if (!dragged)
+                {
+                    if (DraggingThing is Timestamp)
+                    {
+                        TargetTimestamp = new List<Timestamp>(new [] {(Timestamp)DraggingThing});
+                    }
+                    else
+                    {
+                        TargetThing = DraggingThing;
+                        if (TargetThing is Lane) TargetLane = (Lane)TargetThing;
+                    }
+                }
+
+                if (TargetTimestamp.Count > 0) ((IStoryboardable)TargetThing).Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                else if (TargetThing is LaneStep) TargetLane?.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                else if (TargetThing is HitObject) TargetLane?.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                else if (TargetThing is Timestamp) TargetLane?.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+
+                DraggingThing = null;
+                Repaint();
+            }
             if (dragMode == "select")
             {
                 if (selectEnd != null)
@@ -2845,8 +2926,7 @@ public class Chartmaker : EditorWindow
                         {
                             return x.Offset >= selectStart && x.Offset <= selectEnd;
                         });
-                        if (sel.Count == 1) TargetTimestamp = sel[0];
-                        else if (sel.Count > 1) TargetThing = sel;
+                        TargetTimestamp = sel;
                     }
                     else if (timelineMode == "timing")
                     {
@@ -2917,7 +2997,7 @@ public class Chartmaker : EditorWindow
                         HistoryAdd(thing.Storyboard.Timestamps, ts);
                         thing.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                         TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                        TargetTimestamp = ts;
+                        TargetTimestamp = new List<Timestamp>(new [] {ts});
                         Repaint();
                     }
                 }
@@ -3299,10 +3379,10 @@ public class Chartmaker : EditorWindow
                 }
 
             }
-            else if (TargetTimestamp != null)
+            else if (TargetTimestamp.Count == 1)
             {
                 IStoryboardable thing = (IStoryboardable)TargetThing;
-                Timestamp ts = TargetTimestamp;
+                Timestamp ts = TargetTimestamp[0];
                 History.StartRecordItem(ts);
 
                 GUIStyle bStyle = new GUIStyle("textField");
@@ -3364,6 +3444,10 @@ public class Chartmaker : EditorWindow
                 thing.AltSongArtist = EditorGUILayout.TextField("Alt Artist", thing.AltSongArtist);
                 thing.Location = EditorGUILayout.TextField("Location", thing.Location);
                 thing.Genre = EditorGUILayout.TextField("Genre", thing.Genre);
+                GUILayout.Space(8);
+                GUILayout.Label("Colors", "boldLabel");
+                thing.BackgroundColor = EditorGUILayout.ColorField("Background", thing.BackgroundColor);
+                thing.InterfaceColor = EditorGUILayout.ColorField("Interface", thing.InterfaceColor);
                 GUILayout.Space(8);
                 GUILayout.Label("Charts", "boldLabel");
                 foreach (ExternalChartMeta chart in TargetSong.Charts)

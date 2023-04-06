@@ -214,6 +214,21 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
+  - m_Index: 7
+    m_Metrics:
+      m_Width: 50.4375
+      m_Height: 65.78125
+      m_HorizontalBearingX: 1.71875
+      m_HorizontalBearingY: 64.90625
+      m_HorizontalAdvance: 54.015625
+    m_GlyphRect:
+      m_X: 950
+      m_Y: 331
+      m_Width: 52
+      m_Height: 66
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
   - m_Index: 8
     m_Metrics:
       m_Width: 49.5625
@@ -1444,21 +1459,6 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
-  - m_Index: 7
-    m_Metrics:
-      m_Width: 50.4375
-      m_Height: 65.78125
-      m_HorizontalBearingX: 1.71875
-      m_HorizontalBearingY: 64.90625
-      m_HorizontalAdvance: 54.015625
-    m_GlyphRect:
-      m_X: 950
-      m_Y: 331
-      m_Width: 52
-      m_Height: 66
-    m_Scale: 1
-    m_AtlasIndex: 0
-    m_ClassDefinitionType: 0
   - m_Index: 1008
     m_Metrics:
       m_Width: 12.4375
@@ -1478,6 +1478,14 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 32
     m_GlyphIndex: 3
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 33
+    m_GlyphIndex: 1008
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 37
+    m_GlyphIndex: 7
     m_Scale: 1
   - m_ElementType: 1
     m_Unicode: 38
@@ -1806,14 +1814,6 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 9674
     m_GlyphIndex: 400
-    m_Scale: 1
-  - m_ElementType: 1
-    m_Unicode: 37
-    m_GlyphIndex: 7
-    m_Scale: 1
-  - m_ElementType: 1
-    m_Unicode: 33
-    m_GlyphIndex: 1008
     m_Scale: 1
   m_AtlasTextures:
   - {fileID: -2445756542940011023}
@@ -2464,6 +2464,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 29efb340d53467c4f9ba8540588187ab, type: 2}
   - {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
   - {fileID: 11400000, guid: ad9ef9cf5516dfe4ab06f463e9380df4, type: 2}
+  - {fileID: 11400000, guid: 0159476e8859170448df5440a2db8bbf, type: 2}
   m_CreationSettings:
     sourceFontFileName: 
     sourceFontFileGUID: 6f6dc4b6f28ab75499352fea7b499fef

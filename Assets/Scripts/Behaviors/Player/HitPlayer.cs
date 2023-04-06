@@ -59,7 +59,7 @@ public class HitPlayer : MonoBehaviour
                 float pSec = lane.Times[a - 1];
                 LaneStep step = lane.CurrentLane.LaneSteps[a];
                 float nSec = lane.Times[a];
-                float nPos = pos + prev.Speed * (nSec - pSec);
+                float nPos = pos + step.Speed * (nSec - pSec);
                 
                 float start = (sec - pSec) / (nSec - pSec);
                 float end = (Ticks[Ticks.Count - 1] - pSec) / (nSec - pSec);

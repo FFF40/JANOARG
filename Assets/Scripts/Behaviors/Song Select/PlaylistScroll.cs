@@ -27,6 +27,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     float oldOffset = float.NaN;
     float oldVelocity = float.NaN;
     float oldTime;
+    public Graphic MainGraphic;
 
     public RectTransform MainCanvas;
     public RectTransform SafeArea;
@@ -258,6 +259,9 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
 
         SelectedSongBox.gameObject.SetActive(true);
         SelectedItem.CoverImage.gameObject.SetActive(false);
+        
+        Color oldBackColor = Common.main.MainCamera.backgroundColor;
+        Color oldForeColor = MainGraphic.color;
 
         void LerpSelection(float value)
         {
@@ -267,6 +271,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             float ease2 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+
+            float ease3 = Ease.Get(value, EaseFunction.Quadratic, EaseMode.InOut);
+            SetBackgroundColor(Color.Lerp(oldBackColor, SelectedItem.Song.BackgroundColor, ease3));
+            SetForegroundColor(Color.Lerp(oldForeColor, SelectedItem.Song.InterfaceColor, ease3));
         }
 
         void LerpSelection2(float value)
@@ -305,6 +313,19 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         isAnimating = false;
     }
 
+    public void SetBackgroundColor(Color color)
+    {
+        Common.main.MainCamera.backgroundColor = RenderSettings.fogColor = color;
+    }
+
+    public void SetForegroundColor(Color color)
+    {
+        MainGraphic.color = color;
+        foreach (PlaylistScrollItem item in Items)
+        {
+            item.SongNameLabel.color = item.ArtistNameLabel.color = color;
+        }
+    }
 
     public void ShowSelection()
     {
@@ -323,13 +344,15 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         SelectedSongBox.gameObject.SetActive(true);
         SelectedItem.CoverImage.gameObject.SetActive(false);
         isAnimating = true;
+        
+        Color oldBackColor = Common.main.MainCamera.backgroundColor;
+        Color oldForeColor = MainGraphic.color;
 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.InOut);
             Rect coverRect = SelectedItem.CoverImage.rectTransform.rect;
             Vector2 coverPos = MainCanvas.InverseTransformPoint(SelectedItem.CoverImage.transform.position);
-
             SelectedSongBox.sizeDelta = Vector2.Lerp(coverRect.size, new Vector2(0, 120), ease);
             SelectedSongBox.anchorMin = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(0, .5f), ease);
             SelectedSongBox.anchorMax = Vector2.Lerp(new Vector2(.5f, .5f), new Vector2(1, .5f), ease);
@@ -347,6 +370,11 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             float ease3 = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
             ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
             ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            
+            float ease4 = Ease.Get(value, EaseFunction.Quadratic, EaseMode.InOut);
+            SetBackgroundColor(Color.Lerp(oldBackColor, SelectedItem.Song.BackgroundColor, ease4));
+            SetForegroundColor(Color.Lerp(oldForeColor, SelectedItem.Song.InterfaceColor, ease4));
+
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .6f)

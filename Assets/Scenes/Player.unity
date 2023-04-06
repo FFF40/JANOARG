@@ -15,7 +15,7 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 1, g: 1, b: 1, a: 1}
+  m_FogColor: {r: 0.9815119, g: 1, b: 0.8443396, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 0
@@ -11904,7 +11904,7 @@ GameObject:
   - component: {fileID: 1072796300}
   - component: {fileID: 1072796301}
   m_Layer: 5
-  m_Name: About Background
+  m_Name: Abort Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16721,11 +16721,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8acfd40c056295442b18325aad94ed6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SongPath: Songs/playground/Nothing - Nobody
+  SongPath: Songs/raintain/Raintain - Sound Souler
   Song: {fileID: 11400000, guid: 99ebee8463d30ae4b8f934d225e3bce8, type: 2}
   ChartPosition: 0
   IsPlaying: 0
-  AutoPlay: 0
+  AutoPlay: 1
   CurrentTime: -5
   Score: 0
   TotalScore: 0
@@ -16742,7 +16742,7 @@ MonoBehaviour:
   OffsetMean: 0
   Deviation: 0
   AccuracyValues: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  ScrollSpeed: 64
+  ScrollSpeed: 100
   SyncThreshold: 0.1
   PerfectHitWindow: 35
   GoodHitWindow: 200

@@ -72,6 +72,7 @@ public class SettingsPanel : MonoBehaviour
         rt.SetParent(FocusHolder);
 
         float kbHeight = GetKeyboardHeightRatio();
+        while (kbHeight <= 0) kbHeight = GetKeyboardHeightRatio();
         FocusHolder.anchorMin = new Vector2(0, kbHeight);
 
         void Lerp(float value)

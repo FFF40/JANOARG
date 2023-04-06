@@ -37,7 +37,7 @@ public class LanePlayer : MonoBehaviour
             LaneStep prev = lane.LaneSteps[a - 1];
             LaneStep step = lane.LaneSteps[a];
             float nSec = ChartPlayer.main.Song.Timing.ToSeconds(step.Offset);
-            float nPos = pos + prev.Speed * (nSec - sec);
+            float nPos = pos + step.Speed * (nSec - sec);
             if (RenderLane) 
             {
                 MeshFilter mf = Instantiate(ChartPlayer.main.LaneMeshSample, Container);

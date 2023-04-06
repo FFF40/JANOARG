@@ -7,6 +7,8 @@ public class Common : MonoBehaviour
 {
     public static Common main;
 
+    public Camera MainCamera;
+
     public LoadingBar LoadingBar;
     public Storage Storage;
 

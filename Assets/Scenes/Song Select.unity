@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311947, g: 0.38074005, b: 0.35872722, a: 1}
+  m_IndirectSpecularColor: {r: 0.37089843, g: 0.37837029, b: 0.35722524, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2362,6 +2362,7 @@ MonoBehaviour:
   Items: []
   ListPadding: 12
   ItemSize: 50
+  MainGraphic: {fileID: 1354769581}
   MainCanvas: {fileID: 890877647}
   SafeArea: {fileID: 162004779}
   SelectedSongBox: {fileID: 1558943888}
@@ -2388,6 +2389,7 @@ MonoBehaviour:
   isLaunching: 0
   ChartDetail: {fileID: 118697575}
   ChartDetailGroup: {fileID: 118697577}
+  HoldSelection: 0
 --- !u!1 &1396862435
 GameObject:
   m_ObjectHideFlags: 0

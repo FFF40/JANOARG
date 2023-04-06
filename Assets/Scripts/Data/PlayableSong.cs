@@ -13,6 +13,9 @@ public class PlayableSong : ScriptableObject
     public string Genre = "Genreless";
     public AudioClip Clip;
 
+    public Color BackgroundColor = Color.black;
+    public Color InterfaceColor = Color.white;
+
     public Metronome Timing = new Metronome(140);
 
     [FormerlySerializedAs("Charts")]

@@ -225,6 +225,8 @@ public class ChartPlayer : MonoBehaviour
 
         if (!FreeFlickEmblem) FreeFlickEmblem = MakeFreeFlickEmblem();
         if (!DirectionalFlickEmblem) DirectionalFlickEmblem = MakeDirectionalFlickEmblem();
+        
+        Song.Clip.LoadAudioData();
 
         foreach (Timestamp ts in CurrentChart.Camera.Storyboard.Timestamps)
         {
@@ -346,6 +348,8 @@ public class ChartPlayer : MonoBehaviour
             time = t;
             yield return null;
         }
+
+        yield return new WaitUntil(() => Song.Clip.loadState == AudioDataLoadState.Loaded);
 
         PlayInterfaceObject.SetActive(true);
         Debug.Log(ResultScreen.main);
@@ -722,6 +726,7 @@ public class ChartPlayer : MonoBehaviour
     IEnumerator ComboPop () 
     {
         ComboGroup.alpha = 1;
+        ComboLabel.text = AutoPlay ? "AUTOPLAY" : "STREAK";
         ComboText.text = Combo.ToString("#", CultureInfo.InvariantCulture);
         for (float a = 0; a < 1; a += Time.deltaTime / .1f)
         {

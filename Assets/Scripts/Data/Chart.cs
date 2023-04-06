@@ -20,7 +20,6 @@ public class Chart : IStoryboardable, IDeepClonable<Chart>
     public List<LaneGroup> Groups = new List<LaneGroup>();
     public List<Lane> Lanes = new List<Lane>();
 
-    // Might move this to a new class
     public CameraController Camera;
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
