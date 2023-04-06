@@ -2885,7 +2885,6 @@ public class Chartmaker : EditorWindow
         }
         else if (Event.current.type == EventType.MouseUp && Event.current.button == mouseBtn)
         {
-            Debug.Log(DraggingThing);
             if (DraggingThing != null)
             {
                 if (!dragged)
