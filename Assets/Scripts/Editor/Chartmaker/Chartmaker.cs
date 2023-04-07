@@ -3139,8 +3139,13 @@ public class Chartmaker : EditorWindow
 
     public void Inspector(int id)
     {
-        GUI.Label(new Rect(0, 0, 240, 24), "", "button");
+        GUI.Label(new Rect(-2, -2, 244, 26), "", "helpBox");
         EditorGUIUtility.labelWidth = 80;
+
+        GUIStyle backStyle = new GUIStyle("helpBox");
+        backStyle.alignment = TextAnchor.MiddleCenter;
+        backStyle.padding = new RectOffset(4, 0, 0, 0);
+        backStyle.fontSize = 14;
 
         if (LastTargetThing != TargetThing)
         {
@@ -3150,7 +3155,8 @@ public class Chartmaker : EditorWindow
 
         if (inspectMode == "debug")
         {
-            GUI.Label(new Rect(7, 2, 226, 20), "Debug Stats", "boldLabel");
+            GUI.Button(new Rect(-2, -2, 24, 24), "", backStyle);
+            GUI.Label(new Rect(27, 1, 226, 20), "Debug Stats", "boldLabel");
             GUILayout.Space(8);
 
             scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -3180,7 +3186,8 @@ public class Chartmaker : EditorWindow
         }
         else if (inspectMode == "history")
         {
-            GUI.Label(new Rect(7, 2, 226, 20), "Edit History", "boldLabel");
+            GUI.Button(new Rect(-2, -2, 24, 24), "", backStyle);
+            GUI.Label(new Rect(27, 1, 226, 20), "Edit History", "boldLabel");
             GUILayout.Space(8);
 
             scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -3205,14 +3212,15 @@ public class Chartmaker : EditorWindow
         }
         else if (TargetThing == null)
         {
-            GUI.Label(new Rect(7, 2, 226, 20), "No object selected", "boldLabel");
+            GUI.Button(new Rect(-2, -2, 24, 24), "", backStyle);
+            GUI.Label(new Rect(27, 1, 226, 20), "No object selected", "boldLabel");
             GUILayout.Space(8);
             GUILayout.Label("Please select an object to start editing.");
         }
         else if (inspectMode == "properties")
         {
             GUIStyle offsetStyle = new GUIStyle("textField");
-            offsetStyle.padding = new RectOffset(4, 4, 3, 3);
+            offsetStyle.padding = new RectOffset(4, 4, 2, 2);
 
             GUIStyle rightStyle = new GUIStyle("label");
             rightStyle.alignment = TextAnchor.UpperRight;
@@ -3231,7 +3239,12 @@ public class Chartmaker : EditorWindow
                 else if (thing is List<LaneStep>) name = "Lane Steps";
                 else if (thing is List<HitObject>) name = "Hit Objects";
 
-                GUI.Label(new Rect(7, 2, 226, 20), thing.Count + " " + name, "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) 
+                {
+                    if (TargetTimestamp.Count > 1) TargetTimestamp = new List<Timestamp>();
+                    else TargetThing = null;
+                }
+                GUI.Label(new Rect(27, 1, 226, 20), thing.Count + " " + name, "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3434,10 +3447,11 @@ public class Chartmaker : EditorWindow
                     tst.Add(t.Name);
                 }
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Timestamp", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetTimestamp = new List<Timestamp>();
+                GUI.Label(new Rect(27, 1, 226, 20), "Timestamp", "boldLabel");
                 GUILayout.Space(8);
                 ts.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), ts.Offset, offsetStyle);
-                GUI.Label(new Rect(161, 4, 73, 18), "b", rightStyle);
+                GUI.Label(new Rect(162, 3, 73, 18), "b", rightStyle);
 
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3466,7 +3480,8 @@ public class Chartmaker : EditorWindow
                 GUIStyle bStyle = new GUIStyle("textField");
                 bStyle.fontStyle = FontStyle.Bold;
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Song Details", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "Song Details", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Metadata", "boldLabel");
@@ -3517,9 +3532,10 @@ public class Chartmaker : EditorWindow
                 BPMStop thing = (BPMStop)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "BPM Stop", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "BPM Stop", "boldLabel");
                 thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset, offsetStyle);
-                GUI.Label(new Rect(161, 4, 73, 18), "s", rightStyle);
+                GUI.Label(new Rect(162, 3, 73, 18), "s", rightStyle);
 
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -3558,7 +3574,8 @@ public class Chartmaker : EditorWindow
                 Chart thing = TargetChart.Data;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Chart Details", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "Chart Details", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Difficulty", "boldLabel");
@@ -3574,7 +3591,8 @@ public class Chartmaker : EditorWindow
                 CameraController thing = TargetChart.Data.Camera;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Camera Controller", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "Camera Controller", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Transform", "boldLabel");
@@ -3588,7 +3606,8 @@ public class Chartmaker : EditorWindow
                 Pallete thing = (Pallete)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Palette", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "Palette", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3667,7 +3686,8 @@ public class Chartmaker : EditorWindow
                 LaneStyle thing = (LaneStyle)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Lane Style", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = TargetChart.Data.Pallete;
+                GUI.Label(new Rect(27, 1, 226, 20), "Lane Style", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3690,7 +3710,8 @@ public class Chartmaker : EditorWindow
                 HitStyle thing = (HitStyle)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Lane Style", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = TargetChart.Data.Pallete;
+                GUI.Label(new Rect(27, 1, 226, 20), "Hit Style", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3714,7 +3735,8 @@ public class Chartmaker : EditorWindow
                 List<LaneGroup> thing = (List<LaneGroup>)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Lane Groups", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "Lane Groups", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3759,7 +3781,8 @@ public class Chartmaker : EditorWindow
                 LaneGroup thing = (LaneGroup)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Lane Group", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = TargetChart.Data.Groups;
+                GUI.Label(new Rect(27, 1, 226, 20), "Lane Group", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3787,7 +3810,8 @@ public class Chartmaker : EditorWindow
                 Lane thing = (Lane)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Lane", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = null;
+                GUI.Label(new Rect(27, 1, 226, 20), "Lane", "boldLabel");
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3893,9 +3917,10 @@ public class Chartmaker : EditorWindow
                 LaneStep thing = (LaneStep)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Lane Step", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = TargetLane;
+                GUI.Label(new Rect(27, 1, 226, 20), "Lane Step", "boldLabel");
                 thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset, offsetStyle);
-                GUI.Label(new Rect(161, 4, 73, 18), "b", rightStyle);
+                GUI.Label(new Rect(162, 3, 73, 18), "b", rightStyle);
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3940,9 +3965,10 @@ public class Chartmaker : EditorWindow
                 HitObject thing = (HitObject)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUI.Label(new Rect(7, 2, 226, 20), "Hit Object", "boldLabel");
+                if (GUI.Button(new Rect(-2, -2, 24, 24), "←", backStyle)) TargetThing = TargetLane;
+                GUI.Label(new Rect(27, 1, 226, 20), "Hit Object", "boldLabel");
                 thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset, offsetStyle);
-                GUI.Label(new Rect(161, 4, 73, 18), "b", rightStyle);
+                GUI.Label(new Rect(162, 3, 73, 18), "b", rightStyle);
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3981,7 +4007,8 @@ public class Chartmaker : EditorWindow
         }
         else if (inspectMode == "storyboard")
         {
-            GUI.Label(new Rect(7, 2, 226, 20), "Storyboard", "boldLabel");
+            GUI.Button(new Rect(-2, -2, 24, 24), "", backStyle);
+            GUI.Label(new Rect(27, 1, 226, 20), "Storyboard", "boldLabel");
             GUILayout.Space(8);
             if (TargetThing == TargetChart.Data)
             {
