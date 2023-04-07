@@ -42,18 +42,24 @@ public class ChartmakerMultiManager
 
         FieldInfo currentField = AvailableFields[target];
 
+        IList current = Chartmaker.current.TargetTimestamp.Count > 1 
+            ? Chartmaker.current.TargetTimestamp 
+            : Chartmaker.current.TargetThing as IList;
+
         if (currentField.FieldType != Handler?.TargetType)
         {
             if (currentField.FieldType ==  typeof(bool)) 
             {
-                Handler = Handlers.ContainsKey(currentField.FieldType) ? Handlers[currentField.FieldType] : new ChartmakerMultiHandlerBoolean();
+                Handler = Handlers.ContainsKey(currentField.FieldType) 
+                    ? Handlers[currentField.FieldType] 
+                    : new ChartmakerMultiHandlerBoolean();
             }
             else if (currentField.FieldType == typeof(float)) 
             {
                 ChartmakerMultiHandlerFloat handler = Handlers.ContainsKey(currentField.FieldType)
                     ? Handlers[currentField.FieldType] as ChartmakerMultiHandlerFloat 
                     : new ChartmakerMultiHandlerFloat();
-                handler.SetLerp(Chartmaker.current.TargetThing as IList);
+                handler.SetLerp(current);
                 Handler = handler;
             }
             else if (currentField.FieldType == typeof(Vector2)) 
@@ -61,7 +67,7 @@ public class ChartmakerMultiManager
                 ChartmakerMultiHandlerVector2 handler = Handlers.ContainsKey(currentField.FieldType)
                     ? Handlers[currentField.FieldType] as ChartmakerMultiHandlerVector2 
                     : new ChartmakerMultiHandlerVector2();
-                handler.SetLerp(Chartmaker.current.TargetThing as IList);
+                handler.SetLerp(current);
                 Handler = handler;
             }
             else if (currentField.FieldType == typeof(Vector3)) 
@@ -69,7 +75,7 @@ public class ChartmakerMultiManager
                 ChartmakerMultiHandlerVector3 handler = Handlers.ContainsKey(currentField.FieldType)
                     ? Handlers[currentField.FieldType] as ChartmakerMultiHandlerVector3 
                     : new ChartmakerMultiHandlerVector3();
-                handler.SetLerp(Chartmaker.current.TargetThing as IList);
+                handler.SetLerp(current);
                 Handler = handler;
             }
             else 

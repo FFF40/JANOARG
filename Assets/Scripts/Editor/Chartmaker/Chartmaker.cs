@@ -3211,9 +3211,17 @@ public class Chartmaker : EditorWindow
         }
         else if (inspectMode == "properties")
         {
-            if (TargetThing != TargetChart?.Data.Groups && TargetThing is IList)
+            GUIStyle offsetStyle = new GUIStyle("textField");
+            offsetStyle.padding = new RectOffset(4, 4, 3, 3);
+
+            GUIStyle rightStyle = new GUIStyle("label");
+            rightStyle.alignment = TextAnchor.UpperRight;
+            rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
+                rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
+
+            if (TargetTimestamp.Count > 1 || (TargetThing != TargetChart?.Data.Groups && TargetThing is IList))
             {
-                IList thing = (IList)TargetThing;
+                IList thing = TargetTimestamp.Count > 1 ? TargetTimestamp : (IList)TargetThing;
 
                 string name = "items";
                 if (thing is List<Timestamp>) name = "Timestamps";
@@ -3404,7 +3412,7 @@ public class Chartmaker : EditorWindow
                 if (isSupported)
                 {
                     GUILayout.Space(8);
-                    if (GUILayout.Button("Execute")) MultiManager.Execute(TargetThing as IList, History);
+                    if (GUILayout.Button("Execute")) MultiManager.Execute(thing, History);
                 }
 
             }
@@ -3417,11 +3425,6 @@ public class Chartmaker : EditorWindow
                 GUIStyle bStyle = new GUIStyle("textField");
                 bStyle.fontStyle = FontStyle.Bold;
 
-                GUIStyle rightStyle = new GUIStyle("label");
-                rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
-                    rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
-
 
                 List<string> tst = new List<string>();
                 List<string> tso = new List<string>();
@@ -3433,8 +3436,8 @@ public class Chartmaker : EditorWindow
 
                 GUI.Label(new Rect(7, 2, 226, 20), "Timestamp", "boldLabel");
                 GUILayout.Space(8);
-                ts.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), ts.Offset);
-                GUI.Label(new Rect(163, 2, 75, 20), "b", rightStyle);
+                ts.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), ts.Offset, offsetStyle);
+                GUI.Label(new Rect(161, 4, 73, 18), "b", rightStyle);
 
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3514,14 +3517,9 @@ public class Chartmaker : EditorWindow
                 BPMStop thing = (BPMStop)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUIStyle rightStyle = new GUIStyle("label");
-                rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
-                    rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
-
                 GUI.Label(new Rect(7, 2, 226, 20), "BPM Stop", "boldLabel");
-                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset);
-                GUI.Label(new Rect(163, 2, 75, 20), "s", rightStyle);
+                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset, offsetStyle);
+                GUI.Label(new Rect(161, 4, 73, 18), "s", rightStyle);
 
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -3797,11 +3795,6 @@ public class Chartmaker : EditorWindow
                 labelStyle.padding = new RectOffset(3, 3, 1, 1);
                 labelStyle.fontSize = 10;
 
-                GUIStyle rightStyle = new GUIStyle(labelStyle);
-                rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
-                    rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
-
                 GUIStyle fieldStyle = new GUIStyle("textField");
                 fieldStyle.padding = new RectOffset(3, 3, 1, 1);
                 fieldStyle.fontSize = 10;
@@ -3900,14 +3893,9 @@ public class Chartmaker : EditorWindow
                 LaneStep thing = (LaneStep)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUIStyle rightStyle = new GUIStyle("label");
-                rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
-                    rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
-
                 GUI.Label(new Rect(7, 2, 226, 20), "Lane Step", "boldLabel");
-                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset);
-                GUI.Label(new Rect(163, 2, 75, 20), "b", rightStyle);
+                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset, offsetStyle);
+                GUI.Label(new Rect(161, 4, 73, 18), "b", rightStyle);
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
@@ -3952,14 +3940,9 @@ public class Chartmaker : EditorWindow
                 HitObject thing = (HitObject)TargetThing;
                 History.StartRecordItem(TargetThing);
 
-                GUIStyle rightStyle = new GUIStyle("label");
-                rightStyle.alignment = TextAnchor.UpperRight;
-                rightStyle.hover.textColor = rightStyle.normal.textColor = new Color(rightStyle.normal.textColor.r,
-                    rightStyle.normal.textColor.g, rightStyle.normal.textColor.b, .5f);
-
                 GUI.Label(new Rect(7, 2, 226, 20), "Hit Object", "boldLabel");
-                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset);
-                GUI.Label(new Rect(163, 2, 75, 20), "b", rightStyle);
+                thing.Offset = EditorGUI.FloatField(new Rect(163, 2, 75, 20), thing.Offset, offsetStyle);
+                GUI.Label(new Rect(161, 4, 73, 18), "b", rightStyle);
                 GUILayout.Space(8);
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
 
