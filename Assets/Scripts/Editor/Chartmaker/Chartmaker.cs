@@ -1808,6 +1808,26 @@ public class Chartmaker : EditorWindow
         action.Redo();
     }
 
+    public void DoMoveOffset(IList list, float value)
+    {
+        ChartmakerMoveOffsetAction action = null;
+        if (History.ActionsBehind.Count > 0 && History.ActionsBehind.Peek() is ChartmakerMoveOffsetAction)
+        {
+            action = (ChartmakerMoveOffsetAction)History.ActionsBehind.Peek();
+            if (!action.Targets.Equals(list)) action = null;
+        }
+
+        if (action == null)
+        {
+            action = new ChartmakerMoveOffsetAction();
+            action.Targets = list;
+            History.ActionsBehind.Push(action);
+        }
+        action.Value += value;
+
+        History.ActionsAhead.Clear();
+    }
+
     public void RenameGroup(string from, string to)
     {
         ChartmakerGroupRenameAction action = new ChartmakerGroupRenameAction();
@@ -2835,7 +2855,17 @@ public class Chartmaker : EditorWindow
 
                 if (thing is IList)
                 {
-
+                    System.Reflection.FieldInfo field = DraggingThing.GetType().GetField("Offset");
+                    sPos = Mathf.Round(sPos / sep) * sep;
+                    if (field != null && sPos != (float)field.GetValue(DraggingThing)) 
+                    {
+                        float offset = sPos - (float)field.GetValue(DraggingThing);
+                        foreach (object obj in (IList)thing) if (obj.GetType() == DraggingThing.GetType())
+                        {
+                            field.SetValue(obj, (float)field.GetValue(obj) + offset);
+                        }
+                        DoMoveOffset((IList)thing, offset);
+                    }
                 }
                 else if (thing is not BPMStop)
                 {

@@ -450,3 +450,28 @@ public class ChartmakerMultiEditAction: IChartmakerAction
             item.Target.GetType().GetField(Keyword).SetValue(item.Target, item.To);
     }
 }
+
+public class ChartmakerMoveOffsetAction: IChartmakerAction
+{
+    public IList Targets = new List<object>();
+    public string Keyword;
+    public float Value;
+
+    public string GetName()
+    {
+        return "Move " + Chartmaker.GetItemName(Targets) + " Offset";
+    }
+
+    public void Undo() 
+    {
+        System.Reflection.FieldInfo field = Targets[0].GetType().GetField("Offset");
+        foreach (object item in Targets)
+            field.SetValue(item, (float)field.GetValue(item) - Value);
+    }
+    public void Redo() 
+    {
+        System.Reflection.FieldInfo field = Targets[0].GetType().GetField("Offset");
+        foreach (object item in Targets)
+            field.SetValue(item, (float)field.GetValue(item) + Value);
+    }
+}
