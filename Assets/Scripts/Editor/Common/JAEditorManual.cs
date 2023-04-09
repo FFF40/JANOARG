@@ -25,7 +25,7 @@ public class JAEditorManual : EditorWindow
     Font MonospaceFont;
 
     public bool isBusy = false;
-    List<IEnumerator> Coroutines = new List<IEnumerator>();
+    List<IEnumerator> Coroutines = new();
 
     void StartCoroutine(IEnumerator routine)
     {

@@ -543,6 +543,11 @@ public class Chartmaker : EditorWindow
     {
         if (CurrentCamera) CurrentCamera.gameObject.SetActive(false);
     }
+    
+    public void OnEnable()
+    {
+        KeybindActions.LoadKeys();
+    }
 
     public void OnGUI()
     {
@@ -1204,8 +1209,8 @@ public class Chartmaker : EditorWindow
 
     bool menuOpen = false;
 
-    public static KeybindActionList KeybindActions = new KeybindActionList {
-        {"g_play", new KeybindAction {
+    public static KeybindActionList KeybindActions = new KeybindActionList ("CM") {
+        {"GN:Play", new KeybindAction {
             Category = "General",
             Name = "Toggle Play/Pause",
             Keybind = new Keybind(KeyCode.Space),
@@ -1221,13 +1226,13 @@ public class Chartmaker : EditorWindow
                 }
             }
         }},
-        {"g_player", new KeybindAction {
+        {"GN:Player", new KeybindAction {
             Category = "General",
             Name = "Play Chart in Player",
             Keybind = new Keybind(KeyCode.Space, EventModifiers.Shift),
             Invoke = () => current.OpenInPlayMode(),
         }},
-        {"g_menu", new KeybindAction {
+        {"GN:Menu", new KeybindAction {
             Category = "General",
             Name = "Open Menu",
             Keybind = new Keybind(KeyCode.Menu),
@@ -1236,67 +1241,67 @@ public class Chartmaker : EditorWindow
                 current.Repaint();
             },
         }},
-        {"f_save", new KeybindAction {
+        {"FI:Save", new KeybindAction {
             Category = "File",
             Name = "Save",
             Keybind = new Keybind(KeyCode.S, EventModifiers.Command),
             Invoke = () => current.SaveSong(),
         }},
-        {"e_undo", new KeybindAction {
+        {"ED:Undo", new KeybindAction {
             Category = "Edit",
             Name = "Undo",
             Keybind = new Keybind(KeyCode.Z, EventModifiers.Command),
             Invoke = () => current.History.Undo(),
         }},
-        {"e_redo", new KeybindAction {
+        {"ED:Redo", new KeybindAction {
             Category = "Edit",
             Name = "Redo",
             Keybind = new Keybind(KeyCode.Y, EventModifiers.Command),
             Invoke = () => current.History.Redo(),
         }},
-        {"e_cut", new KeybindAction {
+        {"ED:Cut", new KeybindAction {
             Category = "Edit",
             Name = "Cut",
             Keybind = new Keybind(KeyCode.X, EventModifiers.Command),
             Invoke = () => current.CutSelection(),
         }},
-        {"e_copy", new KeybindAction {
+        {"ED:Copy", new KeybindAction {
             Category = "Edit",
             Name = "Copy",
             Keybind = new Keybind(KeyCode.C, EventModifiers.Command),
             Invoke = () => current.CopySelection(),
         }},
-        {"e_paste", new KeybindAction {
+        {"ED:Paste", new KeybindAction {
             Category = "Edit",
             Name = "Paste",
             Keybind = new Keybind(KeyCode.V, EventModifiers.Command),
             Invoke = () => current.PasteSelection(),
         }},
-        {"e_delete", new KeybindAction {
+        {"ED:Delete", new KeybindAction {
             Category = "Edit",
             Name = "Delete",
             Keybind = new Keybind(KeyCode.Delete),
             Invoke = () => current.DeleteSelection(),
         }},
-        {"p_cursor", new KeybindAction {
+        {"PI:Cursor", new KeybindAction {
             Category = "Picker",
             Name = "Select Cursor",
             Keybind = new Keybind(KeyCode.A),
             Invoke = () => current.pickermode = "cursor",
         }},
-        {"p_select", new KeybindAction {
+        {"PI:Select", new KeybindAction {
             Category = "Picker",
             Name = "Select Select",
             Keybind = new Keybind(KeyCode.S),
             Invoke = () => current.pickermode = "select",
         }},
-        {"p_delete", new KeybindAction {
+        {"PI:Delete", new KeybindAction {
             Category = "Picker",
             Name = "Select Delete",
             Keybind = new Keybind(KeyCode.D),
             Invoke = () => current.pickermode = "delete",
         }},
-        {"p_item1", new KeybindAction {
+        {"PI:1stItem", new KeybindAction {
             Category = "Picker",
             Name = "Select 1st Item",
             Keybind = new Keybind(KeyCode.F),
@@ -1308,7 +1313,7 @@ public class Chartmaker : EditorWindow
                 else if (current.timelineMode == "hit") current.pickermode = "hit_normal";
             },
         }},
-        {"p_item2", new KeybindAction {
+        {"PI:2ndItem", new KeybindAction {
             Category = "Picker",
             Name = "Select 2nd Item",
             Keybind = new Keybind(KeyCode.G),
@@ -1316,25 +1321,25 @@ public class Chartmaker : EditorWindow
                         if (current.timelineMode == "hit") current.pickermode = "hit_catch";
             },
         }},
-        {"t_story", new KeybindAction {
+        {"TL:Story", new KeybindAction {
             Category = "Timeline",
             Name = "Select Storyboard",
             Keybind = new Keybind(KeyCode.Alpha1),
             Invoke = () => current.timelineMode = "story",
         }},
-        {"t_timing", new KeybindAction {
+        {"TL:Timing", new KeybindAction {
             Category = "Timeline",
             Name = "Select Timing",
             Keybind = new Keybind(KeyCode.Alpha2),
             Invoke = () => current.timelineMode = "timing",
         }},
-        {"t_lane", new KeybindAction {
+        {"TL:Lane", new KeybindAction {
             Category = "Timeline",
             Name = "Select Lanes",
             Keybind = new Keybind(KeyCode.Alpha3),
             Invoke = () => current.timelineMode = "lane",
         }},
-        {"t_step", new KeybindAction {
+        {"TL:Step", new KeybindAction {
             Category = "Timeline",
             Name = "Select Lane Steps",
             Keybind = new Keybind(KeyCode.Alpha4),
@@ -1342,7 +1347,7 @@ public class Chartmaker : EditorWindow
                 if (current.TargetLane != null) current.timelineMode = "step";
             }
         }},
-        {"t_hit", new KeybindAction {
+        {"TL:Hit", new KeybindAction {
             Category = "Timeline",
             Name = "Select Hit Objects",
             Keybind = new Keybind(KeyCode.Alpha5),
@@ -1350,25 +1355,37 @@ public class Chartmaker : EditorWindow
                 if (current.TargetLane != null) current.timelineMode = "hit";
             }
         }},
-        {"s_song", new KeybindAction {
+        {"SL:Song", new KeybindAction {
             Category = "Selection",
             Name = "Select Song",
             Keybind = new Keybind(KeyCode.Escape, EventModifiers.Shift),
             Invoke = () => current.TargetThing = current.TargetSong,
         }},
-        {"s_chart", new KeybindAction {
+        {"SL:Chart", new KeybindAction {
             Category = "Selection",
             Name = "Select Chart",
             Keybind = new Keybind(KeyCode.Escape),
             Invoke = () => current.TargetThing = current.TargetChart.Data,
         }},
-        {"s_pallete", new KeybindAction {
+        {"SL:Camera", new KeybindAction {
+            Category = "Selection",
+            Name = "Select Camera",
+            Keybind = new Keybind(KeyCode.Alpha8),
+            Invoke = () => current.TargetThing = current.TargetChart.Data.Camera,
+        }},
+        {"SL:Group", new KeybindAction {
+            Category = "Selection",
+            Name = "Select Lane Groups",
+            Keybind = new Keybind(KeyCode.Alpha9),
+            Invoke = () => current.TargetThing = current.TargetChart.Data.Groups,
+        }},
+        {"SL:Pallete", new KeybindAction {
             Category = "Selection",
             Name = "Select Pallete",
             Keybind = new Keybind(KeyCode.Alpha0),
             Invoke = () => current.TargetThing = current.TargetChart.Data.Pallete,
         }},
-        {"s_previtem", new KeybindAction {
+        {"SL:PrevItem", new KeybindAction {
             Category = "Selection",
             Name = "Previous Item",
             Keybind = new Keybind(KeyCode.LeftArrow),
@@ -1379,7 +1396,7 @@ public class Chartmaker : EditorWindow
                     current.TargetLane.Objects[Math.Max(current.TargetLane.Objects.IndexOf((HitObject)current.TargetThing) - 1, 0)];
             },
         }},
-        {"s_nextitem", new KeybindAction {
+        {"SL:NextItem", new KeybindAction {
             Category = "Selection",
             Name = "Next Item",
             Keybind = new Keybind(KeyCode.RightArrow),
@@ -1390,7 +1407,7 @@ public class Chartmaker : EditorWindow
                     current.TargetLane.Objects[Math.Min(current.TargetLane.Objects.IndexOf((HitObject)current.TargetThing) + 1, current.TargetLane.Objects.Count - 1)];
             },
         }},
-        {"s_prevlane", new KeybindAction {
+        {"SL:PrevLane", new KeybindAction {
             Category = "Selection",
             Name = "Previous Lane",
             Keybind = new Keybind(KeyCode.UpArrow),
@@ -1399,7 +1416,7 @@ public class Chartmaker : EditorWindow
                     current.TargetChart.Data.Lanes[Math.Max(current.TargetChart.Data.Lanes.IndexOf(current.TargetLane) - 1, 0)];
             },
         }},
-        {"s_nextlane", new KeybindAction {
+        {"SL:NextLane", new KeybindAction {
             Category = "Selection",
             Name = "Next Lane",
             Keybind = new Keybind(KeyCode.DownArrow),
@@ -1408,10 +1425,10 @@ public class Chartmaker : EditorWindow
                     current.TargetChart.Data.Lanes[Math.Min(current.TargetChart.Data.Lanes.IndexOf(current.TargetLane) + 1, current.TargetChart.Data.Lanes.Count - 1)];
             },
         }},
-        {"m_keybinds", new KeybindAction {
+        {"MS:Keybinds", new KeybindAction {
             Category = "Miscellaneous",
             Name = "Show Keybindings",
-            Keybind = new Keybind(KeyCode.Slash, EventModifiers.Shift),
+            Keybind = new Keybind(KeyCode.Slash, EventModifiers.Command),
             Invoke = () => JAEditorSettings.Open(1),
         }},
     };
@@ -2013,11 +2030,11 @@ public class Chartmaker : EditorWindow
 
             // -------------------- File
             if (TargetChartMeta != null && TargetChart != null)
-                menu.AddItem(new GUIContent("File/Play Chart in Player " + KeybindActions["g_player"].Keybind.ToUnityHotkeyString()), false, OpenInPlayMode);
-            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + KeybindActions["g_player"].Keybind.ToUnityHotkeyString()));
+                menu.AddItem(new GUIContent("File/Play Chart in Player " + KeybindActions["GN:Player"].Keybind.ToUnityHotkeyString()), false, OpenInPlayMode);
+            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + KeybindActions["GN:Player"].Keybind.ToUnityHotkeyString()));
 
             menu.AddSeparator("File/");
-            menu.AddItem(new GUIContent("File/Save " + KeybindActions["f_save"].Keybind.ToUnityHotkeyString()), false, SaveSong);
+            menu.AddItem(new GUIContent("File/Save " + KeybindActions["FI:Save"].Keybind.ToUnityHotkeyString()), false, SaveSong);
 
             menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Refresh"), false, Refresh);
@@ -2025,25 +2042,25 @@ public class Chartmaker : EditorWindow
 
             // -------------------- Edit
             if (History.ActionsBehind.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind.Peek().GetName() + " " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false, () => History.Undo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + KeybindActions["e_undo"].Keybind.ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Undo " + History.ActionsBehind.Peek().GetName() + " " + KeybindActions["ED:Undo"].Keybind.ToUnityHotkeyString()), false, () => History.Undo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Undo " + KeybindActions["ED:Undo"].Keybind.ToUnityHotkeyString()), false);
             if (History.ActionsAhead.Count > 0)
-                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead.Peek().GetName() + " " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false, () => History.Redo());
-            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + KeybindActions["e_redo"].Keybind.ToUnityHotkeyString()), false);
+                menu.AddItem(new GUIContent("Edit/Redo " + History.ActionsAhead.Peek().GetName() + " " + KeybindActions["ED:Redo"].Keybind.ToUnityHotkeyString()), false, () => History.Redo());
+            else menu.AddDisabledItem(new GUIContent("Edit/Redo " + KeybindActions["ED:Redo"].Keybind.ToUnityHotkeyString()), false);
             menu.AddItem(new GUIContent("Edit/Edit History"), false, () => inspectMode = "history");
 
             menu.AddSeparator("Edit/");
-            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Cut " + KeybindActions["e_cut"].Keybind.ToUnityHotkeyString()), false, CutSelection);
-            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Copy " + KeybindActions["e_copy"].Keybind.ToUnityHotkeyString()), false, CopySelection);
+            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Cut " + KeybindActions["ED:Cut"].Keybind.ToUnityHotkeyString()), false, CutSelection);
+            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Copy " + KeybindActions["ED:Copy"].Keybind.ToUnityHotkeyString()), false, CopySelection);
             
-            if (ClipboardThing != null) menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false, PasteSelection);
-            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + KeybindActions["e_paste"].Keybind.ToUnityHotkeyString()), false);
+            if (ClipboardThing != null) menu.AddItem(new GUIContent("Edit/Paste " + GetItemName(ClipboardThing) + " " + KeybindActions["ED:Paste"].Keybind.ToUnityHotkeyString()), false, PasteSelection);
+            else menu.AddDisabledItem(new GUIContent("Edit/Paste " + KeybindActions["ED:Paste"].Keybind.ToUnityHotkeyString()), false);
             
-            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Delete " + KeybindActions["e_delete"].Keybind.ToUnityHotkeyString()), false, DeleteSelection);
+            AddConditionalItem(TargetThing != null, new GUIContent("Edit/Delete " + KeybindActions["ED:Delete"].Keybind.ToUnityHotkeyString()), false, DeleteSelection);
 
             // -------------------- Options
             menu.AddItem(new GUIContent("Options/Chartmaker Settings"), false, JAEditorSettings.Open);
-            menu.AddItem(new GUIContent("Options/Show Keybindings " + KeybindActions["m_keybinds"].Keybind.ToUnityHotkeyString()),
+            menu.AddItem(new GUIContent("Options/Show Keybindings " + KeybindActions["MS:Keybinds"].Keybind.ToUnityHotkeyString()),
                 false, () => JAEditorSettings.Open(1));
 
             // -------------------- Help

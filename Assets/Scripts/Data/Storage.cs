@@ -142,8 +142,7 @@ public class Storage
             catch (Exception ee)
             {
                 fs?.Close();
-                Debug.Log(e.StackTrace);
-                Debug.Log(ee.StackTrace);
+                Debug.Log(e + "\n" + ee);
             }
         }
 
