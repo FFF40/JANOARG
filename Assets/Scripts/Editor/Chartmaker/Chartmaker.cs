@@ -2186,7 +2186,7 @@ public class Chartmaker : EditorWindow
             if (GUI.Toggle(active ? new Rect(284, 3, 70, 25) : new Rect(284, 3, 70, 20), active, "Steps", "buttonLeft") ^ active)
                  { timelineMode = "step"; timelineHeight = Mathf.Max(timelineHeight, 4); }
             active = timelineMode == "hit" && timelineHeight > 0;
-            if (GUI.Toggle(active ? new Rect(355, 3, 70, 25) : new Rect(355, 3, 70, 20), active, "Objects", "buttonRight") ^ active)
+            if (GUI.Toggle(active ? new Rect(355, 3, 70, 25) : new Rect(355, 3, 70, 20), active, "Hits", "buttonRight") ^ active)
                  { timelineMode = "hit"; timelineHeight = Mathf.Max(timelineHeight, 4); }
         }
 
@@ -3614,6 +3614,7 @@ public class Chartmaker : EditorWindow
                 scrollPos = GUILayout.BeginScrollView(scrollPos);
                 GUILayout.Label("Transform", "boldLabel");
                 thing.CameraPivot = EditorGUILayout.Vector3Field("Pivot", thing.CameraPivot);
+                thing.PivotDistance = EditorGUILayout.FloatField("Distance", thing.PivotDistance);
                 thing.CameraRotation = EditorGUILayout.Vector3Field("Rotation", thing.CameraRotation);
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
@@ -4342,21 +4343,35 @@ public class Chartmaker : EditorWindow
         new TutorialStep()
         {
             Content = "This is the Inspector. This panel will display information and let you adjust settings about the thing that's currently selected.\n\n"
-                + "The Inspector has two modes: Attributes and Storyboard. More on the Storyboard later, right now we only need the Attributes mode.",
+                + "The Inspector has two tabs: Properties and Storyboard. More on the Storyboard later, right now we only need the Properties tab.",
             PopupPosition = new Vector2(-380, -80),
             PopupAnchor = new Vector2(1, .5f),
         },
         new TutorialStep()
         {
-            Content = "This is the Timeline. This panel will display selectable items that has a time position on the chart.\n\n"
-                + "Below the Timelines are selectable modes on the left and general chart values on the right.",
+            Content = "This is the Timeline, which will display selectable items that have a temporal position on the chart.\n\n"
+                + "Just like the Inspector, items are separated into tabs that you can navigate using the buttons on the top left corner of the Timeline.\n\n"
+                + "Below the Timeline are general chart actions on the left and Timeline options on the right.",
             PopupPosition = new Vector2(0, -220),
             PopupAnchor = new Vector2(.5f, 1),
         },
         new TutorialStep()
         {
-            Content = "This is the Picker. Items will appear here depending on the Timeline mode you're currently in.\n\n"
-                + "Besides from Timeline-mode-specific items, there are three general commands that's available on every mode: Cursor, Select and Delete.",
+            Content = "This is the Picker. Items will appear here depending on the Timeline tab you're currently in.\n\n"
+                + "Besides from Timeline-tab-specific items, there are three general tools that are always available: Cursor, Select and Delete.",
+            PopupPosition = new Vector2(215, -80),
+            PopupAnchor = new Vector2(0, .5f),
+        },
+        new TutorialStep()
+        {
+            Content = "The Cursor tool lets you move items and snap the play time to the beat of the song, while the Select tool lets you select multiple items by circling them.\n\n"
+                + "Pressing an item using the Delete tool will make it show a question mark \"?\" asking you for confirmation first, then will delete the item when you press it again.",
+            PopupPosition = new Vector2(215, -80),
+            PopupAnchor = new Vector2(0, .5f),
+        },
+        new TutorialStep()
+        {
+            Content = "(Note: You can also Select by right-click-dragging on the Timeline and Delete by pressing the Delete key when an item is selected, just do whatever that is more convenient to you.)",
             PopupPosition = new Vector2(215, -80),
             PopupAnchor = new Vector2(0, .5f),
         },
@@ -4371,8 +4386,8 @@ public class Chartmaker : EditorWindow
         },
         new TutorialStep()
         {
-            Content = "Good! The Inspector will now display the information about the Playable Song since you just selected it earlier.\n\n"
-                + "The section above display global song information that persists within charts, you can edit it here if you make some mistakes earlier.\n\n"
+            Content = "Good! The Inspector will now display the information about the Playable Song that you just selected it just now.\n\n"
+                + "The Metadata contains song information and Colors are used to dictate the color scheme of some aspect of the game when the Playable Song is selected.\n\n"
                 + "Press the Continue button once you finished editing.",
             PopupPosition = new Vector2(-420, -80),
             PopupAnchor = new Vector2(1, .5f),
@@ -4433,7 +4448,7 @@ public class Chartmaker : EditorWindow
         },
         new TutorialStep()
         {
-            Content = "To edit a BPM stop, bring it to the Inspector by selecting it on the Timeline. You'll also be doing this for anything that appears here too.",
+            Content = "To edit a BPM stop, bring it to the Inspector by selecting it on the Timeline. You should be able to do this for anything that appears here too.",
             PopupPosition = new Vector2(0, -260),
             PopupAnchor = new Vector2(.5f, 1),
             RequirementText = "Select the BPM Stop on the Timeline",
@@ -4514,6 +4529,7 @@ public class Chartmaker : EditorWindow
         new TutorialStep()
         {
             Content = "As before, I'll let you use you lanes to your liking.\n\n"
+                + "You might have noticed the Parent field, it does nothing for now, we'll get to it later.\n\n"
                 + "Click Continue when you're finished.",
             PopupPosition = new Vector2(-420, -80),
             PopupAnchor = new Vector2(1, .5f),
@@ -4530,7 +4546,7 @@ public class Chartmaker : EditorWindow
         new TutorialStep()
         {
             Content = "The Hits tabs shows the Timeline of the hit objects that are on the Lane that you selected.\n\n"
-                + "One again, you can select an item and place it here on the Timeline, but there will be different type of notes as well, so here are the abbreviations means:\n"
+                + "One again, you can select an item and place it here on the Timeline, but there will be different types of notes as well, so here are the abbreviations means:\n"
                 + "NOR = Normal notes, CAT = Catch notes",
             PopupPosition = new Vector2(0, -260),
             PopupAnchor = new Vector2(.5f, 1),
@@ -4560,7 +4576,60 @@ public class Chartmaker : EditorWindow
         },
         new TutorialStep()
         {
-            Content = "Let's take a tour on the more complex data of the chart.\n\n"
+            Content = "Let's take a tour on the more complex parts of the chart.\n\n"
+                + "Click on the \"Camera\" button to open the Camera Controller.",
+            PopupPosition = new Vector2(-175, -280),
+            PopupAnchor = new Vector2(1, 1),
+            RequirementText = "Open the Camera Controller",
+            RequirementFunction = x => x.TargetThing is CameraController,
+        },
+        new TutorialStep()
+        {
+            Content = "The Camera Controller controls everything about the camera.\n\n"
+                + "In order of appearance is the pivot position of the camera, how far the camera is to the pivot, and the rotation of the pivot.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep()
+        {
+            Content = "Next up, let's take a look at the \"Groups\" feature.",
+            PopupPosition = new Vector2(-175, -280),
+            PopupAnchor = new Vector2(1, 1),
+            RequirementText = "Open the Group List",
+            RequirementFunction = x => x.TargetThing == x.TargetChart.Data.Groups,
+        },
+        new TutorialStep()
+        {
+            Content = "This is the Group List, which lists the Lane Groups that are presents in the Chart file.\n\n"
+                + "Lane Groups are used when you want to move multiple Lanes at the same time without needing to edit the Lanes' positions separately.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep()
+        {
+            Content = "You might have notice the Parent field earlier when editing a Lane. If you reference it with a Lane Group's name the Lane's position will be additionally moved by the Lane Group too.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep()
+        {
+            Content = "Of course, to do that you'll need to have a Lane Group first.\n\n"
+                + "Click on the \"Create New Group\" button to create a Lane Group, or alternatively select a Lane Group on the list.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+            RequirementText = "Create/Select a Lane Group",
+            RequirementFunction = x => x.TargetThing is LaneGroup,
+        },
+        new TutorialStep()
+        {
+            Content = "Welcome to the Lane Group editor! As you can see, you can move and rotate them just like how you do it with Lanes, and you can rename the Group to reference it easier.\n\n"
+                + "You can also stack Lane Groups into other Lane Groups, and the positions and rotation angles will be calculated accordingly.",
+            PopupPosition = new Vector2(-420, -80),
+            PopupAnchor = new Vector2(1, .5f),
+        },
+        new TutorialStep()
+        {
+            Content = "Alright, time to get some artsy!\n\n"
                 + "Click on the \"Pallete\" button to open the Pallete.",
             PopupPosition = new Vector2(-175, -280),
             PopupAnchor = new Vector2(1, 1),
@@ -4569,8 +4638,9 @@ public class Chartmaker : EditorWindow
         },
         new TutorialStep()
         {
-            Content = "The Pallete will determine how your chart will look.\n\n"
-                + "You can set the Background and the Interface's color get access to the styles here.",
+            Content = "The Pallete will determine how your chart will look like.\n\n"
+                + "You can set the Background and the Interface's color get access to the styles here.\n\n"
+                + "Additionally, you can also make additional Lane Styles and Hit Styles which will be used by Lanes and Hit Objects to determine their looks.",
             PopupPosition = new Vector2(-420, -80),
             PopupAnchor = new Vector2(1, .5f),
             RequirementText = "Open a Style by clicking on one to continue",
@@ -4578,7 +4648,7 @@ public class Chartmaker : EditorWindow
         },
         new TutorialStep()
         {
-            Content = "There are also style groups for Lanes and Hit Objects located in the Pallete. Here you can set the color scheme and even change the feel by using the Material system!\n\n"
+            Content = "Here you can set the color scheme and even change the feel by using the Material system!\n\n"
                 + "Note that Materials and Color Targets are advanced features for Unity users, if you don't know what you're doing you should probably leave them as is.",
             PopupPosition = new Vector2(-420, -80),
             PopupAnchor = new Vector2(1, .5f),
