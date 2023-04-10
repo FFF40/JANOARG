@@ -10,30 +10,32 @@ Here is a flow chart summarizing JANOARG's Playable Song structure:
 
 ```
 
-                                         +--- Playable Song (file) ---+                                             +------ Storyboardable ------+    
-                                         | - Song data                |                                             |  (special components that  |
-   +-------- Metronome ---------+        | (Name, Artist, File, etc.) |                                             |    are marked with [A])    |
-   | - List of BPM Stops ---+   | <--------- Metronome                |       +------- Chart (file) ---[A]-+        | - List of Timestamps ---+  |
-   +------------------------|---+        | - List of Charts ----------+---->  | - Chart data               |        +-------------------------|--+
-                            V            +----------------------------+       |   (Name, Difficulty, etc.) |                                  V
-   +--------- BPM Stop ---------+                                             |[A]Camera controls          |        +--------- Timestamp --------+
-   | - Offset time              |        +--------- Pallete ------[A]-+       | - List of Lanes ---+       |        |  (used on fields that are  |
-   | - Beats per minute         |        |[A]Global colors            | <-------- The Pallete      |       |        |       marked with [A])     |
-   | - Song signature           |        | - List of Styles ----+     |       +--------------------|-------+        | - Target                   |
-   +----------------------------+        +----------------------|-----+                            V                | - Duration                 |
-                                                                V             +----------- Lane -------[A]-+        | - Begin/Ending value       |
-                                         +---------- Style -------[A]-+       |[A]Offset position/rotation |        | - Easings                  |
-                                         | - Unity Materials          | <-------- Lane style               |        +----------------------------+
-                                         | - Material Targets         | <--+  | - List of Lane Steps --------------------+
-                                         |[A]Base Colors              |    |  | - List of Hit Objects --+  |             |
-                                         +----------------------------+    |  +-------------------------|--+             |
-                                                                           |                            V                V
-                                                                           |  +-------- Hit Object ----[A]-+        +--------- Lane Step ----[A]-+
-                                                                           |  | - Time                     |        | - Time                     |
-                                                                           |  |[A]Position                 |        |[A]Scroll speed multiplier  |
-                                                                           |  |[A]Length                   |        |[A]Begin/Ending position    |
-                                                                           |  | - Hold Duration            |        | - Easings                  |
-                                                                           +----- Hit style                |        +----------------------------+
+                                         +--- Playable Song (file) ---+       +-------- Lane Group ----[A]-+        +------ Storyboardable ------+    
+                                         | - Song data                |   /------ Parent group             | <--\   |  (special components that  |
+   +-------- Metronome ---------+        | (Name, Artist, File, etc.) |   \-> |[A]Position/Rotation        |    |   |    are marked with [A])    |
+   | - List of BPM Stops ---\   | <--------- Metronome                |       +----------------------------+    |   | - List of Timestamps ---\  |
+   +------------------------|---+        | - List of Charts ----------+--\                                      |   +-------------------------|--+
+                            V            +----------------------------+  |    +------- Chart (file) ---[A]-+    |                             V
+   +--------- BPM Stop ---------+                                        \--> | - Chart data               |    |   +--------- Timestamp --------+
+   | - Offset time              |        +--------- Pallete ------[A]-+       |   (Name, Difficulty, etc.) |    |   |  (used on fields that are  |
+   | - Beats per minute         |        |[A]Global colors            |       |[A]Camera controls          |    |   |       marked with [A])     |
+   | - Song signature           |        | - List of Styles ----\     |       | - List of Lanes ---\       |    |   | - Target                   |
+   +----------------------------+        +----------------------|-----+ <-------- The Pallete      |       |    |   | - Duration                 |
+                                                                V             +--------------------|-------+    |   | - Begin/Ending value       |
+                                         +---------- Style -------[A]-+                            V            |   | - Easings                  |
+                                         | - Unity Materials          |       +----------- Lane -------[A]-+    |   +----------------------------+
+                                         | - Material Targets         |       | - Parent group -----------------/
+                                         |[A]Base Colors              |       |[A]Offset position/rotation |             
+                                         +----------------------------+ <--+----- Lane style               |              
+                                                                           |  | - List of Lane Steps --------------------\
+                                                                           |  | - List of Hit Objects --\  |             |
+                                                                           |  +-------------------------|--+             V
+                                                                           |                            V           +--------- Lane Step ----[A]-+
+                                                                           |  +-------- Hit Object ----[A]-+        | - Time                     |
+                                                                           |  | - Time                     |        |[A]Scroll speed multiplier  |
+                                                                           |  |[A]Position                 |        |[A]Begin/Ending position    |
+                                                                           |  |[A]Length                   |        | - Easings                  |
+                                                                           |  | - Hold Duration            |        +----------------------------+
+                                                                           \----- Hit style                |
                                                                               +----------------------------+
-
 ```

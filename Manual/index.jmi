@@ -15,10 +15,12 @@ Concepts/Index.jmf Concepts
       Concepts/PlayableSong/References/Metronome.jmf Metronome
       Concepts/PlayableSong/References/BPMStop.jmf BPM Stop
       Concepts/PlayableSong/References/Chart.jmf Chart
+      Concepts/PlayableSong/References/CameraController.jmf Camera Controller
       Concepts/PlayableSong/References/Pallete.jmf Pallete
       Concepts/PlayableSong/References/Styles.jmf Styles
         Concepts/PlayableSong/References/LaneStyle.jmf Lane Style
         Concepts/PlayableSong/References/HitStyle.jmf Hit Style
+      Concepts/PlayableSong/References/LaneGroup.jmf Lane Group
       Concepts/PlayableSong/References/Lane.jmf Lane
       Concepts/PlayableSong/References/LaneStep.jmf Lane Step
       Concepts/PlayableSong/References/HitObject.jmf Hit Object
@@ -26,4 +28,4 @@ Concepts/Index.jmf Concepts
       Concepts/PlayableSong/References/Timestamp.jmf Timestamp
 Acknowledgements/Index.jmf Acknowledgements
   Acknowledgements/Credits.jmf Credits
-  ../license.md License / Derivative guideline
+  ../license.md License / Derivative guidelines

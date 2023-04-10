@@ -33,5 +33,7 @@ Overdrive ɑ or April Fool's ??)
 
 - <b>Camera</b> <i>(Camera Controller)</i>: The chart's camera controller.
 
+- <b>Lane Groups</b> <i>(List of Lane Groups)</i>: A list of lane groups that appears inside the chart.
+
 - <b>Lanes</b> <i>(List of Lanes)</i>: A list of lanes that appears inside the chart.
 

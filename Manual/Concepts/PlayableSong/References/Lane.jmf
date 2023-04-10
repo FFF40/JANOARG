@@ -6,7 +6,9 @@ color using the Pallete feature.
 
 ## Properties
 
-- <b>Offset</b> <i>(Storyboardable, Vector3)</i>: The offset position of the lane, in game units.
+- <b>Parent</b> <i>(Lane Group)</i>: The parent Lane Group of the lane.
+
+- <b>Position</b> <i>(Storyboardable, Vector3)</i>: The offset position of the lane, in game units.
 
 - <b>Rotation</b> <i>(Storyboardable, Vector3)</i>: The offset rotation of the lane, in degrees.
 

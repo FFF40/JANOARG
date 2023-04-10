@@ -278,13 +278,13 @@ public class JAEditorManual : EditorWindow
         GUIStyle tabCol = new GUIStyle("miniButtonLeft");
         tabCol.padding = new RectOffset(0, 0, 0, 0);
 
-        GUIStyle bg = new GUIStyle("toolbarButton");
+        GUIStyle bg = new GUIStyle("ProfilerTimelineLeftPane");
         bg.fixedHeight = 0;
 
         GUILayout.BeginHorizontal();
 
-        GUI.Label(new Rect(0, 0, 200, Screen.height), "", bg);
-        indexScroll = EditorGUILayout.BeginScrollView(indexScroll, GUILayout.MinWidth(200), GUILayout.MaxWidth(200));
+        GUI.Label(new Rect(0, 0, 240, Screen.height), "", bg);
+        indexScroll = EditorGUILayout.BeginScrollView(indexScroll, GUILayout.MinWidth(240), GUILayout.MaxWidth(240));
         int? CollapsedDepth = null;
         int LastDepth = 0;
         Rect rect = new Rect();
@@ -299,7 +299,7 @@ public class JAEditorManual : EditorWindow
                         GUILayout.Space(1);
                         rect = GUILayoutUtility.GetLastRect();
                         rect.x = 9 * Mathf.Min(LastDepth, entry.Depth) + 18;
-                        rect.width = 200 - rect.x;
+                        rect.width = 240 - rect.x;
                         EditorGUI.DrawRect(rect, new Color(0, 0, 0, EditorGUIUtility.isProSkin ? .5f : .2f));
                     }
 
@@ -339,7 +339,7 @@ public class JAEditorManual : EditorWindow
                 GUILayout.Space(1);
                 rect = GUILayoutUtility.GetLastRect();
                 rect.x = 9 * LastDepth + 18;
-                rect.width = 200 - rect.x;
+                rect.width = 240 - rect.x;
                 EditorGUI.DrawRect(rect, new Color(0, 0, 0, EditorGUIUtility.isProSkin ? .5f : .2f));
                 rect.x += 1;
                 rect.y += 1;
@@ -355,7 +355,7 @@ public class JAEditorManual : EditorWindow
         
         GUILayout.EndHorizontal();
 
-        if (isBusy) EditorGUI.ProgressBar(new Rect(199, height - 19, width - 198, 20), 1, "Loading...");
+        if (isBusy) EditorGUI.ProgressBar(new Rect(239, height - 19, width - 198, 20), 1, "Loading...");
     }
 }
 
