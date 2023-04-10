@@ -473,19 +473,19 @@ public class ChartPlayer : MonoBehaviour
             }
             SongProgressSlider.value = CurrentTime / Song.Clip.length;
 
-            CurrentChart.Camera.Advance(CurrentTime);
-            CurrentChart.Pallete.Advance(CurrentTime);
+            CurrentChart.Camera.Advance(CurrentTime + AudioOffset + VisualOffset);
+            CurrentChart.Pallete.Advance(CurrentTime + AudioOffset + VisualOffset);
             RenderSettings.fogColor = MainCamera.backgroundColor = CurrentChart.Pallete.BackgroundColor;
             SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
 
             for (int a = 0; a < LaneStyleManagers.Count; a++)
             {
-                CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime + VisualOffset);
+                CurrentChart.Pallete.LaneStyles[a].Advance(CurrentTime + AudioOffset + VisualOffset);
                 LaneStyleManagers[a].Update(CurrentChart.Pallete.LaneStyles[a]);
             }
             for (int a = 0; a < HitStyleManagers.Count; a++)
             {
-                CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime + VisualOffset);
+                CurrentChart.Pallete.HitStyles[a].Advance(CurrentTime + AudioOffset + VisualOffset);
                 HitStyleManagers[a].Update(CurrentChart.Pallete.HitStyles[a]);
             }
             

@@ -164,7 +164,7 @@ public class HitPlayer : MonoBehaviour
         {
             if (isHit && isFlicked)
             {
-                float time = ChartPlayer.main.CurrentTime + ChartPlayer.main.VisualOffset;
+                float time = ChartPlayer.main.CurrentTime + ChartPlayer.main.AudioOffset + ChartPlayer.main.VisualOffset;
                 UpdateIndicator(time);
 
                 ScreenStart = ChartPlayer.main.MainCamera.WorldToScreenPoint(IndicatorLeft.position);

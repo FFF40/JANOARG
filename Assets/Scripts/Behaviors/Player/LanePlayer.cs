@@ -109,7 +109,7 @@ public class LanePlayer : MonoBehaviour
     {
         if (ChartPlayer.main.IsPlaying)
         {
-            CurrentLane.Advance(ChartPlayer.main.CurrentTime + ChartPlayer.main.VisualOffset);
+            CurrentLane.Advance(ChartPlayer.main.CurrentTime + ChartPlayer.main.AudioOffset + ChartPlayer.main.VisualOffset);
 
             transform.localPosition = CurrentLane.Position;
             transform.localEulerAngles = CurrentLane.Rotation;

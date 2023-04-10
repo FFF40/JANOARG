@@ -30,7 +30,7 @@ public class LaneGroupPlayer : MonoBehaviour
     {
         if (ChartPlayer.main.IsPlaying)
         {
-            CurrentGroup.Advance(ChartPlayer.main.CurrentTime + ChartPlayer.main.VisualOffset);
+            CurrentGroup.Advance(ChartPlayer.main.CurrentTime + ChartPlayer.main.AudioOffset + ChartPlayer.main.VisualOffset);
 
             transform.localPosition = CurrentGroup.Position;
             transform.localEulerAngles = CurrentGroup.Rotation;
