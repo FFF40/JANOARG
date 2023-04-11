@@ -1634,7 +1634,7 @@ public class Chartmaker : EditorWindow
     public void CopySelection()
     {
         if (TargetThing is string) return;
-        ClipboardThing = TargetTimestamp ?? TargetThing;
+        ClipboardThing = TargetTimestamp.Count > 0 ? TargetTimestamp : TargetThing;
     }
 
     public void CutSelection()
@@ -1684,7 +1684,8 @@ public class Chartmaker : EditorWindow
         }
         else if (ClipboardThing is LaneStep || ClipboardThing is List<LaneStep>)
         {
-            if (timelineMode != "step") return;
+            Debug.Log(timelineMode);
+            if (timelineMode != "step" || TargetLane == null) return;
 
             List<LaneStep> list = (ClipboardThing is List<LaneStep> ? (List<LaneStep>)ClipboardThing :
                 new List<LaneStep>(new[] { (LaneStep)ClipboardThing })).ConvertAll<LaneStep>(x => x.DeepClone()); ;
@@ -1696,6 +1697,7 @@ public class Chartmaker : EditorWindow
             
             TargetThing = list.Count <= 1 ? list[0] : list;
 
+            TargetLane.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
             TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
         }
         else if (ClipboardThing is HitObject || ClipboardThing is List<HitObject>)
