@@ -1228,9 +1228,15 @@ public class Chartmaker : EditorWindow
         }},
         {"GN:Player", new KeybindAction {
             Category = "General",
-            Name = "Play Chart in Player",
+            Name = "Play in Player",
             Keybind = new Keybind(KeyCode.Space, EventModifiers.Shift),
             Invoke = () => current.OpenInPlayMode(),
+        }},
+        {"GN:Record", new KeybindAction {
+            Category = "General",
+            Name = "Quick Record",
+            Keybind = new Keybind(KeyCode.F10),
+            Invoke = () => current.OpenInRecorder(),
         }},
         {"GN:Menu", new KeybindAction {
             Category = "General",
@@ -1561,7 +1567,7 @@ public class Chartmaker : EditorWindow
         AssetDatabase.SaveAssetIfDirty(TargetChart);
     }
 
-    public void OpenInPlayMode()
+    public void OpenInPlayMode(bool record = false)
     {
         if (TargetSong == null || TargetChart == null)
         {
@@ -1592,9 +1598,14 @@ public class Chartmaker : EditorWindow
         player.SongPath = path;
         player.ChartPosition = TargetSong.Charts.FindIndex(x => x.Target == TargetChart.name);
 
-        EditorApplication.ExecuteMenuItem("Window/General/Game");
+        EditorApplication.ExecuteMenuItem(record ? "Window/General/Recorder/Quick Recording" : "Window/General/Game");
         EditorApplication.isPlaying = true;
         EditorApplication.Beep();
+    }
+    
+    public void OpenInRecorder()
+    {
+        OpenInPlayMode(true);
     }
 
     public void HistoryAdd(IList list, object item)
@@ -2029,9 +2040,8 @@ public class Chartmaker : EditorWindow
             }
 
             // -------------------- File
-            if (TargetChartMeta != null && TargetChart != null)
-                menu.AddItem(new GUIContent("File/Play Chart in Player " + KeybindActions["GN:Player"].Keybind.ToUnityHotkeyString()), false, OpenInPlayMode);
-            else menu.AddDisabledItem(new GUIContent("File/Play Chart in Player " + KeybindActions["GN:Player"].Keybind.ToUnityHotkeyString()));
+            AddConditionalItem(TargetChartMeta != null && TargetChart != null, new GUIContent("File/Play Chart in Player " + KeybindActions["GN:Player"].Keybind.ToUnityHotkeyString()), false, () => OpenInPlayMode());
+            AddConditionalItem(TargetChartMeta != null && TargetChart != null, new GUIContent("File/Quick Record Chart " + KeybindActions["GN:Record"].Keybind.ToUnityHotkeyString()), false, OpenInRecorder);
 
             menu.AddSeparator("File/");
             menu.AddItem(new GUIContent("File/Save " + KeybindActions["FI:Save"].Keybind.ToUnityHotkeyString()), false, SaveSong);
