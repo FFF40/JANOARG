@@ -43,12 +43,16 @@ public class Chartmaker : EditorWindow
     public AudioClip NormalHitSound;
     public AudioClip CatchHitSound;
 
-    public bool PlayMetronome;
-    public bool SeparateUnits;
-    public bool PlayHitsounds;
-    public bool FollowSeekLine;
+    public float MetronomeVolume;
+    public float HitsoundVolume;
+    public bool HoldEndHitsound;
+
     public int WaveformMode;
     public int HitViewMode;
+
+    public bool SeparateUnits;
+    public bool FollowSeekLine;
+    
 
     public List<LaneStyleManager> LaneStyleManagers = new List<LaneStyleManager>();
     public List<HitStyleManager> HitStyleManagers = new List<HitStyleManager>();
@@ -779,8 +783,11 @@ public class Chartmaker : EditorWindow
                                     Meshes.Add(mesh);
                                 }
                             }
-                            if (hit.Type == HitObject.HitType.Catch) ccount++;
-                            else ncount++;
+                            if (HoldEndHitsound)
+                            {
+                                if (hit.Type == HitObject.HitType.Catch) ccount++;
+                                else ncount++;
+                            }
                         }
                     }
                 }
@@ -1086,16 +1093,12 @@ public class Chartmaker : EditorWindow
                     }
                 }
             }
-
-            if (NormalCount > ncount && PlayHitsounds && CurrentAudioSource.isPlaying)
+            if (HitsoundVolume > 0 && CurrentAudioSource.isPlaying)
             {
-                for (int a = 0; a < NormalCount - ncount; a++) CurrentAudioSource.PlayOneShot(NormalHitSound);
+                for (int a = 0; a < NormalCount - ncount; a++) CurrentAudioSource.PlayOneShot(NormalHitSound, HitsoundVolume);
+                for (int a = 0; a < CatchCount - ccount; a++) CurrentAudioSource.PlayOneShot(CatchHitSound, HitsoundVolume);
             }
             NormalCount = ncount;
-            if (CatchCount > ccount && PlayHitsounds && CurrentAudioSource.isPlaying)
-            {
-                for (int a = 0; a < CatchCount - ccount; a++) CurrentAudioSource.PlayOneShot(CatchHitSound);
-            }
             CatchCount = ccount;
         }
         else
@@ -1112,7 +1115,7 @@ public class Chartmaker : EditorWindow
                 if (extrasmode == "migrate_charts") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_create") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_delete") rect = new Rect(width / 2 - 200, height / 2 - 60, 400, 120);
-                else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 300, 120);
+                else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 330, 113);
                 else if (extrasmode == "timeline_options") rect = new Rect(width - 334, height - 144, 330, 120);
 
                 GUIStyle exStyle = new GUIStyle("window");
@@ -1175,7 +1178,7 @@ public class Chartmaker : EditorWindow
             if (currentBeat != Mathf.Floor(pos))
             {
                 currentBeat = Mathf.Floor(pos);
-                if (PlayMetronome) CurrentAudioSource.PlayOneShot(MetronomeSound);
+                if (MetronomeVolume > 0) CurrentAudioSource.PlayOneShot(MetronomeSound, MetronomeVolume * 2);
             }
             Repaint();
         }
@@ -4263,39 +4266,49 @@ public class Chartmaker : EditorWindow
         }
         if (extrasmode == "play_options")
         {
-            GUI.Label(new Rect(5, 6, 90, 18), "Play Speed");
-            CurrentAudioSource.pitch = Mathf.Round(Mathf.Pow(10, GUI.HorizontalSlider(new Rect(95, 6, 150, 18), Mathf.Log10(CurrentAudioSource.pitch), Mathf.Log10(.05f), 0)) / .05f) * .05f;
-            CurrentAudioSource.pitch = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(252, 6, 43, 18), CurrentAudioSource.pitch), .05f, 1) / .05f) * .05f;
+            GUI.Label(new Rect(5, 5, 90, 18), "Play Speed");
+            CurrentAudioSource.pitch = Mathf.Pow(10, GUI.HorizontalSlider(new Rect(95, 5, 180, 18), Mathf.Log10(CurrentAudioSource.pitch), Mathf.Log10(.05f), 0));
+            CurrentAudioSource.pitch = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 5, 43, 18), CurrentAudioSource.pitch), .05f, 1) / .05f) * .05f;
 
-            GUI.Label(new Rect(5, 28, 90, 18), "Scroll Speed");
+            GUI.Label(new Rect(5, 25, 90, 18), "Scroll Speed");
             float spd = Mathf.Sqrt(ScrollSpeed);
-            spd = Mathf.Round(GUI.HorizontalSlider(new Rect(95, 28, 150, 18), spd, .5f, 20) / .5f) * .5f;
-            spd = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(252, 28, 43, 18), spd), .5f, 20) / .5f) * .5f;
+            spd = GUI.HorizontalSlider(new Rect(95, 25, 180, 18), spd, .5f, 20);
+            spd = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 25, 43, 18), spd), .5f, 20) / .5f) * .5f;
             ScrollSpeed = spd * spd;
+            
+            GUI.Label(new Rect(5, 49, 90, 18), "Metronome");
+            GUI.Label(new Rect(95, 49, 27, 18), "Vol:");
+            MetronomeVolume = Mathf.Pow(GUI.HorizontalSlider(new Rect(122, 49, 153, 18), Mathf.Pow(MetronomeVolume, 2), 0, 1), .5f);
+            MetronomeVolume = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 49, 43, 18), MetronomeVolume), 0, 1) / .05f) * .05f;
+            
+            GUI.Label(new Rect(5, 69, 90, 18), "Hitsound");
+            GUI.Label(new Rect(95, 69, 27, 18), "Vol:");
+            HitsoundVolume = Mathf.Pow(GUI.HorizontalSlider(new Rect(122, 69, 153, 18), Mathf.Pow(HitsoundVolume, 2), 0, 1), .5f);
+            HitsoundVolume = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 69, 43, 18), HitsoundVolume), 0, 1) / .05f) * .05f;
 
-            PlayMetronome = GUI.Toggle(new Rect(5, 95, 145, 20), PlayMetronome, "Metronome", "buttonLeft");
-            PlayHitsounds = GUI.Toggle(new Rect(150, 95, 145, 20), PlayHitsounds, "Hitsounds", "buttonRight");
+            GUI.Label(new Rect(221, 89, 24, 18), "On:");
+            HoldEndHitsound = GUI.Toggle(new Rect(245, 89, 80, 18), HoldEndHitsound, "Hold End", "button");
         }
         else if (extrasmode == "timeline_options")
         {
-            GUI.Label(new Rect(5, 6, 90, 18), "Waveform");
-            if (GUI.Toggle(new Rect(95, 6, 76, 18), WaveformMode == 0, "Disabled", "buttonLeft")) WaveformMode = 0;
-            if (GUI.Toggle(new Rect(172, 6, 76, 18), WaveformMode == 1, "On Pause", "buttonMid")) WaveformMode = 1;
-            if (GUI.Toggle(new Rect(249, 6, 76, 18), WaveformMode == 2, "Always", "buttonRight")) WaveformMode = 2;
+            GUI.Label(new Rect(5, 5, 90, 18), "Waveform");
+            if (GUI.Toggle(new Rect(95, 5, 76, 18), WaveformMode == 0, "Disabled", "buttonLeft")) WaveformMode = 0;
+            if (GUI.Toggle(new Rect(172, 5, 76, 18), WaveformMode == 1, "On Pause", "buttonMid")) WaveformMode = 1;
+            if (GUI.Toggle(new Rect(249, 5, 76, 18), WaveformMode == 2, "Always", "buttonRight")) WaveformMode = 2;
 
-            GUI.Label(new Rect(5, 26, 90, 18), "View Mode");
-            GUI.Label(new Rect(95, 26, 30, 18), "Hits");
-            if (GUI.Toggle(new Rect(125, 26, 35, 18), HitViewMode == 0, "", "buttonLeft")) HitViewMode = 0;
-            GUI.Label(new Rect(133, 29, 4, 12), "", "helpBox");
-            GUI.Label(new Rect(138, 29, 4, 12), "", "helpBox");
-            GUI.Label(new Rect(143, 29, 4, 12), "", "helpBox");
-            GUI.Label(new Rect(148, 29, 4, 12), "", "helpBox");
-            if (GUI.Toggle(new Rect(161, 26, 35, 18), HitViewMode == 1, "", "buttonRight")) HitViewMode = 1;
-            GUI.Label(new Rect(165, 29, 12, 12), "", "helpBox");
-            GUI.Label(new Rect(178, 29, 12, 12), "", "helpBox");
+            GUI.Label(new Rect(5, 25, 90, 18), "View Mode");
+            GUI.Label(new Rect(95, 25, 30, 18), "Hits:");
+            if (GUI.Toggle(new Rect(125, 25, 35, 18), HitViewMode == 0, "", "buttonLeft")) HitViewMode = 0;
+            GUI.Label(new Rect(133, 28, 4, 12), "", "helpBox");
+            GUI.Label(new Rect(138, 28, 4, 12), "", "helpBox");
+            GUI.Label(new Rect(143, 28, 4, 12), "", "helpBox");
+            GUI.Label(new Rect(148, 28, 4, 12), "", "helpBox");
+            if (GUI.Toggle(new Rect(161, 25, 35, 18), HitViewMode == 1, "", "buttonRight")) HitViewMode = 1;
+            GUI.Label(new Rect(165, 28, 12, 12), "", "helpBox");
+            GUI.Label(new Rect(178, 28, 12, 12), "", "helpBox");
 
-            SeparateUnits = GUI.Toggle(new Rect(5, 95, 160, 20), SeparateUnits, "Separate Units", "buttonLeft");
-            FollowSeekLine = GUI.Toggle(new Rect(165, 95, 160, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
+            SeparateUnits = GUI.Toggle(new Rect(5, 94, 160, 20), SeparateUnits, "Separate Units", "buttonLeft");
+            FollowSeekLine = GUI.Toggle(new Rect(165, 94, 160, 20), FollowSeekLine, "Follow Seek Line", "buttonRight");
         }
     }
 
