@@ -2437,7 +2437,7 @@ public class Chartmaker : EditorWindow
 
         GUIStyle itemStyle = new GUIStyle("button");
         itemStyle.fontSize = 12;
-        itemStyle.padding = new RectOffset(1, 0, 0, 0);
+        itemStyle.padding = new RectOffset(2, 1, 1, 1);
 
         if (timelineHeight > 0 && TargetChartMeta != null && TargetChart != null)
         {
@@ -2575,9 +2575,8 @@ public class Chartmaker : EditorWindow
                     if (time < 0 || time >= timelineHeight) continue;
                     if (a > seekStart && a < seekEnd)
                     {
-                        if (IsTargeted(stop)) GUI.Label(new Rect(pos - 29, 2 + time * 22, 62, 22), "", "button");
-                        
                         Rect rect = new Rect(pos - 28, 3 + time * 22, 60, 20);
+                        if (IsTargeted(stop)) GUI.Label(rect, "", "flow node 0 on");
                         if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                         {
                             if (pickermode == "delete")
@@ -2617,9 +2616,9 @@ public class Chartmaker : EditorWindow
                             if (c > seekStart && c < seekEnd)
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
-                                if (IsTargeted(lane.LaneSteps[x])) GUI.Label(new Rect(pos3 - 2, 2 + time * 22, 8, 22), "", "button");
                                 
                                 Rect rect = new Rect(pos3 - 1, 3 + time * 22, 6, 20);
+                                if (IsTargeted(lane.LaneSteps[x])) GUI.Label(rect, "", "flow node 0 on");
                                 if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                                 {
                                     if (pickermode == "delete")
@@ -2642,9 +2641,8 @@ public class Chartmaker : EditorWindow
                             float rpos = (a - seekStart) / (seekEnd - seekStart) * width;
                             rpos = Math.Min(Math.Max(rpos, 13), Math.Max(rpos, (b - seekStart) / (seekEnd - seekStart) * width - 15));
                             
-                            if (IsTargeted(lane)) GUI.Label(new Rect(rpos - 9, 2 + time * 22, 22, 22), "", "button");
-                            
                             Rect rect = new Rect(rpos - 8, 3 + time * 22, 20, 20);
+                            if (IsTargeted(lane)) GUI.Label(rect, "", "flow node 0 on");
                             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
                                 if (pickermode == "delete")
@@ -2692,9 +2690,8 @@ public class Chartmaker : EditorWindow
 
                         if (step.Offset > seekStart && step.Offset < seekEnd)
                         {
-                            if (IsTargeted(step)) GUI.Label(new Rect(pos - 9, 2 + time * 22, 22, 22), "", "button");
-                            
                             Rect rect = new Rect(pos - 8, 3 + time * 22, 20, 20);
+                            if (IsTargeted(step)) GUI.Label(rect, "", "flow node 0 on");
                             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
                                 if (pickermode == "delete")
@@ -2737,6 +2734,11 @@ public class Chartmaker : EditorWindow
                         EditorGUI.DrawRect(new Rect(pos + 2, 0, width - pos + 2, tHeight + 5), new Color(0, 0, 0, .25f));
                     }
                     GUIStyle style = new GUIStyle(itemStyle);
+                    if (HitViewMode == 0) 
+                    {
+                        style.padding = new RectOffset(4, 3, 4, 3);
+                        style.fontSize = 256;
+                    }
                     foreach (HitObject hit in TargetLane.Objects)
                     {
                         float x = hit.Offset;
@@ -2755,13 +2757,13 @@ public class Chartmaker : EditorWindow
                         {
                             float ps = Mathf.Clamp01(hit.Position);
                             float ln = Mathf.Min(hit.Length, 1 - ps);
-                            rect = new Rect(pos - 1, ps * (tHeight - 10), 6, ln * (tHeight - 10));
+                            rect = new Rect(pos - 2, ps * (tHeight - 10), 8, ln * (tHeight - 10));
                         }
                         HitStyleManager hsm = hit.StyleIndex >= 0 && hit.StyleIndex < HitStyleManagers.Count ? HitStyleManagers[hit.StyleIndex] : null;
-                        style.normal.textColor = style.hover.textColor = style.active.textColor = (
-                            hit.Type == HitObject.HitType.Normal ? hsm?.NormalMaterial.color :
-                            hit.Type == HitObject.HitType.Catch ? hsm?.CatchMaterial.color : null 
-                        ) ?? style.normal.textColor;
+                        style.normal.textColor = style.hover.textColor = style.active.textColor =  (
+                            hit.Type == HitObject.HitType.Normal ? itemStyle.active.textColor :
+                            hit.Type == HitObject.HitType.Catch ? itemStyle.active.textColor * new Color(.8f, .8f, .3f) + new Color(.2f, .2f, 0) : Color.white
+                        );
 
                         if (x != y)
                         {
@@ -2769,7 +2771,7 @@ public class Chartmaker : EditorWindow
                         }
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
                         {
-                            if (IsTargeted(hit)) GUI.Label(new Rect(rect.position - Vector2.one, rect.size + Vector2.one * 2), "", "button");
+                            if (IsTargeted(hit)) GUI.Label(rect, "", "flow node 0 on");
                             
                             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
