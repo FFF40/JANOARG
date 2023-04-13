@@ -2531,7 +2531,7 @@ public class Chartmaker : EditorWindow
                             float rpos = Mathf.Min(Mathf.Max((a - seekStart) / (seekEnd - seekStart) * width, 5), (b - seekStart) / (seekEnd - seekStart) * width);
                             if (TargetTimestamp.Contains(ts) || IsTargeted(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "button");
                             
-                            Rect rect = new Rect(rpos - 1, 3 + time * 22, 6, 20);
+                            Rect rect = new Rect(rpos - 2, 3 + time * 22, 8, 20);
                             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                             {
 
@@ -2617,7 +2617,7 @@ public class Chartmaker : EditorWindow
                             {
                                 float pos3 = (c - seekStart) / (seekEnd - seekStart) * width;
                                 
-                                Rect rect = new Rect(pos3 - 1, 3 + time * 22, 6, 20);
+                                Rect rect = new Rect(pos3 - 2, 3 + time * 22, 8, 20);
                                 if (IsTargeted(lane.LaneSteps[x])) GUI.Label(rect, "", "flow node 0 on");
                                 if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                                 {
@@ -2949,7 +2949,7 @@ public class Chartmaker : EditorWindow
         }
         else if (Event.current.type == EventType.MouseUp && Event.current.button == mouseBtn)
         {
-            if (DraggingThing != null)
+            if (DraggingThing != null && mouseBtn == 0)
             {
                 if (!dragged)
                 {
