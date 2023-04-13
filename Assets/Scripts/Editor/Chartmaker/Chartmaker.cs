@@ -2510,8 +2510,8 @@ public class Chartmaker : EditorWindow
 
                     for (int a = verSeek; a < Math.Min(tst.Count, verSeek + timelineHeight); a++)
                     {
-                        GUI.Label(new Rect(9, 4 + (a - verSeek) * 22, 120, 20), tst[a], inv);
-                        GUI.Label(new Rect(8, 3 + (a - verSeek) * 22, 120, 20), tst[a]);
+                        GUI.Label(new Rect(9, 6 + (a - verSeek) * 22, 120, 20), tst[a], inv);
+                        GUI.Label(new Rect(8, 5 + (a - verSeek) * 22, 120, 20), tst[a]);
                     }
 
                     foreach (Timestamp ts in sb.Timestamps)
@@ -2526,10 +2526,17 @@ public class Chartmaker : EditorWindow
 
                         if (b > seekStart && a < seekEnd)
                         {
+                            GUI.Label(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), "", "objectFieldThumb");
                             EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), new Color(0, 1, 0, .2f));
+                            GUI.Label(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), "", "helpBox");
 
-                            float rpos = Mathf.Min(Mathf.Max((a - seekStart) / (seekEnd - seekStart) * width, 5), (b - seekStart) / (seekEnd - seekStart) * width);
-                            if (TargetTimestamp.Contains(ts) || IsTargeted(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "button");
+                            string fromText = float.IsNaN(ts.From) ? "" : ts.Target.ToString(invariant);
+                            string toText = ts.Target.ToString(invariant);
+                            float fromWidth = float.IsNaN(ts.From) ? 0 : left.CalcSize(new GUIContent(fromText)).x + 6;
+                            float toWidth = right.CalcSize(new GUIContent(toText)).x;
+
+                            float rpos = Mathf.Min(Mathf.Max((a - seekStart) / (seekEnd - seekStart) * width, 7), Mathf.Max(pos2 - 9 - fromWidth - toWidth, pos));
+                            if (TargetTimestamp.Contains(ts)) GUI.Label(new Rect(rpos - 2, 2 + time * 22, 8, 22), "", "flow node 0 on");
                             
                             Rect rect = new Rect(rpos - 2, 3 + time * 22, 8, 20);
                             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
@@ -2547,12 +2554,15 @@ public class Chartmaker : EditorWindow
                                 }
                             }
                             else if (Event.current.type == EventType.Repaint) 
-                                GUI.Toggle(rect, DraggingThing == ts, DeletingThing == ts ? "?" : "┃", itemStyle);
+                                GUI.Toggle(rect, DraggingThing == ts, DeletingThing == ts ? "?" : rpos <= 7 ? "〈" : "┃", itemStyle);
 
-                            if (!float.IsNaN(ts.From)) GUI.Label(new Rect(rpos + 6, 2 + time * 22, 60, 22), ts.From.ToString(invariant), left);
+                            if (pos2 - pos > fromWidth + toWidth + 8)
+                            {
+                                GUI.Label(new Rect(rpos + 6, 2 + time * 22, 60, 22), fromText, left);
 
-                            float epos = Mathf.Min(Mathf.Max(rpos, width - 8), (b - seekStart) / (seekEnd - seekStart) * width);
-                            GUI.Label(new Rect(epos - 62, 2 + time * 22, 60, 22), ts.Target.ToString(invariant), right);
+                                float epos = Mathf.Min(Mathf.Max(rpos + fromWidth + toWidth + 8, width - 8), pos2);
+                                GUI.Label(new Rect(epos - 62, 2 + time * 22, 60, 22), toText, right);
+                            }
                         }
                     }
                 }
@@ -2608,7 +2618,9 @@ public class Chartmaker : EditorWindow
                         if (time < 0 || time >= timelineHeight) continue;
                         if (b > seekStart && a < seekEnd)
                         {
+                            GUI.Label(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), "", "objectFieldThumb");
                             EditorGUI.DrawRect(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), TargetLane == lane ? new Color(1, 1, 0, .2f) : new Color(0, 1, 0, .2f));
+                            GUI.Label(new Rect(pos + 2, 3 + time * 22, pos2 - pos, 20), "", "helpBox");
                         }
                         for (int x = 1; x < lane.LaneSteps.Count; x++)
                         {
@@ -2656,7 +2668,7 @@ public class Chartmaker : EditorWindow
                                 }
                             }
                             else if (Event.current.type == EventType.Repaint) 
-                                GUI.Toggle(rect, DraggingThing == lane, DeletingThing == lane ? "?" : "┃", itemStyle);
+                                GUI.Toggle(rect, DraggingThing == lane, DeletingThing == lane ? "?" : rpos <= 13 ? "〈" : "┃", itemStyle);
                         }
                     }
                     else
@@ -2767,6 +2779,8 @@ public class Chartmaker : EditorWindow
 
                         if (x != y)
                         {
+                            GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "objectFieldThumb");
+                            EditorGUI.DrawRect(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), style.normal.textColor * new Color(1, 1, 1, .2f));
                             GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "helpBox");
                         }
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
@@ -2864,7 +2878,7 @@ public class Chartmaker : EditorWindow
         {
             Vector2 mPos = Event.current.mousePosition;
             float sPos = mPos.x * (seekEnd - seekStart) / width + seekStart;
-            if (DraggingThing != null)
+            if (DraggingThing != null && mouseBtn == 0)
             {
                 if (!dragged)
                 {
@@ -2972,7 +2986,7 @@ public class Chartmaker : EditorWindow
                 DraggingThing = null;
                 Repaint();
             }
-            if (dragMode == "select")
+            else if (dragMode == "select")
             {
                 if (selectEnd != null)
                 {
