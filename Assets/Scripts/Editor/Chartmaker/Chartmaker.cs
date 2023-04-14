@@ -3087,7 +3087,7 @@ public class Chartmaker : EditorWindow
                             TargetTimestamp = new List<Timestamp>(new [] {ts});
                             Repaint();
                         }
-                        else if (pickermode.StartsWith("hit_") && TargetLane != null)
+                        else if (pickermode.StartsWith("hit_") && HitViewMode == 1 && TargetLane != null)
                         {
                             HitObject hit = new HitObject();
                             hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
@@ -3184,16 +3184,23 @@ public class Chartmaker : EditorWindow
                             HitObject hit = new HitObject();
                             hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
                             hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
+
                             if (TargetThing is HitObject)
                             {
                                 HitObject thing = (HitObject)TargetThing;
+                                hit.Position = thing.Position;
                                 hit.Length = thing.Length;
                             }
                             else
                             {
                                 hit.Length = 1;
                             }
-                            hit.Position = Mathf.Round(((selectStartY ?? 0) - hit.Length / 2) / .05f) * .05f;
+
+                            if (HitViewMode == 1) 
+                            {
+                                hit.Position = Mathf.Round(((selectStartY ?? 0) - hit.Length / 2) / .05f) * .05f;
+                            }
+
                             HistoryAdd(TargetLane.Objects, hit);
                             TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                             TargetThing = hit;
@@ -3222,7 +3229,7 @@ public class Chartmaker : EditorWindow
                     GUI.Label(new Rect(minPos + 2, index * 22 + 3, maxPos - minPos, 20), "", "helpBox");
                     GUI.Label(new Rect(minPos - 2, index * 22 + 3, 8, 20), "", "button");
                 }
-                if (pickermode.StartsWith("hit_"))
+                if (pickermode.StartsWith("hit_") && HitViewMode == 1 && TargetLane != null)
                 {
                     float minPosY = Mathf.Clamp01(Mathf.Round(Mathf.Min(selectStartY ?? 0, selectEndY ?? 0) / .05f) * .05f) * (tHeight - 10);
                     float maxPosY = Mathf.Clamp01(Mathf.Round(Mathf.Max(selectStartY ?? 0, selectEndY ?? 0) / .05f) * .05f) * (tHeight - 10);
