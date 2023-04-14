@@ -3087,7 +3087,7 @@ public class Chartmaker : EditorWindow
                             TargetTimestamp = new List<Timestamp>(new [] {ts});
                             Repaint();
                         }
-                        else if (pickermode.StartsWith("hit_") && HitViewMode == 1 && TargetLane != null)
+                        else if (pickermode.StartsWith("hit_") && HitViewMode == 0 && TargetLane != null)
                         {
                             HitObject hit = new HitObject();
                             hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
@@ -3196,7 +3196,7 @@ public class Chartmaker : EditorWindow
                                 hit.Length = 1;
                             }
 
-                            if (HitViewMode == 1) 
+                            if (HitViewMode == 0) 
                             {
                                 hit.Position = Mathf.Round(((selectStartY ?? 0) - hit.Length / 2) / .05f) * .05f;
                             }
@@ -3229,7 +3229,7 @@ public class Chartmaker : EditorWindow
                     GUI.Label(new Rect(minPos + 2, index * 22 + 3, maxPos - minPos, 20), "", "helpBox");
                     GUI.Label(new Rect(minPos - 2, index * 22 + 3, 8, 20), "", "button");
                 }
-                if (pickermode.StartsWith("hit_") && HitViewMode == 1 && TargetLane != null)
+                if (pickermode.StartsWith("hit_") && HitViewMode == 0 && TargetLane != null)
                 {
                     float minPosY = Mathf.Clamp01(Mathf.Round(Mathf.Min(selectStartY ?? 0, selectEndY ?? 0) / .05f) * .05f) * (tHeight - 10);
                     float maxPosY = Mathf.Clamp01(Mathf.Round(Mathf.Max(selectStartY ?? 0, selectEndY ?? 0) / .05f) * .05f) * (tHeight - 10);
