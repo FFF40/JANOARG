@@ -578,6 +578,10 @@ public class Chartmaker : EditorWindow
             CurrentAudioSource = new GameObject("Chartmaker Audio").AddComponent<AudioSource>();
             CurrentAudioSource.gameObject.hideFlags = HideFlags.DontSave;
         }
+        if (CurrentAudioSource.clip?.loadState == AudioDataLoadState.Unloaded)
+        {
+            CurrentAudioSource.clip.LoadAudioData();
+        }
         if (!MetronomeSound)
         {
             MetronomeSound = Resources.Load<AudioClip>("Sounds/Metronome");
@@ -2237,6 +2241,7 @@ public class Chartmaker : EditorWindow
 
     public float seekStart, seekEnd;
     public float? selectStart, selectEnd;
+    public float? selectStartY, selectEndY;
 
     public string dragMode = "";
     public bool dragged = false;
@@ -2549,8 +2554,7 @@ public class Chartmaker : EditorWindow
                                 }
                                 else
                                 {
-                                    TargetTimestamp = new List<Timestamp>(new [] {ts});
-                                    DeletingThing = null;
+                                    TimelineSelect(ts);
                                 }
                             }
                             else if (Event.current.type == EventType.Repaint) 
@@ -2748,7 +2752,7 @@ public class Chartmaker : EditorWindow
                     GUIStyle style = new GUIStyle(itemStyle);
                     if (HitViewMode == 0) 
                     {
-                        style.padding = new RectOffset(4, 3, 4, 3);
+                        style.padding = new RectOffset(2, 1, 2, 1);
                         style.fontSize = 256;
                     }
                     foreach (HitObject hit in TargetLane.Objects)
@@ -2780,7 +2784,7 @@ public class Chartmaker : EditorWindow
                         if (x != y)
                         {
                             GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "objectFieldThumb");
-                            EditorGUI.DrawRect(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), style.normal.textColor * new Color(1, 1, 1, .2f));
+                            EditorGUI.DrawRect(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), style.normal.textColor * new Color(1, 1, 1, .4f));
                             GUI.Label(new Rect(pos + 2, rect.y, pos2 - pos, rect.height), "", "helpBox");
                         }
                         if (hit.Offset > seekStart && hit.Offset < seekEnd)
@@ -2860,11 +2864,13 @@ public class Chartmaker : EditorWindow
                         if (pickermode == "select" || mouseBtn == 1)
                         {
                             selectStart = sPos;
+                            selectStartY = mPos.y / (tHeight - 10);
                             dragMode = "select";
                         }
                         else
                         {
                             selectStart = Mathf.Round(sPos / sep) * sep;
+                            selectStartY = mPos.y / (tHeight - 10);
                             CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
                             dragMode = "seeksnap";
                         }
@@ -2931,6 +2937,7 @@ public class Chartmaker : EditorWindow
             else if (dragMode == "select")
             {
                 selectEnd = sPos;
+                selectEndY = mPos.y / (tHeight - 10);
                 Repaint();
             }
             else if (dragMode == "seek")
@@ -2941,6 +2948,7 @@ public class Chartmaker : EditorWindow
             else if (dragMode == "seeksnap")
             {
                 selectEnd = Mathf.Round(sPos / sep) * sep;
+                selectEndY = mPos.y / (tHeight - 10);
                 CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
                 Repaint();
             }
@@ -2995,6 +3003,12 @@ public class Chartmaker : EditorWindow
                         float? tmp = selectStart;
                         selectStart = selectEnd;
                         selectEnd = tmp;
+                    }
+                    if (selectStartY > selectEndY)
+                    {
+                        float? tmp = selectStartY;
+                        selectStartY = selectEndY;
+                        selectEndY = tmp;
                     }
 
                     if (timelineMode == "story" && TargetThing is IStoryboardable)
@@ -3057,90 +3071,140 @@ public class Chartmaker : EditorWindow
                         selectEnd = tmp;
                     }
 
-                    if (dragMode == "seeksnap" && pickermode == "timestamp" && TargetThing is IStoryboardable)
+                    if (dragMode == "seeksnap")
                     {
-                        IStoryboardable thing = (IStoryboardable)TargetThing;
-                        TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
-                        int index = Mathf.FloorToInt(mPos.y / 22) + verSeek;
-                        TimestampType type = types[Mathf.Clamp(index, 0, types.Length - 1)];
-
-                        Timestamp ts = new Timestamp()
+                        if (pickermode == "timestamp" && TargetThing is IStoryboardable)
                         {
-                            ID = type.ID,
-                            Offset = (float)selectStart,
-                            Duration = (float)(selectEnd - selectStart)
-                        };
+                            IStoryboardable thing = (IStoryboardable)TargetThing;
+                            TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
+                            int index = Mathf.Clamp(Mathf.FloorToInt(mPos.y / 22), 0, timelineHeight - 1) + verSeek;
+                            TimestampType type = types[Mathf.Clamp(index, 0, types.Length - 1)];
 
-                        HistoryAdd(thing.Storyboard.Timestamps, ts);
-                        thing.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                        TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                        TargetTimestamp = new List<Timestamp>(new [] {ts});
-                        Repaint();
+                            Timestamp ts = new Timestamp()
+                            {
+                                ID = type.ID,
+                                Offset = (float)selectStart,
+                                Duration = (float)(selectEnd - selectStart)
+                            };
+
+                            HistoryAdd(thing.Storyboard.Timestamps, ts);
+                            thing.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            TargetTimestamp = new List<Timestamp>(new [] {ts});
+                            Repaint();
+                        }
+                        else if (pickermode.StartsWith("hit_") && TargetLane != null)
+                        {
+                            HitObject hit = new HitObject();
+                            hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
+                            hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
+
+                            selectStartY = Mathf.Round((float)selectStartY / .05f) * .05f;
+                            selectEndY = Mathf.Round((float)selectEndY / .05f) * .05f;
+
+                            if (selectStartY != selectEndY)
+                            {
+                                hit.Offset = (float)selectStart;
+                                hit.HoldLength = (float)(selectEnd - selectStart);
+                                hit.Position = (float)selectStartY;
+                                hit.Length = (float)(selectEndY - selectStartY);
+
+                                HistoryAdd(TargetLane.Objects, hit);
+                                TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                                TargetThing = hit;
+                            }
+                            Repaint();
+                        }
                     }
                 }
                 else
                 {
-                    if (dragMode == "seeksnap" && pickermode == "bpmstop")
+                    if (dragMode == "seeksnap")
                     {
-                        BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(preciseTime, out _).BPM, Mathf.Round(preciseTime * 1000) / 1000);
-                        HistoryAdd(TargetSong.Timing.Stops, stop);
-                        TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                        Repaint();
-                    }
-                    else if (dragMode == "seeksnap" && pickermode == "lane")
-                    {
-                        Lane lane = new Lane();
-                        lane.Position = new Vector3(0, -3);
+                        Vector2 mPos = Event.current.mousePosition;
 
-                        LaneStep step = new LaneStep();
-                        step.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
-                        step.StartPos = new Vector2(-6, 0);
-                        step.EndPos = new Vector2(6, 0);
-                        lane.LaneSteps.Add(step);
-
-                        LaneStep next = step.DeepClone();
-                        next.Offset = step.Offset + 1;
-                        lane.LaneSteps.Add(next);
-
-                        HistoryAdd(TargetChart.Data.Lanes, lane);
-                        TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
-                        TargetThing = TargetLane = lane;
-                        Repaint();
-                    }
-                    else if (dragMode == "seeksnap" && pickermode == "step" && TargetLane != null)
-                    {
-                        float p = (float)(Math.Ceiling(pos * 1e5) / 1e5);
-                        LaneStep cur = TargetLane.GetLaneStep(CurrentAudioSource.time, CurrentAudioSource.time, TargetSong.Timing);
-
-                        LaneStep step = new LaneStep();
-                        step.Offset = p;
-                        step.StartPos = cur.StartPos;
-                        step.EndPos = cur.EndPos;
-
-                        HistoryAdd(TargetLane.LaneSteps, step);
-                        TargetLane.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                        TargetThing = step;
-                        Repaint();
-                    }
-                    else if (dragMode == "seeksnap" && pickermode.StartsWith("hit_") && TargetLane != null)
-                    {
-                        HitObject hit = new HitObject();
-                        hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
-                        hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
-                        if (TargetThing is HitObject)
+                        if (pickermode == "timestamp" && TargetThing is IStoryboardable)
                         {
-                            HitObject thing = (HitObject)TargetThing;
-                            hit.Position = thing.Position;
-                            hit.Length = thing.Length;
+                            IStoryboardable thing = (IStoryboardable)TargetThing;
+                            TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
+                            int index = Mathf.Clamp(Mathf.FloorToInt(mPos.y / 22), 0, timelineHeight - 1) + verSeek;
+                            TimestampType type = types[Mathf.Clamp(index, 0, types.Length - 1)];
+
+                            Timestamp ts = new Timestamp()
+                            {
+                                ID = type.ID,
+                                Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5),
+                                Duration = 0
+                            };
+
+                            HistoryAdd(thing.Storyboard.Timestamps, ts);
+                            thing.Storyboard.Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            TargetTimestamp = new List<Timestamp>(new [] {ts});
+                            Repaint();
                         }
-                        else
+                        else if (pickermode == "bpmstop")
                         {
-                            hit.Length = 1;
+                            BPMStop stop = new BPMStop(TargetSong.Timing.GetStop(preciseTime, out _).BPM, Mathf.Round(preciseTime * 1000) / 1000);
+                            HistoryAdd(TargetSong.Timing.Stops, stop);
+                            TargetSong.Timing.Stops.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            Repaint();
                         }
-                        HistoryAdd(TargetLane.Objects, hit);
-                        TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
-                        TargetThing = hit;
-                        Repaint();
+                        else if (pickermode == "lane")
+                        {
+                            Lane lane = new Lane();
+                            lane.Position = new Vector3(0, -3);
+
+                            LaneStep step = new LaneStep();
+                            step.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
+                            step.StartPos = new Vector2(-6, 0);
+                            step.EndPos = new Vector2(6, 0);
+                            lane.LaneSteps.Add(step);
+
+                            LaneStep next = step.DeepClone();
+                            next.Offset = step.Offset + 1;
+                            lane.LaneSteps.Add(next);
+
+                            HistoryAdd(TargetChart.Data.Lanes, lane);
+                            TargetChart.Data.Lanes.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
+                            TargetThing = TargetLane = lane;
+                            Repaint();
+                        }
+                        else if (pickermode == "step" && TargetLane != null)
+                        {
+                            float p = (float)(Math.Ceiling(pos * 1e5) / 1e5);
+                            LaneStep cur = TargetLane.GetLaneStep(CurrentAudioSource.time, CurrentAudioSource.time, TargetSong.Timing);
+
+                            LaneStep step = new LaneStep();
+                            step.Offset = p;
+                            step.StartPos = cur.StartPos;
+                            step.EndPos = cur.EndPos;
+
+                            HistoryAdd(TargetLane.LaneSteps, step);
+                            TargetLane.LaneSteps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            TargetThing = step;
+                            Repaint();
+                        }
+                        else if (pickermode.StartsWith("hit_") && TargetLane != null)
+                        {
+                            HitObject hit = new HitObject();
+                            hit.Offset = (float)(Math.Ceiling(pos * 1e5) / 1e5);
+                            hit.Type = pickermode == "hit_catch" ? HitObject.HitType.Catch : HitObject.HitType.Normal;
+                            if (TargetThing is HitObject)
+                            {
+                                HitObject thing = (HitObject)TargetThing;
+                                hit.Length = thing.Length;
+                            }
+                            else
+                            {
+                                hit.Length = 1;
+                            }
+                            hit.Position = (selectStartY ?? 0) - hit.Length / 2;
+                            HistoryAdd(TargetLane.Objects, hit);
+                            TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
+                            TargetThing = hit;
+                            Repaint();
+                        }
                     }
                 }
             }
@@ -3148,6 +3212,30 @@ public class Chartmaker : EditorWindow
             dragMode = "";
             mouseBtn = -1;
             selectStart = selectEnd = null;
+        }
+        else if (Event.current.type == EventType.Repaint)
+        {
+            if (dragMode == "seeksnap" && !CurrentAudioSource.isPlaying && selectEnd != null)
+            {
+                Vector2 mPos = Event.current.mousePosition;
+
+                float minPos = (Mathf.Min(selectStart ?? 0, selectEnd ?? 0) - seekStart) / (seekEnd - seekStart) * width;
+                float maxPos = (Mathf.Max(selectStart ?? 0, selectEnd ?? 0) - seekStart) / (seekEnd - seekStart) * width;
+
+                if (pickermode == "timestamp" && TargetThing is IStoryboardable)
+                {
+                    int index = Mathf.Clamp(Mathf.FloorToInt(mPos.y / 22), 0, timelineHeight - 1);
+                    GUI.Label(new Rect(minPos + 2, index * 22 + 3, maxPos - minPos, 20), "", "helpBox");
+                    GUI.Label(new Rect(minPos - 2, index * 22 + 3, 8, 20), "", "button");
+                }
+                if (pickermode.StartsWith("hit_"))
+                {
+                    float minPosY = Mathf.Clamp01(Mathf.Round(Mathf.Min(selectStartY ?? 0, selectEndY ?? 0) / .05f) * .05f) * (tHeight - 10);
+                    float maxPosY = Mathf.Clamp01(Mathf.Round(Mathf.Max(selectStartY ?? 0, selectEndY ?? 0) / .05f) * .05f) * (tHeight - 10);
+                    GUI.Label(new Rect(minPos + 2, minPosY, maxPos - minPos, maxPosY - minPosY), "", "helpBox");
+                    GUI.Label(new Rect(minPos - 2, minPosY, 8, maxPosY - minPosY), "", "button");
+                }
+            }
         }
 
         if (seekTime >= seekStart && seekTime < seekEnd)
