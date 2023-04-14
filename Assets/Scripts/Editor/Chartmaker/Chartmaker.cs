@@ -2971,6 +2971,19 @@ public class Chartmaker : EditorWindow
         }
         else if (Event.current.type == EventType.MouseUp && Event.current.button == mouseBtn)
         {
+            if (selectStart > selectEnd)
+            {
+                float? tmp = selectStart;
+                selectStart = selectEnd;
+                selectEnd = tmp;
+            }
+            if (selectStartY > selectEndY)
+            {
+                float? tmp = selectStartY;
+                selectStartY = selectEndY;
+                selectEndY = tmp;
+            }
+
             if (DraggingThing != null && mouseBtn == 0)
             {
                 if (!dragged)
@@ -2998,19 +3011,6 @@ public class Chartmaker : EditorWindow
             {
                 if (selectEnd != null)
                 {
-                    if (selectStart > selectEnd)
-                    {
-                        float? tmp = selectStart;
-                        selectStart = selectEnd;
-                        selectEnd = tmp;
-                    }
-                    if (selectStartY > selectEndY)
-                    {
-                        float? tmp = selectStartY;
-                        selectStartY = selectEndY;
-                        selectEndY = tmp;
-                    }
-
                     if (timelineMode == "story" && TargetThing is IStoryboardable)
                     {
                         List<Timestamp> sel = ((IStoryboardable)TargetThing).Storyboard.Timestamps.FindAll(x =>
@@ -3064,12 +3064,6 @@ public class Chartmaker : EditorWindow
                 if (dragged)
                 {
                     Vector2 mPos = Event.current.mousePosition;
-                    if (selectStart > selectEnd)
-                    {
-                        float? tmp = selectStart;
-                        selectStart = selectEnd;
-                        selectEnd = tmp;
-                    }
 
                     if (dragMode == "seeksnap")
                     {
@@ -3199,7 +3193,7 @@ public class Chartmaker : EditorWindow
                             {
                                 hit.Length = 1;
                             }
-                            hit.Position = (selectStartY ?? 0) - hit.Length / 2;
+                            hit.Position = Mathf.Round(((selectStartY ?? 0) - hit.Length / 2) / .05f) * .05f;
                             HistoryAdd(TargetLane.Objects, hit);
                             TargetLane.Objects.Sort((x, y) => x.Offset.CompareTo(y.Offset));
                             TargetThing = hit;
