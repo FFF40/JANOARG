@@ -2021,7 +2021,7 @@ public class Chartmaker : EditorWindow
 
         // -------------------- Player
 
-        if (GUI.Button(new Rect(position.width / 2 - 20, 1, 40, 28), EditorGUIUtility.IconContent(CurrentAudioSource.isPlaying ? "PauseButton" : "PlayButton"), "buttonMid"))
+        if (GUI.Button(new Rect(width / 2 - 20, 1, 40, 28), EditorGUIUtility.IconContent(CurrentAudioSource.isPlaying ? "PauseButton" : "PlayButton"), "buttonMid"))
         {
             if (CurrentAudioSource.isPlaying)
             {
@@ -2098,7 +2098,7 @@ public class Chartmaker : EditorWindow
 
         // -------------------- Options
 
-        if (GUI.Button(new Rect(position.width / 2 - 66, 5, 40, 20), new GUIContent("Save", "Save Chart")))
+        if (GUI.Button(new Rect(width / 2 - 66, 5, 40, 20), new GUIContent("Save", "Save Chart")))
         {
             SaveSong();
         }
@@ -2107,6 +2107,7 @@ public class Chartmaker : EditorWindow
         {
             extrasmode = extrasmode == "play_options" ? "" : "play_options";
         }
+
 
         // -------------------- Timers
 
@@ -2346,7 +2347,8 @@ public class Chartmaker : EditorWindow
         GUIStyle iconButtonMid = new GUIStyle("buttonMid") { padding = new RectOffset(0, 0, 0, 0) };
         GUIStyle iconButtonLeft = new GUIStyle("buttonLeft") { padding = new RectOffset(0, 0, 0, 0) };
         GUIStyle iconButtonRight = new GUIStyle("buttonRight") { padding = new RectOffset(0, 0, 0, 0) };
-        GUIStyle leftButton = new GUIStyle("button") { alignment = TextAnchor.MiddleLeft };
+        GUIStyle leftLabel = new GUIStyle("helpBox") { fontSize = EditorStyles.label.fontSize, padding = new RectOffset(0, 10, 0, 0), alignment = TextAnchor.MiddleCenter };
+
 
         if (GUI.Button(new Rect(5, tHeight + 26, 46, 19), "Undo", iconButtonLeft))
             History.Undo();
@@ -2360,10 +2362,15 @@ public class Chartmaker : EditorWindow
         if (GUI.Button(new Rect(191, tHeight + 26, 44, 19), "Paste", iconButtonRight))
             PasteSelection();
 
+
         if (GUI.Toggle(new Rect(width - 22, tHeight + 26, 21, 19), extrasmode == "timeline_options", EditorGUIUtility.IconContent("icon dropdown"), iconButton) ^ (extrasmode == "timeline_options"))
             extrasmode = extrasmode == "timeline_options" ? "" : "timeline_options";
+            
 
-        GUI.Label(new Rect(width - 101, tHeight + 26, 40, 19), "sep", leftButton);
+        GUI.Label(new Rect(width - 180, tHeight + 26, 40, 19), "spd", leftLabel);
+        CurrentAudioSource.pitch = Mathf.Clamp(Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(width - 150, tHeight + 26, 46, 19), CurrentAudioSource.pitch), .05f, 1) / .05f) * .05f, .05f, 1);
+
+        GUI.Label(new Rect(width - 101, tHeight + 26, 40, 19), "sep", leftLabel);
         timelineSep = EditorGUI.IntField(new Rect(width - 71, tHeight + 26, 46, 19), timelineSep);
 
 
@@ -2858,6 +2865,7 @@ public class Chartmaker : EditorWindow
                     {
                         CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(sPos), 0, TargetSong.Clip.length - .0001f);
                         dragMode = "seek";
+                        GUI.FocusControl("Nothing");
                     }
                     else if (mPos.y > 0 && mPos.y < tHeight - 10)
                     {
@@ -2866,6 +2874,7 @@ public class Chartmaker : EditorWindow
                             selectStart = sPos;
                             selectStartY = mPos.y / (tHeight - 10);
                             dragMode = "select";
+                            GUI.FocusControl("Nothing");
                         }
                         else
                         {
@@ -2873,6 +2882,7 @@ public class Chartmaker : EditorWindow
                             selectStartY = mPos.y / (tHeight - 10);
                             CurrentAudioSource.time = Mathf.Clamp(TargetSong.Timing.ToSeconds(Mathf.Round(sPos / sep) * sep), 0, TargetSong.Clip.length - .0001f);
                             dragMode = "seeksnap";
+                            GUI.FocusControl("Nothing");
                         }
                     }
                 }
