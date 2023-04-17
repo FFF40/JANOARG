@@ -1767,6 +1767,11 @@ public class Chartmaker : EditorWindow
             HistoryDelete(TargetChart.Data.Lanes, TargetThing);
             TargetThing = null;
         }
+        else if (TargetThing is LaneStep || TargetThing is List<LaneStep>)
+        {
+            HistoryDelete(TargetLane.LaneSteps, TargetThing);
+            TargetThing = null;
+        }
         else if (TargetThing is HitObject || TargetThing is List<HitObject>)
         {
             HistoryDelete(TargetLane.Objects, TargetThing);
