@@ -46,6 +46,7 @@ public class Chartmaker : EditorWindow
     public float MetronomeVolume;
     public float HitsoundVolume;
     public bool HoldEndHitsound;
+    public float[] GridSize = {1, 5, 10};
 
     public int WaveformMode;
     public int HitViewMode;
@@ -879,9 +880,9 @@ public class Chartmaker : EditorWindow
                                 Handles.color = Color.white;
                                 Handles.DrawLine(startPosScr, endPosScr, 2);
 
-                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, Vector3.forward * midPos.z, Quaternion.identity);
-                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation));
-                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation));
+                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, Vector3.forward * midPos.z, Quaternion.identity, GizmoMode == "mid" ? 10 : 4);
+                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation), GizmoMode == "start" ? 10 : 4);
+                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation), GizmoMode == "end" ? 10 : 4);
 
 
                                 Handles.color = Color.black;
@@ -939,7 +940,12 @@ public class Chartmaker : EditorWindow
                                         if (dragPos != null)
                                         {
                                             if (GizmoMode == "start" || GizmoMode == "end") dragPos = inv((Vector3)dragPos);
-                                            if (Event.current.shift) dragPos = new Vector3(Mathf.Round(dragPos?.x ?? 0), Mathf.Round(dragPos?.y ?? 0), Mathf.Round(dragPos?.z ?? 0));
+                                            if (Event.current.shift && GridSize[0] > 0)
+                                            {
+                                                Vector3 des = new Vector3();
+                                                for (int x = 0; x < 3; x++) des[x] = Mathf.Round((dragPos?[x] ?? 0) / GridSize[0]) * GridSize[0];
+                                                dragPos = des;
+                                            } 
                                         }
                                         else
                                         {
@@ -1000,9 +1006,9 @@ public class Chartmaker : EditorWindow
                                 Handles.color = Color.white;
                                 Handles.DrawLine(startPosScr, endPosScr, 2);
 
-                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
-                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
-                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation));
+                                if (midPosHover || GizmoMode == "mid") DrawGrid(midPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation), GizmoMode == "mid" ? 10 : 4);
+                                else if (startPosHover || GizmoMode == "start") DrawGrid(startPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation), GizmoMode == "start" ? 10 : 4);
+                                else if (endPosHover || GizmoMode == "end") DrawGrid(endPosScr, lman.CurrentLane.Position + distOffset, Quaternion.Euler(lman.CurrentLane.Rotation), GizmoMode == "end" ? 10 : 4);
 
 
                                 Handles.color = Color.black;
@@ -1058,7 +1064,12 @@ public class Chartmaker : EditorWindow
                                         if (dragPos != null)
                                         {
                                             dragPos = inv((Vector3)dragPos);
-                                            if (Event.current.shift) dragPos = new Vector3(Mathf.Round(dragPos?.x ?? 0), Mathf.Round(dragPos?.y ?? 0), Mathf.Round(dragPos?.z ?? 0));
+                                            if (Event.current.shift && GridSize[0] > 0)
+                                            {
+                                                Vector3 des = new Vector3();
+                                                for (int x = 0; x < 3; x++) des[x] = Mathf.Round((dragPos?[x] ?? 0) / GridSize[0]) * GridSize[0];
+                                                dragPos = des;
+                                            } 
                                         }
                                         else
                                         {
@@ -1119,7 +1130,7 @@ public class Chartmaker : EditorWindow
                 if (extrasmode == "migrate_charts") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_create") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_delete") rect = new Rect(width / 2 - 200, height / 2 - 60, 400, 120);
-                else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 330, 113);
+                else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 330, 137);
                 else if (extrasmode == "timeline_options") rect = new Rect(width - 334, height - 144, 330, 120);
 
                 GUIStyle exStyle = new GUIStyle("window");
@@ -1798,6 +1809,7 @@ public class Chartmaker : EditorWindow
 
     public void DrawGrid(Vector3 pos, Vector3 center, Quaternion rotation, float radius = 4)
     {
+        if (GridSize.Length < 3 || GridSize[0] <= 0) return;
         Plane plane = new Plane(rotation * Vector3.back, center);
         Ray ray = CurrentCamera.ScreenPointToRay(new Vector2(pos.x, height - pos.y));
         if (plane.Raycast(ray, out float enter))
@@ -1805,23 +1817,23 @@ public class Chartmaker : EditorWindow
             Vector3 point = ray.GetPoint(enter);
             Vector2 normal = Quaternion.Inverse(rotation) * (point - center);
 
-            for (float x = Mathf.Ceil(normal.x) - radius; x < normal.x + radius; x += 1f)
+            for (float x = Mathf.Ceil(normal.x) - radius; x < normal.x + radius; x += GridSize[0])
             {
-                float thick = IsDivisible(x, 10) ? 2 : 1;
+                float thick = IsDivisible(x, GridSize[1]) ? 2 : 1;
                 float length = Mathf.Sqrt(1 - Mathf.Pow(Math.Abs(x - normal.x) / radius, 2)) * radius;
                 Vector3 start = WorldToScreen(rotation * new Vector2(x, normal.y - length) + center) + Vector3.back * thick / 2;
                 Vector3 end = WorldToScreen(rotation * new Vector2(x, normal.y + length) + center) + Vector3.back * thick / 2;
-                Handles.color = new Color(interfaceColor.r, interfaceColor.g, interfaceColor.b, IsDivisible(x, 5) ? .5f : .25f);
+                Handles.color = new Color(interfaceColor.r, interfaceColor.g, interfaceColor.b, IsDivisible(x, GridSize[2]) ? .5f : .25f);
                 Handles.DrawLine(start, end, thick);
             }
 
-            for (float y = Mathf.Ceil(normal.y) - radius; y < normal.y + radius; y += 1f)
+            for (float y = Mathf.Ceil(normal.y) - radius; y < normal.y + radius; y += GridSize[0])
             {
-                float thick = IsDivisible(y, 10) ? 2 : 1;
+                float thick = IsDivisible(y, GridSize[1]) ? 2 : 1;
                 float length = Mathf.Sqrt(1 - Mathf.Pow(Math.Abs(y - normal.y) / radius, 2)) * radius;
                 Vector3 start = WorldToScreen(rotation * new Vector2(normal.x - length, y) + center) + Vector3.back * thick / 2;
                 Vector3 end = WorldToScreen(rotation * new Vector2(normal.x + length, y) + center) + Vector3.back * thick / 2;
-                Handles.color = new Color(interfaceColor.r, interfaceColor.g, interfaceColor.b, IsDivisible(y, 5) ? .5f : .25f);
+                Handles.color = new Color(interfaceColor.r, interfaceColor.g, interfaceColor.b, IsDivisible(y, GridSize[2]) ? .5f : .25f);
                 Handles.DrawLine(start, end, thick);
             }
         }
@@ -4386,28 +4398,34 @@ public class Chartmaker : EditorWindow
         }
         if (extrasmode == "play_options")
         {
-            GUI.Label(new Rect(5, 5, 90, 18), "Play Speed");
+            GUI.Label(new Rect(5, 6, 90, 18), "Play Speed");
             CurrentAudioSource.pitch = Mathf.Pow(10, GUI.HorizontalSlider(new Rect(95, 5, 180, 18), Mathf.Log10(CurrentAudioSource.pitch), Mathf.Log10(.05f), 0));
             CurrentAudioSource.pitch = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 5, 43, 18), CurrentAudioSource.pitch), .05f, 1) / .05f) * .05f;
 
-            GUI.Label(new Rect(5, 25, 90, 18), "Scroll Speed");
+            GUI.Label(new Rect(5, 26, 90, 18), "Scroll Speed");
             float spd = Mathf.Sqrt(ScrollSpeed);
             spd = GUI.HorizontalSlider(new Rect(95, 25, 180, 18), spd, .5f, 20);
             spd = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 25, 43, 18), spd), .5f, 20) / .5f) * .5f;
             ScrollSpeed = spd * spd;
             
-            GUI.Label(new Rect(5, 49, 90, 18), "Metronome");
-            GUI.Label(new Rect(95, 49, 27, 18), "Vol:");
+            GUI.Label(new Rect(5, 50, 90, 18), "Metronome");
+            GUI.Label(new Rect(95, 50, 27, 18), "Vol:");
             MetronomeVolume = Mathf.Pow(GUI.HorizontalSlider(new Rect(122, 49, 153, 18), Mathf.Pow(MetronomeVolume, 2), 0, 1), .5f);
             MetronomeVolume = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 49, 43, 18), MetronomeVolume), 0, 1) / .05f) * .05f;
             
-            GUI.Label(new Rect(5, 69, 90, 18), "Hitsound");
-            GUI.Label(new Rect(95, 69, 27, 18), "Vol:");
+            GUI.Label(new Rect(5, 70, 90, 18), "Hitsound");
+            GUI.Label(new Rect(95, 70, 27, 18), "Vol:");
             HitsoundVolume = Mathf.Pow(GUI.HorizontalSlider(new Rect(122, 69, 153, 18), Mathf.Pow(HitsoundVolume, 2), 0, 1), .5f);
             HitsoundVolume = Mathf.Round(Mathf.Clamp(EditorGUI.FloatField(new Rect(282, 69, 43, 18), HitsoundVolume), 0, 1) / .05f) * .05f;
 
-            GUI.Label(new Rect(221, 89, 24, 18), "On:");
+            GUI.Label(new Rect(221, 90, 24, 18), "On:");
             HoldEndHitsound = GUI.Toggle(new Rect(245, 89, 80, 18), HoldEndHitsound, "Hold End", "button");
+            
+            GUI.Label(new Rect(5, 114, 90, 18), "Grid Lines");
+            GUI.Label(new Rect(95, 114, 35, 18), "Size:");
+            GridSize[0] = EditorGUI.FloatField(new Rect(128, 113, 43, 18), GridSize[0]);
+            GridSize[1] = EditorGUI.FloatField(new Rect(174, 113, 43, 18), GridSize[1]);
+            GridSize[2] = EditorGUI.FloatField(new Rect(220, 113, 43, 18), GridSize[2]);
         }
         else if (extrasmode == "timeline_options")
         {
