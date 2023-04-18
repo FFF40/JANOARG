@@ -414,33 +414,32 @@ public class Chartmaker : EditorWindow
                 float pp = p + ((nTime - sTime) * startPos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
                 AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
             }
+
+            if (next.IsLinear)
             {
-                if (next.IsLinear)
+                start = Vector2.LerpUnclamped(step.StartPos, next.StartPos, Mathf.Clamp01(endPos));
+                end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, Mathf.Clamp01(endPos));
+                Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
+                Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
+                float pp = p + ((nTime - sTime) * Mathf.Clamp01(endPos) - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
+                AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
+            }
+            else
+            {
+
+                void Add(float pos)
                 {
-                    start = Vector2.LerpUnclamped(step.StartPos, next.StartPos, endPos);
-                    end = Vector2.LerpUnclamped(step.EndPos, next.EndPos, endPos);
+                    start = new Vector3(Mathf.LerpUnclamped(step.StartPos.x, next.StartPos.x, Ease.Get(pos, next.StartEaseX, next.StartEaseXMode)),
+                        Mathf.LerpUnclamped(step.StartPos.y, next.StartPos.y, Ease.Get(pos, next.StartEaseY, next.StartEaseYMode)));
+                    end = new Vector3(Mathf.LerpUnclamped(step.EndPos.x, next.EndPos.x, Ease.Get(pos, next.EndEaseX, next.EndEaseXMode)),
+                        Mathf.LerpUnclamped(step.EndPos.y, next.EndPos.y, Ease.Get(pos, next.EndEaseY, next.EndEaseYMode)));
                     Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
                     Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
-                    float pp = p + ((nTime - sTime) * endPos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
+                    float pp = p + ((nTime - sTime) * pos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
                     AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
                 }
-                else
-                {
-
-                    void Add(float pos)
-                    {
-                        start = new Vector3(Mathf.LerpUnclamped(step.StartPos.x, next.StartPos.x, Ease.Get(pos, next.StartEaseX, next.StartEaseXMode)),
-                            Mathf.LerpUnclamped(step.StartPos.y, next.StartPos.y, Ease.Get(pos, next.StartEaseY, next.StartEaseYMode)));
-                        end = new Vector3(Mathf.LerpUnclamped(step.EndPos.x, next.EndPos.x, Ease.Get(pos, next.EndEaseX, next.EndEaseXMode)),
-                            Mathf.LerpUnclamped(step.EndPos.y, next.EndPos.y, Ease.Get(pos, next.EndEaseY, next.EndEaseYMode)));
-                        Vector2 s = Vector2.LerpUnclamped(start, end, hit.Position);
-                        Vector2 e = Vector2.LerpUnclamped(start, end, hit.Position + hit.Length);
-                        float pp = p + ((nTime - sTime) * pos - Math.Max(curtime - sTime, 0)) * next.Speed * ScrollSpeed;
-                        AddStep(new Vector3(s.x, s.y, pp), new Vector3(e.x, e.y, pp));
-                    }
-                    for (float x = Mathf.Floor(Mathf.Clamp01(startPos) * 16 + 1.01f) / 16; x < Mathf.Clamp01(endPos); x = Mathf.Floor(x * 16 + 1.01f) / 16) Add(x);
-                    Add(Mathf.Clamp01(endPos));
-                }
+                for (float x = Mathf.Floor(Mathf.Clamp01(startPos) * 16 + 1.01f) / 16; x < Mathf.Clamp01(endPos); x = Mathf.Floor(x * 16 + 1.01f) / 16) Add(x);
+                Add(Mathf.Clamp01(endPos));
             }
 
             curtime = Mathf.Max(nTime, curtime);
