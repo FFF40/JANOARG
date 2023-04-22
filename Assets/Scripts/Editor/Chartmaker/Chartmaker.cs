@@ -3193,7 +3193,7 @@ public class Chartmaker : EditorWindow
                         else if (pickermode == "step" && TargetLane != null)
                         {
                             float p = (float)(Math.Ceiling(pos * 1e5) / 1e5);
-                            LaneStep cur = TargetLane.GetLaneStep(CurrentAudioSource.time, CurrentAudioSource.time, TargetSong.Timing);
+                            LaneStep cur = TargetLane.GetLaneStep(p, p, Metronome.Identity);
 
                             LaneStep step = new LaneStep();
                             step.Offset = p;

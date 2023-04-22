@@ -100,7 +100,7 @@ public class Metronome
         return Stops[tag];
     }
 
-    public static Metronome Normal = new Metronome(60);
+    public static Metronome Identity = new Metronome(60);
 }
 
 [System.Serializable]
