@@ -1656,7 +1656,7 @@ public class Chartmaker : EditorWindow
 
     public void CutSelection()
     {
-        PasteSelection();
+        CopySelection();
         DeleteSelection();
     }
 
