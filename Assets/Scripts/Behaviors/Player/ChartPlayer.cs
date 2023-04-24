@@ -197,10 +197,14 @@ public class ChartPlayer : MonoBehaviour
 
         HitVolume = Common.main.Storage.Get("PREF:HitVolume", new [] { 80f });
         if (HitVolume.Length < 3) HitVolume = new []{ HitVolume[0], HitVolume[0], HitVolume[0] };
+        else HitVolume = new []{ HitVolume[0], HitVolume[1], HitVolume[2] };
         for (int a = 0; a < HitVolume.Length; a++) HitVolume[a] /= 100;
+
         HitEffectAlpha = Common.main.Storage.Get("PREF:PlayerHitAlpha", new [] { 100f });
         if (HitEffectAlpha.Length < 3) HitEffectAlpha = new []{ HitEffectAlpha[0], HitEffectAlpha[0], HitEffectAlpha[0] };
+        else HitEffectAlpha = new []{ HitEffectAlpha[0], HitEffectAlpha[1], HitEffectAlpha[2] };
         for (int a = 0; a < HitEffectAlpha.Length; a++) HitEffectAlpha[a] /= 100;
+        
         HitEffectSize = Common.main.Storage.Get("PREF:PlayerHitFactor", new [] { 1f });
         if (HitEffectSize.Length < 3) HitEffectSize = new []{ HitEffectSize[0], HitEffectSize[0], HitEffectSize[0] };
 
