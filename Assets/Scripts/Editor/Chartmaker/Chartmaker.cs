@@ -73,8 +73,8 @@ public class Chartmaker : EditorWindow
 
     public void OnDestroy()
     {
-        DestroyImmediate(CurrentAudioSource.gameObject);
-        DestroyImmediate(CurrentCamera.gameObject);
+        if (CurrentAudioSource) DestroyImmediate(CurrentAudioSource.gameObject);
+        if (CurrentCamera) DestroyImmediate(CurrentCamera.gameObject);
         DestroyImmediate(CurrentRenderTexture);
     }
 

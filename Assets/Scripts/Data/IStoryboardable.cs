@@ -128,9 +128,9 @@ public class Ease
             InOut = (x) => x < 0.5f ? 16 * x * x * x * x * x : 1 - Mathf.Pow(-2 * x + 2, 5) / 2,
         }},
         {EaseFunction.Exponential, new Ease {
-            In = (x) => x == 0 ? 0 : Mathf.Pow(2, 10 * x - 10),
-            Out = (x) => x == 1 ? 1 : 1 - Mathf.Pow(2, -10 * x),
-            InOut = (x) => x == 0 ? 0 : x == 1 ? 1 : x < 0.5 ? Mathf.Pow(2, 20 * x - 10) / 2 : (2 - Mathf.Pow(2, -20 * x + 10)) / 2,
+            In = (x) => x == 0 ? 0 : Mathf.Pow(2, 10 * x - 10) - 0.0009765625f * (1 - x),
+            Out = (x) => x == 1 ? 1 : 1 - Mathf.Pow(2, -10 * x) + 0.0009765625f * x,
+            InOut = (x) => x == 0 ? 0 : x == 1 ? 1 : x < 0.5 ? Mathf.Pow(2, 20 * x - 10) / 2 - 0.0009765625f * (1 - x) : (2 - Mathf.Pow(2, -20 * x + 10)) / 2 + 0.0009765625f * x,
         }},
         {EaseFunction.Circle, new Ease {
             In = (x) => 1 - Mathf.Sqrt(1 - Mathf.Pow(x, 2)),
