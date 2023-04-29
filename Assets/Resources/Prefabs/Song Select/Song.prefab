@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 9, y: -14}
+  m_AnchoredPosition: {x: 9, y: -12}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &216273716187927552
@@ -68,8 +68,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Sample Song
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 00f3afb3e7513f746a199a1750c19507, type: 2}
-  m_sharedMaterial: {fileID: -5978015497935776100, guid: 00f3afb3e7513f746a199a1750c19507, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 736bc6ada3492d549a25e18d09489a28, type: 2}
+  m_sharedMaterial: {fileID: 6767016998725404733, guid: 736bc6ada3492d549a25e18d09489a28, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -93,8 +93,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -330,7 +330,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 10, y: 7}
+  m_AnchoredPosition: {x: 10, y: 6}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &216273718043394674
