@@ -4,4 +4,4 @@ The <b>Metronome</b> contains timing informations about the song.
 
 ## Sub-objects
 
-- <b>Timestamps</b> <i>(List of Timestamps)</i>: A list of Timestamps.
+- <b>BPM Stops</b> <i>(List of BPM Stops)</i>: A list of BPM Stops.

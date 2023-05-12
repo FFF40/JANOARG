@@ -530,7 +530,7 @@ public class Chartmaker : EditorWindow
 
     int NormalCount, CatchCount;
 
-    string GizmoMode = "";
+    string GizmoMode = "", lastHover = "";
     Rect startRect, midRect, endRect;
     long delta, now, pass;
     string strain;
@@ -837,7 +837,9 @@ public class Chartmaker : EditorWindow
                         }
                     }
 
+                    // Gizmos
 
+                    #region Cursor tool
                     if (pickermode == "cursor")
                     {
                         if (TargetThing is Lane)
@@ -965,8 +967,12 @@ public class Chartmaker : EditorWindow
                                 }
 
                                 wantsMouseMove = true;
-                                if (Event.current.type == EventType.MouseMove)
+                                string hoverType = startPosHover ? "start" : midPosHover ? "mid" : endPosHover ? "end" : "";
+                                if (Event.current.type == EventType.MouseMove && hoverType != lastHover) 
+                                {
                                     Repaint();
+                                    lastHover = hoverType;
+                                }
                             }
                         }
                         if (TargetThing is LaneStep)
@@ -1089,11 +1095,16 @@ public class Chartmaker : EditorWindow
                                 }
 
                                 wantsMouseMove = true;
-                                if (Event.current.type == EventType.MouseMove)
+                                string hoverType = startPosHover ? "start" : midPosHover ? "mid" : endPosHover ? "end" : "";
+                                if (Event.current.type == EventType.MouseMove && hoverType != lastHover) 
+                                {
                                     Repaint();
+                                    lastHover = hoverType;
+                                }
                             }
                         }
                     }
+                    #endregion
                 }
             }
             else
@@ -1208,7 +1219,8 @@ public class Chartmaker : EditorWindow
         else
         {
             long n = DateTime.Now.Ticks;
-            strain += " " + ((n - strainNow) / 1e4).ToString("N0", invariant);
+            if (pass == 10) strain += "...";
+            else if (pass < 10) strain += " " + ((n - strainNow) / 1e4).ToString("N0", invariant);
             pass++;
         }
 
@@ -1815,6 +1827,8 @@ public class Chartmaker : EditorWindow
         {
             Vector3 point = ray.GetPoint(enter);
             Vector2 normal = Quaternion.Inverse(rotation) * (point - center);
+
+            radius *= GridSize[0];
 
             for (float x = Mathf.Ceil(normal.x) - radius; x < normal.x + radius; x += GridSize[0])
             {
@@ -3442,11 +3456,15 @@ public class Chartmaker : EditorWindow
                 {
                     ChartmakerMultiHandlerFloat handler = MultiManager.Handler as ChartmakerMultiHandlerFloat;
 
-                    handler.From = EditorGUILayout.FloatField("From", handler.From);
-                    handler.To = EditorGUILayout.FloatField("To", handler.To);
-                    
-                    GUILayout.Space(8);
                     handler.Operation = (ChartmakerMultiHandlerFloat.FloatOperation)EditorGUILayout.EnumPopup("Operation", handler.Operation);
+
+                    GUILayout.Space(8);
+                    GUILayout.BeginHorizontal();
+                    handler.From = EditorGUILayout.Toggle("From", !float.IsNaN(handler.From))
+                        ? (float.IsNaN(handler.From) ? handler.To : EditorGUILayout.FloatField(handler.From))
+                        : float.NaN;
+                    GUILayout.EndHorizontal();
+                    handler.To = EditorGUILayout.FloatField("To", handler.To);
                     
                     GUILayout.Space(8);
                     
@@ -3484,7 +3502,11 @@ public class Chartmaker : EditorWindow
                     handler.Axis = EditorGUILayout.Popup("Axis", handler.Axis, new [] {"X", "Y"});
 
                     GUILayout.Space(8);
-                    handler.From = EditorGUILayout.FloatField("From", handler.From);
+                    GUILayout.BeginHorizontal();
+                    handler.From = EditorGUILayout.Toggle("From", !float.IsNaN(handler.From))
+                        ? (float.IsNaN(handler.From) ? handler.To : EditorGUILayout.FloatField(handler.From))
+                        : float.NaN;
+                    GUILayout.EndHorizontal();
                     handler.To = EditorGUILayout.FloatField("To", handler.To);
                     
                     GUILayout.Space(8);
@@ -3523,14 +3545,19 @@ public class Chartmaker : EditorWindow
                 {
                     ChartmakerMultiHandlerVector3 handler = MultiManager.Handler as ChartmakerMultiHandlerVector3;
 
+                    handler.Operation = (ChartmakerMultiHandlerFloat.FloatOperation)EditorGUILayout.EnumPopup("Operation", handler.Operation);
+
+                    GUILayout.Space(8);
                     handler.Axis = EditorGUILayout.Popup("Axis", handler.Axis, new [] {"X", "Y", "Z"});
 
                     GUILayout.Space(8);
-                    handler.From = EditorGUILayout.FloatField("From", handler.From);
+                    GUILayout.BeginHorizontal();
+                    handler.From = EditorGUILayout.Toggle("From", !float.IsNaN(handler.From))
+                        ? (float.IsNaN(handler.From) ? handler.To : EditorGUILayout.FloatField(handler.From))
+                        : float.NaN;
+                    GUILayout.EndHorizontal();
                     handler.To = EditorGUILayout.FloatField("To", handler.To);
                     
-                    GUILayout.Space(8);
-                    handler.Operation = (ChartmakerMultiHandlerFloat.FloatOperation)EditorGUILayout.EnumPopup("Operation", handler.Operation);
                     
                     GUILayout.Space(8);
                     
@@ -3624,9 +3651,11 @@ public class Chartmaker : EditorWindow
                 ts.Duration = EditorGUILayout.FloatField("Duration", ts.Duration);
                 GUILayout.Space(8);
 
+                GUILayout.BeginHorizontal();
                 ts.From = EditorGUILayout.Toggle("From", !float.IsNaN(ts.From))
-                    ? (float.IsNaN(ts.From) ? 0 : EditorGUILayout.FloatField(" ", ts.From))
+                    ? (float.IsNaN(ts.From) ? ts.Target : EditorGUILayout.FloatField(ts.From))
                     : float.NaN;
+                GUILayout.EndHorizontal();
                 ts.Target = EditorGUILayout.FloatField("To", ts.Target);
 
                 ts.Easing = (EaseFunction)EditorGUILayout.EnumPopup("Lerp Easing", ts.Easing);
@@ -3729,6 +3758,10 @@ public class Chartmaker : EditorWindow
                     BPMTapStart = BPMTapEnd = BPMTapCount = 0;
                 }
                 GUILayout.EndHorizontal();
+                
+                GUILayout.Space(8);
+                thing.Significant = EditorGUILayout.Toggle("Significant", thing.Significant);
+
                 GUILayout.EndScrollView();
                 History.EndRecordItem(TargetThing);
             }

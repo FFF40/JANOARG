@@ -148,7 +148,7 @@ public class ChartmakerMultiHandlerBoolean: ChartmakerMultiHandler<bool>
 
 public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
 {
-    public float From;
+    public float From = float.NaN;
     public new float To;
 
     public FloatOperation Operation;
@@ -177,20 +177,21 @@ public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
 
     public override float Get(float from, object src) {
         float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
-        to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
+        to = float.IsFinite(From) ? Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
         return FloatOperations[Operation](from, to);
     }
 
     public enum FloatOperation {
-        Set, Add, Multiply, Min, Max
+        Set, Add, Multiply, Min, Max, Mirror
     }
 
     public static Dictionary<FloatOperation, Func<float, float, float>> FloatOperations = new Dictionary<FloatOperation, Func<float, float, float>> {
-        { FloatOperation.Set,      (from, to) => to },
-        { FloatOperation.Add,      (from, to) => from + to },
-        { FloatOperation.Multiply, (from, to) => from * to },
-        { FloatOperation.Min,      (from, to) => Mathf.Min(from, to) },
-        { FloatOperation.Max,      (from, to) => Mathf.Max(from, to) },
+        { FloatOperation.Set,        (from, to) => to },
+        { FloatOperation.Add,        (from, to) => from + to },
+        { FloatOperation.Multiply,   (from, to) => from * to },
+        { FloatOperation.Min,        (from, to) => Mathf.Min(from, to) },
+        { FloatOperation.Max,        (from, to) => Mathf.Max(from, to) },
+        { FloatOperation.Mirror,     (from, to) => to - (from - to) },
     };
 }
 
@@ -198,7 +199,7 @@ public class ChartmakerMultiHandlerFloat: ChartmakerMultiHandler<float>
 public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
 {
     public int Axis = 0;
-    public float From;
+    public float From = float.NaN;
     public new float To;
 
     public ChartmakerMultiHandlerFloat.FloatOperation Operation;
@@ -227,7 +228,7 @@ public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
 
     public override Vector2 Get(Vector2 from, object src) {
         float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
-        to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
+        to = float.IsFinite(From) ? Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
         from = new Vector2(from.x, from.y);
         from[Axis] = ChartmakerMultiHandlerFloat.FloatOperations[Operation](from[Axis], to);
         return from;
@@ -237,7 +238,7 @@ public class ChartmakerMultiHandlerVector2: ChartmakerMultiHandler<Vector2>
 public class ChartmakerMultiHandlerVector3: ChartmakerMultiHandler<Vector3>
 {
     public int Axis = 0;
-    public float From;
+    public float From = float.NaN;
     public new float To;
 
     public ChartmakerMultiHandlerFloat.FloatOperation Operation;
@@ -266,7 +267,7 @@ public class ChartmakerMultiHandlerVector3: ChartmakerMultiHandler<Vector3>
 
     public override Vector3 Get(Vector3 from, object src) {
         float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
-        to = Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode));
+        to = float.IsFinite(From) ? Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
         from = new Vector3(from.x, from.y, from.z);
         from[Axis] = ChartmakerMultiHandlerFloat.FloatOperations[Operation](from[Axis], to);
         return from;

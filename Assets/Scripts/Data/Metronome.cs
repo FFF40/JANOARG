@@ -110,6 +110,8 @@ public class BPMStop
     public float BPM;
     public int Signature = 4;
 
+    public bool Significant = true;
+
     public BPMStop(float bpm, float offset) {
         Offset = offset;
         BPM = bpm;

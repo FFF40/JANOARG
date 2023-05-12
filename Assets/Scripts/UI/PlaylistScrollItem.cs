@@ -36,8 +36,11 @@ public class PlaylistScrollItem : MonoBehaviour
 
         for (int a = 1; a < timing.Stops.Count; a++)
         {
-            max = Mathf.Max(max, timing.Stops[a].BPM);
-            min = Mathf.Min(min, timing.Stops[a].BPM);
+            if (timing.Stops[a].Significant)
+            {
+                max = Mathf.Max(max, timing.Stops[a].BPM);
+                min = Mathf.Min(min, timing.Stops[a].BPM);
+            }
         }
 
         string ans = min.ToString("0.##", CultureInfo.InvariantCulture);

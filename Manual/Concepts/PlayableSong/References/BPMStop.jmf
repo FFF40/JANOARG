@@ -17,3 +17,9 @@ place.
 - <b>Signature</b> <i>(Integer)</i>: The time signature of the song at this place in time. Note
 that only the top part of the signature (the number of beats in a bar) is needed, so instead of
 "3/4", type "3".
+
+- <b>Significant</b> <i>(Boolean)</i>: Determines whether the BPM Stop is "significant" enough to
+be included in places such as the song card's BPM summary. A BPM Stop is deemed as "insignificant"
+when it is placed when the song BPM or time signature isn't actually changed (i.e. you may need to
+put a small BPM change to realign the main beat of the metronome to the main beat of the song when
+there's a bar of the song with irregular beat quantization.)
