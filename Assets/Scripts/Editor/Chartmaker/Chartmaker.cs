@@ -2308,9 +2308,43 @@ public class Chartmaker : EditorWindow
         timelineHeight = timelineHeight < 1 ? -1 : Mathf.Max(Mathf.Min(timelineHeight, (int)(height / 44 - 5)), 4);
     }
 
-    public void TimelineSelect(object item)
+    public void TimelineSelect<T>(T item)
     {
-        DraggingThing = item;
+        if (Event.current.shift)
+        {
+            List<T> list = null; 
+            if (item is Timestamp)
+            {
+                list = TargetTimestamp as List<T>;
+            }
+            else if (TargetThing is List<T>) 
+            {
+                list = (List<T>)TargetThing;
+            } 
+            else 
+            {
+                list = new List<T>();
+                if (TargetThing is T) {
+                    list.Add((T)TargetThing);
+                }
+            }
+
+
+            if (list.Contains(item)) list.Remove(item);
+            else list.Add(item);
+
+            if (item is Timestamp) TargetTimestamp = list as List<Timestamp>;
+            else if (list.Count == 0) TargetThing = null;
+            else if (list.Count == 1) TargetThing = list[0];
+            else TargetThing = list;
+            
+            if (TargetThing is Lane) TargetLane = (Lane)TargetThing;
+            else if (TargetThing is List<Lane>) TargetLane = null;
+        }
+        else 
+        {
+            DraggingThing = item;
+        }
         DeletingThing = null;
     }
 

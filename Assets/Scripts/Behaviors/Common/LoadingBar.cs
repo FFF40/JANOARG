@@ -28,8 +28,8 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("Flick and Catch notes will always give you their maximum point value as long as you hit them!"),
         new FlavorTextEntry("You can hold overlapping hold notes with just one finger! Just make sure you hit them all first."),
 
-        new FlavorTextEntry("An asterisk (*) on a difficulty rating indicates that the sequence requires using at least 3 or more fingers at the same time to clear."),
-        new FlavorTextEntry("Sequences' difficulty should be rated by their rating numbers, not by their names."),
+        new FlavorTextEntry("An asterisk (*) on a difficulty rating indicates that difficulty requires using at least 3 or more fingers at the same time."),
+        new FlavorTextEntry("Difficulties should be compared based on their rating numbers, not by their names."),
         
         // Resources tips
         /* TODO: Uncomment this when resources and objects are implemented
@@ -51,7 +51,10 @@ public class LoadingBar : MonoBehaviour
 
         // References
         new FlavorTextEntry("Colors of the world are determined by what our world designers feel like that day."),
-        new FlavorTextEntry("Gyroscope support? Maybe later..."),
+        new FlavorTextEntry("History is learned through the visual novel mechanic."),
+        new FlavorTextEntry("Gyroscope gimmick? Maybe later..."),
+        new FlavorTextEntry("Snail's House? Maybe later...", 
+            () => ChartPlayer.main?.CurrentChart?.DifficultyName == "🐌" || PlaylistScroll.main?.SelectedDifficulty?.Chart?.DifficultyName == "🐌"),
 
         // Loading bar
         new FlavorTextEntry("Disclaimer: The loading bar is not guaranteed to always give you actually useful in-game tips"),
@@ -177,7 +180,12 @@ public class FlavorTextEntry
     public static FlavorTextEntry GetRandom(FlavorTextEntry[] entries)
     {
         FlavorTextEntry entry = entries[UnityEngine.Random.Range(0, entries.Length)];
-        while (!entry.Condition()) entry = entries[UnityEngine.Random.Range(0, entries.Length)];
+
+        for (int a = 0; a < 1000; a++) 
+        {
+            if (entry.Condition()) break;
+            entry = entries[UnityEngine.Random.Range(0, entries.Length)];
+        }
         return entry;
     }
 }
