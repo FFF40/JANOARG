@@ -1597,6 +1597,10 @@ public class Chartmaker : EditorWindow
         string path = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".jac");
         Debug.Log(path);
         File.WriteAllText(path, JACEncoder.Encode(TargetChart.Data));
+        
+        string oldPath = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".asset");
+        if (File.Exists(oldPath)) File.Delete(oldPath);
+        if (File.Exists(oldPath + ".meta")) File.Delete(oldPath + ".meta");
     }
 
     public void OpenInPlayMode(bool record = false)
