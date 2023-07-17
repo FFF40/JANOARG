@@ -9,6 +9,7 @@ Shader "UI/Striped"
 
         _StripeVis ("Visibility", Range(0, 1)) = .05
         _StripeSize ("Size", Float) = 20
+        _StripeBalance ("Balance", Range(0, 1)) = 0.5
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -87,6 +88,7 @@ Shader "UI/Striped"
 
             float _StripeVis;
             float _StripeSize;
+            float _StripeBalance;
 
             v2f vert(appdata_t v)
             {
@@ -108,7 +110,7 @@ Shader "UI/Striped"
 
                 float val = IN.worldPos.x * 2 - IN.worldPos.y + _Time.y * 10 + 10000;
     
-                if (val % (_StripeSize * 2) < _StripeSize)
+                if (val % _StripeSize < _StripeSize * _StripeBalance)
                 {
                     color.r = _StripeVis + color.r * (1 - _StripeVis * 2);
                     color.g = _StripeVis + color.g * (1 - _StripeVis * 2);

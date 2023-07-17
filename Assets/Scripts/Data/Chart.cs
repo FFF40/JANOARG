@@ -20,7 +20,7 @@ public class Chart : IStoryboardable, IDeepClonable<Chart>
     public List<LaneGroup> Groups = new List<LaneGroup>();
     public List<Lane> Lanes = new List<Lane>();
 
-    public CameraController Camera;
+    public CameraController Camera = new CameraController();
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
 
@@ -379,8 +379,8 @@ public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle> {
     {
         try 
         {
-            LaneMaterial = (Material)Resources.Load("Materials/Default Lane");
-            JudgeMaterial = (Material)Resources.Load("Materials/Default Judge");
+            LaneMaterial = (Material)Resources.Load("Materials/Lane/Default");
+            JudgeMaterial = (Material)Resources.Load("Materials/Judge/Default");
         }
         catch (UnityException)
         {
@@ -541,8 +541,8 @@ public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
     {
         try 
         {
-            MainMaterial = (Material)Resources.Load("Materials/Default Hit");
-            HoldTailMaterial = (Material)Resources.Load("Materials/Default Hold");
+            MainMaterial = (Material)Resources.Load("Materials/Hit/Default");
+            HoldTailMaterial = (Material)Resources.Load("Materials/Hold/Default");
         }
         catch (UnityException)
         {

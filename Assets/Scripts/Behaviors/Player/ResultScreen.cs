@@ -293,8 +293,8 @@ public class ResultScreen : MonoBehaviour
             RecordBox.anchoredPosition = new Vector2(30 * ease + 50, 0);
 
             float ease2 = Ease.Get(a * 5 - 4, EaseFunction.Quintic, EaseMode.Out);
-            ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
-            ActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+            ProfileBar.main.self.anchoredPosition = new Vector2(0, -48 * ease2);
+            ActionBar.anchoredPosition = new Vector2(0, 48 * ease2);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / 2f)
@@ -394,8 +394,8 @@ public class ResultScreen : MonoBehaviour
             RecordBox.anchoredPosition -= new Vector2((Canvas.rect.width + 100) * ease, 0);
             RankBox.anchoredPosition = new Vector2((Canvas.rect.width + 100) * ease * 2, 0);
 
-            ProfileBar.main.self.anchoredPosition = new Vector2(0, -40 * ease2);
-            ActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+            ProfileBar.main.self.anchoredPosition = new Vector2(0, -48 * ease2);
+            ActionBar.anchoredPosition = new Vector2(0, 48 * ease2);
             ResultSongBox.sizeDelta = new Vector2(ResultSongBox.sizeDelta.x, 40 * ease2);
             DetailsBox.sizeDelta = new Vector2(DetailsBox.sizeDelta.x, (ExtraDetailMode ? 50 : 40) * ease2);
         }

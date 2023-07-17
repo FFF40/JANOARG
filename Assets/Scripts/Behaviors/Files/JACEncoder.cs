@@ -1,0 +1,236 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Globalization;
+using UnityEditor;
+using System.IO;
+
+public class JACEncoder
+{
+
+    public const int IndentSize = 2;
+
+    public static string Encode(Chart chart)
+    {
+        string str = "JANOARG Chart Format\ngithub.com/ducdat0507/janoarg";
+
+        str += "\n\n[METADATA]";
+        str += "\nIndex: " + chart.DifficultyIndex.ToString(CultureInfo.InvariantCulture);
+        str += "\nName: " + chart.DifficultyName;
+        str += "\nLevel: " + chart.DifficultyLevel;
+        str += "\nConstant: " + chart.ChartConstant.ToString(CultureInfo.InvariantCulture);
+
+        str += "\n\n[CAMERA]";
+        str += "\nPivot: " + EncodeVector(chart.Camera.CameraPivot);
+        str += "\nRotation: " + EncodeVector(chart.Camera.CameraRotation);
+        str += "\nDistance: " + chart.Camera.PivotDistance.ToString(CultureInfo.InvariantCulture);
+        str += EncodeStoryboard(chart.Camera);
+
+        str += "\n\n[GROUPS]";
+        foreach (LaneGroup group in chart.Groups) {
+            str += EncodeLaneGroup(group);
+        }
+
+        str += "\n\n[PALLETE]";
+        str += "\nBackground: " + EncodeColor(chart.Pallete.BackgroundColor);
+        str += "\nInterface: " + EncodeColor(chart.Pallete.InterfaceColor);
+        str += EncodeStoryboard(chart.Pallete);
+        foreach (LaneStyle style in chart.Pallete.LaneStyles) {
+            str += EncodeLaneStyle(style);
+        }
+        foreach (HitStyle style in chart.Pallete.HitStyles) {
+            str += EncodeHitStyle(style);
+        }
+        
+        str += "\n\n[OBJECTS]";
+        foreach (Lane lane in chart.Lanes) {
+            str += EncodeLane(lane);
+        }
+
+        return str;
+    }
+
+    public static string EncodeStoryboard(IStoryboardable storyboard, int depth = 0)
+    {
+        return EncodeStoryboard(storyboard.Storyboard, depth);
+    }
+
+    public static string EncodeStoryboard(Storyboard storyboard, int depth = 0)
+    {
+        string str = "";
+        string indent = new string(' ', depth);
+        foreach (Timestamp t in storyboard.Timestamps) 
+        {
+            str += "\n" + indent 
+                + "$ " + t.ID 
+                + " " + t.Offset.ToString(CultureInfo.InvariantCulture)
+                + " " + t.Duration.ToString(CultureInfo.InvariantCulture)
+                + " " + t.Target.ToString(CultureInfo.InvariantCulture)
+                + " " + (float.IsFinite(t.From) ? t.From.ToString(CultureInfo.InvariantCulture) : "_")
+                + " " + EncodeEase(t.Easing, t.EaseMode);
+        }
+        return str;
+    }
+
+    public static string EncodeLaneGroup(LaneGroup group, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ Group"
+            + " " + EncodeVector(group.Position)
+            + " " + EncodeVector(group.Rotation);
+        str += "\n" + indent2 + "Name: " + group.Name;
+
+        if (!string.IsNullOrEmpty(group.Group)) 
+            str += "\n" + indent2 + "Group: " + group.Group;
+
+        str += EncodeStoryboard(group, depth + IndentSize);
+
+        return str;
+    }
+
+    public static string EncodeLaneStyle(LaneStyle style, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ LaneStyle"
+            + " " + EncodeColor(style.LaneColor)
+            + " " + EncodeColor(style.JudgeColor);
+            
+        string lanePath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.LaneMaterial));
+        if (!string.IsNullOrEmpty(lanePath) && lanePath != "Default") 
+            str += "\n" + indent2 + "Lane Material: " + lanePath;
+        if (!string.IsNullOrEmpty(style.LaneColorTarget) && style.LaneColorTarget != "_Color") 
+            str += "\n" + indent2 + "Lane Target: " + style.LaneColorTarget;
+            
+        string judgePath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.JudgeMaterial));
+        if (!string.IsNullOrEmpty(judgePath) && judgePath != "Default") 
+            str += "\n" + indent2 + "Judge Material: " + judgePath;
+        if (!string.IsNullOrEmpty(style.JudgeColorTarget) && style.JudgeColorTarget != "_Color") 
+            str += "\n" + indent2 + "Judge Target: " + style.JudgeColorTarget;
+
+        str += EncodeStoryboard(style, depth + IndentSize);
+
+        return str;
+    }
+
+    public static string EncodeHitStyle(HitStyle style, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ HitStyle"
+            + " " + EncodeColor(style.HoldTailColor)
+            + " " + EncodeColor(style.NormalColor)
+            + " " + EncodeColor(style.CatchColor);
+            
+        string mainPath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.MainMaterial));
+        if (!string.IsNullOrEmpty(mainPath) && mainPath != "Default") 
+            str += "\n" + indent2 + "Main Material: " + mainPath;
+        if (!string.IsNullOrEmpty(style.MainColorTarget) && style.MainColorTarget != "_Color") 
+            str += "\n" + indent2 + "Main Target: " + style.MainColorTarget;
+            
+        string holdPath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.HoldTailMaterial));
+        if (!string.IsNullOrEmpty(holdPath) && holdPath != "Default") 
+            str += "\n" + indent2 + "Hold Tail Material: " + holdPath;
+        if (!string.IsNullOrEmpty(style.HoldTailColorTarget) && style.HoldTailColorTarget != "_Color") 
+            str += "\n" + indent2 + "Hold Tail Target: " + style.HoldTailColorTarget;
+
+        str += EncodeStoryboard(style, depth + IndentSize);
+
+        return str;
+    }
+
+    public static string EncodeLane(Lane lane, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ Lane"
+            + " " + EncodeVector(lane.Position)
+            + " " + EncodeVector(lane.Rotation)
+            + " " + lane.StyleIndex.ToString(CultureInfo.InvariantCulture);
+
+        if (!string.IsNullOrEmpty(lane.Group)) 
+            str += "\n" + indent2 + "Group: " + lane.Group;
+
+        str += EncodeStoryboard(lane, depth + IndentSize);
+        
+        int depth2 = depth + IndentSize;
+        foreach (LaneStep step in lane.LaneSteps) {
+            str += EncodeLaneStep(step, depth2);
+        }
+        foreach (HitObject hit in lane.Objects) {
+            str += EncodeHitObject(hit, depth2);
+        }
+
+        return str;
+    }
+
+    public static string EncodeLaneStep(LaneStep step, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ LaneStep"
+            + " " + step.Offset.ToString(CultureInfo.InvariantCulture)
+            + " " + EncodeVector(step.StartPos)
+            + " " + EncodeEase(step.StartEaseX, step.StartEaseXMode)
+            + " " + EncodeEase(step.StartEaseY, step.StartEaseYMode)
+            + " " + EncodeVector(step.EndPos)
+            + " " + EncodeEase(step.EndEaseX, step.EndEaseXMode)
+            + " " + EncodeEase(step.EndEaseY, step.EndEaseYMode)
+            + " " + step.Speed.ToString(CultureInfo.InvariantCulture);
+
+        str += EncodeStoryboard(step, depth + IndentSize);
+
+        return str;
+    }
+
+    public static string EncodeHitObject(HitObject hit, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ Hit"
+            + " " + hit.Type
+            + " " + hit.Offset.ToString(CultureInfo.InvariantCulture)
+            + " " + hit.Position.ToString(CultureInfo.InvariantCulture)
+            + " " + hit.Length.ToString(CultureInfo.InvariantCulture)
+            + " " + hit.HoldLength.ToString(CultureInfo.InvariantCulture)
+            + " " + (hit.Flickable ? "F" + (hit.FlickDirection >= 0 ? hit.FlickDirection.ToString(CultureInfo.InvariantCulture) : "") : "N")
+            + " " + hit.StyleIndex.ToString(CultureInfo.InvariantCulture);
+
+        str += EncodeStoryboard(hit, depth + IndentSize);
+
+        return str;
+    }
+
+    public static string EncodeEase(EaseFunction ease, EaseMode mode)
+    {
+        return ease + "/" + mode;
+    }
+
+    public static string EncodeVector(Vector2 vec)
+    {
+        return vec.x.ToString(CultureInfo.InvariantCulture)
+            + " " + vec.y.ToString(CultureInfo.InvariantCulture);
+    }
+
+    public static string EncodeVector(Vector3 vec)
+    {
+        return vec.x.ToString(CultureInfo.InvariantCulture)
+            + " " + vec.y.ToString(CultureInfo.InvariantCulture)
+            + " " + vec.z.ToString(CultureInfo.InvariantCulture);
+    }
+
+    public static string EncodeColor(Color col)
+    {
+        return col.r.ToString(CultureInfo.InvariantCulture)
+            + " " + col.g.ToString(CultureInfo.InvariantCulture)
+            + " " + col.b.ToString(CultureInfo.InvariantCulture)
+            + " " + col.a.ToString(CultureInfo.InvariantCulture);
+    }
+}

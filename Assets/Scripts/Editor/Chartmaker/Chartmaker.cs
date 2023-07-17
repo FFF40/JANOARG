@@ -571,12 +571,12 @@ public class Chartmaker : EditorWindow
         {
             CurrentCamera = new GameObject("Chartmaker Camera").AddComponent<Camera>();
             CurrentCamera.clearFlags = CameraClearFlags.SolidColor;
-            CurrentCamera.gameObject.hideFlags = HideFlags.DontSave;
+            CurrentCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
         }
         if (!CurrentAudioSource)
         {
             CurrentAudioSource = new GameObject("Chartmaker Audio").AddComponent<AudioSource>();
-            CurrentAudioSource.gameObject.hideFlags = HideFlags.DontSave;
+            CurrentAudioSource.gameObject.hideFlags = HideFlags.HideAndDontSave;
         }
         if (CurrentAudioSource.clip?.loadState == AudioDataLoadState.Unloaded)
         {
@@ -1488,6 +1488,7 @@ public class Chartmaker : EditorWindow
         string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(TargetSong)).Replace('\\', '/') + "/" + data.Target;
         int resIndex = path.IndexOf("Resources/");
         if (resIndex >= 0) path = path.Substring(resIndex + 10);
+        
         TargetChart = Resources.Load<ExternalChart>(path);
 
         History = new ChartmakerHistory();
@@ -1592,8 +1593,10 @@ public class Chartmaker : EditorWindow
     {
         EditorUtility.SetDirty(TargetSong);
         AssetDatabase.SaveAssetIfDirty(TargetSong);
-        EditorUtility.SetDirty(TargetChart);
-        AssetDatabase.SaveAssetIfDirty(TargetChart);
+
+        string path = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".jac");
+        Debug.Log(path);
+        File.WriteAllText(path, JACEncoder.Encode(TargetChart.Data));
     }
 
     public void OpenInPlayMode(bool record = false)

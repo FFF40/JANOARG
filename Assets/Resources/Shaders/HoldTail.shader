@@ -1,4 +1,4 @@
-Shader "JANOARG/Styles/Default - Hit"
+Shader "JANOARG/Styles/Default - Hold Tail"
 {
     Properties
     {
@@ -8,6 +8,7 @@ Shader "JANOARG/Styles/Default - Hit"
     SubShader
     {
         Tags { "RenderType"="Opaque" }
+        ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha
         LOD 100
 

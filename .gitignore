@@ -4,6 +4,7 @@
 /UserSettings
 /Library
 /Assets/Resources/Songs/*
+/Assets/Resources/Songs~/
 /Recordings
 *.apk
 *.zip

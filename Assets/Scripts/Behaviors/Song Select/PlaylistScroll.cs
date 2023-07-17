@@ -202,7 +202,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
                     bool isPreSel = (Mathf.Sign(ofs) == -Mathf.Sign(SelectionOffset) && Mathf.Abs(ofs) < ItemSize * 3 / 2);
 
                     float realOfs = isMaximized && isSel
-                        ? SelectionOffset
+                        ? SelectionOffset + ofs / 2
                         : ofs + Mathf.Clamp(ofs * (isMaximized ? 80 : 40) / ItemSize, -40, 40) + (isPreSel ? SelectionOffset : 0);
 
                     rt.anchoredPosition = new Vector2(Ease.Get(Mathf.Abs(realOfs / self.rect.height * 2), EaseFunction.Circle, EaseMode.In) * self.rect.width / 2, -realOfs);
@@ -266,11 +266,11 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
-            self.sizeDelta = Vector2.one * (1800 * ease);
+            self.sizeDelta = Vector2.one * (1750 * ease);
 
             float ease2 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
-            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
-            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -48 * ease2);
+            ListActionBar.anchoredPosition = new Vector2(0, 48 * ease2);
 
             float ease3 = Ease.Get(value, EaseFunction.Quadratic, EaseMode.InOut);
             SetBackgroundColor(Color.Lerp(oldBackColor, SelectedItem.Song.BackgroundColor, ease3));
@@ -316,14 +316,16 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
     public void SetBackgroundColor(Color color)
     {
         Common.main.MainCamera.backgroundColor = RenderSettings.fogColor = color;
+        Themer.SetColor("Background", color);
     }
 
     public void SetForegroundColor(Color color)
     {
         MainGraphic.color = color;
+        Themer.SetColor("Foreground", color);
         foreach (PlaylistScrollItem item in Items)
         {
-            item.SongNameLabel.color = item.ArtistNameLabel.color = color;
+            item.SongNameLabel.color = item.ArtistNameLabel.color = item.MainImage.color = color;
         }
     }
 
@@ -368,8 +370,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = ease2;
 
             float ease3 = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
-            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
-            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -48 * ease3);
+            ListActionBar.anchoredPosition = new Vector2(0, 48 * ease3);
             
             float ease4 = Ease.Get(value, EaseFunction.Quadratic, EaseMode.InOut);
             SetBackgroundColor(Color.Lerp(oldBackColor, SelectedItem.Song.BackgroundColor, ease4));
@@ -419,8 +421,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             SongNameLabel.alpha = ArtistNameLabel.alpha = DataLabel.alpha = 1 - ease2;
 
             float ease3 = 1 - Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
-            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease3);
-            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -48 * ease3);
+            ListActionBar.anchoredPosition = new Vector2(0, 48 * ease3);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .3f)
@@ -468,7 +470,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
-            self.sizeDelta = Vector2.one * (1800 + 1800 * ease);
+            self.sizeDelta = Vector2.one * (1750 + 1800 * ease);
 
             float ease2 = Ease.Get(value, EaseFunction.Quintic, EaseMode.InOut);
             SelectedSongBox.sizeDelta = new Vector2(0, 120 + 60 * ease2);
@@ -479,10 +481,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, -52 + 80 * ease2);
 
             float ease3 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
-            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            ListActionBar.anchoredPosition = new Vector2(0, 48 * ease3);
 
             float ease4 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
-            SongActionBar.anchoredPosition = new Vector2(0, 40 * ease4);
+            SongActionBar.anchoredPosition = new Vector2(0, 48 * ease4);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .8f)
@@ -509,7 +511,7 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
-            self.sizeDelta = Vector2.one * (1800 * ease);
+            self.sizeDelta = Vector2.one * (1750 * ease);
 
             float ease2 = Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
             SelectedSongBox.sizeDelta = new Vector2(0, 180 - 60 * ease2);
@@ -520,10 +522,10 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DifficultyHolder.anchoredPosition = new Vector2(DifficultyHolder.anchoredPosition.x, 28 - 70 * ease2);
             
             float ease3 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
-            SongActionBar.anchoredPosition = new Vector2(0, 40 * ease3);
+            SongActionBar.anchoredPosition = new Vector2(0, 48 * ease3);
 
             float ease4 = Ease.Get(value * 2 - 1, EaseFunction.Quintic, EaseMode.Out);
-            ListActionBar.anchoredPosition = new Vector2(0, 40 * ease4);
+            ListActionBar.anchoredPosition = new Vector2(0, 48 * ease4);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .8f)
@@ -586,8 +588,8 @@ public class PlaylistScroll : MonoBehaviour, IPointerDownHandler, IDragHandler, 
             DifficultyHolder.anchoredPosition = new Vector2(posX, 18);
 
             float ease2 = 1 - Ease.Get(value * 2, EaseFunction.Quintic, EaseMode.Out);
-            ProfileBar.self.anchoredPosition = new Vector2(0, -40 * ease2);
-            SongActionBar.anchoredPosition = new Vector2(0, 40 * ease2);
+            ProfileBar.self.anchoredPosition = new Vector2(0, -48 * ease2);
+            SongActionBar.anchoredPosition = new Vector2(0, 48 * ease2);
         }
 
         void LerpSelection2(float value)
