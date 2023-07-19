@@ -1599,8 +1599,22 @@ public class Chartmaker : EditorWindow
         File.WriteAllText(path, JACEncoder.Encode(TargetChart.Data));
         
         string oldPath = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".asset");
-        if (File.Exists(oldPath)) File.Delete(oldPath);
-        if (File.Exists(oldPath + ".meta")) File.Delete(oldPath + ".meta");
+        bool isOld = false;
+        if (File.Exists(oldPath)) 
+        {
+            File.Delete(oldPath);
+            isOld = true;
+        }
+        if (File.Exists(oldPath + ".meta")) 
+        {
+            File.Delete(oldPath + ".meta");
+            isOld = true;
+        }
+        if (isOld)
+        {
+            AssetDatabase.Refresh();
+            LoadChart(TargetChartMeta);
+        }
     }
 
     public void OpenInPlayMode(bool record = false)

@@ -9,11 +9,14 @@ public class LoadingBar : MonoBehaviour
 {
     public static LoadingBar main;
 
+    public Image Background;
+
     public TMP_Text StatusText;
     public TMP_Text FlavorText;
 
     public Slider ProgressBar;
     public RectTransform ProgressBarHolder;
+    public Image ProgressBarFill;
 
     RectTransform self;
 
@@ -22,14 +25,13 @@ public class LoadingBar : MonoBehaviour
         // Rhythm tips
         new FlavorTextEntry("Remember: Everything in JANOARG can move!"),
         new FlavorTextEntry("JANOARG is erratic, but sometimes it is more erratic than others."),
-        new FlavorTextEntry("Beware of difficulties in white! They even have their own custom names!"),
 
-        new FlavorTextEntry("The highest performance score you can get will always be 1000000ppm."),
-        new FlavorTextEntry("Flick and Catch notes will always give you their maximum point value as long as you hit them!"),
-        new FlavorTextEntry("You can hold overlapping hold notes with just one finger! Just make sure you hit them all first."),
+        new FlavorTextEntry("The highest performance score you can get will always be 1000000ppm per difficulty."),
+        new FlavorTextEntry("Flicks and Catchs will always give you their maximum point value as long as you hit them!"),
+        new FlavorTextEntry("You can hold overlapping Hold Tails with just one finger! Just make sure you hit them all first."),
 
-        new FlavorTextEntry("An asterisk (*) on a difficulty rating indicates that difficulty requires using at least 3 or more fingers at the same time."),
-        new FlavorTextEntry("Difficulties should be compared based on their rating numbers, not by their names."),
+        new FlavorTextEntry("Beware of an asterisk (*) on a difficulty rating, it means that that difficulty requires 3 or more fingers to Full Streak!"),
+        new FlavorTextEntry("Track difficulties should be compared based on their rating numbers, not by their names."),
         
         // Resources tips
         /* TODO: Uncomment this when resources and objects are implemented
@@ -72,13 +74,13 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("LOADING COMPLETED"),
         new FlavorTextEntry("LOADING SUCCESS"),
         new FlavorTextEntry("APPROACHING DESTINATION"),
+        new FlavorTextEntry("CONNECTION ESTABLISHED"),
 
         // When starting a song
         new FlavorTextEntry("HERE WE GO", () => ChartPlayer.main?.CurrentTime < 0),
         new FlavorTextEntry("LET'S GO", () => ChartPlayer.main?.CurrentTime < 0),
         new FlavorTextEntry("GET READY", () => ChartPlayer.main?.CurrentTime < 0),
         new FlavorTextEntry("MUSIC START", () => ChartPlayer.main?.CurrentTime < 0),
-        new FlavorTextEntry("CONNECTION ESTABLISHED", () => ChartPlayer.main?.CurrentTime < 0),
         
     };
 
@@ -98,15 +100,18 @@ public class LoadingBar : MonoBehaviour
 
     public IEnumerator ShowAnim()
     {
-        FlavorText.color = StatusText.color = Color.white;
-        ProgressBarHolder.sizeDelta = new Vector2(ProgressBarHolder.sizeDelta.x, -38);
-        StatusText.rectTransform.anchoredPosition = new Vector3(0, -28);
+        Color background = Themer.Colors.ContainsKey("Background") ? Themer.Colors["Background"] : Color.black;
+        Color foreground = Themer.Colors.ContainsKey("Foreground") ? Themer.Colors["Foreground"] : Color.white;
+
+        Background.color = background;
+        FlavorText.color = StatusText.color = ProgressBarFill.color = foreground;
+        StatusText.rectTransform.anchoredPosition = new Vector3(StatusText.rectTransform.anchoredPosition.x, -34);
         ProgressBar.value = 0;
 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
-            self.anchoredPosition = new Vector2(0, 40 * ease);
+            self.anchoredPosition = new Vector2(0, 48 * ease);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .3f)
@@ -126,15 +131,19 @@ public class LoadingBar : MonoBehaviour
     public IEnumerator HideAnim()
     {
         StatusText.text = FlavorTextEntry.GetRandom(CompletedStatuses).Message;
-        ProgressBar.value = 1;
+        ProgressBar.value = 0;
+        
+        Color background = Themer.Colors.ContainsKey("Background") ? Themer.Colors["Background"] : Color.black;
+        Color foreground = Themer.Colors.ContainsKey("Foreground") ? Themer.Colors["Foreground"] : Color.white;
 
         void LerpSelection(float value)
         {
             float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
-            StatusText.color = Color.Lerp(Color.white, Color.black, ease);
-            FlavorText.color = Color.Lerp(Color.white, Color.clear, ease);
+            Background.color = Color.Lerp(foreground, background, ease);
+            Background.color = Color.Lerp(foreground, background, ease);
             ProgressBarHolder.sizeDelta = new Vector2(ProgressBarHolder.sizeDelta.x, -38 * (1 - ease));
-            StatusText.rectTransform.anchoredPosition = new Vector3(0, -28 + 8 * ease);
+            FlavorText.alpha = 1 - ease;
+            StatusText.rectTransform.anchoredPosition = new Vector3(StatusText.rectTransform.anchoredPosition.x, -34 + 8 * ease);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .5f)
@@ -147,7 +156,7 @@ public class LoadingBar : MonoBehaviour
         void LerpSelection2(float value)
         {
             float ease = 1 - Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
-            self.anchoredPosition = new Vector2(0, 40 * ease);
+            self.anchoredPosition = new Vector2(0, 48 * ease);
         }
 
         for (float a = 0; a < 1; a += Time.deltaTime / .5f)
