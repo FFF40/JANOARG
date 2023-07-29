@@ -11,6 +11,8 @@ public class PlayableSong : ScriptableObject
     public string AltSongArtist;
     public string Location = "Prototype";
     public string Genre = "Genreless";
+    
+    public string ClipPath;
     public AudioClip Clip;
 
     public Color BackgroundColor = Color.black;

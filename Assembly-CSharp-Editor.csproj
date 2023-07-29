@@ -46,6 +46,7 @@
      <Compile Include="Assets\Scripts\Behaviors\Files\Editor\JACImporter.cs" />
      <Compile Include="Assets\Scripts\Editor\Common\JAEditorManual.cs" />
      <Compile Include="Assets\Scripts\Editor\Chartmaker\ChartmakerMultiManager.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Files\Editor\JAPSImporter.cs" />
      <Compile Include="Assets\Scripts\Editor\GizmoIconUtility.cs" />
     <Reference Include="UnityEngine">
         <HintPath>D:\E\Unity\2022.2.2f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

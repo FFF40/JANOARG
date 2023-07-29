@@ -1137,22 +1137,25 @@ public class Chartmaker : EditorWindow
             if (extrasmode != "")
             {
                 Rect rect = new Rect();
+                if (extrasmode == "migrate_song") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 if (extrasmode == "migrate_charts") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_create") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
                 else if (extrasmode == "chart_delete") rect = new Rect(width / 2 - 200, height / 2 - 60, 400, 120);
                 else if (extrasmode == "play_options") rect = new Rect(width / 2 + 17, 30, 330, 137);
                 else if (extrasmode == "timeline_options") rect = new Rect(width - 334, height - 144, 330, 120);
 
-                GUIStyle exStyle = new GUIStyle("window");
-                exStyle.focused = exStyle.normal;
+                if (rect.height > 0) {
+                    GUIStyle exStyle = new GUIStyle("window");
+                    exStyle.focused = exStyle.normal;
 
-                GUI.Window(10, rect, Extras, "", exStyle);
-                if (Event.current.type == EventType.MouseDown && !rect.Contains(Event.current.mousePosition))
-                {
-                    extrasmode = "";
-                    Repaint();
+                    GUI.Window(10, rect, Extras, "", exStyle);
+                    if (Event.current.type == EventType.MouseDown && !rect.Contains(Event.current.mousePosition))
+                    {
+                        extrasmode = "";
+                        Repaint();
+                    }
+                    else GUI.BringWindowToFront(10);
                 }
-                else GUI.BringWindowToFront(10);
             }
 
             GUI.Button(new Rect(0, 0, width, 30), "", "toolbar");
@@ -1179,6 +1182,24 @@ public class Chartmaker : EditorWindow
         }
         else
         {
+            if (extrasmode != "")
+            {
+                Rect rect = new Rect();
+                if (extrasmode == "migrate_song") rect = new Rect(width / 2 - 200, height / 2 - 110, 400, 220);
+
+                if (rect.height > 0) {
+                    GUIStyle exStyle = new GUIStyle("window");
+                    exStyle.focused = exStyle.normal;
+
+                    GUI.Window(10, rect, Extras, "", exStyle);
+                    if (Event.current.type == EventType.MouseDown && !rect.Contains(Event.current.mousePosition))
+                    {
+                        extrasmode = "";
+                        Repaint();
+                    }
+                    else GUI.BringWindowToFront(10);
+                }
+            }
             TargetChartMeta = null;
             TargetChart = null;
             TargetThing = null;
@@ -1594,26 +1615,56 @@ public class Chartmaker : EditorWindow
         EditorUtility.SetDirty(TargetSong);
         AssetDatabase.SaveAssetIfDirty(TargetSong);
 
-        string path = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".jac");
-        Debug.Log(path);
-        File.WriteAllText(path, JACEncoder.Encode(TargetChart.Data));
+        string path = "";
+
+        path = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetSong), ".japs");
+        string clipPath = Path.GetRelativePath(Path.GetDirectoryName(path), Path.GetDirectoryName(Application.dataPath) + "\\" + AssetDatabase.GetAssetPath(TargetSong.Clip));
+        Debug.Log(path + "\n" + clipPath);
+        File.WriteAllText(path, JAPSEncoder.Encode(TargetSong, clipPath));
         
-        string oldPath = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".asset");
-        bool isOld = false;
+        string oldPath = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetSong), ".asset");
+        bool isSongOld = false;
         if (File.Exists(oldPath)) 
         {
             File.Delete(oldPath);
-            isOld = true;
+            isSongOld = true;
         }
         if (File.Exists(oldPath + ".meta")) 
         {
             File.Delete(oldPath + ".meta");
-            isOld = true;
+            isSongOld = true;
         }
-        if (isOld)
+        if (isSongOld)
         {
+            extrasmode = "migrate_song";
+        }
+
+        if (TargetChart) {
+            path = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".jac");
+            Debug.Log(path);
+            File.WriteAllText(path, JACEncoder.Encode(TargetChart.Data));
+            
+            oldPath = Path.GetDirectoryName(Application.dataPath) + "\\" + Path.ChangeExtension(AssetDatabase.GetAssetPath(TargetChart), ".asset");
+            bool isOld = isSongOld;
+            if (File.Exists(oldPath)) 
+            {
+                File.Delete(oldPath);
+                isOld = true;
+            }
+            if (File.Exists(oldPath + ".meta")) 
+            {
+                File.Delete(oldPath + ".meta");
+                isOld = true;
+            }
+            if (isOld)
+            {
+                AssetDatabase.Refresh();
+                if (!isSongOld) {
+                    LoadChart(TargetChartMeta);
+                }
+            }
+        } else if (isSongOld) {
             AssetDatabase.Refresh();
-            LoadChart(TargetChartMeta);
         }
     }
 
@@ -4432,6 +4483,20 @@ public class Chartmaker : EditorWindow
             if (GUI.Button(new Rect(200, 195, 195, 20), "Migrate Now", "buttonRight"))
             {
                 MigrateCharts();
+                extrasmode = "";
+            }
+        }
+        if (extrasmode == "migrate_song")
+        {
+            GUIStyle midStyle = new GUIStyle("label");
+            midStyle.wordWrap = true;
+            midStyle.alignment = TextAnchor.MiddleLeft;
+
+            GUI.Label(new Rect(20, 0, 360, 200),
+                "The editor has closed the song because it used a legacy file format and needed to be re-imported. Please open the song again.", midStyle);
+
+            if (GUI.Button(new Rect(100, 195, 195, 20), "Ok", "buttonLeft"))
+            {
                 extrasmode = "";
             }
         }
