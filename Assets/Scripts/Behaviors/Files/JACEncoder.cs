@@ -99,13 +99,14 @@ public class JACEncoder
             + " " + EncodeColor(style.LaneColor)
             + " " + EncodeColor(style.JudgeColor);
             
-        string lanePath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.LaneMaterial));
+        string lanePath = style.LaneMaterial;
+        string judgePath = style.JudgeMaterial;
+            
         if (!string.IsNullOrEmpty(lanePath) && lanePath != "Default") 
             str += "\n" + indent2 + "Lane Material: " + lanePath;
         if (!string.IsNullOrEmpty(style.LaneColorTarget) && style.LaneColorTarget != "_Color") 
             str += "\n" + indent2 + "Lane Target: " + style.LaneColorTarget;
             
-        string judgePath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.JudgeMaterial));
         if (!string.IsNullOrEmpty(judgePath) && judgePath != "Default") 
             str += "\n" + indent2 + "Judge Material: " + judgePath;
         if (!string.IsNullOrEmpty(style.JudgeColorTarget) && style.JudgeColorTarget != "_Color") 
@@ -126,13 +127,14 @@ public class JACEncoder
             + " " + EncodeColor(style.NormalColor)
             + " " + EncodeColor(style.CatchColor);
             
-        string mainPath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.MainMaterial));
+        string mainPath = style.MainMaterial;
+        string holdPath = style.HoldTailMaterial;
+
         if (!string.IsNullOrEmpty(mainPath) && mainPath != "Default") 
             str += "\n" + indent2 + "Main Material: " + mainPath;
         if (!string.IsNullOrEmpty(style.MainColorTarget) && style.MainColorTarget != "_Color") 
             str += "\n" + indent2 + "Main Target: " + style.MainColorTarget;
             
-        string holdPath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.HoldTailMaterial));
         if (!string.IsNullOrEmpty(holdPath) && holdPath != "Default") 
             str += "\n" + indent2 + "Hold Tail Material: " + holdPath;
         if (!string.IsNullOrEmpty(style.HoldTailColorTarget) && style.HoldTailColorTarget != "_Color") 

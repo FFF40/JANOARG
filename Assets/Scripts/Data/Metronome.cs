@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -98,6 +99,11 @@ public class Metronome
         if (Stops.Count == 0) return null;
         while (tag < Stops.Count - 1 && Stops[tag + 1].Offset < seconds) tag++;
         return Stops[tag];
+    }
+
+    internal float ToSeconds(object offset)
+    {
+        throw new NotImplementedException();
     }
 
     public static Metronome Identity = new Metronome(60);

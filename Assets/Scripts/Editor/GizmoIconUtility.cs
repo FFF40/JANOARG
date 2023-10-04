@@ -21,21 +21,20 @@ public class GizmoIconUtility
         else rect.width = rect.height;
         if (rect.height == 16) rect.x += 3;
 
-		if (obj is PlayableSong)
+		if (obj is ExternalPlayableSong)
 		{
 			EditorGUI.DrawRect(rect, Color.black);
 		}
-		else if (obj is ExternalChart)
-		{
-            ExternalChart item = (ExternalChart)obj;
-			EditorGUI.DrawRect(rect, Color.white);
+		else if (obj is ExternalChart item)
+        {
+            EditorGUI.DrawRect(rect, Color.white);
 
             GUIStyle diffStyle = new GUIStyle("label");
             diffStyle.alignment = TextAnchor.MiddleCenter;
             diffStyle.normal.textColor = Color.black;
             diffStyle.fontSize = Mathf.RoundToInt(rect.height / 2);
 
-			GUI.Label(rect, item.Data.DifficultyLevel, diffStyle);
-		}
-	}
+            GUI.Label(rect, item.Data.DifficultyLevel, diffStyle);
+        }
+    }
 }

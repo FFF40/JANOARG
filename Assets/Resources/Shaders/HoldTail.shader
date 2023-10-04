@@ -9,6 +9,7 @@ Shader "JANOARG/Styles/Default - Hold Tail"
     {
         Tags { "RenderType"="Opaque" }
         ZWrite Off
+        Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
         LOD 100
 

@@ -243,16 +243,16 @@ public class JACDecoder
                     }
                     else if (currentObject is LaneStyle laneStyle)
                     {
-                             if (key == "Lane Material")   laneStyle.LaneMaterial = Resources.Load<Material>("Materials/Lane/" + value);
+                             if (key == "Lane Material")   laneStyle.LaneMaterial = value;
                         else if (key == "Lane Target")     laneStyle.LaneColorTarget = value;
-                        else if (key == "Judge Material")  laneStyle.JudgeMaterial = Resources.Load<Material>("Materials/Judge/" + value);
+                        else if (key == "Judge Material")  laneStyle.JudgeMaterial = value;
                         else if (key == "Judge Target")    laneStyle.JudgeColorTarget = value;
                     }
                     else if (currentObject is HitStyle hitStyle)
                     {
-                             if (key == "Main Material")       hitStyle.MainMaterial = Resources.Load<Material>("Materials/Hit/" + value);
+                             if (key == "Main Material")       hitStyle.MainMaterial = value;
                         else if (key == "Main Target")         hitStyle.MainColorTarget = value;
-                        else if (key == "Hold Tail Material")  hitStyle.HoldTailMaterial = Resources.Load<Material>("Materials/Hold/" + value);
+                        else if (key == "Hold Tail Material")  hitStyle.HoldTailMaterial = value;
                         else if (key == "Hold Tail Target")    hitStyle.HoldTailColorTarget = value;
                     }
                     else if (currentObject is Lane lane)

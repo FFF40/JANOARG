@@ -12,7 +12,7 @@ public class JAPSDecoder
 
     public static PlayableSong Decode(string str)
     {
-        PlayableSong song = ScriptableObject.CreateInstance<PlayableSong>();
+        PlayableSong song = new PlayableSong();
 
         song.Timing.Stops.Clear();
 
