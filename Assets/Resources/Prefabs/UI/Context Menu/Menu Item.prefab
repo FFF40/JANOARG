@@ -158,6 +158,7 @@ GameObject:
   - component: {fileID: 2426519697643819535}
   - component: {fileID: 6732241780356526584}
   - component: {fileID: -3832727952768537756}
+  - component: {fileID: 2117366855037381680}
   m_Layer: 5
   m_Name: Menu Item
   m_TagString: Untagged
@@ -266,6 +267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1632a862096e1840a7798daa63da7a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Group: {fileID: 2117366855037381680}
   ContentLabel: {fileID: 2426519698914531863}
   ShortcutLabel: {fileID: 2426519698452526077}
   CheckedIndicator: {fileID: 8520513515576945451}
@@ -320,6 +322,18 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   hoverDelay: 0.5
+--- !u!225 &2117366855037381680
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2426519697643819537}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2426519698452526079
 GameObject:
   m_ObjectHideFlags: 0

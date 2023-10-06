@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class ContextMenuItem : MonoBehaviour
 {
+    public CanvasGroup Group;
     public TMP_Text ContentLabel;
     public TMP_Text ShortcutLabel;
     public GameObject CheckedIndicator;

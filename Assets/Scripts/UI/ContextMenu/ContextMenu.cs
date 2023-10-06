@@ -62,6 +62,7 @@ public class ContextMenu : MonoBehaviour
                     sep.Button.onClick.RemoveAllListeners();
                     sep.transform.SetAsLastSibling();
                 }
+                sep.Group.alpha = (sep.Button.interactable = action.Enabled) ? 1 : .5f;
                 sep.ContentLabel.text = action.Content;
                 sep.ShortcutLabel.text = action.Shortcut;
                 sep.SubmenuIndicator.SetActive(false);
@@ -90,6 +91,8 @@ public class ContextMenu : MonoBehaviour
                     sep.Button.onClick.RemoveAllListeners();
                     sep.transform.SetAsLastSibling();
                 }
+                sep.Group.alpha = 1;
+                sep.Button.interactable = true;
                 sep.ContentLabel.text = list.Title;
                 sep.ShortcutLabel.text = "";
                 sep.SubmenuIndicator.SetActive(true);
@@ -120,6 +123,7 @@ public class ContextMenu : MonoBehaviour
         
         Rect rect = GetWorldRect(target);
 
+        bool hasBeenFunnied = false;
         funny:
         if (direction == ContextMenuDirection.Down) 
         {
@@ -131,6 +135,30 @@ public class ContextMenu : MonoBehaviour
             {
                 rt.anchoredPosition += Vector2.left * (rt.rect.width - rect.width);
                 Debug.Log(rt.rect.width - rect.width);
+            }
+            if (rt.anchoredPosition.y - rt.sizeDelta.y < 0 && !hasBeenFunnied) 
+            {
+                direction = ContextMenuDirection.Up;
+                hasBeenFunnied = true;
+                goto funny;
+            }
+        }
+        else if (direction == ContextMenuDirection.Up) 
+        {
+            rt.anchoredPosition = new Vector2(
+                Mathf.Round(rect.xMin),
+                Mathf.Round(rect.yMax + rt.sizeDelta.y)
+            ) + offset;
+            if (rt.anchoredPosition.x + rt.sizeDelta.x > Screen.width) 
+            {
+                rt.anchoredPosition += Vector2.left * (rt.rect.width - rect.width);
+                Debug.Log(rt.rect.width - rect.width);
+            }
+            if (rt.anchoredPosition.y > Screen.height && !hasBeenFunnied) 
+            {
+                direction = ContextMenuDirection.Down;
+                hasBeenFunnied = true;
+                goto funny;
             }
         }
         else if (direction == ContextMenuDirection.Right) 
