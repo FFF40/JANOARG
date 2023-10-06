@@ -45,6 +45,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     [Space]
     public Button UndoButton;
     public Button RedoButton;
+    public RectTransform EditHistoryHolder;
     public CanvasGroup UndoButtonGroup;
     public CanvasGroup RedoButtonGroup;
     public TMP_Text ActionsBehindCounter;
@@ -954,6 +955,33 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         isDragged = false;
         dragMode = TimelineDragMode.None;
         SelectionRect.gameObject.SetActive(false);
+    }
+
+    public void ShowEditHistory()
+    {
+        ChartmakerHistory history = Chartmaker.main.History;
+        ContextMenuList list = new();
+        var ahead = history.ActionsAhead.ToArray();
+        var behind = history.ActionsBehind.ToArray();
+
+        if (ahead.Length != 0) for (int a = Mathf.Min(ahead.Length, 10) - 1; a >= 0; a--)
+        {
+            int A = a;
+            list.Items.Add(new ContextMenuListAction(ahead[a].GetName(), () => Chartmaker.main.Redo(A + 1), icon: "Redo"));
+        }
+
+        list.Items.Add(new ContextMenuListAction(
+            ahead.Length == 0 && behind.Length == 0 ? "No edit history" : "↑ Redo || Undo ↓",
+            () => {}, _enabled: false
+        ));
+
+        if (behind.Length != 0) for (int a = 0; a < Mathf.Min(behind.Length, 10); a++)
+        {
+            int A = a;
+            list.Items.Add(new ContextMenuListAction(behind[a].GetName(), () => Chartmaker.main.Undo(A + 1), icon: "Undo"));
+        }
+
+        ContextMenuHolder.main.OpenRoot(list, EditHistoryHolder, ContextMenuDirection.Up);
     }
 }
 
