@@ -161,9 +161,17 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 34773266778403783}
+    - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
       propertyPath: m_OnDeselect.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 34773266778403783}
+    - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Reset
+      objectReference: {fileID: 0}
     - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
       propertyPath: m_OnDeselect.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Reset
@@ -177,12 +185,20 @@ PrefabInstance:
       value: SetValue
       objectReference: {fileID: 0}
     - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FormEntryFloat, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
       propertyPath: m_OnDeselect.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: FormEntryFloat, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: FormEntryFloat, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5980990895164369477, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3211936894484873034, guid: e80178b1921fb334c8ade4073a6bf4df, type: 3}
