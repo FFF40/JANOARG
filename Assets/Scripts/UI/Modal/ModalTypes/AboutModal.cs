@@ -6,7 +6,21 @@ using UnityEngine.UI;
 
 public class AboutModal : Modal
 {
+    public AboutModal main;
+
     public TMP_Text FlavorTextLabel;
+
+    public void Awake()
+    {
+        if (main) Close();
+        else main = this;
+    }
+
+    public new void Start()
+    {
+        base.Start();
+        FlavorTextLabel.text = FlavorTexts[Random.Range(0, FlavorTexts.Length)];
+    }
 
     public static readonly string[] FlavorTexts = new[] {
         "<i>Did you know:</i>\n<b>JANOARG stands for \"Just Another Normal, Ordinary, Acceptable Rhythm Game\".",
@@ -20,9 +34,4 @@ public class AboutModal : Modal
 
         "<i>Missing snail:</i>\n<b>We're trying to find a lost snail which is currently hiding somewhere inside the Picker. Can you find it?",
     };
-
-    public void Awake ()
-    {
-        FlavorTextLabel.text = FlavorTexts[Random.Range(0, FlavorTexts.Length)];
-    }
 }
