@@ -18,6 +18,7 @@ public class ChartManager
 
     public float CurrentSpeed;
     public float CurrentTime;
+    public int[] HitObjectsRemaining;
 
     public ChartManager (PlayableSong song, Chart chart, float speed, float time, float pos)
     {
@@ -31,6 +32,7 @@ public class ChartManager
     {
         PalleteManager.Update(CurrentChart.Pallete, pos);
         Camera = (CameraController)CurrentChart.Camera.Get(pos);
+        HitObjectsRemaining = new [] { 0, 0 };
 
         for (int a = 0; a < CurrentChart.Groups.Count; a++)
         {
@@ -758,6 +760,8 @@ public class HitObjectManager
         TimeEnd = data.HoldLength > 0 ? main.Song.Timing.ToSeconds(data.Offset + data.HoldLength) : TimeStart;
         
         if (HoldMesh) MonoBehaviour.DestroyImmediate(HoldMesh);
+        
+        if (time <= TimeStart) main.HitObjectsRemaining[(int)data.Type]++;
 
         if (time <= TimeEnd)
         {

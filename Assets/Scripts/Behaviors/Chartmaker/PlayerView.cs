@@ -9,19 +9,27 @@ public class PlayerView : MonoBehaviour
 
     public Camera MainCamera;
     public Image BoundingBox;
-
+    [Space]
     public ChartManager Manager;
-
+    [Space]
     public Transform Holder;
     public CMLanePlayer LanePlayerSample;
     public List<CMLanePlayer> LanePlayers { get; private set; } = new();
     public CMHitPlayer HitPlayerSample;
     public MeshRenderer HoldMeshSample;
-
+    [Space]
     public Mesh FreeFlickIndicator;
     public Mesh ArrowFlickIndicator;
+    [Space]
+    public PlayOptionsPanel PlayOptions;
+    [Space]
+    public AudioSource SoundPlayer;
+    public AudioClip NormalHitSound;
+    public AudioClip CatchHitSound;
 
     float CurrentTime;
+    
+    int[] HitObjectsRemaining = new [] { 0, 0 };
 
     public void Awake()
     {
@@ -116,6 +124,19 @@ public class PlayerView : MonoBehaviour
                 Destroy(LanePlayers[Manager.Lanes.Count].gameObject);
                 LanePlayers.RemoveAt(Manager.Lanes.Count);
             }
+            
+            if (!TimelinePanel.main.isDragged && PlayOptions.HitsoundsVolume > 0)
+            {
+                if (Manager.HitObjectsRemaining[0] < HitObjectsRemaining[0])
+                {
+                    SoundPlayer.PlayOneShot(NormalHitSound, PlayOptions.HitsoundsVolume);
+                }
+                if (Manager.HitObjectsRemaining[1] < HitObjectsRemaining[1])
+                {
+                    SoundPlayer.PlayOneShot(CatchHitSound, PlayOptions.HitsoundsVolume);
+                }
+            }
+            HitObjectsRemaining = Manager.HitObjectsRemaining;
 
         }
     }

@@ -23,8 +23,6 @@ public class InformationBar : MonoBehaviour
     public AudioSource SoundPlayer;
     public AudioClip MetronomeSoundMain;
     public AudioClip MetronomeSoundSub;
-    public AudioClip NormalHitSound;
-    public AudioClip CatchHitSound;
     [Space]
     public RectTransform Visualizer;
     public Image VisualizerBarSample;

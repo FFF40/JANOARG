@@ -8777,6 +8777,10 @@ MonoBehaviour:
   HoldMeshSample: {fileID: 6151666399633643297, guid: 1e079c78946323f449ed51968d3ad1d7, type: 3}
   FreeFlickIndicator: {fileID: 0}
   ArrowFlickIndicator: {fileID: 0}
+  PlayOptions: {fileID: 3896195485413425110}
+  SoundPlayer: {fileID: 1109089518}
+  NormalHitSound: {fileID: 8300000, guid: f90a4d2bd33f55e48bda9625f2ee1601, type: 3}
+  CatchHitSound: {fileID: 8300000, guid: d68bd3e4706d98743a96de5b314d4921, type: 3}
 --- !u!1 &758874741
 GameObject:
   m_ObjectHideFlags: 0
@@ -13045,7 +13049,7 @@ GameObject:
   - component: {fileID: 1109089519}
   - component: {fileID: 1109089518}
   m_Layer: 5
-  m_Name: Metronome
+  m_Name: Sounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13061,7 +13065,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 6a79a62d1db4c0547846ed9a778396a0, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -13351,8 +13355,6 @@ MonoBehaviour:
   SoundPlayer: {fileID: 1109089518}
   MetronomeSoundMain: {fileID: 8300000, guid: 54b817c4814fcc84394b0dd4e4d1d735, type: 3}
   MetronomeSoundSub: {fileID: 8300000, guid: 6a79a62d1db4c0547846ed9a778396a0, type: 3}
-  NormalHitSound: {fileID: 8300000, guid: f90a4d2bd33f55e48bda9625f2ee1601, type: 3}
-  CatchHitSound: {fileID: 8300000, guid: d68bd3e4706d98743a96de5b314d4921, type: 3}
   Visualizer: {fileID: 1418674469}
   VisualizerBarSample: {fileID: 848966767}
   VisualizerBars: []
