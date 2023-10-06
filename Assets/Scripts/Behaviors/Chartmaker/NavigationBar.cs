@@ -52,7 +52,7 @@ public class NavigationBar : MonoBehaviour
     public void OpenOptionsMenu()
     {
         ContextMenuHolder.main.OpenRoot(new ContextMenuList(
-            new ContextMenuListAction("Preferences...", () => {})
+            new ContextMenuListAction("Preferences...", () => ModalHolder.main.Spawn<PreferencesModal>())
         ), OptionsButton);
     }
 

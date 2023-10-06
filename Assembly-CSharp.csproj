@@ -73,6 +73,7 @@
      <Compile Include="Assets\Scripts\Data\Playlist.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\PlayOptionsPanel.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryDropdown.cs" />
+     <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\PreferencesModal.cs" />
      <Compile Include="Assets\Scripts\UI\NavBarButton.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryVector3.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryFloat.cs" />
