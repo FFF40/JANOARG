@@ -16,7 +16,7 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListAction("New Song...", () => ModalHolder.main.Spawn<NewSongModal>(), "Ctrl+N"),
             new ContextMenuListAction("Open Song...", Chartmaker.main.OpenSongModal, "Ctrl+O"),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Save Song", Chartmaker.main.Save, "Ctrl+S"),
+            new ContextMenuListAction("Save Song", Chartmaker.main.StartSaveRoutine, "Ctrl+S"),
             new ContextMenuListSeparator(),
             // new ContextMenuListSublist("Export", 
             //     new ContextMenuListAction("Record Video...", () => {}),

@@ -24,6 +24,12 @@ public class Chartmaker : MonoBehaviour
     public RectTransform PickerHolder;
     public RectTransform PlayerViewHolder;
     [Space]
+    public TMP_Text NotificationLabel;
+    public CanvasGroup NotificationText;
+    public CanvasGroup NotificationBox;
+    public float NotificationTime;
+    public float NotificationFlashTime;
+    [Space]
     public GameObject Loader;
     public TMP_Text LoaderLabel;
     public bool IsDirty;
@@ -34,6 +40,8 @@ public class Chartmaker : MonoBehaviour
 
     public object ClipboardItem;
     public ChartmakerHistory History = new();
+
+    public Task ActiveTask;
 
     public void Awake()
     {
@@ -46,6 +54,14 @@ public class Chartmaker : MonoBehaviour
         ModalHolder.main.Spawn<HomeModal>();
         Application.wantsToQuit += QuitCheck;
         SetEditorActive(false);
+    }
+
+    public void Update()
+    {
+        NotificationText.alpha = NotificationTime;
+        NotificationBox.alpha = NotificationFlashTime / .5f;
+        NotificationTime -= Time.deltaTime;
+        NotificationFlashTime -= Time.deltaTime;
     }
 
     public void SetEditorActive(bool value)
@@ -87,16 +103,18 @@ public class Chartmaker : MonoBehaviour
     }
     
     public IEnumerator OpenSongRoutine(string path) {
+        if (ActiveTask?.IsCompleted == false) yield break;
+
         Loader.SetActive(true);
         LoaderLabel.text = "Parsing Playable Song data...";
 
-        Task task = OpenSongAsync(path);
-        yield return new WaitUntil(() => task.IsCompleted);
-        if (!task.IsCompletedSuccessfully) 
+        ActiveTask = OpenSongAsync(path);
+        yield return new WaitUntil(() => ActiveTask.IsCompleted);
+        if (!ActiveTask.IsCompletedSuccessfully) 
         {
             Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
-            modal.SetDialog("Parsing Error", task.Exception.Message, new string[] {"Ok"}, _ => {});
+            modal.SetDialog("Parsing Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
             yield break;
         }
 
@@ -163,16 +181,18 @@ public class Chartmaker : MonoBehaviour
     }
     
     public IEnumerator OpenChartRoutine(ExternalChartMeta chart) {
+        if (ActiveTask?.IsCompleted == false) yield break;
+        
         Loader.SetActive(true);
         LoaderLabel.text = "Parsing Playable Song data...";
 
-        Task task = OpenChartAsync(chart);
-        yield return new WaitUntil(() => task.IsCompleted);
-        if (!task.IsCompletedSuccessfully) 
+        ActiveTask = OpenChartAsync(chart);
+        yield return new WaitUntil(() => ActiveTask.IsCompleted);
+        if (!ActiveTask.IsCompletedSuccessfully) 
         {
             Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
-            modal.SetDialog("Parsing Error", task.Exception.Message, new string[] {"Ok"}, _ => {});
+            modal.SetDialog("Parsing Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
             yield break;
         }
 
@@ -196,10 +216,36 @@ public class Chartmaker : MonoBehaviour
         IsDirty = false;
     }
 
-    public Task SaveAsync(ExternalChartMeta chart)
+    public Task SaveAsync()
     {
         return Task.Run(Save);
     }
+    
+    public IEnumerator SaveRoutine() {
+        if (ActiveTask?.IsCompleted == false) yield break;
+        
+        NotificationLabel.text = "Saving song data...";
+        NotificationTime = float.PositiveInfinity;
+
+        ActiveTask = SaveAsync();
+        yield return new WaitUntil(() => ActiveTask.IsCompleted);
+        if (!ActiveTask.IsCompletedSuccessfully) 
+        {
+            Loader.SetActive(false);
+            DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+            modal.SetDialog("Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            yield break;
+        }
+
+        NotificationLabel.text = "Song data saved!";
+        NotificationFlashTime = 0.5f;
+        NotificationTime = 3;
+    }
+    
+    public void StartSaveRoutine() {
+        StartCoroutine(SaveRoutine());
+    }
+    
     
     public void CloseSong() {
         CurrentSongPath = CurrentChartPath = "";

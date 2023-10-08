@@ -328,6 +328,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Preferences
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 408
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f94a0a3ad35327a47ad0a99062f82add
+      internalID: 1615288091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Keybindings
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 408
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7eaa9d6025f3e004d813dc1d94ba39fd
+      internalID: 287186737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -343,9 +385,11 @@ TextureImporter:
       Lane: -1394880727
       Metronome: 369414719
       Lane Step: 103329897
+      Preferences: 1615288091
       Normal Hit: -2141765153
       Cursor: -633373088
       Delete: 671462613
+      Keybindings: 287186737
       Select: -1177934014
       Catch HIt: 1707754823
       snail button: 2064025029

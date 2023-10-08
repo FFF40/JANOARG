@@ -26,6 +26,9 @@ public class PlayerView : MonoBehaviour
     public AudioSource SoundPlayer;
     public AudioClip NormalHitSound;
     public AudioClip CatchHitSound;
+    [Space]
+    public Graphic NotificationText;
+    public Graphic NotificationBox;
 
     float CurrentTime;
     
@@ -112,7 +115,7 @@ public class PlayerView : MonoBehaviour
             MainCamera.transform.Translate(Vector3.back * Manager.Camera.PivotDistance);
 
             RenderSettings.fogColor = MainCamera.backgroundColor = Manager.PalleteManager.CurrentPallete.BackgroundColor;
-            BoundingBox.color = Manager.PalleteManager.CurrentPallete.InterfaceColor;
+            BoundingBox.color = NotificationText.color = NotificationBox.color = Manager.PalleteManager.CurrentPallete.InterfaceColor;
 
             for (int a = 0; a < Manager.Lanes.Count; a++)
             {
