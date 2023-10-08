@@ -20,8 +20,9 @@ public class PlayOptionsPanel : MonoBehaviour
     public TMP_InputField HitsoundsVolumeField;
 
     bool recursionBuster;
+    bool isDirty;
 
-    public void Start()
+    public void Awake()
     {
         GetValues();
         SetValues();
@@ -35,9 +36,25 @@ public class PlayOptionsPanel : MonoBehaviour
         recursionBuster = false;
     }
 
+    public void OnDisable()
+    {
+        if (isDirty)
+        {
+            isDirty = false;
+            Storage str = Chartmaker.main.PreferencesStorage;
+            str.Set("PBK_Volume_Main", MainVolume);
+            str.Set("PBK_Volume_Metronome", MetronomeVolume);
+            str.Set("PBK_Volume_Hitsounds", HitsoundsVolume);
+            Chartmaker.main.StartSavePrefsRoutine();
+        }
+    }
+
     public void GetValues()
     {
-
+        Storage str = Chartmaker.main.PreferencesStorage;
+        MainVolume = str.Get("PBK_Volume_Main", 1f);
+        MetronomeVolume = str.Get("PBK_Volume_Metronome", 1f);
+        HitsoundsVolume = str.Get("PBK_Volume_Hitsounds", 1f);
     }
 
     public void SetValues()
@@ -69,6 +86,7 @@ public class PlayOptionsPanel : MonoBehaviour
         SetValues();
         UpdateFields();
         recursionBuster = false;
+        isDirty = true;
     }
 
     public void OnFieldSet()
@@ -84,5 +102,6 @@ public class PlayOptionsPanel : MonoBehaviour
         SetValues();
         UpdateSliders();
         recursionBuster = false;
+        isDirty = true;
     }
 }

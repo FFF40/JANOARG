@@ -41,11 +41,14 @@ public class Chartmaker : MonoBehaviour
     public object ClipboardItem;
     public ChartmakerHistory History = new();
 
+    public Storage PreferencesStorage;
+
     public Task ActiveTask;
 
     public void Awake()
     {
         main = this;
+        PreferencesStorage = new("cm_prefs");
     }
 
     public void Start()
@@ -244,6 +247,31 @@ public class Chartmaker : MonoBehaviour
     
     public void StartSaveRoutine() {
         StartCoroutine(SaveRoutine());
+    }
+    
+    public IEnumerator SavePrefsRoutine() {
+        if (ActiveTask?.IsCompleted == false) yield break;
+        
+        NotificationLabel.text = "Saving preferences...";
+        NotificationTime = float.PositiveInfinity;
+
+        ActiveTask = Task.Run(PreferencesStorage.Save);
+        yield return new WaitUntil(() => ActiveTask.IsCompleted);
+        if (!ActiveTask.IsCompletedSuccessfully) 
+        {
+            Loader.SetActive(false);
+            DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+            modal.SetDialog("Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            yield break;
+        }
+
+        NotificationLabel.text = "Preferences saved!";
+        NotificationFlashTime = 0.5f;
+        NotificationTime = 3;
+    }
+    
+    public void StartSavePrefsRoutine() {
+        StartCoroutine(SavePrefsRoutine());
     }
     
     

@@ -15,8 +15,9 @@ public class TimelineOptionsPanel : MonoBehaviour
     public Toggle FollowSeekLineToggle;
 
     bool recursionBuster;
+    bool isDirty;
 
-    public void Start()
+    public void Awake()
     {
         GetValues();
         SetValues();
@@ -29,8 +30,25 @@ public class TimelineOptionsPanel : MonoBehaviour
         recursionBuster = false;
     }
 
+    public void OnDisable()
+    {
+        if (isDirty)
+        {
+            isDirty = false;
+            Storage str = Chartmaker.main.PreferencesStorage;
+            str.Set("PBK_Speed", Speed);
+            str.Set("TML_SeparationFactor", SeparationFactor);
+            str.Set("TML_FollowSeekLine", FollowSeekLine);
+            Chartmaker.main.StartSavePrefsRoutine();
+        }
+    }
+
     public void GetValues()
     {
+        Storage str = Chartmaker.main.PreferencesStorage;
+        Speed = str.Get("PBK_Speed", 1f);
+        SeparationFactor = str.Get("TML_SeparationFactor", 2);
+        FollowSeekLine = str.Get("TML_FollowSeekLine", true);
     }
 
     public void SetValues()
@@ -60,5 +78,6 @@ public class TimelineOptionsPanel : MonoBehaviour
         FollowSeekLine = FollowSeekLineToggle.isOn;
         SetValues();
         recursionBuster = false;
+        isDirty = true;
     }
 }
