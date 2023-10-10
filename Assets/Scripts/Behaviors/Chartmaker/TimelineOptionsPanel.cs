@@ -36,9 +36,9 @@ public class TimelineOptionsPanel : MonoBehaviour
         {
             isDirty = false;
             Storage str = Chartmaker.main.PreferencesStorage;
-            str.Set("PBK_Speed", Speed);
-            str.Set("TML_SeparationFactor", SeparationFactor);
-            str.Set("TML_FollowSeekLine", FollowSeekLine);
+            str.Set("PB:Speed", Speed);
+            str.Set("TL:SeparationFactor", SeparationFactor);
+            str.Set("TL:FollowSeekLine", FollowSeekLine);
             Chartmaker.main.StartSavePrefsRoutine();
         }
     }
@@ -46,9 +46,9 @@ public class TimelineOptionsPanel : MonoBehaviour
     public void GetValues()
     {
         Storage str = Chartmaker.main.PreferencesStorage;
-        Speed = str.Get("PBK_Speed", 1f);
-        SeparationFactor = str.Get("TML_SeparationFactor", 2);
-        FollowSeekLine = str.Get("TML_FollowSeekLine", true);
+        Speed = str.Get("PB:Speed", 1f);
+        SeparationFactor = str.Get("TL:SeparationFactor", 2);
+        FollowSeekLine = str.Get("TL:FollowSeekLine", true);
     }
 
     public void SetValues()

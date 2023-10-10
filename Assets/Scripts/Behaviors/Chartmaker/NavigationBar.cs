@@ -10,13 +10,15 @@ public class NavigationBar : MonoBehaviour
     public RectTransform OptionsButton;
     public RectTransform HelpButton;
 
+    string KeyOf(string id) => KeyboardHandler.main.Keybindings[id].Keybind.ToString();
+
     public void OpenFileMenu()
     {
         ContextMenuHolder.main.OpenRoot(new ContextMenuList(
-            new ContextMenuListAction("New Song...", () => ModalHolder.main.Spawn<NewSongModal>(), "Ctrl+N"),
-            new ContextMenuListAction("Open Song...", Chartmaker.main.OpenSongModal, "Ctrl+O"),
+            new ContextMenuListAction("New Song...", () => ModalHolder.main.Spawn<NewSongModal>(), KeyOf("FL:New")),
+            new ContextMenuListAction("Open Song...", Chartmaker.main.OpenSongModal, KeyOf("FL:Open")),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Save Song", Chartmaker.main.StartSaveRoutine, "Ctrl+S"),
+            new ContextMenuListAction("Save Song", Chartmaker.main.StartSaveRoutine, KeyOf("FL:Save")),
             new ContextMenuListSeparator(),
             // new ContextMenuListSublist("Export", 
             //     new ContextMenuListAction("Record Video...", () => {}),
@@ -31,12 +33,12 @@ public class NavigationBar : MonoBehaviour
     public void OpenEditMenu()
     {
         ContextMenuHolder.main.OpenRoot(new ContextMenuList(
-            new ContextMenuListAction("Undo", () => Chartmaker.main.Undo(), "Ctrl+Z", icon: "Undo"),
-            new ContextMenuListAction("Redo", () => Chartmaker.main.Redo(), "Ctrl+Y", icon: "Redo"),
+            new ContextMenuListAction("Undo", () => Chartmaker.main.Undo(), KeyOf("ED:Undo"), icon: "Undo", _enabled: Chartmaker.main.History.ActionsBehind.Count > 0),
+            new ContextMenuListAction("Redo", () => Chartmaker.main.Redo(), KeyOf("ED:Redo"), icon: "Redo", _enabled: Chartmaker.main.History.ActionsAhead.Count > 0),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Cut", Chartmaker.main.Cut, "Ctrl+X", icon: "Cut"),
-            new ContextMenuListAction("Copy", Chartmaker.main.Copy, "Ctrl+C", icon: "Copy"),
-            new ContextMenuListAction("Paste", Chartmaker.main.Paste, "Ctrl+V", icon: "Paste")
+            new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
+            new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
+            new ContextMenuListAction("Paste", Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste())
         ), EditButton);
     }
 

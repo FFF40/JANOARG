@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class WindowHandler : MonoBehaviour, IDragHandler
+public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler
 {
     [Header("Objects")]
     public GameObject WindowControls;
@@ -14,7 +14,7 @@ public class WindowHandler : MonoBehaviour, IDragHandler
     public Vector2Int borderSize;
     public Vector2Int windowMargin;
 
-    Vector2 deltaValue = Vector2.zero;
+    Vector2 mousePos = Vector2.zero;
     bool maximized;
     bool isFullScreen;
 
@@ -25,6 +25,14 @@ public class WindowHandler : MonoBehaviour, IDragHandler
             isFullScreen = Screen.fullScreen;
             WindowControls.SetActive(!isFullScreen);
             if (!isFullScreen) BorderlessWindow.InitializeWindow();
+        }
+        if (Screen.width < 960) 
+        {
+            BorderlessWindow.ResizeWindowDelta(960 - Screen.width, 0);
+        }
+        if (Screen.height < 600) 
+        {
+            BorderlessWindow.ResizeWindowDelta(0, 600 - Screen.height);
         }
     }
 
@@ -57,6 +65,20 @@ public class WindowHandler : MonoBehaviour, IDragHandler
         ResizeIcon1.sizeDelta = ResizeIcon2.sizeDelta = maximized ? new(8, 8) : new(10, 10);
     }
 
+    public void FinalizeDrag() 
+    {
+        var rect = BorderlessWindow.GetWindowRect();
+        Chartmaker.main.NotificationTime = 5;
+        Chartmaker.main.NotificationLabel.text = (rect.yMin + Input.mousePosition.y).ToString();
+        if (rect.yMin - Input.mousePosition.y + Screen.height < 1 && !maximized) ResizeWindow();
+        else if (rect.yMin < 0) BorderlessWindow.MoveWindowDelta(Vector2.up * rect.yMin);
+    }
+
+    public void OnPointerDown(PointerEventData data)
+    {
+        mousePos = Input.mousePosition;
+    }
+
     public void OnDrag(PointerEventData data)
     {
         if (BorderlessWindow.framed) return;
@@ -64,13 +86,19 @@ public class WindowHandler : MonoBehaviour, IDragHandler
         if (maximized) {
             ResizeWindow();
             var rect = BorderlessWindow.GetWindowRect();
-            BorderlessWindow.MoveWindow(new Vector2(0, Mathf.Clamp(Input.mousePosition.x - rect.width / 2, 0, Screen.width)));
+            BorderlessWindow.MoveWindow(new Vector2(Mathf.Clamp(Input.mousePosition.x - rect.width / 2 + 7, 0, Screen.width), Screen.height * 2 - rect.height - Input.mousePosition.y - 28));
+            mousePos = new Vector2(rect.width / 2 + 7, rect.height - 30);
+        } else {
         }
 
-        deltaValue += data.delta;
         if (data.dragging)
         {
-            BorderlessWindow.MoveWindowDelta(deltaValue);
+            BorderlessWindow.MoveWindowDelta((Vector2)Input.mousePosition - mousePos);
         }
+    }
+
+    public void OnEndDrag(PointerEventData data)
+    {
+        FinalizeDrag();
     }
 }

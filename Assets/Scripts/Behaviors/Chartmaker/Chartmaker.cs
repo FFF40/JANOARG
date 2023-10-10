@@ -42,6 +42,7 @@ public class Chartmaker : MonoBehaviour
     public ChartmakerHistory History = new();
 
     public Storage PreferencesStorage;
+    public Storage KeybindingsStorage;
 
     public Task ActiveTask;
 
@@ -49,6 +50,7 @@ public class Chartmaker : MonoBehaviour
     {
         main = this;
         PreferencesStorage = new("cm_prefs");
+        KeybindingsStorage = new("cm_keys");
     }
 
     public void Start()
