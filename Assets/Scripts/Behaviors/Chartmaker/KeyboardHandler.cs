@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using TMPro;
 
 public class KeyboardHandler : MonoBehaviour
 {
@@ -69,6 +72,10 @@ public class KeyboardHandler : MonoBehaviour
 
     public void OnGUI()
     {
+        if (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>())
+        {
+            return;
+        }
         if (Event.current.isKey)
         {
             Keybindings.HandleEvent(Event.current);
