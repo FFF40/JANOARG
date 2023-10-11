@@ -43,6 +43,7 @@ public class Chartmaker : MonoBehaviour
 
     public Storage PreferencesStorage;
     public Storage KeybindingsStorage;
+    public Storage RecentSongsStorage;
 
     public Task ActiveTask;
 
@@ -51,6 +52,7 @@ public class Chartmaker : MonoBehaviour
         main = this;
         PreferencesStorage = new("cm_prefs");
         KeybindingsStorage = new("cm_keys");
+        RecentSongsStorage = new("cm_recent");
     }
 
     public void Start()
@@ -106,6 +108,26 @@ public class Chartmaker : MonoBehaviour
     {
         return Task.Run(() => OpenSong(path));
     }
+
+    public void AddToRecent()
+    {
+        List<RecentSong> list = new(RecentSongsStorage.Get("List", new RecentSong[] {}));
+        int index = list.FindIndex(x => x.Path == CurrentSongPath);
+        if (index == 0) if (list[0].SongName == CurrentSong.SongName && list[0].SongArtist == CurrentSong.SongArtist) return;
+        else if (index > 0) list.RemoveAt(index);
+        list.Insert(0, new RecentSong {
+            Path = CurrentSongPath,
+            SongName = CurrentSong.SongName,
+            SongArtist = CurrentSong.SongArtist,
+        });
+        RecentSongsStorage.Set("List", list.ToArray());
+        RecentSongsStorage.Save();
+    }
+
+    public Task AddToRecentAsync()
+    {
+        return Task.Run(AddToRecent);
+    }
     
     public IEnumerator OpenSongRoutine(string path) {
         if (ActiveTask?.IsCompleted == false) yield break;
@@ -122,6 +144,9 @@ public class Chartmaker : MonoBehaviour
             modal.SetDialog("Parsing Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
             yield break;
         }
+
+        ActiveTask = AddToRecentAsync();
+        yield return new WaitUntil(() => ActiveTask.IsCompleted);
 
         LoaderLabel.text = "Fetching audio file...";
 
@@ -216,7 +241,7 @@ public class Chartmaker : MonoBehaviour
 
     public void Save()
     {
-        File.WriteAllText(CurrentSongPath, JAPSEncoder.Encode(CurrentSong, CurrentSong.ClipPath));
+        if (CurrentSong != null) File.WriteAllText(CurrentSongPath, JAPSEncoder.Encode(CurrentSong, CurrentSong.ClipPath));
         if (CurrentChart != null) File.WriteAllText(CurrentChartPath, JACEncoder.Encode(CurrentChart));
         IsDirty = false;
     }
@@ -228,6 +253,7 @@ public class Chartmaker : MonoBehaviour
     
     public IEnumerator SaveRoutine() {
         if (ActiveTask?.IsCompleted == false) yield break;
+        if (CurrentSong == null) yield break;
         
         NotificationLabel.text = "Saving song data...";
         NotificationTime = float.PositiveInfinity;

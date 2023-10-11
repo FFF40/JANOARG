@@ -5,11 +5,26 @@ using UnityEngine;
 public class HomeModal : Modal
 {
     public static HomeModal main;
+    public RectTransform RecentSongsHolder;
+    public RecentSongItem RecentSongSample;
 
     public void Awake()
     {
         if (main) Close();
         else main = this;
+    }
+
+    public new void Start() 
+    {
+        base.Start();
+        List<RecentSong> list = new(Chartmaker.main.RecentSongsStorage.Get("List", new RecentSong[] {}));
+        foreach (RecentSong recent in list) 
+        {
+            RecentSongItem item = Instantiate(RecentSongSample, RecentSongsHolder);
+            item.DataLabel.text = "<alpha=#aa>" + recent.SongArtist + " - <alpha=#ff>" + recent.SongName; 
+            item.PathLabel.text = recent.Path;
+            item.Button.onClick.AddListener(() => StartCoroutine(Chartmaker.main.OpenSongRoutine(recent.Path)));
+        }
     }
 
     public void OpenSong()

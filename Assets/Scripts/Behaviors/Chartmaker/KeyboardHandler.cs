@@ -72,7 +72,7 @@ public class KeyboardHandler : MonoBehaviour
 
     public void OnGUI()
     {
-        if (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>())
+        if (EventSystem.current?.currentSelectedGameObject?.GetComponent<TMP_InputField>())
         {
             return;
         }

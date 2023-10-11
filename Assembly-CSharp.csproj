@@ -119,6 +119,7 @@
      <Compile Include="Assets\Scripts\Data\ChartManager.cs" />
      <Compile Include="Assets\Scripts\UI\Form\Formmaker.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\NewSongModal.cs" />
+     <Compile Include="Assets\Scripts\UI\RecentSongItem.cs" />
      <Compile Include="Assets\Scripts\Data\Helper.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\Chartmaker.cs" />
      <Compile Include="Assets\Scripts\UI\Tooltip\Tooltip.cs" />
