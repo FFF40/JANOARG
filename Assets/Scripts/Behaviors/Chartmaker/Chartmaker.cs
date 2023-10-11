@@ -300,6 +300,7 @@ public class Chartmaker : MonoBehaviour
             IsDirty = false;
             Application.Quit();
         });
+        if (!IsDirty) WindowHandler.main.Quit();
         return !IsDirty;
     }
     

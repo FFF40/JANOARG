@@ -1,147 +1,229 @@
 ﻿using System;
 using UnityEngine;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
 using UnityEngine.Rendering;
 using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine.SceneManagement;
+using System.Text;
 
 public class BorderlessWindow
 {
     public static bool framed = true;
 
+    static IntPtr CurrentWindow;
+    
+    static WinProc newWndProcDelegate = null;
+    static IntPtr newWndProc = IntPtr.Zero;
+    static IntPtr oldWndProc = IntPtr.Zero;
+    
+    delegate IntPtr WinProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
     [DllImport("user32.dll")]
-    private static extern IntPtr GetActiveWindow();
+    private static extern bool EnumThreadWindows(uint dwThreadId, EnumWinProc lpEnumFunc, IntPtr lParam);
+    private delegate bool EnumWinProc(IntPtr hWnd, IntPtr lParam);
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern int GetClassName(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
     [DllImport("user32.dll")]
-    private static extern IntPtr FindWindowA(string lpClassName, string lpWindowName);
+    static extern IntPtr GetActiveWindow();
     [DllImport("user32.dll")]
-    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
+    static extern IntPtr FindWindowA(string lpClassName, string lpWindowName);
     [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
+    static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
+    [DllImport("user32.dll", EntryPoint = "SetWindowLong", CharSet = CharSet.Auto)]
+    static extern IntPtr SetWindowLong32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", CharSet = CharSet.Auto)]
+    static extern IntPtr SetWindowLong64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
     [DllImport("user32.dll")]
-    private static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
+    static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
     [DllImport("user32.dll")]
-    private static extern bool GetWindowRect(IntPtr hwnd, out WinRect lpRect);
+    static extern bool MoveWindow(IntPtr hWnd, int x, int y, int nWidth, int nHeight, bool bRepaint);
+    [DllImport("user32.dll")]
+    static extern bool GetWindowRect(IntPtr hwnd, out WinRect lpRect);
+    [DllImport("user32.dll")]
+    static extern bool GetClientRect(IntPtr hwnd, out WinRect lpRect);
     
     [DllImport("dwmapi.dll")]
-    private static extern int DwmExtendFrameIntoClientArea(IntPtr hwnd, WinMargin margin);
+    static extern int DwmExtendFrameIntoClientArea(IntPtr hwnd, WinMargin margin);
 
-    private struct WinRect { public int left, top, right, bottom; }
-    private struct WinMargin { public int left, right, top, bottom; }
+    [DllImport("user32.dll")]
+    static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+	[DllImport("user32.dll")]
+	private static extern IntPtr DefWindowProc(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
 
-    private const int GWL_STYLE = -16;
+    struct WinRect { public int left, top, right, bottom; }
+    struct WinMargin { public int left, right, top, bottom; }
+    struct WinPoint { public int x, y; }
 
-    private const int SW_MINIMIZE = 6;
-    private const int SW_MAXIMIZE = 3;
-    private const int SW_RESTORE = 9;
+    [StructLayout(LayoutKind.Sequential)]
+    struct MinMaxInfo
+    {
+        public WinPoint Reserved, MaxSize, MaxPosition, MinTrackSize, MaxTrackSize;
+    }
 
-    private const uint WS_VISIBLE = 0x10000000;    
-    private const uint WS_POPUP = 0x80000000;
-    private const uint WS_BORDER = 0x00800000;
-    private const uint WS_OVERLAPPED = 0x00000000;
-    private const uint WS_CAPTION = 0x00C00000;
-    private const uint WS_DLGFRAME = 0x00400000;
-    private const uint WS_SYSMENU = 0x00080000;
-    private const uint WS_THICKFRAME = 0x00040000; // WS_SIZEBOX
-    private const uint WS_MINIMIZEBOX = 0x00020000;
-    private const uint WS_MAXIMIZEBOX = 0x00010000;
-    private const uint WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    const int GWL_WINPROC = -4;
+    const int GWL_STYLE = -16;
 
+    const int SW_MINIMIZE = 6;
+    const int SW_MAXIMIZE = 3;
+    const int SW_RESTORE = 9;
+
+    const int WM_GETMINMAXINFO = 0x0024;
+    const int WM_SIZING = 0x0214;
+
+    const uint WS_VISIBLE = 0x10000000;    
+    const uint WS_POPUP = 0x80000000;
+    const uint WS_BORDER = 0x00800000;
+    const uint WS_OVERLAPPED = 0x00000000;
+    const uint WS_CAPTION = 0x00C00000;
+    const uint WS_DLGFRAME = 0x00400000;
+    const uint WS_SYSMENU = 0x00080000;
+    const uint WS_THICKFRAME = 0x00040000; // WS_SIZEBOX
+    const uint WS_MINIMIZEBOX = 0x00020000;
+    const uint WS_MAXIMIZEBOX = 0x00010000;
+    const uint WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+
+    static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        if (IntPtr.Size == 8) return SetWindowLong64(hWnd, nIndex, dwNewLong);
+        else return SetWindowLong32(hWnd, nIndex, dwNewLong);
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
     public static void InitializeWindow()
     {
         Vector2Int screenSize = new(Screen.width, Screen.height);
         #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
+            FindWindow();
             SetFramelessWindow();
             ResizeWindow(screenSize.x + 14, screenSize.y + 14);
         #endif
     }
 
-    public static IntPtr GetMainWindow () {
-        return FindWindowA(null, "JANOARG");
+    public static void FindWindow () {
+        const string TargetClassName = "UnityWndClass";
+        EnumThreadWindows(GetCurrentThreadId(), (hWnd, lParam) =>
+        {
+            var classText = new StringBuilder(TargetClassName.Length + 1);
+            GetClassName(hWnd, classText, classText.Capacity);
+
+            if (classText.ToString() == TargetClassName)
+            {
+                CurrentWindow = hWnd;
+                return false;
+            }
+            return true;
+        }, IntPtr.Zero);
     }
 
     public static Rect GetWindowRect()
     {
-        var hwnd = GetMainWindow();
 
-        GetWindowRect(hwnd, out WinRect winRect);
+        GetWindowRect(CurrentWindow, out WinRect winRect);
 
         return new Rect(winRect.left, winRect.top, winRect.right - winRect.left, winRect.bottom - winRect.top);
     }
 
+    public static void HookWindowProc()
+    {
+        newWndProcDelegate = new WinProc(WindowProc);
+        newWndProc = Marshal.GetFunctionPointerForDelegate(newWndProcDelegate);
+        oldWndProc = SetWindowLong(CurrentWindow, GWL_WINPROC, newWndProc);
+    }
+
+    public static void UnhookWindowProc()
+    {
+        oldWndProc = SetWindowLong(CurrentWindow, GWL_WINPROC, oldWndProc);
+    }
+
+    static IntPtr WindowProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam)
+    { 
+        if (msg == WM_SIZING) 
+        {
+            GetWindowRect(CurrentWindow, out WinRect winRect);
+            MoveWindowDelta(Vector2.one, true);
+            MoveWindowDelta(-Vector2.one, true);
+            return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+        }
+        else if (msg == WM_GETMINMAXINFO) 
+        {
+            var minMaxInfo = Marshal.PtrToStructure<MinMaxInfo>(lParam);
+
+            minMaxInfo.MinTrackSize.x = 960;
+            minMaxInfo.MinTrackSize.y = 600;
+
+            Marshal.StructureToPtr(minMaxInfo, lParam, false);
+            return DefWindowProc(hWnd, msg, wParam, lParam);
+        }
+        else 
+        {
+            return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+        }
+    }
+
     public static void SetFramelessWindow()
     {
-        var hwnd = GetMainWindow();
-        SetWindowLong(hwnd, GWL_STYLE, WS_THICKFRAME | WS_VISIBLE);
+        SetWindowLong(CurrentWindow, GWL_STYLE, WS_THICKFRAME | WS_VISIBLE);
         framed = false;
     }
 
     public static void SetFramedWindow()
     {
-        var hwnd = GetMainWindow();
-        SetWindowLong(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+        SetWindowLong(CurrentWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
         framed = true;
     }
 
     public static void MinimizeWindow()
     {
-        var hwnd = GetMainWindow();
-        ShowWindow(hwnd, SW_MINIMIZE);
+        ShowWindow(CurrentWindow, SW_MINIMIZE);
     }
 
     public static void MaximizeWindow()
     {
-        var hwnd = GetMainWindow();
-        ShowWindow(hwnd, SW_MAXIMIZE);
+        ShowWindow(CurrentWindow, SW_MAXIMIZE);
     }
 
     public static void RestoreWindow()
     {
-        var hwnd = GetMainWindow();
-        ShowWindow(hwnd, SW_RESTORE);
+        ShowWindow(CurrentWindow, SW_RESTORE);
     }
 
-    public static void MoveWindow(Vector2 pos)
+    public static void MoveWindow(Vector2 pos, bool bRepaint = false)
     {
-        var hwnd = GetMainWindow();
 
-        GetWindowRect(hwnd, out WinRect winRect);
+        GetWindowRect(CurrentWindow, out WinRect winRect);
 
-        MoveWindow(hwnd, (int)pos.x, (int)pos.y, winRect.right - winRect.left, winRect.bottom - winRect.top, false);
+        MoveWindow(CurrentWindow, (int)pos.x, (int)pos.y, winRect.right - winRect.left, winRect.bottom - winRect.top, bRepaint);
     }
 
-    public static void MoveWindowDelta(Vector2 posDelta)
+    public static void MoveWindowDelta(Vector2 posDelta, bool bRepaint = false)
     {
-        var hwnd = GetMainWindow();
 
-        GetWindowRect(hwnd, out WinRect winRect);
+        GetWindowRect(CurrentWindow, out WinRect winRect);
 
         var x = winRect.left + (int)posDelta.x;
         var y = winRect.top - (int)posDelta.y;
-        MoveWindow(hwnd, x, y, winRect.right - winRect.left, winRect.bottom - winRect.top, false);
+        MoveWindow(CurrentWindow, x, y, winRect.right - winRect.left, winRect.bottom - winRect.top, bRepaint);
     }
 
     public static void ResizeWindow(int width, int height)
     {
-        var hwnd = GetMainWindow();
 
-        GetWindowRect(hwnd, out WinRect winRect);
+        GetWindowRect(CurrentWindow, out WinRect winRect);
 
-        MoveWindow(hwnd, winRect.left, winRect.top, width, height, false);
+        MoveWindow(CurrentWindow, winRect.left, winRect.top, width, height, false);
     }
 
     public static void ResizeWindowDelta(int dWidth, int dHeight)
     {
-        var hwnd = GetMainWindow();
 
-        GetWindowRect(hwnd, out WinRect winRect);
+        GetWindowRect(CurrentWindow, out WinRect winRect);
 
         var w = winRect.right - winRect.left + dWidth;
         var h = winRect.bottom - winRect.top + dHeight;
-        MoveWindow(hwnd, winRect.left, winRect.top, w, h, false);
+        MoveWindow(CurrentWindow, winRect.left, winRect.top, w, h, false);
     }
 }
 
