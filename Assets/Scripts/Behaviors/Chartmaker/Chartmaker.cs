@@ -44,6 +44,7 @@ public class Chartmaker : MonoBehaviour
     public Storage PreferencesStorage;
     public Storage KeybindingsStorage;
     public Storage RecentSongsStorage;
+    public ChartmakerPrefs Preferences = new();
 
     public Task ActiveTask;
 
@@ -53,6 +54,7 @@ public class Chartmaker : MonoBehaviour
         PreferencesStorage = new("cm_prefs");
         KeybindingsStorage = new("cm_keys");
         RecentSongsStorage = new("cm_recent");
+        Preferences.Load(PreferencesStorage);
     }
 
     public void Start()
@@ -69,6 +71,11 @@ public class Chartmaker : MonoBehaviour
         NotificationBox.alpha = NotificationFlashTime / .5f;
         NotificationTime -= Time.deltaTime;
         NotificationFlashTime -= Time.deltaTime;
+
+        if (Preferences.SaveOnPlay && SongSource.isPlaying && IsDirty && ActiveTask?.IsCompleted != false)
+        {
+            StartSaveRoutine();
+        }
     }
 
     public void SetEditorActive(bool value)
@@ -262,7 +269,6 @@ public class Chartmaker : MonoBehaviour
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
         if (!ActiveTask.IsCompletedSuccessfully) 
         {
-            Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
             yield break;
@@ -271,6 +277,20 @@ public class Chartmaker : MonoBehaviour
         NotificationLabel.text = "Song data saved!";
         NotificationFlashTime = 0.5f;
         NotificationTime = 3;
+    }
+    
+    public IEnumerator SaveThenQuit() {
+        if (ActiveTask?.IsCompleted == false) yield break;
+        if (CurrentSong == null) yield break;
+
+        Loader.SetActive(true);
+        LoaderLabel.text = "Saving song before quitting...";
+
+        yield return SaveRoutine();
+        
+        Loader.SetActive(false);
+
+        if (!IsDirty) Application.Quit();
     }
     
     public void StartSaveRoutine() {
@@ -327,6 +347,7 @@ public class Chartmaker : MonoBehaviour
             Application.Quit();
         });
         if (!IsDirty) WindowHandler.main.Quit();
+        else if (Preferences.SaveOnQuit) StartCoroutine(SaveThenQuit());
         return !IsDirty;
     }
     
@@ -592,5 +613,16 @@ public class Chartmaker : MonoBehaviour
         object obj = SmartClone(ClipboardItem);
         AddItem(obj, obj is BPMStop or List<BPMStop> ? SongSource.time : CurrentSong.Timing.ToBeat(SongSource.time));
         InspectorPanel.main.SetObject(obj);
+    }
+}
+
+public class ChartmakerPrefs {
+    public bool SaveOnQuit;
+    public bool SaveOnPlay;
+
+    public void Load(Storage storage)
+    {
+        SaveOnPlay = storage.Get("AS:SaveOnPlay", SaveOnPlay);
+        SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
     }
 }
