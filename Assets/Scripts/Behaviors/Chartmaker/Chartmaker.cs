@@ -48,6 +48,8 @@ public class Chartmaker : MonoBehaviour
 
     public Task ActiveTask;
 
+    bool lastPlayed;
+
     public void Awake()
     {
         main = this;
@@ -72,10 +74,11 @@ public class Chartmaker : MonoBehaviour
         NotificationTime -= Time.deltaTime;
         NotificationFlashTime -= Time.deltaTime;
 
-        if (Preferences.SaveOnPlay && SongSource.isPlaying && IsDirty && ActiveTask?.IsCompleted != false)
+        if (Preferences.SaveOnPlay && SongSource.isPlaying && !lastPlayed && IsDirty && ActiveTask?.IsCompleted != false)
         {
             StartSaveRoutine();
         }
+        lastPlayed = SongSource.isPlaying;
     }
 
     public void SetEditorActive(bool value)
