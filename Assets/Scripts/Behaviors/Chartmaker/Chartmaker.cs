@@ -272,6 +272,7 @@ public class Chartmaker : MonoBehaviour
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
         if (!ActiveTask.IsCompletedSuccessfully) 
         {
+        Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
             yield break;
@@ -290,8 +291,6 @@ public class Chartmaker : MonoBehaviour
         LoaderLabel.text = "Saving song before quitting...";
 
         yield return SaveRoutine();
-        
-        Loader.SetActive(false);
 
         if (!IsDirty) Application.Quit();
     }
@@ -345,12 +344,15 @@ public class Chartmaker : MonoBehaviour
     
     public bool QuitCheck() 
     {
-        if (IsDirty) DirtyModal(() => {
-            IsDirty = false;
-            Application.Quit();
-        });
         if (!IsDirty) WindowHandler.main.Quit();
-        else if (Preferences.SaveOnQuit) StartCoroutine(SaveThenQuit());
+        else 
+        {
+            if (Preferences.SaveOnQuit) StartCoroutine(SaveThenQuit());
+            else DirtyModal(() => {
+                IsDirty = false;
+                Application.Quit();
+            });
+        }
         return !IsDirty;
     }
     
