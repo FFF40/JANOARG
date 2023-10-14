@@ -71,17 +71,17 @@ public class KeyboardHandler : MonoBehaviour
         }},
 
         // -------------------------------------------------- Timeline
-        { "TL:Storyboard", new KeybindAction {
-            Category = "Timeline",
-            Name = "Storyboard",
-            Keybind = new Keybind(KeyCode.Alpha1),
-            Invoke = () => TimelinePanel.main.SetTabMode(TimelineMode.Storyboard),
-        }},
         { "TL:Timing", new KeybindAction {
             Category = "Timeline",
             Name = "Timing",
             Keybind = new Keybind(KeyCode.BackQuote),
             Invoke = () => TimelinePanel.main.SetTabMode(TimelineMode.Timing),
+        }},
+        { "TL:Storyboard", new KeybindAction {
+            Category = "Timeline",
+            Name = "Storyboard",
+            Keybind = new Keybind(KeyCode.Alpha1),
+            Invoke = () => TimelinePanel.main.SetTabMode(TimelineMode.Storyboard),
         }},
         { "TL:Lanes", new KeybindAction {
             Category = "Timeline",
