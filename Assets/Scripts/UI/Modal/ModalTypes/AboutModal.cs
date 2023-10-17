@@ -7,6 +7,8 @@ using UnityEngine.UI;
 public class AboutModal : Modal
 {
     public AboutModal main;
+    
+    public TMP_Text VersionLabel;
 
     public TMP_Text FlavorTextLabel;
 
@@ -19,6 +21,7 @@ public class AboutModal : Modal
     public new void Start()
     {
         base.Start();
+        VersionLabel.text = "Version " + Application.version;
         FlavorTextLabel.text = FlavorTexts[Random.Range(0, FlavorTexts.Length)];
     }
 

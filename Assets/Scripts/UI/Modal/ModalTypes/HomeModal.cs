@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class HomeModal : Modal
 {
     public static HomeModal main;
+    
+    public TMP_Text VersionLabel;
+    
     public RectTransform RecentSongsHolder;
     public RecentSongItem RecentSongSample;
 
@@ -17,6 +21,7 @@ public class HomeModal : Modal
     public new void Start() 
     {
         base.Start();
+        VersionLabel.text = "Version " + Application.version;
         List<RecentSong> list = new(Chartmaker.main.RecentSongsStorage.Get("List", new RecentSong[] {}));
         foreach (RecentSong recent in list) 
         {

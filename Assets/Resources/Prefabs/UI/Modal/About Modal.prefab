@@ -1279,6 +1279,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   main: {fileID: 0}
+  VersionLabel: {fileID: 6708504424250701822}
   FlavorTextLabel: {fileID: 1558789833578552593}
 --- !u!224 &1786024706207662129 stripped
 RectTransform:

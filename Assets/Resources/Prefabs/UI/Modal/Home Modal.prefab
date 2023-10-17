@@ -2292,6 +2292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43713d0d9c3a141409c3d5b4c57930b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  VersionLabel: {fileID: 6708504424250701822}
   RecentSongsHolder: {fileID: 2221529037543296777}
   RecentSongSample: {fileID: 1430747658520687913, guid: c25936042acedcb49862214dd165401f, type: 3}
 --- !u!224 &1786024706207662129 stripped
