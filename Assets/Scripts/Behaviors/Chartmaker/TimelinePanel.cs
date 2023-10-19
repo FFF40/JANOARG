@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,6 +39,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public RectTransform CurrentTimeTick;
     public RectTransform CurrentTimeConnector;
     public RectTransform SelectionRect;
+    [Space]
+    public Image WaveformImage;
     [Space]
     public Scrollbar VerticalScrollbar;
     public GameObject Blocker;
@@ -233,6 +236,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             }
 
             UpdateItems();
+            UpdateWaveform();
         }
     }
 
@@ -515,6 +519,47 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             ItemHeight = times.Count;
             UpdateScrollbar();
         }
+    }
+
+    public void UpdateWaveform()
+    {
+        if (PeekRange.y == PeekRange.x) return;
+
+        Sprite wave = WaveformImage.sprite;
+        RectTransform waveRT = WaveformImage.rectTransform;
+        if (!wave || wave.texture.width != (int)waveRT.rect.width || wave.texture.height != (int)waveRT.rect.height)
+        {
+            WaveformImage.sprite = wave = Sprite.Create(
+                new Texture2D((int)waveRT.rect.width, (int)waveRT.rect.height), 
+                new Rect(0, 0, waveRT.rect.width, waveRT.rect.height), 
+                new Vector2(.5f, .5f)
+            );
+        }
+
+        Texture2D tex = wave.texture;
+        AudioClip clip = Chartmaker.main.SongSource.clip;
+        int density = Mathf.CeilToInt(clip.frequency * (PeekRange.y - PeekRange.x) / tex.width);
+        float[] data = new float[Mathf.Min(256, density)];
+        Color[] buffer = new Color[tex.height];
+        for (int x = 0; x < tex.width; x++) 
+        {
+            float sec = Mathf.Lerp(PeekRange.x, PeekRange.y, (float)x / tex.width);
+            float min = 1, max = -1;
+            int pos = (int)(sec * clip.frequency);
+            if (pos >= 0 && pos < clip.samples - data.Length)
+            {
+                clip.GetData(data, pos);
+                min = Mathf.Min(data);
+                max = Mathf.Max(data);
+            }
+            for (int y = 0; y < tex.height; y++) 
+            {
+                float sPos = 1 - y * 2f / tex.height;
+                buffer[y] = sPos > min && sPos < max ? new(1, 1, 1, .1f) : Color.clear;
+            }
+            tex.SetPixels(x, 0, 1, tex.height, buffer);
+        }
+        tex.Apply();
     }
 
     public void UpdateScrollbar()
