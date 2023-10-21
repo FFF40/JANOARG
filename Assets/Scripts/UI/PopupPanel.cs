@@ -9,7 +9,7 @@ public class PopupPanel : MonoBehaviour
 {
     Rect worldRect;
 
-    public void Awake()
+    public void Start()
     {
         gameObject.SetActive(false);
     }

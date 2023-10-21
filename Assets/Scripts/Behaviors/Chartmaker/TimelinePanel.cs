@@ -78,6 +78,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     const int TimelineHeight = 5;
     int ItemHeight = 0;
+    bool lastPlayed;
 
     public void Awake()
     {
@@ -191,9 +192,10 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void UpdateTimeline(bool forced = false)
     {
-        if (lastLimit != PeekRange || forced)
+        if (lastLimit != PeekRange || lastPlayed != Chartmaker.main.SongSource.isPlaying || forced)
         {
             lastLimit = PeekRange;
+            lastPlayed = Chartmaker.main.SongSource.isPlaying;
             Metronome metronome = Chartmaker.main.CurrentSong.Timing;
             float density = (PeekRange.y - PeekRange.x) * metronome.GetStop(PeekRange.x, out _).BPM / TicksHolder.rect.width / 8;
             int count = 0;
@@ -523,7 +525,18 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void UpdateWaveform()
     {
-        if (PeekRange.y == PeekRange.x) return;
+        if (PeekRange.y == PeekRange.x) 
+        {
+            WaveformImage.enabled = false;
+            return;
+        }
+        if (Options.Waveform < (Chartmaker.main.SongSource.isPlaying ? 2 : 1)) 
+        {
+            WaveformImage.enabled = false;
+            return;
+        }
+        
+        WaveformImage.enabled = true;
 
         Sprite wave = WaveformImage.sprite;
         RectTransform waveRT = WaveformImage.rectTransform;
@@ -538,27 +551,98 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
         Texture2D tex = wave.texture;
         AudioClip clip = Chartmaker.main.SongSource.clip;
-        int density = Mathf.CeilToInt(clip.frequency * (PeekRange.y - PeekRange.x) / tex.width);
-        float[] data = new float[Mathf.Min(256, density)];
-        Color[] buffer = new Color[tex.height];
-        for (int x = 0; x < tex.width; x++) 
+
+        float density = clip.frequency * (PeekRange.y - PeekRange.x) / tex.width;
+        if (density > 128) density = 28 * Mathf.Log(density, 128);
+
+        float step = (PeekRange.y - PeekRange.x) / tex.width;
+        float sec = Mathf.Floor(PeekRange.x / step) * step;
+
+        switch (Options.WaveformMode) 
         {
-            float sec = Mathf.Lerp(PeekRange.x, PeekRange.y, (float)x / tex.width);
-            float min = 1, max = -1;
-            int pos = (int)(sec * clip.frequency);
-            if (pos >= 0 && pos < clip.samples - data.Length)
-            {
-                clip.GetData(data, pos);
-                min = Mathf.Min(data);
-                max = Mathf.Max(data);
-            }
-            for (int y = 0; y < tex.height; y++) 
-            {
-                float sPos = 1 - y * 2f / tex.height;
-                buffer[y] = sPos > min && sPos < max ? new(1, 1, 1, .1f) : Color.clear;
-            }
-            tex.SetPixels(x, 0, 1, tex.height, buffer);
+            case 0: {
+                float[] data = new float[Mathf.CeilToInt(Mathf.Max(density, 32))];
+                float denY = 1f / tex.height;
+                Color[] buffer = new Color[tex.height];
+                
+                for (int x = 0; x < tex.width; x++) 
+                {
+                    float sum = 0;
+                    int pos = (int)(sec * clip.frequency);
+                    if (pos >= 0 && pos < clip.samples - data.Length)
+                    {
+                        clip.GetData(data, pos);
+                        for (int a = 0; a < data.Length; a++)
+                        {
+                            int chan = (a + pos) % clip.channels;
+                            sum += data[a] * data[a];
+                        }
+                    }
+                    sum = Mathf.Sqrt(sum / data.Length) * .8f;
+                    float sPos = 0;
+                    for (int y = 0; y < tex.height; y++) 
+                    {
+                        float window = 1 - sPos * 2f;
+                        buffer[y] = window >= -sum - denY && window <= sum + denY ? Color.white : Color.clear;
+                        sPos += denY;
+                    }
+                    tex.SetPixels(x, 0, 1, tex.height, buffer);
+                    sec += step;
+                }
+            } break;
+
+            case 1: {
+                float[] data = new float[Mathf.CeilToInt(density / clip.channels) * clip.channels];
+                float denY = 1f / tex.height * clip.channels;
+                float[] lastMin = new float[clip.channels], lastMax = new float[clip.channels];
+                Color[] buffer = new Color[tex.height];
+
+                for (int a = 0; a < clip.channels; a++)
+                {
+                    lastMin[a] = 1;
+                    lastMax[a] = -1;
+                }
+
+                for (int x = 0; x < tex.width; x++) 
+                {
+                    float[] min = new float[clip.channels], max = new float[clip.channels];
+                    int pos = (int)(sec * clip.frequency);
+                    if (pos >= 0 && pos < clip.samples - data.Length)
+                    {
+                        clip.GetData(data, pos);
+                        for (int a = 0; a < clip.channels; a++)
+                        {
+                            min[a] = 1;
+                            max[a] = -1;
+                        }
+                        for (int a = 0; a < data.Length; a++)
+                        {
+                            int chan = (a + pos) % clip.channels;
+                            min[chan] = Math.Min(min[chan], data[a]);
+                            max[chan] = Math.Max(max[chan], data[a]);
+                        }
+                        for (int a = 0; a < clip.channels; a++)
+                        {
+                            float temp;
+                            min[a] = Math.Min(lastMax[a], temp = min[a]) * .8f;
+                            max[a] = Math.Max(lastMin[a], lastMax[a] = max[a]) * .8f;
+                            lastMin[a] = temp;
+                        }
+                    }
+                    float sPos = 0;
+                    for (int y = 0; y < tex.height; y++) 
+                    {
+                        int channel = Mathf.FloorToInt(sPos);
+                        float window = 1 - (sPos % 1) * 2f;
+                        buffer[y] = window >= min[channel] - denY && window <= max[channel] + denY ? Color.white : Color.clear;
+                        sPos += denY;
+                    }
+                    tex.SetPixels(x, 0, 1, tex.height, buffer);
+                    sec += step;
+                }
+            } break;
         }
+
         tex.Apply();
     }
 

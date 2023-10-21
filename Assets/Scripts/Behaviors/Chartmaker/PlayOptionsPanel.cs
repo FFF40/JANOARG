@@ -22,7 +22,7 @@ public class PlayOptionsPanel : MonoBehaviour
     bool recursionBuster;
     bool isDirty;
 
-    public void Awake()
+    public void Init()
     {
         GetValues();
         SetValues();

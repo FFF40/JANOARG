@@ -64,6 +64,8 @@ public class Chartmaker : MonoBehaviour
         System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
         ModalHolder.main.Spawn<HomeModal>();
         Application.wantsToQuit += QuitCheck;
+        InformationBar.main.PlayOptions.Init();
+        TimelinePanel.main.Options.Init();
         SetEditorActive(false);
     }
 
@@ -123,8 +125,8 @@ public class Chartmaker : MonoBehaviour
     {
         List<RecentSong> list = new(RecentSongsStorage.Get("List", new RecentSong[] {}));
         int index = list.FindIndex(x => x.Path == CurrentSongPath);
-        if (index == 0) if (list[0].SongName == CurrentSong.SongName && list[0].SongArtist == CurrentSong.SongArtist) return;
-        else if (index > 0) list.RemoveAt(index);
+        if (index == 0 && list[0].SongName == CurrentSong.SongName && list[0].SongArtist == CurrentSong.SongArtist) return;
+        else if (index >= 0) list.RemoveAt(index);
         list.Insert(0, new RecentSong {
             Path = CurrentSongPath,
             SongName = CurrentSong.SongName,
