@@ -63,7 +63,7 @@ public class KeyboardHandler : MonoBehaviour
             Keybind = new Keybind(KeyCode.Delete),
             Invoke = () => { 
                 if (Chartmaker.main.CanCopy()) 
-                    Chartmaker.main.DeleteItem(InspectorPanel.main.CurrentTimestamp.Count > 0 ? InspectorPanel.main.CurrentTimestamp.Count : InspectorPanel.main.CurrentObject);
+                    Chartmaker.main.DeleteItem(InspectorPanel.main.CurrentTimestamp.Count > 0 ? InspectorPanel.main.CurrentTimestamp : InspectorPanel.main.CurrentObject);
             },
         }},
         { "ED:Undo", new KeybindAction {
