@@ -463,7 +463,7 @@ public class Chartmaker : MonoBehaviour
         History.AddAction(action);
         OnHistoryDo();
         OnHistoryUpdate();
-        if (setNull) InspectorPanel.main.SetObject(null);
+        if (setNull) InspectorPanel.main.UnsetObject();
     }
 
     public void AddItem(object obj)
@@ -603,7 +603,7 @@ public class Chartmaker : MonoBehaviour
         if ((InspectorPanel.main.CurrentTimestamp?.Count ?? 0) > 0) ClipboardItem = InspectorPanel.main.CurrentTimestamp;
         else ClipboardItem = InspectorPanel.main.CurrentObject;
         DeleteItem(ClipboardItem);
-        InspectorPanel.main.SetObject(null);
+        InspectorPanel.main.UnsetObject();
     }
 
     public void Copy()

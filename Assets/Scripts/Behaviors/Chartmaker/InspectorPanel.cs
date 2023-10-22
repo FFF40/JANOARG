@@ -39,6 +39,18 @@ public class InspectorPanel : MonoBehaviour
         UpdateForm();
     }
 
+    public void UnsetObject()
+    {
+        if (CurrentTimestamp?.Count > 0)
+        {
+            CurrentTimestamp = new ();
+        }
+        else
+        {
+            CurrentObject = null;
+        }
+    }
+
     public void SetObject(object obj)
     {
         if (obj is Timestamp ts)
