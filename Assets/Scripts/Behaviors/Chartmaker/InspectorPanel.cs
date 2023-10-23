@@ -572,7 +572,7 @@ public class InspectorPanel : MonoBehaviour
 
         var button = SpawnForm<FormEntryButton>("Execute");
         button.Button.onClick.AddListener(() => {
-            ExecuteMulti((IList)CurrentObject, Chartmaker.main.History);
+            ExecuteMulti(thing, Chartmaker.main.History);
         });
     }
     

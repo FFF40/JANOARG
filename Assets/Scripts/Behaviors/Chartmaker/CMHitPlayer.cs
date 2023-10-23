@@ -11,6 +11,10 @@ public class CMHitPlayer : MonoBehaviour
     public MeshRenderer HoldTail;
     public MeshRenderer FlickEmblem;
 
+    public void OnDestroy()
+    {
+        if (HoldTail) Destroy(HoldTail.gameObject);
+    }
 
     public void UpdateObjects(HitObjectManager hit) 
     {

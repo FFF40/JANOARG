@@ -67,7 +67,7 @@ public class TimelineOptionsPanel : MonoBehaviour
         if (TimelinePanel.main.SeparationFactor != SeparationFactor)
         {
             TimelinePanel.main.SeparationFactor = SeparationFactor;
-            TimelinePanel.main.UpdateTimeline(true);
+            if (Chartmaker.main.CurrentSong != null) TimelinePanel.main.UpdateTimeline(true);
         }
     }
 
