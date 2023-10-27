@@ -5,7 +5,7 @@ using System;
 using UnityEngine.Serialization;
 
 [Serializable]
-public class Timestamp 
+public class Timestamp : IDeepClonable<Timestamp>
 {
     [FormerlySerializedAs("Time")]
     public float Offset;

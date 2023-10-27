@@ -110,7 +110,7 @@ public class Metronome
 }
 
 [System.Serializable]
-public class BPMStop
+public class BPMStop : IDeepClonable<BPMStop>
 {
     public float Offset;
     public float BPM;

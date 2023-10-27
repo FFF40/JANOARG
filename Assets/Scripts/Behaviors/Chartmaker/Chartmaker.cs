@@ -535,15 +535,15 @@ public class Chartmaker : MonoBehaviour
         return obj.DeepClone();
     }
 
-    public IList SmartClone(IList obj) 
-    {
-        List<object> newList = new (); 
-        foreach (object item in obj) newList.Add(SmartClone(item)); 
-        return newList;
-    }
-
     public object SmartClone(object obj) => obj switch {
-        IList list    => SmartClone(list),
+        List<Timestamp> lts  => DeepClone(lts),
+        List<BPMStop> lbs    => DeepClone(lbs),
+        List<LaneStyle> lls  => DeepClone(lls),
+        List<HitStyle> lhs   => DeepClone(lhs),
+        List<LaneGroup> llg  => DeepClone(llg),
+        List<Lane> lla       => DeepClone(lla),
+        List<LaneStep> lst   => DeepClone(lst),
+        List<HitObject> lho  => DeepClone(lho),
         Timestamp ts  => ts.DeepClone(),
         BPMStop bs    => bs.DeepClone(),
         LaneStyle ls  => ls.DeepClone(),

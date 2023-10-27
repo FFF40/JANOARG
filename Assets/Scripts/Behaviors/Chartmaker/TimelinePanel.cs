@@ -1004,9 +1004,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         TimestampType type = types[Math.Clamp(Mathf.FloorToInt((ItemsHolder.rect.height - dragEnd.y - 3) / 24) + ScrollOffset, 0, types.Length - 1)];
                         Chartmaker.main.AddItem(new Timestamp {
                             ID = type.ID,
-                            Offset = Mathf.Min(beatStart, beatEnd),
-                            Duration = Mathf.Abs(beatStart - beatEnd),
-                            Target = type.Get(thing.Get(Mathf.Min(beatStart, beatEnd))),
+                            Offset = isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart,
+                            Duration = isDragged ? Mathf.Abs(beatStart - beatEnd) : 0,
+                            Target = type.Get(thing.Get(isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart)),
                         });
                     }
                     break;
@@ -1026,12 +1026,12 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         lane.LaneSteps.Add(new LaneStep{ 
                             StartPos = new(-8, 0),
                             EndPos = new(8, 0),
-                            Offset = Math.Min(beatStart, beatEnd)
+                            Offset = isDragged ? Math.Min(beatStart, beatEnd) : beatStart
                         });
                         lane.LaneSteps.Add(new LaneStep{ 
                             StartPos = new(-8, 0),
                             EndPos = new(8, 0),
-                            Offset = Math.Max(beatStart, beatEnd)
+                            Offset = isDragged ? Math.Max(beatStart, beatEnd) : beatStart + 1,
                         });
                         Chartmaker.main.AddItem(lane);
                     }
@@ -1070,6 +1070,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         else 
                         {
                             hit.Offset = beatStart;
+                            hit.HoldLength = 0;
                         }
 
                         hit.Type = PickerPanel.main.CurrentMode == PickerMode.CatchHit ? HitObject.HitType.Catch : HitObject.HitType.Normal;
