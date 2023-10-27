@@ -69,7 +69,7 @@ public class KeyboardHandler : MonoBehaviour
         { "ED:Undo", new KeybindAction {
             Category = "Edit",
             Name = "Undo",
-            Keybind = new Keybind(KeyCode.X, EventModifiers.Command),
+            Keybind = new Keybind(KeyCode.Z, EventModifiers.Command),
             Invoke = () => Chartmaker.main.Undo(),
         }},
         { "ED:Redo", new KeybindAction {
