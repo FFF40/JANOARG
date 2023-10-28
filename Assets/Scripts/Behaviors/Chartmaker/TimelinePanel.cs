@@ -1044,8 +1044,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         if (lane == null) break;
 
                         LaneStep baseStep = ((Lane)lane.Get(timeEnd)).GetLaneStep(timeStart, timeStart, metronome);
+                        baseStep.Offset = isDragged ? beatEnd : beatStart;
 
-                        Chartmaker.main.AddItem(baseStep, beatStart);
+                        Chartmaker.main.AddItem(baseStep);
                     }
                     break;
                     case PickerMode.NormalHit or PickerMode.CatchHit:
