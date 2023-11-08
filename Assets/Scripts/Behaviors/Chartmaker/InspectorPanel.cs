@@ -13,7 +13,8 @@ public class InspectorPanel : MonoBehaviour
 
     public object CurrentObject;
     public List<Timestamp> CurrentTimestamp;
-    public Lane CurrentLane;
+    [NonSerialized]
+    public Lane CurrentLane = null;
 
     public TMP_Text FormTitle;
     public RectTransform FormHolder;
@@ -39,6 +40,16 @@ public class InspectorPanel : MonoBehaviour
         UpdateForm();
     }
 
+    public void OnObjectChange()
+    {
+        UpdateButtons();
+        UpdateForm();
+        TimelinePanel.main.UpdateTabs();
+        TimelinePanel.main.UpdateItems();
+        Chartmaker.main.OnClipboardUpdate();
+        PlayerView.main.UpdateHandles();
+    }
+
     public void UnsetObject()
     {
         if (CurrentTimestamp?.Count > 0)
@@ -49,6 +60,7 @@ public class InspectorPanel : MonoBehaviour
         {
             CurrentObject = null;
         }
+        OnObjectChange();
     }
 
     public void SetObject(object obj)
@@ -67,11 +79,7 @@ public class InspectorPanel : MonoBehaviour
             CurrentTimestamp = new ();
             if (obj is Lane lane) CurrentLane = lane;
         }
-        UpdateButtons();
-        UpdateForm();
-        TimelinePanel.main.UpdateTabs();
-        TimelinePanel.main.UpdateItems();
-        Chartmaker.main.OnClipboardUpdate();
+        OnObjectChange();
     }
 
     public void ClearForm()

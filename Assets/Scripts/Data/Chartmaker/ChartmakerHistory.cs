@@ -303,12 +303,12 @@ public class ChartmakerMoveLaneStepAction : ChartmakerMoveAction<LaneStep>
         Item.EndPos += (Vector2)offset;
         foreach (Timestamp ts in Item.Storyboard.Timestamps)
         {
-            if (ts.ID == "StartPos_X" && ts.ID == "EndPos_X")
+            if (ts.ID == "StartPos_X" || ts.ID == "EndPos_X")
             {
                 ts.From += offset.x;
                 ts.Target += offset.x;
             }
-            if (ts.ID == "StartPos_Y" && ts.ID == "EndPos_Y")
+            if (ts.ID == "StartPos_Y" || ts.ID == "EndPos_Y")
             {
                 ts.From += offset.y;
                 ts.Target += offset.y;
