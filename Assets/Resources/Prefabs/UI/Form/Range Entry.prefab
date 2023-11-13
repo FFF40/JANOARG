@@ -330,6 +330,8 @@ GameObject:
   - component: {fileID: 1056461069}
   - component: {fileID: 1056461068}
   - component: {fileID: 1056461070}
+  - component: {fileID: 8383524718192383390}
+  - component: {fileID: 1864208448042475290}
   m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
@@ -410,6 +412,34 @@ MonoBehaviour:
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.2}
   m_EffectDistance: {x: -1, y: 1}
   m_UseGraphicAlpha: 1
+--- !u!114 &8383524718192383390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1056461066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1056461068}
+  ID: ControlNormal
+--- !u!114 &1864208448042475290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1056461066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49723feda0e615c438b2199ffe11b316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1056461070}
+  ID: BorderNormal
 --- !u!1 &1104474194
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,6 +451,7 @@ GameObject:
   - component: {fileID: 1104474195}
   - component: {fileID: 1104474197}
   - component: {fileID: 1104474196}
+  - component: {fileID: 908552089628918501}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -545,6 +576,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &908552089628918501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1104474194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1104474196}
+  ID: ControlContent
 --- !u!1 &1219657124
 GameObject:
   m_ObjectHideFlags: 0
@@ -556,6 +601,7 @@ GameObject:
   - component: {fileID: 1219657125}
   - component: {fileID: 1219657127}
   - component: {fileID: 1219657126}
+  - component: {fileID: 2404512451304518987}
   m_Layer: 5
   m_Name: Slider
   m_TagString: Untagged
@@ -668,6 +714,24 @@ MonoBehaviour:
   m_FlexibleWidth: 2
   m_FlexibleHeight: -1
   m_LayoutPriority: 2
+--- !u!114 &2404512451304518987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219657124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1219657127}
+  NormalID: SliderThumbNormal
+  HighlightedID: SliderThumbHighlighted
+  SelectedID: 
+  PressedID: SliderThumbPressed
+  DisabledID: 
 --- !u!1 &1270132143
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,6 +745,8 @@ GameObject:
   - component: {fileID: 1270132147}
   - component: {fileID: 1270132146}
   - component: {fileID: 1270132145}
+  - component: {fileID: 897678866150716275}
+  - component: {fileID: 6466446124386988255}
   m_Layer: 5
   m_Name: Field
   m_TagString: Untagged
@@ -890,6 +956,39 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 2
+--- !u!114 &897678866150716275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270132143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1270132147}
+  ID: ControlNormal
+--- !u!114 &6466446124386988255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270132143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7475b616421ceb4c836aa4b41490817, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1270132146}
+  NormalID: BorderNormal
+  HighlightedID: BorderHighlighted
+  SelectedID: BorderSelected
+  PressedID: BorderPressed
+  DisabledID: 
+  SelectionID: BorderSelection
 --- !u!1 &1347372921
 GameObject:
   m_ObjectHideFlags: 0
@@ -939,6 +1038,7 @@ GameObject:
   - component: {fileID: 1496539032}
   - component: {fileID: 1496539031}
   - component: {fileID: 1496539030}
+  - component: {fileID: 8107869947424385285}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -1020,6 +1120,20 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 0
+--- !u!114 &8107869947424385285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496539028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49723feda0e615c438b2199ffe11b316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1496539030}
+  ID: ShadowNormal
 --- !u!1 &1566407537
 GameObject:
   m_ObjectHideFlags: 0
@@ -1084,6 +1198,7 @@ GameObject:
   - component: {fileID: 1862481911}
   - component: {fileID: 1862481913}
   - component: {fileID: 1862481912}
+  - component: {fileID: 6970119595010025683}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -1149,6 +1264,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6970119595010025683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862481910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1862481912}
+  ID: BorderNormal
 --- !u!1001 &3405977266235361019
 PrefabInstance:
   m_ObjectHideFlags: 0

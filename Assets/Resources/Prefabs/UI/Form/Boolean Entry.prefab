@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8358402336195488922}
   - component: {fileID: 6978014399927259926}
   - component: {fileID: 8169757816407554148}
+  - component: {fileID: 5379978780559327513}
   m_Layer: 5
   m_Name: Toggle
   m_TagString: Untagged
@@ -119,6 +120,24 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &5379978780559327513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550921003007572582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 6978014399927259926}
+  NormalID: ControlNormal
+  HighlightedID: ControlHighlighted
+  SelectedID: 
+  PressedID: ControlPressed
+  DisabledID: 
 --- !u!1 &2510869527249371317
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,6 +227,7 @@ GameObject:
   - component: {fileID: 6426307304574396408}
   - component: {fileID: 8225189370202143465}
   - component: {fileID: 1339104527877048756}
+  - component: {fileID: 4584890511291470627}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -273,6 +293,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4584890511291470627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3866809124409032669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1339104527877048756}
+  ID: BorderNormal
 --- !u!1 &7192639927506610493
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,6 +318,7 @@ GameObject:
   - component: {fileID: 7355395286808172167}
   - component: {fileID: 2084636260978410563}
   - component: {fileID: 1658871901885935613}
+  - component: {fileID: 1090400921907150915}
   m_Layer: 5
   m_Name: Checkmark
   m_TagString: Untagged
@@ -349,6 +384,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1090400921907150915
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7192639927506610493}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1658871901885935613}
+  ID: ControlContent
 --- !u!1001 &6207388088416127347
 PrefabInstance:
   m_ObjectHideFlags: 0

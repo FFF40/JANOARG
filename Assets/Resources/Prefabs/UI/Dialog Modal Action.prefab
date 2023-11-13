@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2889383908850511655}
   - component: {fileID: 2889383908850511654}
   - component: {fileID: 7464551853351395451}
+  - component: {fileID: 3806794003342043586}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -156,6 +157,20 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &3806794003342043586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2889383908850511652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2889383908850511654}
+  ID: ControlContent
 --- !u!1 &2889383909217105965
 GameObject:
   m_ObjectHideFlags: 0
@@ -168,6 +183,7 @@ GameObject:
   - component: {fileID: 2889383909217105960}
   - component: {fileID: 2889383909217105967}
   - component: {fileID: 5072181182857290886}
+  - component: {fileID: 3324368011454863092}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -253,6 +269,20 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &3324368011454863092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2889383909217105965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2889383909217105967}
+  ID: BorderNormal
 --- !u!1 &2889383909829203651
 GameObject:
   m_ObjectHideFlags: 0
@@ -267,6 +297,7 @@ GameObject:
   - component: {fileID: 2889383909829203677}
   - component: {fileID: -3268869651671325420}
   - component: {fileID: 1640204282008323015}
+  - component: {fileID: 2817076837028589236}
   m_Layer: 5
   m_Name: Dialog Modal Action
   m_TagString: Untagged
@@ -418,3 +449,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Button: {fileID: 2889383909829203677}
   Text: {fileID: 2889383908850511654}
+--- !u!114 &2817076837028589236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2889383909829203651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2889383909829203677}
+  NormalID: ControlNormal
+  HighlightedID: ControlHighlighted
+  SelectedID: 
+  PressedID: ControlPressed
+  DisabledID: 

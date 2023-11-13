@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Behaviors\Files\Editor\JACImporter.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\Editor\ThemeKeyDrawer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Files\Editor\JAPSImporter.cs" />
      <Compile Include="Assets\Scripts\Editor\GizmoIconUtility.cs" />
     <Reference Include="UnityEngine">

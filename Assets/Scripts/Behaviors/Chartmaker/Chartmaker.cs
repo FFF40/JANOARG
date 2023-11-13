@@ -45,6 +45,8 @@ public class Chartmaker : MonoBehaviour
     public Storage KeybindingsStorage;
     public Storage RecentSongsStorage;
     public ChartmakerPrefs Preferences = new();
+    [Space]
+    public Themer Themer;
 
     public Task ActiveTask;
 
@@ -57,6 +59,7 @@ public class Chartmaker : MonoBehaviour
         KeybindingsStorage = new("cm_keys");
         RecentSongsStorage = new("cm_recent");
         Preferences.Load(PreferencesStorage);
+        Themer.InitTheme();
     }
 
     public void Start()
@@ -627,9 +630,13 @@ public class ChartmakerPrefs {
     public bool SaveOnQuit;
     public bool SaveOnPlay;
 
+    public string Theme = "Prototype";
+
     public void Load(Storage storage)
     {
         SaveOnPlay = storage.Get("AS:SaveOnPlay", SaveOnPlay);
         SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
+
+        Theme = storage.Get("AP:Theme", Theme);
     }
 }

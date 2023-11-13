@@ -63,8 +63,24 @@ public class BorderlessWindow
         public WinPoint Reserved, MaxSize, MaxPosition, MinTrackSize, MaxTrackSize;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    struct WindowPos
+    {
+        public IntPtr hWnd, hWndInsertAfter;
+        public int x, y, cx, cy, flags;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct NCCalcSizeParams
+    {
+        public WinRect rect0, rect1, rect2;
+        public WindowPos pos;
+    }
+
+
     const int GWL_WINPROC = -4;
     const int GWL_STYLE = -16;
+    const int GWL_EXSTYLE = -20;
 
     const int SW_MINIMIZE = 6;
     const int SW_MAXIMIZE = 3;
@@ -72,6 +88,7 @@ public class BorderlessWindow
 
     const int WM_GETMINMAXINFO = 0x0024;
     const int WM_SIZING = 0x0214;
+    const int WM_NCCALCSIZE = 0x0083;
 
     const uint WS_VISIBLE = 0x10000000;    
     const uint WS_POPUP = 0x80000000;
@@ -84,6 +101,8 @@ public class BorderlessWindow
     const uint WS_MINIMIZEBOX = 0x00020000;
     const uint WS_MAXIMIZEBOX = 0x00010000;
     const uint WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+
+    const uint WS_EX_WINDOWEDGE = 0x00000100;
 
     static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
     {
@@ -99,6 +118,9 @@ public class BorderlessWindow
             FindWindow();
             SetFramelessWindow();
             ResizeWindow(screenSize.x + 14, screenSize.y + 14);
+            BorderlessWindow.HookWindowProc();
+            ResizeWindow(screenSize.x + 1, screenSize.y + 1);
+            ResizeWindow(screenSize.x - 1, screenSize.y - 1);
         #endif
     }
 
@@ -156,6 +178,33 @@ public class BorderlessWindow
 
             Marshal.StructureToPtr(minMaxInfo, lParam, false);
             return DefWindowProc(hWnd, msg, wParam, lParam);
+        }
+        else if (msg == WM_NCCALCSIZE) 
+        {
+            if (wParam != IntPtr.Zero)
+            {
+                var size = Marshal.PtrToStructure<NCCalcSizeParams>(lParam);
+
+                size.rect0.top += WindowHandler.main?.maximized == true ? 7 : 1;
+                size.rect0.bottom -= 7;
+                size.rect0.left += 7;
+                size.rect0.right -= 7;
+                
+                Marshal.StructureToPtr(size, lParam, true);
+            }
+            else
+            {
+                var size = Marshal.PtrToStructure<WinRect>(lParam);
+
+                size.top += WindowHandler.main?.maximized == true ? 7 : 1;
+                size.bottom -= 7;
+                size.left += 7;
+                size.right -= 7;
+                
+                Marshal.StructureToPtr(size, lParam, true);
+            }
+
+            return IntPtr.Zero;
         }
         else 
         {

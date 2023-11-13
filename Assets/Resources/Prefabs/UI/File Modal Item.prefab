@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2889383908850511655}
   - component: {fileID: 2889383908850511654}
   - component: {fileID: 7464551853351395451}
+  - component: {fileID: 327349225366101878}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -156,6 +157,20 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &327349225366101878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2889383908850511652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2889383908850511654}
+  ID: ControlContent
 --- !u!1 &2889383909829203651
 GameObject:
   m_ObjectHideFlags: 0
@@ -170,6 +185,7 @@ GameObject:
   - component: {fileID: 2889383909829203677}
   - component: {fileID: -3268869651671325420}
   - component: {fileID: -6803191243040954381}
+  - component: {fileID: 3554069617213123189}
   m_Layer: 5
   m_Name: File Modal Item
   m_TagString: Untagged
@@ -333,3 +349,21 @@ MonoBehaviour:
   Button: {fileID: 2889383909829203677}
   Text: {fileID: 2889383908850511654}
   Parent: {fileID: 0}
+--- !u!114 &3554069617213123189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2889383909829203651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2889383909829203677}
+  NormalID: 
+  HighlightedID: ControlHighlighted
+  SelectedID: 
+  PressedID: ControlPressed
+  DisabledID: 

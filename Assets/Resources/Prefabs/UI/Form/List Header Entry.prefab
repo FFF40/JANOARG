@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7625752531461797046}
   - component: {fileID: 5273914922260677497}
   - component: {fileID: 2669450738350423582}
+  - component: {fileID: 7561536899612106798}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -144,6 +145,24 @@ MonoBehaviour:
   m_FlexibleWidth: 0
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &7561536899612106798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 819913703538765710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2998220394515402866}
+  NormalID: ControlNormal
+  HighlightedID: ControlHighlighted
+  SelectedID: 
+  PressedID: ControlPressed
+  DisabledID: 
 --- !u!1 &5770991248534756742
 GameObject:
   m_ObjectHideFlags: 0
@@ -155,6 +174,7 @@ GameObject:
   - component: {fileID: 1290195742634514717}
   - component: {fileID: 6300531175027817918}
   - component: {fileID: 8868972281423015490}
+  - component: {fileID: 1611526009526670707}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -220,6 +240,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1611526009526670707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5770991248534756742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8868972281423015490}
+  ID: BorderNormal
 --- !u!1 &9051036102036212769
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,6 +265,7 @@ GameObject:
   - component: {fileID: 254455601040940808}
   - component: {fileID: 9184969638885531955}
   - component: {fileID: 3881695837501541216}
+  - component: {fileID: 6532275766481827735}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -355,6 +390,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6532275766481827735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9051036102036212769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 3881695837501541216}
+  ID: ControlContent
 --- !u!1001 &1510256197897270485
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5754871487754312959}
   - component: {fileID: 7924183380841939112}
   - component: {fileID: 916312317414922693}
+  - component: {fileID: 1124358401706844351}
   m_Layer: 5
   m_Name: Info
   m_TagString: Untagged
@@ -135,6 +136,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1124358401706844351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 874418612901986158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 916312317414922693}
+  ID: ControlContent
 --- !u!1 &2963789166607226026
 GameObject:
   m_ObjectHideFlags: 0
@@ -148,6 +163,7 @@ GameObject:
   - component: {fileID: 5538399762891281958}
   - component: {fileID: 750325741264785341}
   - component: {fileID: 1430747658520687913}
+  - component: {fileID: 4496598476424419099}
   m_Layer: 5
   m_Name: Recent Song
   m_TagString: Untagged
@@ -287,6 +303,24 @@ MonoBehaviour:
   Button: {fileID: 750325741264785341}
   DataLabel: {fileID: 916312317414922693}
   PathLabel: {fileID: 3357594923793951608}
+--- !u!114 &4496598476424419099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2963789166607226026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 750325741264785341}
+  NormalID: ControlNormal
+  HighlightedID: ControlHighlighted
+  SelectedID: 
+  PressedID: ControlPressed
+  DisabledID: 
 --- !u!1 &3563514005867539151
 GameObject:
   m_ObjectHideFlags: 0
@@ -298,6 +332,7 @@ GameObject:
   - component: {fileID: 3917537475015570616}
   - component: {fileID: 2196922480444400627}
   - component: {fileID: 2470677062286293773}
+  - component: {fileID: 1766301999300990749}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -363,6 +398,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1766301999300990749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3563514005867539151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 2470677062286293773}
+  ID: BorderNormal
 --- !u!1 &7277466638083480167
 GameObject:
   m_ObjectHideFlags: 0
@@ -374,6 +423,7 @@ GameObject:
   - component: {fileID: 5465136021577138776}
   - component: {fileID: 5408306340993767912}
   - component: {fileID: 3357594923793951608}
+  - component: {fileID: 1703068415567620517}
   m_Layer: 5
   m_Name: Path
   m_TagString: Untagged
@@ -498,3 +548,17 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1703068415567620517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7277466638083480167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 3357594923793951608}
+  ID: Content1

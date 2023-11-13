@@ -200,6 +200,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             float density = (PeekRange.y - PeekRange.x) * metronome.GetStop(PeekRange.x, out _).BPM / TicksHolder.rect.width / 8;
             int count = 0;
 
+            Color color = Themer.main.Keys["TimelineTickMain"];
+
             if (density != 0)
             {
                 float factor = Mathf.Log(density, SeparationFactor);
@@ -222,6 +224,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     rt.anchorMax = new(rt.anchorMin.x, 1);
 
                     tick.Image.color = GetBeatColor(beat) * new Color(1, 1, 1, Mathf.Clamp01((Mathf.Pow(1.5f, den) - 1) / (Mathf.Pow(1.5f, 3) - 1)) * .5f);
+                    tick.Label.color = color;
                     tick.Label.alpha = Mathf.Clamp01(den - 2.5f) * .5f;
                     if (tick.Label.alpha > 0) tick.Label.text = beat.ToString();
 
@@ -537,6 +540,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
         
         WaveformImage.enabled = true;
+        Color color = Themer.main.Keys["TimelineTickMain"];
 
         Sprite wave = WaveformImage.sprite;
         RectTransform waveRT = WaveformImage.rectTransform;
@@ -583,7 +587,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     for (int y = 0; y < tex.height; y++) 
                     {
                         float window = 1 - sPos * 2f;
-                        buffer[y] = window >= -sum - denY && window <= sum + denY ? Color.white : Color.clear;
+                        buffer[y] = window >= -sum - denY && window <= sum + denY ? color : Color.clear;
                         sPos += denY;
                     }
                     tex.SetPixels(x, 0, 1, tex.height, buffer);
@@ -634,7 +638,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     {
                         int channel = Mathf.FloorToInt(sPos);
                         float window = 1 - (sPos % 1) * 2f;
-                        buffer[y] = window >= min[channel] - denY && window <= max[channel] + denY ? Color.white : Color.clear;
+                        buffer[y] = window >= min[channel] - denY && window <= max[channel] + denY ? color : Color.clear;
                         sPos += denY;
                     }
                     tex.SetPixels(x, 0, 1, tex.height, buffer);
@@ -722,13 +726,13 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     {
         switch (time.Denominator)
         {
-            case 1:      return new Color(1, 1, 1);
-            case 2:      return new Color(.5f, 1, .5f);
-            case 4:      return new Color(.7f, .7f, 1);
-            case 8:      return new Color(.5f, 1, 1);
-            case 3:      return new Color(1, 1, .5f);
-            case 6:      return new Color(1, .8f, .6f);
-            default:     return new Color(.8f, .6f, 1);
+            case 1:      return Themer.main.Keys["TimelineTickMain"];
+            case 2:      return Themer.main.Keys["TimelineTick2"];
+            case 4:      return Themer.main.Keys["TimelineTick4"];
+            case 8:      return Themer.main.Keys["TimelineTick8"];
+            case 3:      return Themer.main.Keys["TimelineTick3"];
+            case 6:      return Themer.main.Keys["TimelineTick6"];
+            default:     return Themer.main.Keys["TimelineTickOther"];
         }
     }
 

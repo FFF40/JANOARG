@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3539771160069313084}
   - component: {fileID: 3539771160069313085}
   - component: {fileID: 3539771160069313087}
+  - component: {fileID: 7890910062405256060}
   m_Layer: 5
   m_Name: Timeline Item
   m_TagString: Untagged
@@ -124,6 +125,24 @@ MonoBehaviour:
   Border: {fileID: 3539771161518149319}
   Indicator: {fileID: 3539771161263551468}
   SelectedBorder: {fileID: 4067269901588971924}
+--- !u!114 &7890910062405256060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3539771160069313080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 3539771160069313087}
+  NormalID: TimelineItemNormal
+  HighlightedID: TimelineItemHighlighted
+  SelectedID: 
+  PressedID: TimelineItemPressed
+  DisabledID: 
 --- !u!1 &3539771161263551466
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,6 +154,7 @@ GameObject:
   - component: {fileID: 3539771161263551469}
   - component: {fileID: 3539771161263551471}
   - component: {fileID: 3539771161263551468}
+  - component: {fileID: 463528349599107497}
   m_Layer: 5
   m_Name: Item
   m_TagString: Untagged
@@ -200,6 +220,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &463528349599107497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3539771161263551466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 3539771161263551468}
+  ID: ControlContent
 --- !u!1 &3539771161518149317
 GameObject:
   m_ObjectHideFlags: 0
@@ -211,6 +245,7 @@ GameObject:
   - component: {fileID: 3539771161518149316}
   - component: {fileID: 3539771161518149318}
   - component: {fileID: 3539771161518149319}
+  - component: {fileID: 8025784937122931124}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -276,6 +311,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8025784937122931124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3539771161518149317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 3539771161518149319}
+  ID: BorderNormal
 --- !u!1 &7893999958375389195
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,6 +336,7 @@ GameObject:
   - component: {fileID: 1537729226482259936}
   - component: {fileID: 1461267319646834145}
   - component: {fileID: 4067269901588971924}
+  - component: {fileID: 9062502093194445186}
   m_Layer: 5
   m_Name: Selected
   m_TagString: Untagged
@@ -352,3 +402,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &9062502093194445186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7893999958375389195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 4067269901588971924}
+  ID: TimelineSelectionBorder

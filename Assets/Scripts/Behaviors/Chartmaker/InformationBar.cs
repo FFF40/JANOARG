@@ -168,6 +168,7 @@ public class InformationBar : MonoBehaviour
         }
 
         Rect rect = Visualizer.rect;
+        Color color = Themer.main.Keys["ControlContent"];
 
         if (VisualizerMode == VisualizerMode.Metronome)
         {
@@ -177,17 +178,17 @@ public class InformationBar : MonoBehaviour
             Image bar = AddBar();         
             bar.rectTransform.sizeDelta = new Vector2(sizeX, rect.height);
             bar.rectTransform.anchoredPosition = new Vector2(Mathf.Floor(barPos) * sizeX, 0);
-            bar.color = new Color(1, 1, 1, Mathf.Pow(1 - (barPos % 1), 2));
+            bar.color = color * new Color(1, 1, 1, Mathf.Pow(1 - (barPos % 1), 2));
 
             Image bar2 = AddBar();
             bar2.rectTransform.sizeDelta = new Vector2(sizeX, rect.height * bar.color.a);
             bar2.rectTransform.anchoredPosition = new Vector2(Mathf.Floor(barPos) * sizeX, 0);
-            bar2.color = new Color(1, 1, 1, .5f);
+            bar2.color = color * new Color(1, 1, 1, .5f);
 
             Image bar3 = AddBar();
             bar3.rectTransform.sizeDelta = new Vector2(sizeX, 1);
             bar3.rectTransform.anchoredPosition = new Vector2(Mathf.Floor(barPos) * sizeX, rect.height - 1);
-            bar3.color = new Color(1, 1, 1, Mathf.Pow(2 - (barPos % 1) * 2, 2));
+            bar3.color = color * new Color(1, 1, 1, Mathf.Pow(2 - (barPos % 1) * 2, 2));
         }
         else if (VisualizerMode == VisualizerMode.FrequencyBars)
         {
@@ -217,21 +218,21 @@ public class InformationBar : MonoBehaviour
                 heightL = rect.height * Mathf.Min(Mathf.Clamp(Mathf.Sqrt(barsL[a] / (1 << a) / 2), heightL - Time.deltaTime / fallTime, heightL + Time.deltaTime / riseTime), 1);
                 barL.rectTransform.sizeDelta = new Vector2(sizeX, heightL);
                 barL.rectTransform.anchoredPosition = new Vector2(a * sizeX, 0);
-                barL.color = new Color(1, 1, 1, .5f);
+                barL.color = color * new Color(1, 1, 1, .5f);
 
                 Image barR = AddBar();
                 float heightR = barR.rectTransform.rect.height / rect.height;
                 heightR = rect.height * Mathf.Min(Mathf.Clamp(Mathf.Sqrt(barsR[a] / (1 << a) / 2), heightR - Time.deltaTime / fallTime, heightR + Time.deltaTime / riseTime), 1);
                 barR.rectTransform.sizeDelta = new Vector2(sizeX, heightR);
                 barR.rectTransform.anchoredPosition = new Vector2(a * sizeX, 0);
-                barR.color = new Color(1, 1, 1, .5f);
+                barR.color = color * new Color(1, 1, 1, .5f);
 
                 Image barC = AddBar();
                 float heightC = barC.rectTransform.anchoredPosition.y; 
                 heightC = Mathf.Min(Mathf.Max(heightL, heightR, heightC - Time.deltaTime / fallTime / 2 * rect.height), rect.height - 1);
                 barC.rectTransform.sizeDelta = new Vector2(sizeX, 1);
                 barC.rectTransform.anchoredPosition = new Vector2(a * sizeX, heightC);
-                barC.color = new Color(1, 1, 1, 1);
+                barC.color = color * new Color(1, 1, 1, 1);
             }
         }
 

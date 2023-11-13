@@ -50,7 +50,10 @@
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\InformationBar.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryString.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\ThemeableTypes\InputFieldThemeable.cs" />
      <Compile Include="Assets\Scripts\Utils\MetadataReader.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\ThemeableTypes\SelectableThemeable.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\Theme.cs" />
      <Compile Include="Assets\Scripts\UI\DialogModalAction.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntrySpace.cs" />
      <Compile Include="Assets\Scripts\Data\Metronome.cs" />
@@ -60,6 +63,7 @@
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\KeyboardHandler.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\WindowHandler.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\TimelineOptionsPanel.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\Themer.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryRange.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\InspectorPanel.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\AboutModal.cs" />
@@ -70,11 +74,13 @@
      <Compile Include="Assets\Scripts\UI\BorderlessWindow.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormEntry.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryListItem.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\ThemeableTypes\GraphicThemeable.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryVector2.cs" />
      <Compile Include="Assets\Scripts\Data\Playlist.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\PlayOptionsPanel.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryDropdown.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\PreferencesModal.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\Themeable.cs" />
      <Compile Include="Assets\Scripts\UI\NavBarButton.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryVector3.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryFloat.cs" />
@@ -102,6 +108,7 @@
      <Compile Include="Assets\Scripts\Data\Chartmaker\Keybind.cs" />
      <Compile Include="Assets\Scripts\UI\ColorPicker\ColorRect.cs" />
      <Compile Include="Assets\Scripts\UI\ContextMenu\ContextMenuList.cs" />
+     <Compile Include="Assets\Scripts\UI\Themeable\ThemeableTypes\ShadowThemeable.cs" />
      <Compile Include="Assets\Scripts\UI\Tooltip\TooltipTarget.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\NavigationBar.cs" />
      <Compile Include="Assets\Scripts\Data\ExternalPlayableSong.cs" />

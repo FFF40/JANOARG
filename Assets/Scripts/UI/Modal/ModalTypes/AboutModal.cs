@@ -12,6 +12,8 @@ public class AboutModal : Modal
 
     public TMP_Text FlavorTextLabel;
 
+    public RectTransform Content;
+
     public void Awake()
     {
         if (main) Close();
@@ -25,6 +27,12 @@ public class AboutModal : Modal
         FlavorTextLabel.text = FlavorTexts[Random.Range(0, FlavorTexts.Length)];
     }
 
+    public void Update()
+    {
+        Content.anchoredPosition += Vector2.up * 15 * Time.deltaTime;
+        if (Content.anchoredPosition.y > Content.rect.height - 250) Content.anchoredPosition -= Vector2.up * Content.rect.height;
+    }
+
     public static readonly string[] FlavorTexts = new[] {
         "<i>Did you know:</i>\n<b>JANOARG stands for \"Just Another Normal, Ordinary, Acceptable Rhythm Game\".",
         "<i>Did you know:</i>\n<b>Our team consists of a nursery of snails which are current developing this game at record snail speed.",
@@ -34,6 +42,7 @@ public class AboutModal : Modal
         "<i>Did you know:</i>\n<b>You can click on the visualizer (metronome) on the top right corner to switch between different visualizers.",
         
         "<i>Charting tips:</i>\n<b>Missing something? Want more features? Have message ideas to put here? Suggest them in our Discord server and we may make them real!",
+        "<i>Charting tips:</i>\n<b>Be sure to make use of the keybindings, they are pretty helpful!",
 
         "<i>Missing snail:</i>\n<b>We're trying to find a lost snail which is currently hiding somewhere inside the Picker. Can you find it?",
     };

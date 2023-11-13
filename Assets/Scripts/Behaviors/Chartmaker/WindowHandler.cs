@@ -17,7 +17,7 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     public Vector2Int windowMargin;
 
     Vector2 mousePos = Vector2.zero;
-    bool maximized;
+    public bool maximized { get; private set; }
     bool isFullScreen;
 
     float clickTime = float.NegativeInfinity;
@@ -29,9 +29,6 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
     public void Start()
     {
-        #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
-            BorderlessWindow.HookWindowProc();
-        #endif
     }
 
     public void Quit()
@@ -72,10 +69,14 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     {
         EventSystem.current.SetSelectedGameObject(null);
 
-        if (maximized) BorderlessWindow.RestoreWindow();
-        else BorderlessWindow.MaximizeWindow();
-
         maximized = !maximized;
+
+        if (maximized) BorderlessWindow.MaximizeWindow();
+        else BorderlessWindow.RestoreWindow();
+        
+        var rect = BorderlessWindow.GetWindowRect();
+        if (!maximized && rect.yMin < 0) BorderlessWindow.MoveWindowDelta(Vector2.up * rect.yMin);
+
         ResizeTooltip.Text = maximized ? "Restore" : "Maximize";
         ResizeIcon1.sizeDelta = ResizeIcon2.sizeDelta = maximized ? new(8, 8) : new(10, 10);
     }

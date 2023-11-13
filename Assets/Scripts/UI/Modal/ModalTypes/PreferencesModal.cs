@@ -65,6 +65,26 @@ public class PreferencesModal : Modal
                 }
             }
         }
+        else if (tab == 2)
+        {
+            var prefs = Chartmaker.main.Preferences;
+            var storage = Chartmaker.main.PreferencesStorage;
+
+            SpawnForm<FormEntryHeader>("Theme");
+            var themeDropdown = SpawnForm<FormEntryDropdown, object>("", () => prefs.Theme, x => {
+                if (prefs.Theme != x.ToString()) 
+                {
+                    storage.Set("AP:Theme", prefs.Theme = x.ToString()); IsDirty = true;
+                    Themer.main.InitTheme(); TimelinePanel.main.UpdateTimeline(true);
+                }
+            });
+            themeDropdown.ValidValues.Add("Prototype", "Prototype (default)");
+            themeDropdown.ValidValues.Add("PastelDay", "Pastelland - Day");
+            themeDropdown.ValidValues.Add("PastelNight", "Pastelland - Night");
+            themeDropdown.ValidValues.Add("Hyperpop", "Hyperpop");
+            themeDropdown.TitleLabel.gameObject.SetActive(false);
+            themeDropdown.GetComponent<HorizontalLayoutGroup>().padding.left = 10;
+        }
     }
     
     public void ClearForm()

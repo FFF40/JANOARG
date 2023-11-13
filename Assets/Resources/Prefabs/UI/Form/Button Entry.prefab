@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 912180176}
   - component: {fileID: 912180178}
   - component: {fileID: 912180177}
+  - component: {fileID: 7158944812230147804}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -76,6 +77,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7158944812230147804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912180175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 912180177}
+  ID: BorderNormal
 --- !u!1 &1341837794802704841
 GameObject:
   m_ObjectHideFlags: 0
@@ -89,6 +104,7 @@ GameObject:
   - component: {fileID: 5581133803775502562}
   - component: {fileID: 1641158781673264802}
   - component: {fileID: 6130462182479130187}
+  - component: {fileID: 567376697639864051}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -220,6 +236,24 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &567376697639864051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1341837794802704841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 6346396194821929364}
+  NormalID: ControlNormal
+  HighlightedID: ControlHighlighted
+  SelectedID: 
+  PressedID: ControlPressed
+  DisabledID: 
 --- !u!1 &1905335253662400921
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,6 +266,7 @@ GameObject:
   - component: {fileID: 2885571925754793905}
   - component: {fileID: 7594095254305831298}
   - component: {fileID: 8357710667127410075}
+  - component: {fileID: 1694336499022065428}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -378,6 +413,20 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1694336499022065428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1905335253662400921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 7594095254305831298}
+  ID: ControlContent
 --- !u!1001 &8111830134614076490
 PrefabInstance:
   m_ObjectHideFlags: 0

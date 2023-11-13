@@ -47,6 +47,7 @@ GameObject:
   - component: {fileID: 8114330190229511011}
   - component: {fileID: 8114330190229511009}
   - component: {fileID: 8114330190229511008}
+  - component: {fileID: 4577357555574491775}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -112,6 +113,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4577357555574491775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330190229511010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330190229511008}
+  ID: ControlContent
 --- !u!1 &8114330190553048468
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,6 +142,8 @@ GameObject:
   - component: {fileID: 1923116746719500071}
   - component: {fileID: 1029041792817471797}
   - component: {fileID: -4710138900020841958}
+  - component: {fileID: 2455794837731244831}
+  - component: {fileID: 8441985552655874287}
   m_Layer: 5
   m_Name: Modal
   m_TagString: Untagged
@@ -266,6 +283,34 @@ MonoBehaviour:
   maxWidth: 500
   minHeight: 0
   maxHeight: Infinity
+--- !u!114 &2455794837731244831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330190553048468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330190553048459}
+  ID: Background2
+--- !u!114 &8441985552655874287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330190553048468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49723feda0e615c438b2199ffe11b316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330190553048458}
+  ID: ShadowNormal
 --- !u!1 &8114330190922506808
 GameObject:
   m_ObjectHideFlags: 0
@@ -277,6 +322,7 @@ GameObject:
   - component: {fileID: 8114330190922506809}
   - component: {fileID: 8114330190922506815}
   - component: {fileID: 8114330190922506814}
+  - component: {fileID: 6146643031546271799}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -342,6 +388,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6146643031546271799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330190922506808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330190922506814}
+  ID: ControlContent
 --- !u!1 &8114330190933503010
 GameObject:
   m_ObjectHideFlags: 0
@@ -354,6 +414,7 @@ GameObject:
   - component: {fileID: 8114330190933503014}
   - component: {fileID: 8114330190933503009}
   - component: {fileID: 8114330190933503008}
+  - component: {fileID: 7744776909752672263}
   m_Layer: 5
   m_Name: Close
   m_TagString: Untagged
@@ -477,6 +538,24 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &7744776909752672263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330190933503010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330190933503008}
+  NormalID: 
+  HighlightedID: DangerHighlighted
+  SelectedID: 
+  PressedID: DangerPressed
+  DisabledID: 
 --- !u!1 &8114330190961399766
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,6 +567,7 @@ GameObject:
   - component: {fileID: 8114330190961399767}
   - component: {fileID: 8114330190961399765}
   - component: {fileID: 8114330190961399764}
+  - component: {fileID: 6347422436346182385}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -612,6 +692,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6347422436346182385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330190961399766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330190961399764}
+  ID: Content0
 --- !u!1 &8114330191821865987
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,6 +717,7 @@ GameObject:
   - component: {fileID: 8114330191821865984}
   - component: {fileID: 8114330191821865990}
   - component: {fileID: 8114330191821865985}
+  - component: {fileID: 2994815761552505001}
   m_Layer: 5
   m_Name: Header
   m_TagString: Untagged
@@ -690,6 +785,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2994815761552505001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330191821865987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330191821865985}
+  ID: Background0
 --- !u!1 &8114330192109801384
 GameObject:
   m_ObjectHideFlags: 0
@@ -702,6 +811,7 @@ GameObject:
   - component: {fileID: 8114330192109801391}
   - component: {fileID: 8114330192109801390}
   - component: {fileID: 1348258259915227104}
+  - component: {fileID: 2823708507648807800}
   m_Layer: 5
   m_Name: Border
   m_TagString: Untagged
@@ -787,3 +897,17 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2823708507648807800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114330192109801384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 8114330192109801390}
+  ID: BorderNormal

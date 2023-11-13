@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 519606748625946921}
   - component: {fileID: 519606748625947094}
   - component: {fileID: 6888980694397592839}
+  - component: {fileID: 7037095450597536184}
+  - component: {fileID: 4109858089839465676}
   m_Layer: 5
   m_Name: Menu
   m_TagString: Untagged
@@ -161,6 +163,34 @@ MonoBehaviour:
   Separators: []
   currentTarget: {fileID: 0}
   isOpen: 0
+--- !u!114 &7037095450597536184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519606748625947093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 519606748625946923}
+  ID: PopupNormal
+--- !u!114 &4109858089839465676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519606748625947093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49723feda0e615c438b2199ffe11b316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 519606748625946921}
+  ID: ShadowNormal
 --- !u!1 &519606749221569683
 GameObject:
   m_ObjectHideFlags: 0
@@ -173,6 +203,7 @@ GameObject:
   - component: {fileID: 519606749221569687}
   - component: {fileID: 519606749221569684}
   - component: {fileID: 519606749221569685}
+  - component: {fileID: 8246775028141922200}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -264,3 +295,17 @@ MonoBehaviour:
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &8246775028141922200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519606749221569683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 519606749221569684}
+  ID: BorderNormal
