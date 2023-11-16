@@ -126,7 +126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 8114330190229511008}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &8114330190553048468
 GameObject:
   m_ObjectHideFlags: 0
@@ -401,7 +401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 8114330190922506814}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &8114330190933503010
 GameObject:
   m_ObjectHideFlags: 0

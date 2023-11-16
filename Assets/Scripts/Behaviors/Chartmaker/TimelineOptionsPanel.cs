@@ -42,7 +42,7 @@ public class TimelineOptionsPanel : MonoBehaviour
         if (isDirty)
         {
             isDirty = false;
-            Storage str = Chartmaker.main.PreferencesStorage;
+            Storage str = Chartmaker.PreferencesStorage;
             str.Set("PB:Speed", Speed);
             str.Set("TL:SeparationFactor", SeparationFactor);
             str.Set("TL:FollowSeekLine", FollowSeekLine);
@@ -53,7 +53,7 @@ public class TimelineOptionsPanel : MonoBehaviour
 
     public void GetValues()
     {
-        Storage str = Chartmaker.main.PreferencesStorage;
+        Storage str = Chartmaker.PreferencesStorage;
         Speed = str.Get("PB:Speed", 1f);
         SeparationFactor = str.Get("TL:SeparationFactor", 2);
         FollowSeekLine = str.Get("TL:FollowSeekLine", true);

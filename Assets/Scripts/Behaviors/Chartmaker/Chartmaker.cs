@@ -41,10 +41,10 @@ public class Chartmaker : MonoBehaviour
     public object ClipboardItem;
     public ChartmakerHistory History = new();
 
-    public Storage PreferencesStorage;
+    public static Storage PreferencesStorage;
     public Storage KeybindingsStorage;
     public Storage RecentSongsStorage;
-    public ChartmakerPrefs Preferences = new();
+    public static ChartmakerPrefs Preferences = new();
     [Space]
     public Themer Themer;
 
@@ -55,7 +55,6 @@ public class Chartmaker : MonoBehaviour
     public void Awake()
     {
         main = this;
-        PreferencesStorage = new("cm_prefs");
         KeybindingsStorage = new("cm_keys");
         RecentSongsStorage = new("cm_recent");
         Preferences.Load(PreferencesStorage);
@@ -207,6 +206,8 @@ public class Chartmaker : MonoBehaviour
         OnHistoryUpdate();
         ClipboardItem = null;
         OnClipboardUpdate();
+
+        BorderlessWindow.RenameWindow(CurrentSong.SongArtist + " - " + CurrentSong.SongName + " // JANOARG Chartmaker");
         
         SetEditorActive(true);
     }
@@ -340,6 +341,9 @@ public class Chartmaker : MonoBehaviour
         SongSource.time = 0;
         SetEditorActive(false);
         PlayerView.main.MainCamera.rect = new (0, 0, 1, 1);
+        
+        BorderlessWindow.RenameWindow("JANOARG Chartmaker");
+
         IsDirty = false;
     }
     
@@ -631,6 +635,7 @@ public class ChartmakerPrefs {
     public bool SaveOnPlay;
 
     public string Theme = "Prototype";
+    public bool UseDefaultWindow;
 
     public void Load(Storage storage)
     {
@@ -638,5 +643,6 @@ public class ChartmakerPrefs {
         SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
 
         Theme = storage.Get("AP:Theme", Theme);
+        UseDefaultWindow = storage.Get("LA:UseDefaultWindow", UseDefaultWindow);
     }
 }

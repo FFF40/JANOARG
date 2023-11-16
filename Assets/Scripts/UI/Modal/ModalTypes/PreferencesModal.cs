@@ -41,8 +41,8 @@ public class PreferencesModal : Modal
 
         if (tab == 0)
         {
-            var prefs = Chartmaker.main.Preferences;
-            var storage = Chartmaker.main.PreferencesStorage;
+            var prefs = Chartmaker.Preferences;
+            var storage = Chartmaker.PreferencesStorage;
             SpawnForm<FormEntryHeader>("Auto-Save");
             SpawnForm<FormEntryBool, bool>("Save on Play", () => prefs.SaveOnPlay, x => {
                 storage.Set("AS:SaveOnPlay", prefs.SaveOnPlay = x); IsDirty = true;
@@ -67,8 +67,8 @@ public class PreferencesModal : Modal
         }
         else if (tab == 2)
         {
-            var prefs = Chartmaker.main.Preferences;
-            var storage = Chartmaker.main.PreferencesStorage;
+            var prefs = Chartmaker.Preferences;
+            var storage = Chartmaker.PreferencesStorage;
 
             SpawnForm<FormEntryHeader>("Theme");
             var themeDropdown = SpawnForm<FormEntryDropdown, object>("", () => prefs.Theme, x => {
@@ -81,9 +81,29 @@ public class PreferencesModal : Modal
             themeDropdown.ValidValues.Add("Prototype", "Prototype (default)");
             themeDropdown.ValidValues.Add("PastelDay", "Pastelland - Day");
             themeDropdown.ValidValues.Add("PastelNight", "Pastelland - Night");
+            themeDropdown.ValidValues.Add("SpaceChrome", "Spaceware - Chrome");
             themeDropdown.ValidValues.Add("Hyperpop", "Hyperpop");
             themeDropdown.TitleLabel.gameObject.SetActive(false);
             themeDropdown.GetComponent<HorizontalLayoutGroup>().padding.left = 10;
+            
+            SpawnForm<FormEntryHeader>("Layout");
+            SpawnForm<FormEntryBool, bool>("Use Default Window", () => prefs.UseDefaultWindow, x => {
+                storage.Set("LA:UseDefaultWindow", prefs.UseDefaultWindow = x); IsDirty = true;
+                #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
+                    if (x) 
+                    {
+                        BorderlessWindow.SetFramedWindow();
+                        BorderlessWindow.ResizeWindowDelta(2, 1);
+                        BorderlessWindow.MoveWindowDelta(new(-1, 0));
+                    }
+                    else 
+                    {
+                        BorderlessWindow.SetFramelessWindow();
+                        BorderlessWindow.ResizeWindowDelta(-2, -1);
+                        BorderlessWindow.MoveWindowDelta(new(1, 0));
+                    }
+                #endif
+            });
         }
     }
     

@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 6743236304066667854}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &1971423905908226969
 GameObject:
   m_ObjectHideFlags: 0
@@ -667,7 +667,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 2426519698914531863}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &4689990028152016604
 GameObject:
   m_ObjectHideFlags: 0
@@ -758,7 +758,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 5807243635614871336}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &5261361371704921814
 GameObject:
   m_ObjectHideFlags: 0
@@ -849,7 +849,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 4325119772196977039}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &5770443907416181379
 GameObject:
   m_ObjectHideFlags: 0
@@ -940,7 +940,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 3354998920825341176}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &7539578358487799473
 GameObject:
   m_ObjectHideFlags: 0
@@ -1052,7 +1052,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 6119820968349211684}
-  ID: ControlContent
+  ID: Content0
 --- !u!1 &8520513515576945451
 GameObject:
   m_ObjectHideFlags: 0

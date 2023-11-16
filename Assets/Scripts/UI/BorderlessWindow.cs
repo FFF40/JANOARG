@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine.SceneManagement;
 using System.Text;
+using UnityEngine.Events;
 
 public class BorderlessWindow
 {
-    public static bool framed = true;
+    public static bool IsFramed;
+    public static bool IsMaximized;
+
+    public static UnityEvent OnWindowUpdate = new();
 
     static IntPtr CurrentWindow;
     
@@ -20,12 +24,14 @@ public class BorderlessWindow
     delegate IntPtr WinProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
     [DllImport("kernel32.dll")]
-    private static extern uint GetCurrentThreadId();
+    static extern uint GetCurrentThreadId();
     [DllImport("user32.dll")]
-    private static extern bool EnumThreadWindows(uint dwThreadId, EnumWinProc lpEnumFunc, IntPtr lParam);
-    private delegate bool EnumWinProc(IntPtr hWnd, IntPtr lParam);
+    static extern bool EnumThreadWindows(uint dwThreadId, EnumWinProc lpEnumFunc, IntPtr lParam);
+    delegate bool EnumWinProc(IntPtr hWnd, IntPtr lParam);
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern int GetClassName(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+    static extern int GetClassName(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    static extern bool SetWindowText(IntPtr hWnd, string lpString);
     [DllImport("user32.dll")]
     static extern IntPtr GetActiveWindow();
     [DllImport("user32.dll")]
@@ -77,6 +83,12 @@ public class BorderlessWindow
         public WindowPos pos;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    struct StyleStruct
+    {
+        public uint oldStyle, newStyle;
+    }
+
 
     const int GWL_WINPROC = -4;
     const int GWL_STYLE = -16;
@@ -88,7 +100,9 @@ public class BorderlessWindow
 
     const int WM_GETMINMAXINFO = 0x0024;
     const int WM_SIZING = 0x0214;
+    const int WM_SIZE = 0x0005;
     const int WM_NCCALCSIZE = 0x0083;
+    const int WM_STYLECHANGED = 0x007D;
 
     const uint WS_VISIBLE = 0x10000000;    
     const uint WS_POPUP = 0x80000000;
@@ -114,13 +128,21 @@ public class BorderlessWindow
     public static void InitializeWindow()
     {
         Vector2Int screenSize = new(Screen.width, Screen.height);
+        
+        Chartmaker.PreferencesStorage = new("cm_prefs");
+        Chartmaker.Preferences.Load(Chartmaker.PreferencesStorage);
+
         #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
             FindWindow();
-            SetFramelessWindow();
-            ResizeWindow(screenSize.x + 14, screenSize.y + 14);
             BorderlessWindow.HookWindowProc();
-            ResizeWindow(screenSize.x + 1, screenSize.y + 1);
-            ResizeWindow(screenSize.x - 1, screenSize.y - 1);
+            RenameWindow("JANOARG Chartmaker");
+            
+            IsFramed = Chartmaker.Preferences.UseDefaultWindow;
+            if (!IsFramed)
+            {
+                SetFramelessWindow();
+                ResizeWindow(screenSize.x + 14, screenSize.y + 14);
+            }
         #endif
     }
 
@@ -164,9 +186,37 @@ public class BorderlessWindow
     { 
         if (msg == WM_SIZING) 
         {
+            if (IsFramed) return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+
             GetWindowRect(CurrentWindow, out WinRect winRect);
             MoveWindowDelta(Vector2.one, true);
             MoveWindowDelta(-Vector2.one, true);
+            return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+        }
+        else if (msg == WM_STYLECHANGED) 
+        {
+            if ((int)wParam == GWL_STYLE)
+            {
+                var styleStruct = Marshal.PtrToStructure<StyleStruct>(lParam);
+                IsFramed = (styleStruct.newStyle & WS_CAPTION) != 0;
+                OnWindowUpdate.Invoke();
+            }
+
+            return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+        }
+        else if (msg == WM_SIZE) 
+        {
+            if ((int)wParam == 2)
+            {
+                IsMaximized = true;
+                OnWindowUpdate.Invoke();
+            }
+            else if ((int)wParam == 0)
+            {
+                IsMaximized = false;
+                OnWindowUpdate.Invoke();
+            }
+
             return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
         }
         else if (msg == WM_GETMINMAXINFO) 
@@ -181,6 +231,8 @@ public class BorderlessWindow
         }
         else if (msg == WM_NCCALCSIZE) 
         {
+            if (IsFramed) return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+
             if (wParam != IntPtr.Zero)
             {
                 var size = Marshal.PtrToStructure<NCCalcSizeParams>(lParam);
@@ -215,13 +267,13 @@ public class BorderlessWindow
     public static void SetFramelessWindow()
     {
         SetWindowLong(CurrentWindow, GWL_STYLE, WS_THICKFRAME | WS_VISIBLE);
-        framed = false;
+        IsFramed = false;
     }
 
     public static void SetFramedWindow()
     {
         SetWindowLong(CurrentWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-        framed = true;
+        IsFramed = true;
     }
 
     public static void MinimizeWindow()
@@ -273,6 +325,10 @@ public class BorderlessWindow
         var w = winRect.right - winRect.left + dWidth;
         var h = winRect.bottom - winRect.top + dHeight;
         MoveWindow(CurrentWindow, winRect.left, winRect.top, w, h, false);
+    }
+
+    public static void RenameWindow (string title) {
+        SetWindowText(CurrentWindow, title);
     }
 }
 

@@ -50,7 +50,7 @@ public class ContextMenuHolder : MonoBehaviour
             menu = Instantiate(ContextMenuSample, transform);
             ContextMenus.Add(menu);
         }
-        if (menu.isOpen) 
+        if (menu.isOpen)
         {
             menu.Close();
         }

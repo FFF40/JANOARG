@@ -73,6 +73,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     [HideInInspector]
     public List<Image> ItemTails;
     public TMP_Text StoryboardEntrySample;
+    public Material StoryboardEntryMaterial;
     [HideInInspector]
     public List<TMP_Text> StoryboardEntries;
 
@@ -324,6 +325,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             {
                 TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
                 Storyboard sb = thing.Storyboard;
+
+                StoryboardEntryMaterial.SetColor("_OutlineColor", Themer.main.Keys["Background0"] + new Color(0, 0, 0, 1));
 
                 for (int a = 0; a < types.Length; a++)
                 {

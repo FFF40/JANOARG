@@ -7,6 +7,12 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
     [Header("Objects")]
     public GameObject WindowControls;
+    public RectTransform NavBar;
+    public RectTransform ContentHolder;
+    public RectTransform ModalHolder;
+    public RectTransform LoaderHolder;
+    public GameObject MenuButton;
+    public RectTransform SongDetails;
     [Space]
     public TooltipTarget ResizeTooltip;
     public RectTransform ResizeIcon1;
@@ -19,6 +25,8 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     Vector2 mousePos = Vector2.zero;
     public bool maximized { get; private set; }
     bool isFullScreen;
+
+    bool framed;
 
     float clickTime = float.NegativeInfinity;
 
@@ -45,6 +53,21 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
             isFullScreen = Screen.fullScreen;
             WindowControls.SetActive(!isFullScreen);
             if (!isFullScreen) BorderlessWindow.InitializeWindow();
+        }
+        
+
+        if (maximized != BorderlessWindow.IsMaximized) 
+        {
+            maximized = BorderlessWindow.IsMaximized;
+            ResizeTooltip.Text = maximized ? "Restore" : "Maximize";
+            ResizeIcon1.sizeDelta = ResizeIcon2.sizeDelta = maximized ? new(8, 8) : new(10, 10);
+        }
+        if (framed != BorderlessWindow.IsFramed) 
+        {
+            framed = BorderlessWindow.IsFramed;
+            ContentHolder.sizeDelta = ModalHolder.sizeDelta = LoaderHolder.sizeDelta = NavBar.anchoredPosition = Vector2.up * (framed ? 0 : -28);
+            MenuButton.SetActive(framed);
+            SongDetails.anchoredPosition = Vector2.right * (framed ? 32 : 4);
         }
     }
 
@@ -108,7 +131,7 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
     public void OnDrag(PointerEventData data)
     {
-        if (float.IsNaN(mousePos.x) || BorderlessWindow.framed) return;
+        if (float.IsNaN(mousePos.x) || BorderlessWindow.IsFramed) return;
 
         if (maximized) {
             ResizeWindow();

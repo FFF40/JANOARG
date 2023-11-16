@@ -41,7 +41,7 @@ public class PlayOptionsPanel : MonoBehaviour
         if (isDirty)
         {
             isDirty = false;
-            Storage str = Chartmaker.main.PreferencesStorage;
+            Storage str = Chartmaker.PreferencesStorage;
             str.Set("PB:Volume:Main", MainVolume);
             str.Set("PB:Volume:Metronome", MetronomeVolume);
             str.Set("PB:Volume:Hitsounds", HitsoundsVolume);
@@ -51,7 +51,7 @@ public class PlayOptionsPanel : MonoBehaviour
 
     public void GetValues()
     {
-        Storage str = Chartmaker.main.PreferencesStorage;
+        Storage str = Chartmaker.PreferencesStorage;
         MainVolume = str.Get("PB:Volume:Main", 1f);
         MetronomeVolume = str.Get("PB:Volume:Metronome", 0f);
         HitsoundsVolume = str.Get("PB:Volume:Hitsounds", 1f);

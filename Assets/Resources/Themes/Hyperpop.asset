@@ -82,9 +82,9 @@ MonoBehaviour:
   - Key: TimelineHandleBorder
     Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: TimelinePeekRangeNormal
-    Value: {r: 0, g: 0, b: 0, a: 1}
-  - Key: TimelinePeekRangeBorder
     Value: {r: 1, g: 1, b: 1, a: 1}
+  - Key: TimelinePeekRangeBorder
+    Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: TimelineSeekLineNormal
     Value: {r: 0, g: 1, b: 1, a: 1}
   - Key: TimelineSeekLineBorder
@@ -108,13 +108,13 @@ MonoBehaviour:
   - Key: TimelineTickOther
     Value: {r: 0.5, g: 0, b: 1, a: 1}
   - Key: TimelineItemNormal
-    Value: {r: 0, g: 0, b: 0, a: 1}
+    Value: {r: 1, g: 1, b: 1, a: 1}
   - Key: TimelineItemHighlighted
-    Value: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+    Value: {r: 0, g: 1, b: 1, a: 1}
   - Key: TimelineItemPressed
-    Value: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: TimelineItemTail
-    Value: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
+    Value: {r: 0, g: 0.75, b: 1, a: 0.5}
   - Key: InspectorHeader
     Value: {r: 1, g: 0.9, b: 1, a: 1}
   - Key: BlockerBackground

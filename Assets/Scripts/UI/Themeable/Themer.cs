@@ -13,7 +13,7 @@ public class Themer : MonoBehaviour
     public void InitTheme()
     {
         main = this;
-        string name = Chartmaker.main.Preferences.Theme;
+        string name = Chartmaker.Preferences.Theme;
         Theme theme = Themes.Find(x => x.name == name);
         if (!theme) theme = Themes[0];
         Keys = Theme.ToDict(theme.Keys);

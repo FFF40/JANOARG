@@ -103,6 +103,11 @@ public class ContextMenu : MonoBehaviour
                 {
                     if (ChildMenu?.isOpen == false || ChildMenu?.currentTarget != sep.transform)
                     {
+                        if (ChildMenu)
+                        {
+                            ChildMenu.Close();
+                            ChildMenu.justState = false;
+                        } 
                         ChildMenu = ContextMenuHolder.main.Open(
                             ChildMenu, list.Items, (RectTransform)sep.transform, ContextMenuDirection.Right, new Vector2(0, 3)
                         );
