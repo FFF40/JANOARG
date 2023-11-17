@@ -144,7 +144,7 @@ public class InspectorPanel : MonoBehaviour
             SpawnForm<FormEntryHeader>("General");
             SpawnForm<FormEntryFloat, float>("Offset", () => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
             SpawnForm<FormEntryFloat, float>("Duration", () => ts.Duration, x => Chartmaker.main.SetItem(ts, "Duration", x));
-            SpawnForm<FormEntryFloat, float>("From", () => ts.From, x => Chartmaker.main.SetItem(ts, "From", x));
+            SpawnForm<FormEntryToggleFloat, float>("From", () => ts.From, x => Chartmaker.main.SetItem(ts, "From", x));
             SpawnForm<FormEntryFloat, float>("To", () => ts.Target, x => Chartmaker.main.SetItem(ts, "Target", x));
             SpawnForm<FormEntryEasing, EasingPair>("Easing", () => new (ts.Easing, ts.EaseMode), 
                 x => { Chartmaker.main.SetItem(ts, "Easing", x.Function); Chartmaker.main.SetItem(ts, "EaseMode", x.Mode); }
@@ -445,9 +445,14 @@ public class InspectorPanel : MonoBehaviour
             SpawnForm<FormEntryHeader>("Appearance");
             MakeHitStyleEntry(hit);
 
+            FormEntryToggleFloat dirField = null;
             SpawnForm<FormEntryHeader>("Behavior");
-            SpawnForm<FormEntryBool, bool>("Flickable", () => hit.Flickable, x => Chartmaker.main.SetItem(hit, "Flickable", x));
-            SpawnForm<FormEntryFloat, float>("Direction", () => hit.FlickDirection, x => Chartmaker.main.SetItem(hit, "FlickDirection", x));
+            SpawnForm<FormEntryBool, bool>("Flickable", () => hit.Flickable, x => {
+                Chartmaker.main.SetItem(hit, "Flickable", x);
+                dirField?.gameObject.SetActive(x);
+            });
+            dirField = SpawnForm<FormEntryToggleFloat, float>("Direction", () => hit.FlickDirection, x => Chartmaker.main.SetItem(hit, "FlickDirection", x));
+            dirField.gameObject.SetActive(hit.Flickable);
         }
         else 
         {

@@ -123,6 +123,7 @@
      <Compile Include="Assets\Scripts\UI\GraphicCircle.cs" />
      <Compile Include="Assets\Scripts\UI\ContextMenu\ContextMenuItem.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
+     <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryToggleFloat.cs" />
      <Compile Include="Assets\Scripts\Data\ChartManager.cs" />
      <Compile Include="Assets\Scripts\UI\Form\Formmaker.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\NewSongModal.cs" />
