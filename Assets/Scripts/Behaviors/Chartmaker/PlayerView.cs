@@ -344,9 +344,9 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(man.CurrentLane.Rotation)) * (x - man.CurrentLane.Position);
 
                 Func<Vector3> get = 
-                    CurrentDragMode == HandleDragMode.Start ? (() => man.StartPos) : 
+                    CurrentDragMode == HandleDragMode.Start ? (() => inv(man.StartPos)) : 
                     CurrentDragMode == HandleDragMode.Center ? (() => man.CurrentLane.Position) : 
-                    CurrentDragMode == HandleDragMode.End ? (() => man.EndPos) : null;
+                    CurrentDragMode == HandleDragMode.End ? (() => inv(man.EndPos)) : null;
                     
                 Vector3 gizmoAnchor = get();
                 
@@ -389,7 +389,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 if (index < 0) return;
                 LaneStepManager man = lman.Steps[index];
 
-                Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(lman.CurrentLane.Rotation)) * (x - lman.CurrentLane.Position);
+                Vector3 inv(Vector3 x) => Quaternion.Inverse(lman.FinalRotation) * (x - lman.FinalPosition);
 
                 Func<Vector3> get = 
                     CurrentDragMode == HandleDragMode.Start ? (() => man.CurrentStep.StartPos) : 
@@ -399,7 +399,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 Vector3 gizmoAnchor = get();
 
                 OnDragEvent += (ev) => {
-                    Vector3? dragPos = RaycastScreenToPlane(ev.position, lman.CurrentLane.Position + (man.Distance - lman.CurrentDistance) * Vector3.forward, Quaternion.Euler(lman.CurrentLane.Rotation));
+                    Vector3? dragPos = RaycastScreenToPlane(ev.position, lman.FinalPosition + lman.FinalRotation * Vector3.forward * (man.Distance - lman.CurrentDistance), lman.FinalRotation);
                     if (dragPos != null)
                     {
                         dragPos = inv((Vector3)dragPos);
@@ -414,8 +414,6 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                     {
                         dragPos = gizmoAnchor;
                     }
-
-                    Debug.Log(CurrentDragMode + " " + dragPos);
                 
                     if (CurrentDragMode == HandleDragMode.Start) 
                         DoMove<ChartmakerMoveLaneStepStartAction, LaneStep>(step, (Vector3)dragPos - get());
@@ -423,6 +421,56 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                         DoMove<ChartmakerMoveLaneStepAction, LaneStep>(step, (Vector3)dragPos - get());
                     else if (CurrentDragMode == HandleDragMode.End) 
                         DoMove<ChartmakerMoveLaneStepEndAction, LaneStep>(step, (Vector3)dragPos - get());
+                };
+            }
+            break;
+            
+            case HitObject hit:
+            {
+                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                if (lindex < 0) return;
+                LaneManager lman = Manager.Lanes[lindex];
+
+                int index = InspectorPanel.main.CurrentLane.Objects.IndexOf(hit);
+                if (index < 0) return;
+                HitObjectManager man = lman.Objects[index];
+                
+                Vector3 inv(Vector3 x)
+                {
+                    Vector3 point = Quaternion.Inverse(lman.FinalRotation) * (x - lman.FinalPosition) - Vector3.forward * (man.Position.z - lman.CurrentDistance);
+                    return Vector3.right * (Quaternion.Euler(0, 0, Vector2.SignedAngle(lman.EndPos - lman.StartPos, Vector2.right)) * (point - lman.StartPos)).x / Vector2.Distance(lman.StartPos, lman.EndPos);
+                }
+
+                Func<Vector3> get = 
+                    CurrentDragMode == HandleDragMode.Start ? (() => Vector3.right * man.CurrentHit.Position) : 
+                    CurrentDragMode == HandleDragMode.Center ? (() => Vector3.right * (man.CurrentHit.Position + man.CurrentHit.Length / 2)) : 
+                    CurrentDragMode == HandleDragMode.End ? (() => Vector3.right * (man.CurrentHit.Position + man.CurrentHit.Length)) : null;
+                    
+                Vector3 gizmoAnchor = get();
+
+                OnDragEvent += (ev) => {
+                    Vector3? dragPos = RaycastScreenToPlane(ev.position, lman.FinalPosition + lman.FinalRotation * Vector3.forward * (man.Position.z - lman.CurrentDistance), lman.FinalRotation);
+                    if (dragPos != null)
+                    {
+                        dragPos = inv((Vector3)dragPos);
+                        if (GridSize[0] > 0)
+                        {
+                            Vector3 des = new();
+                            des[0] = Mathf.Round((dragPos?[0] ?? 0) / 0.05f) * 0.05f;
+                            dragPos = des;
+                        } 
+                    }
+                    else
+                    {
+                        dragPos = gizmoAnchor;
+                    }
+                
+                    if (CurrentDragMode == HandleDragMode.Start) 
+                        DoMove<ChartmakerMoveHitObjectStartAction, HitObject>(hit, (Vector3)dragPos - get());
+                    else if (CurrentDragMode == HandleDragMode.Center) 
+                        DoMove<ChartmakerMoveHitObjectAction, HitObject>(hit, (Vector3)dragPos - get());
+                    else if (CurrentDragMode == HandleDragMode.End) 
+                        DoMove<ChartmakerMoveHitObjectEndAction, HitObject>(hit, (Vector3)dragPos - get());
                 };
             }
             break;
@@ -458,6 +506,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         if (CurrentDragMode != HandleDragMode.None)
         {
             InspectorPanel.main.UpdateForm();
+            TimelinePanel.main.UpdateItems();
         }
         isDragged = false;
         OnDragEvent = null;

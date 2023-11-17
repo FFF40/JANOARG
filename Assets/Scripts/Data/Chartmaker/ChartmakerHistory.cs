@@ -371,6 +371,79 @@ public class ChartmakerMoveLaneStepEndAction : ChartmakerMoveAction<LaneStep>
     }
 }
 
+public class ChartmakerMoveHitObjectAction : ChartmakerMoveAction<HitObject>
+{
+
+    public override string GetName()
+    {
+        return "Move Hit Object";
+    }
+
+    public override void Do(Vector3 offset) 
+    {
+        Item.Position += offset.x;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "Position")
+            {
+                ts.From += offset.x;
+                ts.Target += offset.x;
+            }
+        }
+    }
+}
+
+public class ChartmakerMoveHitObjectStartAction : ChartmakerMoveAction<HitObject>
+{
+
+    public override string GetName()
+    {
+        return "Move Hit Object Start";
+    }
+
+    public override void Do(Vector3 offset) 
+    {
+        Item.Position += offset.x;
+        Item.Length -= offset.x;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "Position")
+            {
+                ts.From += offset.x;
+                ts.Target += offset.x;
+            }
+            else if (ts.ID == "Length")
+            {
+                ts.From -= offset.x;
+                ts.Target -= offset.x;
+            }
+        }
+    }
+}
+
+public class ChartmakerMoveHitObjectEndAction : ChartmakerMoveAction<HitObject>
+{
+
+    public override string GetName()
+    {
+        return "Move Hit Object End";
+    }
+
+    public override void Do(Vector3 offset) 
+    {
+        Item.Length += offset.x;
+        foreach (Timestamp ts in Item.Storyboard.Timestamps)
+        {
+            if (ts.ID == "Length")
+            {
+                ts.From += offset.x;
+                ts.Target += offset.x;
+            }
+        }
+    }
+}
+
+
 public class ChartmakerGroupRenameAction: IChartmakerAction
 {
     public Chart Target;
