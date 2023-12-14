@@ -1,0 +1,24 @@
+$title
+Pattern Design
+$
+This section of the manual will document some of the common pattern designs and how to evaluate chart difficulty.
+
+$t2
+Pattern
+$
+A Pattern is simply a sequence of Hit Objects.
+
+$t2
+Pattern Notation
+$
+For the sake of demonstration, let us have the following representation of a Pattern:
+$layout
+Box 0 0 125 250 color Background3 shadow ShadowNormal
+Box 0 248 125 2 color BorderNormal
+Box 5 180 25 4 color Content0
+Box 35 140 25 4 color Content0
+Box 65 100 25 4 color Content0
+Box 95 60 25 4 color Content0
+$
+This box represents a single Lane with Hit Objects on it. The line below is the judgment line - where 
+the Hit Objects will fall into.

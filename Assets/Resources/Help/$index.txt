@@ -1,0 +1,32 @@
+index Main
+theory Chart Theory
+ theory/structure Data Structures
+  theory/structure/PlayableSong Playable Song
+   theory/structure/Metronome Metronome
+   theory/structure/BPMStop BPM Stop
+   theory/structure/Chart Chart
+   theory/structure/Palette Palette
+   theory/structure/LaneStyle Lane Style
+   theory/structure/HitStyle Hit Style
+   theory/structure/CameraController Camera Controller
+   theory/structure/LaneGroup Lane Group
+   theory/structure/Lane Lane
+   theory/structure/LaneStep Lane Step
+   theory/structure/HitObject Hit Object
+  theory/structure/Storyboard Storyboard
+   theory/structure/Timestamp Timestamp
+ theory/terms Terminology
+ theory/pattern Pattern Design
+  theory/pattern/difficulty Difficulty Analysis
+  theory/pattern/patterns Common Patterns
+  theory/pattern/patternshort Patterns Cheat Sheet
+anatomy Chartmaker Anatomy
+ anatomy/elements UI Elements
+  anatomy/elements/TitleBar Title Bar
+  anatomy/elements/HomeScreen Home Screen
+  anatomy/elements/EditorScreen Editor Screen
+   anatomy/elements/InformationBar Information Bar
+   anatomy/elements/PlayerView Player View
+   anatomy/elements/Picker Picker
+   anatomy/elements/Inspector Inspector
+   anatomy/elements/Timeline Timeline

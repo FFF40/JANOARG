@@ -217,7 +217,7 @@ public class LaneGroupManager
             LaneGroupManager group = main.Groups[CurrentGroup.Group];
             if (group.CurrentGroup.Name == CurrentGroup.Group)
             {
-                Debug.LogError("Infinite group reference loop detected: " + original);
+                Debug.LogError("Cyclical Lane group reference detected: " + original);
             }
             else 
             {

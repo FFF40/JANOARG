@@ -1,0 +1,30 @@
+$title
+Palette
+$
+The <b>Palette</b> contains appearance and color information of a Chart and ultimately determines 
+the look and feel of that Chart.
+
+
+$t2
+Properties
+
+$
+ • <indent=2em><b>Background Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the background of the game when this chart is being played.
+
+$
+ • <indent=2em><b>Interface Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the user interface of the game when this chart is being played.
+
+$t2
+Child Objects
+
+$
+ • <indent=2em><b>Lane Styles</b> <i>(List<Lane Style>)</i>;
+$n
+ • <indent=2em><b>Hit Styles</b> <i>(List<Hit Style>)</i>:
+$n
+<indent=2em>The style instances of the chart's Lanes and Hit Objects, respectively, Those Lanes/Hit Objects 
+can then choose an instance of a Lane/Hit Style which will determine the looks of that Lane/Hit Object.

@@ -1,0 +1,31 @@
+$title
+Title Bar
+$
+The <b>title bar</b> works like what you would expect a title bar to do in an operating system like Windows. 
+It is the only UI element that persists between the Home screen and the Editor screen and is used to control 
+the Chartmaker program window.
+
+$t2
+Layout
+$
+<b><size=120%>Layout
+$layout
+Box 0 0 400 24 color Background0 shadow ShadowNormal border BorderNormal
+Box 3 3 120 18 border BorderNormal text Content0 <b>1
+Box 230 12 0 0 text Content0 <b>2
+Box 337 3 60 18 border BorderNormal text Content0 <b>3
+$
+1. <indent=2em><b>Main Menu</b>
+$n
+<indent=2em>A menu consisting of basic actions grouped in categories such as File or Edit. Note that some 
+of the actions are only available when a certain screen is active.
+
+$
+2. <indent=2em><b>Window Title</b>
+$n
+<indent=2em>The title of the program.
+
+$
+3. <indent=2em><b>Window Actions</b>
+$n
+<indent=2em>The Minimize, Maximize/Restore, and Close buttons.

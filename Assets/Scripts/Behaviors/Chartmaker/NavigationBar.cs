@@ -99,6 +99,8 @@ public class NavigationBar : MonoBehaviour
         return new ContextMenuList(
             new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>()),
             new ContextMenuListSeparator(),
+            new ContextMenuListAction("Chartmaker Manual...", () => ModalHolder.main.Spawn<HelpModal>()),
+            new ContextMenuListSeparator(),
             new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/ducdat0507/janoarg")),
             new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm"))
         );

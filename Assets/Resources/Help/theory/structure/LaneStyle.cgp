@@ -1,0 +1,22 @@
+$title
+Lane Style
+$
+A <b>Lane Style</b> instance contains appearance information related to Lanes. The Lanes can then 
+select a Lane Style to determine its looks based on the Lane Style's current parameters.
+$
+<b>Note:</b> Styles are currently simplified to only use the default material in the standalone 
+version of the Chartmaker, which makes the Material and Color Target fields unavailable.
+
+$t2
+Properties
+
+$
+ • <indent=2em><b>Lane Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the body of the Lane.
+
+$
+ • <indent=2em><b>Judge Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the judgement line of the Lane. (Note: The default material currently does not use 
+this color.)

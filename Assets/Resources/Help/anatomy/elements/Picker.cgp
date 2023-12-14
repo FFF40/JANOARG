@@ -1,0 +1,24 @@
+$title
+Picker
+$
+The <b>Picker</b> shows a list of actions or objects that can be selected, which changes the behavior of 
+the Timeline. The options the Picker gives changes depending on the current Timeline tab that is being 
+active.
+
+$
+ • <indent=2em><b>Cursor</b>
+$n
+<indent=2em>Clicking on an object on the Timeline will select it on the Inspector. Dragging the background 
+of the Timeline will seek the current time to the cursor's position.
+
+$
+ • <indent=2em><b>Select</b>
+$n
+<indent=2em>Clicking on an object on the Timeline will select it on the Inspector. Dragging the background 
+of the Timeline activates the multi-select box. All objects that are inside the multi-select box will be 
+selected when the mouse button is lifted.
+
+$
+ • <indent=2em><b>Delete</b>
+$n
+<indent=2em>Clicking on an object on the Timeline will remove it from the object list.

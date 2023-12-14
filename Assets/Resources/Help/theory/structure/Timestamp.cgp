@@ -1,0 +1,41 @@
+$title
+Timestamp
+$
+A <b>Timestamp</b> object defines a point in time that a field of a Storyboardale object changes from a value to 
+another.
+
+
+$t2
+Properties
+
+$
+ • <indent=2em><b>Offset</b> <i>(Float)</i>:
+$n
+<indent=2em>The point in time when the animation start, in beats.
+
+$
+ • <indent=2em><b>Type</b> <i>(Enum)</i>:
+$n
+<indent=2em>The property to animate. The possible values of this property changes based on the object 
+that the Timestamp belongs to.
+
+$
+ • <indent=2em><b>Duration</b> <i>(Float)</i>:
+$n
+<indent=2em>The time duration that the animation will take, in beats.
+
+$
+ • <indent=2em><b>From</b> <i>(Float, Optional)</i>:
+$n
+<indent=2em>The initial value that the targeted property will start from. If this is unset, the value 
+that the target property has before the animation will be used.
+
+$
+ • <indent=2em><b>To</b> <i>(Float)</i>:
+$n
+<indent=2em>The target value that the targeted property will change to.
+
+$
+ • <indent=2em><b>Easing</b> <i>(Easing)</i>:
+$n
+<indent=2em>The easing function that the animation uses.

@@ -1,0 +1,26 @@
+$title
+Hit Style
+$
+A <b>Hit Style</b> instance contains appearance information related to Hit Objects. The Hit Objects can then 
+select a Hit Style to determine its looks based on the Hit Style's current parameters.
+$
+<b>Note:</b> Styles are currently simplified to only use the default material in the standalone 
+version of the Chartmaker, which makes the Material and Color Target fields unavailable.
+
+$t2
+Properties
+
+$
+ • <indent=2em><b>Normal Hit Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the Hit Objects that are the Normal type.
+
+$
+ • <indent=2em><b>Catch Hit Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the Hit Objects that are the Catch type.
+
+$
+ • <indent=2em><b>Hold Tail Color</b> <i>(Color, Storyboardable)</i>:
+$n
+<indent=2em>The color of the hold tail for Hit Object that has hold tails.

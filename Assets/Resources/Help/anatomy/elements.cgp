@@ -1,0 +1,10 @@
+$title
+Chartmaker UI Elements
+$
+As with most other programs, the JANOARG Chartmaker communicates with the user (charter) using what's 
+called an user interface. The user interface (or UI, for short) lets the charter make charts quicker 
+and makes the charting process easier.
+$
+The Chartmaker's UI consist of two parts: the Home screen and the Editor screen. The Home screen appears 
+when you start the Chartmaker program, while the Editor screen appears in place of the Home screen after 
+you open a song to edit.

@@ -1,0 +1,24 @@
+$title
+Metronome
+$
+The <b>Metronome</b> contains the information needed to align the game's timing unit (beats) to 
+the actual beats of the song.
+$
+Most objects in JANOARG uses beats to represent that object's temporal position (a.k.a. position 
+in the Timeline) that will be used for the game's logic (for example, the temporal position of a Hit 
+Object indicates the position in the song that that object needs to be hit). The only exceptions are objects 
+that don't have a temporal position (such as the Palette) and the BPM Stops, which uses seconds 
+instead.
+$
+Since adjusting the Metronome can affect the final position of nearly all objects that contain a timing 
+position, it is crucial to make sure the timing data is correct before starting any charting 
+work. The Chartmaker contains certain features that can help you achieve this such as Metronome 
+hinting sounds and showing the song's waveform representation on the Timeline.
+
+$t2
+Objects
+
+$
+ • <indent=2em><b>BPM Stops</b> <i>(List<BPM Stop>)</i>:
+$n
+<indent=2em>A list of BPM Stops that will be used to calculate the timing positions of each beat in the song.

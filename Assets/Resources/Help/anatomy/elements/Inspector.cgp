@@ -1,0 +1,55 @@
+$title
+Inspector
+$
+The <b>Inspector</b> panel shows and lets you edit property of the currently selected object.
+
+$t2
+Layout
+$layout
+Box 0 0 200 300 color Background2 shadow ShadowNormal border BorderNormal
+Box 1 1 20 298 color Background1 text Content0 <b>5
+Box 1 1 198 20 color InspectorHeader
+Box 3 3 16 16 border BorderNormal text Content0 <b>1
+Box 21 1 114 20 text Content0 <b>2
+Box 139 1 60 20 color ControlNormal text ControlContent <b>3
+Box 21 21 178 258 text Content0 <b>4
+Box 21 279 178 20 color Background1 text Content0 <b>7
+Box 3 281 16 16 border BorderNormal text Content0 <b>6
+$
+
+$
+1. <indent=2em><b>Back Button</b>
+$n
+<indent=2em>Press the button to deselect the currently selected object.
+
+$
+2. <indent=2em><b>Object Name</b>
+$n
+<indent=2em>Shows the name of the currently selected object.
+
+$
+3. <indent=2em><b>Offset Field</b>
+$n
+<indent=2em>The current time position of the currently selected object. Will only be shown if the 
+current object has a time position property. Can be edited.
+
+$
+4. <indent=2em><b>Inspector Form</b>
+$n
+<indent=2em>Shows the properties of the currently active object.
+
+$
+5. <indent=2em><b>Inspector Modes</b>
+$n
+<indent=2em>The list of Inspector modes.
+
+$
+6. <indent=2em><b>Extra Inspector Modes Dropdown</b>
+$n
+<indent=2em>Press the button to show extra Inspector modes.
+
+$
+7. <indent=2em><b>Global Objects</b>
+$n
+<indent=2em>The non-Timeline objects that the current Chart object is a parent of. 
+Press on one of the items shown here to select that object.

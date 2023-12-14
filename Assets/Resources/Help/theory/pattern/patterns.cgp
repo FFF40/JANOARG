@@ -1,0 +1,160 @@
+$title
+Common Patterns
+$
+Some of the patterns are so commonly used on rhythm games they are named by the rhythm game community. 
+This page will document some of them here for ease of reference. Note that although these patterns are only 
+represented with one single Lane, you can (and feel free to) apply these on multiple Lanes on your charts.
+
+$t2
+Chords
+$
+<b>Chords</b> are two or multiple Hit Objects that need to be hit at the same time. The term comes from the music 
+theory field where a chord means two or multiple notes played together.
+$
+There are also terms that refer to chords that consist of a certain amount of Hit Objects 
+(<b>Double</b> for 2, <b>Triple</b> for 3, <b>Quad</b> for 4, e.t.c...). The terms <b>Jump</b> and <b>Hand</b> 
+are also used to refer to Double abd Triple chords, respectively. These terms comes from dance-based rhythm games 
+such as Dance Dance Revolution where you'll need to <i>jump</i> to hit 2 receptors with your feet and a <i>hand</i> 
+is need to hit 3 of them.
+
+$layout
+Box 0 0 425 20 text Content0 <b>Chords
+Box 0 20 425 2 color BorderNormal
+
+$layout
+Box 0 0 125 40 color Background3 shadow ShadowNormal
+Box 0 38 125 2 color BorderNormal
+Box 35 18 25 4 color Content0
+Box 65 18 25 4 color Content0
+Box 0 45 125 20 text Content0 Double/Hand
+
+Box 150 0 125 40 color Background3 shadow ShadowNormal
+Box 150 38 125 2 color BorderNormal
+Box 185 18 25 4 color Content0
+Box 215 18 25 4 color Content0
+Box 245 18 25 4 color Content0
+Box 150 45 125 20 text Content0 Triple/Jump
+
+Box 300 0 125 40 color Background3 shadow ShadowNormal
+Box 300 38 125 2 color BorderNormal
+Box 305 18 25 4 color Content0
+Box 335 18 25 4 color Content0
+Box 365 18 25 4 color Content0
+Box 395 18 25 4 color Content0
+Box 300 45 125 20 text Content0 Quad
+
+$t2
+Streams
+$
+<b>Streams</b> are series of Hit Objects that are scattered across the Lane, timed evenly, and usually 
+have no two Hit Objects that are directly placed before/after each other. The terms <b>Handstream</b> 
+and <b>Jumpstream</b> is used to refer to streams that have Double and Triple note chords 
+occasionally, usually every n-th beat, whereas a stream that do not have any chords can also be referred 
+to as a <b>Single Stream</b>.
+
+
+$layout
+Box 0 0 425 20 text Content0 <b>Streams
+Box 0 20 425 2 color BorderNormal
+
+$layout
+Box 0 0 125 150 color Background3 shadow ShadowNormal
+Box 0 148 125 2 color BorderNormal
+Box 35 8 25 4 color Content0
+Box 65 24 25 4 color Content0
+Box 5 40 25 4 color Content0
+Box 95 56 25 4 color Content0
+Box 65 72 25 4 color Content0
+Box 5 88 25 4 color Content0
+Box 35 104 25 4 color Content0
+Box 65 120 25 4 color Content0
+Box 95 136 25 4 color Content0
+Box 0 155 125 20 text Content0 "Single Stream"
+
+Box 150 0 125 150 color Background3 shadow ShadowNormal
+Box 150 148 125 2 color BorderNormal
+Box 185 8 25 4 color Content0
+Box 215 8 25 4 color Content0
+Box 245 24 25 4 color Content0
+Box 185 40 25 4 color Content0
+Box 155 56 25 4 color Content0
+Box 245 72 25 4 color Content0
+Box 215 72 25 4 color Content0
+Box 185 88 25 4 color Content0
+Box 215 104 25 4 color Content0
+Box 185 120 25 4 color Content0
+Box 245 136 25 4 color Content0
+Box 155 136 25 4 color Content0
+Box 145 6 135 8 border BorderNormal
+Box 145 70 135 8 border BorderNormal
+Box 145 134 135 8 border BorderNormal
+Box 150 155 125 20 text Content0 Handstream
+
+Box 300 0 125 150 color Background3 shadow ShadowNormal
+Box 300 148 125 2 color BorderNormal
+Box 335 8 25 4 color Content0
+Box 365 8 25 4 color Content0
+Box 395 8 25 4 color Content0
+Box 305 24 25 4 color Content0
+Box 335 40 25 4 color Content0
+Box 395 56 25 4 color Content0
+Box 305 72 25 4 color Content0
+Box 335 72 25 4 color Content0
+Box 365 72 25 4 color Content0
+Box 395 88 25 4 color Content0
+Box 305 104 25 4 color Content0
+Box 365 120 25 4 color Content0
+Box 305 136 25 4 color Content0
+Box 335 136 25 4 color Content0
+Box 395 136 25 4 color Content0
+Box 295 6 135 8 border BorderNormal
+Box 295 70 135 8 border BorderNormal
+Box 295 134 135 8 border BorderNormal
+Box 300 155 125 20 text Content0 Jumpstream
+
+$t2
+Rolls/Staircases
+$
+A <b>Roll</b> is a special case of a Stream where the Hit Objects are arranged in an ascending/descending order. 
+A <b>Staircase</b> is similar to a Roll, except the direction switches at each end. A Roll that alternates between 
+every even position and every odd position is called a <b>Split Roll</b>.
+
+$layout
+Box 0 0 125 150 color Background3 shadow ShadowNormal
+Box 0 148 125 2 color BorderNormal
+Box 95 8 25 4 color Content0
+Box 65 24 25 4 color Content0
+Box 35 40 25 4 color Content0
+Box 5 56 25 4 color Content0
+Box 95 72 25 4 color Content0
+Box 65 88 25 4 color Content0
+Box 35 104 25 4 color Content0
+Box 5 120 25 4 color Content0
+Box 95 136 25 4 color Content0
+Box 0 155 125 20 text Content0 Roll
+
+Box 150 0 125 150 color Background3 shadow ShadowNormal
+Box 150 148 125 2 color BorderNormal
+Box 155 8 25 4 color Content0
+Box 185 24 25 4 color Content0
+Box 215 40 25 4 color Content0
+Box 245 56 25 4 color Content0
+Box 215 72 25 4 color Content0
+Box 185 88 25 4 color Content0
+Box 155 104 25 4 color Content0
+Box 185 120 25 4 color Content0
+Box 215 136 25 4 color Content0
+Box 150 155 125 20 text Content0 Staircase
+
+Box 300 0 125 150 color Background3 shadow ShadowNormal
+Box 300 148 125 2 color BorderNormal
+Box 305 8 25 4 color Content0
+Box 395 24 25 4 color Content0
+Box 335 40 25 4 color Content0
+Box 365 56 25 4 color Content0
+Box 305 72 25 4 color Content0
+Box 395 88 25 4 color Content0
+Box 335 104 25 4 color Content0
+Box 365 120 25 4 color Content0
+Box 305 136 25 4 color Content0
+Box 300 155 125 20 text Content0 "Split Roll"

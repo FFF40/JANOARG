@@ -1,0 +1,57 @@
+$title
+Timeline
+$
+The <b>Timeline</b> panel show a chronological view of the items that are inside the song. The Timeline 
+view has 5 tabs: Storyboard, Timing, Lanes; and if a lane is selected: Lane Steps (shown as Steps), 
+and Hit Objects (shown as Hits). Below the Timeline are actions related to the Timeline and options 
+to tweak the Timeline. 
+
+$t2
+Layout
+$pre
+$layout
+Box 0 0 400 150 color Background2 shadow ShadowNormal border BorderNormal
+Box 1 1 398 20 text Content0 <b>1
+Box 1 21 398 108 color TimelineBackground text Content0 <b>2
+Box 2 130 100 18 border BorderNormal text Content0 <b>3
+Box 279 130 100 18 border BorderNormal text Content0 <b>4
+Box 380 130 18 18 color ControlNormal border BorderNormal text ControlContent <b>5
++---------------------------------------------------+
+|                         1                         |
+|---------------------------------------------------|
+|                                                   |
+|                         2                         |
+|                                                   |
+|---------------------------------------------------|
+|[     3     ]                        [    4    ][5]|
++---------------------------------------------------+
+$
+
+$
+1. <indent=2em><b>Timeline Modes</b>
+$n
+<indent=2em>A list of the Timeline's available modes. Each mode changes the type of Objects that 
+the Timeline shows.
+
+$
+2. <indent=2em><b>Timeline Body</b>
+$n
+<indent=2em>The body of the Timeline panel, where the Timeline objects reside.
+
+$
+3. <indent=2em><b>Timeline Actions</b>
+$n
+<indent=2em>The bottom left of the panel contains basic actions that are used while 
+editing: Undo, Redo, Cut, Copy, and Paste.
+
+$
+4. <indent=2em><b>Timeline Options</b>
+$n
+<indent=2em>The bottom right of the panel contains basic timeline options such as 
+the song's playback speed or the Timeline's separatoion factor.
+
+$
+5. <indent=2em><b>Extra Timeline Options Dropdown</b>
+$n
+<indent=2em>Press the button to show and edit extra timeline options such as the waveform 
+settings.

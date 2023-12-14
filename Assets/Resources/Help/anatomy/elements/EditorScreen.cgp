@@ -1,0 +1,45 @@
+$title
+Editor Screen
+$
+The <b>Editor screen</b> is the screen that appears after you open a Playable Song on the Home screen. 
+This will be the screen that you spend most of the time in and the screen that you will use to edit Charts.
+
+$t2
+Layout
+$layout
+Box 0 0 240 180 color Background2 shadow ShadowNormal border BorderNormal
+Box 1 1 238 20 text Content0 <b>1
+Box 1 22 24 107 text Content0 <b>2
+Box 26 22 143 107 color Background0 text Content0 <b>3
+Box 170 22 69 107 text Content0 <b>4
+Box 1 130 238 49 text Content0 <b>5
+Box 1 21 238 1 color BorderNormal
+Box 1 129 238 1 color BorderNormal
+Box 25 22 1 107 color BorderNormal
+Box 169 22 1 107 color BorderNormal
+$
+1. <indent=2em><b>Information Bar</b>
+$n
+<indent=2em>The bar at the top of the screen that contains basic information such as the song's name, the 
+charts' name, and the current song time.
+
+$
+2. <indent=2em><b>Picker</b>
+$n
+<indent=2em>Contains a list of Objects that can be placed onto the Timeline.
+
+$
+3. <indent=2em><b>Player View</b>
+$n
+<indent=2em>The live preview of the current chart.
+
+$
+4. <indent=2em><b>Inspector</b>
+$n
+<indent=2em>Shows and lets you edit properties of the current selected Object.
+
+$
+5. <indent=2em><b>Timeline</b>
+$n
+<indent=2em>Shows the representation of objects that contains a time position. This is where 
+you can place, edit, and delete objects.

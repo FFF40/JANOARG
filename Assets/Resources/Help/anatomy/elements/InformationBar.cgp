@@ -1,0 +1,53 @@
+$title
+Information Bar
+$
+The <b>information bar</b> is just below the title bar when the Editor window is active. It displays information 
+about the current song and the state of it.
+
+$t2
+Layout
+$layout
+Box 0 0 400 24 color Background2 shadow ShadowNormal border BorderNormal
+Box 3 3 60 18 color ControlNormal border BorderNormal text ControlContent <b>1
+Box 64 3 50 18 color ControlNormal border BorderNormal text ControlContent <b>2
+Box 115 3 18 18 color ControlNormal border BorderNormal text ControlContent <b>3
+Box 185 2 30 20 color ControlNormal border BorderNormal text ControlContent <b>4
+Box 216 3 18 18 color ControlNormal border BorderNormal text ControlContent <b>5
+Box 306 3 50 18 border BorderNormal text Content0 <b>6
+Box 357 3 40 18 color ControlNormal border BorderNormal text ControlContent <b>7
+$
+1. <indent=2em><b>Song Info Button</b>
+$n
+<indent=2em>The name of the current Playable Song. Click on it to select the current Playable Song.
+
+$
+2. <indent=2em><b>Chart Info Button</b>
+$n
+<indent=2em>The name and difficulty of the current Chart. Click on it to select the current Chart.
+
+$
+3. <indent=2em><b>Chart Dropdown</b>
+$n
+<indent=2em>Click on it to change the selected Chart or create a new Chart based on the 
+current Playable Song. If there are no Charts currently being edited, this button will be hidden and the 
+Chart Info Button will have the functionality of this button instead.
+
+$
+4. <indent=2em><b>Play/Pause Button</b>
+$n
+<indent=2em>Click on it to play/pause the current song.
+
+$
+5. <indent=2em><b>Play Options Dropdown</b>
+$n
+<indent=2em>Click on it to show and edit play options such as the volume of the song or the hitsounds.
+
+$
+6. <indent=2em><b>Timers</b>
+$n
+<indent=2em>Shows the current time of the songs, in beats and seconds.
+
+$
+7. <indent=2em><b>Visualizer</b>
+$n
+<indent=2em>Click on it to switch between different visualizers.

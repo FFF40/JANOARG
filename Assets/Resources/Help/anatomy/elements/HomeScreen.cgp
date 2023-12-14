@@ -1,0 +1,35 @@
+$title
+Home Screen
+$
+The <b>Home screen</b> is the screen that appears when you start the Chartmaker program. The purpose of 
+this screen is to prompt you to open/create a Playable Song which will open the Editor screen when 
+completed.
+
+$t2
+Home Modal
+$
+At the middle of the screen is the <b>Home modal</b>. The Home modal contains buttons of basic actions such as 
+opening/creating a Song as well as a list of Playable Songs that have been opened recently.
+
+$
+<b><size=120%>Layout
+$layout
+Box 0 0 240 180 color Background2 shadow ShadowNormal border BorderNormal
+Box 1 1 238 59 color Background0 text Content0 <b>1
+Box 1 60 79 119 color Background1 text Content0 <b>2
+Box 80 60 159 119 text Content0 <b>3
+$
+1. <indent=2em><b>Title Bar</b>
+$n
+<indent=2em>The title bar of the Home modal. Contains the application name and version number.
+
+$
+2. <indent=2em><b>Action Box</b>
+$n
+<indent=2em>Contains actions such as opening/creating a Playable Song or exiting the Chartmaker.
+
+$
+3. <indent=2em><b>Recents List</b>
+$n
+<indent=2em>Contains a list of recently opened Playable Songs. Clicking on an item will automatically open 
+the associated Playable Song.

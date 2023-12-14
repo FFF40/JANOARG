@@ -1,0 +1,54 @@
+$title
+Difficulty Analysis
+$
+In rhythm game, a chart's difficulty determine how hard it is to play and clear - a higher difficulty chart will 
+require more skill to beat than a lower difficulty one.
+$
+Difficulty of a JANOARG chart comes from a lot of factors, such as note speed, pattern complexity, and readability. 
+The more mechanic the chart uses, the more factors will be involved, therefore the harder it is to 
+determine the difficulty of that chart.
+
+$t2
+Density
+$
+Density is the amount of unique actions the player needs to do in a given time frame. The more density a pattern has, 
+the faster the player will need to make actions, therefore the harder it is to clear.
+
+$layout
+Box 0 0 125 150 color Background3 shadow ShadowNormal
+Box 0 148 125 2 color BorderNormal
+Box 35 28 25 4 color Content0
+Box 65 58 25 4 color Content0
+Box 35 88 25 4 color Content0
+Box 65 118 25 4 color Content0
+
+Box 150 0 125 150 color Background3 shadow ShadowNormal
+Box 150 148 125 2 color BorderNormal
+Box 185 10 25 4 color Content0
+Box 215 30 25 4 color Content0
+Box 185 50 25 4 color Content0
+Box 215 70 25 4 color Content0
+Box 185 90 25 4 color Content0
+Box 215 110 25 4 color Content0
+Box 185 130 25 4 color Content0
+
+Box 300 0 125 150 color Background3 shadow ShadowNormal
+Box 300 148 125 2 color BorderNormal
+Box 335 10 25 4 color Content0
+Box 365 20 25 4 color Content0
+Box 335 30 25 4 color Content0
+Box 365 40 25 4 color Content0
+Box 335 50 25 4 color Content0
+Box 365 60 25 4 color Content0
+Box 335 70 25 4 color Content0
+Box 365 80 25 4 color Content0
+Box 335 90 25 4 color Content0
+Box 365 100 25 4 color Content0
+Box 335 110 25 4 color Content0
+Box 365 120 25 4 color Content0
+Box 335 130 25 4 color Content0
+
+$layout
+Box 0 -10 425 2 color BorderNormal
+Box 0 -8 125 20 text Content0 Easier
+Box 300 -8 125 20 text Content0 Harder

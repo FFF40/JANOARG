@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class AboutModal : Modal
 {
-    public AboutModal main;
+    public static AboutModal main;
     
     public TMP_Text VersionLabel;
 

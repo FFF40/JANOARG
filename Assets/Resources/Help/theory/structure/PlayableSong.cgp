@@ -1,0 +1,75 @@
+$title
+Playable Song
+$
+The <b>Playable Song</b> structure is the main and most inportant structure of the game. A Playable 
+Song object contains info about the song, such as the song's name and the artist(s) who created it, and a 
+list of Charts that serves as different difficulties of that song.
+$
+In the file structure, the Playable Song is stored in drive as a .japs file (which stands for a 
+<b><u>JA</b></u>NOARG <b><u>P</b></u>layable 
+<b><u>S</b></u>ong file). The content of a .japs file is encoded in a text format and thus the file itself can 
+be safely edited using a text editor (for example, Notepad). The song audio file and the individual charts 
+are saved as separate files and the .japs stores a reference to those files in the form of paths for 
+JANOARG to be able to access them.
+
+$t2
+Properties
+
+$
+ • <indent=2em><b>Source</b> <i>(String)</i>:
+$n
+<indent=2em>The location of the song file, relative to the folder containing the .japs file. This 
+field is not exposed in the Chartmaker's Inspector, however you can edit this field by opening the 
+.japs file as a text file and edit it from there.
+
+$
+ • <indent=2em><b>Song Name</b> <i>(String)</i>:
+$n
+<indent=2em>The name of the song. People will refer to the song with this name.
+
+$
+ • <indent=2em><b>Song Artist</b> <i>(String)</i>:
+$n
+<indent=2em>The name or alias of the person/people who composed the song.
+
+$
+ • <indent=2em><b>Alt Song Name</b> <i>(String)</i>;
+$n
+<indent=2em><b>Alt Song Artist</b> <i>(String)</i>:
+$n
+<indent=2em>The alternative name of the song and the artist, respectively. This would be the Latin 
+form of the song/artist names for names that are written in a non-Latin script (for example, 
+Japanese). If there isn't an alternative song/artist name, simply leave this field blank.
+
+$
+ • <indent=2em><b>Genre</b> <i>(String)</i>:
+$n
+<indent=2em>The genre of the song.
+
+$
+ • <indent=2em><b>Location</b> <i>(String)</i>:
+$n
+<indent=2em>The in-game location that the song would appear in.
+
+$
+ • <indent=2em><b>Background Color</b> <i>(Color)</i>;
+$n
+<indent=2em><b>Foreground Color</b> <i>(Color)</i>:
+$n
+<indent=2em>The colors associated with the song, used in the styling of the UI and will be used as 
+the default Pallete colors on creation of new Charts.
+
+$t2
+Child Objects
+
+$
+ • <indent=2em><b>Timing</b> <i>(Metronome)</i>:
+$n
+<indent=2em>The timing information of the song, which will be used by JANOARG to align objects to 
+the beat of the song.
+
+$
+ • <indent=2em><b>Charts</b> <i>(List<Chart>)</i>:
+$n
+<indent=2em>The list of Charts that serves as different difficulties of the song. The Charts will 
+use the audio file referenced in this Playable Song as the background music.

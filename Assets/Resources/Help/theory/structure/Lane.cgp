@@ -1,0 +1,44 @@
+$title
+Lane
+$
+A <b>Lane</b> is a playfield sheet that Hit Objects spawn on. A Lane can take on different shapes, which is 
+determined based on the Lane Steps that are associated with that Lane.
+
+$t2
+Properties
+
+$
+ • <indent=2em><b>Parent</b> <i>(Lane Group, Optional)</i>:
+$n
+<indent=2em>The Lane's parent Lane Group. Can be set to empty, in which case the Lane will move independantly 
+from other Lanes and Lane Groups.
+
+$
+ • <indent=2em><b>Position</b> <i>(3D Vector, Storyboardable)</i>:
+$n
+<indent=2em>The position of the Lane in game space.
+
+$
+ • <indent=2em><b>Rotation</b> <i>(3D Vector, Storyboardable)</i>:
+$n
+<indent=2em>The rotation of the Lane in degrees.
+
+$
+ • <indent=2em><b>Style Index</b> <i>(Lane Style, Optional)</i>:
+$n
+<indent=2em>The Lane Style instance that the Lane will use. Can be set to not use any Lane Style, in which 
+case the lane body will become invisible.
+
+$t2
+Child Objects
+
+$
+ • <indent=2em><b>Lane Steps</b> <i>(List<Lane Step>)</i>:
+$n
+<indent=2em>A list of Lane Steps that will define the shape of the Lane.
+
+$
+ • <indent=2em><b>Hit Objects</b> <i>(List<Hit Object>)</i>:
+$n
+<indent=2em>A list of Hit Objects that will define the actions that are
+needed for the player to take.

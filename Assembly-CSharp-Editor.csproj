@@ -40,6 +40,7 @@
     <Analyzer Include="D:\E\Unity\2022.2.2f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Behaviors\Files\Editor\CGPImporter.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Files\Editor\JACImporter.cs" />
      <Compile Include="Assets\Scripts\UI\Themeable\Editor\ThemeKeyDrawer.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Files\Editor\JAPSImporter.cs" />

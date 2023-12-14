@@ -1,0 +1,22 @@
+$title
+Storyboard
+$
+The <b>Storyboard</b> is the most powerful feature of JANOARG. It allows objects inheriting it to 
+be able to change its values as the song plays, therefore creating animations that can change and 
+spice up the gameplay when used.
+$
+The Storyboard can animate Float values and data types that consist of Float values, such as 
+2D Vector, 3D Vector, and Color.
+$
+An object that inherits the Storyboard object is called a <i>Storyboardable</i> object. Most of 
+the objects that are children of the Chart object are Storyboardable, and the fields that are marked 
+as <i>Storyboardable</i> on their help pages can be animated using the Storyboard feature.
+
+
+$t2
+Child Objects
+
+$
+ • <indent=2em><b>Timestamps</b> <i>(List<Timestamp>)</i>:
+$n
+<indent=2em>The list of Timestamps that will define the values of the object at a point in time.
