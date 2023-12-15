@@ -80,6 +80,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     const int TimelineHeight = 5;
     int ItemHeight = 0;
     bool lastPlayed;
+    public List<object> DraggingItem;
 
     public void Awake()
     {
@@ -413,6 +414,23 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
                     if (pos < -1 || pos >= TimelineHeight + 1) continue;
                     if (timeEnd < PeekRange.x - dOffset || time > PeekRange.y + dOffset) continue;
+
+                    for (int a = 1; a < lane.LaneSteps.Count; a++)
+                    {
+                        LaneStep step = lane.LaneSteps[a];
+                        float stepTime = metronome.ToSeconds(step.Offset);
+                        if (stepTime < PeekRange.x - dOffset || stepTime > PeekRange.y + dOffset) continue;
+
+                        float sposX = InverseLerpUnclamped(PeekRange.x, PeekRange.y, stepTime);
+                        var sitem = GetTimelineItem(count);
+                        RectTransform srt = (RectTransform)sitem.transform;
+                        srt.anchorMin = srt.anchorMax = new (sposX, 1);
+                        srt.anchoredPosition = new(0, -24 * pos - 5);
+                        srt.sizeDelta = new(8, 22);
+                        sitem.SetItem(step, lane);
+                        
+                        count++;
+                    }
 
                     float posX = InverseLerpUnclamped(PeekRange.x, PeekRange.y, time);
                     if (time != timeEnd)
@@ -804,6 +822,21 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
     }
 
+    public void BeginDragItem(List<object> items, PointerEventData eventData) 
+    {
+        DraggingItem = items;
+        dragMode = TimelineDragMode.ItemDrag;
+        
+        bool localPos(RectTransform rt, out Vector2 pos) => RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, eventData.pressPosition, eventData.pressEventCamera, out pos);
+        localPos(ItemsHolder, out dragStart);
+
+        dragEnd = dragStart;
+        timeStart = timeEnd = Mathf.Lerp(PeekRange.x, PeekRange.y, dragStart.x / ItemsHolder.rect.width);
+        
+        Metronome metronome = Chartmaker.main.CurrentSong.Timing;
+        beatStart = RoundBeat(timeStart);
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
         isDragged = true;
@@ -830,7 +863,34 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             Metronome metronome = Chartmaker.main.CurrentSong.Timing;
             beatEnd = RoundBeat(timeEnd);
 
-            if (dragMode == TimelineDragMode.TimelineDrag)
+            if (DraggingItem != null) 
+            {
+                if (DraggingItem.Count > 0 && DraggingItem[0] is not Lane) 
+                {
+                    ChartmakerHistory history = Chartmaker.main.History;
+                    ChartmakerMoveOffsetAction action;
+                    var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
+                    if (last is ChartmakerMoveOffsetAction lastMove && lastMove.Targets == DraggingItem)
+                    {
+                        action = lastMove;
+                        action.Undo();
+                    } 
+                    else 
+                    {
+                        action = new ChartmakerMoveOffsetAction {
+                            Targets = DraggingItem,
+                        };
+                        history.ActionsBehind.Push(action);
+                    }
+                    action.Value = DraggingItem[0] is BPMStop ? timeEnd - timeStart : beatEnd - beatStart;
+                    action.Redo();
+                    history.ActionsAhead.Clear();
+                    Chartmaker.main.OnHistoryDo();
+                    Chartmaker.main.OnHistoryUpdate();
+                    Debug.Log(action.Value + " " + timeStart + " " + timeEnd);
+                }
+            } 
+            else if (dragMode == TimelineDragMode.TimelineDrag)
             {
                 float offset = Mathf.Clamp(-eventData.delta.x * (PeekRange.y - PeekRange.x) / TicksHolder.rect.width, limit.x - PeekRange.x, limit.y - PeekRange.y);
                 PeekRange.x += offset;
@@ -910,7 +970,11 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (dragMode == TimelineDragMode.Select)
+        if (DraggingItem != null) 
+        {
+            DraggingItem = null;
+        }
+        else if (dragMode == TimelineDragMode.Select)
         {
             Metronome metronome = Chartmaker.main.CurrentSong.Timing;
             float beatStart = metronome.ToBeat(Mathf.Min(timeStart, timeEnd));
@@ -1144,4 +1208,5 @@ public enum TimelineDragMode
     TimelineDrag = 1,
     Timeline = 3,
     Select = 5,
+    ItemDrag = 7,
 }
