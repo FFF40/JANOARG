@@ -6,7 +6,7 @@ the actual beats of the song.
 $
 Most objects in JANOARG uses beats to represent that object's temporal position (a.k.a. position 
 in the Timeline) that will be used for the game's logic (for example, the temporal position of a Hit 
-Object indicates the position in the song that that object needs to be hit). The only exceptions are objects 
+Object indicates the position in the song that the object needs to be hit). The only exceptions are objects 
 that don't have a temporal position (such as the Palette) and the BPM Stops, which uses seconds 
 instead.
 $

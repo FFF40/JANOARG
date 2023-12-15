@@ -1,12 +1,12 @@
 $title
 Terminology
 $
-This section of the manual will document some of the terms used within JANOARG and rhythm games 
-as a whole. Terms from <i>"Pattern Design"</i> sections are not included.
+This section will document some of the terms used within JANOARG and rhythm games 
+as a whole. Terms from the section <i>"Pattern Design"</i> are not included.
 $
  • <indent=2em><b>Ability Rating (AR)</b>
 $n
-<indent=2em>A rating associated with each player to indicate how well one is at playing the game. 
-The AR system in JANOARG works by obtaining a "performance rating" for each of the charts the player has played, 
-based on the chart's difficulty and the highest score achieved. The best 20 performance ratings are then summarised 
-and averaged to output the final Ability Rating for the corresponding player.
+<indent=2em>A rating system associated to each player to showcase the player's progress in the game. 
+AR in JANOARG works by recording the 'performance rate' from each player's highest scores taken from each chart, 
+based on the difficulty, which then summarised and averaged from the best 20 recorded performance rating, to
+calculate the final AR for the corresponding player.

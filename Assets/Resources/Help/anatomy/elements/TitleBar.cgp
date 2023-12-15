@@ -1,7 +1,7 @@
 $title
 Title Bar
 $
-The <b>title bar</b> works like what you would expect a title bar to do in an operating system like Windows. 
+The <b>title bar</b> works like what you would expect one to do in operating systems like Windows. 
 It is the only UI element that persists between the Home screen and the Editor screen and is used to control 
 the Chartmaker program window.
 
@@ -17,7 +17,7 @@ Box 337 3 60 18 border BorderNormal text Content0 <b>3
 $
 1. <indent=2em><b>Main Menu</b>
 $n
-<indent=2em>A menu consisting of basic actions grouped in categories such as File or Edit. Note that some 
+<indent=2em>A menu consisting basic actions grouped in categories such as File or Edit. Note that some 
 of the actions are only available when a certain screen is active.
 
 $

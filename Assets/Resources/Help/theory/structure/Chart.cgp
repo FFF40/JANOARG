@@ -6,7 +6,7 @@ $
 In the file structure, the Charts are stored in drive as a .jac file (which stands for a 
 <b><u>JA</b></u>NOARG <b><u>C</b></u>hart file). All objects that are used by a Chart are then stored in their 
 respective .jac file. Similar to .japs, the content of a .jac file is also encoded in 
-a text format and thus the file itself can be safely edited using a text editor. 
+a text format and thus the file itself can be safely edited using a text editor, such as notepad. 
 
 
 $t2
@@ -15,15 +15,15 @@ Properties
 $
  • <indent=2em><b>Target</b> <i>(String)</i>:
 $n
-<indent=2em>The location of this chart file, relative to the folder containing the Playable Song file, which 
+<indent=2em>The location of the chart file, relative to the folder containing the Playable Song file, which 
 is stored in the Playable Song file for JANOARG to obtain the Chart file. This 
-field is not exposed in the Chartmaker's Inspector, however you can edit this field by opening the 
+field is not exposed in the Chartmaker's Inspector itself, however you can edit this field by opening the 
 .japs file as a text file and edit it from there.
 
 $
  • <indent=2em><b>Chart Name</b> <i>(String)</i>:
 $n
-<indent=2em>The name of the chart / difficulty. Can be Simple, Normal, Complex, Overdrive, or 
+<indent=2em>The name of the chart and the difficulty. Can be Simple, Normal, Complex, Overdrive, or 
 custom for Special charts.
 
 $
@@ -31,7 +31,7 @@ $
 $n
 <indent=2em>The index of the chart, which is used for sorting. Can be 0~3 for Simple, Normal, Complex, and Overdrive 
 charts respectively (starting at 0 for Simple), or a negative number for Special charts. Each Chart of a Playable Song should have a different 
-sorting index for each of them, to avoid conflict.
+sorting index for each of them, to avoid conflicts.
 
 $
  • <indent=2em><b>Difficulty Level</b> <i>(String)</i>:
@@ -39,15 +39,15 @@ $n
 <indent=2em>The visible difficulty number rating of the chart, visible to the player. Normally this 
 would just be the chart constant, with an asterisk (*) placed after the number for charts that 
 are designed to be played using 3 or more fingers, however, on special charts, this field 
-can be obstructed to give players a sense of mystery (e.g. April Fool's ??)
+can be obstructed to give players a sense of mystery (e.g. April Fool's '??')
 
 $
  • <indent=2em><b>Chart Constant</b> <i>(Float)</i>:
 $n
 <indent=2em>The difficulty number rating of the chart, used in
 internal calculations. A higher chart constant means the chart is harder and requires more skill 
-to play. Sometimes a difficulty constant of 0 or negative is used for charts that are non-serious / unfair to 
-play / very gimmicky and should not be included in anything that involves player progression.
+to play. Sometimes a difficulty constant of 0 or negative is used for charts that are either non-serious, unfair to 
+play, or very gimmicky that it should not be included in anything that involves player progression.
 
 $t2
 Child Objects
@@ -60,7 +60,7 @@ $n
 $
  • <indent=2em><b>Camera</b> <i>(Camera Controller)</i>:
 $n
-<indent=2em>The chart's Camera Controller. which controls the camera's movements.
+<indent=2em>The chart's Camera Controller, which controls the camera's movements.
 
 $
  • <indent=2em><b>Groups</b> <i>(List<Lane Group>)</i>:

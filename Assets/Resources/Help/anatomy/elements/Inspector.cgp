@@ -1,7 +1,7 @@
 $title
 Inspector
 $
-The <b>Inspector</b> panel shows and lets you edit property of the currently selected object.
+The <b>Inspector</b> panel shows and lets you edit property of the selected object.
 
 $t2
 Layout
@@ -20,17 +20,17 @@ $
 $
 1. <indent=2em><b>Back Button</b>
 $n
-<indent=2em>Press the button to deselect the currently selected object.
+<indent=2em>Press the button to deselect the selected object.
 
 $
 2. <indent=2em><b>Object Name</b>
 $n
-<indent=2em>Shows the name of the currently selected object.
+<indent=2em>Shows the name of the selected object.
 
 $
 3. <indent=2em><b>Offset Field</b>
 $n
-<indent=2em>The current time position of the currently selected object. Will only be shown if the 
+<indent=2em>The current time position of the selected object. Will only be shown if the 
 current object has a time position property. Can be edited.
 
 $
@@ -52,4 +52,4 @@ $
 7. <indent=2em><b>Global Objects</b>
 $n
 <indent=2em>The non-Timeline objects that the current Chart object is a parent of. 
-Press on one of the items shown here to select that object.
+Press on one of the items shown here to select the object.

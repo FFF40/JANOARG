@@ -1,7 +1,7 @@
 $title
 Timestamp
 $
-A <b>Timestamp</b> object defines a point in time that a field of a Storyboardale object changes from a value to 
+A <b>Timestamp</b> object defines a point in time that a field of a Storyboardable object's value changes from one to 
 another.
 
 
@@ -27,13 +27,13 @@ $n
 $
  • <indent=2em><b>From</b> <i>(Float, Optional)</i>:
 $n
-<indent=2em>The initial value that the targeted property will start from. If this is unset, the value 
+<indent=2em>The initial value that the target property will start from. If unset, the value 
 that the target property has before the animation will be used.
 
 $
  • <indent=2em><b>To</b> <i>(Float)</i>:
 $n
-<indent=2em>The target value that the targeted property will change to.
+<indent=2em>The target value that the target property will change to.
 
 $
  • <indent=2em><b>Easing</b> <i>(Easing)</i>:

@@ -1,7 +1,7 @@
 $title
 Lane Step
 $
-A <b>Lane Step</b> is a key line at a point in time that determines the shape of its associated Lane.
+A <b>Lane Step</b> is a key line at a point in time, that determines the shape of its associated Lane.
 
 $t2
 Properties
@@ -14,14 +14,14 @@ $n
 $
  • <indent=2em><b>Start/End Position</b> <i>(2D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The line that determines the relative position of the judgement edge at the time position 
+<indent=2em>The line that determines the relative position of the judgement edge at the time position, 
 specified in Offset.
 
 $
  • <indent=2em><b>Start/End Position Easing X/Y</b> <i>(Easing)</i>:
 $n
 <indent=2em>The four easing of each axis of each point of the line. The judgement line will be eased when 
-moving between the previous Lane Step and the current one based on the specified easing.
+moving between the previous Lane Step and the current one, based on the specified easing.
 
 $
  • <indent=2em><b>Scroll Speed</b> <i>(Float, Storyboardable)</i>:

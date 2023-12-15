@@ -1,8 +1,9 @@
 $title
 Editor Screen
 $
-The <b>Editor screen</b> is the screen that appears after you open a Playable Song on the Home screen. 
-This will be the screen that you spend most of the time in and the screen that you will use to edit Charts.
+The <b>Editor screen</b> is what you'll see after opening a Playable Song on the Home screen. 
+This will be the screen that you will spend most of the time with and the screen that you will use to 
+edit or create Charts.
 
 $t2
 Layout
@@ -21,7 +22,7 @@ $
 1. <indent=2em><b>Information Bar</b>
 $n
 <indent=2em>The bar at the top of the screen that contains basic information such as the song's name, the 
-charts' name, and the current song time.
+charts' name, and the current song time, in beats.
 
 $
 2. <indent=2em><b>Picker</b>
@@ -36,7 +37,7 @@ $n
 $
 4. <indent=2em><b>Inspector</b>
 $n
-<indent=2em>Shows and lets you edit properties of the current selected Object.
+<indent=2em>Shows and lets you edit properties of the currently selected Object.
 
 $
 5. <indent=2em><b>Timeline</b>

@@ -2,8 +2,8 @@ $title
 Lane Group
 $
 A <b>Lane Group</b> allows you to group multiple Lanes together and move them all at once without 
-having to manually set each of them up. A Lane that has a Lane Group as its parent will inherit that 
-Lane Group's position and rotation and will move and rotate accordingly.
+having to manually move them individually. A Lane that has a Lane Group as its parent will inherit that 
+Lane Group's position and rotation and instead, will move and rotate accordingly.
 
 $t2
 Properties
@@ -11,16 +11,16 @@ Properties
 $
  • <indent=2em><b>Reference Name</b> <i>(String)</i>:
 $n
-<indent=2em>The name of the Lane Group, that will be used as reference by the Lanes. It is 
-recommended to rename this from the default, automatically set name for ease of reference. Each Lane Group 
-in a Chart must have different names to each other.
+<indent=2em>The name of the Lane Group that will be used as reference by the Lanes. It is 
+recommended to rename it from the default's, automatically set name ,for ease of reference. Each Lane Group 
+in a Chart must have different names to each other, to avoid conflicts.
 
 $
  • <indent=2em><b>Parent</b> <i>(Lane Group, Optional)</i>:
 $n
-<indent=2em>The parent of the Lane Group, which also happens to be a Lane Group. If 
-this is set, all the child Lanes and Lane Groups will also inherit the parent Lane Group's movement. 
-Be careful not to make any cyclical Lane Group references though...
+<indent=2em>The parent of the Lane Group, which also happens to be a Lane Group. If set, all the child Lanes and 
+Lane Groups will also inherit the parent Lane Group's movement. Be careful not to make any 
+cyclical Lane Group references though...
 
 $
  • <indent=2em><b>Position</b> <i>(3D Vector, Storyboardable)</i>:
