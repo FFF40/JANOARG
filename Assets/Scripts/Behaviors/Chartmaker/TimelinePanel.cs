@@ -80,7 +80,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     const int TimelineHeight = 5;
     int ItemHeight = 0;
     bool lastPlayed;
-    public List<object> DraggingItem;
+    public IList DraggingItem;
+    float DraggingItemOffset;
 
     public void Awake()
     {
@@ -822,7 +823,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
     }
 
-    public void BeginDragItem(List<object> items, PointerEventData eventData) 
+    public void BeginDragItem(IList items, PointerEventData eventData) 
     {
         DraggingItem = items;
         dragMode = TimelineDragMode.ItemDrag;
@@ -835,6 +836,17 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         
         Metronome metronome = Chartmaker.main.CurrentSong.Timing;
         beatStart = RoundBeat(timeStart);
+        
+        ChartmakerHistory history = Chartmaker.main.History;
+        var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
+        if (last is ChartmakerMoveOffsetAction lastMove && lastMove.Targets == DraggingItem)
+        {
+            DraggingItemOffset = lastMove.Value;
+        } 
+        else 
+        {
+            DraggingItemOffset = 0;
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -882,7 +894,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         };
                         history.ActionsBehind.Push(action);
                     }
-                    action.Value = DraggingItem[0] is BPMStop ? timeEnd - timeStart : beatEnd - beatStart;
+                    action.Value = (DraggingItem[0] is BPMStop ? timeEnd - timeStart : beatEnd - beatStart) + DraggingItemOffset;
                     action.Redo();
                     history.ActionsAhead.Clear();
                     Chartmaker.main.OnHistoryDo();
