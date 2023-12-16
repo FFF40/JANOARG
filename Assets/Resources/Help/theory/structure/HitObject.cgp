@@ -6,8 +6,8 @@ or a drum beat of the song and corresponds to an action the player must take at 
 $
 For the record, the location where the Hit Object hits the edge of the Lane is called its <b>judgment zone</b> and 
 the time it does so is the <b>judgment time</b>. A Hit Object will only register the action if it's done within 
-its judgment zone and the player's performance is judged based on how close the player's action is compared to the judgment 
-time.
+its judgment zone. The player's performance is judged by how close the player's action is compared to the judgement 
+timing.
 
 $t2
 Properties
@@ -22,12 +22,12 @@ $n
 and time where it touches the edge of the Lane.
 $n
 <indent=2em> - <indent=4em><b>Catch</b>: The player will only need to have one of their fingers stay on the point 
-where it touches the edge of the Lane at the time it does so and doesn't need to tap.
+where it lands on the Lane and the player doesn't need to tap it individually.
 
 $
  • <indent=2em><b>Position</b> <i>(Float, Storyboardable)</i>:
 $n
-<indent=2em>The position of the Hit Object in lane unit, starting at 0 for the start point to 1 for the 
+<indent=2em>The position of the Hit Object in lane unit, starting at '0' for the start point to '1' for the 
 end point.
 
 $
@@ -40,7 +40,7 @@ $
  • <indent=2em><b>Hold Length</b> <i>(Float)</i>:
 $n
 <indent=2em>The hold duration of the Hit Objects, in beats. If this value is greater than 0, a hold tail will 
-be added to the Hit Object and the player will need to have at least one of their finger stay on the hold tail's end for 
+be added to the Hit Object and the player will at least have one of their finger stay on the hold tail's end for 
 the duration of the hold.
 
 $
@@ -53,4 +53,5 @@ $
  • <indent=2em><b>Flick Direction</b> <i>(Float, Optional)</i>: 
 $n
 <indent=2em>The direction of the flick that the player needs to swipe into, in degrees, clockwise where 0 degrees means up 
-the screen. If this value is not present, the player can swipe in any direction as one wish.
+the screen and 90 degrees means right the screen, and so on. If this value is not present, the player can swipe in any 
+direction as one wish.

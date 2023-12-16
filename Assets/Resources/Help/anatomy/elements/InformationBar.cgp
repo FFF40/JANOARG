@@ -29,7 +29,7 @@ $
 3. <indent=2em><b>Chart Dropdown</b>
 $n
 <indent=2em>Click on it to change the selected Chart or create a new Chart based on the 
-current Playable Song. If there are no Charts currently being edited, this button will be hidden and the 
+current Playable Song. If there's no Charts open, this button will be hidden and the 
 Chart Info Button will have the functionality of this button instead.
 
 $
@@ -40,7 +40,7 @@ $n
 $
 5. <indent=2em><b>Play Options Dropdown</b>
 $n
-<indent=2em>Click on it to show and edit play options such as the volume of the song or the hitsounds.
+<indent=2em>Click on it to show and edit play options such as the volume of the song and the hitsounds.
 
 $
 6. <indent=2em><b>Timers</b>

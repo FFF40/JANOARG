@@ -1,10 +1,10 @@
 $title
 BPM Stop
 $
-The <b>BPM Stop</b> contains BPM data at a specific point in the song. Together, they create 
-timing instructions for the Metronome to calculate the position of each beat in the song. Most songs do not 
-have changes in tempo or signature while playing, so only one BPM Stop at the beginning beat of 
-the song is needed, but for some that do feature those, more than one BPM Stop will be 
+<b>BPM Stop</b> contains BPM data at a specific position in the song. Together, they create 
+timing instructions for the metronome to calculate the position of each beat in the song. Most songs do not 
+have changes in tempo or signature mid-way, so only one BPM Stop at the beginning of 
+the song is required, but for some that do feature those, more than one BPM Stop will be 
 needed to be able to accurately sync the song's timing unit (beats) - which most 
 objects uses - to the beats of the song.
 
@@ -14,24 +14,24 @@ Properties
 $
  • <indent=2em><b>Offset</b> <i>(Float)</i>:
 $n
-<indent=2em>The time position (in seconds) since the beginning of the song before this BPM Stop's 
-values take into effect.
+<indent=2em>The time position (in seconds) of the song before this BPM Stop's values 
+take into effect.
 
 $
  • <indent=2em><b>BPM</b> <i>(Float)</i>: 
 $n
-<indent=2em>The tempo of the song at this place in time, in beats per minute.
+<indent=2em>The tempo of the song at the specified time position, in beats per minute.
 
 $
  • <indent=2em><b>Signature</b> <i>(Integer)</i>:
 $n
-<indent=2em>The time signature of the song at this place in time. Note that only the top part of the 
-signature (the number of beats in a bar) is needed, so instead of "3/4", type "3".
+<indent=2em>The time signature of the song at the specified time position. Note that only the 
+top part of the signature (the number of beats in a bar) is needed, so instead of "3/4", type "3".
 
 $
  • <indent=2em><b>Significant</b> <i>(Boolean)</i>: 
 $n
 <indent=2em>Whether the BPM Stop is "significant" enough to be used in places such as the song card's BPM summary. 
-A BPM Stop is deemed as "insignificant" when it is placed when the song's BPM and time signature isn't actually 
-changed (i.e. you may need to put a small BPM change to realign the main beat of the metronome to the main beat 
+A BPM Stop is deemed as "insignificant" if it's placed while the song's BPM and time signature isn't actually 
+changing (i.e. you may need to put a small BPM change to realign the main beat of the metronome to the main beat 
 of the song when there's a bar of the song with irregular beat quantization.)

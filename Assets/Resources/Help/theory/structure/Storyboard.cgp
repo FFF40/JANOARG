@@ -1,11 +1,11 @@
 $title
 Storyboard
 $
-The <b>Storyboard</b> is the most powerful feature of JANOARG. It allows objects inheriting it to 
-be able to change its values as the song plays, therefore creating animations that can change and 
-spice up the gameplay when used.
+The <b>Storyboard</b> is the most powerful feature of JANOARG. It allows objects inheriting the
+Storyboard to be able to change its values as the song plays, therefore creating animations that 
+can change and spice up the gameplay when used.
 $
-The Storyboard can animate Float values and data types that consist of Float values, such as 
+The Storyboard can animate Float values and data types that consists Float values, such as 
 2D Vector, 3D Vector, and Color.
 $
 An object that inherits the Storyboard object is called a <i>Storyboardable</i> object. Most of 

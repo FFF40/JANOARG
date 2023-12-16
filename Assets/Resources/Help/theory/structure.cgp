@@ -1,13 +1,13 @@
 $title
 Data Structures
 $
-In JANOARG, data of the game is structured into objects. An object can contain a number of properties, 
+In JANOARG, the game's data is structured into objects. An object can contains a certain amount of properties, 
 as well as references to a child object and/or a list of child objects.
 
 $t2
 Property Types
 $
-A property that a JANOARG object has can have one of the following data types:
+A JANOARG's object property can have one of the following data types:
 
 $
  • <indent=2em><b>String</b>:
@@ -22,25 +22,25 @@ $n
 $
  • <indent=2em><b>Float</b>:
 $n
-<indent=2em>Floating point numbers, which can be a whole number or a decimal number. (e.g. 3.7, 0.1, 98)
+<indent=2em>Floating point numbers, which can be either a whole number or a decimal number. (e.g. 3.7, 0.1, 98)
 
 $
  • <indent=2em><b>2D Vector</b>:
 $n
-<indent=2em>A vector that represents a 2D point in space, which contains 2 Float values that correspond to the vector's 
-X and Y position.
+<indent=2em>A vector that represents a 2D point in space, which contains 2 float values that correspond to the vector's 
+X and Y position respectively.
 
 $
  • <indent=2em><b>3D Vector</b>:
 $n
-<indent=2em>Same as a 2D vector, but represents the 3D space instead. A 3D Vector has 3 Float values that 
-correspond to the vector's X, Y, and Z position, respectively.
+<indent=2em>Same as a 2D vector, but represents the 3D space instead. A 3D Vector has 3 float values that 
+correspond to the vector's X, Y, and Z position respectively.
 
 $
  • <indent=2em><b>Color</b>:
 $n
-<indent=2em>An object containing 4 Float values that represents a color's Red, Green, Blue, and Alpha value, 
-respectively.
+<indent=2em>An object containing 4 float values in the range of 0~1 that represent a color's Red, Green, Blue, and Alpha value respectively. 
+(for example '0.184, 0.286, 0.616, 1' represents the color #2f499d in hex value)
 
 $
  • <indent=2em><b>List</b>:

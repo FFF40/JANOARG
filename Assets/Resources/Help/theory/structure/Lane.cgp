@@ -10,7 +10,7 @@ Properties
 $
  • <indent=2em><b>Parent</b> <i>(Lane Group, Optional)</i>:
 $n
-<indent=2em>The Lane's parent Lane Group. Can be set to empty, in which case the Lane will move independantly 
+<indent=2em>The Lane's parent Lane Group. Can be set to empty, in which case will move the Lane independently 
 from other Lanes and Lane Groups.
 
 $
@@ -26,8 +26,8 @@ $n
 $
  • <indent=2em><b>Style Index</b> <i>(Lane Style, Optional)</i>:
 $n
-<indent=2em>The Lane Style instance that the Lane will use. Can be set to not use any Lane Style, in which 
-case the lane body will become invisible.
+<indent=2em>The Lane Style instance that will be used by the Lane. Can be set to not use any Lane Style, which 
+in this case, will turn the lane invisible.
 
 $t2
 Child Objects
@@ -40,5 +40,5 @@ $n
 $
  • <indent=2em><b>Hit Objects</b> <i>(List<Hit Object>)</i>:
 $n
-<indent=2em>A list of Hit Objects that will define the actions that are
-needed for the player to take.
+<indent=2em>A list of Hit Objects that will define the needed player's
+action in the specified lane.

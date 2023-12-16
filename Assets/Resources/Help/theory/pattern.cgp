@@ -1,7 +1,7 @@
 $title
 Pattern Design
 $
-This section of the manual will document some of the common pattern designs and how to evaluate chart difficulty.
+This section will document some of the most common pattern designs and techniques to evaluate chart difficulties.
 
 $t2
 Pattern
@@ -10,8 +10,8 @@ A Pattern is simply a sequence of Hit Objects.
 
 $t2
 Pattern Notation
-$
-For the sake of demonstration, let us have the following representation of a Pattern:
+$ 
+For the sake of demonstration, let us visualise the following pattern:
 $layout
 Box 0 0 125 250 color Background3 shadow ShadowNormal
 Box 0 248 125 2 color BorderNormal

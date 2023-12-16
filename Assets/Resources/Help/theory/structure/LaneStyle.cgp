@@ -18,5 +18,5 @@ $n
 $
  • <indent=2em><b>Judge Color</b> <i>(Color, Storyboardable)</i>:
 $n
-<indent=2em>The color of the judgement line of the Lane. (Note: The default material currently does not use 
+<indent=2em>The color of the judgement line of the Lane. (<b>Note</b>: The default material currently does not use 
 this color.)
