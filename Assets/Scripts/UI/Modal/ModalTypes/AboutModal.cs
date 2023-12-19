@@ -51,12 +51,14 @@ public class AboutModal : Modal
         
         // Chartmaker facts
         () => "<i>Did you know:</i>\n<b>You can click on the visualizer (metronome) on the top right corner to switch between different visualizers.",
+        () => "<i>Did you know:</i>\n<b>You can drag the Timeline view with the middle mouse button and select with the right mouse button.",
         () => "<i>Did you know:</i>\n<b>Making messages for this message box takes somewhere about one half of our development time (or less. I'm pretty sure it's less.)",
         () => "<i>Did you know:</i>\n<b>The text info fields support <color=#800>r<color=#550>i<color=#070>c<color=#066>h <color=#009>t<color=#606>e<color=#800>x<color=#550>t<color=#070>!<color=#000><br>Check out TextMesh Pro rich text tags for how to use them!",
 
         // Meta facts
         () => "<i>Did you know:</i>\n<b>This randomly displayed text box may not always give 100% factual statements.",
         () => "<i>Did you know:</i>\n<b>There are " + FlavorTexts.Length + " total possible outcomes that this message box gives.",
+        () => "<i>Did you know:</i>\n<b>We don't have that many tips, unfortunately.",
         () => "<i>Did you know:</i>\n<b>Instead of closing and reopening the about window, you can click on this text box to reroll this message and obtain a new random one.",
         () => "<i>Did you know:</i>\n<b>There is no canonical term to specify this message box/text box/tip box/...what is it called again?",
         
