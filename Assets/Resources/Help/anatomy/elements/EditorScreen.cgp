@@ -21,26 +21,26 @@ Box 169 22 1 107 color BorderNormal
 $
 1. <indent=2em><b>Information Bar</b>
 $n
-<indent=2em>The bar at the top of the screen that contains basic information such as the song's name, the 
+The bar at the top of the screen that contains basic information such as the song's name, the 
 charts' name, and the current song time.
 
 $
 2. <indent=2em><b>Picker</b>
 $n
-<indent=2em>Contains a list of Objects that can be placed onto the Timeline.
+Contains a list of Objects that can be placed onto the Timeline.
 
 $
 3. <indent=2em><b>Player View</b>
 $n
-<indent=2em>The live preview of the current chart.
+The live preview of the current chart.
 
 $
 4. <indent=2em><b>Inspector</b>
 $n
-<indent=2em>Shows and lets you edit properties of the currently selected Object.
+Shows and lets you edit properties of the currently selected Object.
 
 $
 5. <indent=2em><b>Timeline</b>
 $n
-<indent=2em>Shows the representation of objects that contains a time position. This is where 
+Shows the representation of objects that contains a time position. This is where 
 you can place, edit, and delete objects.

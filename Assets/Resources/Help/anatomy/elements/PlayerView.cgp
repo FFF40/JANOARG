@@ -17,12 +17,12 @@ Box 121 120 100 16 border BorderNormal text Content0 <b>2
 $
 1. <indent=2em><b>View Frame</b>
 $n
-<indent=2em>Visualizes the safe area of the playfield. The safe area will always be visible to the player, where 
+Visualizes the safe area of the playfield. The safe area will always be visible to the player, where 
 the screen portion outside the safe area might not be available for players with a different screen ratio. 
 All Hit Objects must have their judgement zone to be hittable within this safe area.
 
 $
 2. <indent=2em><b>Editor Message</b>
 $n
-<indent=2em>The Chartmaker's messages that appear on certain events such as when the Chartmaker saves the current 
+The Chartmaker's messages that appear on certain events such as when the Chartmaker saves the current 
 Playable Song's data.

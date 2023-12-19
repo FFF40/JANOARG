@@ -11,12 +11,12 @@ Properties
 $
  • <indent=2em><b>Background Color</b> <i>(Color, Storyboardable)</i>:
 $n
-<indent=2em>The background color of the game when the chart is being played.
+The background color of the game when the chart is being played.
 
 $
  • <indent=2em><b>Interface Color</b> <i>(Color, Storyboardable)</i>:
 $n
-<indent=2em>The color of the game's user interface when the chart is being played.
+The color of the game's user interface when the chart is being played.
 
 $t2
 Child Objects
@@ -26,5 +26,5 @@ $
 $n
  • <indent=2em><b>Hit Styles</b> <i>(List<Hit Style>)</i>:
 $n
-<indent=2em>A list of style instances of the chart's Lanes and Hit Objects, respectively. The Lanes/Hit Objects 
+A list of style instances of the chart's Lanes and Hit Objects, respectively. The Lanes/Hit Objects 
 can then choose an instance out of the list which will determine the looks of that Lane/Hit Object.

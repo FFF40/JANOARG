@@ -12,40 +12,40 @@ A JANOARG's object property can have one of the following data types:
 $
  • <indent=2em><b>String</b>:
 $n
-<indent=2em>A string of characters, a.k.a. text. (e.g. "JANOARG")
+A string of characters, a.k.a. text. (e.g. "JANOARG")
 
 $
  • <indent=2em><b>Integer</b>:
 $n
-<indent=2em>Whole numbers. (e.g. 3280, 4, 21)
+Whole numbers. (e.g. 3280, 4, 21)
 
 $
  • <indent=2em><b>Float</b>:
 $n
-<indent=2em>Floating point numbers, which can be either a whole number or a decimal number. (e.g. 3.7, 0.1, 98)
+Floating point numbers, which can be either a whole number or a decimal number. (e.g. 3.7, 0.1, 98)
 
 $
  • <indent=2em><b>2D Vector</b>:
 $n
-<indent=2em>A vector that represents a 2D point in space, which contains 2 float values that correspond to the vector's 
+A vector that represents a 2D point in space, which contains 2 float values that correspond to the vector's 
 X and Y position respectively.
 
 $
  • <indent=2em><b>3D Vector</b>:
 $n
-<indent=2em>Same as a 2D vector, but represents the 3D space instead. A 3D Vector has 3 float values that 
+Same as a 2D vector, but represents the 3D space instead. A 3D Vector has 3 float values that 
 correspond to the vector's X, Y, and Z position respectively.
 
 $
  • <indent=2em><b>Color</b>:
 $n
-<indent=2em>An object containing 4 float values in the range of 0~1 that represent a color's Red, Green, Blue, and Alpha value respectively. 
+An object containing 4 float values in the range of 0~1 that represent a color's Red, Green, Blue, and Alpha value respectively. 
 (for example '0.184, 0.286, 0.616, 1' represents the color #2f499d in hex value)
 
 $
  • <indent=2em><b>List</b>:
 $n
-<indent=2em>A list of values that have the same data type. In this manual, a list of objects are presented under the 
+A list of values that have the same data type. In this manual, a list of objects are presented under the 
 "List<X>" syntax, where the X inside the angled bracket is replaced with the data type that the List accepts. 
 (for example List<Hit Object> means a List of Hit Objects.)
 

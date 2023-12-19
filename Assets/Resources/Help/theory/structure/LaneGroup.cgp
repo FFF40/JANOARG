@@ -11,23 +11,23 @@ Properties
 $
  • <indent=2em><b>Reference Name</b> <i>(String)</i>:
 $n
-<indent=2em>The name of the Lane Group that will be used as reference by the Lanes. It is 
+The name of the Lane Group that will be used as reference by the Lanes. It is 
 recommended to rename it from the default name for ease of reference. Each Lane Group 
 in a Chart must have different names to each other, to avoid conflicts.
 
 $
  • <indent=2em><b>Parent</b> <i>(Lane Group, Optional)</i>:
 $n
-<indent=2em>The parent of the Lane Group, which also happens to be a Lane Group. If set, all the child Lanes and 
+The parent of the Lane Group, which also happens to be a Lane Group. If set, all the child Lanes and 
 Lane Groups will also inherit the parent Lane Group's movement. Be careful not to make any 
 cyclical Lane Group references though...
 
 $
  • <indent=2em><b>Position</b> <i>(3D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The position of the Lane Group in game space.
+The position of the Lane Group in game space.
 
 $
  • <indent=2em><b>Rotation</b> <i>(3D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The rotation of the Lane Group in degrees.
+The rotation of the Lane Group in degrees.

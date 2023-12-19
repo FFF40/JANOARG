@@ -19,4 +19,4 @@ Child Objects
 $
  • <indent=2em><b>Timestamps</b> <i>(List<Timestamp>)</i>:
 $n
-<indent=2em>The list of Timestamps that will define the values of the object at a point in time.
+The list of Timestamps that will define the values of the object at a point in time.

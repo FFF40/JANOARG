@@ -9,22 +9,22 @@ Properties
 $
  • <indent=2em><b>Offset</b> <i>(Float)</i>:
 $n
-<indent=2em>The time position of the Lane Step, in beats.
+The time position of the Lane Step, in beats.
 
 $
  • <indent=2em><b>Start/End Position</b> <i>(2D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The line that determines the relative position of the judgement edge at the time position, 
+The line that determines the relative position of the judgement edge at the time position, 
 specified in Offset.
 
 $
  • <indent=2em><b>Start/End Position Easing X/Y</b> <i>(Easing)</i>:
 $n
-<indent=2em>The four easing of each axis of each point of the line. The judgement line will be eased when 
+The four easing of each axis of each point of the line. The judgement line will be eased when 
 moving between the previous Lane Step and the current one, based on the specified easing.
 
 $
  • <indent=2em><b>Scroll Speed</b> <i>(Float, Storyboardable)</i>:
 $n
-<indent=2em>The scroll speed multiplier applied to the global scroll speed set by the player. 
+The scroll speed multiplier applied to the global scroll speed set by the player. 
 This defines the Z position of the Lane Step.

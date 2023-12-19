@@ -21,4 +21,4 @@ Objects
 $
  • <indent=2em><b>BPM Stops</b> <i>(List<BPM Stop>)</i>:
 $n
-<indent=2em>A list of BPM Stops that will be used to calculate the timing positions of each beat in the song.
+A list of BPM Stops that will be used to calculate the timing positions of each beat in the song.

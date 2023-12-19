@@ -30,28 +30,28 @@ $
 $
 1. <indent=2em><b>Timeline Modes</b>
 $n
-<indent=2em>List of the Timeline's available modes. Each mode changes the type of Objects that 
+List of the Timeline's available modes. Each mode changes the type of Objects that 
 the Timeline shows.
 
 $
 2. <indent=2em><b>Timeline Body</b>
 $n
-<indent=2em>The body of the Timeline panel, where the Timeline objects reside.
+The body of the Timeline panel, where the Timeline objects reside.
 
 $
 3. <indent=2em><b>Timeline Actions</b>
 $n
-<indent=2em>The bottom left of the panel are Timeline Actions that contained basic actions 
+The bottom left of the panel are Timeline Actions that contained basic actions 
 that are used while editing such as: Undo, Redo, Cut, Copy, and Paste.
 
 $
 4. <indent=2em><b>Timeline Options</b>
 $n
-<indent=2em>The bottom right of the panel are Timeline Options that contains basic timeline 
+The bottom right of the panel are Timeline Options that contains basic timeline 
 options such as the song's playback speed or the Timeline's separatoion factor.
 
 $
 5. <indent=2em><b>Extra Timeline Options Dropdown</b>
 $n
-<indent=2em>Press the button to show and edit extra timeline options such as the waveform 
+Press the button to show and edit extra timeline options such as the waveform 
 settings.

@@ -20,36 +20,36 @@ $
 $
 1. <indent=2em><b>Back Button</b>
 $n
-<indent=2em>Press the button to deselect the selected object.
+Press the button to deselect the selected object.
 
 $
 2. <indent=2em><b>Object Name</b>
 $n
-<indent=2em>Shows the name of the selected object.
+Shows the name of the selected object.
 
 $
 3. <indent=2em><b>Offset Field</b>
 $n
-<indent=2em>The current time position of the selected object. Will only be shown if the 
+The current time position of the selected object. Will only be shown if the 
 current object has a time position property. Can be edited.
 
 $
 4. <indent=2em><b>Inspector Form</b>
 $n
-<indent=2em>Shows the properties of the currently active object.
+Shows the properties of the currently active object.
 
 $
 5. <indent=2em><b>Inspector Modes</b>
 $n
-<indent=2em>The list of Inspector modes.
+The list of Inspector modes.
 
 $
 6. <indent=2em><b>Extra Inspector Modes Dropdown</b>
 $n
-<indent=2em>Press the button to show extra Inspector modes.
+Press the button to show extra Inspector modes.
 
 $
 7. <indent=2em><b>Global Objects</b>
 $n
-<indent=2em>The non-Timeline objects that the current Chart object is a parent of. 
+The non-Timeline objects that the current Chart object is a parent of. 
 Press on one of the items shown here to select the object.

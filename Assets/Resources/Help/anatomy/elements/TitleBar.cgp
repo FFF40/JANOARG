@@ -17,15 +17,15 @@ Box 337 3 60 18 border BorderNormal text Content0 <b>3
 $
 1. <indent=2em><b>Main Menu</b>
 $n
-<indent=2em>A menu consisting basic actions grouped in categories such as File or Edit. Note that some 
+A menu consisting basic actions grouped in categories such as File or Edit. Note that some 
 of the actions are only available when a certain screen is active.
 
 $
 2. <indent=2em><b>Window Title</b>
 $n
-<indent=2em>The title of the program.
+The title of the program.
 
 $
 3. <indent=2em><b>Window Actions</b>
 $n
-<indent=2em>The Minimize, Maximize/Restore, and Close buttons.
+The Minimize, Maximize/Restore, and Close buttons.

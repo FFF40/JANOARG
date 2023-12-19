@@ -10,14 +10,14 @@ Properties
 $
  • <indent=2em><b>Pivot Position</b> <i>(3D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The position of the pivot in game space.
+The position of the pivot in game space.
 
 $
  • <indent=2em><b>Pivot Distance</b> <i>(Float, Storyboardable)</i>:
 $n
-<indent=2em>The distance between the pivot and the camera in game space units.
+The distance between the pivot and the camera in game space units.
 
 $
  • <indent=2em><b>Pivot Rotation</b> <i>(3D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The rotation of the pivot in degrees.
+The rotation of the pivot in degrees.

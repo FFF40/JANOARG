@@ -20,6 +20,7 @@ theory Chart Theory
   theory/pattern/difficulty Difficulty Analysis
   theory/pattern/patterns Common Patterns
   theory/pattern/patternshort Patterns Cheat Sheet
+ theory/richtext Rich Text
 anatomy Chartmaker Anatomy
  anatomy/elements UI Elements
   anatomy/elements/TitleBar Title Bar

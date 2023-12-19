@@ -10,7 +10,7 @@ A Pattern is simply a sequence of Hit Objects.
 
 $t2
 Pattern Notation
-$ 
+$
 For the sake of demonstration, let us visualise the following pattern:
 $layout
 Box 0 0 125 250 color Background3 shadow ShadowNormal

@@ -8,17 +8,17 @@ active.
 $
  • <indent=2em><b>Cursor</b>
 $n
-<indent=2em>Clicking on an object on the Timeline will select it on the Inspector. Dragging the background 
+Clicking on an object on the Timeline will select it on the Inspector. Dragging the background 
 of the Timeline will seek the current time to the cursor's position.
 
 $
  • <indent=2em><b>Select</b>
 $n
-<indent=2em>Clicking on an object on the Timeline will select it on the Inspector. Dragging the background 
+Clicking on an object on the Timeline will select it on the Inspector. Dragging the background 
 of the Timeline activates the multi-select box. All objects that are inside the multi-select box will be 
 selected when the hold is released.
 
 $
  • <indent=2em><b>Delete</b>
 $n
-<indent=2em>Clicking on an object on the Timeline will remove it from the object list.
+Clicking on an object on the Timeline will remove it from the object list.

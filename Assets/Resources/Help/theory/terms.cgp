@@ -6,7 +6,7 @@ as a whole. Terms from the section <i>"Pattern Design"</i> are not included.
 $
  • <indent=2em><b>Ability Rating (AR)</b>
 $n
-<indent=2em>A rating system associated to each player to showcase the player's progress in the game. 
+A rating system associated to each player to showcase the player's progress in the game. 
 AR in JANOARG works by recording the 'performance rate' from each player's highest scores taken from each chart, 
 based on the difficulty, which then summarised and averaged from the best 20 recorded performance rating, to
 calculate the final AR for the corresponding player.

@@ -10,23 +10,23 @@ Properties
 $
  • <indent=2em><b>Parent</b> <i>(Lane Group, Optional)</i>:
 $n
-<indent=2em>The Lane's parent Lane Group. Can be set to empty, in which case will move the Lane independently 
+The Lane's parent Lane Group. Can be set to empty, in which case will move the Lane independently 
 from other Lanes and Lane Groups.
 
 $
  • <indent=2em><b>Position</b> <i>(3D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The position of the Lane in game space.
+The position of the Lane in game space.
 
 $
  • <indent=2em><b>Rotation</b> <i>(3D Vector, Storyboardable)</i>:
 $n
-<indent=2em>The rotation of the Lane in degrees.
+The rotation of the Lane in degrees.
 
 $
  • <indent=2em><b>Style Index</b> <i>(Lane Style, Optional)</i>:
 $n
-<indent=2em>The Lane Style instance that will be used by the Lane. Can be set to not use any Lane Style, which 
+The Lane Style instance that will be used by the Lane. Can be set to not use any Lane Style, which 
 in this case, will turn the lane invisible.
 
 $t2
@@ -35,10 +35,10 @@ Child Objects
 $
  • <indent=2em><b>Lane Steps</b> <i>(List<Lane Step>)</i>:
 $n
-<indent=2em>A list of Lane Steps that will define the shape of the Lane.
+A list of Lane Steps that will define the shape of the Lane.
 
 $
  • <indent=2em><b>Hit Objects</b> <i>(List<Hit Object>)</i>:
 $n
-<indent=2em>A list of Hit Objects that will define the needed player's
+A list of Hit Objects that will define the needed player's
 action in the specified lane.

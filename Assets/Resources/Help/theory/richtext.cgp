@@ -1,0 +1,61 @@
+$title
+Rich Text
+$
+Some of the text fields in JANOARG allows rich text to be used. Rich text allows text to change appearance 
+or layout dynamically. JANOARG uses TextMesh Pro's rich text syntax, which uses a tag-like syntax similar to 
+HTML or XML.
+
+$t2
+Overview
+
+$
+A simple tag is defined with a tag name and looks like this: 
+$n
+<indent=2em><b><tag></b>
+$
+<indent=0>Tags may have additional values or attributes, which follows the following syntax:
+$n
+<indent=2em><b><tag="value"></b> or <b><tag attribute="value"></b>
+$
+<indent=0>Tags only affect the portion of text that stands after it. Most tags can be closed with a 
+closing tag (<b></tag></b>), which will limit the effect of the corresponding tag to the portion 
+of the text behind it.
+
+$t2
+List of Tags
+$
+The list below lists the tags that work in JANOARG. JANOARG does not use all the tags used by TextMesh Pro.
+
+$
+ • <indent=2em><b><noparse><b></noparse></b>
+$n
+Makes the text bold, <b>like this.</b>
+
+$
+ • <indent=2em><b><noparse><i></noparse></b>
+$n
+Italicize the text, <i>like this.</i>
+
+$
+ • <indent=2em><b><noparse><u></noparse></b>
+$n
+Add an underline to the text, <u>like this.</u>
+
+$
+ • <indent=2em><b><noparse><color=[color]></noparse></b>
+$n
+Colors the text. [color] can be one of the defined keywords (
+<color=black>black</color>, 
+<color=blue>blue</color>, 
+<color=green>green</color>, 
+<color=orange>orange</color>, 
+<color=purple>purple</color>, 
+<color=red>red</color>, 
+<color=white>white</color>, 
+and <color=yellow>yellow</color>), 
+or a 6 or 8 digit hexadecimal color (#RRGGBB / #RRGGBBAA).
+
+$
+ • <indent=2em><b><noparse><noparse></noparse></b>
+$n
+Disable tag parsing for the text, which would make text display text that would be interpreted as tags.

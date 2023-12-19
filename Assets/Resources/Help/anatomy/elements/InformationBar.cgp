@@ -18,36 +18,36 @@ Box 357 3 40 18 color ControlNormal border BorderNormal text ControlContent <b>7
 $
 1. <indent=2em><b>Song Info Button</b>
 $n
-<indent=2em>The name of the current Playable Song. Click on it to select the current Playable Song.
+The name of the current Playable Song. Click on it to select the current Playable Song.
 
 $
 2. <indent=2em><b>Chart Info Button</b>
 $n
-<indent=2em>The name and difficulty of the current Chart. Click on it to select the current Chart.
+The name and difficulty of the current Chart. Click on it to select the current Chart.
 
 $
 3. <indent=2em><b>Chart Dropdown</b>
 $n
-<indent=2em>Click on it to change the selected Chart or create a new Chart based on the 
+Click on it to change the selected Chart or create a new Chart based on the 
 current Playable Song. If there's no Charts open, this button will be hidden and the 
 Chart Info Button will have the functionality of this button instead.
 
 $
 4. <indent=2em><b>Play/Pause Button</b>
 $n
-<indent=2em>Click on it to play/pause the current song.
+Click on it to play/pause the current song.
 
 $
 5. <indent=2em><b>Play Options Dropdown</b>
 $n
-<indent=2em>Click on it to show and edit play options such as the volume of the song and the hitsounds.
+Click on it to show and edit play options such as the volume of the song and the hitsounds.
 
 $
 6. <indent=2em><b>Timers</b>
 $n
-<indent=2em>Shows the current time of the songs, in beats and seconds.
+Shows the current time of the songs, in beats and seconds.
 
 $
 7. <indent=2em><b>Visualizer</b>
 $n
-<indent=2em>Click on it to switch between different visualizers.
+Click on it to switch between different visualizers.

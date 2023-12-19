@@ -21,15 +21,15 @@ Box 80 60 159 119 text Content0 <b>3
 $
 1. <indent=2em><b>Title Bar</b>
 $n
-<indent=2em>The title bar of the Home modal. Contains the application name and version number.
+The title bar of the Home modal. Contains the application name and version number.
 
 $
 2. <indent=2em><b>Action Box</b>
 $n
-<indent=2em>Contains actions such as opening/creating a Playable Song, or exiting the Chartmaker.
+Contains actions such as opening/creating a Playable Song, or exiting the Chartmaker.
 
 $
 3. <indent=2em><b>Recents List</b>
 $n
-<indent=2em>Contains a list of recently opened Playable Songs. Clicking on an item will automatically open 
+Contains a list of recently opened Playable Songs. Clicking on an item will automatically open 
 the associated Playable Song.
