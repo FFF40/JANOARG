@@ -509,7 +509,7 @@ public class ChartmakerMultiEditAction: IChartmakerAction
     }
 }
 
-public class ChartmakerMoveOffsetAction: IChartmakerAction
+public class ChartmakerTimelineDragAction: IChartmakerAction
 {
     public IList Targets = new List<object>();
     public string Keyword;
@@ -517,7 +517,7 @@ public class ChartmakerMoveOffsetAction: IChartmakerAction
 
     public string GetName()
     {
-        return "Move " + Chartmaker.GetItemName(Targets) + " Offset";
+        return "Drag " + Chartmaker.GetItemName(Targets);
     }
 
     public void Undo() 

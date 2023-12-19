@@ -442,7 +442,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         trt.anchorMax = new (InverseLerpUnclamped(PeekRange.x, PeekRange.y, timeEnd), 1);
                         trt.anchoredPosition = new(0, -24 * pos - 5);
                         trt.sizeDelta = new(0, 22);
-                        posX = Mathf.Max(posX, Mathf.Min(15 / ItemsHolder.rect.width, Mathf.Max(trt ? trt.anchorMax.x - 11 / ItemsHolder.rect.width : posX, posX)));
+                        posX = Mathf.Max(posX, Mathf.Min(15 / ItemsHolder.rect.width, Mathf.Max(trt ? trt.anchorMax.x - 16 / ItemsHolder.rect.width : posX, posX)));
                         tcount++;
                     }
 
@@ -782,7 +782,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         {
             if (eventData.button == PointerEventData.InputButton.Middle)
                 dragMode = TimelineDragMode.TimelineDrag;
-            else if (PickerPanel.main.CurrentMode == PickerMode.Select)
+            else if (eventData.button == PointerEventData.InputButton.Right || PickerPanel.main.CurrentMode == PickerMode.Select)
                 dragMode = TimelineDragMode.Select;
             else
                 dragMode = TimelineDragMode.Timeline;
@@ -839,7 +839,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         
         ChartmakerHistory history = Chartmaker.main.History;
         var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
-        if (last is ChartmakerMoveOffsetAction lastMove && lastMove.Targets == DraggingItem)
+        if (last is ChartmakerTimelineDragAction lastMove && lastMove.Targets == DraggingItem)
         {
             DraggingItemOffset = lastMove.Value;
         } 
@@ -880,16 +880,16 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 if (DraggingItem.Count > 0 && DraggingItem[0] is not Lane) 
                 {
                     ChartmakerHistory history = Chartmaker.main.History;
-                    ChartmakerMoveOffsetAction action;
+                    ChartmakerTimelineDragAction action;
                     var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
-                    if (last is ChartmakerMoveOffsetAction lastMove && lastMove.Targets == DraggingItem)
+                    if (last is ChartmakerTimelineDragAction lastMove && lastMove.Targets == DraggingItem)
                     {
                         action = lastMove;
                         action.Undo();
                     } 
                     else 
                     {
-                        action = new ChartmakerMoveOffsetAction {
+                        action = new ChartmakerTimelineDragAction {
                             Targets = DraggingItem,
                         };
                         history.ActionsBehind.Push(action);

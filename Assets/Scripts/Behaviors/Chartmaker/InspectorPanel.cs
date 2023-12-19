@@ -209,17 +209,18 @@ public class InspectorPanel : MonoBehaviour
                 return;
             }
 
+            ExternalChartMeta meta = Chartmaker.main.CurrentChartMeta;
             FormTitle.text = "Chart";
 
             SpawnForm<FormEntryHeader>("Metadata");
             SpawnForm<FormEntryString, string>("Chart Name", () => chart.DifficultyName, 
-                x => Chartmaker.main.SetItem(chart, "DifficultyName", x));
+                x => Chartmaker.main.SetItem(chart, "DifficultyName", meta.DifficultyName = x));
             SpawnForm<FormEntryInt, int>("Sorting Index", () => chart.DifficultyIndex, 
-                x => Chartmaker.main.SetItem(chart, "DifficultyIndex", x));
+                x => Chartmaker.main.SetItem(chart, "DifficultyIndex", meta.DifficultyIndex = x));
             SpawnForm<FormEntryString, string>("Difficulty", () => chart.DifficultyLevel, 
-                x => Chartmaker.main.SetItem(chart, "DifficultyLevel", x));
+                x => Chartmaker.main.SetItem(chart, "DifficultyLevel", meta.DifficultyLevel = x));
             SpawnForm<FormEntryFloat, float>("Chart Constant", () => chart.ChartConstant, 
-                x => Chartmaker.main.SetItem(chart, "ChartConstant", x));
+                x => Chartmaker.main.SetItem(chart, "ChartConstant", meta.ChartConstant = x));
         }
         else if (CurrentObject is Pallete pallete)
         {

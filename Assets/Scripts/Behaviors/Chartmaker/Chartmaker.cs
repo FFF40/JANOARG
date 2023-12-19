@@ -389,7 +389,7 @@ public class Chartmaker : MonoBehaviour
 
     public static string GetItemName(object item) => item switch
     {
-        IList list =>   list.Count > 0 ? list.Count + " " + GetItemName(list[0]) + "s" : "Empty List",
+        IList list =>   list.Count > 0 ? (list.Count > 1 ? list.Count + " " + GetItemName(list[0]) + "s" : GetItemName(list[0])) : "Empty List",
         Chart =>        "Chart",
         BPMStop =>      "BPM Stop",
         HitStyle =>     "Hit Style",
