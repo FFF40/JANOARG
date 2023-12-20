@@ -712,6 +712,25 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         return Mathf.Round(metronome.ToBeat(time) / step) * step;
     }
 
+    public BeatPosition ToRoundedBeat(float beat) 
+    {
+        Metronome metronome = Chartmaker.main.CurrentSong.Timing;
+        float density = (PeekRange.y - PeekRange.x) * metronome.GetStop(beat, out _).BPM / TicksHolder.rect.width / 8;
+        float factor = Mathf.Floor(Mathf.Log(density, SeparationFactor));
+        float step = Mathf.Pow(SeparationFactor, -1 - factor);
+        if (step > 1) 
+        {
+            return new BeatPosition(
+                Mathf.FloorToInt(beat),
+                Mathf.RoundToInt((beat % 1) * step),
+                (int)step);
+        } 
+        else 
+        {
+            return new BeatPosition((int)(Mathf.Floor(beat * step) / step));
+        }
+    }
+
     BeatPosition BeatFloor(float time, int factor, int sep) 
     {
         int fMin = (int)Math.Pow(sep, Math.Max(factor, 0));
@@ -729,7 +748,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         return new(0, fMin, fMax);
     }
 
-    int GetSepFactor(BeatPosition time, int sep) 
+    static int GetSepFactor(BeatPosition time, int sep) 
     {
         if (time.Denominator == 1) 
         {
@@ -777,6 +796,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         bool localPos(RectTransform rt, out Vector2 pos) => RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, eventData.pressPosition, eventData.pressEventCamera, out pos);
         isDragged = false;
         lastDrag = eventData;
+        DraggingItem = null;
 
         if (contains(ItemsHolder))
         {
@@ -839,7 +859,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         
         ChartmakerHistory history = Chartmaker.main.History;
         var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
-        if (last is ChartmakerTimelineDragAction lastMove && lastMove.Targets == DraggingItem)
+        if (last is ChartmakerTimelineDragFloatAction lastMove && lastMove.Targets == DraggingItem)
         {
             DraggingItemOffset = lastMove.Value;
         } 
@@ -880,26 +900,47 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 if (DraggingItem.Count > 0 && DraggingItem[0] is not Lane) 
                 {
                     ChartmakerHistory history = Chartmaker.main.History;
-                    ChartmakerTimelineDragAction action;
-                    var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
-                    if (last is ChartmakerTimelineDragAction lastMove && lastMove.Targets == DraggingItem)
+                    if (DraggingItem[0] is BPMStop) 
                     {
-                        action = lastMove;
-                        action.Undo();
-                    } 
-                    else 
-                    {
-                        action = new ChartmakerTimelineDragAction {
-                            Targets = DraggingItem,
-                        };
-                        history.ActionsBehind.Push(action);
+                        ChartmakerTimelineDragFloatAction action;
+                        var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
+                        if (last is ChartmakerTimelineDragFloatAction lastMove && lastMove.Targets == DraggingItem)
+                        {
+                            action = lastMove;
+                            action.Undo();
+                        } 
+                        else 
+                        {
+                            action = new ChartmakerTimelineDragFloatAction {
+                                Targets = DraggingItem,
+                            };
+                            history.ActionsBehind.Push(action);
+                        }
+                        action.Value = (DraggingItem[0] is BPMStop ? timeEnd - timeStart : beatEnd - beatStart) + DraggingItemOffset;
+                        action.Redo();
                     }
-                    action.Value = (DraggingItem[0] is BPMStop ? timeEnd - timeStart : beatEnd - beatStart) + DraggingItemOffset;
-                    action.Redo();
+                    else
+                    {
+                        ChartmakerTimelineDragBeatPositionAction action;
+                        var last = history.ActionsBehind.Count == 0 ? null : history.ActionsBehind.Peek();
+                        if (last is ChartmakerTimelineDragBeatPositionAction lastMove && lastMove.Targets == DraggingItem)
+                        {
+                            action = lastMove;
+                            action.Undo();
+                        } 
+                        else 
+                        {
+                            action = new ChartmakerTimelineDragBeatPositionAction {
+                                Targets = DraggingItem,
+                            };
+                            history.ActionsBehind.Push(action);
+                        }
+                        action.Value = ToRoundedBeat((DraggingItem[0] is BPMStop ? timeEnd - timeStart : beatEnd - beatStart) + DraggingItemOffset);
+                        action.Redo();
+                    }
                     history.ActionsAhead.Clear();
                     Chartmaker.main.OnHistoryDo();
                     Chartmaker.main.OnHistoryUpdate();
-                    Debug.Log(action.Value + " " + timeStart + " " + timeEnd);
                 }
             } 
             else if (dragMode == TimelineDragMode.TimelineDrag)
@@ -1087,7 +1128,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         TimestampType type = types[Math.Clamp(Mathf.FloorToInt((ItemsHolder.rect.height - dragEnd.y - 3) / 24) + ScrollOffset, 0, types.Length - 1)];
                         Chartmaker.main.AddItem(new Timestamp {
                             ID = type.ID,
-                            Offset = isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart,
+                            Offset = (BeatPosition)(isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart),
                             Duration = isDragged ? Mathf.Abs(beatStart - beatEnd) : 0,
                             Target = type.Get(thing.Get(isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart)),
                         });
@@ -1109,12 +1150,12 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         lane.LaneSteps.Add(new LaneStep{ 
                             StartPos = new(-8, 0),
                             EndPos = new(8, 0),
-                            Offset = isDragged ? Math.Min(beatStart, beatEnd) : beatStart
+                            Offset = (BeatPosition)(isDragged ? Math.Min(beatStart, beatEnd) : beatStart)
                         });
                         lane.LaneSteps.Add(new LaneStep{ 
                             StartPos = new(-8, 0),
                             EndPos = new(8, 0),
-                            Offset = isDragged ? Math.Max(beatStart, beatEnd) : beatStart + 1,
+                            Offset = (BeatPosition)(isDragged ? Math.Max(beatStart, beatEnd) : beatStart + 1),
                         });
                         Chartmaker.main.AddItem(lane);
                     }
@@ -1126,8 +1167,12 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         Lane lane = InspectorPanel.main.CurrentLane;
                         if (lane == null) break;
 
-                        LaneStep baseStep = ((Lane)lane.Get(timeEnd)).GetLaneStep(timeStart, timeStart, metronome);
-                        baseStep.Offset = isDragged ? beatEnd : beatStart;
+                        LanePosition basePos = ((Lane)lane.Get(timeEnd)).GetLanePosition(timeStart, timeStart, metronome);
+                        LaneStep baseStep = new() {
+                            StartPos = basePos.StartPos,
+                            EndPos = basePos.EndPos,
+                            Offset = (BeatPosition)(isDragged ? beatEnd : beatStart),
+                        };
 
                         Chartmaker.main.AddItem(baseStep);
                     }
@@ -1141,7 +1186,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
                         if (isDragged) 
                         {
-                            hit.Offset = Math.Min(beatStart, beatEnd);
+                            hit.Offset = (BeatPosition)(Math.Min(beatStart, beatEnd));
                             hit.HoldLength = Math.Abs(beatStart - beatEnd);
                             float yStart = Mathf.Lerp(0, 1, Mathf.Round(Mathf.Clamp01(1 - (Mathf.Max(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)) / .05f) * .05f);
                             float yEnd = Mathf.Lerp(0, 1, Mathf.Round(Mathf.Clamp01(1 - (Mathf.Min(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)) / .05f) * .05f);
@@ -1153,7 +1198,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         } 
                         else 
                         {
-                            hit.Offset = beatStart;
+                            hit.Offset = (BeatPosition)beatStart;
                             hit.HoldLength = 0;
                         }
 

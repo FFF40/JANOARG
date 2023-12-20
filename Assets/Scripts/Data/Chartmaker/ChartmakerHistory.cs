@@ -509,7 +509,7 @@ public class ChartmakerMultiEditAction: IChartmakerAction
     }
 }
 
-public class ChartmakerTimelineDragAction: IChartmakerAction
+public class ChartmakerTimelineDragFloatAction: IChartmakerAction
 {
     public IList Targets = new List<object>();
     public string Keyword;
@@ -531,5 +531,30 @@ public class ChartmakerTimelineDragAction: IChartmakerAction
         System.Reflection.FieldInfo field = Targets[0].GetType().GetField("Offset");
         foreach (object item in Targets)
             field.SetValue(item, (float)field.GetValue(item) + Value);
+    }
+}
+
+public class ChartmakerTimelineDragBeatPositionAction: IChartmakerAction
+{
+    public IList Targets = new List<object>();
+    public string Keyword;
+    public BeatPosition Value;
+
+    public string GetName()
+    {
+        return "Drag " + Chartmaker.GetItemName(Targets);
+    }
+
+    public void Undo() 
+    {
+        System.Reflection.FieldInfo field = Targets[0].GetType().GetField("Offset");
+        foreach (object item in Targets)
+            field.SetValue(item, (BeatPosition)field.GetValue(item) - Value);
+    }
+    public void Redo() 
+    {
+        System.Reflection.FieldInfo field = Targets[0].GetType().GetField("Offset");
+        foreach (object item in Targets)
+            field.SetValue(item, (BeatPosition)field.GetValue(item) + Value);
     }
 }

@@ -469,6 +469,14 @@ public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup>
 }
 
 [System.Serializable]
+public class LanePosition
+{
+    public Vector2 StartPos;
+    public Vector2 EndPos;
+    public float Offset;
+}
+
+[System.Serializable]
 public class Lane : IStoryboardable, IDeepClonable<Lane>
 {
     public List<HitObject> Objects = new List<HitObject>();
@@ -481,7 +489,7 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 
     public int StyleIndex = 0;
 
-    public LaneStep GetLaneStep(float time, float laneTime, Metronome timing) 
+    public LanePosition GetLanePosition(float time, float laneTime, Metronome timing) 
     {
         float offset = 0;
         float timeT = timing.ToSeconds(time);
@@ -497,7 +505,7 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
             offset += step.Speed * (Mathf.Max(t, laneTimeT) - curtime);
             curtime = Mathf.Max(t, laneTimeT);
 
-            if (time == step.Offset) return new LaneStep 
+            if (time == step.Offset) return new LanePosition 
             {
                 StartPos = step.StartPos,
                 EndPos = step.EndPos,
@@ -505,7 +513,7 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
             };
             else if (time < step.Offset) 
             {
-                if (a == 0) return new LaneStep 
+                if (a == 0) return new LanePosition 
                 {
                     StartPos = step.StartPos,
                     EndPos = step.EndPos,
@@ -517,23 +525,23 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 
                 if (step.IsLinear)
                 {
-                    return new LaneStep 
+                    return new LanePosition 
                     {
                         StartPos = Vector2.LerpUnclamped(prev.StartPos, step.StartPos, p),
                         EndPos = Vector2.LerpUnclamped(prev.EndPos, step.EndPos, p),
-                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : float.NaN,
+                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
                     };
                 }
                 else 
                 {
                     
-                    return new LaneStep 
+                    return new LanePosition 
                     {
                         StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, Ease.Get(p, step.StartEaseX, step.StartEaseXMode)),
                             Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, Ease.Get(p, step.StartEaseY, step.StartEaseYMode))),
                         EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, Ease.Get(p, step.EndEaseX, step.EndEaseXMode)),
                             Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, Ease.Get(p, step.EndEaseY, step.EndEaseYMode))),
-                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : float.NaN,
+                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
                     };
                 }
             }
@@ -541,7 +549,7 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
         }
         {
             float t = timing.ToSeconds(steps[steps.Count - 1].Offset);
-            return new LaneStep 
+            return new LanePosition 
             {
                 StartPos = steps[steps.Count - 1].StartPos,
                 EndPos = steps[steps.Count - 1].EndPos,
@@ -615,7 +623,7 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 [System.Serializable]
 public class LaneStep : IStoryboardable, IDeepClonable<LaneStep> 
 {
-    public float Offset;
+    public BeatPosition Offset = new();
     public Vector2 StartPos;
     public EaseFunction StartEaseX = EaseFunction.Linear;
     public EaseMode StartEaseXMode;
@@ -695,7 +703,7 @@ public class LaneStep : IStoryboardable, IDeepClonable<LaneStep>
 public class HitObject : IStoryboardable, IDeepClonable<HitObject>
 {
     public HitType Type;
-    public float Offset = 0;
+    public BeatPosition Offset = new();
     public float Position;
     public float Length;
     public float HoldLength = 0;

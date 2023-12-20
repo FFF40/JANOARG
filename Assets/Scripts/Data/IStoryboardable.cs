@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 public class Timestamp : IDeepClonable<Timestamp>
 {
     [FormerlySerializedAs("Time")]
-    public float Offset;
+    public BeatPosition Offset;
     public float Duration;
     public string ID;
     public float From = float.NaN;

@@ -71,7 +71,7 @@ public class JACDecoder
                     {
                         Timestamp ts = new Timestamp {
                             ID = tokens[1],
-                            Offset = ParseFloat(tokens[2]),
+                            Offset = ParseTime(tokens[2]),
                             Duration = ParseFloat(tokens[3]),
                             Target = ParseFloat(tokens[4]),
                             From = tokens[5] == "_" ? float.NaN : ParseFloat(tokens[5]),
@@ -299,9 +299,22 @@ public class JACDecoder
         return float.Parse(number, CultureInfo.InvariantCulture);
     }
 
-    static float ParseTime(string number)
+    static BeatPosition ParseTime(string number)
     {
-        return float.Parse(number, CultureInfo.InvariantCulture);
+        int slashPos = number.IndexOf('/');
+        if (slashPos >= 0)
+        {
+            int bPos = number.IndexOf('b');
+            return new BeatPosition(
+                ParseInt(number[..bPos]),
+                ParseInt(number[(bPos + 1)..slashPos]),
+                ParseInt(number[(slashPos + 1)..])
+            );
+        }
+        else 
+        {
+            return (BeatPosition)ParseFloat(number.Replace('b', '.'));
+        }
     }
 
     static Vector3 ParseVector(string str)

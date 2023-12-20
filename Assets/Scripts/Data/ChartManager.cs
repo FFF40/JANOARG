@@ -497,11 +497,11 @@ public class LaneManager
         return mesh;
     }
 
-    public LaneStep GetLaneStep(float sec, float speed = 1)
+    public LanePosition GetLanePosition(float sec, float speed = 1)
     {
         if (sec < Steps[0].Offset || Steps.Count <= 1)
         {
-            return new LaneStep()
+            return new LanePosition()
             {
                 StartPos = CurrentLane.LaneSteps[0].StartPos,
                 EndPos = CurrentLane.LaneSteps[0].EndPos,
@@ -510,7 +510,7 @@ public class LaneManager
         }
         else if (sec > Steps[Steps.Count - 1].Offset)
         {
-            return new LaneStep()
+            return new LanePosition()
             {
                 StartPos = CurrentLane.LaneSteps[Steps.Count - 1].StartPos,
                 EndPos = CurrentLane.LaneSteps[Steps.Count - 1].EndPos,
@@ -530,7 +530,7 @@ public class LaneManager
 
             if (currS.IsLinear)
             {
-                return new LaneStep 
+                return new LanePosition 
                 {
                     StartPos = Vector2.LerpUnclamped(prevS.StartPos, currS.StartPos, p),
                     EndPos = Vector2.LerpUnclamped(prevS.EndPos, currS.EndPos, p),
@@ -540,7 +540,7 @@ public class LaneManager
             else 
             {
                 
-                return new LaneStep 
+                return new LanePosition 
                 {
                     StartPos = new Vector2(Mathf.LerpUnclamped(prevS.StartPos.x, currS.StartPos.x, Ease.Get(p, currS.StartEaseX, currS.StartEaseXMode)),
                         Mathf.LerpUnclamped(prevS.StartPos.y, currS.StartPos.y, Ease.Get(p, currS.StartEaseY, currS.StartEaseYMode))),
@@ -765,17 +765,17 @@ public class HitObjectManager
 
         if (time <= TimeEnd)
         {
-            LaneStep step = lane.GetLaneStep(Mathf.Max(TimeStart, time), main.CurrentSpeed);
+            LanePosition pos = lane.GetLanePosition(Mathf.Max(TimeStart, time), main.CurrentSpeed);
 
-            Vector3 fwd = Vector3.forward * step.Offset;
-            StartPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position) + fwd;
-            EndPos = Vector3.LerpUnclamped(step.StartPos, step.EndPos, data.Position + data.Length) + fwd;
+            Vector3 fwd = Vector3.forward * pos.Offset;
+            StartPos = Vector3.LerpUnclamped(pos.StartPos, pos.EndPos, data.Position) + fwd;
+            EndPos = Vector3.LerpUnclamped(pos.StartPos, pos.EndPos, data.Position + data.Length) + fwd;
 
             Position = (StartPos + EndPos) / 2;
             Rotation = Quaternion.LookRotation(EndPos - StartPos) * Quaternion.Euler(0, 90, 0);
             Length = Vector3.Distance(StartPos, EndPos);
 
-            HoldMesh = step.Offset < lane.CurrentDistance + 250 && TimeStart < TimeEnd ? lane.GetPartOfLane(Mathf.Max(TimeStart, time), TimeEnd, data.Position, data.Length) : null;
+            HoldMesh = pos.Offset < lane.CurrentDistance + 250 && TimeStart < TimeEnd ? lane.GetPartOfLane(Mathf.Max(TimeStart, time), TimeEnd, data.Position, data.Length) : null;
         } else {
             HoldMesh = null;
         }

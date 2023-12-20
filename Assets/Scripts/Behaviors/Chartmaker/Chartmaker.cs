@@ -485,14 +485,29 @@ public class Chartmaker : MonoBehaviour
         OnHistoryUpdate();
         InspectorPanel.main.SetObject(obj);
     }
-
     public void AddItem(object obj, float startingOffset)
+    {
+        IList list = obj is IList l ? l : new [] { obj };
+        FieldInfo field = list[0].GetType().GetField("Offset");
+        if (list[0] is BPMStop fbs)
+        {
+            float offset = startingOffset - fbs.Offset;
+            foreach (object item in list)
+            {
+                BPMStop stop = (BPMStop)item;
+                stop.Offset += offset;
+            }
+        }
+        AddItem(list);
+    }
+
+    public void AddItem(object obj, BeatPosition startingOffset)
     {
         IList list = obj is IList l ? l : new [] { obj };
         FieldInfo field = list[0].GetType().GetField("Offset");
         if (list[0] is Lane fl)
         {
-            float offset = startingOffset - fl.LaneSteps[0].Offset;
+            BeatPosition offset = startingOffset - fl.LaneSteps[0].Offset;
             foreach (object item in list)
             {
                 Lane lane = (Lane)item;
@@ -510,25 +525,17 @@ public class Chartmaker : MonoBehaviour
         }
         else if (field != null)
         {
-            float offset = startingOffset - (float)field.GetValue(list[0]);
+            BeatPosition offset = startingOffset - (BeatPosition)field.GetValue(list[0]);
             foreach (object item in list)
             {
-                field.SetValue(item, (float)field.GetValue(item) + offset);
+                field.SetValue(item, (BeatPosition)field.GetValue(item) + offset);
                 if (item is IStoryboardable isb)
                 {
                     foreach (Timestamp ts in isb.Storyboard.Timestamps) ts.Offset += offset;
                 }
             }
         }
-        ChartmakerAddAction action = new ChartmakerAddAction {
-            Target = GetListTarget(obj),
-            Item = list,
-        };
-        action.Redo();
-        History.AddAction(action);
-        OnHistoryDo();
-        OnHistoryUpdate();
-        InspectorPanel.main.SetObject(list);
+        AddItem(list);
     }
     public List<T> DeepClone<T>(List<T> obj) where T : IDeepClonable<T>
     {
@@ -625,7 +632,14 @@ public class Chartmaker : MonoBehaviour
     {
         if (!CanPaste()) return;
         object obj = SmartClone(ClipboardItem);
-        AddItem(obj, obj is BPMStop or List<BPMStop> ? SongSource.time : CurrentSong.Timing.ToBeat(SongSource.time));
+        if (obj is BPMStop or List<BPMStop>)
+        {
+            AddItem(obj, SongSource.time);
+        }
+        else 
+        {
+            AddItem(obj, TimelinePanel.main.ToRoundedBeat(CurrentSong.Timing.ToBeat(SongSource.time)));
+        }
         InspectorPanel.main.SetObject(obj);
     }
 }

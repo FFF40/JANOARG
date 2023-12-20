@@ -470,6 +470,15 @@ public class InspectorPanel : MonoBehaviour
         field.TitleLabel.gameObject.SetActive(false);
     }
 
+    public void MakeOffsetEntry(Func<BeatPosition> get, Action<BeatPosition> set)
+    {
+        var field = SpawnForm<FormEntryString, string>("", () => get().ToString(), x => {
+            if (BeatPosition.TryParse(x, out BeatPosition output)) set(output);
+        });
+        field.transform.SetParent(OffsetFieldHolder);
+        field.TitleLabel.gameObject.SetActive(false);
+    }
+
     public void MakeLaneStyleEntry(Lane lane)
     {
         var dropdown = SpawnForm<FormEntryDropdown, object>("Style Index", () => lane.StyleIndex, x => Chartmaker.main.SetItem(lane, "StyleIndex", x));

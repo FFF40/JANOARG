@@ -1,14 +1,17 @@
 
 using System;
+using System.Globalization;
 using System.Numerics;
 using Unity.VisualScripting;
 
 [Serializable]
-public struct BeatPosition 
+public struct BeatPosition : IComparable<BeatPosition>
 {
     public int Number;
     public int Numerator;
     public int Denominator;
+
+    public const double Precision = 1e-5;
 
     public BeatPosition(int a)
     {
@@ -33,8 +36,74 @@ public struct BeatPosition
         else return (Numerator < 0 ? "-" : "") + Math.Abs(Number) + "b" + Math.Abs(Numerator) + "/" + Denominator;
     }
 
+    public string ToString(CultureInfo cultureInfo)
+    {
+        if (Numerator == 0) return Number.ToString(cultureInfo) + "b";
+        else return (Numerator < 0 ? "-" : "") + Math.Abs(Number).ToString(cultureInfo) + "b" + Math.Abs(Numerator).ToString(cultureInfo) + "/" + Denominator.ToString(cultureInfo);
+    }
+
+
+    public static BeatPosition Parse(string number, CultureInfo culture = null)
+    {
+        int slashPos = number.IndexOf('/');
+        if (slashPos >= 0)
+        {
+            int bPos = number.IndexOf('b');
+            return new BeatPosition(
+                int.Parse(number[..bPos], culture),
+                int.Parse(number[(bPos + 1)..slashPos], culture),
+                int.Parse(number[(slashPos + 1)..], culture)
+            );
+        }
+        else 
+        {
+            return (BeatPosition)float.Parse(number.Replace('b', '.'), culture);
+        }
+    }
+
+    public static bool TryParse(string number, out BeatPosition output, CultureInfo culture = null)
+    {
+        try
+        {
+            output = Parse(number, culture);
+            return true;
+        }
+        catch
+        {
+            output = NaN;
+            return false;
+        }
+    }
+
     public static implicit operator double(BeatPosition a) => a.Number + (double)a.Numerator / a.Denominator;
     public static implicit operator float(BeatPosition a) => a.Number + (float)a.Numerator / a.Denominator;
+
+    public static explicit operator BeatPosition(double a) 
+    {
+        int num = (int)Math.Floor(a);
+        a -= num;
+        if (a == 0) return new BeatPosition(num);
+
+        int minN = 0, minD = 1, maxN = 1, maxD = 1;
+        while (true) 
+        {
+            int midN = minN + maxN;
+            int midD = minD + maxD;
+            if (midN > midD * (a + Precision))
+            {
+                maxN = midN; maxD = midD;
+            }
+            else if (midD * (a - Precision) > midN)
+            {
+                minN = midN; minD = midD;
+            }
+            else 
+            {
+                return new BeatPosition(num, midN, midD);
+            }
+            
+        }
+    }
 
     public static BeatPosition operator +(BeatPosition a, BeatPosition b)
     {
@@ -63,8 +132,30 @@ public struct BeatPosition
         );
     }
 
+    public static bool operator <(BeatPosition a, BeatPosition b)
+    {
+        return a.CompareTo(b) < 0;
+    }
+
+    public static bool operator <=(BeatPosition a, BeatPosition b)
+    {
+        return a.CompareTo(b) <= 0;
+    }
+
+    public static bool operator >(BeatPosition a, BeatPosition b)
+    {
+        return a.CompareTo(b) > 0;
+    }
+
+    public static bool operator >=(BeatPosition a, BeatPosition b)
+    {
+        return a.CompareTo(b) >= 0;
+    }
+
     void Normalize()
     {
+        if (Denominator <= 0) return;
+
         if (Number < 0)
         {
             if (Numerator <= -Denominator)
@@ -134,5 +225,16 @@ public struct BeatPosition
             else b %= a;
         }
         return a | b;
+    }
+
+    public static readonly BeatPosition NaN = new() { Number = 0, Numerator = 0, Denominator = 0 };
+    public static bool IsNaN(BeatPosition a)
+    {
+        return a.Denominator <= 0;
+    }
+
+    public readonly int CompareTo(BeatPosition other)
+    {
+        return ((float)this).CompareTo((float)other);
     }
 }
