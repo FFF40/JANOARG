@@ -71,6 +71,7 @@
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\HelpModal.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\CMHitPlayer.cs" />
      <Compile Include="Assets\Scripts\UI\ColorPicker\SliderGradient.cs" />
+     <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryBeatPosition.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryHeader.cs" />
      <Compile Include="Assets\Scripts\UI\BorderlessWindow.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormEntry.cs" />

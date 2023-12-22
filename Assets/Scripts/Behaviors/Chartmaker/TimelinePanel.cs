@@ -721,8 +721,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         if (step > 1) 
         {
             return new BeatPosition(
-                Mathf.FloorToInt(beat),
-                Mathf.RoundToInt((beat % 1) * step),
+                Mathf.FloorToInt(Mathf.Abs(beat)) * Math.Sign(beat),
+                Mathf.RoundToInt(Mathf.Abs(beat % 1) * step) * Math.Sign(beat),
                 (int)step);
         } 
         else 

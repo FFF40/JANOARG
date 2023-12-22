@@ -18,7 +18,6 @@ public struct BeatPosition : IComparable<BeatPosition>
         Number = a;
         Numerator = 0;
         Denominator = 1;
-        Normalize();
     }
 
     public BeatPosition(int a, int b, int c)

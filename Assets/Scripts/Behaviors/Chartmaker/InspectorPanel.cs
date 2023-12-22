@@ -472,9 +472,7 @@ public class InspectorPanel : MonoBehaviour
 
     public void MakeOffsetEntry(Func<BeatPosition> get, Action<BeatPosition> set)
     {
-        var field = SpawnForm<FormEntryString, string>("", () => get().ToString(), x => {
-            if (BeatPosition.TryParse(x, out BeatPosition output)) set(output);
-        });
+        var field = SpawnForm<FormEntryBeatPosition, BeatPosition>("", get, set);
         field.transform.SetParent(OffsetFieldHolder);
         field.TitleLabel.gameObject.SetActive(false);
     }
@@ -537,6 +535,7 @@ public class InspectorPanel : MonoBehaviour
             bool advanced = float.IsFinite(lerpHandler.From);
             SpawnForm<FormEntryBool, bool>("Advanced", () => advanced, x => { 
                 lerpHandler.From = x ? lerpHandler.To : float.NaN; 
+                if (x) lerpHandler.SetLerp(thing);
                 UpdateForm();
             });
             if (advanced) SpawnForm<FormEntryFloat, float>("From", () => lerpHandler.From, x => { lerpHandler.From = x; });
@@ -545,11 +544,11 @@ public class InspectorPanel : MonoBehaviour
             if (advanced) 
             {
                 var lerpDropdown = SpawnForm<FormEntryDropdown, object>("Lerp Source", () => lerpHandler.LerpSource, x => {
-                    lerpHandler.LerpSource = (string)x;
+                    lerpHandler.LerpSource = (string)x; lerpHandler.SetLerp(thing);
                 });
                 foreach (FieldInfo field in fields)
                 {
-                    if (typeof(float).IsAssignableFrom(field.FieldType))
+                    if (typeof(float).IsAssignableFrom(field.FieldType) || field.FieldType == typeof(BeatPosition))
                         lerpDropdown.ValidValues.Add(field.Name, field.Name);
                 }
                 SpawnForm<FormEntryEasing, EasingPair>("Lerp Easing", () => new (lerpHandler.LerpEasing, lerpHandler.LerpEaseMode), 
@@ -561,11 +560,43 @@ public class InspectorPanel : MonoBehaviour
                 x => { lerpHandler.Operation = (LerpableOperation)x; }
             ).TargetEnum(typeof(LerpableOperation));
         }
+        void MakeBeatPositionEditor(ChartmakerMultiHandlerBeatPosition beatHandler)
+        {
+            bool advanced = !BeatPosition.IsNaN(beatHandler.From);
+            SpawnForm<FormEntryBool, bool>("Advanced", () => advanced, x => { 
+                beatHandler.From = x ? beatHandler.To : BeatPosition.NaN; 
+                if (x) beatHandler.SetLerp(thing);
+                UpdateForm();
+            });
+            if (advanced) SpawnForm<FormEntryBeatPosition, BeatPosition>("From", () => beatHandler.From, x => { beatHandler.From = x; });
+            SpawnForm<FormEntryBeatPosition, BeatPosition>("To", () => beatHandler.To, x => { beatHandler.To = x; });
+            
+            if (advanced) 
+            {
+                var lerpDropdown = SpawnForm<FormEntryDropdown, object>("Lerp Source", () => beatHandler.LerpSource, x => {
+                    beatHandler.LerpSource = (string)x; beatHandler.SetLerp(thing);
+                });
+                foreach (FieldInfo field in fields)
+                {
+                    if (typeof(float).IsAssignableFrom(field.FieldType) || field.FieldType == typeof(BeatPosition))
+                        lerpDropdown.ValidValues.Add(field.Name, field.Name);
+                }
+                SpawnForm<FormEntryEasing, EasingPair>("Lerp Easing", () => new (beatHandler.LerpEasing, beatHandler.LerpEaseMode), 
+                    x => { beatHandler.LerpEasing = x.Function; beatHandler.LerpEaseMode = x.Mode; }
+                );
+            }
+            
+            SpawnForm<FormEntryDropdown, object>("Operation", () => beatHandler.Operation, 
+                x => { beatHandler.Operation = (BeatPositionOperation)x; }
+            ).TargetEnum(typeof(BeatPositionOperation));
+        }
 
         if (MultiHandler is ChartmakerMultiHandlerBoolean boolHandler) {
             SpawnForm<FormEntryDropdown, object>("To", () => boolHandler.To == null ? 2 : (bool)boolHandler.To ? 1 : 0, x => {
                 boolHandler.To = new bool?[] {true, false, null}[(int)x];
             }).TargetList("False", "True", "Toggle");
+        } else if (MultiHandler is ChartmakerMultiHandlerBeatPosition beatHandler) {
+            MakeBeatPositionEditor(beatHandler);
         } else if (MultiHandler is ChartmakerMultiHandlerFloat floatHandler) {
             MakeLerpableEditor(floatHandler);
         } else if (MultiHandler is ChartmakerMultiHandlerVector2 v2Handler) {
@@ -619,6 +650,7 @@ public class InspectorPanel : MonoBehaviour
         history.ActionsBehind.Push(action);
         history.ActionsAhead.Clear();
         Chartmaker.main.OnHistoryDo();
+        Chartmaker.main.OnHistoryUpdate();
     }
 
 
@@ -633,6 +665,10 @@ public class InspectorPanel : MonoBehaviour
         if (type ==  typeof(bool)) 
         {
             return new ChartmakerMultiHandlerBoolean();
+        }
+        else if (type == typeof(BeatPosition)) 
+        {
+            return new ChartmakerMultiHandlerBeatPosition();
         }
         else if (type == typeof(float)) 
         {

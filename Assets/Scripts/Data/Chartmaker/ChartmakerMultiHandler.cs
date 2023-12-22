@@ -48,11 +48,19 @@ public class ChartmakerMultiManager
 
         if (currentField.FieldType != Handler?.TargetType)
         {
-            if (currentField.FieldType ==  typeof(bool)) 
+            if (currentField.FieldType == typeof(bool)) 
             {
                 Handler = Handlers.ContainsKey(currentField.FieldType) 
                     ? Handlers[currentField.FieldType] 
                     : new ChartmakerMultiHandlerBoolean();
+            }
+            else if (currentField.FieldType == typeof(BeatPosition)) 
+            {
+                ChartmakerMultiHandlerBeatPosition handler = Handlers.ContainsKey(currentField.FieldType)
+                    ? Handlers[currentField.FieldType] as ChartmakerMultiHandlerBeatPosition
+                    : new ChartmakerMultiHandlerBeatPosition();
+                handler.SetLerp(current);
+                Handler = handler;
             }
             else if (currentField.FieldType == typeof(float)) 
             {
@@ -173,10 +181,58 @@ public class LerpableMultiHandler<T> : ChartmakerMultiHandler<T>
         if (LerpField == null) return;
         foreach (object item in list)
         {
-            float value = (float)LerpField.GetValue(item);
+            float value = LerpField.FieldType == typeof(BeatPosition) ? (BeatPosition)LerpField.GetValue(item) : (float)LerpField.GetValue(item);
             LerpFrom = Mathf.Min(LerpFrom, value);
             LerpTo = Mathf.Max(LerpTo, value);
         }
+    }
+}
+
+public enum BeatPositionOperation {
+    Set, Add, Snap
+}
+public static class BeatPositionOperations {
+    public static Dictionary<BeatPositionOperation, Func<BeatPosition, BeatPosition, BeatPosition>> Get = new Dictionary<BeatPositionOperation, Func<BeatPosition, BeatPosition, BeatPosition>> {
+        { BeatPositionOperation.Set,        (from, to) => to },
+        { BeatPositionOperation.Add,        (from, to) => from + to },
+        { BeatPositionOperation.Snap,       (from, to) => new BeatPosition(from.Number, Mathf.RoundToInt(from.Numerator * (float)to.Number / from.Denominator), to.Number) },
+    };
+}
+
+public class ChartmakerMultiHandlerBeatPosition : ChartmakerMultiHandler<BeatPosition>
+{
+    public BeatPosition From = BeatPosition.NaN;
+    public new BeatPosition To = new(0);
+
+    public BeatPositionOperation Operation;
+
+    public string LerpSource = "Offset";
+    protected FieldInfo LerpField;
+    public EaseFunction LerpEasing = EaseFunction.Linear;
+    public EaseMode LerpEaseMode = EaseMode.In;
+
+    public float LerpFrom;
+    public float LerpTo;
+
+    public void SetLerp(IList list)
+    {
+        LerpFrom = float.PositiveInfinity;
+        LerpTo = float.NegativeInfinity;
+        LerpField = list.GetType().GetGenericArguments()[0].GetField(LerpSource);
+        if (LerpField == null) return;
+        foreach (object item in list)
+        {
+            float value = LerpField.FieldType == typeof(BeatPosition) ? (BeatPosition)LerpField.GetValue(item) : (float)LerpField.GetValue(item);
+            LerpFrom = Mathf.Min(LerpFrom, value);
+            LerpTo = Mathf.Max(LerpTo, value);
+        }
+    }
+
+    public override BeatPosition Get(BeatPosition from, object src) {
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, 
+            LerpField.FieldType == typeof(BeatPosition) ? (BeatPosition)LerpField.GetValue(src) : (float)LerpField.GetValue(src));
+        BeatPosition toBeat = float.IsFinite(From) ? (BeatPosition)Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
+        return BeatPositionOperations.Get[Operation](from, toBeat);
     }
 }
 
@@ -192,7 +248,8 @@ public class ChartmakerMultiHandlerBoolean: ChartmakerMultiHandler<bool>
 public class ChartmakerMultiHandlerFloat: LerpableMultiHandler<float>
 {
     public override float Get(float from, object src) {
-        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, 
+            LerpField.FieldType == typeof(BeatPosition) ? (BeatPosition)LerpField.GetValue(src) : (float)LerpField.GetValue(src));
         to = float.IsFinite(From) ? Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
         return LerpableOperations.Get[Operation](from, to);
     }
@@ -203,7 +260,8 @@ public class ChartmakerMultiHandlerVector2: LerpableMultiHandler<Vector2>
     public int Axis = 0;
     
     public override Vector2 Get(Vector2 from, object src) {
-        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, 
+            LerpField.FieldType == typeof(BeatPosition) ? (BeatPosition)LerpField.GetValue(src) : (float)LerpField.GetValue(src));
         to = float.IsFinite(From) ? Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
         from = new Vector2(from.x, from.y);
         from[Axis] = LerpableOperations.Get[Operation](from[Axis], to);
@@ -216,7 +274,8 @@ public class ChartmakerMultiHandlerVector3: LerpableMultiHandler<Vector3>
     public int Axis = 0;
 
     public override Vector3 Get(Vector3 from, object src) {
-        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, (float)LerpField.GetValue(src));
+        float to = LerpField == null ? LerpTo : Mathf.InverseLerp(LerpFrom, LerpTo, 
+            LerpField.FieldType == typeof(BeatPosition) ? (BeatPosition)LerpField.GetValue(src) : (float)LerpField.GetValue(src));
         to = float.IsFinite(From) ? Mathf.Lerp(From, To, Ease.Get(to, LerpEasing, LerpEaseMode)) : To;
         from = new Vector3(from.x, from.y, from.z);
         from[Axis] = LerpableOperations.Get[Operation](from[Axis], to);

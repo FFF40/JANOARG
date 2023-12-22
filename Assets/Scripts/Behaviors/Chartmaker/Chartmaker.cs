@@ -590,6 +590,7 @@ public class Chartmaker : MonoBehaviour
 
     public bool CanCopy()
     {
+        if (InspectorPanel.main.CurrentTimestamp?.Count > 0) return true;
         object currentItem = InspectorPanel.main.CurrentObject;
         return currentItem is not (null or PlayableSong or Chart or Pallete or CameraController) && currentItem != CurrentChart?.Groups;
     }

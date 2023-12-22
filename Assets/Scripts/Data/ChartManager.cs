@@ -215,7 +215,7 @@ public class LaneGroupManager
         if (!string.IsNullOrEmpty(CurrentGroup.Group) && main.Groups.ContainsKey(CurrentGroup.Group))
         {
             LaneGroupManager group = main.Groups[CurrentGroup.Group];
-            if (group.CurrentGroup.Name == CurrentGroup.Group)
+            if (original == group.CurrentGroup.Group)
             {
                 Debug.LogError("Cyclical Lane group reference detected: " + original);
             }
