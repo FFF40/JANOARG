@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,6 +11,8 @@ using UnityEngine.UI;
 public class InspectorPanel : MonoBehaviour
 {
     public static InspectorPanel main;
+
+    public InspectorMode CurrentMode;
 
     public object CurrentObject;
     public List<Timestamp> CurrentTimestamp;
@@ -24,11 +27,16 @@ public class InspectorPanel : MonoBehaviour
     public Button GroupsButton;
     public Button CameraButton;
     [Space]
+    public Button PropertiesButton;
+    public Button ExtraModesButton;
+    [Space]
     public Button BackButton;
-
+    [Space]
     public FieldInfo CurrentMultiField;
     public ChartmakerMultiHandler MultiHandler;
     public Dictionary<Type, ChartmakerMultiHandler> MultiHandlers = new ();
+    [Space]
+    public DebugStatsInspector DebugStatsSample;
 
     public void Awake()
     {
@@ -38,6 +46,7 @@ public class InspectorPanel : MonoBehaviour
     public void Start()
     {
         UpdateForm();
+        PropertiesButton.onClick.AddListener(() => SetMode(InspectorMode.Properties));
     }
 
     public void OnObjectChange()
@@ -60,6 +69,12 @@ public class InspectorPanel : MonoBehaviour
         {
             CurrentObject = null;
         }
+        OnObjectChange();
+    }
+
+    public void SetMode(InspectorMode mode)
+    {
+        CurrentMode = mode;
         OnObjectChange();
     }
 
@@ -123,343 +138,354 @@ public class InspectorPanel : MonoBehaviour
         PaletteButton.interactable = CurrentObject is not Pallete;
         GroupsButton.interactable = CurrentObject != Chartmaker.main.CurrentChart?.Groups;
         CameraButton.interactable = CurrentObject is not CameraController;
+
+        PropertiesButton.interactable = CurrentMode != InspectorMode.Properties;
     }
 
     public void UpdateForm()
     {
         ClearForm();
 
-        if (CurrentObject == null)
+        if (CurrentMode == InspectorMode.Properties)
         {
-            FormTitle.text = "No object selected";
-            SpawnForm<FormEntryLabel>("Select an item to get started.");
-        }
-        else if (CurrentTimestamp.Count == 1)
-        {
-            FormTitle.text = "Timestamp";
-
-            Timestamp ts = CurrentTimestamp[0];
-            MakeOffsetEntry(() => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
-
-            SpawnForm<FormEntryHeader>("General");
-            SpawnForm<FormEntryFloat, float>("Offset", () => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
-            SpawnForm<FormEntryFloat, float>("Duration", () => ts.Duration, x => Chartmaker.main.SetItem(ts, "Duration", x));
-            SpawnForm<FormEntryToggleFloat, float>("From", () => ts.From, x => Chartmaker.main.SetItem(ts, "From", x));
-            SpawnForm<FormEntryFloat, float>("To", () => ts.Target, x => Chartmaker.main.SetItem(ts, "Target", x));
-            SpawnForm<FormEntryEasing, EasingPair>("Easing", () => new (ts.Easing, ts.EaseMode), 
-                x => { Chartmaker.main.SetItem(ts, "Easing", x.Function); Chartmaker.main.SetItem(ts, "EaseMode", x.Mode); }
-            );
-        }
-        else if (CurrentTimestamp.Count >= 1)
-        {
-            FormTitle.text = "Multi-select";
-
-            MakeMultiEditForm(CurrentTimestamp);
-        }
-        else if (CurrentObject is IList list && CurrentObject != Chartmaker.main.CurrentChart?.Groups)
-        {
-            FormTitle.text = "Multi-select";
-
-            MakeMultiEditForm(list);
-        }
-        else if (CurrentObject is PlayableSong song)
-        {
-            if (song != Chartmaker.main.CurrentSong)
+            if (CurrentObject == null)
             {
-                SetObject(null);
-                return;
+                FormTitle.text = "No object selected";
+                SpawnForm<FormEntryLabel>("Select an item to get started.");
             }
-
-            FormTitle.text = "Playable Song";
-
-            SpawnForm<FormEntryHeader>("Metadata");
-            SpawnForm<FormEntryString, string>("Song Name", () => song.SongName, x => Chartmaker.main.SetItem(song, "SongName", x));
-            SpawnForm<FormEntryString, string>("Alt Name", () => song.AltSongName, x => Chartmaker.main.SetItem(song, "AltSongName", x));
-            SpawnForm<FormEntryString, string>("Song Artist", () => song.SongArtist, x => Chartmaker.main.SetItem(song, "SongArtist", x));
-            SpawnForm<FormEntryString, string>("Alt Artist", () => song.AltSongArtist, x => Chartmaker.main.SetItem(song, "AltSongArtist", x));
-            SpawnForm<FormEntryString, string>("Genre", () => song.Genre, x => Chartmaker.main.SetItem(song, "Genre", x));
-            SpawnForm<FormEntryString, string>("Location", () => song.Location, x => Chartmaker.main.SetItem(song, "Location", x));
-            
-            SpawnForm<FormEntryHeader>("Accent Colors");
-            SpawnForm<FormEntryColor, Color>("Background", () => song.BackgroundColor, x => Chartmaker.main.SetItem(song, "BackgroundColor", x));
-            SpawnForm<FormEntryColor, Color>("Interface", () => song.InterfaceColor, x => Chartmaker.main.SetItem(song, "InterfaceColor", x));
-        }
-        else if (CurrentObject is BPMStop stop)
-        {
-            if (!Chartmaker.main.CurrentSong.Timing.Stops.Contains(stop))
+            else if (CurrentTimestamp.Count == 1)
             {
-                SetObject(null);
-                return;
+                FormTitle.text = "Timestamp";
+
+                Timestamp ts = CurrentTimestamp[0];
+                MakeOffsetEntry(() => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
+
+                SpawnForm<FormEntryHeader>("General");
+                SpawnForm<FormEntryFloat, float>("Offset", () => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
+                SpawnForm<FormEntryFloat, float>("Duration", () => ts.Duration, x => Chartmaker.main.SetItem(ts, "Duration", x));
+                SpawnForm<FormEntryToggleFloat, float>("From", () => ts.From, x => Chartmaker.main.SetItem(ts, "From", x));
+                SpawnForm<FormEntryFloat, float>("To", () => ts.Target, x => Chartmaker.main.SetItem(ts, "Target", x));
+                SpawnForm<FormEntryEasing, EasingPair>("Easing", () => new (ts.Easing, ts.EaseMode), 
+                    x => { Chartmaker.main.SetItem(ts, "Easing", x.Function); Chartmaker.main.SetItem(ts, "EaseMode", x.Mode); }
+                );
             }
-
-            FormTitle.text = "BPM Stop";
-            MakeOffsetEntry(() => stop.Offset, x => Chartmaker.main.SetItem(stop, "Offset", x));
-
-            SpawnForm<FormEntryHeader>("Properties");
-            SpawnForm<FormEntryFloat, float>("BPM", () => stop.BPM, x => Chartmaker.main.SetItem(stop, "BPM", x));
-            SpawnForm<FormEntryFloat, float>("Signature", () => stop.Signature, x => Chartmaker.main.SetItem(stop, "Signature", x));
-            SpawnForm<FormEntryHeader>("Flags");
-            SpawnForm<FormEntryBool, bool>("Significant", () => stop.Significant, x => Chartmaker.main.SetItem(stop, "Significant", x));
-        }
-        else if (CurrentObject is Chart chart)
-        {
-            if (chart != Chartmaker.main.CurrentChart)
+            else if (CurrentTimestamp.Count >= 1)
             {
-                SetObject(null);
-                return;
+                FormTitle.text = "Multi-select";
+
+                MakeMultiEditForm(CurrentTimestamp);
             }
-
-            ExternalChartMeta meta = Chartmaker.main.CurrentChartMeta;
-            FormTitle.text = "Chart";
-
-            SpawnForm<FormEntryHeader>("Metadata");
-            SpawnForm<FormEntryString, string>("Chart Name", () => chart.DifficultyName, 
-                x => Chartmaker.main.SetItem(chart, "DifficultyName", meta.DifficultyName = x));
-            SpawnForm<FormEntryInt, int>("Sorting Index", () => chart.DifficultyIndex, 
-                x => Chartmaker.main.SetItem(chart, "DifficultyIndex", meta.DifficultyIndex = x));
-            SpawnForm<FormEntryString, string>("Difficulty", () => chart.DifficultyLevel, 
-                x => Chartmaker.main.SetItem(chart, "DifficultyLevel", meta.DifficultyLevel = x));
-            SpawnForm<FormEntryFloat, float>("Chart Constant", () => chart.ChartConstant, 
-                x => Chartmaker.main.SetItem(chart, "ChartConstant", meta.ChartConstant = x));
-        }
-        else if (CurrentObject is Pallete pallete)
-        {
-            if (pallete != Chartmaker.main.CurrentChart?.Pallete)
+            else if (CurrentObject is IList list && CurrentObject != Chartmaker.main.CurrentChart?.Groups)
             {
-                SetObject(null);
-                return;
+                FormTitle.text = "Multi-select";
+
+                MakeMultiEditForm(list);
             }
-
-            FormTitle.text = "Palette";
-
-            SpawnForm<FormEntryHeader>("Colors");
-            var bgColor = SpawnForm<FormEntryColor, Color>("Background", () => pallete.BackgroundColor, x => Chartmaker.main.SetItem(pallete, "BackgroundColor", x));
-            var fgColor = SpawnForm<FormEntryColor, Color>("Interface", () => pallete.InterfaceColor, x => Chartmaker.main.SetItem(pallete, "InterfaceColor", x));
-            var copy = SpawnForm<FormEntryButton>("Copy from Playable Song");
-            copy.Button.onClick.AddListener(() => {
-                Chartmaker.main.SetItem(pallete, "BackgroundColor", Chartmaker.main.CurrentSong.BackgroundColor);
-                bgColor.Start();
-                Chartmaker.main.SetItem(pallete, "InterfaceColor", Chartmaker.main.CurrentSong.InterfaceColor);
-                fgColor.Start();
-            });
-
-            var laneStyles = SpawnForm<FormEntryListHeader>("Lane Styles");
-            laneStyles.Button.onClick.AddListener(() => {
-                Chartmaker.main.AddItem(pallete.LaneStyles[0].DeepClone());
-            });
-            int index = 0;
-            foreach (LaneStyle style in pallete.LaneStyles)
+            else if (CurrentObject is PlayableSong song)
             {
-                LaneStyle Style = style;
-                var btn = SpawnForm<FormEntryListItem>("ID " + index);
-                btn.Button.onClick.AddListener(() => {
-                    SetObject(Style);
+                if (song != Chartmaker.main.CurrentSong)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Playable Song";
+
+                SpawnForm<FormEntryHeader>("Metadata");
+                SpawnForm<FormEntryString, string>("Song Name", () => song.SongName, x => Chartmaker.main.SetItem(song, "SongName", x));
+                SpawnForm<FormEntryString, string>("Alt Name", () => song.AltSongName, x => Chartmaker.main.SetItem(song, "AltSongName", x));
+                SpawnForm<FormEntryString, string>("Song Artist", () => song.SongArtist, x => Chartmaker.main.SetItem(song, "SongArtist", x));
+                SpawnForm<FormEntryString, string>("Alt Artist", () => song.AltSongArtist, x => Chartmaker.main.SetItem(song, "AltSongArtist", x));
+                SpawnForm<FormEntryString, string>("Genre", () => song.Genre, x => Chartmaker.main.SetItem(song, "Genre", x));
+                SpawnForm<FormEntryString, string>("Location", () => song.Location, x => Chartmaker.main.SetItem(song, "Location", x));
+                
+                SpawnForm<FormEntryHeader>("Accent Colors");
+                SpawnForm<FormEntryColor, Color>("Background", () => song.BackgroundColor, x => Chartmaker.main.SetItem(song, "BackgroundColor", x));
+                SpawnForm<FormEntryColor, Color>("Interface", () => song.InterfaceColor, x => Chartmaker.main.SetItem(song, "InterfaceColor", x));
+            }
+            else if (CurrentObject is BPMStop stop)
+            {
+                if (!Chartmaker.main.CurrentSong.Timing.Stops.Contains(stop))
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "BPM Stop";
+                MakeOffsetEntry(() => stop.Offset, x => Chartmaker.main.SetItem(stop, "Offset", x));
+
+                SpawnForm<FormEntryHeader>("Properties");
+                SpawnForm<FormEntryFloat, float>("BPM", () => stop.BPM, x => Chartmaker.main.SetItem(stop, "BPM", x));
+                SpawnForm<FormEntryFloat, float>("Signature", () => stop.Signature, x => Chartmaker.main.SetItem(stop, "Signature", x));
+                SpawnForm<FormEntryHeader>("Flags");
+                SpawnForm<FormEntryBool, bool>("Significant", () => stop.Significant, x => Chartmaker.main.SetItem(stop, "Significant", x));
+            }
+            else if (CurrentObject is Chart chart)
+            {
+                if (chart != Chartmaker.main.CurrentChart)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                ExternalChartMeta meta = Chartmaker.main.CurrentChartMeta;
+                FormTitle.text = "Chart";
+
+                SpawnForm<FormEntryHeader>("Metadata");
+                SpawnForm<FormEntryString, string>("Chart Name", () => chart.DifficultyName, 
+                    x => Chartmaker.main.SetItem(chart, "DifficultyName", meta.DifficultyName = x));
+                SpawnForm<FormEntryInt, int>("Sorting Index", () => chart.DifficultyIndex, 
+                    x => Chartmaker.main.SetItem(chart, "DifficultyIndex", meta.DifficultyIndex = x));
+                SpawnForm<FormEntryString, string>("Difficulty", () => chart.DifficultyLevel, 
+                    x => Chartmaker.main.SetItem(chart, "DifficultyLevel", meta.DifficultyLevel = x));
+                SpawnForm<FormEntryFloat, float>("Chart Constant", () => chart.ChartConstant, 
+                    x => Chartmaker.main.SetItem(chart, "ChartConstant", meta.ChartConstant = x));
+            }
+            else if (CurrentObject is Pallete pallete)
+            {
+                if (pallete != Chartmaker.main.CurrentChart?.Pallete)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Palette";
+
+                SpawnForm<FormEntryHeader>("Colors");
+                var bgColor = SpawnForm<FormEntryColor, Color>("Background", () => pallete.BackgroundColor, x => Chartmaker.main.SetItem(pallete, "BackgroundColor", x));
+                var fgColor = SpawnForm<FormEntryColor, Color>("Interface", () => pallete.InterfaceColor, x => Chartmaker.main.SetItem(pallete, "InterfaceColor", x));
+                var copy = SpawnForm<FormEntryButton>("Copy from Playable Song");
+                copy.Button.onClick.AddListener(() => {
+                    Chartmaker.main.SetItem(pallete, "BackgroundColor", Chartmaker.main.CurrentSong.BackgroundColor);
+                    bgColor.Start();
+                    Chartmaker.main.SetItem(pallete, "InterfaceColor", Chartmaker.main.CurrentSong.InterfaceColor);
+                    fgColor.Start();
                 });
-                btn.RemoveButton.onClick.AddListener(() => {
-                    Chartmaker.main.DeleteItem(Style, false);
+
+                var laneStyles = SpawnForm<FormEntryListHeader>("Lane Styles");
+                laneStyles.Button.onClick.AddListener(() => {
+                    Chartmaker.main.AddItem(pallete.LaneStyles[0].DeepClone());
                 });
-                index++;
-            }
+                int index = 0;
+                foreach (LaneStyle style in pallete.LaneStyles)
+                {
+                    LaneStyle Style = style;
+                    var btn = SpawnForm<FormEntryListItem>("ID " + index);
+                    btn.Button.onClick.AddListener(() => {
+                        SetObject(Style);
+                    });
+                    btn.RemoveButton.onClick.AddListener(() => {
+                        Chartmaker.main.DeleteItem(Style, false);
+                    });
+                    index++;
+                }
 
-            var hitStyles = SpawnForm<FormEntryListHeader>("Hit Styles");
-            hitStyles.Button.onClick.AddListener(() => {
-                Chartmaker.main.AddItem(pallete.HitStyles[0].DeepClone());
-            });
-            index = 0;
-            foreach (HitStyle style in pallete.HitStyles)
-            {
-                HitStyle Style = style;
-                var btn = SpawnForm<FormEntryListItem>("ID " + index);
-                btn.Button.onClick.AddListener(() => {
-                    SetObject(Style);
+                var hitStyles = SpawnForm<FormEntryListHeader>("Hit Styles");
+                hitStyles.Button.onClick.AddListener(() => {
+                    Chartmaker.main.AddItem(pallete.HitStyles[0].DeepClone());
                 });
-                btn.RemoveButton.onClick.AddListener(() => {
-                    Chartmaker.main.DeleteItem(Style, false);
+                index = 0;
+                foreach (HitStyle style in pallete.HitStyles)
+                {
+                    HitStyle Style = style;
+                    var btn = SpawnForm<FormEntryListItem>("ID " + index);
+                    btn.Button.onClick.AddListener(() => {
+                        SetObject(Style);
+                    });
+                    btn.RemoveButton.onClick.AddListener(() => {
+                        Chartmaker.main.DeleteItem(Style, false);
+                    });
+                    index++;
+                }
+            }
+            else if (CurrentObject is LaneStyle laneStyle)
+            {
+                if (Chartmaker.main.CurrentChart?.Pallete.LaneStyles.Contains(laneStyle) != true)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Lane Style";
+
+                SpawnForm<FormEntryHeader>("Lane");
+                SpawnForm<FormEntryColor, Color>("Color", () => laneStyle.LaneColor, x => Chartmaker.main.SetItem(laneStyle, "LaneColor", x));
+
+                SpawnForm<FormEntryHeader>("Judge");
+                SpawnForm<FormEntryColor, Color>("Color", () => laneStyle.JudgeColor, x => Chartmaker.main.SetItem(laneStyle, "JudgeColor", x));
+            }
+            else if (CurrentObject is HitStyle hitStyle)
+            {
+                if (Chartmaker.main.CurrentChart?.Pallete.HitStyles.Contains(hitStyle) != true)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Hit Style";
+
+                SpawnForm<FormEntryHeader>("Hit Body");
+                SpawnForm<FormEntryColor, Color>("Normal Color", () => hitStyle.NormalColor, x => Chartmaker.main.SetItem(hitStyle, "NormalColor", x));
+                SpawnForm<FormEntryColor, Color>("Catch Color", () => hitStyle.CatchColor, x => Chartmaker.main.SetItem(hitStyle, "CatchColor", x));
+
+                SpawnForm<FormEntryHeader>("Hold Tail");
+                SpawnForm<FormEntryColor, Color>("Color", () => hitStyle.HoldTailColor, x => Chartmaker.main.SetItem(hitStyle, "HoldTailColor", x));
+            }
+            else if (CurrentObject == Chartmaker.main.CurrentChart?.Groups)
+            {
+                FormTitle.text = "Lane Groups";
+
+                List<LaneGroup> groups = Chartmaker.main.CurrentChart?.Groups;
+
+                var listHeader = SpawnForm<FormEntryListHeader>("Groups");
+                listHeader.Button.onClick.AddListener(() => {
+                    LaneGroup group = new();
+                    int index = 1;
+                    while (Chartmaker.main.CurrentChart.Groups.FindIndex(x => x.Name == "Group " + index) >= 0) index++;
+                    group.Name = "Group " + index;
+                    Chartmaker.main.AddItem(group);
                 });
-                index++;
+                int index = 0;
+                foreach (LaneGroup group in groups)
+                {
+                    LaneGroup Group = group;
+                    var btn = SpawnForm<FormEntryListItem>(group.Name);
+                    btn.Button.onClick.AddListener(() => {
+                        SetObject(Group);
+                    });
+                    btn.RemoveButton.onClick.AddListener(() => {
+                        Chartmaker.main.DeleteItem(Group, false);
+                    });
+                    index++;
+                }
             }
-        }
-        else if (CurrentObject is LaneStyle laneStyle)
-        {
-            if (Chartmaker.main.CurrentChart?.Pallete.LaneStyles.Contains(laneStyle) != true)
+            else if (CurrentObject is LaneGroup group)
             {
-                SetObject(null);
-                return;
+                if (Chartmaker.main.CurrentChart?.Groups.Contains(group) != true)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Lane Group";
+
+                SpawnForm<FormEntryHeader>("Transform");
+                SpawnForm<FormEntryVector3, Vector3>("Position", () => group.Position, x => Chartmaker.main.SetItem(group, "Position", x));
+                SpawnForm<FormEntryVector3, Vector3>("Rotation", () => group.Rotation, x => Chartmaker.main.SetItem(group, "Rotation", x));
+                MakeLaneGroupEntry(group);
             }
-
-            FormTitle.text = "Lane Style";
-
-            SpawnForm<FormEntryHeader>("Lane");
-            SpawnForm<FormEntryColor, Color>("Color", () => laneStyle.LaneColor, x => Chartmaker.main.SetItem(laneStyle, "LaneColor", x));
-
-            SpawnForm<FormEntryHeader>("Judge");
-            SpawnForm<FormEntryColor, Color>("Color", () => laneStyle.JudgeColor, x => Chartmaker.main.SetItem(laneStyle, "JudgeColor", x));
-        }
-        else if (CurrentObject is HitStyle hitStyle)
-        {
-            if (Chartmaker.main.CurrentChart?.Pallete.HitStyles.Contains(hitStyle) != true)
+            else if (CurrentObject is CameraController camera)
             {
-                SetObject(null);
-                return;
+                if (camera != Chartmaker.main.CurrentChart?.Camera)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Camera Controller";
+
+                SpawnForm<FormEntryHeader>("Pivot");
+                SpawnForm<FormEntryVector3, Vector3>("Position", () => camera.CameraPivot, x => Chartmaker.main.SetItem(camera, "CameraPivot", x));
+                SpawnForm<FormEntryVector3, Vector3>("Rotation", () => camera.CameraRotation, x => Chartmaker.main.SetItem(camera, "CameraRotation", x));
+                SpawnForm<FormEntryFloat, float>("Distance", () => camera.PivotDistance, x => Chartmaker.main.SetItem(camera, "PivotDistance", x));
             }
-
-            FormTitle.text = "Hit Style";
-
-            SpawnForm<FormEntryHeader>("Hit Body");
-            SpawnForm<FormEntryColor, Color>("Normal Color", () => hitStyle.NormalColor, x => Chartmaker.main.SetItem(hitStyle, "NormalColor", x));
-            SpawnForm<FormEntryColor, Color>("Catch Color", () => hitStyle.CatchColor, x => Chartmaker.main.SetItem(hitStyle, "CatchColor", x));
-
-            SpawnForm<FormEntryHeader>("Hold Tail");
-            SpawnForm<FormEntryColor, Color>("Color", () => hitStyle.HoldTailColor, x => Chartmaker.main.SetItem(hitStyle, "HoldTailColor", x));
-        }
-        else if (CurrentObject == Chartmaker.main.CurrentChart?.Groups)
-        {
-            FormTitle.text = "Lane Groups";
-
-            List<LaneGroup> groups = Chartmaker.main.CurrentChart?.Groups;
-
-            var listHeader = SpawnForm<FormEntryListHeader>("Groups");
-            listHeader.Button.onClick.AddListener(() => {
-                LaneGroup group = new();
-                int index = 1;
-                while (Chartmaker.main.CurrentChart.Groups.FindIndex(x => x.Name == "Group " + index) >= 0) index++;
-                group.Name = "Group " + index;
-                Chartmaker.main.AddItem(group);
-            });
-            int index = 0;
-            foreach (LaneGroup group in groups)
+            else if (CurrentObject is Lane lane)
             {
-                LaneGroup Group = group;
-                var btn = SpawnForm<FormEntryListItem>(group.Name);
-                btn.Button.onClick.AddListener(() => {
-                    SetObject(Group);
+                if (Chartmaker.main.CurrentChart?.Lanes.Contains(lane) != true)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Lane";
+
+                SpawnForm<FormEntryHeader>("Transform");
+                SpawnForm<FormEntryVector3, Vector3>("Position", () => lane.Position, x => Chartmaker.main.SetItem(lane, "Position", x));
+                SpawnForm<FormEntryVector3, Vector3>("Rotation", () => lane.Rotation, x => Chartmaker.main.SetItem(lane, "Rotation", x));
+                MakeLaneGroupEntry(lane);
+                SpawnForm<FormEntryHeader>("Appearance");
+                MakeLaneStyleEntry(lane);
+            }
+            else if (CurrentObject is LaneStep step)
+            {
+                if (CurrentLane?.LaneSteps.Contains(step) != true)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Lane Step";
+                MakeOffsetEntry(() => step.Offset, x => Chartmaker.main.SetItem(step, "Offset", x));
+
+                SpawnForm<FormEntryHeader>("Transform");
+                SpawnForm<FormEntryVector2, Vector2>("Start Pos", () => step.StartPos, x => Chartmaker.main.SetItem(step, "StartPos", x));
+                SetEase2(
+                    SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.StartEaseX, step.StartEaseXMode), 
+                        x => { Chartmaker.main.SetItem(step, "StartEaseX", x.Function); Chartmaker.main.SetItem(step, "StartEaseXMode", x.Mode);  }
+                    ),
+                    SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.StartEaseY, step.StartEaseYMode), 
+                        x => { Chartmaker.main.SetItem(step, "StartEaseY", x.Function); Chartmaker.main.SetItem(step, "StartEaseYMode", x.Mode);  }
+                    )
+                );
+
+                SpawnForm<FormEntryVector2, Vector2>("End Pos", () => step.EndPos, x => Chartmaker.main.SetItem(step, "EndPos", x));
+                SetEase2(
+                    SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.EndEaseX, step.EndEaseXMode), 
+                        x => { Chartmaker.main.SetItem(step, "EndEaseX", x.Function); Chartmaker.main.SetItem(step, "EndEaseXMode", x.Mode);  }
+                    ),
+                    SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.EndEaseY, step.EndEaseYMode), 
+                        x => { Chartmaker.main.SetItem(step, "EndEaseY", x.Function); Chartmaker.main.SetItem(step, "EndEaseYMode", x.Mode);  }
+                    )
+                );
+
+                SpawnForm<FormEntryFloat, float>("Speed", () => step.Speed, x => Chartmaker.main.SetItem(step, "Speed", x));
+            }
+            else if (CurrentObject is HitObject hit)
+            {
+                if (CurrentLane?.Objects.Contains(hit) != true)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Hit Object";
+                MakeOffsetEntry(() => hit.Offset, x => Chartmaker.main.SetItem(hit, "Offset", x));
+                
+                SpawnForm<FormEntryHeader>("Type");
+                var typeDropdown = SpawnForm<FormEntryDropdown, object>("", () => hit.Type, x => hit.Type = (HitObject.HitType)x);
+                typeDropdown.TargetEnum(typeof(HitObject.HitType));
+                typeDropdown.TitleLabel.gameObject.SetActive(false);
+                typeDropdown.GetComponent<HorizontalLayoutGroup>().padding.left = 10;
+
+                SpawnForm<FormEntryHeader>("Transform");
+                SpawnForm<FormEntryFloat, float>("Position", () => hit.Position, x => Chartmaker.main.SetItem(hit, "Position", x));
+                SpawnForm<FormEntryFloat, float>("Width", () => hit.Length, x => Chartmaker.main.SetItem(hit, "Length", x));
+                SpawnForm<FormEntryFloat, float>("Hold Length", () => hit.HoldLength, x => Chartmaker.main.SetItem(hit, "HoldLength", x));
+
+                SpawnForm<FormEntryHeader>("Appearance");
+                MakeHitStyleEntry(hit);
+
+                FormEntryToggleFloat dirField = null;
+                SpawnForm<FormEntryHeader>("Behavior");
+                SpawnForm<FormEntryBool, bool>("Flickable", () => hit.Flickable, x => {
+                    Chartmaker.main.SetItem(hit, "Flickable", x);
+                    dirField?.gameObject.SetActive(x);
                 });
-                btn.RemoveButton.onClick.AddListener(() => {
-                    Chartmaker.main.DeleteItem(Group, false);
-                });
-                index++;
+                dirField = SpawnForm<FormEntryToggleFloat, float>("Direction", () => hit.FlickDirection, x => Chartmaker.main.SetItem(hit, "FlickDirection", x));
+                dirField.gameObject.SetActive(hit.Flickable);
             }
-        }
-        else if (CurrentObject is LaneGroup group)
-        {
-            if (Chartmaker.main.CurrentChart?.Groups.Contains(group) != true)
+            else 
             {
-                SetObject(null);
-                return;
+                FormTitle.text = "?????";
+
+                SpawnForm<FormEntryLabel>("Unsupported object " + CurrentObject.GetType());
             }
-
-            FormTitle.text = "Lane Group";
-
-            SpawnForm<FormEntryHeader>("Transform");
-            SpawnForm<FormEntryVector3, Vector3>("Position", () => group.Position, x => Chartmaker.main.SetItem(group, "Position", x));
-            SpawnForm<FormEntryVector3, Vector3>("Rotation", () => group.Rotation, x => Chartmaker.main.SetItem(group, "Rotation", x));
-            MakeLaneGroupEntry(group);
         }
-        else if (CurrentObject is CameraController camera)
+        else if (CurrentMode == InspectorMode.DebugStats)
         {
-            if (camera != Chartmaker.main.CurrentChart?.Camera)
-            {
-                SetObject(null);
-                return;
-            }
+            FormTitle.text = "Debug Stats";
 
-            FormTitle.text = "Camera Controller";
-
-            SpawnForm<FormEntryHeader>("Pivot");
-            SpawnForm<FormEntryVector3, Vector3>("Position", () => camera.CameraPivot, x => Chartmaker.main.SetItem(camera, "CameraPivot", x));
-            SpawnForm<FormEntryVector3, Vector3>("Rotation", () => camera.CameraRotation, x => Chartmaker.main.SetItem(camera, "CameraRotation", x));
-            SpawnForm<FormEntryFloat, float>("Distance", () => camera.PivotDistance, x => Chartmaker.main.SetItem(camera, "PivotDistance", x));
-        }
-        else if (CurrentObject is Lane lane)
-        {
-            if (Chartmaker.main.CurrentChart?.Lanes.Contains(lane) != true)
-            {
-                SetObject(null);
-                return;
-            }
-
-            FormTitle.text = "Lane";
-
-            SpawnForm<FormEntryHeader>("Transform");
-            SpawnForm<FormEntryVector3, Vector3>("Position", () => lane.Position, x => Chartmaker.main.SetItem(lane, "Position", x));
-            SpawnForm<FormEntryVector3, Vector3>("Rotation", () => lane.Rotation, x => Chartmaker.main.SetItem(lane, "Rotation", x));
-            MakeLaneGroupEntry(lane);
-            SpawnForm<FormEntryHeader>("Appearance");
-            MakeLaneStyleEntry(lane);
-        }
-        else if (CurrentObject is LaneStep step)
-        {
-            if (CurrentLane?.LaneSteps.Contains(step) != true)
-            {
-                SetObject(null);
-                return;
-            }
-
-            FormTitle.text = "Lane Step";
-            MakeOffsetEntry(() => step.Offset, x => Chartmaker.main.SetItem(step, "Offset", x));
-
-            SpawnForm<FormEntryHeader>("Transform");
-            SpawnForm<FormEntryVector2, Vector2>("Start Pos", () => step.StartPos, x => Chartmaker.main.SetItem(step, "StartPos", x));
-            SetEase2(
-                SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.StartEaseX, step.StartEaseXMode), 
-                    x => { Chartmaker.main.SetItem(step, "StartEaseX", x.Function); Chartmaker.main.SetItem(step, "StartEaseXMode", x.Mode);  }
-                ),
-                SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.StartEaseY, step.StartEaseYMode), 
-                    x => { Chartmaker.main.SetItem(step, "StartEaseY", x.Function); Chartmaker.main.SetItem(step, "StartEaseYMode", x.Mode);  }
-                )
-            );
-
-            SpawnForm<FormEntryVector2, Vector2>("End Pos", () => step.EndPos, x => Chartmaker.main.SetItem(step, "EndPos", x));
-            SetEase2(
-                SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.EndEaseX, step.EndEaseXMode), 
-                    x => { Chartmaker.main.SetItem(step, "EndEaseX", x.Function); Chartmaker.main.SetItem(step, "EndEaseXMode", x.Mode);  }
-                ),
-                SpawnForm<FormEntryEasing, EasingPair>("", () => new (step.EndEaseY, step.EndEaseYMode), 
-                    x => { Chartmaker.main.SetItem(step, "EndEaseY", x.Function); Chartmaker.main.SetItem(step, "EndEaseYMode", x.Mode);  }
-                )
-            );
-
-            SpawnForm<FormEntryFloat, float>("Speed", () => step.Speed, x => Chartmaker.main.SetItem(step, "Speed", x));
-        }
-        else if (CurrentObject is HitObject hit)
-        {
-            if (CurrentLane?.Objects.Contains(hit) != true)
-            {
-                SetObject(null);
-                return;
-            }
-
-            FormTitle.text = "Hit Object";
-            MakeOffsetEntry(() => hit.Offset, x => Chartmaker.main.SetItem(hit, "Offset", x));
-            
-            SpawnForm<FormEntryHeader>("Type");
-            var typeDropdown = SpawnForm<FormEntryDropdown, object>("", () => hit.Type, x => hit.Type = (HitObject.HitType)x);
-            typeDropdown.TargetEnum(typeof(HitObject.HitType));
-            typeDropdown.TitleLabel.gameObject.SetActive(false);
-            typeDropdown.GetComponent<HorizontalLayoutGroup>().padding.left = 10;
-
-            SpawnForm<FormEntryHeader>("Transform");
-            SpawnForm<FormEntryFloat, float>("Position", () => hit.Position, x => Chartmaker.main.SetItem(hit, "Position", x));
-            SpawnForm<FormEntryFloat, float>("Width", () => hit.Length, x => Chartmaker.main.SetItem(hit, "Length", x));
-            SpawnForm<FormEntryFloat, float>("Hold Length", () => hit.HoldLength, x => Chartmaker.main.SetItem(hit, "HoldLength", x));
-
-            SpawnForm<FormEntryHeader>("Appearance");
-            MakeHitStyleEntry(hit);
-
-            FormEntryToggleFloat dirField = null;
-            SpawnForm<FormEntryHeader>("Behavior");
-            SpawnForm<FormEntryBool, bool>("Flickable", () => hit.Flickable, x => {
-                Chartmaker.main.SetItem(hit, "Flickable", x);
-                dirField?.gameObject.SetActive(x);
-            });
-            dirField = SpawnForm<FormEntryToggleFloat, float>("Direction", () => hit.FlickDirection, x => Chartmaker.main.SetItem(hit, "FlickDirection", x));
-            dirField.gameObject.SetActive(hit.Flickable);
-        }
-        else 
-        {
-            FormTitle.text = "?????";
-
-            SpawnForm<FormEntryLabel>("Unsupported object " + CurrentObject.GetType());
+            Instantiate(DebugStatsSample, FormHolder);
         }
     }
 
@@ -717,4 +743,17 @@ public class InspectorPanel : MonoBehaviour
         lg.padding.left = 10;
         lg.spacing = 2;
     }
+
+    public void OpenExtraModesMenu()
+    {
+        ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+            new ContextMenuListAction("Debug Stats", () => SetMode(InspectorMode.DebugStats), _checked: CurrentMode == InspectorMode.DebugStats)
+        ), (RectTransform)ExtraModesButton.transform, ContextMenuDirection.Left); 
+    }
+}
+
+public enum InspectorMode 
+{
+    Properties,
+    DebugStats,
 }

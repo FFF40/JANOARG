@@ -1,4 +1,4 @@
-Shader "UI/Cutoff"
+Shader "UI/Triple Graph"
 {
     Properties
     {
@@ -70,7 +70,7 @@ Shader "UI/Cutoff"
                 float4 vertex   : SV_POSITION;
                 fixed4 color    : COLOR;
                 float2 texcoord  : TEXCOORD0;
-                float4 worldPosition : TEXCOORD1;
+                float4 worldPos : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -80,13 +80,17 @@ Shader "UI/Cutoff"
             float4 _ClipRect;
             float4 _MainTex_ST;
 
+            float _Values1[64];
+            float _Values2[64];
+            float _Values3[64];
+
             v2f vert(appdata_t v)
             {
                 v2f OUT;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
-                OUT.worldPosition = v.vertex;
-                OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
+                OUT.worldPos = v.vertex;
+                OUT.vertex = UnityObjectToClipPos(OUT.worldPos);
 
                 OUT.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
 
@@ -97,11 +101,22 @@ Shader "UI/Cutoff"
             fixed4 frag(v2f IN) : SV_Target
             {
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
- 
-                color.a = color.a / IN.color.a > 1 - IN.color.a ? 1 : 0;
+                
+                float colPos = IN.texcoord.x * 63;
+                float y1 = _Values1[floor(colPos)] + (_Values1[ceil(colPos)] - _Values1[floor(colPos)]) * (colPos % 1);
+                float y2 = _Values2[floor(colPos)] + (_Values2[ceil(colPos)] - _Values2[floor(colPos)]) * (colPos % 1);
+                float y3 = _Values3[floor(colPos)] + (_Values3[ceil(colPos)] - _Values3[floor(colPos)]) * (colPos % 1);
+                
+                color.a = 0;
+                if (IN.texcoord.y < y1) color.a += 1;
+                if (IN.texcoord.y < y2) color.a += 2;
+                if (IN.texcoord.y < y3) color.a += 0.5;
+
+                color.a *= IN.texcoord.x * IN.texcoord.x * IN.texcoord.y;
+                if (IN.worldPos.y > _ScreenParams.y * 0.5 - 140) color.a *= _ScreenParams.y * 0.01 - 1.8 - IN.worldPos.y * 0.02;
 
                 #ifdef UNITY_UI_CLIP_RECT
-                color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
+                color.a *= UnityGet2DClipping(IN.worldPos.xy, _ClipRect);
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP

@@ -20,6 +20,11 @@ public class ChartManager
     public float CurrentTime;
     public int[] HitObjectsRemaining;
 
+    public int ActiveLaneCount;
+    public int ActiveHitCount;
+    public int ActiveLaneVerts;
+    public int ActiveLaneTris;
+
     public ChartManager (PlayableSong song, Chart chart, float speed, float time, float pos)
     {
         Song = song;
@@ -33,6 +38,7 @@ public class ChartManager
         PalleteManager.Update(CurrentChart.Pallete, pos);
         Camera = (CameraController)CurrentChart.Camera.Get(pos);
         HitObjectsRemaining = new [] { 0, 0 };
+        ActiveLaneCount = ActiveHitCount = ActiveLaneVerts = ActiveLaneTris = 0;
 
         for (int a = 0; a < CurrentChart.Groups.Count; a++)
         {
@@ -378,7 +384,12 @@ public class LaneManager
             CurrentMesh.SetVertices(verts);
             CurrentMesh.SetUVs(0, uvs);
             CurrentMesh.SetTriangles(tris, 0);
+            
         }
+
+        main.ActiveLaneCount++;
+        main.ActiveLaneVerts += verts.Length;
+        main.ActiveLaneTris += CurrentMesh.triangles.Length;
 
         FinalPosition = CurrentLane.Position;
         FinalRotation = Quaternion.Euler(CurrentLane.Rotation);
@@ -776,6 +787,10 @@ public class HitObjectManager
             Length = Vector3.Distance(StartPos, EndPos);
 
             HoldMesh = pos.Offset < lane.CurrentDistance + 250 && TimeStart < TimeEnd ? lane.GetPartOfLane(Mathf.Max(TimeStart, time), TimeEnd, data.Position, data.Length) : null;
+
+            if (pos.Offset < lane.CurrentDistance + 250) main.ActiveHitCount++;
+            main.ActiveLaneVerts += HoldMesh?.vertices.Length ?? 0;
+            main.ActiveLaneTris += HoldMesh?.triangles.Length ?? 0;
         } else {
             HoldMesh = null;
         }

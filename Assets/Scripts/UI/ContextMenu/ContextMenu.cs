@@ -166,6 +166,17 @@ public class ContextMenu : MonoBehaviour
                 goto funny;
             }
         }
+        else if (direction == ContextMenuDirection.Left) 
+        {
+            rt.anchoredPosition = new Vector2(
+                Mathf.Round(rect.xMin - rt.rect.width),
+                Mathf.Round(rect.yMax)
+            ) + offset;
+            if (rt.anchoredPosition.y - rt.sizeDelta.y < -Screen.height) 
+            {
+                rt.anchoredPosition += Vector2.up * (rt.rect.height - rect.height);
+            }
+        }
         else if (direction == ContextMenuDirection.Right) 
         {
             rt.anchoredPosition = new Vector2(
