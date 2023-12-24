@@ -97,7 +97,7 @@ public class NavigationBar : MonoBehaviour
     public ContextMenuList GetHelpMenu()
     {
         return new ContextMenuList(
-            new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>()),
+            new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits"),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Chartmaker Manual...", () => ModalHolder.main.Spawn<HelpModal>()),
             new ContextMenuListSeparator(),
