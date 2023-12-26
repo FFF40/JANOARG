@@ -222,6 +222,7 @@ public class JACDecoder
                     {
                              if (key == "Index")     chart.DifficultyIndex = ParseInt(value);
                         else if (key == "Name")      chart.DifficultyName = value;
+                        else if (key == "Charter")   chart.CharterName = value;
                         else if (key == "Level")     chart.DifficultyLevel = value;
                         else if (key == "Constant")  chart.ChartConstant = ParseFloat(value);
                     }

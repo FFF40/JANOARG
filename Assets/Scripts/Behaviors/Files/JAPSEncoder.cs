@@ -71,6 +71,7 @@ public class JAPSEncoder
             + "\n" + indent2 + "Target: " + chart.Target
             + "\n" + indent2 + "Index: " + chart.DifficultyIndex.ToString(CultureInfo.InvariantCulture)
             + "\n" + indent2 + "Name: " + chart.DifficultyName
+            + "\n" + indent2 + "Charter: " + chart.CharterName
             + "\n" + indent2 + "Level: " + chart.DifficultyLevel
             + "\n" + indent2 + "Constant: " + chart.ChartConstant.ToString(CultureInfo.InvariantCulture);
 

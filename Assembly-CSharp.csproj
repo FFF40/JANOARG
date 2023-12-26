@@ -129,6 +129,7 @@
      <Compile Include="Assets\Scripts\UI\ContextMenu\ContextMenuItem.cs" />
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryToggleFloat.cs" />
+     <Compile Include="Assets\Scripts\UI\CursorChanger.cs" />
      <Compile Include="Assets\Scripts\Data\ChartManager.cs" />
      <Compile Include="Assets\Scripts\UI\Form\Formmaker.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\NewSongModal.cs" />
@@ -797,11 +798,17 @@
     <Reference Include="System.Xml.Serialization">
         <HintPath>D:\E\Unity\2022.2.2f1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.Xml.Serialization.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.MemoryProfiler">
+        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Recorder.Editor">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.EditorCoroutines.Editor">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.MemoryProfiler.Editor.MemoryProfilerModule">
+        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.MemoryProfilerModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
@@ -853,6 +860,9 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.MemoryProfiler.Editor">
+        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation.Updater">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Updater.dll</HintPath>

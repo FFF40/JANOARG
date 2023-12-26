@@ -59,6 +59,9 @@ public class BorderlessWindow
 	[DllImport("user32.dll")]
 	private static extern IntPtr DefWindowProc(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
 
+    [DllImport("user32.dll")]
+    static extern IntPtr SetCursor(IntPtr hCursor);
+
     struct WinRect { public int left, top, right, bottom; }
     struct WinMargin { public int left, right, top, bottom; }
     struct WinPoint { public int x, y; }
@@ -103,6 +106,8 @@ public class BorderlessWindow
     const int WM_SIZE = 0x0005;
     const int WM_NCCALCSIZE = 0x0083;
     const int WM_STYLECHANGED = 0x007D;
+    const int WM_SETCURSOR = 0x0020;
+    const int WM_MOUSEMOVE = 0x0200;
 
     const uint WS_VISIBLE = 0x10000000;    
     const uint WS_POPUP = 0x80000000;
@@ -136,6 +141,9 @@ public class BorderlessWindow
             FindWindow();
             BorderlessWindow.HookWindowProc();
             RenameWindow("JANOARG Chartmaker");
+
+            Cursor.SetCursor(new Texture2D(0, 0), Vector2.zero, CursorMode.ForceSoftware);
+            CursorChanger.PushCursor(CursorType.Arrow);
             
             IsFramed = Chartmaker.Preferences.UseDefaultWindow;
             if (!IsFramed)
@@ -258,6 +266,14 @@ public class BorderlessWindow
 
             return IntPtr.Zero;
         }
+        else if (msg == WM_SETCURSOR || msg == WM_MOUSEMOVE) 
+        {
+            var proc = CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+            if (CursorChanger.Cursors.Count <= 0) return proc;
+
+            UpdateCursor();
+            return (IntPtr)(-1);
+        }
         else 
         {
             return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
@@ -327,8 +343,17 @@ public class BorderlessWindow
         MoveWindow(CurrentWindow, winRect.left, winRect.top, w, h, false);
     }
 
-    public static void RenameWindow (string title) {
+    public static void RenameWindow (string title) 
+    {
         SetWindowText(CurrentWindow, title);
+    }
+
+    public static void UpdateCursor ()
+    {
+        if (CursorChanger.Cursors.Count > ((
+            Input.mousePosition.x >= 0 && Input.mousePosition.x < Screen.width &&
+            Input.mousePosition.y >= 0 && Input.mousePosition.y < Screen.height
+        ) ? 0 : 1)) SetCursor(CursorChanger.Cursors.Peek());
     }
 }
 

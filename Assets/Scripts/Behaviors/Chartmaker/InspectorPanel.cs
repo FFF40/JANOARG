@@ -236,6 +236,8 @@ public class InspectorPanel : MonoBehaviour
                     x => Chartmaker.main.SetItem(chart, "DifficultyName", meta.DifficultyName = x));
                 SpawnForm<FormEntryInt, int>("Sorting Index", () => chart.DifficultyIndex, 
                     x => Chartmaker.main.SetItem(chart, "DifficultyIndex", meta.DifficultyIndex = x));
+                SpawnForm<FormEntryString, string>("Charter Name", () => chart.CharterName, 
+                    x => Chartmaker.main.SetItem(chart, "CharterName", meta.CharterName = x));
                 SpawnForm<FormEntryString, string>("Difficulty", () => chart.DifficultyLevel, 
                     x => Chartmaker.main.SetItem(chart, "DifficultyLevel", meta.DifficultyLevel = x));
                 SpawnForm<FormEntryFloat, float>("Chart Constant", () => chart.ChartConstant, 

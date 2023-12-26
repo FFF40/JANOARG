@@ -77,7 +77,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     [HideInInspector]
     public List<TMP_Text> StoryboardEntries;
 
-    const int TimelineHeight = 5;
+    int TimelineHeight = 5;
     int ItemHeight = 0;
     bool lastPlayed;
     public IList DraggingItem;

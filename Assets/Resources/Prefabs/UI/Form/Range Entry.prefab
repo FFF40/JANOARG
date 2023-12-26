@@ -747,6 +747,7 @@ GameObject:
   - component: {fileID: 1270132145}
   - component: {fileID: 897678866150716275}
   - component: {fileID: 6466446124386988255}
+  - component: {fileID: 1702421054943222911}
   m_Layer: 5
   m_Name: Field
   m_TagString: Untagged
@@ -989,6 +990,19 @@ MonoBehaviour:
   PressedID: BorderPressed
   DisabledID: 
   SelectionID: BorderSelection
+--- !u!114 &1702421054943222911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270132143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32513
 --- !u!1 &1347372921
 GameObject:
   m_ObjectHideFlags: 0

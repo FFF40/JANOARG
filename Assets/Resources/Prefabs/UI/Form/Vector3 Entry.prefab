@@ -577,6 +577,7 @@ GameObject:
   - component: {fileID: 903144030}
   - component: {fileID: 5247070666312533545}
   - component: {fileID: 364556972995876588}
+  - component: {fileID: 7042534651941026151}
   m_Layer: 5
   m_Name: Z
   m_TagString: Untagged
@@ -819,6 +820,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Target: {fileID: 903144032}
   ID: ControlNormal
+--- !u!114 &7042534651941026151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903144028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32513
 --- !u!1 &956342678
 GameObject:
   m_ObjectHideFlags: 0
@@ -1142,6 +1156,7 @@ GameObject:
   - component: {fileID: 1305842170}
   - component: {fileID: 1921522783003596213}
   - component: {fileID: 6042347473102387773}
+  - component: {fileID: 7221312622288256565}
   m_Layer: 5
   m_Name: X
   m_TagString: Untagged
@@ -1384,6 +1399,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Target: {fileID: 1305842172}
   ID: ControlNormal
+--- !u!114 &7221312622288256565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305842168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32513
 --- !u!1 &1333461393
 GameObject:
   m_ObjectHideFlags: 0
@@ -1684,6 +1712,7 @@ GameObject:
   - component: {fileID: 1605498428}
   - component: {fileID: 1358395549947106400}
   - component: {fileID: 6504359085847845747}
+  - component: {fileID: 3003074626589421136}
   m_Layer: 5
   m_Name: Y
   m_TagString: Untagged
@@ -1926,6 +1955,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Target: {fileID: 1605498430}
   ID: ControlNormal
+--- !u!114 &3003074626589421136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605498426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32513
 --- !u!1 &1902482885
 GameObject:
   m_ObjectHideFlags: 0

@@ -726,11 +726,17 @@
     <Reference Include="UnityEngine.TestRunner">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\UnityEngine.TestRunner.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.MemoryProfiler">
+        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Recorder.Editor">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.EditorCoroutines.Editor">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.MemoryProfiler.Editor.MemoryProfilerModule">
+        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.MemoryProfilerModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
@@ -782,6 +788,9 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.MemoryProfiler.Editor">
+        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation.Updater">
         <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Updater.dll</HintPath>
