@@ -22,6 +22,7 @@ public class Chartmaker : MonoBehaviour
     public RectTransform TimelineHolder;
     public RectTransform InspectorHolder;
     public RectTransform PickerHolder;
+    public RectTransform MainViewHolder;
     public RectTransform PlayerViewHolder;
     [Space]
     public TMP_Text NotificationLabel;

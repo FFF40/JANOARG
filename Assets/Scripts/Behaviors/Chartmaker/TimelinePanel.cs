@@ -45,6 +45,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public Scrollbar VerticalScrollbar;
     public GameObject Blocker;
     public TMP_Text BlockerLabel;
+    public CanvasGroup CurrentTimeCoonectorGroup;
+    public CanvasGroup PeekSliderGroup;
+    public CanvasGroup BlockerTextGroup;
     [Space]
     public Button UndoButton;
     public Button RedoButton;
@@ -78,6 +81,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public List<TMP_Text> StoryboardEntries;
 
     int TimelineHeight = 5;
+    int TimelineExpandHeight = 5;
     int ItemHeight = 0;
     bool lastPlayed;
     public IList DraggingItem;
@@ -174,11 +178,11 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         LaneStepTab.gameObject.SetActive(InspectorPanel.main.CurrentLane != null);
         HitObjectTab.gameObject.SetActive(InspectorPanel.main.CurrentLane != null);
 
-        StoryboardTab.interactable = CurrentMode != TimelineMode.Storyboard;
-        TimingTab.interactable = CurrentMode != TimelineMode.Timing;
-        LaneTab.interactable = CurrentMode != TimelineMode.Lanes;
-        LaneStepTab.interactable = CurrentMode != TimelineMode.LaneSteps;
-        HitObjectTab.interactable = CurrentMode != TimelineMode.HitObjects;
+        StoryboardTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Storyboard;
+        TimingTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Timing;
+        LaneTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Lanes;
+        LaneStepTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.LaneSteps;
+        HitObjectTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.HitObjects;
 
         PickerPanel.main.UpdateButtons();
     }
@@ -188,9 +192,16 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public void SetTabMode(TimelineMode mode)
     {
         CurrentMode = mode;
+        if (TimelineExpandHeight != TimelineHeight) 
+        {
+            ResizeTimeline(TimelineExpandHeight * 24 + 80);
+        }
+        else 
+        {
+            UpdateTabs();
+            UpdateItems();
+        }
 
-        UpdateTabs();
-        UpdateItems();
     }
 
     public void UpdateTimeline(bool forced = false)
@@ -272,6 +283,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void UpdateItems()
     {
+        if (TimelineHeight <= 0) return;
+
         int count = 0;
         int tcount = 0;
         int sbcount = 0;
@@ -550,6 +563,11 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void UpdateWaveform()
     {
+        if (TimelineHeight <= 0)
+        {
+            WaveformImage.enabled = false;
+            return;
+        }
         if (PeekRange.y == PeekRange.x) 
         {
             WaveformImage.enabled = false;
@@ -1241,6 +1259,44 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
 
         ContextMenuHolder.main.OpenRoot(list, EditHistoryHolder, ContextMenuDirection.Up);
+    }
+
+    public void OnResizerDrag()
+    {
+        ResizeTimeline(Input.mousePosition.y, false);
+    }
+    public void OnResizerEndDrag()
+    {
+        ResizeTimeline(Input.mousePosition.y);
+    }
+
+    public float SnapTimeline(float height)
+    {
+        return height < 72 ? 40 : Mathf.Max(Mathf.Round((height - 80) / 24) * 24 + 80, 104);
+    }
+    
+    public void ResizeTimeline(float height, bool snap = true)
+    {
+        float maxHeight = SnapTimeline(Screen.height * 0.5f);
+        height = Mathf.Round(Mathf.Clamp(height, 40, maxHeight));
+        if (snap) height = SnapTimeline(height);
+        Chartmaker.main.TimelineHolder.anchoredPosition = new (Chartmaker.main.TimelineHolder.sizeDelta.x, 
+            -Mathf.Pow(Mathf.Max(104 - height, 0) / 64, 2) * 32);
+        Chartmaker.main.TimelineHolder.sizeDelta = new (Chartmaker.main.TimelineHolder.sizeDelta.x, 
+            height - Chartmaker.main.TimelineHolder.anchoredPosition.y);
+        Chartmaker.main.MainViewHolder.sizeDelta = new (Chartmaker.main.MainViewHolder.sizeDelta.x, - 33 - height);
+        CurrentTimeCoonectorGroup.alpha = PeekSliderGroup.alpha = BlockerTextGroup.alpha =
+            1 + Chartmaker.main.TimelineHolder.anchoredPosition.y / 32;
+        TimelineHeight = height <= 40 ? 0 : Mathf.Max(Mathf.RoundToInt((height - 80) / 24), 1);
+        if (snap) 
+        {
+            if (TimelineHeight > 0) TimelineExpandHeight = TimelineHeight;
+            UpdateTabs();
+        }
+        UpdateTimeline(true);
+        UpdateScrollbar();
+        PlayerView.main.Update();
+        PlayerView.main.UpdateObjects();
     }
 }
 
