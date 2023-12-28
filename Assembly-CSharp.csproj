@@ -124,6 +124,7 @@
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryInt.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryBool.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryEasing.cs" />
+     <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryKeybind.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\TimelinePanel.cs" />
      <Compile Include="Assets\Scripts\UI\GraphicCircle.cs" />
      <Compile Include="Assets\Scripts\UI\ContextMenu\ContextMenuItem.cs" />

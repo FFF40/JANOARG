@@ -72,7 +72,7 @@ public class Keybind
 
         }
 
-        if (Application.platform == RuntimePlatform.OSXEditor)
+        if (Application.platform is RuntimePlatform.OSXPlayer or RuntimePlatform.OSXEditor)
         {
             if ((Modifiers & EventModifiers.Shift) > 0) str = "⇧" + str;
             if ((Modifiers & EventModifiers.Alt) > 0) str = "⌥" + str;

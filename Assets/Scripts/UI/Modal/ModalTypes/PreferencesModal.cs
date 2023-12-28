@@ -53,15 +53,17 @@ public class PreferencesModal : Modal
         }
         else if (tab == 1)
         {
-            SpawnForm<FormEntryLabel>("Note: These are not editable for now, consider this as a reference sheet.");
             var categories = KeyboardHandler.main.Keybindings.MakeCategoryGroups();
             foreach (var cat in categories)
             {
                 SpawnForm<FormEntryHeader>(cat.Key);
                 foreach (var entry in cat.Value)
                 {
-                    var field = SpawnForm<FormEntryString, string>(entry.Value.Name, () => entry.Value.Keybind.ToString(), x => {});
-                    field.Field.interactable = false;
+                    var field = SpawnForm<FormEntryKeybind, Keybind>(entry.Value.Name, () => entry.Value.Keybind, x => {
+                        Chartmaker.main.KeybindingsStorage.Set(entry.Key, (entry.Value.Keybind = x).ToSaveString());
+                        IsDirty = true;
+                    });
+                    field.Category = cat.Key;
                 }
             }
         }
@@ -87,7 +89,7 @@ public class PreferencesModal : Modal
             themeDropdown.GetComponent<HorizontalLayoutGroup>().padding.left = 10;
             
             SpawnForm<FormEntryHeader>("Layout");
-            SpawnForm<FormEntryBool, bool>("Use Default Window", () => prefs.UseDefaultWindow, x => {
+            SpawnForm<FormEntryBool, bool>("Default Window Frame", () => prefs.UseDefaultWindow, x => {
                 storage.Set("LA:UseDefaultWindow", prefs.UseDefaultWindow = x); IsDirty = true;
                 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
                     if (x) 

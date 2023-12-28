@@ -11,13 +11,15 @@ public class DialogModal : Modal
     public TMP_Text BodyLabel;
     public RectTransform ActionHolder;
     public DialogModalAction ActionSample;
+    public GameObject CloseButton;
     
     List<DialogModalAction> Actions = new();
 
-    public void SetDialog(string title, string body, string[] actions, Action<int> onSelect)
+    public void SetDialog(string title, string body, string[] actions, Action<int> onSelect, bool allowX = true)
     {
         TitleLabel.text = title;
         BodyLabel.text = body;
+        CloseButton.SetActive(allowX);
         
         foreach (DialogModalAction act in Actions) Destroy(act.gameObject);
         Actions.Clear();

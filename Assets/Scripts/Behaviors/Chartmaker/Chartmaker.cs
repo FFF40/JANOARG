@@ -312,7 +312,10 @@ public class Chartmaker : MonoBehaviour
         NotificationLabel.text = "Saving preferences...";
         NotificationTime = float.PositiveInfinity;
 
-        ActiveTask = Task.Run(PreferencesStorage.Save);
+        ActiveTask = Task.Run(() => {
+            PreferencesStorage.Save();
+            KeybindingsStorage.Save();
+        });
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
         if (!ActiveTask.IsCompletedSuccessfully) 
         {

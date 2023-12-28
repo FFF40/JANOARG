@@ -588,6 +588,7 @@ MonoBehaviour:
   BodyLabel: {fileID: 980299037}
   ActionHolder: {fileID: 1573831449}
   ActionSample: {fileID: 1640204282008323015, guid: 5adbb73f07cf7c54ca1bcf355865dc15, type: 3}
+  CloseButton: {fileID: 8914311921399962291}
 --- !u!114 &5940025126520086036
 MonoBehaviour:
   m_ObjectHideFlags: 0

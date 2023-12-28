@@ -8,6 +8,8 @@ using TMPro;
 public class KeyboardHandler : MonoBehaviour
 {
     public static KeyboardHandler main;
+    public FormEntryKeybind ChangingKeybind;
+    public DialogModal ChangingModal;
 
     public KeybindActionList Keybindings = new KeybindActionList {
         // -------------------------------------------------- General
@@ -172,7 +174,40 @@ public class KeyboardHandler : MonoBehaviour
         }
         if (Event.current.type == EventType.KeyDown)
         {
-            Keybindings.HandleEvent(Event.current);
+            if (!ChangingKeybind) Keybindings.HandleEvent(Event.current);
+            Event.current.Use();
         }
+        else if (Event.current.type == EventType.KeyUp)
+        {
+            if (ChangingKeybind) EndKeybindChange(new (Event.current));
+            Event.current.Use();
+        }
+    }
+
+    public void StartKeybindChange(FormEntryKeybind target)
+    {
+        if (ChangingKeybind) return;
+        ChangingKeybind = target; 
+        ChangingModal = ModalHolder.main.Spawn<DialogModal>();
+        ChangingModal.SetDialog("Change Keybind", 
+                "Press a key or key combination to change keybind for: \n"
+              + "<indent=2em><b>" + target.Category + " > " + target.Title, 
+            new [] {"Cancel"}, x => {
+                CancelKeybindChange();
+            }, false
+        );
+    }
+
+    public void EndKeybindChange(Keybind keybind)
+    {
+        if (ChangingModal) ChangingModal.Close();
+        ChangingKeybind.SetValue(keybind);
+        ChangingKeybind.Reset();
+        ChangingKeybind = null; 
+    }
+
+    public void CancelKeybindChange()
+    {
+        ChangingKeybind = null; 
     }
 }
