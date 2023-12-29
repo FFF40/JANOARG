@@ -145,10 +145,18 @@ public class InformationBar : MonoBehaviour
         if (Chartmaker.main.SongSource.isPlaying)
         {
             Chartmaker.main.SongSource.Pause();
+            if (Chartmaker.Preferences.MaximizeOnPlay)
+            {
+                TimelinePanel.main.Restore();
+            }
         }
         else 
         {
             Chartmaker.main.SongSource.Play();
+            if (Chartmaker.Preferences.MaximizeOnPlay)
+            {
+                TimelinePanel.main.Collapse();
+            }
         }
         UpdatePlayButton();
     }

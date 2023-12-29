@@ -650,6 +650,7 @@ public class Chartmaker : MonoBehaviour
 }
 
 public class ChartmakerPrefs {
+    public bool MaximizeOnPlay;
     public bool SaveOnQuit;
     public bool SaveOnPlay;
 
@@ -658,6 +659,7 @@ public class ChartmakerPrefs {
 
     public void Load(Storage storage)
     {
+        MaximizeOnPlay = storage.Get("PL:MaximizeOnPlay", MaximizeOnPlay);
         SaveOnPlay = storage.Get("AS:SaveOnPlay", SaveOnPlay);
         SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
 

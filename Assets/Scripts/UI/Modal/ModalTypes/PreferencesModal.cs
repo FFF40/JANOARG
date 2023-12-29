@@ -43,6 +43,12 @@ public class PreferencesModal : Modal
         {
             var prefs = Chartmaker.Preferences;
             var storage = Chartmaker.PreferencesStorage;
+            
+            SpawnForm<FormEntryHeader>("Player");
+            SpawnForm<FormEntryBool, bool>("Maximize on Play", () => prefs.MaximizeOnPlay, x => {
+                storage.Set("PL:MaximizeOnPlay", prefs.MaximizeOnPlay = x); IsDirty = true;
+            });
+
             SpawnForm<FormEntryHeader>("Auto-Save");
             SpawnForm<FormEntryBool, bool>("Save on Play", () => prefs.SaveOnPlay, x => {
                 storage.Set("AS:SaveOnPlay", prefs.SaveOnPlay = x); IsDirty = true;

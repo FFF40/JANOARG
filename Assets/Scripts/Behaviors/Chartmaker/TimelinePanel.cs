@@ -82,6 +82,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     int TimelineHeight = 5;
     int TimelineExpandHeight = 5;
+    int TimelineRestoreHeight = 5;
     int ItemHeight = 0;
     bool lastPlayed;
     public IList DraggingItem;
@@ -1297,6 +1298,17 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         UpdateScrollbar();
         PlayerView.main.Update();
         PlayerView.main.UpdateObjects();
+    }
+    
+    public void Collapse()
+    {
+        TimelineRestoreHeight = TimelineHeight;
+        ResizeTimeline(40);
+    }
+    
+    public void Restore()
+    {
+        if (TimelineHeight <= 0) ResizeTimeline(TimelineRestoreHeight * 24 + 80);
     }
 }
 
