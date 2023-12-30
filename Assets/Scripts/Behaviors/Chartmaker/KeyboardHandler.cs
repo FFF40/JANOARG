@@ -154,6 +154,34 @@ public class KeyboardHandler : MonoBehaviour
                 if (mode == TimelineMode.HitObjects) PickerPanel.main.SetTabMode(PickerMode.CatchHit);
             }
         }},
+
+        // -------------------------------------------------- Selection
+        { "SE:PreviousLane", new KeybindAction {
+            Category = "Selection",
+            Name = "Previous Lane",
+            Keybind = new Keybind(KeyCode.UpArrow),
+            Invoke = () => {
+                if (InspectorPanel.main.CurrentLane != null)
+                {
+                    var lanes = Chartmaker.main.CurrentChart.Lanes;
+                    int index = lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                    InspectorPanel.main.SetObject(lanes[Mathf.Max(index - 1, 0)]);
+                }
+            },
+        }},
+        { "SE:NextLane", new KeybindAction {
+            Category = "Selection",
+            Name = "Next Lane",
+            Keybind = new Keybind(KeyCode.DownArrow),
+            Invoke = () => {
+                if (InspectorPanel.main.CurrentLane != null)
+                {
+                    var lanes = Chartmaker.main.CurrentChart.Lanes;
+                    int index = lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                    InspectorPanel.main.SetObject(lanes[Mathf.Min(index + 1, lanes.Count - 1)]);
+                }
+            },
+        }},
     };
     
     public void Awake() 
