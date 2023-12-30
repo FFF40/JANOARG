@@ -16,18 +16,13 @@ public class MetadataReader {
 	// ---- Classes ----
 
 	public enum TagLibraries {
-		/// This file doesn't have any tags.
 		None = 0,
-		/// An error was encountered while reading tags.
 		Error = -1,
-		/// This file have a ID3v1 tag.
 		ID3Ver1 = 31,
-		/// This file have a ID3v2.2 tag.
 		ID3Ver2Point2 = 32,
-		/// This file have a ID3v2.3 tag.
 		ID3Ver2Point3 = 33,
-		/// This file have a ID3v2.4 tag.
 		ID3Ver2Point4 = 34,
+		VorbisComment = 100,
 	}
 
 	public class PopularimeterClass {
@@ -96,7 +91,7 @@ public class MetadataReader {
 	/// The date that the file has been encoded.
 	public readonly DateTime EncodedDate = new DateTime();
 	/// Returns the BPM rate of the audio file if declared, else returns -1.
-	public readonly int BeatsPerMinute = -1;
+	public readonly float BeatsPerMinute = -1;
 	/// Returns the audio length of the file in milliseconds.
 	public readonly int LengthInMilliseconds = 0;
 	/// The file's tag library.
@@ -112,7 +107,76 @@ public class MetadataReader {
 		// ready to read tags
 		FileStream stream = new FileStream (path, FileMode.Open);
 		BinaryReader reader = new BinaryReader(stream);
-		try {
+		byte[] header = new byte[5];
+		stream.Seek(0, SeekOrigin.Begin);
+		reader.Read(header, 0, header.Length);
+		if (header[0] == 'O' && header[1] == 'g' && header[2] == 'g' && header[3] == 'S')
+		{
+			// read OGG packets
+			stream.Seek(0, SeekOrigin.Begin);
+			List<byte> metadata = new();
+			for (int i = 0; i < 2; i++) 
+			{
+				byte[] tag = new byte[4];
+				reader.Read(tag, 0, tag.Length);
+				byte[] version = new byte[1];
+				reader.Read(version, 0, version.Length);
+				byte[] flags = new byte[1];
+				reader.Read(flags, 0, flags.Length);
+				byte[] position = new byte[8];
+				reader.Read(position, 0, position.Length);
+				byte[] serial = new byte[4];
+				reader.Read(serial, 0, serial.Length);
+				byte[] counter = new byte[4];
+				reader.Read(counter, 0, counter.Length);
+				byte[] checksum = new byte[4];
+				reader.Read(checksum, 0, checksum.Length);
+				byte[] segsCount = new byte[1];
+				reader.Read(segsCount, 0, segsCount.Length);
+				byte[] segs = new byte[segsCount[0]];
+				reader.Read(segs, 0, segs.Length);
+				int size = 0;
+				for (int a = 0; a < segs.Length; a++) size += segs[a];
+				byte[] data = new byte[size];
+				reader.Read(data, 0, data.Length);
+				uint pos = (uint)position[3] << 24 | (uint)position[2] << 16 | (uint)position[1] << 8 | position[0];
+				if (pos == 0xFFFFFFFF) i--;
+				if (i == 1) for (int a = 0; a < size; a++) metadata.Add(data[a]);
+			}
+			Debug.Log(metadata.Count);
+			byte[] mdata = metadata.ToArray();
+			metadata.Clear();
+			if (System.Text.Encoding.ASCII.GetString(mdata, 1, 6) == "vorbis" && mdata[0] == 3)
+			{
+				uint vendorLength = (uint)mdata[10] << 24 | (uint)mdata[9] << 16 | (uint)mdata[8] << 8 | mdata[7];
+				string vendor = System.Text.Encoding.UTF8.GetString(mdata, 11, (int)vendorLength);
+				Debug.Log(vendorLength + " " + vendor);
+				uint p = 11 + vendorLength;
+				uint tagCounts = (uint)mdata[p+3] << 24 | (uint)mdata[p+2] << 16 | (uint)mdata[p+1] << 8 | mdata[p];
+				Debug.Log(tagCounts);
+				p += 4;
+				for (int i = 0; i < tagCounts; i++) 
+				{
+					uint tagLength = (uint)mdata[p+3] << 24 | (uint)mdata[p+2] << 16 | (uint)mdata[p+1] << 8 | mdata[p];
+					string tag = System.Text.Encoding.UTF8.GetString(mdata, (int)p+4, (int)tagLength);
+					p += 4 + tagLength;
+					int sep = tag.IndexOf('=');
+					string key = tag[..sep].ToUpper();
+					string value = tag[(sep+1)..];
+					switch (key) 
+					{
+						case "TITLE": Title = value; break;
+						case "ARTIST": Artist = string.IsNullOrEmpty(Artist) ? value : Artist + ", " + value; break;
+						case "ALBUM": Album = value; break;
+						case "GENRE": Type = string.IsNullOrEmpty(Type) ? value : Type + ", " + value; break;
+						case "BPM": float.TryParse(value, out BeatsPerMinute); break;
+					}
+				}
+				TagLibrary = TagLibraries.VorbisComment;
+			}
+		}
+		else try 
+		{
 			// read ID3v1 tags
 			byte[] sample = new byte[128];
 			stream.Seek(-128, SeekOrigin.End);
@@ -273,7 +337,7 @@ public class MetadataReader {
 						} else {
 							TempString = System.Text.Encoding.Default.GetString (body, 1, body.Length - 1).Trim();
 						}
-						BeatsPerMinute = Convert.ToInt32(TempString);
+						BeatsPerMinute = Convert.ToSingle(TempString);
 					}
 					// "TLEN" = Length
 					else if (System.Text.Encoding.Default.GetString (id) == "TLEN" && body.Length > 1) {
