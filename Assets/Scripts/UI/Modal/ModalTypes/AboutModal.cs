@@ -14,6 +14,9 @@ public class AboutModal : Modal
 
     public RectTransform Content;
 
+    public RectTransform TwitterIcon;
+    public RectTransform XIcon;
+
     public void Awake()
     {
         if (main) Close();
@@ -39,7 +42,36 @@ public class AboutModal : Modal
     public void Update()
     {
         Content.anchoredPosition += Vector2.up * 15 * Time.deltaTime;
-        if (Content.anchoredPosition.y > Content.rect.height - 250) Content.anchoredPosition -= Vector2.up * Content.rect.height;
+        if (Content.anchoredPosition.y > Content.rect.height - 270) Content.anchoredPosition -= Vector2.up * Content.rect.height;
+    }
+
+    public void OpenGitHub()
+    {
+        Application.OpenURL("https://github.com/ducdat0507/JANOARG");
+    }
+
+    public void OpenDiscord()
+    {
+        Application.OpenURL("https://discord.gg/vXJTPFQBHm");
+    }
+
+    public void OpenTwitter()
+    {
+        StopCoroutine(OpenTwitterRoutine());
+        StartCoroutine(OpenTwitterRoutine());
+    }
+    public IEnumerator OpenTwitterRoutine()
+    {
+        for (float a = 0; a < 1; a += Time.deltaTime)
+        {
+            XIcon.gameObject.SetActive(a < .5f);
+            TwitterIcon.gameObject.SetActive(a >= .5f);
+            XIcon.anchoredPosition = TwitterIcon.anchoredPosition = Vector2.right * Mathf.Cos(a * 20) * (1 - a) * (1 - a) * 5;
+            yield return null;
+        }
+        XIcon.gameObject.SetActive(false);
+        TwitterIcon.gameObject.SetActive(true);
+        XIcon.anchoredPosition = TwitterIcon.anchoredPosition = Vector2.zero;
     }
 
     public static readonly System.Func<string>[] FlavorTexts = new System.Func<string>[] {
