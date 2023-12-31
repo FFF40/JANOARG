@@ -345,6 +345,7 @@ public class Chartmaker : MonoBehaviour
         SongSource.time = 0;
         SetEditorActive(false);
         PlayerView.main.MainCamera.rect = new (0, 0, 1, 1);
+        Resources.UnloadUnusedAssets();
         
         BorderlessWindow.RenameWindow("JANOARG Chartmaker");
 

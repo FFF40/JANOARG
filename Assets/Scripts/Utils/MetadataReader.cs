@@ -140,10 +140,9 @@ public class MetadataReader {
 				byte[] data = new byte[size];
 				reader.Read(data, 0, data.Length);
 				uint pos = (uint)position[3] << 24 | (uint)position[2] << 16 | (uint)position[1] << 8 | position[0];
-				if (pos == 0xFFFFFFFF) i--;
 				if (i == 1) for (int a = 0; a < size; a++) metadata.Add(data[a]);
+				if (pos == 0xFFFFFFFF) i--;
 			}
-			Debug.Log(metadata.Count);
 			byte[] mdata = metadata.ToArray();
 			metadata.Clear();
 			if (System.Text.Encoding.ASCII.GetString(mdata, 1, 6) == "vorbis" && mdata[0] == 3)
