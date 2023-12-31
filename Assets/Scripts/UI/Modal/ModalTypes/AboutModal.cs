@@ -57,7 +57,7 @@ public class AboutModal : Modal
 
     public void OpenTwitter()
     {
-        StopCoroutine(OpenTwitterRoutine());
+        StopAllCoroutines();
         StartCoroutine(OpenTwitterRoutine());
     }
     public IEnumerator OpenTwitterRoutine()
