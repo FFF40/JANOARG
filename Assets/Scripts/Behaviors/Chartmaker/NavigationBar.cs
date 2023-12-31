@@ -90,19 +90,21 @@ public class NavigationBar : MonoBehaviour
     public ContextMenuList GetOptionsMenu()
     {
         return new ContextMenuList(
-            new ContextMenuListAction("Preferences...", () => ModalHolder.main.Spawn<PreferencesModal>())
+            new ContextMenuListAction("Preferences...", () => ModalHolder.main.Spawn<PreferencesModal>()),
+            new ContextMenuListAction("Show Keybindings...", () => ModalHolder.main.Spawn<PreferencesModal>().SetTab(1))
         );
     }
 
     public ContextMenuList GetHelpMenu()
     {
         return new ContextMenuList(
-            new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits"),
-            new ContextMenuListSeparator(),
             new ContextMenuListAction("Chartmaker Manual...", () => ModalHolder.main.Spawn<HelpModal>()),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/ducdat0507/janoarg")),
-            new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm"))
+            new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG")),
+            new ContextMenuListAction("Report an Issue / Suggestion", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG/issues")),
+            new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm")),
+            new ContextMenuListSeparator(),
+            new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits")
         );
     }
 }

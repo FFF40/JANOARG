@@ -12,6 +12,7 @@ public class PreferencesModal : Modal
     public Button[] TabButtons;
 
     public bool IsDirty = false;
+    public int CurrentTab {get; private set;} = -1;
 
     public void Awake()
     {
@@ -27,11 +28,12 @@ public class PreferencesModal : Modal
     public new void Start()
     {
         base.Start();
-        SetTab(0);
+        if (CurrentTab < 0) SetTab(0);
     }
 
     public void SetTab(int tab)
     {
+        CurrentTab = tab;
         for (int a = 0; a < TabButtons.Length; a++) 
         {
             TabButtons[a].interactable = tab != a;
