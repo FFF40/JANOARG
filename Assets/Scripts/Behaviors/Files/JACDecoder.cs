@@ -195,7 +195,7 @@ public class JACDecoder
                                 Length = ParseFloat(tokens[5]),
                                 HoldLength = ParseFloat(tokens[6]),
                                 Flickable = tokens[7][0] == 'F',
-                                FlickDirection = tokens[7].Length > 1 ? ParseFloat(tokens[7][1..]) : -1,
+                                FlickDirection = tokens[7].Length > 1 ? ParseFloat(tokens[7][1..]) : float.NaN,
                                 StyleIndex = ParseInt(tokens[8]),
                             };
                             currentObject = hit;

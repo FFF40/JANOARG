@@ -203,7 +203,7 @@ public class JACEncoder
             + " " + hit.Position.ToString(CultureInfo.InvariantCulture)
             + " " + hit.Length.ToString(CultureInfo.InvariantCulture)
             + " " + hit.HoldLength.ToString(CultureInfo.InvariantCulture)
-            + " " + (hit.Flickable ? "F" + (hit.FlickDirection >= 0 ? hit.FlickDirection.ToString(CultureInfo.InvariantCulture) : "") : "N")
+            + " " + (hit.Flickable ? "F" + (float.IsFinite(hit.FlickDirection) ? hit.FlickDirection.ToString(CultureInfo.InvariantCulture) : "") : "N")
             + " " + hit.StyleIndex.ToString(CultureInfo.InvariantCulture);
 
         str += EncodeStoryboard(hit, depth + IndentSize);
