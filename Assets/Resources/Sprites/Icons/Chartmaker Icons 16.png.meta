@@ -496,6 +496,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Guilded Icon
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 600755380d8cb334bac81bcd4103b26e
+      internalID: 1108116061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Reddit Icon
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 888e35edc3a5f974690fa1f8f9f2c834
+      internalID: -1754122059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -522,6 +564,8 @@ TextureImporter:
       Music: -1610311330
       Hitsounds: -707145241
       Paste: -1684136540
+      Reddit Icon: -1754122059
+      Guilded Icon: 1108116061
       Close: -1075177032
       Cut: 197281861
       Discord Icon: -1407520920

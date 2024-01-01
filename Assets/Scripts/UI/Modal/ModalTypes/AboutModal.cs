@@ -55,6 +55,16 @@ public class AboutModal : Modal
         Application.OpenURL("https://discord.gg/vXJTPFQBHm");
     }
 
+    public void OpenGuilded()
+    {
+        Application.OpenURL("https://guilded.gg/FFF40");
+    }
+
+    public void OpenSubreddit()
+    {
+        Application.OpenURL("https://reddit.com/r/fff40");
+    }
+
     public void OpenTwitter()
     {
         StopAllCoroutines();
