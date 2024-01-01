@@ -80,6 +80,7 @@ public class AboutModal : Modal
         () => "<i>Did you know:</i>\n<b>JANOARG stands for \"Just Another Normal, Ordinary, Acceptable Rhythm Game\".",
         () => "<i>Did you know:</i>\n<b>Our team consists of a nursery of snails which are current developing this game at record snail speed.",
         () => "<i>Did you know:</i>\n<b>We chose the \"developing at snail speed\" subtitle because we believe that by the time this game officially releases it will become true to its name.",
+        () => "<i>Did you know:</i>\n<b>Don't try to press that Twitter button below, we actually don't have a Twitter account.",
         
         // Chartmaker facts
         () => "<i>Did you know:</i>\n<b>You can click on the visualizer (metronome) on the top right corner to switch between different visualizers.",
@@ -93,13 +94,18 @@ public class AboutModal : Modal
         () => "<i>Did you know:</i>\n<b>We don't have that many tips, unfortunately.",
         () => "<i>Did you know:</i>\n<b>Instead of closing and reopening the about window, you can click on this text box to reroll this message and obtain a new random one.",
         () => "<i>Did you know:</i>\n<b>There is no canonical term to specify this message box/text box/tip box/...what is it called again?",
+        () => {
+            var calendar = new System.Globalization.ChineseLunisolarCalendar();
+            var now = System.DateTime.Now;
+            return "<i>Did you know:</i>\n<b>Some messages here are dynamically generated. For example, today is " + calendar.GetYear(now) + "-" + calendar.GetMonth(now) + "-" + calendar.GetDayOfMonth(now) + " in East Asian lunisolar calendar.";      
+        },
         
         // Snail facts
         () => "<i>Did you know:</i>\n<b>A nursery of snails is called an \"escargatoire\".",
         () => "<i>Did you know:</i>\n<b>A snail can live somewhere for 1~10 years in the wild, but in here they can live for 3. Just 3.",
 
         // Charting tips
-        () => "<i>Charting tip:</i>\n<b>Missing something? Want more features? Have message ideas to put here? Suggest them in our Discord server and we may make them real!",
+        () => "<i>Charting tip:</i>\n<b>Missing something? Want more features? Have message ideas to put here? Suggest them in our GitHub issues page and we may make them real!",
         () => "<i>Charting tip:</i>\n<b>Be sure to make use of the keybindings, mastering them can be proven to be extremely helpful!",
         () => "<i>Charting tip:</i>\n<b>Experiencing a chart block? Join our Discord server, it's where charters like you and us exchange tips and ideas!",
         () => "<i>Charting tip:</i>\n<b>Make sure to test play your charts, playability is just as important as those lane-twisting effects!",
@@ -110,6 +116,9 @@ public class AboutModal : Modal
         () => "<i>Charting tip:</i>\n<b>Make sure to respect the song artist's copyright guidelines before charting their song. If you're not sure you can distribute the chart without the song file!",
         () => "<i>Charting tip:</i>\n<b>Watching the song's MV (if one exists) is the best way to get inspirations for your charts.",
         () => "<i>Charting tip:</i>\n<b>Want more tips? Our folks on our Discord server have plenty of them!",
+        
+        // Quotes
+        () => "<b>🐌</b>\n<i><align=right>- 🐌",
 
         // Super secret easter egg
         () => "<i>Missing snail:</i>\n<b>We're trying to find a lost snail which is currently hiding somewhere inside the Picker. Can you find it?",
