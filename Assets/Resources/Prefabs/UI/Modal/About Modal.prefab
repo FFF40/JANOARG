@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3737871741268176203}
   - component: {fileID: 2729360214855167300}
   - component: {fileID: 6458754303354330203}
+  - component: {fileID: 6535156276291973867}
   m_Layer: 5
   m_Name: Reddit
   m_TagString: Untagged
@@ -182,6 +183,19 @@ MonoBehaviour:
   Text: r/FFF40 Subreddit
   Delay: 1
   PositionMode: 1
+--- !u!114 &6535156276291973867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348816874612638312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32649
 --- !u!1 &441537172826216117
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +759,7 @@ GameObject:
   - component: {fileID: 4629174439667218795}
   - component: {fileID: 4125949134517601331}
   - component: {fileID: 5704569937223089057}
+  - component: {fileID: 1197167323363679602}
   m_Layer: 5
   m_Name: GitHub
   m_TagString: Untagged
@@ -912,6 +927,19 @@ MonoBehaviour:
   Text: Source Code on GitHub
   Delay: 1
   PositionMode: 1
+--- !u!114 &1197167323363679602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2267382458544321542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32649
 --- !u!1 &3145129540961668727
 GameObject:
   m_ObjectHideFlags: 0
@@ -1080,6 +1108,7 @@ GameObject:
   - component: {fileID: 8740399698056899688}
   - component: {fileID: 1196435275354404768}
   - component: {fileID: 1184861566832400397}
+  - component: {fileID: 5910707279253318731}
   m_Layer: 5
   m_Name: Discord
   m_TagString: Untagged
@@ -1247,6 +1276,19 @@ MonoBehaviour:
   Text: FFF40 Studios Discord Server
   Delay: 1
   PositionMode: 1
+--- !u!114 &5910707279253318731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3766710475721329138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32649
 --- !u!1 &4088847900543325782
 GameObject:
   m_ObjectHideFlags: 0
@@ -1374,6 +1416,7 @@ GameObject:
   - component: {fileID: 4446376351867447142}
   - component: {fileID: 7235359352659293015}
   - component: {fileID: 4413515773702999904}
+  - component: {fileID: 6291306602527674445}
   m_Layer: 5
   m_Name: Guilded
   m_TagString: Untagged
@@ -1541,6 +1584,19 @@ MonoBehaviour:
   Text: FFF40 Studios Guilded Server
   Delay: 1
   PositionMode: 1
+--- !u!114 &6291306602527674445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4372457810690691019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32649
 --- !u!1 &4978459314803617382
 GameObject:
   m_ObjectHideFlags: 0
@@ -2138,7 +2194,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -3}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -150, y: 20}
+  m_AnchoredPosition: {x: -120, y: 20}
   m_SizeDelta: {x: 350, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1374365557003459785
@@ -2279,6 +2335,7 @@ GameObject:
   - component: {fileID: 6446994956718163061}
   - component: {fileID: 98446195189121961}
   - component: {fileID: 6136764661298648971}
+  - component: {fileID: 8587512162453921614}
   m_Layer: 5
   m_Name: Twitter
   m_TagString: Untagged
@@ -2449,6 +2506,19 @@ MonoBehaviour:
     <alpha=#77><i>(who calls it X anyways)'
   Delay: 1
   PositionMode: 1
+--- !u!114 &8587512162453921614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7215240596627923758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 32649
 --- !u!1 &7368207319927134549
 GameObject:
   m_ObjectHideFlags: 0
@@ -2905,44 +2975,15 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Created by
-
-    <b>ducdat0507 / duducat</b>
-
-
-    with some help from
-
-    <b>GitHub
-    contributors</b>
-
-
-
-
-    The fonts
-
-    <b>Roboto and Roboto Mono</b>
-
-    are
-    licensed under the Apache License, Version 2.0
-
-    and belong to their respective
-    owners.
-
-
-    The fonts
-
-    <b>Space Grotesk, Michroma, Noto Sans and Noto Emoji</b>
-
-    are
-    licensed under the Open Font License
-
-    and belong to their respective owners.
-
-
-
-
-    The
-    brand icons below belong to their respective trademark holders.'
+  m_text: "Created by\n<b>ducdat0507 / duducat</b>\n\n----------\n\nThe fonts\n<b>Roboto
+    and Roboto Mono</b>\nare licensed under the Apache License, Version 2.0\nand
+    belong to their respective owners.\n\nThe fonts\n<b>Space Grotesk, Michroma,
+    Noto Sans and Noto Emoji</b>\nare licensed under the Open Font License\nand belong
+    to their respective owners.\n\n----------\n\nThe brand icons below belong to\ntheir
+    respective trademark holders.\n\nI basically drew all of the other icons.\n                          
+    <b><i>-duducat</i></b>\n\n----------\n\nSpecial thanks to\n<b>GitHub contributors</b>\n<b>Phigros
+    Fanmade Discord server</b>\n<b>This snail -> \U0001F40C</b>\n\n----------\n\nAnd
+    lastly:\n<b>Thank You for Chartmaking</b>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
   m_sharedMaterial: {fileID: -6645923801699503097, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
@@ -3005,7 +3046,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 10, y: 250, z: 10, w: 300}
+  m_margin: {x: 10, y: 350, z: 10, w: 400}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3051,7 +3092,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8114330190228983642, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 300
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 8114330190228983642, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -3095,7 +3136,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8114330190553048469, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 550
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 8114330190553048469, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
       propertyPath: m_SizeDelta.y

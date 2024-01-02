@@ -37,6 +37,9 @@ public class InspectorPanel : MonoBehaviour
     public Dictionary<Type, ChartmakerMultiHandler> MultiHandlers = new ();
     [Space]
     public DebugStatsInspector DebugStatsSample;
+    [Space]
+    public bool IsCollapsed;
+    public RectTransform PanelHolder;
 
     public void Awake()
     {
@@ -75,6 +78,7 @@ public class InspectorPanel : MonoBehaviour
     public void SetMode(InspectorMode mode)
     {
         CurrentMode = mode;
+        if (IsCollapsed) Restore();
         OnObjectChange();
     }
 
@@ -139,7 +143,7 @@ public class InspectorPanel : MonoBehaviour
         GroupsButton.interactable = CurrentObject != Chartmaker.main.CurrentChart?.Groups;
         CameraButton.interactable = CurrentObject is not CameraController;
 
-        PropertiesButton.interactable = CurrentMode != InspectorMode.Properties;
+        PropertiesButton.interactable = IsCollapsed || CurrentMode != InspectorMode.Properties;
     }
 
     public void UpdateForm()
@@ -749,8 +753,43 @@ public class InspectorPanel : MonoBehaviour
     public void OpenExtraModesMenu()
     {
         ContextMenuHolder.main.OpenRoot(new ContextMenuList(
-            new ContextMenuListAction("Debug Stats", () => SetMode(InspectorMode.DebugStats), _checked: CurrentMode == InspectorMode.DebugStats)
+            new ContextMenuListAction("Debug Stats", () => SetMode(InspectorMode.DebugStats), _checked: !IsCollapsed && CurrentMode == InspectorMode.DebugStats)
         ), (RectTransform)ExtraModesButton.transform, ContextMenuDirection.Left); 
+    }
+    
+
+    public void OnResizerDrag()
+    {
+        ResizeInspector(Screen.width - Input.mousePosition.x, false);
+    }
+    public void OnResizerEndDrag()
+    {
+        ResizeInspector(Screen.width - Input.mousePosition.x);
+    }
+    
+    public void ResizeInspector(float width, bool snap = true)
+    {
+        if (snap) width = width < 172 ? 25 : 320;
+        else width = Mathf.Clamp(width, 25, 320);
+        PanelHolder.anchoredPosition = new(320 - width, PanelHolder.anchoredPosition.y);
+        Chartmaker.main.PlayerViewHolder.sizeDelta = new(-24 - width, Chartmaker.main.PlayerViewHolder.sizeDelta.y);
+        PlayerView.main.Update();
+        PlayerView.main.UpdateObjects();
+        if (snap) 
+        {
+            IsCollapsed = width < 172;
+            UpdateButtons();
+        }
+    }
+    
+    public void Collapse()
+    {
+        ResizeInspector(25, true);
+    }
+    
+    public void Restore()
+    {
+        ResizeInspector(320, true);
     }
 }
 
