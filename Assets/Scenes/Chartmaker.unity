@@ -3964,7 +3964,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c3575a8e2f3f824ba92bd05325e044a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Text: Separation Factor
+  Text: Beat Divisor Factor
   Delay: 1
   PositionMode: 1
 --- !u!114 &205392517
@@ -4443,7 +4443,7 @@ MonoBehaviour:
   ExtraModesButton: {fileID: 1240274868}
   BackButton: {fileID: 1478809413}
   DebugStatsSample: {fileID: 8311844125951479924, guid: 1fbd1f8b6fa14e84cb36b911454c948c, type: 3}
-  Collapsed: 0
+  IsCollapsed: 0
   PanelHolder: {fileID: 229728604}
 --- !u!114 &229728608
 MonoBehaviour:

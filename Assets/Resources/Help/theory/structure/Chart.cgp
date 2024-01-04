@@ -34,6 +34,11 @@ charts respectively (starting at 0 for Simple), or a negative number for Special
 sorting index for each of them, to avoid conflicts.
 
 $
+ • <indent=2em><b>Charter Name</b> <i>(String)</i>:
+$n
+The name or pseudonym of the person who created the chart.
+
+$
  • <indent=2em><b>Difficulty Level</b> <i>(String)</i>:
 $n
 The visible difficulty number rating of the chart, visible to the player. Normally this 

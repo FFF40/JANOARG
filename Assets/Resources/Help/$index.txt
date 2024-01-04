@@ -22,6 +22,7 @@ theory Chart Theory
   theory/pattern/patternshort Patterns Cheat Sheet
  theory/richtext Rich Text
 anatomy Chartmaker Anatomy
+ anatomy/quickstart Quick Start
  anatomy/elements UI Elements
   anatomy/elements/TitleBar Title Bar
   anatomy/elements/HomeScreen Home Screen

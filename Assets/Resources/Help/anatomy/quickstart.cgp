@@ -1,0 +1,52 @@
+$title
+Chartmaker Quick Start
+$
+This page will guide you to start charting using the JANOARG Chartmaker.
+
+$t2
+Creating a Playable Song
+$
+There are 3 ways to start creating a new Playable Song:
+$n
+ • <indent=2em>Select "Create a new Playable Song" on the Home Modal, or
+$n
+<indent=0> • <indent=2em>Select "File" > "New Song..." on the top navigation menu, or
+$n
+<indent=0> • <indent=2em>Press Ctrl+N (or the equivalent if you changed it) on your keyboard.
+$
+After you do any of the above, the new Playable Song modal will appear, which will ask you some 
+information before creating a Playable Song. The most important fields are:
+$n
+ • <indent=2em>The Codename, which will determine the folder name containg the Playable Song and 
+the Playable Song file and the audio file's name, and
+$n
+<indent=0> • <indent=2em>The location of the music audio file that you're going to chart.
+$
+The other fields will determine which data the Playable Song will be initialized with. You can manually 
+enter data into these fields, or you can use the Auto-fill button which will read the metadata embedded within the 
+audio file and fill the corresponding fields automatically.
+$
+Once you filled the necessary fields, press the "Create Song" button, which will start the creating process. 
+The editor will automatically open the newly created Playable Song when it's done.
+
+$t2
+Time the Metronome
+$
+Before you can start charting, it is necessary to make sure the Timing is in sync with the song. In order to edit 
+Timing data, select the Timing tab on the Timeline panel. The Timeline will then show the BPM Stops that corresponds 
+with a certain point in time of the song. You can edit a BPM Stop by clicking it or ad a new one by selecting the BPM 
+Stop on the Picker panel on the left side of the screen and click the area that corresponds to the place in time that 
+the BPM Stop applies.
+
+$t2
+Create a Chart
+$
+Playable Songs when are newly create do not have a Chart, so first you'll need to create a Chart to chart the song to. 
+There are 2 ways to create a Chart:
+$n
+ • <indent=2em>Select "Select Chart..." > "Create Chart..." on the information bar, or
+$n
+<indent=0> • <indent=2em>Select "File" > "Create Chart..." on the top navigation menu.
+$
+Similar to when you create a Playable Song, a modal that ask you information about the Chart will appear. When you 
+are done, click the "Create Chart" button and a Chart will be created.
