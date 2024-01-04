@@ -16,7 +16,7 @@ Note: The Standalone Chartmaker has less features than the Unity Editor-based Ch
 
 ## How to Contribute Code
 
-### You'll nreleaseseed the following:
+### You'll need the following:
 * A personal computer (Windows/Mac/Linux, the editor isn't available on mobile, sorry)
 * A copy of Unity Editor (preferably version 2022.2.2)
 * A code editor (any text editor should work)
