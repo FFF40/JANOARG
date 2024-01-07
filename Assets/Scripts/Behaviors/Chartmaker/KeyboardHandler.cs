@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System.Linq;
 
 public class KeyboardHandler : MonoBehaviour
 {
@@ -58,6 +59,24 @@ public class KeyboardHandler : MonoBehaviour
             Name = "Paste",
             Keybind = new Keybind(KeyCode.V, EventModifiers.Command),
             Invoke = () => Chartmaker.main.Paste(),
+        }},
+        { "ED:SelectAll", new KeybindAction {
+            Category = "Edit",
+            Name = "Select All",
+            Keybind = new Keybind(KeyCode.A, EventModifiers.Command),
+            Invoke = () => { 
+                if (TimelinePanel.main.CurrentMode == TimelineMode.Storyboard) {
+                    if (InspectorPanel.main.CurrentObject is IStoryboardable) InspectorPanel.main.SetObject(((IStoryboardable)InspectorPanel.main.CurrentObject).Storyboard.Timestamps.FindAll(x => true));
+                } else if (TimelinePanel.main.CurrentMode == TimelineMode.Lanes) {
+                    if (Chartmaker.main.CurrentChart != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentChart.Lanes.FindAll(x => true));
+                } else if (TimelinePanel.main.CurrentMode == TimelineMode.LaneSteps) {
+                    if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.LaneSteps.FindAll(x => true));
+                } else if (TimelinePanel.main.CurrentMode == TimelineMode.HitObjects) {
+                    if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.Objects.FindAll(x => true));
+                } else if (TimelinePanel.main.CurrentMode == TimelineMode.Timing) {
+                    if (Chartmaker.main.CurrentSong != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentSong.Timing.Stops.FindAll(x => true));
+                }
+            },
         }},
         { "ED:Delete", new KeybindAction {
             Category = "Edit",

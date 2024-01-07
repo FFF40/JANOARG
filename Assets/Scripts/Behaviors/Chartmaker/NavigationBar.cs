@@ -40,12 +40,23 @@ public class NavigationBar : MonoBehaviour
 
     public void OpenMenu()
     {
-        ContextMenuHolder.main.OpenRoot(new ContextMenuList(
-            new ContextMenuListSublist("File", GetFileMenu().Items.ToArray()),
-            new ContextMenuListSublist("Edit", GetEditMenu().Items.ToArray()),
-            new ContextMenuListSublist("Options", GetOptionsMenu().Items.ToArray()),
-            new ContextMenuListSublist("Help", GetHelpMenu().Items.ToArray())
-        ), MenuButton);
+        if (Chartmaker.main.CurrentSong != null)
+        {
+            ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+                new ContextMenuListSublist("File", GetFileMenu().Items.ToArray()),
+                new ContextMenuListSublist("Edit", GetEditMenu().Items.ToArray()),
+                new ContextMenuListSublist("Options", GetOptionsMenu().Items.ToArray()),
+                new ContextMenuListSublist("Help", GetHelpMenu().Items.ToArray())
+            ), MenuButton);
+        }
+        else 
+        {
+            ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+                new ContextMenuListSublist("File", GetFileMenu().Items.ToArray()),
+                new ContextMenuListSublist("Options", GetOptionsMenu().Items.ToArray()),
+                new ContextMenuListSublist("Help", GetHelpMenu().Items.ToArray())
+            ), MenuButton);
+        }
     }
 
     public ContextMenuList GetFileMenu()
@@ -54,16 +65,16 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListAction("New Song...", () => ModalHolder.main.Spawn<NewSongModal>(), KeyOf("FL:New")),
             new ContextMenuListAction("Open Song...", Chartmaker.main.OpenSongModal, KeyOf("FL:Open")),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Create Chart...", () => ModalHolder.main.Spawn<NewChartModal>()),
+            new ContextMenuListAction("Create Chart...", () => ModalHolder.main.Spawn<NewChartModal>(), _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Save", Chartmaker.main.StartSaveRoutine, KeyOf("FL:Save")),
+            new ContextMenuListAction("Save", Chartmaker.main.StartSaveRoutine, KeyOf("FL:Save"), _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListSeparator(),
             // new ContextMenuListSublist("Export", 
             //     new ContextMenuListAction("Record Video...", () => {}),
             //     new ContextMenuListAction("Bundle...", () => {})
             // ),
             // new ContextMenuListSeparator(),
-            new ContextMenuListAction("Close Song", Chartmaker.main.TryCloseSong),
+            new ContextMenuListAction("Close Song", Chartmaker.main.TryCloseSong, _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListAction("Exit Chartmaker", Application.Quit)
         );
     }
@@ -76,7 +87,9 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
-            new ContextMenuListAction("Paste", Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste())
+            new ContextMenuListAction("Paste", Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
+            new ContextMenuListAction("Select All", () => KeyboardHandler.main.Keybindings["ED:SelectAll"].Invoke(), KeyOf("ED:SelectAll")),
+            new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), _enabled: Chartmaker.main.CanCopy())
         );
     }
 
@@ -102,9 +115,9 @@ public class NavigationBar : MonoBehaviour
         return new ContextMenuList(
             new ContextMenuListAction("Chartmaker Manual...", () => ModalHolder.main.Spawn<HelpModal>()),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG")),
+            new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG"), icon: "Github Icon"),
             new ContextMenuListAction("Report an Issue / Suggestion", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG/issues")),
-            new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm")),
+            new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm"), icon: "Discord Icon"),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits")
         );

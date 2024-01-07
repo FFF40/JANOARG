@@ -65,6 +65,7 @@ public class CMHitPlayer : MonoBehaviour
         else 
         {
             if (HoldTail) {
+                Destroy(HoldTail.GetComponent<MeshFilter>().mesh);
                 Destroy(HoldTail.gameObject);
             } 
         }

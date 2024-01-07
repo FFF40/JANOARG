@@ -14301,6 +14301,7 @@ MonoBehaviour:
   CurrentSongPath: 
   CurrentChartPath: 
   SongSource: {fileID: 1691296885}
+  NavBar: {fileID: 1445882522}
   NavBarItemHolder: {fileID: 482193825}
   InfoBarHolder: {fileID: 1115440386}
   TimelineHolder: {fileID: 1621242179}
@@ -34863,6 +34864,8 @@ MonoBehaviour:
   - {fileID: -1018057754, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   - {fileID: 50928159, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   - {fileID: 117254162, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  - {fileID: 1533055934, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  - {fileID: -1407520920, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   ContextMenus: []
 --- !u!222 &2125735976
 CanvasRenderer:

@@ -17,6 +17,7 @@ public class Chartmaker : MonoBehaviour
     [Space]
     public AudioSource SongSource;
     [Space]
+    public NavigationBar NavBar;
     public RectTransform NavBarItemHolder;
     public RectTransform InfoBarHolder;
     public RectTransform TimelineHolder;
@@ -88,7 +89,7 @@ public class Chartmaker : MonoBehaviour
 
     public void SetEditorActive(bool value)
     {
-        NavBarItemHolder.gameObject.SetActive(value);
+        NavBar.EditButton.gameObject.SetActive(value);
         InfoBarHolder.gameObject.SetActive(value);
         TimelineHolder.gameObject.SetActive(value);
         InspectorHolder.gameObject.SetActive(value);
