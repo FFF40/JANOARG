@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler
+public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public static WindowHandler main;
 
@@ -114,41 +114,13 @@ public class WindowHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, I
         }
     }
 
-    public void OnPointerDown(PointerEventData data)
+    public void OnPointerEnter(PointerEventData data)
     {
-        if (Time.time - clickTime < .5f)
-        {
-            ResizeWindow();
-            clickTime = float.NegativeInfinity;
-            mousePos = Vector2.zero * float.NaN;
-        }
-        else 
-        {
-            clickTime = Time.time;
-            mousePos = Input.mousePosition;
-        }
+        BorderlessWindow.IsInTitleBar = true;
     }
 
-    public void OnDrag(PointerEventData data)
+    public void OnPointerExit(PointerEventData data)
     {
-        if (float.IsNaN(mousePos.x) || BorderlessWindow.IsFramed) return;
-
-        if (maximized) {
-            ResizeWindow();
-            var rect = BorderlessWindow.GetWindowRect();
-            BorderlessWindow.MoveWindow(new Vector2(Mathf.Clamp(Input.mousePosition.x - rect.width / 2 + 7, 0, Screen.width), Screen.height * 2 - rect.height - Input.mousePosition.y - 28));
-            mousePos = new Vector2(rect.width / 2 + 7, rect.height - 30);
-        } else {
-        }
-
-        if (data.dragging)
-        {
-            BorderlessWindow.MoveWindowDelta((Vector2)Input.mousePosition - mousePos);
-        }
-    }
-
-    public void OnEndDrag(PointerEventData data)
-    {
-        FinalizeDrag();
+        BorderlessWindow.IsInTitleBar = false;
     }
 }

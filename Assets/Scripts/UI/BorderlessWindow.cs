@@ -12,6 +12,7 @@ public class BorderlessWindow
 {
     public static bool IsFramed;
     public static bool IsMaximized;
+    public static bool IsInTitleBar;
 
     public static UnityEvent OnWindowUpdate = new();
 
@@ -50,6 +51,8 @@ public class BorderlessWindow
     static extern bool GetWindowRect(IntPtr hwnd, out WinRect lpRect);
     [DllImport("user32.dll")]
     static extern bool GetClientRect(IntPtr hwnd, out WinRect lpRect);
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
     
     [DllImport("dwmapi.dll")]
     static extern int DwmExtendFrameIntoClientArea(IntPtr hwnd, WinMargin margin);
@@ -108,6 +111,7 @@ public class BorderlessWindow
     const int WM_STYLECHANGED = 0x007D;
     const int WM_SETCURSOR = 0x0020;
     const int WM_MOUSEMOVE = 0x0200;
+    const int WM_NCHITTEST = 0x0084;
 
     const uint WS_VISIBLE = 0x10000000;    
     const uint WS_POPUP = 0x80000000;
@@ -122,6 +126,10 @@ public class BorderlessWindow
     const uint WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 
     const uint WS_EX_WINDOWEDGE = 0x00000100;
+
+    const int SWP_NOSIZE = 0x0001;
+    const int SWP_NOMOVE = 0x0002;
+    const int SWP_FRAMECHANGED = 0x0020;
 
     static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
     {
@@ -149,7 +157,7 @@ public class BorderlessWindow
             if (!IsFramed)
             {
                 SetFramelessWindow();
-                ResizeWindow(screenSize.x + 14, screenSize.y + 14);
+                ResizeWindow(screenSize.x + 14, screenSize.y + 7);
             }
         #endif
     }
@@ -216,12 +224,20 @@ public class BorderlessWindow
         {
             if ((int)wParam == 2)
             {
-                IsMaximized = true;
+                if (!IsMaximized) 
+                {
+                    IsMaximized = true;
+                    SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
+                }
                 OnWindowUpdate.Invoke();
             }
             else if ((int)wParam == 0)
             {
-                IsMaximized = false;
+                if (IsMaximized) 
+                {
+                    IsMaximized = false;
+                    SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
+                }
                 OnWindowUpdate.Invoke();
             }
 
@@ -231,8 +247,8 @@ public class BorderlessWindow
         {
             var minMaxInfo = Marshal.PtrToStructure<MinMaxInfo>(lParam);
 
-            minMaxInfo.MinTrackSize.x = 960;
-            minMaxInfo.MinTrackSize.y = 600;
+            minMaxInfo.MinTrackSize.x = 974;
+            minMaxInfo.MinTrackSize.y = 607;
 
             Marshal.StructureToPtr(minMaxInfo, lParam, false);
             return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -245,7 +261,7 @@ public class BorderlessWindow
             {
                 var size = Marshal.PtrToStructure<NCCalcSizeParams>(lParam);
 
-                size.rect0.top += WindowHandler.main?.maximized == true ? 7 : 1;
+                size.rect0.top += IsMaximized ? 7 : 0;
                 size.rect0.bottom -= 7;
                 size.rect0.left += 7;
                 size.rect0.right -= 7;
@@ -256,7 +272,7 @@ public class BorderlessWindow
             {
                 var size = Marshal.PtrToStructure<WinRect>(lParam);
 
-                size.top += WindowHandler.main?.maximized == true ? 7 : 1;
+                size.top += IsMaximized ? 7 : 0;
                 size.bottom -= 7;
                 size.left += 7;
                 size.right -= 7;
@@ -274,6 +290,13 @@ public class BorderlessWindow
             UpdateCursor();
             return (IntPtr)(-1);
         }
+        else if (msg == WM_NCHITTEST) 
+        {
+            var proc = CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
+            if (IsFramed) return proc;
+
+            return IsInTitleBar ? (IntPtr)2 : proc;
+        }
         else 
         {
             return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
@@ -282,7 +305,8 @@ public class BorderlessWindow
 
     public static void SetFramelessWindow()
     {
-        SetWindowLong(CurrentWindow, GWL_STYLE, WS_THICKFRAME | WS_VISIBLE);
+        SetWindowLong(CurrentWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+        DwmExtendFrameIntoClientArea(CurrentWindow, new WinMargin { top = 0, left = 0, bottom = 0, right = 0 });
         IsFramed = false;
     }
 
@@ -294,16 +318,19 @@ public class BorderlessWindow
 
     public static void MinimizeWindow()
     {
+        IsMaximized = false;
         ShowWindow(CurrentWindow, SW_MINIMIZE);
     }
 
     public static void MaximizeWindow()
     {
+        IsMaximized = true;
         ShowWindow(CurrentWindow, SW_MAXIMIZE);
     }
 
     public static void RestoreWindow()
     {
+        IsMaximized = false;
         ShowWindow(CurrentWindow, SW_RESTORE);
     }
 

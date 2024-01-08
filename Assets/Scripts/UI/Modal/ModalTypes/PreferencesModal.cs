@@ -85,7 +85,7 @@ public class PreferencesModal : Modal
                 if (prefs.Theme != x.ToString()) 
                 {
                     storage.Set("AP:Theme", prefs.Theme = x.ToString()); IsDirty = true;
-                    Themer.main.InitTheme(); TimelinePanel.main.UpdateTimeline(true);
+                    Themer.main.InitTheme(); if (Chartmaker.main.CurrentSong != null) TimelinePanel.main.UpdateTimeline(true);
                 }
             });
             themeDropdown.ValidValues.Add("Prototype", "Prototype (default)");
