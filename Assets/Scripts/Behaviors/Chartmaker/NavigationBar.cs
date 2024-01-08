@@ -63,11 +63,30 @@ public class NavigationBar : MonoBehaviour
 
     public ContextMenuList GetFileMenu()
     {
+        ContextMenuListItem openChartItem = null;
+        if (Chartmaker.main.CurrentSong == null || Chartmaker.main.CurrentSong.Charts.Count <= 0)
+        {
+            openChartItem = new ContextMenuListAction("Open Chart", () => {}, _enabled: false);
+        }
+        else 
+        {
+            ContextMenuListSublist list = new ("Open Chart");
+            openChartItem = list;
+            foreach (ExternalChartMeta chart in Chartmaker.main.CurrentSong.Charts)
+            {
+                ExternalChartMeta _chart = chart;
+                list.Items.Items.Add(new ContextMenuListAction(chart.DifficultyName + " " + chart.DifficultyLevel, () => {
+                    StartCoroutine(Chartmaker.main.OpenChartRoutine(_chart));
+                }));
+            }
+        }
+
         return new ContextMenuList(
             new ContextMenuListAction("New Song...", () => ModalHolder.main.Spawn<NewSongModal>(), KeyOf("FL:New")),
             new ContextMenuListAction("Open Song...", Chartmaker.main.OpenSongModal, KeyOf("FL:Open")),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Create Chart...", () => ModalHolder.main.Spawn<NewChartModal>(), _enabled: Chartmaker.main.CurrentSong != null),
+            openChartItem,
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Save", Chartmaker.main.StartSaveRoutine, KeyOf("FL:Save"), _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListSeparator(),
@@ -118,9 +137,11 @@ public class NavigationBar : MonoBehaviour
         return new ContextMenuList(
             new ContextMenuListAction("Chartmaker Manual...", () => ModalHolder.main.Spawn<HelpModal>()),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG"), icon: "Github Icon"),
-            new ContextMenuListAction("Report an Issue / Suggestion", () => Application.OpenURL("https://github.com/ducdat0507/JANOARG/issues")),
+            new ContextMenuListAction("Source Code on GitHub", () => Application.OpenURL("https://github.com/FFF40/JANOARG"), icon: "Github Icon"),
+            new ContextMenuListAction("Report an Issue / Suggestion", () => Application.OpenURL("https://github.com/FFF40/JANOARG/issues")),
             new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm"), icon: "Discord Icon"),
+            new ContextMenuListSeparator(),
+            new ContextMenuListAction("Check for Updates", () => Application.OpenURL("https://github.com/FFF40/JANOARG/releases")),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits")
         );
