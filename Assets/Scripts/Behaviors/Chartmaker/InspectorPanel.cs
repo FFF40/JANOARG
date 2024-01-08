@@ -92,7 +92,18 @@ public class InspectorPanel : MonoBehaviour
         {
             CurrentTimestamp = tsl;
         }
-        else 
+        else if (obj is IList list)
+        {
+            if (list.Count == 0) SetObject(null);
+            else if (list.Count == 1) SetObject(list[0]);
+            else
+            {
+                CurrentObject = obj;
+                CurrentTimestamp = new ();
+                if (obj is Lane lane) CurrentLane = lane;
+            }
+        }
+        else
         {
             CurrentObject = obj;
             CurrentTimestamp = new ();

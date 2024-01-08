@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class NavigationBar : MonoBehaviour
@@ -88,8 +90,9 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Paste", Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
+            new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Select All", () => KeyboardHandler.main.Keybindings["ED:SelectAll"].Invoke(), KeyOf("ED:SelectAll")),
-            new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), _enabled: Chartmaker.main.CanCopy())
+            new ContextMenuListAction("Invert Selection", InvertSelection)
         );
     }
 
@@ -121,5 +124,25 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListSeparator(),
             new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits")
         );
+    }
+
+
+
+
+
+    public void InvertSelection() 
+    {
+        IList list = InspectorPanel.main.CurrentObject is IList li ? li : new List<object> { InspectorPanel.main.CurrentObject };
+        if (TimelinePanel.main.CurrentMode == TimelineMode.Storyboard) {
+            if (InspectorPanel.main.CurrentObject is IStoryboardable) InspectorPanel.main.SetObject(((IStoryboardable)InspectorPanel.main.CurrentObject).Storyboard.Timestamps.FindAll(x => InspectorPanel.main.CurrentTimestamp?.Contains(x) == false));
+        } else if (TimelinePanel.main.CurrentMode == TimelineMode.Lanes) {
+            if (Chartmaker.main.CurrentChart != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentChart.Lanes.FindAll(x => !list.Contains(x)));
+        } else if (TimelinePanel.main.CurrentMode == TimelineMode.LaneSteps) {
+            if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.LaneSteps.FindAll(x => !list.Contains(x)));
+        } else if (TimelinePanel.main.CurrentMode == TimelineMode.HitObjects) {
+            if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.Objects.FindAll(x => !list.Contains(x)));
+        } else if (TimelinePanel.main.CurrentMode == TimelineMode.Timing) {
+            if (Chartmaker.main.CurrentSong != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentSong.Timing.Stops.FindAll(x => !list.Contains(x)));
+        }
     }
 }
