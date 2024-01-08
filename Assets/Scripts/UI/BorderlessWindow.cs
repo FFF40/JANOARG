@@ -237,6 +237,7 @@ public class BorderlessWindow
                 {
                     IsMaximized = false;
                     SetWindowPos(hWnd, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
+                    ResizeWindowDelta(0, -7);
                 }
                 OnWindowUpdate.Invoke();
             }
