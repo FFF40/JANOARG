@@ -8,6 +8,7 @@ using System.IO;
 public class JACDecoder
 {
 
+    public const int FormatVersion = 1;
     public const int IndentSize = 2;
 
     public static Chart Decode(string str)
@@ -35,7 +36,11 @@ public class JACDecoder
                 if (line.StartsWith("[") && line.EndsWith("]"))
                 {
                     mode = line[1..^1];
-                    if (mode == "METADATA")
+                    if (mode == "VERSION")
+                    {
+                        currentObject = "version";
+                    }
+                    else if (mode == "METADATA")
                     {
                         currentObject = chart;
                     }
@@ -260,6 +265,12 @@ public class JACDecoder
                     {
                              if (key == "Group")  lane.Group = value;
                     }
+                }
+                else if (currentObject?.ToString() == "version")
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    if (!int.TryParse(line, out int version)) continue;
+                    if (version > FormatVersion) throw new System.Exception("Chart version is newer than the supported format version. Please open this chart using a newer version of the Chartmaker.");
                 }
             }
         }

@@ -8,6 +8,7 @@ using System.IO;
 public class JAPSDecoder
 {
 
+    public const int FormatVersion = 1;
     public const int IndentSize = 2;
 
     public static PlayableSong Decode(string str)
@@ -32,7 +33,11 @@ public class JAPSDecoder
                 if (line.StartsWith("[") && line.EndsWith("]"))
                 {
                     mode = line[1..^1];
-                    if (mode == "METADATA")
+                    if (mode == "VERSION")
+                    {
+                        currentObject = "version";
+                    }
+                    else if (mode == "METADATA")
                     {
                         currentObject = song;
                     }
@@ -121,6 +126,12 @@ public class JAPSDecoder
                         else if (key == "Level")     chart.DifficultyLevel = value;
                         else if (key == "Constant")  chart.ChartConstant = ParseFloat(value);
                     }
+                }
+                else if (currentObject?.ToString() == "version")
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    if (!int.TryParse(line, out int version)) continue;
+                    if (version > FormatVersion) throw new System.Exception("Chart version is newer than the supported format version. Please open this chart using a newer version of the Chartmaker.");
                 }
             }
         }

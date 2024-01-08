@@ -8,11 +8,14 @@ using System.IO;
 public class JAPSEncoder
 {
 
+    public const int FormatVersion = 1;
     public const int IndentSize = 2;
 
     public static string Encode(PlayableSong song, string clipName)
     {
-        string str = "JANOARG Playable Song Format\ngithub.com/ducdat0507/janoarg";
+        string str = "JANOARG Playable Song Format\ngithub.com/FFF40/JANOARG";
+
+        str += "\n\n[VERSION]\n" + FormatVersion;
         
         str += "\n\n[METADATA]";
 

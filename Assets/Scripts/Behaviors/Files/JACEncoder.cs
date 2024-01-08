@@ -8,11 +8,14 @@ using System.IO;
 public class JACEncoder
 {
 
+    public const int FormatVersion = 1;
     public const int IndentSize = 2;
 
     public static string Encode(Chart chart)
     {
-        string str = "JANOARG Chart Format\ngithub.com/ducdat0507/janoarg";
+        string str = "JANOARG Chart Format\ngithub.com/FFF40/JANOARG";
+
+        str += "\n\n[VERSION]\n" + FormatVersion;
 
         str += "\n\n[METADATA]";
         str += "\nIndex: " + chart.DifficultyIndex.ToString(CultureInfo.InvariantCulture);
