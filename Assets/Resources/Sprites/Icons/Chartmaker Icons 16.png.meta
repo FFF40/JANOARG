@@ -538,6 +538,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Vertical Scale
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 496
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd421016398b3094dad0c16a8e88eb3c
+      internalID: 2071649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vertical Offset
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 496
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b9015bfaee55ac4883292758a1bf0ba
+      internalID: -818939314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -550,6 +592,7 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       Twitter Icon: -654048039
+      Vertical Scale: 2071649
       Speed: -401747491
       Metronome: 1393924800
       Checkmark: 123409038
@@ -560,6 +603,7 @@ TextureImporter:
       Redo: -1018057754
       Undo: 50928159
       Github Icon: 1533055934
+      Vertical Offset: -818939314
       Separator: -1993552242
       Music: -1610311330
       Hitsounds: -707145241

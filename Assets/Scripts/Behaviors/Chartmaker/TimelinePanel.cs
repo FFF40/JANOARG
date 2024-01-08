@@ -19,6 +19,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     [Space]
     public int ScrollOffset;
     public int SeparationFactor;
+    public float VerticalScale;
+    public float VerticalOffset;
 
     [Header("Objects")]
     public Button StoryboardTab;
@@ -63,6 +65,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public CanvasGroup CutButtonGroup;
     public CanvasGroup CopyButtonGroup;
     public CanvasGroup PasteButtonGroup;
+    [Space]
+    public GameObject VerticalScaleHolder;
+    public GameObject VerticalOffsetHolder;
     [Space]
     public TimelineOptionsPanel Options;
     [Header("Samples")]
@@ -184,6 +189,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         LaneTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Lanes;
         LaneStepTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.LaneSteps;
         HitObjectTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.HitObjects;
+        
+        VerticalScaleHolder.gameObject.SetActive(CurrentMode == TimelineMode.HitObjects);
+        VerticalOffsetHolder.gameObject.SetActive(CurrentMode == TimelineMode.HitObjects);
 
         PickerPanel.main.UpdateButtons();
     }
@@ -498,14 +506,17 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 float height = ItemsHolder.rect.height - 8;
                 float dOffset = 4 * density;
 
+                float vpStart = .5f - VerticalScale * .5f + VerticalOffset;
+                float vpEnd = .5f + VerticalScale * .5f + VerticalOffset;
+
                 foreach (HitObject hit in InspectorPanel.main.CurrentLane.Objects)
                 {
                     float time = metronome.ToSeconds(hit.Offset);
                     float timeEnd = metronome.ToSeconds(hit.Offset + hit.HoldLength);
                     if (timeEnd < PeekRange.x - dOffset || time > PeekRange.y + dOffset) continue;
 
-                    float start = hit.Position;
-                    float end = hit.Position + hit.Length;
+                    float start = InverseLerpUnclamped(vpStart, vpEnd, hit.Position);
+                    float end = InverseLerpUnclamped(vpStart, vpEnd, hit.Position + hit.Length);
                     float pos = Mathf.Floor(-start * height) - 2;
                     float length = Mathf.Floor((end - start) * height) + 4;
 
@@ -1109,8 +1120,11 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 {
                     if (InspectorPanel.main.CurrentLane == null) break;
 
-                    float yStart = Mathf.Lerp(0, 1, Mathf.Clamp01(1 - (Mathf.Max(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)));
-                    float yEnd = Mathf.Lerp(0, 1, Mathf.Clamp01(1 - (Mathf.Min(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)));
+                    float vpStart = .5f - VerticalScale * .5f + VerticalOffset;
+                    float vpEnd = .5f + VerticalScale * .5f + VerticalOffset;
+
+                    float yStart = Mathf.Lerp(vpStart, vpEnd, Mathf.Clamp01(1 - (Mathf.Max(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)));
+                    float yEnd = Mathf.Lerp(vpStart, vpEnd, Mathf.Clamp01(1 - (Mathf.Min(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)));
 
                     list = InspectorPanel.main.CurrentLane.Objects.FindAll(x =>
                     {
@@ -1207,8 +1221,10 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         {
                             hit.Offset = (BeatPosition)(Math.Min(beatStart, beatEnd));
                             hit.HoldLength = Math.Abs(beatStart - beatEnd);
-                            float yStart = Mathf.Lerp(0, 1, Mathf.Round(Mathf.Clamp01(1 - (Mathf.Max(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)) / .05f) * .05f);
-                            float yEnd = Mathf.Lerp(0, 1, Mathf.Round(Mathf.Clamp01(1 - (Mathf.Min(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)) / .05f) * .05f);
+                            float vpStart = .5f - VerticalScale * .5f + VerticalOffset;
+                            float vpEnd = .5f + VerticalScale * .5f + VerticalOffset;
+                            float yStart = Mathf.Lerp(vpStart, vpEnd, Mathf.Round(Mathf.Clamp01(1 - (Mathf.Max(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)) / .05f) * .05f);
+                            float yEnd = Mathf.Lerp(vpStart, vpEnd, Mathf.Round(Mathf.Clamp01(1 - (Mathf.Min(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)) / .05f) * .05f);
                             if (yStart != yEnd) 
                             {
                                 hit.Position = yStart;

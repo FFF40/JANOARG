@@ -43,6 +43,9 @@ public class CMHitPlayer : MonoBehaviour
             material = index >= 0 && index < styles.Count ? styles[index].CatchMaterial : null;
         }
 
+        Vector2 camStart = PlayerView.main.MainCamera.WorldToScreenPoint(IndicatohRenderers[0].transform.position);
+        Vector2 camEnd = PlayerView.main.MainCamera.WorldToScreenPoint(IndicatohRenderers[1].transform.position);
+
         if (Renderer.material != material) 
         {
             Renderer.enabled = material;
@@ -80,6 +83,7 @@ public class CMHitPlayer : MonoBehaviour
             bool directional = float.IsFinite(hit.CurrentHit.FlickDirection);
             FlickEmblem.GetComponent<MeshFilter>().mesh = directional ? PlayerView.main.ArrowFlickIndicator : PlayerView.main.FreeFlickIndicator;
             if (directional) FlickEmblem.transform.Rotate(Vector3.back * hit.CurrentHit.FlickDirection);
+            else FlickEmblem.transform.Rotate(Vector3.forward * Vector2.SignedAngle(Vector2.right, camEnd - camStart));
         }
         else 
         {

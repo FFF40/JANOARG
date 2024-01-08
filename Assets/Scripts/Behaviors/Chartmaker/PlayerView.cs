@@ -295,7 +295,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             List<Vector3> verts = new();
             List<int> tris = new();
 
-            verts.AddRange(new Vector3[] { new(0, 1.6f), new(1, 0), new(0, -1), new(0, -1.6f), new(-1, 0), new(0, 1) });
+            verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2), new(0, -.5f), new(1, 0), new(0, -2), new(0, .5f) });
             tris.AddRange(new [] {0, 1, 2, 3, 4, 5});
 
             mesh.SetVertices(verts);
