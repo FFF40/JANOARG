@@ -8,6 +8,7 @@ using System.IO;
 public class JACDecoder
 {
 
+    public const int FormatVersion = 1;
     public const int IndentSize = 2;
 
     public static Chart Decode(string str)
@@ -35,7 +36,11 @@ public class JACDecoder
                 if (line.StartsWith("[") && line.EndsWith("]"))
                 {
                     mode = line[1..^1];
-                    if (mode == "METADATA")
+                    if (mode == "VERSION")
+                    {
+                        currentObject = "version";
+                    }
+                    else if (mode == "METADATA")
                     {
                         currentObject = chart;
                     }
@@ -71,7 +76,7 @@ public class JACDecoder
                     {
                         Timestamp ts = new Timestamp {
                             ID = tokens[1],
-                            Offset = ParseFloat(tokens[2]),
+                            Offset = ParseTime(tokens[2]),
                             Duration = ParseFloat(tokens[3]),
                             Target = ParseFloat(tokens[4]),
                             From = tokens[5] == "_" ? float.NaN : ParseFloat(tokens[5]),
@@ -195,7 +200,7 @@ public class JACDecoder
                                 Length = ParseFloat(tokens[5]),
                                 HoldLength = ParseFloat(tokens[6]),
                                 Flickable = tokens[7][0] == 'F',
-                                FlickDirection = tokens[7].Length > 1 ? ParseFloat(tokens[7][1..]) : -1,
+                                FlickDirection = tokens[7].Length > 1 ? ParseFloat(tokens[7][1..]) : float.NaN,
                                 StyleIndex = ParseInt(tokens[8]),
                             };
                             currentObject = hit;
@@ -222,6 +227,7 @@ public class JACDecoder
                     {
                              if (key == "Index")     chart.DifficultyIndex = ParseInt(value);
                         else if (key == "Name")      chart.DifficultyName = value;
+                        else if (key == "Charter")   chart.CharterName = value;
                         else if (key == "Level")     chart.DifficultyLevel = value;
                         else if (key == "Constant")  chart.ChartConstant = ParseFloat(value);
                     }
@@ -243,22 +249,28 @@ public class JACDecoder
                     }
                     else if (currentObject is LaneStyle laneStyle)
                     {
-                             if (key == "Lane Material")   laneStyle.LaneMaterial = Resources.Load<Material>("Materials/Lane/" + value);
+                             if (key == "Lane Material")   laneStyle.LaneMaterial = value;
                         else if (key == "Lane Target")     laneStyle.LaneColorTarget = value;
-                        else if (key == "Judge Material")  laneStyle.JudgeMaterial = Resources.Load<Material>("Materials/Judge/" + value);
+                        else if (key == "Judge Material")  laneStyle.JudgeMaterial = value;
                         else if (key == "Judge Target")    laneStyle.JudgeColorTarget = value;
                     }
                     else if (currentObject is HitStyle hitStyle)
                     {
-                             if (key == "Main Material")       hitStyle.MainMaterial = Resources.Load<Material>("Materials/Hit/" + value);
+                             if (key == "Main Material")       hitStyle.MainMaterial = value;
                         else if (key == "Main Target")         hitStyle.MainColorTarget = value;
-                        else if (key == "Hold Tail Material")  hitStyle.HoldTailMaterial = Resources.Load<Material>("Materials/Hold/" + value);
+                        else if (key == "Hold Tail Material")  hitStyle.HoldTailMaterial = value;
                         else if (key == "Hold Tail Target")    hitStyle.HoldTailColorTarget = value;
                     }
                     else if (currentObject is Lane lane)
                     {
                              if (key == "Group")  lane.Group = value;
                     }
+                }
+                else if (currentObject?.ToString() == "version")
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    if (!int.TryParse(line, out int version)) continue;
+                    if (version > FormatVersion) throw new System.Exception("Chart version is newer than the supported format version. Please open this chart using a newer version of the Chartmaker.");
                 }
             }
         }
@@ -299,9 +311,22 @@ public class JACDecoder
         return float.Parse(number, CultureInfo.InvariantCulture);
     }
 
-    static float ParseTime(string number)
+    static BeatPosition ParseTime(string number)
     {
-        return float.Parse(number, CultureInfo.InvariantCulture);
+        int slashPos = number.IndexOf('/');
+        if (slashPos >= 0)
+        {
+            int bPos = number.IndexOf('b');
+            return new BeatPosition(
+                ParseInt(number[..bPos]),
+                ParseInt(number[(bPos + 1)..slashPos]),
+                ParseInt(number[(slashPos + 1)..])
+            );
+        }
+        else 
+        {
+            return (BeatPosition)ParseFloat(number.Replace('b', '.'));
+        }
     }
 
     static Vector3 ParseVector(string str)
