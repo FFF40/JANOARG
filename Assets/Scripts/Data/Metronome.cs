@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -100,11 +101,16 @@ public class Metronome
         return Stops[tag];
     }
 
+    internal float ToSeconds(object offset)
+    {
+        throw new NotImplementedException();
+    }
+
     public static Metronome Identity = new Metronome(60);
 }
 
 [System.Serializable]
-public class BPMStop
+public class BPMStop : IDeepClonable<BPMStop>
 {
     public float Offset;
     public float BPM;

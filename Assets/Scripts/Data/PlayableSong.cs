@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class PlayableSong : ScriptableObject
+[Serializable]
+public class PlayableSong
 {
     public string SongName;
     public string AltSongName;

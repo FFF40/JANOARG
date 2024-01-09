@@ -8,15 +8,19 @@ using System.IO;
 public class JACEncoder
 {
 
+    public const int FormatVersion = 1;
     public const int IndentSize = 2;
 
     public static string Encode(Chart chart)
     {
-        string str = "JANOARG Chart Format\ngithub.com/ducdat0507/janoarg";
+        string str = "JANOARG Chart Format\ngithub.com/FFF40/JANOARG";
+
+        str += "\n\n[VERSION]\n" + FormatVersion;
 
         str += "\n\n[METADATA]";
         str += "\nIndex: " + chart.DifficultyIndex.ToString(CultureInfo.InvariantCulture);
         str += "\nName: " + chart.DifficultyName;
+        str += "\nCharter: " + chart.CharterName;
         str += "\nLevel: " + chart.DifficultyLevel;
         str += "\nConstant: " + chart.ChartConstant.ToString(CultureInfo.InvariantCulture);
 
@@ -99,13 +103,14 @@ public class JACEncoder
             + " " + EncodeColor(style.LaneColor)
             + " " + EncodeColor(style.JudgeColor);
             
-        string lanePath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.LaneMaterial));
+        string lanePath = style.LaneMaterial;
+        string judgePath = style.JudgeMaterial;
+            
         if (!string.IsNullOrEmpty(lanePath) && lanePath != "Default") 
             str += "\n" + indent2 + "Lane Material: " + lanePath;
         if (!string.IsNullOrEmpty(style.LaneColorTarget) && style.LaneColorTarget != "_Color") 
             str += "\n" + indent2 + "Lane Target: " + style.LaneColorTarget;
             
-        string judgePath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.JudgeMaterial));
         if (!string.IsNullOrEmpty(judgePath) && judgePath != "Default") 
             str += "\n" + indent2 + "Judge Material: " + judgePath;
         if (!string.IsNullOrEmpty(style.JudgeColorTarget) && style.JudgeColorTarget != "_Color") 
@@ -126,13 +131,14 @@ public class JACEncoder
             + " " + EncodeColor(style.NormalColor)
             + " " + EncodeColor(style.CatchColor);
             
-        string mainPath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.MainMaterial));
+        string mainPath = style.MainMaterial;
+        string holdPath = style.HoldTailMaterial;
+
         if (!string.IsNullOrEmpty(mainPath) && mainPath != "Default") 
             str += "\n" + indent2 + "Main Material: " + mainPath;
         if (!string.IsNullOrEmpty(style.MainColorTarget) && style.MainColorTarget != "_Color") 
             str += "\n" + indent2 + "Main Target: " + style.MainColorTarget;
             
-        string holdPath = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(style.HoldTailMaterial));
         if (!string.IsNullOrEmpty(holdPath) && holdPath != "Default") 
             str += "\n" + indent2 + "Hold Tail Material: " + holdPath;
         if (!string.IsNullOrEmpty(style.HoldTailColorTarget) && style.HoldTailColorTarget != "_Color") 
@@ -200,7 +206,7 @@ public class JACEncoder
             + " " + hit.Position.ToString(CultureInfo.InvariantCulture)
             + " " + hit.Length.ToString(CultureInfo.InvariantCulture)
             + " " + hit.HoldLength.ToString(CultureInfo.InvariantCulture)
-            + " " + (hit.Flickable ? "F" + (hit.FlickDirection >= 0 ? hit.FlickDirection.ToString(CultureInfo.InvariantCulture) : "") : "N")
+            + " " + (hit.Flickable ? "F" + (float.IsFinite(hit.FlickDirection) ? hit.FlickDirection.ToString(CultureInfo.InvariantCulture) : "") : "N")
             + " " + hit.StyleIndex.ToString(CultureInfo.InvariantCulture);
 
         str += EncodeStoryboard(hit, depth + IndentSize);
