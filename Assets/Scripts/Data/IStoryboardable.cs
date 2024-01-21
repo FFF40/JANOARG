@@ -95,6 +95,17 @@ public class Ease
         if (mode == EaseMode.Out) func = _ease.Out;
         return func(Mathf.Clamp01(x));
     }
+    
+    // We don't need DOTween, guys
+    public static IEnumerator Animate(float duration, System.Action<float> callback)
+    {
+        for (float a = 0; a < 1; a += Time.deltaTime / duration)
+        {
+            callback(a);
+            yield return null;
+        }
+        callback(1);
+    }
 
     public static Dictionary<EaseFunction, Ease> Eases = new Dictionary<EaseFunction, Ease>() {
         {EaseFunction.Linear, new Ease {

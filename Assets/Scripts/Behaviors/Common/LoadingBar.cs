@@ -22,50 +22,26 @@ public class LoadingBar : MonoBehaviour
 
     public static readonly FlavorTextEntry[] FlavorTextEntries = new[] {
 
-        // Rhythm tips
-        new FlavorTextEntry("Remember: Everything in JANOARG can move!"),
-        new FlavorTextEntry("JANOARG is erratic, but sometimes it is more erratic than others."),
+        /* ----- TIPS ----- */
 
-        new FlavorTextEntry("The highest performance score you can get will always be 1000000ppm per difficulty."),
-        new FlavorTextEntry("Flicks and Catchs will always give you their maximum point value as long as you hit them!"),
-        new FlavorTextEntry("You can hold overlapping Hold Tails with just one finger! Just make sure you hit them all first."),
-
-        new FlavorTextEntry("Beware of an asterisk (*) on a difficulty rating, it means that that difficulty requires 3 or more fingers to Full Streak!"),
-        new FlavorTextEntry("Track difficulties should be compared based on their rating numbers, not by their names."),
+        // Gameplay tips
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Use wired headphones for the intended ✨flawless✨rhythm✨game✨experience✨."),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>You can apply a few drops of water between the back of your device and the table to add friction and reduce device drifting. Make sure your device has a case!"),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Don't think about it, just feel it."),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Increase your Ability Rating to improve your place in social and global rankings."),
         
-        // Resources tips
-        /* TODO: Uncomment this when resources and objects are implemented
-        new FlavorTextEntry("Gaining resources too slow? Maybe it's time to try out some of the harder tracks...", 
-           () => PlaylistScroll.main?.SelectedDifficulty?.Chart?.ChartConstant < 20),
-        new FlavorTextEntry("Essence multiplies your Orb and Experience gain! Make sure to stack a lot of them!"),
-        new FlavorTextEntry("Get high scores on more complex sequences of a track to gain extra Essence!"),
-
-        new FlavorTextEntry("Offline gains? Is this an idle game or something?"),
-        new FlavorTextEntry("The Idlinator will still work when you close the game for more than 24 hours, but its effectiveness reduces the longer you idle!"),
+        /* ----- FACTS ----- */
         
-        new FlavorTextEntry("Make sure to give your Objects some of your care - they give a lot of benefits!"),
-        new FlavorTextEntry("All Objects work across worlds!"),
-        */
-
-        // Meta
-        new FlavorTextEntry("JANOARG - Developing at snail speed"),
-        new FlavorTextEntry("haha System.Func go brrrrrrrrrrr"),
-
-        // References
-        new FlavorTextEntry("Colors of the world are determined by what our world designers feel like that day."),
-        new FlavorTextEntry("History is learned through the visual novel mechanic."),
-        new FlavorTextEntry("Gyroscope gimmick? Maybe later..."),
-        new FlavorTextEntry("Snail's House? Maybe later...", 
-            () => ChartPlayer.main?.CurrentChart?.DifficultyName == "🐌" || PlaylistScroll.main?.SelectedDifficulty?.Chart?.DifficultyName == "🐌"),
-
-        // Loading bar
-        new FlavorTextEntry("Disclaimer: The loading bar is not guaranteed to always give you actually useful in-game tips"),
-        new FlavorTextEntry("Loading bar is the new news ticker"),
-        new FlavorTextEntry("Look ma, I'm in a rhythm game's loading screen!"),
-
-        new FlavorTextEntry("This loading text will never appear in the loading bar, isn't that weird?",
-            () => false),
-
+        // General game facts
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>“JANOARG” is an acronym for “Just Another Normal, Ordinary, Acceptable Rhythm Game”."),
+        
+        // Gameplay facts
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>The maximum score that you can obtain on any song is 1000000ppm regardless of difficulty, and 1000000ppm = the rank that you get by reaching that score."),
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>Catch Hit Objects and Flickable Hit Objects always give Flawless or Broken judgment, or in other words, it's either hit or miss."),
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>Multiple overlapping Hold Tails can be hold with just one finger. Just remember to tap the Hit Objects beforehand."),
+        
+        /* ----- OTHER ----- */
+        new FlavorTextEntry("<b>🐌"),
     };
 
     public static readonly FlavorTextEntry[] CompletedStatuses = new[] {
@@ -75,12 +51,6 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("LOADING SUCCESS"),
         new FlavorTextEntry("APPROACHING DESTINATION"),
         new FlavorTextEntry("CONNECTION ESTABLISHED"),
-
-        // When starting a song
-        new FlavorTextEntry("HERE WE GO", () => ChartPlayer.main?.CurrentTime < 0),
-        new FlavorTextEntry("LET'S GO", () => ChartPlayer.main?.CurrentTime < 0),
-        new FlavorTextEntry("GET READY", () => ChartPlayer.main?.CurrentTime < 0),
-        new FlavorTextEntry("MUSIC START", () => ChartPlayer.main?.CurrentTime < 0),
         
     };
 
@@ -88,38 +58,37 @@ public class LoadingBar : MonoBehaviour
     {
         main = this;
         self = GetComponent<RectTransform>();
+        FlavorText.alpha = StatusText.alpha = 0;
+        Background.color = Color.clear;
+        gameObject.SetActive(false);
     }
 
     public void Show()
     {
         gameObject.SetActive(true);
-        FlavorText.text = FlavorTextEntry.GetRandom(FlavorTextEntries).Message;
+
+        SetFlavorText(FlavorTextEntry.GetRandom(FlavorTextEntries).Message);
+
         StopCoroutine(HideAnim());
         StartCoroutine(ShowAnim());
     }
 
     public IEnumerator ShowAnim()
     {
-        Color background = Themer.Colors.ContainsKey("Background") ? Themer.Colors["Background"] : Color.black;
-        Color foreground = Themer.Colors.ContainsKey("Foreground") ? Themer.Colors["Foreground"] : Color.white;
+        yield return null;
 
-        Background.color = background;
-        FlavorText.color = StatusText.color = ProgressBarFill.color = foreground;
-        StatusText.rectTransform.anchoredPosition = new Vector3(StatusText.rectTransform.anchoredPosition.x, -34);
-        ProgressBar.value = 0;
+        StatusText.text = "NOW LOADING...";
 
-        void LerpSelection(float value)
-        {
-            float ease = Ease.Get(value, EaseFunction.Quintic, EaseMode.Out);
-            self.anchoredPosition = new Vector2(0, 48 * ease);
-        }
+        Color background = Color.black;
 
-        for (float a = 0; a < 1; a += Time.deltaTime / .3f)
-        {
-            LerpSelection(a);
-            yield return null;
-        }
-        LerpSelection(1);
+        yield return Ease.Animate(2f, (a) => {
+            float lerp = Mathf.Pow(Ease.Get(a * 3f, EaseFunction.Circle, EaseMode.Out), 2);
+            FlavorText.alpha = lerp;
+            float lerp2 = Mathf.Pow(Ease.Get(a * 3f - 0.5f, EaseFunction.Circle, EaseMode.Out), 2);
+            StatusText.alpha = lerp2;
+            float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Quadratic, EaseMode.Out), 2);
+            Background.color = background * new Color(1, 1, 1, .5f * lerp3);
+        });
     }
 
     public void Hide()
@@ -130,43 +99,15 @@ public class LoadingBar : MonoBehaviour
 
     public IEnumerator HideAnim()
     {
-        StatusText.text = FlavorTextEntry.GetRandom(CompletedStatuses).Message;
-        ProgressBar.value = 0;
-        
-        Color background = Themer.Colors.ContainsKey("Background") ? Themer.Colors["Background"] : Color.black;
-        Color foreground = Themer.Colors.ContainsKey("Foreground") ? Themer.Colors["Foreground"] : Color.white;
-
-        void LerpSelection(float value)
-        {
-            float ease = Ease.Get(value, EaseFunction.Exponential, EaseMode.Out);
-            Background.color = Color.Lerp(foreground, background, ease);
-            Background.color = Color.Lerp(foreground, background, ease);
-            ProgressBarHolder.sizeDelta = new Vector2(ProgressBarHolder.sizeDelta.x, -38 * (1 - ease));
-            FlavorText.alpha = 1 - ease;
-            StatusText.rectTransform.anchoredPosition = new Vector3(StatusText.rectTransform.anchoredPosition.x, -34 + 8 * ease);
-        }
-
-        for (float a = 0; a < 1; a += Time.deltaTime / .5f)
-        {
-            LerpSelection(a);
-            yield return null;
-        }
-        LerpSelection(1);
-
-        void LerpSelection2(float value)
-        {
-            float ease = 1 - Ease.Get(value, EaseFunction.Exponential, EaseMode.In);
-            self.anchoredPosition = new Vector2(0, 48 * ease);
-        }
-
-        for (float a = 0; a < 1; a += Time.deltaTime / .5f)
-        {
-            LerpSelection2(a);
-            yield return null;
-        }
-        LerpSelection2(1);
-
+        yield return null;
         gameObject.SetActive(false);
+    }
+
+    public void SetFlavorText(string text) 
+    {
+        FlavorText.text = text;
+        FlavorText.ForceMeshUpdate();
+        FlavorText.rectTransform.localPosition = -FlavorText.textBounds.center;
     }
 }
 

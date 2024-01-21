@@ -25,7 +25,7 @@ public class Common : MonoBehaviour
 
         Application.targetFrameRate = 60;
 
-        CommonScene.LoadAlt("Song Select");
+        CommonScene.LoadAlt("Intro");
         
     }
 

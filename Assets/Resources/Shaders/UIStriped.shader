@@ -108,7 +108,7 @@ Shader "UI/Striped"
             {
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
-                float val = IN.worldPos.x * 2 - IN.worldPos.y + _Time.y * 10 + 10000;
+                float val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * 5 + 10000;
     
                 if (val % _StripeSize < _StripeSize * _StripeBalance)
                 {
