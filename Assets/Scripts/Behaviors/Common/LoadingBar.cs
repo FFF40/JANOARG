@@ -25,7 +25,7 @@ public class LoadingBar : MonoBehaviour
         /* ----- TIPS ----- */
 
         // Gameplay tips
-        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Use wired headphones for the intended ✨flawless✨rhythm✨game✨experience✨."),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Use wired headphones for the developer-intended ✨flawless✨rhythm✨game✨experience✨."),
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>You can apply a few drops of water between the back of your device and the table to add friction and reduce device drifting. Make sure your device has a case!"),
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Don't think about it, just feel it."),
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Increase your Ability Rating to improve your place in social and global rankings."),
@@ -39,6 +39,9 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("<i>Did you know:</i>\n<b>The maximum score that you can obtain on any song is 1000000ppm regardless of difficulty, and 1000000ppm = the rank that you get by reaching that score."),
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Catch Hit Objects and Flickable Hit Objects always give Flawless or Broken judgment, or in other words, it's either hit or miss."),
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Multiple overlapping Hold Tails can be hold with just one finger. Just remember to tap the Hit Objects beforehand."),
+        
+        // Meta facts
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>Most of the facts shown here are nonsense."),
         
         /* ----- OTHER ----- */
         new FlavorTextEntry("<b>🐌"),
