@@ -40,11 +40,13 @@
     <Analyzer Include="D:\E\Unity\2022.2.2f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Behaviors\Song Select\SongSelectDifficulty.cs" />
      <Compile Include="Assets\Scripts\Data\BeatPosition.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
      <Compile Include="Assets\Scripts\UI\Themer.cs" />
      <Compile Include="Assets\Scripts\Data\Metronome.cs" />
      <Compile Include="Assets\Scripts\Debug\FPSCounter.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Song Select\SongSelectItem.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Files\JAPSDecoder.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Intro\IntroScreen.cs" />
      <Compile Include="Assets\Scripts\Data\Playlist.cs" />
@@ -57,6 +59,7 @@
      <Compile Include="Assets\Scripts\Behaviors\Files\JACEncoder.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Files\JAPSEncoder.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Files\JACDecoder.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Song Select\SongSelectScreen.cs" />
      <Compile Include="Assets\Scripts\Data\Storage.cs" />
      <Compile Include="Assets\Scripts\UI\Sidebar.cs" />
      <Compile Include="Assets\Scripts\UI\TabbedSidebar.cs" />

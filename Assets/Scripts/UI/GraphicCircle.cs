@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
-public class GraphicCircle : Graphic
+[ExecuteAlways][RequireComponent(typeof(CanvasRenderer))]
+public class GraphicCircle : MaskableGraphic
 {
     public int Resolution = 90;
     [Range(0, 1)]

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
-public class GraphicParallelogram : Graphic
+[ExecuteAlways][RequireComponent(typeof(CanvasRenderer))]
+public class GraphicParallelogram : MaskableGraphic
 {
     [Space][Range(-90, 90)]
     public float Slant = 15;

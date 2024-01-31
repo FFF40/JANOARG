@@ -13,8 +13,10 @@ public class ProfileBar : MonoBehaviour
     public long OrbCount;
     public long EssenceCount;
 
+    public CanvasGroup LeftPane;
     public TMP_Text NameLabel;
 
+    public CanvasGroup RightPane;
     public TMP_Text CoinLabel;
     public TMP_Text OrbLabel;
     public TMP_Text EssenceLabel;
@@ -36,7 +38,7 @@ public class ProfileBar : MonoBehaviour
     {
         CoinLabel.text = Common.main.Storage.Get("CURR:Coins", 0L).ToString(CultureInfo.InvariantCulture);
         OrbLabel.text = Common.main.Storage.Get("CURR:Orbs", 0L).ToString(CultureInfo.InvariantCulture);
-        EssenceLabel.text = Common.main.Storage.Get("CURR:Essence", 100L).ToString(CultureInfo.InvariantCulture);
+        EssenceLabel.text = "+" + (Common.main.Storage.Get("CURR:Essence", 0L) / 10f).ToString("F1", CultureInfo.InvariantCulture) + "%";
     }
 
     // Start is called before the first frame update
@@ -45,6 +47,7 @@ public class ProfileBar : MonoBehaviour
         UpdateName();
         UpdateCurrencies();
         Common.main.Storage.OnSave.AddListener(OnSave);
+        SetVisibilty(0);
     }
 
     void OnDestroy()
@@ -62,5 +65,15 @@ public class ProfileBar : MonoBehaviour
     {
         
     }
+
+    public void SetVisibilty(float a)
+    {
+        LeftPane.alpha = RightPane.alpha = a * a;
+        LeftPane.blocksRaycasts = RightPane.blocksRaycasts = a == 1;
+        rt(LeftPane).anchoredPosition = new (-10 * (1 - a), rt(LeftPane).anchoredPosition.y);
+        rt(RightPane).anchoredPosition = new (10 * (1 - a), rt(RightPane).anchoredPosition.y);
+    }
+
+    RectTransform rt (Component obj) => obj.transform as RectTransform;
 
 }

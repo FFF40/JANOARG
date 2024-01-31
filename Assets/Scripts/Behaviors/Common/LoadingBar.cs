@@ -27,13 +27,15 @@ public class LoadingBar : MonoBehaviour
         // Gameplay tips
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Use wired headphones for the developer-intended ✨flawless✨rhythm✨game✨experience✨."),
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>You can apply a few drops of water between the back of your device and the table to add friction and reduce device drifting. Make sure your device has a case!"),
-        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Don't think about it, just feel it."),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Don't think about it, just feel it. And if you can't feel it, memorize it."),
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Increase your Ability Rating to improve your place in social and global rankings."),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Please send us monetary donations for more content like this. Lots of thanks."),
         
         /* ----- FACTS ----- */
         
         // General game facts
         new FlavorTextEntry("<i>Did you know:</i>\n<b>“JANOARG” is an acronym for “Just Another Normal, Ordinary, Acceptable Rhythm Game”."),
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>Despite having “ARG” in the name, JANOARG doesn't actually have any ARGs."),
         
         // Gameplay facts
         new FlavorTextEntry("<i>Did you know:</i>\n<b>The maximum score that you can obtain on any song is 1000000ppm regardless of difficulty, and 1000000ppm = the rank that you get by reaching that score."),
@@ -41,9 +43,11 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Multiple overlapping Hold Tails can be hold with just one finger. Just remember to tap the Hit Objects beforehand."),
         
         // Meta facts
-        new FlavorTextEntry("<i>Did you know:</i>\n<b>Most of the facts shown here are nonsense."),
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>Most of the facts shown here are nonsense... or are they?"),
         
         /* ----- OTHER ----- */
+        
+        // 🐌 is love, 🐌 is life.
         new FlavorTextEntry("<b>🐌"),
     };
 
