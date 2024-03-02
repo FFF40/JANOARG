@@ -46,14 +46,14 @@ public class CMHitPlayer : MonoBehaviour
         Vector2 camStart = PlayerView.main.MainCamera.WorldToScreenPoint(IndicatohRenderers[0].transform.position);
         Vector2 camEnd = PlayerView.main.MainCamera.WorldToScreenPoint(IndicatohRenderers[1].transform.position);
 
-        if (Renderer.material != material) 
+        if (Renderer.sharedMaterial != material) 
         {
             Renderer.enabled = material;
-            Renderer.material = material;
+            Renderer.sharedMaterial = material;
             foreach (MeshRenderer ind in IndicatohRenderers) 
             {
                 ind.enabled = Renderer.enabled;
-                ind.material = material;
+                ind.sharedMaterial = material;
             }
         }
 
@@ -62,13 +62,12 @@ public class CMHitPlayer : MonoBehaviour
             if (!HoldTail) {
                 HoldTail = Instantiate(PlayerView.main.HoldMeshSample, transform.parent);
             } 
-            HoldTail.material = styles[index].HoldTailMaterial;
-            HoldTail.GetComponent<MeshFilter>().mesh = hit.HoldMesh;
+            HoldTail.sharedMaterial = styles[index].HoldTailMaterial;
+            HoldTail.GetComponent<MeshFilter>().sharedMesh = hit.HoldMesh;
         }
         else 
         {
             if (HoldTail) {
-                Destroy(HoldTail.GetComponent<MeshFilter>().mesh);
                 Destroy(HoldTail.gameObject);
             } 
         }
@@ -78,10 +77,10 @@ public class CMHitPlayer : MonoBehaviour
             if (!FlickEmblem) {
                 FlickEmblem = Instantiate(PlayerView.main.HoldMeshSample, transform);
             } 
-            FlickEmblem.material = Renderer.material;
+            FlickEmblem.sharedMaterial = Renderer.material;
             FlickEmblem.transform.eulerAngles = PlayerView.main.MainCamera.transform.eulerAngles;
             bool directional = float.IsFinite(hit.CurrentHit.FlickDirection);
-            FlickEmblem.GetComponent<MeshFilter>().mesh = directional ? PlayerView.main.ArrowFlickIndicator : PlayerView.main.FreeFlickIndicator;
+            FlickEmblem.GetComponent<MeshFilter>().sharedMesh = directional ? PlayerView.main.ArrowFlickIndicator : PlayerView.main.FreeFlickIndicator;
             if (directional) FlickEmblem.transform.Rotate(Vector3.back * hit.CurrentHit.FlickDirection);
             else FlickEmblem.transform.Rotate(Vector3.forward * Vector2.SignedAngle(Vector2.right, camEnd - camStart));
         }

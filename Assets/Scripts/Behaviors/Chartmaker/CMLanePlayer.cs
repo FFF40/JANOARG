@@ -20,8 +20,8 @@ public class CMLanePlayer : MonoBehaviour
         var styles = PlayerView.main.Manager.PalleteManager.LaneStyles;
         int index = lane.CurrentLane.StyleIndex;
         Renderer.enabled = index >= 0 && index < styles.Count;
-        Renderer.material = Renderer.enabled ? styles[index].LaneMaterial : null;
-        Filter.mesh = Renderer.enabled ? lane.CurrentMesh : null;
+        Renderer.sharedMaterial = Renderer.enabled ? styles[index].LaneMaterial : null;
+        Filter.sharedMesh = Renderer.enabled ? lane.CurrentMesh : null;
         
         int count = 0;
         for (int a = 0; a < lane.Objects.Count; a++)

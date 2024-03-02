@@ -307,34 +307,34 @@
         <HintPath>D:\E\Unity\2022.2.2f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.YamlDotNet">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="log4netPlastic">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\log4netPlastic.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\log4netPlastic.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.IonicZip">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.TextureAssets">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.visualscripting@1.8.0\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
     </Reference>
     <Reference Include="unityplastic">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\unityplastic.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.collab-proxy@1.17.7\Lib\Editor\PlasticSCM\unityplastic.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
-        <HintPath>D:\E\Documents\JANOARG\Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom\nunit.framework.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
         <HintPath>D:\E\Unity\2022.2.2f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
@@ -721,109 +721,109 @@
         <HintPath>D:\E\Unity\2022.2.2f1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Xml.XPath.XDocument.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.TestRunner">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\UnityEditor.TestRunner.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\UnityEditor.TestRunner.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TestRunner">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\UnityEngine.TestRunner.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\UnityEngine.TestRunner.dll</HintPath>
     </Reference>
     <Reference Include="Unity.MemoryProfiler">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Recorder.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.EditorCoroutines.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.MemoryProfiler.Editor.MemoryProfilerModule">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.MemoryProfilerModule.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.MemoryProfilerModule.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PlasticSCM.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.Shared.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Shared.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Shared.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualStudio.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualStudio.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualStudio.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Recorder.Base">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Base.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Recorder.Base.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.Core">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Core.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Core.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.Core.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Core.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Core.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Rider.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Rider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Sprite.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.Flow.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Flow.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Flow.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.Flow">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Flow.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.Flow.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Timeline.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Services.Core.Environments">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Services.Core.Environments.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Services.Core.Environments.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.MemoryProfiler.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation.Updater">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Updater.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Updater.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.State.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.State.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.State.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Services.Core">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Services.Core.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Services.Core.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.TextMeshPro.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Services.Core.Analytics">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Services.Core.Analytics.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Services.Core.Analytics.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Recorder">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.Recorder.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.Recorder.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VisualScripting.State">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation.Editor.ConversionSystem">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Editor.ConversionSystem.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.AI.Navigation.Editor.ConversionSystem.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
-        <HintPath>D:\E\Documents\JANOARG\Library\ScriptAssemblies\Unity.VSCode.Editor.dll</HintPath>
+        <HintPath>D:\E\Documents\JANOARG_Chartmaker\JANOARG\Library\ScriptAssemblies\Unity.VSCode.Editor.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
