@@ -8,6 +8,7 @@ Shader "UI/Striped"
         _Color ("Tint", Color) = (1,1,1,1)
 
         _StripeVis ("Visibility", Range(0, 1)) = .05
+        _StripeVisAlpha ("Alpha Visibility", Range(0, 1)) = 1
         _StripeSize ("Size", Float) = 20
         _StripeBalance ("Balance", Range(0, 1)) = 0.5
 
@@ -87,6 +88,7 @@ Shader "UI/Striped"
             float4 _MainTex_ST;
 
             float _StripeVis;
+            float _StripeVisAlpha;
             float _StripeSize;
             float _StripeBalance;
 
@@ -115,6 +117,7 @@ Shader "UI/Striped"
                     color.r = _StripeVis + color.r * (1 - _StripeVis * 2);
                     color.g = _StripeVis + color.g * (1 - _StripeVis * 2);
                     color.b = _StripeVis + color.b * (1 - _StripeVis * 2);
+                    color.a *= _StripeVisAlpha;
                 }
 
                 #ifdef UNITY_UI_CLIP_RECT

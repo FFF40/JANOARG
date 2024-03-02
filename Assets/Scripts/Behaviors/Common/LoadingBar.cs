@@ -35,6 +35,7 @@ public class LoadingBar : MonoBehaviour
         
         // General game facts
         new FlavorTextEntry("<i>Did you know:</i>\n<b>“JANOARG” is an acronym for “Just Another Normal, Ordinary, Acceptable Rhythm Game”."),
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>JANOARG? More like RYCHUNIThigrcaez:Reboot am I right?"),
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Despite having “ARG” in the name, JANOARG doesn't actually have any ARGs."),
         
         // Gameplay facts

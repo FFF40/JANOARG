@@ -491,6 +491,9 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 
     public int StyleIndex = 0;
 
+    [NonSerialized]
+    public bool IsDirty = false;
+
     public LanePosition GetLanePosition(float time, float laneTime, Metronome timing) 
     {
         float offset = 0;
@@ -567,42 +570,42 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
             ID = "Offset_X",
             Name = "Position X",
             Get = (x) => ((Lane)x).Position.x,
-            Set = (x, a) => { ((Lane)x).Position.x = a; },
+            Set = (x, a) => { ((Lane)x).Position.x = a; ((Lane)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "Offset_Y",
             Name = "Position Y",
             Get = (x) => ((Lane)x).Position.y,
-            Set = (x, a) => { ((Lane)x).Position.y = a; },
+            Set = (x, a) => { ((Lane)x).Position.y = a; ((Lane)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "Offset_Z",
             Name = "Position Z",
             Get = (x) => ((Lane)x).Position.z,
-            Set = (x, a) => { ((Lane)x).Position.z = a; },
+            Set = (x, a) => { ((Lane)x).Position.z = a; ((Lane)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "OffsetRotation_X",
             Name = "Rotation X",
             Get = (x) => ((Lane)x).Rotation.x,
-            Set = (x, a) => { ((Lane)x).Rotation.x = a; },
+            Set = (x, a) => { ((Lane)x).Rotation.x = a; ((Lane)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "OffsetRotation_Y",
             Name = "Rotation Y",
             Get = (x) => ((Lane)x).Rotation.y,
-            Set = (x, a) => { ((Lane)x).Rotation.y = a; },
+            Set = (x, a) => { ((Lane)x).Rotation.y = a; ((Lane)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "OffsetRotation_Z",
             Name = "Rotation Z",
             Get = (x) => ((Lane)x).Rotation.z,
-            Set = (x, a) => { ((Lane)x).Rotation.z = a; },
+            Set = (x, a) => { ((Lane)x).Rotation.z = a; ((Lane)x).IsDirty = true; },
         },
     };
 
@@ -638,6 +641,9 @@ public class LaneStep : IStoryboardable, IDeepClonable<LaneStep>
     public EaseMode EndEaseYMode;
     public float Speed = 1;
 
+    [NonSerialized]
+    public bool IsDirty = false;
+
     public bool IsLinear => StartEaseX == EaseFunction.Linear && StartEaseY == EaseFunction.Linear && EndEaseX == EaseFunction.Linear && EndEaseY == EaseFunction.Linear;
 
     public new static TimestampType[] TimestampTypes = 
@@ -647,35 +653,35 @@ public class LaneStep : IStoryboardable, IDeepClonable<LaneStep>
             ID = "StartPos_X",
             Name = "Start Position X",
             Get = (x) => ((LaneStep)x).StartPos.x,
-            Set = (x, a) => { ((LaneStep)x).StartPos.x = a; },
+            Set = (x, a) => { ((LaneStep)x).StartPos.x = a; ((LaneStep)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "StartPos_Y",
             Name = "Start Position Y",
             Get = (x) => ((LaneStep)x).StartPos.y,
-            Set = (x, a) => { ((LaneStep)x).StartPos.y = a; },
+            Set = (x, a) => { ((LaneStep)x).StartPos.y = a; ((LaneStep)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "EndPos_X",
             Name = "End Position X",
             Get = (x) => ((LaneStep)x).EndPos.x,
-            Set = (x, a) => { ((LaneStep)x).EndPos.x = a; },
+            Set = (x, a) => { ((LaneStep)x).EndPos.x = a; ((LaneStep)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "EndPos_Y",
             Name = "End Position Y",
             Get = (x) => ((LaneStep)x).EndPos.y,
-            Set = (x, a) => { ((LaneStep)x).EndPos.y = a; },
+            Set = (x, a) => { ((LaneStep)x).EndPos.y = a; ((LaneStep)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "Speed",
             Name = "Speed",
             Get = (x) => ((LaneStep)x).Speed,
-            Set = (x, a) => { ((LaneStep)x).Speed = a; },
+            Set = (x, a) => { ((LaneStep)x).Speed = a; ((LaneStep)x).IsDirty = true; },
         },
     };
     
@@ -713,6 +719,9 @@ public class HitObject : IStoryboardable, IDeepClonable<HitObject>
     public float FlickDirection = -1;
 
     public int StyleIndex = 0;
+
+    [NonSerialized]
+    public bool IsDirty = false;
     
     public enum HitType
     {
@@ -727,14 +736,14 @@ public class HitObject : IStoryboardable, IDeepClonable<HitObject>
             ID = "Position",
             Name = "Position",
             Get = (x) => ((HitObject)x).Position,
-            Set = (x, a) => { ((HitObject)x).Position = a; },
+            Set = (x, a) => { ((HitObject)x).Position = a; ((HitObject)x).IsDirty = true; },
         },
         new TimestampType
         {
             ID = "Length",
             Name = "Length",
             Get = (x) => ((HitObject)x).Length,
-            Set = (x, a) => { ((HitObject)x).Length = a; },
+            Set = (x, a) => { ((HitObject)x).Length = a; ((HitObject)x).IsDirty = true; },
         },
     };
     

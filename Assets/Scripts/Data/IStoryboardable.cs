@@ -202,6 +202,7 @@ public abstract class IStoryboardable
         }
         foreach(TimestampType tst in tts) try {
             float value = currentValues[tst.ID];
+            bool isSet = false;
             while (true) 
             {
                 Timestamp ts = Storyboard.Timestamps.Find(x => x.ID == tst.ID);
@@ -214,15 +215,17 @@ public abstract class IStoryboardable
                     if (ts.EaseMode == EaseMode.In) func = ease.In;
                     else if (ts.EaseMode == EaseMode.Out) func = ease.Out;
                     value = Mathf.LerpUnclamped(value, ts.Target, func((time - ts.Offset) / ts.Duration));
+                    isSet = true;
                     break;
                 }
                 else
                 {
                     currentValues[tst.ID] = value = ts.Target;
+                    isSet = true;
                     Storyboard.Timestamps.Remove(ts);
                 }
             }
-            tst.Set(this, value);
+            if (isSet) tst.Set(this, value);
         } catch (Exception e) {
             Debug.LogError(this.GetType() + " " + tst.ID + "\n" + e);
         }

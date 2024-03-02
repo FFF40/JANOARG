@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class SongSelectScreen : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text TargetSongInfoArtist;
     public TMP_Text TargetSongInfoInfo;
     public RectTransform TargetSongCoverHolder;
+    public Image TargetSongCoverFlash;
     [Space]
     public CanvasGroup DifficultyHolder;
     public RectTransform DifficultyListHolder;
@@ -30,6 +32,9 @@ public class SongSelectScreen : MonoBehaviour
     [Space]
     public CanvasGroup LeftActionsHolder;
     public CanvasGroup RightActionsHolder;
+    [Space]
+    public CanvasGroup LaunchTextHolder;
+    public TMP_Text LaunchText;
     [Space]
     public float ScrollOffset;
     public float TargetScrollOffset;
@@ -281,17 +286,48 @@ public class SongSelectScreen : MonoBehaviour
     public IEnumerator LaunchAnim()
     {
         IsAnimating = true;
-        yield return Ease.Animate(.2f, a => {
-            float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-            LerpUI(1 - lerp);
 
-            float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
-            foreach (SongSelectItem item in ItemList)
-            {
-                item.SetVisibilty(1 - lerp2);
-            }
+        string[] launchTextList = new []{
+            "LET'S GO",
+            "LET'S DO THIS",
+            "HERE WE GO",
+            "NOW LAUNCHING",
+            "YOU ARE NOW EXPERIENCING",
+        };
+        LaunchText.text = launchTextList[Random.Range(0, launchTextList.Length)];
+        
+        LerpInfo(0);
+
+        SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+
+        yield return Ease.Animate(1, a => {
+            float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
+            LerpUI(1 - lerp);
+            foreach (SongSelectItem item in ItemList) item.SetVisibilty(1 - lerp);
+
+            float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
+            float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+            float offset = scrollOfs - TargetSongOffset;
+            TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp2));
+            TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp2));
+            TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp2));
+            TargetSongCoverHolder.sizeDelta = new(0, 128 * (1 - lerp2));
             IsDirty = true;
+            
+            float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
+            rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp3, rt(LaunchTextHolder).sizeDelta.y);
+            LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
+            TargetSongCoverFlash.color = new (1, 1, 1, 1 - lerp3);
         });
+
+        PlayerScreen.TargetSongPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
+        PlayerScreen.TargetSong = TargetSong.Song;
+        PlayerScreen.TargetChartMeta = TargetDifficulty.Chart;
+
+        Common.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
+
+        }, false);
+        SceneManager.UnloadSceneAsync("Song Select");
     }
 
     public void LerpInfo(float a)

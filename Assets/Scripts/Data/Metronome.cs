@@ -101,11 +101,6 @@ public class Metronome
         return Stops[tag];
     }
 
-    internal float ToSeconds(object offset)
-    {
-        throw new NotImplementedException();
-    }
-
     public static Metronome Identity = new Metronome(60);
 }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -32,5 +33,17 @@ public class Common : MonoBehaviour
     void OnDestroy()
     {
         main = main == this ? null : main;
+    }
+
+    public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+    {
+        main.StartCoroutine(main.LoadAnim(target, completed, onComplete, showBar) );
+    }
+
+    public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+    {
+        yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+        yield return Resources.UnloadUnusedAssets();
+        yield return new WaitUntil(completed);
     }
 }

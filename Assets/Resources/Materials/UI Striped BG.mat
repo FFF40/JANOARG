@@ -84,6 +84,7 @@ Material:
     - _StripeBalance: 0.8
     - _StripeSize: 15
     - _StripeVis: 0.1
+    - _StripeVisAlpha: 1
     - _StripeVisibility: 0.27
     - _UVSec: 0
     - _UseUIAlphaClip: 0
