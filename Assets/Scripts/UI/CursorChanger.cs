@@ -64,15 +64,18 @@ public class CursorChanger : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
     }
 
     public static Stack<IntPtr> Cursors = new();
+    public static Stack<CursorType> CursorTypes = new();
 
     public static void PushCursor(CursorType type)
     {
-        Cursors.Push(LoadCursor(IntPtr.Zero, type));
+        Cursors.Push(!Chartmaker.Preferences.CustomCursors && type > 0 ? LoadCursor(IntPtr.Zero, type) : IntPtr.Zero);
+        CursorTypes.Push(type);
     }
 
     public static void PopCursor()
     {
         DestroyCursor(Cursors.Pop());
+        CursorTypes.Pop();
     }
     
     [DllImport("user32.dll")]
@@ -90,4 +93,7 @@ public enum CursorType
     SizeHorizontal = 32644,
     SizeVertical = 32645,
     Blocked = 32648,
+    
+    Grab = -1,
+    Grabbing = -2,
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -21,6 +22,11 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public Vector2Int defaultWindowSize;
     public Vector2Int borderSize;
     public Vector2Int windowMargin;
+    [Header("Window")]
+    public List<CursorType> CursorMapping;
+    public List<Texture2D> Cursors;
+    public List<Vector2> CursorPivots;
+    public Dictionary<CursorType, int> CursorMap;
 
     Vector2 mousePos = Vector2.zero;
     public bool maximized { get; private set; }
@@ -33,6 +39,11 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void Awake()
     {
         main = this;
+        CursorMap = new();
+        for (int a = 0; a < CursorMapping.Count; a++)
+        {
+            CursorMap.Add(CursorMapping[a], a);
+        }
     }
 
     public void Start()

@@ -12594,6 +12594,9 @@ GameObject:
   - component: {fileID: 758002021}
   - component: {fileID: 758002022}
   - component: {fileID: 758002023}
+  - component: {fileID: 758002024}
+  - component: {fileID: 758002026}
+  - component: {fileID: 758002025}
   m_Layer: 5
   m_Name: Player View
   m_TagString: Untagged
@@ -12651,6 +12654,8 @@ MonoBehaviour:
   SoundPlayer: {fileID: 1109089518}
   NormalHitSound: {fileID: 8300000, guid: f90a4d2bd33f55e48bda9625f2ee1601, type: 3}
   CatchHitSound: {fileID: 8300000, guid: d68bd3e4706d98743a96de5b314d4921, type: 3}
+  NormalFlickHitSound: {fileID: 8300000, guid: 0d2355a6802bb794cad246eb6c1351e8, type: 3}
+  CatchFlickHitSound: {fileID: 8300000, guid: cde11ceb512ea8c4b963624c75f27b25, type: 3}
   NotificationText: {fileID: 1788224626}
   NotificationBox: {fileID: 2114292999}
   CurrentLaneLine: {fileID: 970189085}
@@ -12675,6 +12680,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding: {x: 0, y: 0, z: 0, w: 0}
   m_Softness: {x: 0, y: 0}
+--- !u!114 &758002024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758002020}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73d7cff0e6cb074f96035507a3daaac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CursorType: 0
+--- !u!114 &758002025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758002020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &758002026
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758002020}
+  m_CullTransparentMesh: 1
 --- !u!1 &758874741
 GameObject:
   m_ObjectHideFlags: 0
@@ -29669,6 +29725,25 @@ MonoBehaviour:
   defaultWindowSize: {x: 960, y: 600}
   borderSize: {x: 0, y: 0}
   windowMargin: {x: 14, y: 14}
+  CursorMapping: 007f0000897f0000027f0000017f0000847f0000857f0000fffffffffeffffff
+  Cursors:
+  - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
+  - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
+  - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
+  - {fileID: 2800000, guid: a53338b85652f3d49b1259bdc358edc5, type: 3}
+  - {fileID: 2800000, guid: a6af4aabfe1cdf747b9b7014c7647857, type: 3}
+  - {fileID: 2800000, guid: 58b61e66913e9d2429edc41c78b8c298, type: 3}
+  - {fileID: 2800000, guid: 45114074ad2c57546811fd37ec04f7d7, type: 3}
+  - {fileID: 2800000, guid: c8b29236e8a6e2a48b7da558a040f0fa, type: 3}
+  CursorPivots:
+  - {x: 8, y: 6}
+  - {x: 8, y: 6}
+  - {x: 8, y: 6}
+  - {x: 8, y: 16}
+  - {x: 15, y: 15}
+  - {x: 15, y: 15}
+  - {x: 14, y: 14}
+  - {x: 14, y: 14}
 --- !u!114 &1769234555
 MonoBehaviour:
   m_ObjectHideFlags: 0

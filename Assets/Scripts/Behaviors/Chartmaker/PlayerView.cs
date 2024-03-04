@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler
+public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IDragHandler, IEndDragHandler
 {
     public static PlayerView main;
 
@@ -27,6 +27,8 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     public AudioSource SoundPlayer;
     public AudioClip NormalHitSound;
     public AudioClip CatchHitSound;
+    public AudioClip NormalFlickHitSound;
+    public AudioClip CatchFlickHitSound;
     [Space]
     public Graphic NotificationText;
     public Graphic NotificationBox;
@@ -144,11 +146,11 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             {
                 if (Manager.HitObjectsRemaining[0] < HitObjectsRemaining[0])
                 {
-                    SoundPlayer.PlayOneShot(NormalHitSound, PlayOptions.HitsoundsVolume);
+                    SoundPlayer.PlayOneShot(Chartmaker.Preferences.PerfectHitsounds ? NormalFlickHitSound : NormalHitSound, PlayOptions.HitsoundsVolume);
                 }
                 if (Manager.HitObjectsRemaining[1] < HitObjectsRemaining[1])
                 {
-                    SoundPlayer.PlayOneShot(CatchHitSound, PlayOptions.HitsoundsVolume);
+                    SoundPlayer.PlayOneShot(Chartmaker.Preferences.PerfectHitsounds ? CatchFlickHitSound : CatchHitSound, PlayOptions.HitsoundsVolume);
                 }
             }
             HitObjectsRemaining = Manager.HitObjectsRemaining;
@@ -477,6 +479,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         }
         
         UpdateHandles();
+        UpdateCursor(eventData.position, eventData.pressEventCamera);
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -484,6 +487,40 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         if (!isDragged)
         {
             OnEndDrag(eventData);
+        }
+    }
+
+    CursorType CurrentCursor = 0;
+
+    public void UpdateCursor(Vector2 position, Camera eventCamera)
+    {
+        bool contains(RectTransform rt) => RectTransformUtility.RectangleContainsScreenPoint(rt, position, eventCamera);
+
+        CursorType Cursor = 0;
+
+        if (CurrentDragMode != HandleDragMode.None) 
+        {
+           Cursor = CursorType.Grabbing;
+        }
+        else if (contains((RectTransform)transform)) 
+        {
+            if (contains(StartHandle) || contains(CenterHandle) || contains(EndHandle)) Cursor = CursorType.Grab;
+        }
+
+        if (CurrentCursor != Cursor)
+        {
+            if (CurrentCursor != 0) CursorChanger.PopCursor();
+            if (Cursor != 0) CursorChanger.PushCursor(Cursor);
+            CurrentCursor = Cursor;
+            BorderlessWindow.UpdateCursor();
+        }
+    }
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        if (!isDragged)
+        {
+            UpdateCursor(eventData.position, eventData.pressEventCamera);
         }
     }
 
@@ -512,6 +549,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         OnDragEvent = null;
         CurrentDragMode = HandleDragMode.None;
         UpdateHandles();
+        UpdateCursor(eventData.position, eventData.pressEventCamera);
     }
     
     public Vector3? RaycastScreenToPlane(Vector3 pos, Vector3 center, Quaternion rotation)

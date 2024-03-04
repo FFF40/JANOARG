@@ -131,6 +131,8 @@ public class BorderlessWindow
     const int SWP_NOMOVE = 0x0002;
     const int SWP_FRAMECHANGED = 0x0020;
 
+    static Texture2D Nothing;
+
     static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
     {
         if (IntPtr.Size == 8) return SetWindowLong64(hWnd, nIndex, dwNewLong);
@@ -150,7 +152,8 @@ public class BorderlessWindow
             BorderlessWindow.HookWindowProc();
             RenameWindow("JANOARG Chartmaker");
 
-            Cursor.SetCursor(new Texture2D(0, 0), Vector2.zero, CursorMode.ForceSoftware);
+            Nothing = new Texture2D(0, 0);
+            Cursor.SetCursor(Nothing, Vector2.zero, CursorMode.ForceSoftware);
             CursorChanger.PushCursor(CursorType.Arrow);
             
             IsFramed = Chartmaker.Preferences.UseDefaultWindow;
@@ -378,10 +381,32 @@ public class BorderlessWindow
 
     public static void UpdateCursor ()
     {
-        if (CursorChanger.Cursors.Count > ((
-            Input.mousePosition.x >= 0 && Input.mousePosition.x < Screen.width &&
-            Input.mousePosition.y >= 0 && Input.mousePosition.y < Screen.height
-        ) ? 0 : 1)) SetCursor(CursorChanger.Cursors.Peek());
+        IntPtr cursor = CursorChanger.Cursors.Count > 0 ? CursorChanger.Cursors.Peek() : IntPtr.Zero;
+        if (cursor == IntPtr.Zero && WindowHandler.main) 
+        {
+            if (CursorChanger.CursorTypes.Count > 0)
+            {
+                CursorType target = CursorChanger.CursorTypes.Peek();
+                if (WindowHandler.main.CursorMap.ContainsKey(target)) 
+                {
+                    int index = WindowHandler.main.CursorMap[target];
+                    Cursor.SetCursor(WindowHandler.main.Cursors[index], WindowHandler.main.CursorPivots[index], CursorMode.Auto);
+                }
+                else Cursor.SetCursor(WindowHandler.main.Cursors[0], WindowHandler.main.CursorPivots[0], CursorMode.Auto);
+            }
+            else 
+            {
+                Cursor.SetCursor(WindowHandler.main.Cursors[0], WindowHandler.main.CursorPivots[0], CursorMode.Auto);
+            }
+        }
+        else 
+        {
+            Cursor.SetCursor(Nothing, Vector2.zero, CursorMode.ForceSoftware);
+            if (CursorChanger.Cursors.Count > ((
+                Input.mousePosition.x >= 0 && Input.mousePosition.x < Screen.width &&
+                Input.mousePosition.y >= 0 && Input.mousePosition.y < Screen.height
+            ) ? 0 : 1)) SetCursor(CursorChanger.Cursors.Peek());
+        }
     }
 }
 

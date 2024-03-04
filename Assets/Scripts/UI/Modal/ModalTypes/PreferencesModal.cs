@@ -80,8 +80,8 @@ public class PreferencesModal : Modal
             var prefs = Chartmaker.Preferences;
             var storage = Chartmaker.PreferencesStorage;
 
-            SpawnForm<FormEntryHeader>("Theme");
-            var themeDropdown = SpawnForm<FormEntryDropdown, object>("", () => prefs.Theme, x => {
+            SpawnForm<FormEntryHeader>("Appearance");
+            var themeDropdown = SpawnForm<FormEntryDropdown, object>("Theme", () => prefs.Theme, x => {
                 if (prefs.Theme != x.ToString()) 
                 {
                     storage.Set("AP:Theme", prefs.Theme = x.ToString()); IsDirty = true;
@@ -93,26 +93,51 @@ public class PreferencesModal : Modal
             themeDropdown.ValidValues.Add("PastelNight", "Pastelland - Night");
             themeDropdown.ValidValues.Add("SpaceChrome", "Spaceware - Chrome");
             themeDropdown.ValidValues.Add("Hyperpop", "Hyperpop");
-            themeDropdown.TitleLabel.gameObject.SetActive(false);
-            themeDropdown.GetComponent<HorizontalLayoutGroup>().padding.left = 10;
+
+            SpawnForm<FormEntrySpace>("");
+            
+            var cursorDropdown = SpawnForm<FormEntryDropdown, object>("Cursor Mode", () => prefs.CustomCursors, x => {
+                storage.Set("AP:CustomCursors", prefs.CustomCursors = (bool)x); IsDirty = true;
+                if (CursorChanger.Cursors.Count > 0) CursorChanger.PopCursor(); 
+                CursorChanger.PushCursor(CursorType.Arrow); BorderlessWindow.UpdateCursor();
+            });
+            cursorDropdown.ValidValues.Add(false, "Native");
+            cursorDropdown.ValidValues.Add(true, "Custom");
             
             SpawnForm<FormEntryHeader>("Layout");
-            SpawnForm<FormEntryBool, bool>("Default Window Frame", () => prefs.UseDefaultWindow, x => {
-                storage.Set("LA:UseDefaultWindow", prefs.UseDefaultWindow = x); IsDirty = true;
+
+            var windowDropdown = SpawnForm<FormEntryDropdown, object>("Window Frame Mode", () => prefs.UseDefaultWindow, x => {
+                bool y = prefs.UseDefaultWindow;
+                storage.Set("LA:UseDefaultWindow", prefs.UseDefaultWindow = (bool)x); IsDirty = true;
                 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
-                    if (x) 
+                    if (x != y)
                     {
-                        BorderlessWindow.SetFramedWindow();
-                        BorderlessWindow.ResizeWindowDelta(2, 1);
-                        BorderlessWindow.MoveWindowDelta(new(-1, 0));
-                    }
-                    else 
-                    {
-                        BorderlessWindow.SetFramelessWindow();
-                        BorderlessWindow.ResizeWindowDelta(-2, -1);
-                        BorderlessWindow.MoveWindowDelta(new(1, 0));
+                        if ((bool)x) 
+                        {
+                            BorderlessWindow.SetFramedWindow();
+                            BorderlessWindow.ResizeWindowDelta(2, 1);
+                            BorderlessWindow.MoveWindowDelta(new(-1, 0));
+                        }
+                        else 
+                        {
+                            BorderlessWindow.SetFramelessWindow();
+                            BorderlessWindow.ResizeWindowDelta(-2, -1);
+                            BorderlessWindow.MoveWindowDelta(new(1, 0));
+                        }
                     }
                 #endif
+            });
+            windowDropdown.ValidValues.Add(true, "Native");
+            windowDropdown.ValidValues.Add(false, "Custom");
+        }
+        else if (tab == 3)
+        {
+            var prefs = Chartmaker.Preferences;
+            var storage = Chartmaker.PreferencesStorage;
+            
+            SpawnForm<FormEntryHeader>("Fun<i>!</i> :D");
+            SpawnForm<FormEntryBool, bool>("More Perfect Hitsounds", () => prefs.PerfectHitsounds, x => {
+                storage.Set("BO:PerfectHitsounds", prefs.PerfectHitsounds = x); IsDirty = true;
             });
         }
     }

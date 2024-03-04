@@ -657,7 +657,10 @@ public class ChartmakerPrefs {
     public bool SaveOnPlay;
 
     public string Theme = "Prototype";
+    public bool CustomCursors = true;
     public bool UseDefaultWindow;
+    
+    public bool PerfectHitsounds;
 
     public void Load(Storage storage)
     {
@@ -666,6 +669,9 @@ public class ChartmakerPrefs {
         SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
 
         Theme = storage.Get("AP:Theme", Theme);
+        CustomCursors = storage.Get("AP:CustomCursors", CustomCursors);
         UseDefaultWindow = storage.Get("LA:UseDefaultWindow", UseDefaultWindow);
+
+        PerfectHitsounds = storage.Get("BO:PerfectHitsounds", PerfectHitsounds);
     }
 }
