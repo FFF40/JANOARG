@@ -84,7 +84,12 @@ public class InspectorPanel : MonoBehaviour
 
     public void SetObject(object obj)
     {
-        if (obj is Timestamp ts)
+        if (obj == Chartmaker.main.CurrentChart?.Groups)
+        {
+            CurrentObject = obj;
+            CurrentTimestamp = new ();
+        }
+        else if (obj is Timestamp ts)
         {
             CurrentTimestamp = new () { ts };
         }
