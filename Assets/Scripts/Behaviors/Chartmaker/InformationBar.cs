@@ -245,6 +245,61 @@ public class InformationBar : MonoBehaviour
                 barC.color = color * new Color(1, 1, 1, 1);
             }
         }
+        else if (VisualizerMode == VisualizerMode.SoundWaves)
+        {
+            int dataCount = (int)rect.width + 1;
+
+            float[] dataL = new float[dataCount], dataR = new float[dataCount];
+            Chartmaker.main.SongSource.GetOutputData(dataL, 0);
+            Chartmaker.main.SongSource.GetOutputData(dataR, 1);
+
+            for (int a = 0; a < dataCount - 1; a++) 
+            {
+                Image barL = AddBar();
+                float minL = Mathf.Min(dataL[a], dataL[a + 1]);
+                float maxL = Mathf.Max(dataL[a], dataL[a + 1]);
+                barL.rectTransform.sizeDelta = new Vector2(1, (maxL - minL) / 2 * (rect.height - 1) + 1);
+                barL.rectTransform.anchoredPosition = new Vector2(a, (minL / 2 + .5f) * (rect.height - 1));
+                barL.color = color * new Color(1, 1, 1, .5f);
+
+                Image barR = AddBar();
+                float minR = Mathf.Min(dataR[a], dataR[a + 1]);
+                float maxR = Mathf.Max(dataR[a], dataR[a + 1]);
+                barR.rectTransform.sizeDelta = new Vector2(1, (maxR - minR) / 2 * (rect.height - 1) + 1);
+                barR.rectTransform.anchoredPosition = new Vector2(a, (minR / 2 + .5f) * (rect.height - 1));
+                barR.color = color * new Color(1, 1, 1, .5f);
+            }
+        }
+        else if (VisualizerMode == VisualizerMode.PitchLines)
+        {
+            const int fftCount = 1 << 8;
+
+            float[] fftL = new float[fftCount], fftR = new float[fftCount];
+            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, FFTWindow.Rectangular);
+            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, FFTWindow.Rectangular);
+
+            float[] notes = new float[12];
+            for (int a = 0; a < fftCount; a++) 
+            {
+                int note = (Mathf.RoundToInt(Mathf.Log((a + 1f) / fftCount / 440 * Chartmaker.main.CurrentSong.Clip.frequency, 2) * 12) % 12 + 12) % 12;
+                notes[note] = Mathf.Max(notes[note], fftL[a] * (a + 1), fftR[a] * (a + 1));
+            }
+            float sizeX = rect.width / 12;  
+            int target = 0;  
+            float[] sems = {1, 3, 6, 8, 10};
+            for (int a = 0; a < 12; a++) 
+            {
+                Image barL = AddBar();
+                barL.rectTransform.sizeDelta = new Vector2(sizeX, rect.height * (Array.IndexOf(sems, a) >= 0 ? .5f : 1));
+                barL.rectTransform.anchoredPosition = new Vector2(a * sizeX, 0);
+                barL.color = color * new Color(1, 1, 1, .25f) * notes[a];
+                if (notes[target] < notes[a]) target = a;
+            }
+            Image freqBar = AddBar();
+            freqBar.rectTransform.sizeDelta = new Vector2(sizeX, 2);
+            freqBar.rectTransform.anchoredPosition = new Vector2(target * sizeX, 0);
+            freqBar.color = color * new Color(1, 1, 1);
+        }
 
         while (VisualizerBars.Count > count)
         {
@@ -255,7 +310,30 @@ public class InformationBar : MonoBehaviour
 
     public void SwitchVisualizer()
     {
-        VisualizerMode = (VisualizerMode)(((int)VisualizerMode + 1) % 3);
+        VisualizerMode = (VisualizerMode)(((int)VisualizerMode + 1) % 5);
+    }
+
+    public void SwitchVisualizer(VisualizerMode mode)
+    {
+        VisualizerMode = mode;
+    }
+
+    public void ShowVisualizerMenu()
+    {
+        ContextMenuListAction VisItem (string name, VisualizerMode mode) 
+            => new ContextMenuListAction(name, () => SwitchVisualizer(mode), _checked: VisualizerMode == mode);
+
+        print("Showing visualizer menu");
+        ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+            VisItem("Metronome", VisualizerMode.Metronome),
+            new ContextMenuListSeparator(),
+            VisItem("Classic Bars", VisualizerMode.FrequencyBars),
+            VisItem("Oscilloscope", VisualizerMode.SoundWaves),
+            new ContextMenuListSeparator(),
+            VisItem("Glowing Piano", VisualizerMode.PitchLines),
+            new ContextMenuListSeparator(),
+            VisItem("Disabled", VisualizerMode.None)
+        ), Visualizer, offset: new (2, -4));
     }
 }
 
@@ -263,5 +341,7 @@ public enum VisualizerMode
 {
     Metronome,
     FrequencyBars,
+    SoundWaves,
+    PitchLines,
     None,
 }

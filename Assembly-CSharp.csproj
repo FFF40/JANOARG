@@ -131,6 +131,7 @@
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryToggleFloat.cs" />
      <Compile Include="Assets\Scripts\UI\CursorChanger.cs" />
+     <Compile Include="Assets\Scripts\UI\RightClickTarget.cs" />
      <Compile Include="Assets\Scripts\Data\ChartManager.cs" />
      <Compile Include="Assets\Scripts\UI\Form\Formmaker.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\NewSongModal.cs" />
