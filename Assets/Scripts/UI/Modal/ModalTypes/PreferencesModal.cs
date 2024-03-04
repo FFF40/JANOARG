@@ -110,7 +110,7 @@ public class PreferencesModal : Modal
                 bool y = prefs.UseDefaultWindow;
                 storage.Set("LA:UseDefaultWindow", prefs.UseDefaultWindow = (bool)x); IsDirty = true;
                 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
-                    if (x != y)
+                    if ((bool)x != y)
                     {
                         if ((bool)x) 
                         {
