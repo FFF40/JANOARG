@@ -325,7 +325,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        bool contains(RectTransform rt) => RectTransformUtility.RectangleContainsScreenPoint(rt, eventData.pressPosition, eventData.pressEventCamera);
+        bool contains(RectTransform rt) => rt.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(rt, eventData.pressPosition, eventData.pressEventCamera);
 
         CurrentDragMode = HandleDragMode.None;
 
@@ -494,7 +494,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void UpdateCursor(Vector2 position, Camera eventCamera)
     {
-        bool contains(RectTransform rt) => RectTransformUtility.RectangleContainsScreenPoint(rt, position, eventCamera);
+        bool contains(RectTransform rt) => rt.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(rt, position, eventCamera);
 
         CursorType Cursor = 0;
 
