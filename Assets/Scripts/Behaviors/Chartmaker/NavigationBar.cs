@@ -141,7 +141,8 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListAction("Report an Issue / Suggestion", () => Application.OpenURL("https://github.com/FFF40/JANOARG/issues")),
             new ContextMenuListAction("FFF40 Studios Discord Server", () => Application.OpenURL("https://discord.gg/vXJTPFQBHm"), icon: "Discord Icon"),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Check for Updates", () => Application.OpenURL("https://github.com/FFF40/JANOARG/releases")),
+            new ContextMenuListAction("Check for Updates", () => VersionCheckerModal.InitFetch()),
+            new ContextMenuListAction("Show All Releases", () => Application.OpenURL("https://github.com/FFF40/JANOARG/releases")),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("About Chartmaker...", () => ModalHolder.main.Spawn<AboutModal>(), icon: "Credits")
         );

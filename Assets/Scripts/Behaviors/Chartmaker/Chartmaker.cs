@@ -70,6 +70,7 @@ public class Chartmaker : MonoBehaviour
         Application.wantsToQuit += QuitCheck;
         InformationBar.main.PlayOptions.Init();
         TimelinePanel.main.Options.Init();
+        if (Preferences.AutoUpdateCheck) VersionCheckerModal.InitFetch(true);
         SetEditorActive(false);
     }
 
@@ -655,6 +656,7 @@ public class ChartmakerPrefs {
     public bool MaximizeOnPlay;
     public bool SaveOnQuit;
     public bool SaveOnPlay;
+    public bool AutoUpdateCheck = true;
 
     public string Theme = "Prototype";
     public bool CustomCursors = true;
@@ -667,6 +669,7 @@ public class ChartmakerPrefs {
         MaximizeOnPlay = storage.Get("PL:MaximizeOnPlay", MaximizeOnPlay);
         SaveOnPlay = storage.Get("AS:SaveOnPlay", SaveOnPlay);
         SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
+        AutoUpdateCheck = storage.Get("UP:AutoUpdateCheck", AutoUpdateCheck);
 
         Theme = storage.Get("AP:Theme", Theme);
         CustomCursors = storage.Get("AP:CustomCursors", CustomCursors);

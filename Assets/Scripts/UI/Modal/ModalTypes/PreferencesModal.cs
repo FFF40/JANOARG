@@ -58,9 +58,18 @@ public class PreferencesModal : Modal
             SpawnForm<FormEntryBool, bool>("Save on Quit", () => prefs.SaveOnQuit, x => {
                 storage.Set("AS:SaveOnQuit", prefs.SaveOnQuit = x); IsDirty = true;
             });
+
+            SpawnForm<FormEntryHeader>("Updates");
+            SpawnForm<FormEntryBool, bool>("Auto-Check on Start", () => prefs.AutoUpdateCheck, x => {
+                storage.Set("UP:AutoUpdateCheck", prefs.AutoUpdateCheck = x); IsDirty = true;
+            });
+            
         }
         else if (tab == 1)
         {
+            SpawnForm<FormEntrySpace>("");
+            SpawnForm<FormEntryLabel>("Click on the button associated with a keybind, then press a key or key combination on your keyboard to change that keybind.");
+
             var categories = KeyboardHandler.main.Keybindings.MakeCategoryGroups();
             foreach (var cat in categories)
             {
