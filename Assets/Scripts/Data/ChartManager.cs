@@ -279,6 +279,10 @@ public class LaneManager
                 Steps[a].Offset = main.Song.Timing.ToSeconds(step.Offset);
                 force = true;
             }
+            if (step.Speed != Steps[a].CurrentStep?.Speed) 
+            {
+                force = true;
+            }
             if (force)
             {
                 LaneStepManager prev = a < 1 ? new LaneStepManager() : Steps[a - 1];
@@ -516,7 +520,7 @@ public class LaneManager
             {
                 StartPos = CurrentLane.LaneSteps[0].StartPos,
                 EndPos = CurrentLane.LaneSteps[0].EndPos,
-                Offset = Steps[0].Distance - CurrentLane.LaneSteps[0].Speed * speed * (Steps[0].Offset - sec),
+                Offset = Steps[0].Distance - Steps[0].CurrentStep.Speed * speed * (Steps[0].Offset - sec),
             };
         }
         else if (sec > Steps[Steps.Count - 1].Offset)
@@ -525,15 +529,15 @@ public class LaneManager
             {
                 StartPos = CurrentLane.LaneSteps[Steps.Count - 1].StartPos,
                 EndPos = CurrentLane.LaneSteps[Steps.Count - 1].EndPos,
-                Offset = Steps[Steps.Count - 1].Distance + CurrentLane.LaneSteps[Steps.Count - 1].Speed * speed * (sec - Steps[Steps.Count - 1].Offset),
+                Offset = Steps[Steps.Count - 1].Distance + Steps[Steps.Count - 1].CurrentStep.Speed * speed * (sec - Steps[Steps.Count - 1].Offset),
             };
         }
         else for (int i = 1; i < Steps.Count; i++)
         {
             LaneStepManager prev = Steps[i - 1];
-            LaneStep prevS = CurrentLane.LaneSteps[i - 1];
+            LaneStep prevS = prev.CurrentStep;
             LaneStepManager curr = Steps[i];
-            LaneStep currS = CurrentLane.LaneSteps[i];
+            LaneStep currS = curr.CurrentStep;
             if (sec > curr.Offset) continue;
 
             

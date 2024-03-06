@@ -116,6 +116,7 @@
      <Compile Include="Assets\Scripts\UI\Tooltip\TooltipTarget.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\NavigationBar.cs" />
      <Compile Include="Assets\Scripts\Data\ExternalPlayableSong.cs" />
+     <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\VersionCheckerModal.cs" />
      <Compile Include="Assets\Scripts\Data\Chartmaker\ChartmakerHistory.cs" />
      <Compile Include="Assets\Scripts\UI\ColorPicker\HueCircle.cs" />
      <Compile Include="Assets\Scripts\Data\HelpPage.cs" />

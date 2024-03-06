@@ -250,6 +250,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                         EndHandle.gameObject.SetActive(CurrentDragMode is HandleDragMode.None or HandleDragMode.End);
                         EndHandle.position = end;
                         EndHandle.eulerAngles = new(0, 0, Vector2.SignedAngle(Vector2.up, end - start));
+                        
                     }
                 }
             } break;
