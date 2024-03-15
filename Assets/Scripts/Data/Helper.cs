@@ -28,4 +28,10 @@ public static class Helper
         >=  700000 => Mathf.Lerp(0,                           Mathf.Max(constant - 10, 0), (score - 700000) / 150000),
                  _ => 0
     };
+
+    public static string FormatDifficulty(string str)
+    {
+        if (str.EndsWith("*")) str = str[..^1] + "<sub>*</sub>";
+        return str;
+    }
 }

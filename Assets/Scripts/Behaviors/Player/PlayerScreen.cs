@@ -36,6 +36,7 @@ public class PlayerScreen : MonoBehaviour
     public ScrollingCounter ScoreCounter;
     public List<Graphic> ScoreDigits;
     [Space]
+    public TMP_Text JudgmentLabel;
     public TMP_Text ComboLabel;
     [Space]
     [Header("Samples")]
@@ -86,6 +87,8 @@ public class PlayerScreen : MonoBehaviour
 
     public void Start()
     {
+        SetInterfaceColor(Color.clear);
+        SongProgress.value = 0;
         StartCoroutine(InitChart());
     }
 
@@ -151,6 +154,21 @@ public class PlayerScreen : MonoBehaviour
         }
 
         IsReady = true;
+        lastDSPTime = AudioSettings.dspTime;
+    }
+
+    public void BeginReadyAnim() 
+    {
+        StartCoroutine(ReadyAnim());
+    }
+
+    public IEnumerator ReadyAnim() 
+    {
+        yield return Ease.Animate(1, (x) => {
+            float ease = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+            SetInterfaceColor(TargetSong.InterfaceColor * new Color(1, 1, 1, ease));
+            PlayerHUD.transform.localScale = Vector3.one * (ease * .1f + .9f);
+        });
         IsPlaying = true;
         lastDSPTime = AudioSettings.dspTime;
     }
@@ -329,7 +347,7 @@ public class PlayerScreen : MonoBehaviour
     public void SetInterfaceColor(Color color) 
     {
         SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color = 
-            SongProgressTip.color = SongProgressGlow.color = ComboLabel.color = color;
+            SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color = color;
         foreach (Graphic g in ScoreDigits) g.color = color;
         SongProgressBody.color = color * new Color (1, 1, 1, .5f);
     }

@@ -9,6 +9,7 @@ public class Common : MonoBehaviour
     public static Common main;
 
     public Camera MainCamera;
+    public RectTransform CommonCanvas;
 
     public LoadingBar LoadingBar;
     public Storage Storage;
@@ -45,5 +46,6 @@ public class Common : MonoBehaviour
         yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target, UnityEngine.SceneManagement.LoadSceneMode.Additive);
         yield return Resources.UnloadUnusedAssets();
         yield return new WaitUntil(completed);
+        if (onComplete != null) onComplete();
     }
 }

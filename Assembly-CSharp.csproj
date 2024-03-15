@@ -81,6 +81,7 @@
      <Compile Include="Assets\Scripts\Data\IStoryboardable.cs" />
      <Compile Include="Assets\Scripts\Data\ChartManager.cs" />
      <Compile Include="Assets\Scripts\Data\Helper.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Song Select\SongSelectReadyScreen.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\Resources\Shaders\Hit.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />

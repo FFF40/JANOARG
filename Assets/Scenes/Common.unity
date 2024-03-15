@@ -3069,6 +3069,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MainCamera: {fileID: 309085665}
+  CommonCanvas: {fileID: 1562277642}
   LoadingBar: {fileID: 1508486259}
 --- !u!1 &1574698829
 GameObject:

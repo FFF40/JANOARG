@@ -69,7 +69,7 @@ public class ResultScreen : MonoBehaviour
             );
         });
 
-        yield return new WaitWhile(() => PlayerScreen.main.CurrentTime > PlayerScreen.main.Music.clip.length);
+        yield return new WaitWhile(() => PlayerScreen.main.CurrentTime < PlayerScreen.main.Music.clip.length);
         StartResultAnim();
     }
 

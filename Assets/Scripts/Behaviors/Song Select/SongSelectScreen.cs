@@ -21,6 +21,7 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text TargetSongInfoArtist;
     public TMP_Text TargetSongInfoInfo;
     public RectTransform TargetSongCoverHolder;
+    public Image TargetSongCoverBackground;
     public Image TargetSongCoverFlash;
     [Space]
     public CanvasGroup DifficultyHolder;
@@ -35,6 +36,8 @@ public class SongSelectScreen : MonoBehaviour
     [Space]
     public CanvasGroup LaunchTextHolder;
     public TMP_Text LaunchText;
+    [Space]
+    public SongSelectReadyScreen ReadyScreen;
     [Space]
     public float ScrollOffset;
     public float TargetScrollOffset;
@@ -299,6 +302,7 @@ public class SongSelectScreen : MonoBehaviour
         LerpInfo(0);
 
         SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+        TargetSongCoverBackground.color = TargetSong.Song.BackgroundColor;
 
         yield return Ease.Animate(1, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
@@ -323,9 +327,11 @@ public class SongSelectScreen : MonoBehaviour
         PlayerScreen.TargetSongPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
         PlayerScreen.TargetSong = TargetSong.Song;
         PlayerScreen.TargetChartMeta = TargetDifficulty.Chart;
+        Common.main.MainCamera.backgroundColor = TargetSong.Song.BackgroundColor;
+        ReadyScreen.BeginLaunch();
 
         Common.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
-
+            SongSelectReadyScreen.main.EndLaunch();
         }, false);
         SceneManager.UnloadSceneAsync("Song Select");
     }
