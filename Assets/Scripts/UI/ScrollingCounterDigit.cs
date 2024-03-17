@@ -14,6 +14,7 @@ public class ScrollingCounterDigit : MonoBehaviour
 
     public string CurrentDigit;
     public float Progress;
+    public float Speed = 9;
 
     public void Start() 
     {
@@ -24,7 +25,7 @@ public class ScrollingCounterDigit : MonoBehaviour
     {
         if (Progress > 0.001f || List.Count > 0) 
         {
-            Progress -= (List.Count + Progress) * (1 - Mathf.Pow(1e-9f, Time.deltaTime));
+            Progress -= (List.Count + Progress) * (1 - Mathf.Pow(0.1f, Time.deltaTime * Speed));
             while (Progress < 0) 
             {
                 TopLabel.text = BottomLabel.text;

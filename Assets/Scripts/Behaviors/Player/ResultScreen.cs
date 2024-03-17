@@ -29,6 +29,10 @@ public class ResultScreen : MonoBehaviour
     [Space]
     public CanvasGroup DetailsHolder;
     public RectTransform DetailsTransform;
+    [Space]
+    public AudioClip Fanfare;
+    public AudioSource FanfareSource;
+    public float FanfareStart;
 
     void Awake() 
     {
@@ -42,6 +46,8 @@ public class ResultScreen : MonoBehaviour
 
     IEnumerator EndingAnim()
     {
+        Fanfare.LoadAudioData();
+
         PlayerScreen.main.PlayerHUD.SetActive(false);
         Flash.gameObject.SetActive(true);
         ResultText.gameObject.SetActive(false);
@@ -57,15 +63,15 @@ public class ResultScreen : MonoBehaviour
         ResultText.rectTransform.localScale = Vector3.one;
         ResultText.rectTransform.anchoredPosition = Vector2.zero;
 
-        yield return Ease.Animate(8, (x) => {
+        yield return Ease.Animate(4, (x) => {
             FlashBackground.color = new Color (
                 1f - x * 2, 1f - x * 2, 1f - x * 2, 
-                Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.InOut) * .2f + .2f
+                Ease.Get(Mathf.Clamp01(x * 2), EaseFunction.Circle, EaseMode.InOut) * .2f + .2f
             );
 
             ResultBackground.rectTransform.sizeDelta = new (
                 ResultBackground.rectTransform.sizeDelta.y,
-                Mathf.Pow(Ease.Get(Mathf.Clamp01(x * 8), EaseFunction.Circle, EaseMode.Out), 2) * 50 + 50
+                Mathf.Pow(Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 2) * 50 + 50
             );
         });
 
@@ -80,6 +86,20 @@ public class ResultScreen : MonoBehaviour
 
     IEnumerator ResultAnim()
     {
+        PlayerScreen.main.IsPlaying = false;
+        FanfareSource.clip = Fanfare;
+        FanfareSource.volume = 0;
+        while (!FanfareSource.isPlaying) 
+        {
+            FanfareSource.Play();
+            FanfareSource.time = FanfareStart - 4.5f;
+            Debug.Log("Trying play");
+            yield return null;
+        }
+        FanfareSource.loop = true;
+
+        yield return new WaitForSeconds(1);
+
         yield return Ease.Animate(1, (x) => {
             float ease1 = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.In), 2);
             float ease2 = Ease.Get(x, EaseFunction.Quadratic, EaseMode.In);
@@ -89,6 +109,7 @@ public class ResultScreen : MonoBehaviour
             );
             ResultText.rectTransform.localScale = Vector3.one * (1 - ease2 * .1f);
             ResultText.rectTransform.anchoredPosition = Vector2.up * (ease1 * 40);
+            FanfareSource.volume = x * .4f;
         });
 
         ResultText.gameObject.SetActive(false);
@@ -104,7 +125,7 @@ public class ResultScreen : MonoBehaviour
         string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA", "AA", "A", "B", "C", "D", "?"};
         int rankNum = System.Array.IndexOf(ranks, rank);
 
-        yield return Ease.Animate(1.5f, (x) => {
+        yield return Ease.Animate(2.5f, (x) => {
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Circle, EaseMode.Out), 2);
             float ease2 = Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Quadratic, EaseMode.Out);
             ResultBackground.rectTransform.sizeDelta = new (
@@ -123,6 +144,8 @@ public class ResultScreen : MonoBehaviour
                 ScoreRings[a].FillAmount = ScoreRings[a - 1].FillAmount * 10 - 9;
                 ScoreRings[a].SetVerticesDirty();
             }
+            
+            FanfareSource.volume = x * .6f + .4f;
         });
         
         SongInfoHolder.alpha = DetailsHolder.alpha = 0;

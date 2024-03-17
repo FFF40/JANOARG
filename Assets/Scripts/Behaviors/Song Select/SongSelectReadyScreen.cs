@@ -58,10 +58,10 @@ public class SongSelectReadyScreen : MonoBehaviour
 
         static float lerp(float x) => Random.Range(Ease.Get(x, EaseFunction.Exponential, EaseMode.Out), Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
         
-        yield return Ease.Animate(1.5f, x => {
-            DifficultyLayout.anchoredPosition = diffStart + Vector2.right * (50 * (1 - Ease.Get(x * 1.2f,        EaseFunction.Exponential, EaseMode.Out)));
-            SongLayout.anchoredPosition =       songStart + Vector2.right * (50 * (1 - Ease.Get(x * 1.2f - .05f, EaseFunction.Exponential, EaseMode.Out)));
-            InfoLayout.anchoredPosition =       infoStart + Vector2.right * (50 * (1 - Ease.Get(x * 1.2f - .1f,  EaseFunction.Exponential, EaseMode.Out)));
+        yield return Ease.Animate(2, x => {
+            DifficultyLayout.anchoredPosition = diffStart + Vector2.right * (500 * (1 - Ease.Get(x * 1.2f,        EaseFunction.Exponential, EaseMode.Out)));
+            SongLayout.anchoredPosition =       songStart + Vector2.right * (500 * (1 - Ease.Get(x * 1.2f - .05f, EaseFunction.Exponential, EaseMode.Out)));
+            InfoLayout.anchoredPosition =       infoStart + Vector2.right * (500 * (1 - Ease.Get(x * 1.2f - .1f,  EaseFunction.Exponential, EaseMode.Out)));
 
             DifficultyGroup.alpha = lerp(x * 2.4f);
             SongGroup.alpha =       lerp(x * 2.4f - .1f);
@@ -86,11 +86,11 @@ public class SongSelectReadyScreen : MonoBehaviour
         Vector2 songStart = SongLayout.anchoredPosition;
         Vector2 infoStart = InfoLayout.anchoredPosition;
 
-        static float lerp(float x) => Random.Range(Ease.Get(x, EaseFunction.Exponential, EaseMode.Out), Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+        static float lerp(float x) => Random.Range(Ease.Get(x, EaseFunction.Exponential, EaseMode.In), Ease.Get(x, EaseFunction.Cubic, EaseMode.In));
 
-        yield return Ease.Animate(.5f, x => {
-            SongLayout.anchoredPosition = songStart + Vector2.left * (50 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
-            InfoLayout.anchoredPosition = infoStart + Vector2.left * (50 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+        yield return Ease.Animate(1.2f, x => {
+            SongLayout.anchoredPosition = songStart + Vector2.left * (1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.In));
+            InfoLayout.anchoredPosition = infoStart + Vector2.left * (1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.In));
 
             SongGroup.alpha = 1 - lerp(x);
             InfoGroup.alpha = 1 - lerp(x);

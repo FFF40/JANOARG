@@ -39,6 +39,8 @@ public class PlayerScreen : MonoBehaviour
     public TMP_Text JudgmentLabel;
     public TMP_Text ComboLabel;
     [Space]
+    public TMP_Text PauseLabel;
+    [Space]
     [Header("Samples")]
     public LaneGroupPlayer LaneGroupSample;
     public LanePlayer LaneSample;
@@ -164,11 +166,24 @@ public class PlayerScreen : MonoBehaviour
 
     public IEnumerator ReadyAnim() 
     {
-        yield return Ease.Animate(1, (x) => {
+        for (int a = 0; a < ScoreCounter.Digits.Count; a++)
+        {
+            ScoreCounter.Digits[a].List.Clear();
+            ScoreCounter.Digits[a].Speed = 3;
+            for (int b = 9 - a; b <= 10; b++) 
+            {
+                ScoreCounter.Digits[a].List.Add((b % 10).ToString());
+            }
+        }
+        yield return Ease.Animate(1.5f, (x) => {
             float ease = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
             SetInterfaceColor(TargetSong.InterfaceColor * new Color(1, 1, 1, ease));
-            PlayerHUD.transform.localScale = Vector3.one * (ease * .1f + .9f);
+            PlayerHUD.transform.localScale = Vector3.one * (ease * .05f + .95f);
         });
+        for (int a = 0; a < ScoreCounter.Digits.Count; a++)
+        {
+            ScoreCounter.Digits[a].Speed = 9;
+        }
         IsPlaying = true;
         lastDSPTime = AudioSettings.dspTime;
     }
@@ -347,7 +362,8 @@ public class PlayerScreen : MonoBehaviour
     public void SetInterfaceColor(Color color) 
     {
         SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color = 
-            SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color = color;
+            SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color = 
+            PauseLabel.color = color;
         foreach (Graphic g in ScoreDigits) g.color = color;
         SongProgressBody.color = color * new Color (1, 1, 1, .5f);
     }
