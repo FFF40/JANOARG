@@ -64,6 +64,10 @@ public class PlayerScreen : MonoBehaviour
     public float TotalExScore = 0;
     public float CurrentExScore = 0;
     [Space]
+    public int PerfectCount = 0;
+    public int GoodCount = 0;
+    public int BadCount = 0;
+    [Space]
     public int Combo = 0;
     public int MaxCombo = 0;
     public int TotalCombo = 0;
@@ -307,10 +311,12 @@ public class PlayerScreen : MonoBehaviour
         {
             Combo++;
             MaxCombo = Mathf.Max(MaxCombo, Combo);
+            PerfectCount++;
         }
         else 
         {
             Combo = 0;
+            BadCount++;
         }
         TotalCombo++;
         ComboLabel.text = Combo.ToString("0000");

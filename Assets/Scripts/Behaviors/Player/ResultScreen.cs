@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class ResultScreen : MonoBehaviour
 {
@@ -12,11 +13,13 @@ public class ResultScreen : MonoBehaviour
     public Image FlashBackground;
     public Image ResultBackground;
     public TMP_Text ResultText;
+    public TMP_Text ResultTextBig;
     [Space]
     public RectTransform ScoreHolder;
     public TMP_Text ScoreText;
     public TMP_Text RankText;
     public List<GraphicCircle> ScoreRings;
+    public List<GraphicCircle> ScoreExplosionRings;
     [Space]
     public CanvasGroup BestScoreHolder;
     public RectTransform BestScoreTransform;
@@ -29,6 +32,10 @@ public class ResultScreen : MonoBehaviour
     [Space]
     public CanvasGroup DetailsHolder;
     public RectTransform DetailsTransform;
+    public TMP_Text PerfectCountText;
+    public TMP_Text GoodCountText;
+    public TMP_Text BadCountText;
+    public TMP_Text MaxComboText;
     [Space]
     public AudioClip Fanfare;
     public AudioSource FanfareSource;
@@ -51,6 +58,8 @@ public class ResultScreen : MonoBehaviour
         PlayerScreen.main.PlayerHUD.SetActive(false);
         Flash.gameObject.SetActive(true);
         ResultText.gameObject.SetActive(false);
+        ResultTextBig.alpha = 0;
+
         yield return Ease.Animate(1, (x) => {
             FlashBackground.color = new (1, 1, 1, .2f * (1 - x));
             ResultBackground.rectTransform.sizeDelta = new (
@@ -62,12 +71,22 @@ public class ResultScreen : MonoBehaviour
         ResultText.gameObject.SetActive(true);
         ResultText.rectTransform.localScale = Vector3.one;
         ResultText.rectTransform.anchoredPosition = Vector2.zero;
+        ResultTextBig.text = ResultText.text;
+        ResultTextBig.color = PlayerScreen.CurrentChart.Pallete.InterfaceColor;
 
         yield return Ease.Animate(4, (x) => {
             FlashBackground.color = new Color (
                 1f - x * 2, 1f - x * 2, 1f - x * 2, 
                 Ease.Get(Mathf.Clamp01(x * 2), EaseFunction.Circle, EaseMode.InOut) * .2f + .2f
             );
+
+            ResultTextBig.alpha = 1 - Random.Range(
+                Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out),
+                Ease.Get(Mathf.Clamp01(x * 2), EaseFunction.Exponential, EaseMode.Out)
+            );
+            float ease = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.Out), 2);
+            ResultText.characterSpacing = 15 / ease;
+            ResultTextBig.characterSpacing = 25 * ease - 40;
 
             ResultBackground.rectTransform.sizeDelta = new (
                 ResultBackground.rectTransform.sizeDelta.y,
@@ -98,7 +117,10 @@ public class ResultScreen : MonoBehaviour
         }
         FanfareSource.loop = true;
 
-        yield return new WaitForSeconds(1);
+        yield return Ease.Animate(1, (x) => {
+            PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Pallete.InterfaceColor * new Color(1, 1, 1, 1 - x));;
+            FanfareSource.volume = x * .3f;
+        });
 
         yield return Ease.Animate(1, (x) => {
             float ease1 = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.In), 2);
@@ -109,7 +131,7 @@ public class ResultScreen : MonoBehaviour
             );
             ResultText.rectTransform.localScale = Vector3.one * (1 - ease2 * .1f);
             ResultText.rectTransform.anchoredPosition = Vector2.up * (ease1 * 40);
-            FanfareSource.volume = x * .4f;
+            FanfareSource.volume = x * .3f + .3f;
         });
 
         ResultText.gameObject.SetActive(false);
@@ -124,6 +146,9 @@ public class ResultScreen : MonoBehaviour
         string rank = Helper.GetRank(score);
         string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA", "AA", "A", "B", "C", "D", "?"};
         int rankNum = System.Array.IndexOf(ranks, rank);
+        
+        ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
+            PlayerScreen.CurrentChart.Pallete.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
         yield return Ease.Animate(2.5f, (x) => {
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Circle, EaseMode.Out), 2);
@@ -144,14 +169,39 @@ public class ResultScreen : MonoBehaviour
                 ScoreRings[a].FillAmount = ScoreRings[a - 1].FillAmount * 10 - 9;
                 ScoreRings[a].SetVerticesDirty();
             }
+
+            float ease3 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+            ScoreExplosionRings[0].InsideRadius = 1 - ease3 - x * .01f;
+            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (600 / ease1 * (1 - ease3) + 100);
+            ScoreExplosionRings[0].rectTransform.position = ScoreRings[0].rectTransform.position;
+            float ease4 = Ease.Get(x * 1.5f - .5f, EaseFunction.Exponential, EaseMode.In);
+            ScoreExplosionRings[1].InsideRadius = 1 - ease4 - x * .01f;
+            ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (900 / ease1 * (1 - ease3) + 100);
+            ScoreExplosionRings[1].rectTransform.position = ScoreRings[0].rectTransform.position;
             
-            FanfareSource.volume = x * .6f + .4f;
+            FanfareSource.volume = x * .4f + .6f;
         });
+
+        ScoreExplosionRings[2].rectTransform.position = ScoreRings[0].rectTransform.position;
+        StartCoroutine(RankExplosionAnim());
         
         SongInfoHolder.alpha = DetailsHolder.alpha = 0;
+
         SongInfoHolder.gameObject.SetActive(true);
-        yield return new WaitForSeconds(1);
+        SongNameText.text = PlayerScreen.TargetSong.SongName;
+        SongArtistText.text = PlayerScreen.TargetSong.SongArtist;
+        SongDifficultyText.text = Helper.FormatDifficulty(PlayerScreen.TargetChart.Data.DifficultyLevel);
+
+        yield return Ease.Animate(1, (x) => {
+            RankText.color = new Color(1 - x, 1 - x, 1 - x);
+        });
+
         DetailsHolder.gameObject.SetActive(true);
+        PerfectCountText.text = PlayerScreen.main.PerfectCount.ToString();
+        GoodCountText.text = PlayerScreen.main.GoodCount.ToString();
+        BadCountText.text = PlayerScreen.main.BadCount.ToString();
+        MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
+            + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
 
         yield return Ease.Animate(0.8f, (x) => {
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(x, EaseFunction.Circle, EaseMode.Out), 2);
@@ -168,6 +218,25 @@ public class ResultScreen : MonoBehaviour
             DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, 10 * ease3 - 35);
         });
     }
+    IEnumerator RankExplosionAnim()
+    {
+        yield return Ease.Animate(2.5f, (x) => {
+            FlashBackground.color = new Color (0, 0, 0, .8f - .4f * x);
+
+            float ease2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+            ScoreExplosionRings[0].InsideRadius = ease2;
+            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (700 * ease2 + 100);
+            float ease4 = Ease.Get(x * 1.5f, EaseFunction.Exponential, EaseMode.Out);
+            ScoreExplosionRings[1].InsideRadius = ease4;
+            ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (1400 * ease4 + 100);
+            float ease1 = Ease.Get(x * 1.2f - .2f, EaseFunction.Exponential, EaseMode.Out);
+            ScoreExplosionRings[2].InsideRadius = ease1;
+            ScoreExplosionRings[2].rectTransform.sizeDelta = Vector2.one * (1600 * ease2 + 100);
+            
+            FanfareSource.volume = x * .4f + .6f;
+        });
+    }
+
     string PadAlpha(string source, char pad, int length)
     {
         if (source.Length >= length) return source;
