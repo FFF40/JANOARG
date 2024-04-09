@@ -2973,6 +2973,7 @@ GameObject:
   - component: {fileID: 879351028}
   - component: {fileID: 879351030}
   - component: {fileID: 879351031}
+  - component: {fileID: 879351032}
   m_Layer: 5
   m_Name: List
   m_TagString: Untagged
@@ -3072,6 +3073,18 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+--- !u!225 &879351032
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879351027}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &885272950
 GameObject:
   m_ObjectHideFlags: 0
@@ -5078,7 +5091,11 @@ MonoBehaviour:
   Playlist: {fileID: 11400000, guid: 8496bc59e6795a44785a16fe995ec357, type: 2}
   ItemSample: {fileID: 1567076798739812424, guid: 70ce51dbf68132e49a34eb0db328beb2, type: 3}
   ItemHolder: {fileID: 879351028}
+  ItemGroup: {fileID: 879351032}
+  ItemTrack: {fileID: 1149158469}
   ItemCursor: {fileID: 1323845866}
+  BackgroundHolder: {fileID: 1850335546}
+  BackgroundGroup: {fileID: 1850335551}
   TargetSongInfoHolder: {fileID: 832619951}
   TargetSongInfoName: {fileID: 1887098833}
   TargetSongInfoArtist: {fileID: 1709992015}
@@ -6120,6 +6137,7 @@ GameObject:
   - component: {fileID: 1850335548}
   - component: {fileID: 1850335549}
   - component: {fileID: 1850335550}
+  - component: {fileID: 1850335551}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -6200,6 +6218,18 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_EffectDistance: {x: 4, y: -2}
   m_UseGraphicAlpha: 1
+--- !u!225 &1850335551
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850335545}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1884794239
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 public class ResultScreen : MonoBehaviour
 {
@@ -37,9 +38,20 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text BadCountText;
     public TMP_Text MaxComboText;
     [Space]
+    public CanvasGroup LeftActionsHolder;
+    public RectTransform LeftActionsTransform;
+    public CanvasGroup RightActionsHolder;
+    public RectTransform RightActionsTransform;
+    [Space]
     public AudioClip Fanfare;
     public AudioSource FanfareSource;
     public float FanfareStart;
+    [Space]
+    public Image RetryBackground;
+    public Image RetryFlash;
+
+    [HideInInspector]
+    public bool IsAnimating;
 
     void Awake() 
     {
@@ -126,7 +138,7 @@ public class ResultScreen : MonoBehaviour
             float ease1 = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.In), 2);
             float ease2 = Ease.Get(x, EaseFunction.Quadratic, EaseMode.In);
             ResultBackground.rectTransform.sizeDelta = new (
-                ResultBackground.rectTransform.sizeDelta.y,
+                ResultBackground.rectTransform.sizeDelta.x,
                 ease1 * -10 + 100
             );
             ResultText.rectTransform.localScale = Vector3.one * (1 - ease2 * .1f);
@@ -154,7 +166,7 @@ public class ResultScreen : MonoBehaviour
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Circle, EaseMode.Out), 2);
             float ease2 = Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Quadratic, EaseMode.Out);
             ResultBackground.rectTransform.sizeDelta = new (
-                ResultBackground.rectTransform.sizeDelta.y,
+                ResultBackground.rectTransform.sizeDelta.x,
                 ease1 * -10 + 90
             );
             ScoreHolder.localScale = Vector3.one * (1.1f - ease2 * .1f);
@@ -202,6 +214,9 @@ public class ResultScreen : MonoBehaviour
         BadCountText.text = PlayerScreen.main.BadCount.ToString();
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
             + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
+            
+        LeftActionsHolder.gameObject.SetActive(true);
+        RightActionsHolder.gameObject.SetActive(true);
 
         yield return Ease.Animate(0.8f, (x) => {
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(x, EaseFunction.Circle, EaseMode.Out), 2);
@@ -211,11 +226,14 @@ public class ResultScreen : MonoBehaviour
             ScoreText.rectTransform.anchoredPosition = new (ScoreText.rectTransform.anchoredPosition.x, -20 * (1 - ease2));
             
             float ease3 = Ease.Get(Mathf.Clamp01(x * 2 - 1), EaseFunction.Cubic, EaseMode.Out);
-            BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha = ease3;
+            BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
+                = LeftActionsHolder.alpha = RightActionsHolder.alpha = ease3;
             ProfileBar.main.SetVisibilty(ease3);
             BestScoreTransform.anchoredPosition = new (-1010 + 10 * ease3, BestScoreTransform.anchoredPosition.y);
-            SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 25 - 10 * ease3);
-            DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, 10 * ease3 - 35);
+            SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 40 - 10 * ease3);
+            DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, 10 * ease3 - 50);
+            LeftActionsTransform.anchoredPosition = new (-10 * (1 - ease3), LeftActionsTransform.anchoredPosition.y);
+            RightActionsTransform.anchoredPosition = new (10 * (1 - ease3), RightActionsTransform.anchoredPosition.y);
         });
     }
     IEnumerator RankExplosionAnim()
@@ -235,6 +253,108 @@ public class ResultScreen : MonoBehaviour
             
             FanfareSource.volume = x * .4f + .6f;
         });
+    }
+
+    public void Retry() 
+    {
+        if (!IsAnimating) StartCoroutine(RetryAnim());
+    }
+
+    IEnumerator RetryAnim()
+    {
+        IsAnimating = true;
+
+        ScoreHolder.gameObject.SetActive(false);
+        RetryBackground.gameObject.SetActive(true);
+        RetryBackground.color = PlayerScreen.TargetSong.BackgroundColor;
+
+        yield return Ease.Animate(1, a => {
+            float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
+            ProfileBar.main.SetVisibilty(1 - lerp);
+            BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
+                = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
+            
+            SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);
+            DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, -10 * lerp - 40);
+            LeftActionsTransform.anchoredPosition = new (-10 * lerp, LeftActionsTransform.anchoredPosition.y);
+            RightActionsTransform.anchoredPosition = new (10 * lerp, RightActionsTransform.anchoredPosition.y);
+
+            float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
+            RetryBackground.rectTransform.anchorMin = new(0, .5f * (1 - lerp2));
+            RetryBackground.rectTransform.anchorMax = new(1, 1 - .5f * (1 - lerp2));
+            RetryBackground.rectTransform.sizeDelta = new(0, ResultBackground.rectTransform.sizeDelta.y * (1 - lerp2));
+            
+            float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
+            RetryFlash.color = new (1, 1, 1, 1 - lerp3);
+        });
+
+        RetryBackground.gameObject.SetActive(false);
+        SongInfoHolder.gameObject.SetActive(false);
+        LeftActionsHolder.gameObject.SetActive(false);
+        RightActionsHolder.gameObject.SetActive(false);
+        DetailsHolder.gameObject.SetActive(false);
+        Flash.gameObject.SetActive(false);
+        Common.main.MainCamera.backgroundColor = PlayerScreen.TargetSong.BackgroundColor;
+
+        yield return PlayerScreen.main.InitChart();
+        PlayerScreen.main.PlayerHUD.SetActive(true);
+        PlayerScreen.main.BeginReadyAnim();
+
+        IsAnimating = false;
+    }
+
+    public void Continue() 
+    {
+        if (!IsAnimating) StartCoroutine(ContinueAnim());
+    }
+
+    IEnumerator ContinueAnim()
+    {
+        IsAnimating = true;
+        
+        Color backColor = FlashBackground.color;
+
+        yield return Ease.Animate(1, a => {
+            float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
+            ProfileBar.main.SetVisibilty(1 - lerp);
+            BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
+                = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
+            
+            SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);
+            DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, -10 * lerp - 40);
+            LeftActionsTransform.anchoredPosition = new (-10 * lerp, LeftActionsTransform.anchoredPosition.y);
+            RightActionsTransform.anchoredPosition = new (10 * lerp, RightActionsTransform.anchoredPosition.y);
+            ResultBackground.rectTransform.sizeDelta = new (
+                ResultBackground.rectTransform.sizeDelta.x,
+                80 * (1 - lerp)
+            );
+
+            float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
+            ScoreHolder.pivot = new(lerp2, .5f);
+            ScoreHolder.anchorMin = ScoreHolder.anchorMax = new(-lerp2, .5f);
+            
+            float lerp3 = Ease.Get(a, EaseFunction.Exponential, EaseMode.InOut);
+            FlashBackground.color = Color.Lerp(backColor, Common.main.MainCamera.backgroundColor, lerp3);
+        });
+
+        RetryBackground.gameObject.SetActive(false);
+        SongInfoHolder.gameObject.SetActive(false);
+        LeftActionsHolder.gameObject.SetActive(false);
+        RightActionsHolder.gameObject.SetActive(false);
+        DetailsHolder.gameObject.SetActive(false);
+        Flash.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(1);
+
+        LoadingBar.main.Show();
+        Common.Load("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
+            LoadingBar.main.Hide();
+            SongSelectScreen.main.Intro();
+        }, false);
+        SceneManager.UnloadSceneAsync("Player");
+        Resources.UnloadUnusedAssets();
+
+        IsAnimating = false;
     }
 
     string PadAlpha(string source, char pad, int length)

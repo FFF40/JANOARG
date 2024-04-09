@@ -8,13 +8,20 @@ using UnityEngine.SceneManagement;
 
 public class SongSelectScreen : MonoBehaviour
 {
+    public static SongSelectScreen main;
+
     public Playlist Playlist;
     public List<PlayableSong> SongList { get; private set; } = new();
     [Space]
     public SongSelectItem ItemSample;
     public RectTransform ItemHolder;
+    public CanvasGroup ItemGroup;
     public List<SongSelectItem> ItemList { get; private set; } = new();
+    public Graphic ItemTrack;
     public Graphic ItemCursor;
+    [Space]
+    public RectTransform BackgroundHolder;
+    public CanvasGroup BackgroundGroup;
     [Space]
     public CanvasGroup TargetSongInfoHolder;
     public TMP_Text TargetSongInfoName;
@@ -48,9 +55,11 @@ public class SongSelectScreen : MonoBehaviour
     public bool TargetSongHiddenTarget;
     public float TargetSongOffset;
     public bool IsAnimating;
+    public bool IsInit;
 
     public void Awake()
     {
+        main = this;
         CommonScene.Load();
     }
 
@@ -108,13 +117,15 @@ public class SongSelectScreen : MonoBehaviour
             index++;
             pos += 48;
         }
-        IsReady = true;
-        UpdateItems();
+        IsInit = true;
+        if (!LoadingBar.main.gameObject.activeSelf) Intro();
     }
 
-    public void UpdateItems()
+    public void UpdateItems(bool cap = true)
     {
-        float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+        float scrollOfs = ScrollOffset;
+        if (cap) scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+
         foreach (SongSelectItem item in ItemList)
         {
             RectTransform rt = (RectTransform)item.transform;
@@ -295,7 +306,9 @@ public class SongSelectScreen : MonoBehaviour
             "LET'S DO THIS",
             "HERE WE GO",
             "NOW LAUNCHING",
+            "YOU ARE ABOUT TO EXPERIENCE",
             "YOU ARE NOW EXPERIENCING",
+            "NEXT DESTINATION",
         };
         LaunchText.text = launchTextList[Random.Range(0, launchTextList.Length)];
         
@@ -334,6 +347,7 @@ public class SongSelectScreen : MonoBehaviour
             SongSelectReadyScreen.main.EndLaunch();
         }, false);
         SceneManager.UnloadSceneAsync("Song Select");
+        Resources.UnloadUnusedAssets();
     }
 
     public void LerpInfo(float a)
@@ -351,6 +365,30 @@ public class SongSelectScreen : MonoBehaviour
         rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
         rt(DifficultyHolder).anchoredPosition = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
         ProfileBar.main.SetVisibilty(a);
+    }
+
+    public void Intro()
+    {
+        if (!IsAnimating) StartCoroutine(IntroAnim());
+    }
+
+    public IEnumerator IntroAnim() 
+    {
+        ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x;
+        UpdateItems(false);
+
+        yield return StartCoroutine(Ease.Animate(1, x => {
+            ItemGroup.alpha = x * 1e10f;
+            float xPos = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+            ItemTrack.color = new (1, 1, 1, Mathf.Clamp01(x * 3));
+            BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
+            ItemTrack.rectTransform.anchoredPosition = new (xPos - 180, ItemTrack.rectTransform.anchoredPosition.y);
+            BackgroundHolder.anchoredPosition = new (xPos, BackgroundHolder.anchoredPosition.y);
+
+            ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
+            UpdateItems(false);
+            IsReady = x > 0.6f;
+        }));
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;

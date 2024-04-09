@@ -59,6 +59,7 @@ public class PlayerScreen : MonoBehaviour
     [Header("Data")]
     public bool IsReady;
     public bool IsPlaying;
+    public bool HasPlayedBefore;
     public float CurrentTime = -5;
     [Space]
     public float TotalExScore = 0;
@@ -72,7 +73,7 @@ public class PlayerScreen : MonoBehaviour
     public int MaxCombo = 0;
     public int TotalCombo = 0;
     [Space]
-    public float HitsRemaining = 0;
+    public int HitsRemaining = 0;
     
     [HideInInspector]
     public List<LaneStyleManager> LaneStyles = new ();
@@ -95,10 +96,10 @@ public class PlayerScreen : MonoBehaviour
     {
         SetInterfaceColor(Color.clear);
         SongProgress.value = 0;
-        StartCoroutine(InitChart());
+        StartCoroutine(LoadChart());
     }
 
-    public IEnumerator InitChart()
+    public IEnumerator LoadChart()
     {
         SongNameLabel.text = TargetSong.SongName;
         SongArtistLabel.text = TargetSong.SongArtist;
@@ -109,31 +110,53 @@ public class PlayerScreen : MonoBehaviour
         Debug.Log(path);
         ResourceRequest thing = Resources.LoadAsync<ExternalChart>(path);
         
-        Music.clip = TargetSong.Clip;
-        Music.clip.LoadAudioData();
+        TargetSong.Clip.LoadAudioData();
 
-        yield return new WaitUntil(() => thing.isDone && Music.clip.loadState != AudioDataLoadState.Loading);
+        yield return new WaitUntil(() => thing.isDone && TargetSong.Clip.loadState != AudioDataLoadState.Loading);
 
         TargetChart = thing.asset as ExternalChart;
+
+        yield return InitChart();
+    }
+
+    public IEnumerator InitChart()
+    {
         CurrentChart = TargetChart.Data.DeepClone();
 
-        foreach (LaneStyle style in CurrentChart.Pallete.LaneStyles) LaneStyles.Add(new(style));
-        foreach (HitStyle style in CurrentChart.Pallete.HitStyles) HitStyles.Add(new(style));
+        if (HasPlayedBefore) 
+        {
+            TotalExScore = CurrentExScore = 0;
+            PerfectCount = GoodCount = BadCount = Combo = MaxCombo = TotalCombo = HitsRemaining = 0;
+            ScoreCounter.SetNumber(0);
+            SongProgress.value = 0;
 
-        for (int a = 0; a < TargetChart.Data.Groups.Count; a++)
+            for (int a = 0; a < LaneStyles.Count; a++) LaneStyles[a].Update(CurrentChart.Pallete.LaneStyles[a]);
+            for (int a = 0; a < HitStyles.Count; a++) HitStyles[a].Update(CurrentChart.Pallete.HitStyles[a]);
+            for (int a = 0; a < TargetChart.Data.Groups.Count; a++) LaneGroups[a].Current = CurrentChart.Groups[a];
+            foreach (LanePlayer lane in Lanes) Destroy(lane.gameObject);
+            Lanes.Clear();
+        } 
+        else 
         {
-            LaneGroupPlayer player = Instantiate(LaneGroupSample, Holder);
-            player.Original = TargetChart.Data.Groups[a];
-            player.Current = CurrentChart.Groups[a];
-            player.gameObject.name = player.Current.Name;
-            LaneGroups.Add(player);
-            yield return new WaitForEndOfFrame();
-        }
-        for (int a = 0; a < LaneGroups.Count; a++)
-        {
-            LaneGroupPlayer player = LaneGroups[a];
-            if (!string.IsNullOrEmpty(player.Current.Group))
-            player.transform.SetParent(LaneGroups.Find(x => x.Current.Name == player.Current.Group).transform);
+            foreach (LaneStyle style in CurrentChart.Pallete.LaneStyles) LaneStyles.Add(new(style));
+            foreach (HitStyle style in CurrentChart.Pallete.HitStyles) HitStyles.Add(new(style));
+
+            for (int a = 0; a < TargetChart.Data.Groups.Count; a++)
+            {
+                LaneGroupPlayer player = Instantiate(LaneGroupSample, Holder);
+                player.Original = TargetChart.Data.Groups[a];
+                player.Current = CurrentChart.Groups[a];
+                player.gameObject.name = player.Current.Name;
+                LaneGroups.Add(player);
+                yield return new WaitForEndOfFrame();
+            }
+            for (int a = 0; a < LaneGroups.Count; a++)
+            {
+                LaneGroupPlayer player = LaneGroups[a];
+                if (!string.IsNullOrEmpty(player.Current.Group))
+                player.transform.SetParent(LaneGroups.Find(x => x.Current.Name == player.Current.Group).transform);
+            }
+
         }
 
         for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
@@ -147,7 +170,7 @@ public class PlayerScreen : MonoBehaviour
             Lanes.Add(player);
             foreach (HitObject hit in player.Original.Objects)
             {
-                TotalExScore += (hit.Type == HitObject.HitType.Normal ? 3 : 1);
+                TotalExScore += hit.Type == HitObject.HitType.Normal ? 3 : 1;
                 TotalExScore += Mathf.Ceil(hit.HoldLength / 0.5f);
                 if (hit.Flickable)
                 {
@@ -159,7 +182,10 @@ public class PlayerScreen : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
+        Music.clip = TargetSong.Clip;
+        CurrentTime = -5;
         IsReady = true;
+        HasPlayedBefore = true;
         lastDSPTime = AudioSettings.dspTime;
     }
 
@@ -225,6 +251,9 @@ public class PlayerScreen : MonoBehaviour
                 if (Music.isPlaying) Music.Pause();
             }
             
+            // Check hit objects
+            CheckHitObjects();
+            
             // Update song progress slider
             SongProgress.value = CurrentTime / Music.clip.length;
 
@@ -255,9 +284,6 @@ public class PlayerScreen : MonoBehaviour
             // Update scene
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(CurrentTime, beat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(CurrentTime, beat);
-            
-            // Check hit objects
-            CheckHitObjects();
         }
     }
 

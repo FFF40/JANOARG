@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Security.Cryptography.X509Certificates;
+using UnityEngine.SceneManagement;
 
 public class IntroScreen : MonoBehaviour
 {
@@ -202,6 +203,15 @@ public class IntroScreen : MonoBehaviour
             PostTitleCover2.anchorMax = new (PostTitleCover2.anchorMax.x, Mathf.Lerp(yPos, 1, lerp2));
         });
         yield return new WaitForSecondsRealtime(1);
+
+        Common.main.MainCamera.backgroundColor = Color.black;
+
         LoadingBar.main.Show();
+        Common.Load("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
+            LoadingBar.main.Hide();
+            SongSelectScreen.main.Intro();
+        }, false);
+        SceneManager.UnloadSceneAsync("Intro");
+        Resources.UnloadUnusedAssets();
     }
 }
