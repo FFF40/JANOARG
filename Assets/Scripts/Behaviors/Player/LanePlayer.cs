@@ -12,27 +12,16 @@ public class LanePlayer : MonoBehaviour
     public Transform Holder;
     public MeshFilter MeshFilter;
     public MeshRenderer MeshRenderer;
+    public LaneGroupPlayer Group;
 
     public List<float> Positions = new();
     public List<float> Times = new();
     public float CurrentPosition;
 
     public List<HitPlayer> HitObjects = new();
+    public List<HitScreenCoord> HitCoords = new();
 
     public bool LaneStepDirty = false;
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void Init() 
     {
@@ -224,6 +213,7 @@ public class LanePlayer : MonoBehaviour
                 
                 player.Time = hoTime;
                 player.EndTime = player.Current.HoldLength > 0 ? PlayerScreen.TargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : hoTime;
+                player.HitCoord = HitCoords[0];
                 if (player.Current.HoldLength > 0)
                 {
                     for (float a = 0.5f; a < player.Current.HoldLength; a += 0.5f) player.HoldTicks.Add(PlayerScreen.TargetSong.Timing.ToSeconds(hit.Offset + a));
@@ -233,9 +223,11 @@ public class LanePlayer : MonoBehaviour
                 
                 player.Lane = this;
                 HitObjects.Add(player);
+                PlayerInputManager.main.AddToQueue(player);
                 player.Init();
 
                 Current.Objects.RemoveAt(0);
+                HitCoords.RemoveAt(0);
                 hoTime = float.NaN;
                 hoOffset++;
             }
@@ -412,4 +404,10 @@ public class LanePlayer : MonoBehaviour
     }
 
     float InverseLerpUnclamped(float start, float end, float val) => (val - start) / (end - start);
+}
+
+[System.Serializable]
+public struct HitScreenCoord {
+    public Vector2 Position;
+    public float Radius;
 }

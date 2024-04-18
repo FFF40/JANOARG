@@ -317,7 +317,7 @@ public class ResultScreen : MonoBehaviour
         yield return Ease.Animate(1, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
             ProfileBar.main.SetVisibilty(1 - lerp);
-            BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
+            SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
             
             SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);

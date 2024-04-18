@@ -7,17 +7,7 @@ public class LaneGroupPlayer : MonoBehaviour
     public LaneGroup Original; 
     public LaneGroup Current;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public LaneGroupPlayer Parent;
 
     public void UpdateSelf(float time, float beat)
     {

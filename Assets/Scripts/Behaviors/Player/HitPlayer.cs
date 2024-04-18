@@ -19,22 +19,16 @@ public class HitPlayer : MonoBehaviour
     
     public MeshFilter HoldMesh;
     public MeshRenderer HoldRenderer;
+    
+    public MeshFilter FlickMesh;
+    public MeshRenderer FlickRenderer;
 
     public LanePlayer Lane;
+    public HitScreenCoord HitCoord;
 
+    public bool IsQueuedHit;
     public bool IsHit;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public bool IsTapped;
 
     public void Init()
     {
@@ -43,7 +37,17 @@ public class HitPlayer : MonoBehaviour
             HitStyleManager style = PlayerScreen.main.HitStyles[Current.StyleIndex];
             Center.sharedMaterial = Left.sharedMaterial = Right.sharedMaterial =
                 Current.Type == HitObject.HitType.Catch ? style.CatchMaterial : style.NormalMaterial;
+
             if (HoldRenderer) HoldRenderer.sharedMaterial = style.HoldTailMaterial;
+
+            if (Current.Flickable)
+            {
+                FlickMesh.gameObject.SetActive(true);
+                FlickMesh.sharedMesh = float.IsFinite(Current.FlickDirection) 
+                    ? PlayerScreen.main.ArrowFlickIndicator 
+                    : PlayerScreen.main.FreeFlickIndicator;
+                FlickRenderer.sharedMaterial = Center.sharedMaterial;
+            }
         }
         else 
         {
@@ -61,6 +65,13 @@ public class HitPlayer : MonoBehaviour
         {
             UpdateMesh();
             Current.IsDirty = false;
+        }
+
+        if (FlickMesh.gameObject.activeSelf)
+        {
+            Quaternion rot = Common.main.MainCamera.transform.rotation;
+            float angle = float.IsFinite(Current.FlickDirection) ? Current.FlickDirection : 0;
+            FlickMesh.transform.rotation = Quaternion.Euler(0, 0, angle) * rot;
         }
     }
 
@@ -92,3 +103,5 @@ public class HitPlayer : MonoBehaviour
         }
     }
 }
+
+

@@ -19,6 +19,7 @@ public class PlayerScreen : MonoBehaviour
 
     [Space]
     public AudioSource Music;
+    public Camera Pseudocamera;
     [Space]
     public Transform Holder;
     public GameObject PlayerHUD;
@@ -38,6 +39,7 @@ public class PlayerScreen : MonoBehaviour
     [Space]
     public TMP_Text JudgmentLabel;
     public TMP_Text ComboLabel;
+    public RectTransform JudgeScreenHolder;
     [Space]
     public TMP_Text PauseLabel;
     [Space]
@@ -46,12 +48,16 @@ public class PlayerScreen : MonoBehaviour
     public LanePlayer LaneSample;
     public HitPlayer HitSample;
     public MeshRenderer HoldSample;
+    public JudgeScreenEffect JudgeScreenSample;
     [Space]
+    public Mesh FreeFlickIndicator;
+    public Mesh ArrowFlickIndicator;
     [Header("Values")]
     public float Speed = 121;
     [Space]
     public float PerfectWindow = 0.05f;
-    public float GoodWindow = 0.2f;
+    public float GoodWindow = 0.15f;
+    public float BadWindow = 0.2f;
     public float PassWindow = 0.1f;
     [Space]
     public float SyncThreshold = 0.05f;
@@ -94,6 +100,7 @@ public class PlayerScreen : MonoBehaviour
 
     public void Start()
     {
+        InitFlickMeshes();
         SetInterfaceColor(Color.clear);
         SongProgress.value = 0;
         StartCoroutine(LoadChart());
@@ -153,21 +160,32 @@ public class PlayerScreen : MonoBehaviour
             for (int a = 0; a < LaneGroups.Count; a++)
             {
                 LaneGroupPlayer player = LaneGroups[a];
-                if (!string.IsNullOrEmpty(player.Current.Group))
-                player.transform.SetParent(LaneGroups.Find(x => x.Current.Name == player.Current.Group).transform);
+                if (string.IsNullOrEmpty(player.Current.Group)) continue;
+                player.Parent = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
+                player.transform.SetParent(player.Parent.transform);
             }
 
         }
+
+        float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
 
         for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
         {
             LanePlayer player = Instantiate(LaneSample, Holder);
             player.Original = TargetChart.Data.Lanes[a];
             player.Current = CurrentChart.Lanes[a];
+            LaneGroupPlayer group = null;
             if (!string.IsNullOrEmpty(player.Current.Group)) 
-                player.transform.SetParent(LaneGroups.Find(x => x.Current.Name == player.Current.Group).transform);
+            {
+                group = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
+                player.transform.SetParent(group.transform);
+                player.Group = group;
+            }
             player.Init();
             Lanes.Add(player);
+
+            float time = float.NaN;
+            Vector3 startPos = Vector3.zero, endPos = Vector3.zero;
             foreach (HitObject hit in player.Original.Objects)
             {
                 TotalExScore += hit.Type == HitObject.HitType.Normal ? 3 : 1;
@@ -177,8 +195,39 @@ public class PlayerScreen : MonoBehaviour
                     TotalExScore += 1;
                     if (!float.IsNaN(hit.FlickDirection)) TotalExScore += 1;
                 }
+
+                if (time != hit.Offset) 
+                {
+                    CameraController camera = (CameraController)TargetChart.Data.Camera.Get(hit.Offset);
+                    Pseudocamera.transform.position = camera.CameraPivot;
+                    Pseudocamera.transform.eulerAngles = camera.CameraRotation;
+                    Pseudocamera.transform.Translate(Vector3.back * camera.PivotDistance);
+
+                    Lane lane = (Lane)player.Original.Get(hit.Offset);
+                    LanePosition step = lane.GetLanePosition(hit.Offset, hit.Offset, TargetSong.Timing);
+                    startPos = Quaternion.Euler(lane.Rotation) * step.StartPos + lane.Position;
+                    endPos = Quaternion.Euler(lane.Rotation) * step.EndPos + lane.Position;
+                    LaneGroupPlayer gp = group;
+                    while (gp) 
+                    {
+                        LaneGroup laneGroup = (LaneGroup)gp.Original.Get(hit.Offset);
+                        startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
+                        endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
+                        gp = gp.Parent;
+                    }
+                }
+
+                HitObject h = (HitObject)hit.Get(hit.Offset);
+                Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position));
+                Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position + hit.Length));
+                player.HitCoords.Add(new HitScreenCoord {
+                    Position = (hitStart + hitEnd) / 2,
+                    Radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f,
+                });
             }
+
             HitsRemaining += player.Original.Objects.Count;
+
             yield return new WaitForEndOfFrame();
         }
 
@@ -299,33 +348,8 @@ public class PlayerScreen : MonoBehaviour
                     lane.UpdateHoldMesh(hit);
                 }
             }
-            for (int a = 0; a < lane.HitObjects.Count; a++)
-            {
-                HitPlayer hit = lane.HitObjects[a];
-                if (hit.IsHit)
-                {
-                    while (hit.HoldTicks.Count > 0 && hit.HoldTicks[0] <= CurrentTime) 
-                    {
-                        AddScore(1, null);
-                        hit.HoldTicks.RemoveAt(0);
-                    }
-                    if (hit.HoldTicks.Count <= 0)
-                    {
-                        RemoveHitPlayer(hit);
-                        a--;
-                    }
-                }
-                else if (hit.Time <= CurrentTime)
-                {
-                    Hit(hit, 0);
-                    a--;
-                }
-                else 
-                {
-                    break;
-                }
-            }
         }
+        PlayerInputManager.main.UpdateTouches();
     }
 
     public void AddScore(float score, float? acc)
@@ -337,7 +361,8 @@ public class PlayerScreen : MonoBehaviour
         {
             Combo++;
             MaxCombo = Mathf.Max(MaxCombo, Combo);
-            PerfectCount++;
+            if (acc == null || acc == 0) PerfectCount++;
+            else GoodCount++;
         }
         else 
         {
@@ -365,16 +390,38 @@ public class PlayerScreen : MonoBehaviour
         }
     }
 
-    public void Hit(HitPlayer hit, float offset)
+    public void Hit(HitPlayer hit, float offset, bool spawnEffect = true)
     {
         int score = hit.Current.Type == HitObject.HitType.Normal ? 3 : 1;
         if (hit.Current.Flickable)
         {
             score += 1;
-            if (!float.IsNaN(hit.Current.FlickDirection))   score += 1;
+            if (!float.IsNaN(hit.Current.FlickDirection)) score += 1;
         }
         
-        AddScore(score, 0);
+        float offsetAbs = Mathf.Abs(offset);
+        float? acc = null;
+        if (hit.Current.Flickable || hit.Current.Type == HitObject.HitType.Catch)
+        {
+            if (offsetAbs <= PassWindow) AddScore(score, null);
+            else AddScore(0, null);
+        }
+        else 
+        {
+            acc = 0;
+            if (offsetAbs > GoodWindow) acc = Mathf.Sign(offset);
+            else if (offsetAbs > PerfectWindow) acc = Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
+            AddScore(score * (1 - (float)acc), acc);
+        }
+
+        if (spawnEffect)
+        {
+            var effect = Instantiate(JudgeScreenSample, JudgeScreenHolder);
+            effect.SetAccuracy(acc);
+            effect.SetColor(CurrentChart.Pallete.InterfaceColor);
+            var rt = (RectTransform)effect.transform;
+            rt.position = hit.HitCoord.Position;
+        }
 
         if (hit.Time == hit.EndTime)
         {
@@ -398,5 +445,39 @@ public class PlayerScreen : MonoBehaviour
             PauseLabel.color = color;
         foreach (Graphic g in ScoreDigits) g.color = color;
         SongProgressBody.color = color * new Color (1, 1, 1, .5f);
+    }
+
+    public void InitFlickMeshes() 
+    {
+        if (!FreeFlickIndicator) 
+        {
+            Mesh mesh = new();
+            List<Vector3> verts = new();
+            List<int> tris = new();
+
+            verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2), new(0, -.5f), new(1, 0), new(0, -2), new(0, .5f) });
+            tris.AddRange(new [] {0, 1, 2, 3, 4, 5});
+
+            mesh.SetVertices(verts);
+            mesh.SetUVs(0, verts);
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateNormals();
+            FreeFlickIndicator = mesh;
+        }
+        if (!ArrowFlickIndicator) 
+        {
+            Mesh mesh = new();
+            List<Vector3> verts = new();
+            List<int> tris = new();
+
+            verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2.2f), new(1, 0), new(.71f, -.71f), new(0, -1), new(-.71f, -.71f) });
+            tris.AddRange(new [] {0, 1, 2, 2, 3, 0, 3, 4, 0, 4, 5, 0});
+
+            mesh.SetVertices(verts);
+            mesh.SetUVs(0, verts);
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateNormals();
+            ArrowFlickIndicator = mesh;
+        }
     }
 }

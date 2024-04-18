@@ -978,6 +978,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &324592699
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 324592700}
+  m_Layer: 5
+  m_Name: Judge Screen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &324592700
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 324592699}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1551788790}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &325656911
 GameObject:
   m_ObjectHideFlags: 0
@@ -3520,7 +3556,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 26.991467
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -6584,6 +6620,7 @@ GameObject:
   - component: {fileID: 1551788788}
   - component: {fileID: 1551788787}
   - component: {fileID: 1551788791}
+  - component: {fileID: 1551788792}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -6666,6 +6703,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1743933711}
+  - {fileID: 324592700}
   - {fileID: 150717747}
   - {fileID: 1598840471}
   - {fileID: 1463477073}
@@ -6690,6 +6728,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Music: {fileID: 1395341278}
+  Pseudocamera: {fileID: 939693537}
   Holder: {fileID: 1854443385}
   PlayerHUD: {fileID: 150717746}
   SongNameLabel: {fileID: 2716741191531877648}
@@ -6719,14 +6758,19 @@ MonoBehaviour:
   - {fileID: 1084434980}
   JudgmentLabel: {fileID: 1214491412}
   ComboLabel: {fileID: 80537440}
+  JudgeScreenHolder: {fileID: 324592700}
   PauseLabel: {fileID: 664049825}
   LaneGroupSample: {fileID: 7932530262983194933, guid: 9f163d8f499bace4694fcbbda4c1d6b3, type: 3}
   LaneSample: {fileID: 2572600698700152797, guid: 21d1e5daa792aad4599081b3d9a9aa5a, type: 3}
   HitSample: {fileID: 6330576044930397103, guid: f7c5f9796af0db641befed862691db8f, type: 3}
   HoldSample: {fileID: 3155999716207336932, guid: defee50d3359a704fbd6e85864f1a183, type: 3}
+  JudgeScreenSample: {fileID: 423507467669762518, guid: 8a7d01df89b0588429a2a71d4f1c8272, type: 3}
+  FreeFlickIndicator: {fileID: 0}
+  ArrowFlickIndicator: {fileID: 0}
   Speed: 121
   PerfectWindow: 0.05
   GoodWindow: 0.2
+  BadWindow: 0.2
   PassWindow: 0.1
   SyncThreshold: 0.1
   IsReady: 0
@@ -6744,6 +6788,21 @@ MonoBehaviour:
   HitsRemaining: 0
   LaneGroups: []
   Lanes: []
+--- !u!114 &1551788792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551788786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6a4bfa751512848bc43d2424a79ca2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player: {fileID: 1551788791}
+  Autoplay: 0
+  HitQueue: []
 --- !u!114 &1580230708 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9170983560658053137, guid: 3a6720bb216fc2343a4fb37ed69e6fd8, type: 3}
