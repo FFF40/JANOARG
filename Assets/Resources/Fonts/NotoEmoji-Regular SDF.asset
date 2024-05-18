@@ -230,7 +230,7 @@ MonoBehaviour:
   normalSpacingOffset: 0
   boldStyle: 0.75
   boldSpacing: 7
-  italicStyle: 35
+  italicStyle: 15
   tabSize: 10
 --- !u!21 &5117857869213938233
 Material:

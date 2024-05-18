@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="Player.svg"
+   inkscape:export-filename="Player.png"
+   inkscape:export-xdpi="384"
+   inkscape:export-ydpi="384"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="px"
+     inkscape:lockguides="false"
+     showgrid="true"
+     inkscape:zoom="21.124655"
+     inkscape:cx="6.7930103"
+     inkscape:cy="7.2190528"
+     inkscape:window-width="1366"
+     inkscape:window-height="745"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="1"
+       spacingy="1"
+       empcolor="#3f3fff"
+       empopacity="0.25098039"
+       color="#3f3fff"
+       opacity="0.1254902"
+       empspacing="5"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path1"
+       style="color:#000000;fill:#ffffff;stroke-linecap:square;stroke-linejoin:bevel;-inkscape-stroke:none"
+       d="M 6.1777344 3 L 6.0175781 3.8164062 L 5.2324219 8 L 7.2675781 8 L 7.9824219 4.1835938 L 8.15625 3 L 6.1777344 3 z M 14.740234 3 L 15.029297 4.2421875 L 15.96875 8 L 18.03125 8 L 16.970703 3.7578125 L 16.787109 3 L 14.740234 3 z M 3.7324219 16 L 3.0175781 19.816406 L 4 21 L 20 21 L 20.970703 19.757812 L 20.03125 16 L 17.96875 16 L 18.71875 19 L 5.2050781 19 L 5.7675781 16 L 3.7324219 16 z " />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:1.2"
+       id="rect4"
+       width="2"
+       height="4"
+       x="3"
+       y="10" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:1.2"
+       id="rect5"
+       width="12"
+       height="4"
+       x="6"
+       y="10" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:1.2"
+       id="rect6"
+       width="2"
+       height="4"
+       x="19"
+       y="10" />
+  </g>
+</svg>

@@ -13,6 +13,7 @@ public class Common : MonoBehaviour
 
     public LoadingBar LoadingBar;
     public Storage Storage;
+    public Storage Preferences;
 
     public void Awake()
     {
@@ -21,9 +22,12 @@ public class Common : MonoBehaviour
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
         Storage = new Storage("save");
-        Storage.Set("Count", Storage.Get("Count", 0) + 1);
-        Debug.Log(Storage.Get("Count", 0));
+        int count;
+        Storage.Set("STAT_Count", count = Storage.Get("STAT_Count", 0) + 1);
+        Debug.Log(count);
         Storage.Save();
+
+        Preferences = new Storage("prefs");
 
         Application.targetFrameRate = 60;
 
