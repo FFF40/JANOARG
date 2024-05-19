@@ -94,6 +94,7 @@
      <Compile Include="Assets\Scripts\Behaviors\Options\Input Types\OptionText.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Options\Input Types\StringOptionInput.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Options\Input Types\FloatOptionInput.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Options\Input Types\OptionAboutEntry.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Options\OptionInputHandler.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Options\OptionInputField.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

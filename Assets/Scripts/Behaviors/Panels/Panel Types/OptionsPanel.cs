@@ -78,6 +78,11 @@ public class OptionsPanel : MonoBehaviour
         IsAnimating = false;
     }
 
+    public void SetScrollerWidth(float width)
+    {
+        rt(ContentScroller).sizeDelta = new (width, rt(ContentScroller).sizeDelta.y);
+    }
+
     public void MakeTab(int tab) 
     {
         ClearAll();
@@ -93,6 +98,7 @@ public class OptionsPanel : MonoBehaviour
             case 0:
             {
                 SubtitleLabel.text = " > General";
+                SetScrollerWidth(400);
 
                 Spawn<OptionCategoryTitle>("Profile");
 
@@ -107,6 +113,7 @@ public class OptionsPanel : MonoBehaviour
             case 1:
             {
                 SubtitleLabel.text = " > Player";
+                SetScrollerWidth(400);
 
                 Spawn<OptionCategoryTitle>("Syncronization");
 
@@ -129,31 +136,27 @@ public class OptionsPanel : MonoBehaviour
             case 2:
             {
                 SubtitleLabel.text = " > About";
+                SetScrollerWidth(600);
 
                 AboutPane.SetActive(true);
-                Spawn<OptionCategoryTitle>("LEAD PROGRAMMER / GAME DESIGNER");
-                Spawn<OptionText>("duducat / ducdat0507");
+                OptionAboutEntry entry;
+                entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
+                entry.BodyLabel.text = "duducat / ducdat0507";
 
-                Spawn<OptionText>("");
-                Spawn<OptionCategoryTitle>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
-                Spawn<OptionText>("Insert name of a famous artist here");
+                entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
+                entry.BodyLabel.text = "Insert name of a famous artist here";
 
-                Spawn<OptionText>("");
-                Spawn<OptionCategoryTitle>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                Spawn<OptionText>("mrcool909090");
-                Spawn<OptionText>("Sound Souler");
+                entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
+                entry.BodyLabel.text = "Sound Souler  •  mrcool909090";
                 
-                Spawn<OptionText>("");
-                Spawn<OptionCategoryTitle>("SOUNDTRACK COMPOSERS (UI BACKGROUND MUSIC)");
-                Spawn<OptionText>("duducat");
+                entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
+                entry.BodyLabel.text = "duducat";
 
-                Spawn<OptionText>("");
-                Spawn<OptionCategoryTitle>("COVER ARTISTS");
-                Spawn<OptionText>(":blobcat:");
+                entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
+                entry.BodyLabel.text = ":blobcat:";
 
-                Spawn<OptionText>("");
-                Spawn<OptionCategoryTitle>("CHART DESIGNERS");
-                Spawn<OptionText>("duducat");
+                entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
+                entry.BodyLabel.text = "duducat";
             }
             break;
         }
@@ -194,4 +197,6 @@ public class OptionsPanel : MonoBehaviour
         }
         CurrentItems.Clear();
     }
+
+    static RectTransform rt(MonoBehaviour item) => (RectTransform)item.transform;
 }
