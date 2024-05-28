@@ -22,11 +22,17 @@ public class OptionInputHandler : MonoBehaviour
     [Space]
     public TMP_Text BeforeText;
     public TMP_Text AfterText;
+    [Space]
+    public CanvasGroup AdvancedInputGroup;
+    public RectTransform AdvancedInputTransform;
+    public AnimatedToggle AdvancedInputToggle;
 
     [Space]
     public OptionInputField InputSample;
     public RectTransform InputHolder;
     public List<OptionInputField> CurrentInputs;
+    public LayoutGroup InputLayout;
+    public CanvasGroup InputGroup;
     [Space]
     public TMP_Text TextAnimSample;
     public RectTransform TextAnimHolder;
@@ -35,7 +41,11 @@ public class OptionInputHandler : MonoBehaviour
     [HideInInspector]
     public bool IsAnimating;
     [HideInInspector]
+    public bool IsAdvanced;
+    [HideInInspector]
     public OptionItem CurrentItem;
+
+    bool recursionBuster = false;
 
     public void Awake() 
     {
@@ -74,6 +84,7 @@ public class OptionInputHandler : MonoBehaviour
                     BeforeText.gameObject.SetActive(false);
                     AfterText.gameObject.SetActive(true);
                     AfterText.text = i.CurrentValue.Length.ToString() + " / " + i.Limit.ToString();
+                    AdvancedInputGroup.gameObject.SetActive(false);
                     field.InputField.onValueChanged.AddListener(value =>
                     {
                         AfterText.text = value.Length.ToString() + " / " + i.Limit.ToString();
@@ -119,8 +130,8 @@ public class OptionInputHandler : MonoBehaviour
                     BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> <";
                     AfterText.gameObject.SetActive(true);
                     AfterText.text = "< " + i.Max + "<alpha=#77>" + i.Unit;
+                    AdvancedInputGroup.gameObject.SetActive(false);
 
-                    bool recursionBuster = false;
                     field.InputField.onEndEdit.AddListener(value =>
                     {
                         if (recursionBuster) return;
@@ -147,6 +158,90 @@ public class OptionInputHandler : MonoBehaviour
                         i.UpdateValue();
                         recursionBuster = false;
                     });
+                    break;
+                }
+
+            case MultiFloatOptionInput:
+                {
+                    MultiFloatOptionInput i = (MultiFloatOptionInput)item;
+                    var fieldInfos = MultiValueFieldData.Info[i.ValueType];
+                    bool recursionBuster = false;
+
+                    IsAdvanced = i.CurrentValue.Length > 1;
+
+                    for (int a = 0; a < fieldInfos.Count; a++) 
+                    {
+                        int aa = a;
+                        var fieldInfo = fieldInfos[a];
+                        
+                        OptionInputField field = Instantiate(InputSample, InputHolder);
+                        field.InputField.text = (i.CurrentValue.Length > 1 ? i.CurrentValue[a] : i.CurrentValue[0]).ToString();
+                        field.InputField.contentType = i.Step != 0 && i.Step % 1 == 0
+                            ? TMP_InputField.ContentType.IntegerNumber
+                            : TMP_InputField.ContentType.DecimalNumber;
+                        field.UnitLabel.text = "<alpha=#77>" + i.Unit;
+                        field.Slider.minValue = i.Min;
+                        field.Slider.maxValue = i.Max;
+                        field.Slider.value = i.CurrentValue.Length > 1 ? i.CurrentValue[a] : i.CurrentValue[0];
+                        field.SetColor(fieldInfo.Color);
+                        CurrentInputs.Add(field);
+
+                        TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                        Vector3[] corners = new Vector3[4];
+                        i.ValueHolders[a].rectTransform.GetWorldCorners(corners);
+                        textAnim.rectTransform.position = corners[3];
+                        textAnim.text = i.ValueHolders[a].text;
+                        TextAnimLabels.Add(textAnim);
+
+                        TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                        i.UnitLabels[a].rectTransform.GetWorldCorners(corners);
+                        unitAnim.rectTransform.position = corners[3];
+                        unitAnim.font = i.UnitLabels[a].font;
+                        unitAnim.text = i.UnitLabels[a].text;
+                        TextAnimLabels.Add(unitAnim);
+
+                        textAnim.color = unitAnim.color = fieldInfo.Color;
+
+                        field.InputField.onEndEdit.AddListener(value =>
+                        {
+                            if (recursionBuster) return;
+                            recursionBuster = true;
+                            bool valid = float.TryParse(value, out float val);
+                            if (valid)
+                            {
+                                val = Mathf.Clamp(val, i.Min, i.Max);
+                                if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
+                                field.Slider.value = val;
+                                i.CurrentValue[aa] = val;
+                                i.Set(i.CurrentValue);
+                                i.UpdateValue();
+                            }
+                            textAnim.text = field.InputField.text = i.CurrentValue[aa].ToString();
+                            recursionBuster = false;
+                        });
+                        field.Slider.onValueChanged.AddListener(val =>
+                        {
+                            if (recursionBuster) return;
+                            val = Mathf.Clamp(val, i.Min, i.Max);
+                            if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
+                            textAnim.text = field.InputField.text = val.ToString();
+                            i.CurrentValue[aa] = val;
+                            i.Set(i.CurrentValue);
+                            i.UpdateValue();
+                            recursionBuster = false;
+                        });
+                    }
+
+                    BeforeText.gameObject.SetActive(true);
+                    BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> <";
+                    AfterText.gameObject.SetActive(true);
+                    AfterText.text = "< " + i.Max + "<alpha=#77>" + i.Unit;
+                    AdvancedInputGroup.gameObject.SetActive(true);
+                    recursionBuster = true;
+                    AdvancedInputToggle.Value = IsAdvanced;
+                    recursionBuster = false;
+                    SetAdvancedInput(i.ValueType, IsAdvanced);
+                        
                     break;
                 }
 
@@ -200,6 +295,20 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
+            case MultiFloatOptionInput: 
+                {
+                    MultiFloatOptionInput input = (MultiFloatOptionInput)item;
+                    inputLerp = x => {
+                        for (int a = 0; a < CurrentInputs.Count; a++) 
+                        {
+                            LerpText(TextAnimLabels[a * 2], input.ValueHolders[a], CurrentInputs[a].InputField.textComponent, x);
+                            LerpText(TextAnimLabels[a * 2 + 1], input.UnitLabels[a], CurrentInputs[a].UnitLabel, x);
+                        }
+                    };
+                    endLerp = () => {
+                    };
+                    break;
+                }
 
             default:
                 {
@@ -235,6 +344,11 @@ public class OptionInputHandler : MonoBehaviour
 
             float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
             TitleText.alpha = RightHolder.alpha = ease3;
+            AdvancedInputTransform.anchoredPosition = new (
+                (IsAdvanced ? -690 : -190) - 10 * ease3, 
+                AdvancedInputTransform.anchoredPosition.y
+            );
+            AdvancedInputGroup.alpha = ease3;
 
             inputLerp(ease); 
         });
@@ -267,6 +381,12 @@ public class OptionInputHandler : MonoBehaviour
             RightTransform.anchoredPosition = rightPos + Vector2.right * 10 * ease;
             TitleText.alpha = RightHolder.alpha = 1 - ease;
 
+            AdvancedInputTransform.anchoredPosition = new (
+                (IsAdvanced ? -700 : -200) + 10 * ease, 
+                AdvancedInputTransform.anchoredPosition.y
+            );
+            AdvancedInputGroup.alpha = 1 - ease;
+
             inputLerp(1 - ease);
         });
 
@@ -295,5 +415,97 @@ public class OptionInputHandler : MonoBehaviour
         to.rectTransform.GetWorldCorners(corners);
         Vector3 cornerTo = corners[0];
         textAnim.rectTransform.position = Vector3.Lerp(cornerFrom, cornerTo, lerp);
+    }
+
+    public void UpdateAdvancedInput() 
+    {
+        if (IsAnimating || recursionBuster) 
+        {
+            recursionBuster = true;
+            AdvancedInputToggle.Value = !AdvancedInputToggle.Value;
+            recursionBuster = false;
+            return;
+        }
+
+        MultiValueType type;
+
+        switch (CurrentItem) 
+        {
+            case MultiFloatOptionInput: 
+                {
+                    MultiFloatOptionInput input = (MultiFloatOptionInput)CurrentItem;
+                    type = input.ValueType;
+                    input.Set(AdvancedInputToggle.Value ? new [] {
+                        CurrentInputs[0].Slider.value,
+                        CurrentInputs[1].Slider.value,
+                        CurrentInputs[2].Slider.value,
+                    } : new [] {
+                        CurrentInputs[0].Slider.value,
+                    });
+                    input.UpdateValue();
+                    break;
+                }
+
+            default: return;
+        }
+
+        StartCoroutine(AdvancedInputAnim(type, AdvancedInputToggle.Value));
+    }
+
+    public void SetAdvancedInput(MultiValueType type, bool active) 
+    {
+        IsAdvanced = active;
+        var list = MultiValueFieldData.Info[type];
+
+        Color firstColor = active ? list[0].Color : Color.white;
+        TextAnimLabels[0].color = TextAnimLabels[1].color = firstColor;
+        CurrentInputs[0].SetColor(firstColor);
+        
+        for (int a = 0; a < CurrentInputs.Count; a++)
+        {
+            CurrentInputs[a].Title.text = active ? list[a].Name : "";
+        }
+        for (int a = 1; a < CurrentInputs.Count; a++)
+        {
+            CurrentInputs[a].gameObject.SetActive(active);
+            TextAnimLabels[a * 2].text = active ? CurrentInputs[a].InputField.text : "";
+            TextAnimLabels[a * 2 + 1].text = active ? CurrentInputs[a].UnitLabel.text : "";
+        }
+    }
+
+    public IEnumerator AdvancedInputAnim(MultiValueType type, bool active)
+    {
+        IsAnimating = true;
+
+        if (active)
+        {
+            StartCoroutine(Ease.Animate(.4f, x => {
+                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                AdvancedInputTransform.anchoredPosition = new (-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
+            }));
+        }
+        else 
+        {
+            StartCoroutine(Ease.Animate(.5f, x => {
+                float ease2 = Ease.Get(Mathf.Clamp01(x * 1.2f - .2f), EaseFunction.Cubic, EaseMode.Out);
+                AdvancedInputTransform.anchoredPosition = new (-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
+            }));
+        }
+
+        yield return Ease.Animate(.2f, x => {
+            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+            InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * ease);
+            InputGroup.alpha = (1 - ease) * (1 - ease);
+        });
+
+        SetAdvancedInput(type, active);
+
+        yield return Ease.Animate(.4f, x => {
+            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+            InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * (1 - ease));
+            InputGroup.alpha = ease * ease;
+        });
+
+        IsAnimating = false;
     }
 }

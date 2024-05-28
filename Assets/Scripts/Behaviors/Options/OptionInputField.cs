@@ -18,7 +18,7 @@ public class OptionInputField : MonoBehaviour
     public void SetColor(Color color) 
     {
         InputUnderline.color = InputField.textComponent.color = 
-            Title.color = color;
+            Title.color = UnitLabel.color = color;
 
         foreach (Graphic graphic in SliderTints) graphic.color = color;
         

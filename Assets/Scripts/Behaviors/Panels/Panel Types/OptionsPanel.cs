@@ -130,6 +130,29 @@ public class OptionsPanel : MonoBehaviour
                     () => Preferences.Get("PLYR_VisualOffset", 0f),
                     x => Preferences.Set("PLYR_VisualOffset", x)
                 );
+
+                Spawn<OptionCategoryTitle>("Audio");
+                
+                sample.Min = 0;
+                sample.Max = 100;
+                sample.Step = 5;
+                sample.Unit = "%";
+
+                MultiFloatOptionInput msample = GetOptionItemSample<MultiFloatOptionInput>();
+                msample.Min = 0;
+                msample.Max = 100;
+                msample.Step = 5;
+                msample.Unit = "%";
+                msample.ValueType = MultiValueType.PerJudgment;
+
+                var musicVol = Spawn<FloatOptionInput, float>("Music Volume", 
+                    () => Preferences.Get("PLYR_BGMusicVolume", 100f),
+                    x => Preferences.Set("PLYR_BGMusicVolume", x)
+                );
+                var hsVol = Spawn<MultiFloatOptionInput, float[]>("Hitsound Volume", 
+                    () => Preferences.Get("PLYR_HitsoundVolume", new [] {100f}),
+                    x => Preferences.Set("PLYR_HitsoundVolume", x)
+                );
             }
             break;
 
