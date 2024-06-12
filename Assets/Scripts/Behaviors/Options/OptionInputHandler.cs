@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.Windows;
 using Unity.VisualScripting;
 using UnityEngine.EventSystems;
+using System.Linq;
 
 public class OptionInputHandler : MonoBehaviour
 {
@@ -26,6 +27,10 @@ public class OptionInputHandler : MonoBehaviour
     public CanvasGroup AdvancedInputGroup;
     public RectTransform AdvancedInputTransform;
     public AnimatedToggle AdvancedInputToggle;
+    [Space]
+    public CanvasGroup ListGroup;
+    public RectTransform ListTransform;
+    public OptionInputListHandler ListHandler;
 
     [Space]
     public OptionInputField InputSample;
@@ -127,9 +132,9 @@ public class OptionInputHandler : MonoBehaviour
                     TextAnimLabels.Add(unitAnim);
 
                     BeforeText.gameObject.SetActive(true);
-                    BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> <";
+                    BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> ≤";
                     AfterText.gameObject.SetActive(true);
-                    AfterText.text = "< " + i.Max + "<alpha=#77>" + i.Unit;
+                    AfterText.text = "≤ " + i.Max + "<alpha=#77>" + i.Unit;
                     AdvancedInputGroup.gameObject.SetActive(false);
 
                     field.InputField.onEndEdit.AddListener(value =>
@@ -233,15 +238,35 @@ public class OptionInputHandler : MonoBehaviour
                     }
 
                     BeforeText.gameObject.SetActive(true);
-                    BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> <";
+                    BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> ≤";
                     AfterText.gameObject.SetActive(true);
-                    AfterText.text = "< " + i.Max + "<alpha=#77>" + i.Unit;
+                    AfterText.text = "≤ " + i.Max + "<alpha=#77>" + i.Unit;
                     AdvancedInputGroup.gameObject.SetActive(true);
                     recursionBuster = true;
                     AdvancedInputToggle.Value = IsAdvanced;
                     recursionBuster = false;
                     SetAdvancedInput(i.ValueType, IsAdvanced);
                         
+                    break;
+                }
+                
+            case ListOptionInput:
+                {
+                    Debug.Log("ListOptionInput");
+                    ListOptionInput i = (ListOptionInput)item;
+
+                    TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    Vector3[] corners = new Vector3[4];
+                    i.ValueHolder.rectTransform.GetWorldCorners(corners);
+                    textAnim.rectTransform.position = corners[3];
+                    textAnim.text = i.ValueHolder.text;
+                    TextAnimLabels.Add(textAnim);
+
+                    ListHandler.gameObject.SetActive(true);
+                    ListHandler.SetList(item as ListOptionInput<string>);
+                    AdvancedInputGroup.gameObject.SetActive(false);
+                    BeforeText.text = AfterText.text = "";
+
                     break;
                 }
 
@@ -309,11 +334,42 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
+            case ListOptionInput: 
+                {
+                    ListOptionInput input = (ListOptionInput)item;
+                    inputLerp = x => {
+                        LerpText(TextAnimLabels[0], input.ValueHolder, ListHandler.Items[ListHandler.CurrentPosition].Text, x);
+                    };
+                    endLerp = () => {
+                    };
+                    break;
+                }
 
             default:
                 {
                     inputLerp = _ => {};
                     endLerp = () => {};
+                    break;
+                }
+        }
+    }
+
+    public void GetItemFinishFunctions(OptionItem item, out Action onFinish) 
+    {
+        switch (item) 
+        {
+            case ListOptionInput: 
+                {
+                    onFinish = () => {
+                        ListHandler.Finish();
+                        TextAnimLabels[0].text = ListHandler.Items[ListHandler.CurrentPosition].Text.text;
+                    };
+                    break;
+                }
+
+            default:
+                {
+                    onFinish = () => {};
                     break;
                 }
         }
@@ -331,6 +387,7 @@ public class OptionInputHandler : MonoBehaviour
         Vector2 titlePos = TitleText.rectTransform.anchoredPosition;
         TitleText.alpha = RightHolder.alpha = 0;
         Vector2 rightPos = RightTransform.anchoredPosition;
+        Vector2 listPos = ListTransform.anchoredPosition;
 
         yield return Ease.Animate(.45f, x => {
 
@@ -339,11 +396,13 @@ public class OptionInputHandler : MonoBehaviour
             InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, ease * 40);
 
             float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * 30 * (1 - ease2);
-            RightTransform.anchoredPosition = rightPos + Vector2.right * 30 * (1 - ease2);
+            float offset = 30 * (1 - ease2);
+            TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
+            RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
+            ListTransform.anchoredPosition = listPos + Vector2.right * offset;
 
             float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
-            TitleText.alpha = RightHolder.alpha = ease3;
+            TitleText.alpha = RightHolder.alpha = ListGroup.alpha = ease3;
             AdvancedInputTransform.anchoredPosition = new (
                 (IsAdvanced ? -690 : -190) - 10 * ease3, 
                 AdvancedInputTransform.anchoredPosition.y
@@ -368,18 +427,23 @@ public class OptionInputHandler : MonoBehaviour
     {
         IsAnimating = true;
         GetItemLerpFunctions(CurrentItem, out Action<float> inputLerp, out Action endLerp);
+        GetItemFinishFunctions(CurrentItem, out Action onFinish);
+        onFinish();
 
         Vector2 titlePos = TitleText.rectTransform.anchoredPosition;
         Vector2 rightPos = RightTransform.anchoredPosition;
+        Vector2 listPos = ListTransform.anchoredPosition;
 
         yield return Ease.Animate(.3f, x => {
             float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
             InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, (1 - ease) * 40);
             Background.color = new Color(0, 0, 0, .5f * (1 - ease));
 
-            TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * 10 * ease;
-            RightTransform.anchoredPosition = rightPos + Vector2.right * 10 * ease;
-            TitleText.alpha = RightHolder.alpha = 1 - ease;
+            float offset = 10 * ease;
+            TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
+            RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
+            ListTransform.anchoredPosition = listPos + Vector2.right * offset;
+            TitleText.alpha = RightHolder.alpha = ListGroup.alpha = 1 - ease;
 
             AdvancedInputTransform.anchoredPosition = new (
                 (IsAdvanced ? -700 : -200) + 10 * ease, 
@@ -397,8 +461,10 @@ public class OptionInputHandler : MonoBehaviour
         
         Background.gameObject.SetActive(false);
         MainHolder.SetActive(false);
+        ListHandler.gameObject.SetActive(false);
         TitleText.rectTransform.anchoredPosition = titlePos;
         RightTransform.anchoredPosition = rightPos;
+        ListTransform.anchoredPosition = listPos;
 
         IsAnimating = false;
     }
@@ -435,11 +501,7 @@ public class OptionInputHandler : MonoBehaviour
                 {
                     MultiFloatOptionInput input = (MultiFloatOptionInput)CurrentItem;
                     type = input.ValueType;
-                    input.Set(AdvancedInputToggle.Value ? new [] {
-                        CurrentInputs[0].Slider.value,
-                        CurrentInputs[1].Slider.value,
-                        CurrentInputs[2].Slider.value,
-                    } : new [] {
+                    input.Set(AdvancedInputToggle.Value ? CurrentInputs.Select(x => x.Slider.value).ToArray() : new [] {
                         CurrentInputs[0].Slider.value,
                     });
                     input.UpdateValue();

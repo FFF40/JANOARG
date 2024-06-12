@@ -98,7 +98,7 @@ public class OptionsPanel : MonoBehaviour
             case 0:
             {
                 SubtitleLabel.text = " > General";
-                SetScrollerWidth(400);
+                SetScrollerWidth(500);
 
                 Spawn<OptionCategoryTitle>("Profile");
 
@@ -106,6 +106,48 @@ public class OptionsPanel : MonoBehaviour
                 Spawn<StringOptionInput, string>("Player Name", 
                     () => Storage.Get("INFO_Name", "JANOARG"),
                     x => Storage.Set("INFO_Name", x)
+                );
+
+                Spawn<OptionCategoryTitle>("Localization");
+                var lang = Spawn<ListOptionInput, string>("🌐 Language", 
+                    () => Storage.Get("MAIN_Language", "en"),
+                    x => Storage.Set("MAIN_Language", x)
+                );
+                lang.ValidValues.Add("en", "English");
+                lang.ValidValues.Add("fr", "Français");
+                lang.ValidValues.Add("zh_CN", "简体中文");
+                lang.ValidValues.Add("zh_TW", "繁體中文");
+                lang.ValidValues.Add("ja", "日本語");
+                lang.ValidValues.Add("ko", "한국어");
+                lang.ValidValues.Add("tok", "toki pona");
+                lang.ValidValues.Add("snale", "🐌 <alpha=#77>Snailian");
+
+                var altNames = Spawn<ListOptionInput, string>("Alt. Song Titles", 
+                    () => Storage.Get("MAIN_AltNameRule", "auto"),
+                    x => Storage.Set("MAIN_AltNameRule", x)
+                );
+                altNames.ValidValues.Add("auto", "Automatic (based on language)");
+                altNames.ValidValues.Add("never", "Always use original song titles");
+                altNames.ValidValues.Add("side", "Show original and alt. names side by side");
+                altNames.ValidValues.Add("always", "Always use alternative song titles");
+
+                var altArtist = Spawn<ListOptionInput, string>("Alt. Artist Names", 
+                    () => Storage.Get("MAIN_AltArtistRule", "auto"),
+                    x => Storage.Set("MAIN_AltArtistRule", x)
+                );
+                altArtist.ValidValues.Add("auto", "Use alternative song title setting");
+                altArtist.ValidValues.Add("never", "Always use original artist names");
+
+
+
+                Spawn<OptionCategoryTitle>("🐌");
+                Spawn<BooleanOptionInput, bool>("snail mode", 
+                    () => false,
+                    x => {}
+                );
+                Spawn<OptionText>(
+                    "This mode turns the game into an ✨indie✨scale✨rhythm✨game✨™, enable at your own risk."
+                    + "\nRequires a restart to reflect changes."
                 );
             }
             break;
@@ -122,11 +164,11 @@ public class OptionsPanel : MonoBehaviour
                 sample.Max = 500;
                 sample.Step = 1;
                 sample.Unit = "ms";
-                var judgOffset = Spawn<FloatOptionInput, float>("Judgment Offset", 
+                Spawn<FloatOptionInput, float>("Judgment Offset", 
                     () => Preferences.Get("PLYR_JudgmentOffset", 0f),
                     x => Preferences.Set("PLYR_JudgmentOffset", x)
                 );
-                var visOffset = Spawn<FloatOptionInput, float>("Visual Offset", 
+                Spawn<FloatOptionInput, float>("Visual Offset", 
                     () => Preferences.Get("PLYR_VisualOffset", 0f),
                     x => Preferences.Set("PLYR_VisualOffset", x)
                 );
@@ -145,13 +187,30 @@ public class OptionsPanel : MonoBehaviour
                 msample.Unit = "%";
                 msample.ValueType = MultiValueType.PerJudgment;
 
-                var musicVol = Spawn<FloatOptionInput, float>("Music Volume", 
+                Spawn<FloatOptionInput, float>("Music Volume", 
                     () => Preferences.Get("PLYR_BGMusicVolume", 100f),
                     x => Preferences.Set("PLYR_BGMusicVolume", x)
                 );
-                var hsVol = Spawn<MultiFloatOptionInput, float[]>("Hitsound Volume", 
+                Spawn<MultiFloatOptionInput, float[]>("Hitsound Volume", 
                     () => Preferences.Get("PLYR_HitsoundVolume", new [] {100f}),
                     x => Preferences.Set("PLYR_HitsoundVolume", x)
+                );
+
+                Spawn<OptionCategoryTitle>("Visual");
+                
+                sample.Min = msample.Min = .2f;
+                sample.Max = msample.Max = 5;
+                sample.Step = msample.Step = .1f;
+                sample.Unit = msample.Unit = "×";
+                msample.ValueType = MultiValueType.PerHitType;
+
+                Spawn<MultiFloatOptionInput, float[]>("Hit Object Scale", 
+                    () => Preferences.Get("PLYR_HitScale", new [] {1f}),
+                    x => Preferences.Set("PLYR_HitScale", x)
+                );
+                Spawn<FloatOptionInput, float>("Flick Emblem Scale", 
+                    () => Preferences.Get("PLYR_FlickScale", 1f),
+                    x => Preferences.Set("PLYR_FlickScale", x)
                 );
             }
             break;

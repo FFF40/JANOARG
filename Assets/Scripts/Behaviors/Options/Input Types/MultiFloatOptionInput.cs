@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class MultiFloatOptionInput : OptionInput<float[]>
 {
     [Space]
-    public int Min = 0;
-    public int Max = 100;
-    public int Step = 1;
+    public float Min = 0;
+    public float Max = 100;
+    public float Step = 1;
     public string Unit;
     public MultiValueType ValueType;
     [Space]
@@ -71,6 +72,7 @@ public class MultiFloatOptionInput : OptionInput<float[]>
             ValueHolders[0].color = UnitLabels[0].color = standardColor * new Color (1, 1, 1, ValueHolders[0].color.a);
             ValueHolders[0].text = CurrentValue[0].ToString();
             UnitLabels[0].text = "<alpha=#77>" + Unit;
+            if (UnitLabels[0].margin.z != 0) UnitLabels[0].rectTransform.sizeDelta -= new Vector2 (5, 0);
             UnitLabels[0].margin = Vector4.zero;
             for (int a = 1; a < ValueHolders.Count; a++) 
             {

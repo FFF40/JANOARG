@@ -271,6 +271,21 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
+  - m_Index: 11
+    m_Metrics:
+      m_Width: 43.5625
+      m_Height: 63
+      m_HorizontalBearingX: 7.734375
+      m_HorizontalBearingY: 63
+      m_HorizontalAdvance: 59.046875
+    m_GlyphRect:
+      m_X: 610
+      m_Y: 258
+      m_Width: 45
+      m_Height: 63
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
   - m_Index: 12
     m_Metrics:
       m_Width: 5.765625
@@ -1201,21 +1216,6 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
-  - m_Index: 11
-    m_Metrics:
-      m_Width: 43.5625
-      m_Height: 63
-      m_HorizontalBearingX: 7.734375
-      m_HorizontalBearingY: 63
-      m_HorizontalAdvance: 59.046875
-    m_GlyphRect:
-      m_X: 610
-      m_Y: 258
-      m_Width: 45
-      m_Height: 63
-    m_Scale: 1
-    m_AtlasIndex: 0
-    m_ClassDefinitionType: 0
   m_CharacterTable:
   - m_ElementType: 1
     m_Unicode: 32
@@ -1328,6 +1328,10 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 71
     m_GlyphIndex: 10
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 72
+    m_GlyphIndex: 11
     m_Scale: 1
   - m_ElementType: 1
     m_Unicode: 73
@@ -1496,10 +1500,6 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 9674
     m_GlyphIndex: 335
-    m_Scale: 1
-  - m_ElementType: 1
-    m_Unicode: 72
-    m_GlyphIndex: 11
     m_Scale: 1
   m_AtlasTextures:
   - {fileID: 3632869876117147128}
@@ -2067,8 +2067,8 @@ MonoBehaviour:
   fallbackFontAssets: []
   m_FallbackFontAssetTable:
   - {fileID: 11400000, guid: 00f3afb3e7513f746a199a1750c19507, type: 2}
-  - {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
-  - {fileID: 11400000, guid: ad9ef9cf5516dfe4ab06f463e9380df4, type: 2}
+  - {fileID: 11400000, guid: 65176bde51c3dce42a899f10bdc2f7a0, type: 2}
+  - {fileID: 11400000, guid: d71c634505dcb0945a839d30ef76384a, type: 2}
   - {fileID: 11400000, guid: 0159476e8859170448df5440a2db8bbf, type: 2}
   m_CreationSettings:
     sourceFontFileName: 

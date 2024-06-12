@@ -7,9 +7,9 @@ using TMPro;
 public class FloatOptionInput : OptionInput<float>
 {
     [Space]
-    public int Min = 0;
-    public int Max = 100;
-    public int Step = 1;
+    public float Min = 0;
+    public float Max = 100;
+    public float Step = 1;
     public string Unit;
     [Space]
     public TMP_Text ValueHolder;

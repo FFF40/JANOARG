@@ -169,7 +169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2612054754315245438, guid: 7c4472adf7b4494498663d59db57fad9, type: 3}
       propertyPath: m_Name
-      value: Text Option Item
+      value: String Option Item
       objectReference: {fileID: 0}
     - target: {fileID: 2612054754315245439, guid: 7c4472adf7b4494498663d59db57fad9, type: 3}
       propertyPath: m_Pivot.x

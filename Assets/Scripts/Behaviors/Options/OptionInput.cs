@@ -53,7 +53,7 @@ public class MultiValueFieldData
         }},
         {MultiValueType.PerHitType, new () {
             new () { Name = "Normal", Color = new (.8f, .9f, 1) },
-            new () { Name = "Catch", Color = new (1, .8f, 1) },
+            new () { Name = "Catch", Color = new (1, 1, .8f) },
         }},
     };
 }
