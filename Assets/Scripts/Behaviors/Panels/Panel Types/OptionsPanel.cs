@@ -135,7 +135,7 @@ public class OptionsPanel : MonoBehaviour
                     () => Storage.Get("MAIN_AltArtistRule", "auto"),
                     x => Storage.Set("MAIN_AltArtistRule", x)
                 );
-                altArtist.ValidValues.Add("auto", "Use alternative song title setting");
+                altArtist.ValidValues.Add("auto", "Use \"Alt. Song Titles\" setting");
                 altArtist.ValidValues.Add("never", "Always use original artist names");
 
 
@@ -278,6 +278,15 @@ public class OptionsPanel : MonoBehaviour
             Destroy(item.gameObject);
         }
         CurrentItems.Clear();
+    }
+
+    public void GoToSocial(string target) {
+        string url = target switch {
+            "discord" => "https://discord.gg/vXJTPFQBHm",
+            "reddit" => "https://reddit.com/r/fff40",
+            _ => "",
+        };
+        if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
     }
 
     static RectTransform rt(MonoBehaviour item) => (RectTransform)item.transform;
