@@ -16,3 +16,4 @@ Future plans:
 - Get more illustrators
 - Make original characters/mascots
 - Story (it is scientifically proven that if you put a visual novel into a rhythm game it'll become famous)
+- Feed the snail (more 🐌 charts)
