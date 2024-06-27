@@ -1,1 +1,2 @@
 - Currency system
+- Make settings actually work
