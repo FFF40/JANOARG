@@ -97,6 +97,7 @@
     <Compile Include="Assets\Scripts\Behaviors\Intro\IntroScene.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Files\JACEncoder.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Files\JAPSEncoder.cs" />
+    <Compile Include="Assets\Scripts\Behaviors\Panels\Panel Types\ProfilePanel.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Files\JACDecoder.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Song Select\SongSelectScreen.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Options\OptionInputHandler.cs" />
