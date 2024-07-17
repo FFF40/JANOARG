@@ -11,6 +11,7 @@ Shader "UI/Striped"
         _StripeVisAlpha ("Alpha Visibility", Range(0, 1)) = 1
         _StripeSize ("Size", Float) = 20
         _StripeBalance ("Balance", Range(0, 1)) = 0.5
+        _StripeSpeed ("Speed", Float) = 5
 
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -91,6 +92,7 @@ Shader "UI/Striped"
             float _StripeVisAlpha;
             float _StripeSize;
             float _StripeBalance;
+            float _StripeSpeed;
 
             v2f vert(appdata_t v)
             {
@@ -110,7 +112,7 @@ Shader "UI/Striped"
             {
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
-                float val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * 5 + 10000;
+                float val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * _StripeSpeed + 10000;
     
                 if (val % _StripeSize < _StripeSize * _StripeBalance)
                 {

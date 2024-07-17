@@ -108,6 +108,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 }
             }
 
+            float judgTime = Player.CurrentTime + Player.Settings.JudgmentOffset;
+
             for (int a = 0; a < HitQueue.Count; a++)
             {
                 HitPlayer hit = HitQueue[a];
@@ -118,7 +120,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     continue;
                 }
 
-                float offset = Player.CurrentTime - hit.Time;
+                float offset = judgTime - hit.Time;
                 bool isDiscrete = (hit.Current.Type == HitObject.HitType.Catch) || hit.Current.Flickable;
                 float window = isDiscrete ? Player.PassWindow : Player.GoodWindow;
 

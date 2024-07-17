@@ -314,7 +314,7 @@ public class LanePlayer : MonoBehaviour
             });
         }
 
-        float time = Mathf.Max(PlayerScreen.main.CurrentTime, hit.Time);
+        float time = Mathf.Max(PlayerScreen.main.CurrentTime + PlayerScreen.main.Settings.VisualOffset, hit.Time);
 
         int index = Times.FindIndex(x => x > time);
         if (index <= 0 || Positions.Count <= index) return;

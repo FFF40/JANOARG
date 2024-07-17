@@ -92,6 +92,8 @@ public class PlayerScreen : MonoBehaviour
 
     double lastDSPTime;
 
+    public PlayerSettings Settings = new();
+
     public void Awake() 
     {
         main = this;
@@ -306,33 +308,34 @@ public class PlayerScreen : MonoBehaviour
             // Update song progress slider
             SongProgress.value = CurrentTime / Music.clip.length;
 
-            float beat = TargetSong.Timing.ToBeat(CurrentTime);
+            float visualTime = CurrentTime + Settings.VisualOffset;
+            float visualBeat = TargetSong.Timing.ToBeat(visualTime);
             
             // Update palette
-            CurrentChart.Pallete.Advance(beat);
+            CurrentChart.Pallete.Advance(visualBeat);
             if (Common.main.MainCamera.backgroundColor != CurrentChart.Pallete.BackgroundColor) SetBackgroundColor(CurrentChart.Pallete.BackgroundColor);
             if (SongNameLabel.color != CurrentChart.Pallete.InterfaceColor) SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
             for (int a = 0; a < LaneStyles.Count; a++)
             {
-                CurrentChart.Pallete.LaneStyles[a].Advance(beat);
+                CurrentChart.Pallete.LaneStyles[a].Advance(visualBeat);
                 LaneStyles[a].Update(CurrentChart.Pallete.LaneStyles[a]);
             }
             for (int a = 0; a < HitStyles.Count; a++)
             {
-                CurrentChart.Pallete.HitStyles[a].Advance(beat);
+                CurrentChart.Pallete.HitStyles[a].Advance(visualBeat);
                 HitStyles[a].Update(CurrentChart.Pallete.HitStyles[a]);
             }
 
             // Update camera
-            CurrentChart.Camera.Advance(beat);
+            CurrentChart.Camera.Advance(visualBeat);
             Camera camera = Common.main.MainCamera;
             camera.transform.position = CurrentChart.Camera.CameraPivot;
             camera.transform.eulerAngles = CurrentChart.Camera.CameraRotation;
             camera.transform.Translate(Vector3.back * CurrentChart.Camera.PivotDistance);
 
             // Update scene
-            foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(CurrentTime, beat);
-            foreach (LanePlayer lane in Lanes) lane.UpdateSelf(CurrentTime, beat);
+            foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
+            foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
         }
     }
 
@@ -479,5 +482,18 @@ public class PlayerScreen : MonoBehaviour
             mesh.RecalculateNormals();
             ArrowFlickIndicator = mesh;
         }
+    }
+}
+
+public class PlayerSettings 
+{
+    public float JudgmentOffset;
+    public float VisualOffset;
+
+    public PlayerSettings ()
+    {
+        Storage prefs = Common.main.Preferences;
+        JudgmentOffset = prefs.Get("PLYR_JudgmentOffset", 0f) / 1000;
+        VisualOffset = prefs.Get("PLYR_VisualOffset", 0f) / 1000;
     }
 }

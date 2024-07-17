@@ -30,9 +30,9 @@ public class LoadingBar : MonoBehaviour
 
         // Gameplay tips
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Use wired headphones for the developer-intended ✨flawless✨rhythm✨game✨experience✨."),
-        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>You can apply a few drops of water between the back of your device and the table to add friction and reduce device drifting. Make sure your device has a case first!"),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>You can apply a few drops of water between the back of your device and the table to reduce device drifting. Make sure your device has a case first!"),
         new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Don't think about it, just feel it. And if you can't feel it, memorize it."),
-        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Increase your Ability Rating to improve your place in social rankings and bragging rights."),
+        new FlavorTextEntry("<i>Gameplay tip:</i>\n<b>Increase your Ability Rating to improve your place in leaderboard rankings and bragging rights."),
         
         /* ----- FACTS ----- */
         
@@ -45,6 +45,7 @@ public class LoadingBar : MonoBehaviour
         new FlavorTextEntry("<i>Did you know:</i>\n<b>The maximum score that you can obtain on any song is 1000000ppm regardless of difficulty."),
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Catch and Flickable Hit Objects can only give Flawless or Broken judgment. They are either hit or miss."),
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Multiple overlapping Hold Tails can be hold with just one finger. Just remember to tap the Hit Objects beforehand."),
+        new FlavorTextEntry("<i>Did you know:</i>\n<b>Directional Flick Hit Objects have their hit detection zone extend infinitely along the back and forward directions of the flick!"),
         
         // Meta facts
         new FlavorTextEntry("<i>Did you know:</i>\n<b>Most of the facts shown here are nonsense... or are they?"),
