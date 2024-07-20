@@ -66,7 +66,8 @@ public class ResultScreen : MonoBehaviour
     IEnumerator EndingAnim()
     {
         Fanfare.LoadAudioData();
-
+        PlayerScreen.main.PlayerHUD.SetActive(false);
+        
         //Added logic to display ALL FLAWLESS or FULL COMBO
         PlayerScreen ps = PlayerScreen.main;
         Transform childTransform = ps.transform.Find("End Flash/Result");
@@ -82,7 +83,7 @@ public class ResultScreen : MonoBehaviour
         } else {
             childTMP.text = "TRACK CLEARED";
         }
-        
+
         Flash.gameObject.SetActive(true);
         ResultText.gameObject.SetActive(false);
         ResultTextBig.alpha = 0;
