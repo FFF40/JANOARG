@@ -68,7 +68,15 @@ public class ResultScreen : MonoBehaviour
         Fanfare.LoadAudioData();
 
         PlayerScreen.main.PlayerHUD.SetActive(false);
-        Flash.gameObject.SetActive(true);
+        if (PlayerScreen.main.TotalCombo == PlayerScreen.main.PerfectCount){
+            Flash.gameObject.SetActive(true);
+        } else if (PlayerScreen.main.BadCount == 0 && PlayerScreen.main.GoodCount != 0){
+            Transform childTransform = PlayerScreen.main.transform.Find("End Flash/Result");
+            TMP_Text childTMP = childTransform.GetComponent<TMP_Text>();
+            childTMP.text = "FULL COMBO!!!";
+            Flash.gameObject.SetActive(true);
+        }
+        
         ResultText.gameObject.SetActive(false);
         ResultTextBig.alpha = 0;
 
