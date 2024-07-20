@@ -74,7 +74,7 @@ MonoBehaviour:
   - Key: SliderThumbPressed
     Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: PickerItemActive
-    Value: {r: 0, g: 1, b: 1, a: 1}
+    Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: TimelineBackground
     Value: {r: 1, g: 0.9, b: 1, a: 1}
   - Key: TimelineHandleNormal

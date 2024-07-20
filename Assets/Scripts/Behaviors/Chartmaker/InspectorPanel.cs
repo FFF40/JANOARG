@@ -787,10 +787,16 @@ public class InspectorPanel : MonoBehaviour
     {
         if (snap) width = width < 172 ? 25 : 320;
         else width = Mathf.Clamp(width, 25, 320);
+
         PanelHolder.anchoredPosition = new(320 - width, PanelHolder.anchoredPosition.y);
-        Chartmaker.main.PlayerViewHolder.sizeDelta = new(-42 - width, Chartmaker.main.PlayerViewHolder.sizeDelta.y);
+        Chartmaker.main.PlayerViewHolder.sizeDelta = new(
+            -Chartmaker.main.HierarchyHolder.sizeDelta.x - Chartmaker.main.HierarchyHolder.anchoredPosition.x - width, 
+            Chartmaker.main.PlayerViewHolder.sizeDelta.y
+        );
+
         PlayerView.main.Update();
         PlayerView.main.UpdateObjects();
+
         if (snap) 
         {
             IsCollapsed = width < 172;

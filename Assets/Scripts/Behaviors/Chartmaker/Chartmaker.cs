@@ -23,6 +23,7 @@ public class Chartmaker : MonoBehaviour
     public RectTransform TimelineHolder;
     public RectTransform InspectorHolder;
     public RectTransform PickerHolder;
+    public RectTransform HierarchyHolder;
     public RectTransform MainViewHolder;
     public RectTransform PlayerViewHolder;
     [Space]
@@ -95,6 +96,7 @@ public class Chartmaker : MonoBehaviour
         TimelineHolder.gameObject.SetActive(value);
         InspectorHolder.gameObject.SetActive(value);
         PickerHolder.gameObject.SetActive(value);
+        HierarchyHolder.gameObject.SetActive(value);
         PlayerViewHolder.gameObject.SetActive(value);
     }
 
@@ -202,6 +204,7 @@ public class Chartmaker : MonoBehaviour
         InspectorPanel.main.UpdateButtons();
         InspectorPanel.main.SetObject(null);
         InspectorPanel.main.CurrentLane = null;
+        HierarchyPanel.main.InitHierarchy();
         TimelinePanel.main.UpdatePeekLimit();
         TimelinePanel.main.UpdateItems();
         PlayerView.main.UpdateObjects();
@@ -250,6 +253,7 @@ public class Chartmaker : MonoBehaviour
         InspectorPanel.main.UpdateButtons();
         InspectorPanel.main.UpdateForm();
         InspectorPanel.main.CurrentLane = null;
+        HierarchyPanel.main.InitHierarchy();
         TimelinePanel.main.UpdateItems();
         PlayerView.main.UpdateObjects();
         History = new();

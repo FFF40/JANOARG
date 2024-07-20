@@ -148,6 +148,7 @@ public class InformationBar : MonoBehaviour
             if (Chartmaker.Preferences.MaximizeOnPlay)
             {
                 TimelinePanel.main.Restore();
+                HierarchyPanel.main.Restore();
                 InspectorPanel.main.Restore();
             }
         }
@@ -157,6 +158,7 @@ public class InformationBar : MonoBehaviour
             if (Chartmaker.Preferences.MaximizeOnPlay)
             {
                 TimelinePanel.main.Collapse();
+                HierarchyPanel.main.Collapse();
                 InspectorPanel.main.Collapse();
             }
         }

@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\UI\ContextMenu\ContextMenuButton.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryFile.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\InformationBar.cs" />
+     <Compile Include="Assets\Scripts\UI\HierarchyItemHolder.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryString.cs" />
      <Compile Include="Assets\Scripts\Data\Chart.cs" />
      <Compile Include="Assets\Scripts\UI\Themeable\ThemeableTypes\InputFieldThemeable.cs" />
@@ -112,6 +113,7 @@
      <Compile Include="Assets\Scripts\Data\Chartmaker\Keybind.cs" />
      <Compile Include="Assets\Scripts\UI\ColorPicker\ColorRect.cs" />
      <Compile Include="Assets\Scripts\UI\ContextMenu\ContextMenuList.cs" />
+     <Compile Include="Assets\Scripts\Behaviors\Chartmaker\HierarchyPanel.cs" />
      <Compile Include="Assets\Scripts\UI\Themeable\ThemeableTypes\ShadowThemeable.cs" />
      <Compile Include="Assets\Scripts\UI\Tooltip\TooltipTarget.cs" />
      <Compile Include="Assets\Scripts\Behaviors\Chartmaker\NavigationBar.cs" />
