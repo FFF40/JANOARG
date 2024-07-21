@@ -43,14 +43,22 @@ public class HierarchyPanel : MonoBehaviour
         if (Chartmaker.main.CurrentChart != null) 
         {
             Chart chart = Chartmaker.main.CurrentChart;
-            Items.Add(new HierarchyItem {
+            HierarchyItem chartItem;
+            Items.Add(chartItem = new () {
+                Name = "Chart",
+                Type = HierarchyItemType.Chart,
+                Target = chart,
+                Expanded = true,
+            });
+
+            chartItem.Children.Add(new HierarchyItem {
                 Name = "Camera",
                 Type = HierarchyItemType.Camera,
                 Target = chart.Camera
             });
 
             HierarchyItem paletteItem;
-            Items.Add(paletteItem = new () {
+            chartItem.Children.Add(paletteItem = new () {
                 Name = "Palette",
                 Type = HierarchyItemType.Palette,
                 Target = chart.Pallete
@@ -80,7 +88,7 @@ public class HierarchyPanel : MonoBehaviour
             }
 
             HierarchyItem worldItem;
-            Items.Add(worldItem = new () {
+            chartItem.Children.Add(worldItem = new () {
                 Name = "World",
                 Type = HierarchyItemType.World,
             });
@@ -232,11 +240,12 @@ public class HierarchyItem
 
 public enum HierarchyItemType 
 {
-    Camera = 0,
-    Palette = 1,
-    LaneStyle = 2,
-    HitStyle = 3,
-    World = 4,
-    LaneGroup = 5,
-    Lane = 6,
+    Chart = 0,
+    Camera = 1,
+    Palette = 2,
+    LaneStyle = 3,
+    HitStyle = 4,
+    World = 5,
+    LaneGroup = 6,
+    Lane = 7,
 }

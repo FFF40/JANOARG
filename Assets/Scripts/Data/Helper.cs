@@ -34,6 +34,11 @@ public static class Helper
 
     public static bool IsHierarchyObject(object obj)
     {
-        return obj is CameraController or Pallete or LaneStyle or HitStyle or LaneGroup or Lane;
+        return obj 
+            is Chart 
+            or CameraController or Pallete
+            or LaneStyle or HitStyle 
+            or LaneGroup or Lane
+        ;
     }
 }

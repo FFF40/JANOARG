@@ -31,6 +31,15 @@ public class FileModal : Modal
     public TMP_Text FileTypeLabel;
 
     [Space]
+    public Sprite FileIcon;
+    public Sprite FolderIcon;
+    public Sprite DriveIcon;
+    public Sprite AudioFileIcon;
+    public Sprite ImageFileIcon;
+    public Sprite PlayableSongFileIcon;
+    public Sprite ChartFileIcon;
+
+    [Space]
     public TMP_Text HeaderLabel;
     public TMP_Text SelectLabel;
 
@@ -234,6 +243,7 @@ public class FileModal : Modal
             ((RectTransform)item.transform).anchoredPosition = new Vector2(0, index * -itemHeight);
             item.Entry = entries[index];
             item.Text.text = entries[index].Text;
+            item.Icon.sprite = entries[index].IsFolder ? FolderIcon : GetIcon(entries[index].Text);
         }
     }
 
@@ -244,6 +254,7 @@ public class FileModal : Modal
         item.Button.onClick.RemoveAllListeners();
         item.Button.onClick.AddListener(() => Navigate(entry.Path));
         item.Text.text = entry.Text;
+        item.Icon.sprite = DriveIcon;
     }
 
     public void InvokeEntry()
@@ -320,6 +331,14 @@ public class FileModal : Modal
     {
         MoveHistory(HistoryAhead, HistoryBehind);
     }
+
+    public Sprite GetIcon(string path) => Path.GetExtension(path).ToLower() switch {
+        ".japs" => PlayableSongFileIcon,
+        ".jac" => ChartFileIcon,
+        ".mp3" or ".ogg" or ".wav" => AudioFileIcon,
+        ".png" or ".jpg" => ImageFileIcon,
+        _ => FileIcon,
+    };
 }
 
 [Serializable]

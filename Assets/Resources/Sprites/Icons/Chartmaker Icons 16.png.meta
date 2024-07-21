@@ -694,7 +694,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -715,7 +715,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -723,6 +723,153 @@ TextureImporter:
       bones: []
       spriteID: f1c4c960854e41548995148f92e057da
       internalID: -412229566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Playable Song
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9184e206f96402a42857d49c1f72d528
+      internalID: 2108899617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chart
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cec67bacd5805d42b9209bc18fc1e1e
+      internalID: 42657011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: File
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de96df2134007484e825c83d991d52aa
+      internalID: 1622769349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Folder
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af04d9ef446bf2847bf87035ac19c81a
+      internalID: -117557889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drive
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d1f9d3edb97dad4a96f34f37516a508
+      internalID: 506822628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Audio
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fd96456566181d46b72f181a1c11c05
+      internalID: 1850832790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Image
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 448
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 933d62afc0f06fa4b86668a454429ae5
+      internalID: -413458045
       vertices: []
       indices: 
       edges: []
@@ -743,12 +890,14 @@ TextureImporter:
       Vertical Scale: 2071649
       Speed: -401747491
       Lane: 1560761252
+      File: 1622769349
       Metronome: 1393924800
       Checkmark: 123409038
       Palette: -844261610
       X Icon: 1725627929
       Copy: -768827679
       Credits: 117254162
+      Chart: 42657011
       Next: -46201198
       Redo: -1018057754
       Undo: 50928159
@@ -757,16 +906,21 @@ TextureImporter:
       Separator: -1993552242
       Music: -1610311330
       Hitsounds: -707145241
+      Playable Song: 2108899617
       Paste: -1684136540
       Reddit Icon: -1754122059
       Hit Style: -412229566
       World: 1001677262
+      Folder: -117557889
+      Drive: 506822628
       Guilded Icon: 1108116061
+      Image: -413458045
       Camera: 193347055
       Close: -1075177032
       Cut: 197281861
       Discord Icon: -1407520920
       Group: 441202879
+      Audio: 1850832790
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

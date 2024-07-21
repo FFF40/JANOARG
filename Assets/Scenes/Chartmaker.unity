@@ -38432,6 +38432,7 @@ MonoBehaviour:
   IsCollapsed: 0
   PanelHolder: {fileID: 2090811819}
   Icons:
+  - {fileID: 42657011, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   - {fileID: 193347055, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   - {fileID: -844261610, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   - {fileID: -126200475, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}

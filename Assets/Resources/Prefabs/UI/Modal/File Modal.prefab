@@ -5913,6 +5913,13 @@ MonoBehaviour:
   MessageLabel: {fileID: 2123510524681036637}
   FileTypeHolder: {fileID: 7180741475219662007}
   FileTypeLabel: {fileID: 7180741475544276301}
+  FileIcon: {fileID: 1622769349, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  FolderIcon: {fileID: -117557889, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  DriveIcon: {fileID: 506822628, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  AudioFileIcon: {fileID: 1850832790, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  ImageFileIcon: {fileID: -413458045, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  PlayableSongFileIcon: {fileID: 2108899617, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
+  ChartFileIcon: {fileID: 42657011, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   HeaderLabel: {fileID: 8731328435326730028}
   SelectLabel: {fileID: 5052537638944265127}
   AcceptedTypes:
