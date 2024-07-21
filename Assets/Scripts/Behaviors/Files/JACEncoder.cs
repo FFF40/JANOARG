@@ -21,6 +21,8 @@ public class JACEncoder
         str += "\nIndex: " + chart.DifficultyIndex.ToString(CultureInfo.InvariantCulture);
         str += "\nName: " + chart.DifficultyName;
         str += "\nCharter: " + chart.CharterName;
+        if (!string.IsNullOrWhiteSpace(chart.AltCharterName))
+            str += "\nAlt Charter: " + chart.AltCharterName;
         str += "\nLevel: " + chart.DifficultyLevel;
         str += "\nConstant: " + chart.ChartConstant.ToString(CultureInfo.InvariantCulture);
 

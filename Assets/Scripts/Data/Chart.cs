@@ -18,6 +18,7 @@ public class Chart : IDeepClonable<Chart>
     public float ChartConstant = 6;
 
     public string CharterName = "";
+    public string AltCharterName = "";
 
     public List<LaneGroup> Groups = new List<LaneGroup>();
     public List<Lane> Lanes = new List<Lane>();

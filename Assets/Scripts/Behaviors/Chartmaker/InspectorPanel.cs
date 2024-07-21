@@ -222,8 +222,10 @@ public class InspectorPanel : MonoBehaviour
                 SpawnForm<FormEntryHeader>("Metadata");
                 SpawnForm<FormEntryString, string>("Song Name", () => song.SongName, x => Chartmaker.main.SetItem(song, "SongName", x));
                 SpawnForm<FormEntryString, string>("Alt Name", () => song.AltSongName, x => Chartmaker.main.SetItem(song, "AltSongName", x));
+                SpawnForm<FormEntrySpace>("");
                 SpawnForm<FormEntryString, string>("Song Artist", () => song.SongArtist, x => Chartmaker.main.SetItem(song, "SongArtist", x));
                 SpawnForm<FormEntryString, string>("Alt Artist", () => song.AltSongArtist, x => Chartmaker.main.SetItem(song, "AltSongArtist", x));
+                SpawnForm<FormEntrySpace>("");
                 SpawnForm<FormEntryString, string>("Genre", () => song.Genre, x => Chartmaker.main.SetItem(song, "Genre", x));
                 SpawnForm<FormEntryString, string>("Location", () => song.Location, x => Chartmaker.main.SetItem(song, "Location", x));
                 
@@ -264,8 +266,12 @@ public class InspectorPanel : MonoBehaviour
                     x => Chartmaker.main.SetItem(chart, "DifficultyName", meta.DifficultyName = x));
                 SpawnForm<FormEntryInt, int>("Sorting Index", () => chart.DifficultyIndex, 
                     x => Chartmaker.main.SetItem(chart, "DifficultyIndex", meta.DifficultyIndex = x));
+                SpawnForm<FormEntrySpace>("");
                 SpawnForm<FormEntryString, string>("Charter Name", () => chart.CharterName, 
                     x => Chartmaker.main.SetItem(chart, "CharterName", meta.CharterName = x));
+                SpawnForm<FormEntryString, string>("Alt C. Name", () => chart.AltCharterName, 
+                    x => Chartmaker.main.SetItem(chart, "AltCharterName", meta.AltCharterName = x));
+                SpawnForm<FormEntrySpace>("");
                 SpawnForm<FormEntryString, string>("Difficulty", () => chart.DifficultyLevel, 
                     x => Chartmaker.main.SetItem(chart, "DifficultyLevel", meta.DifficultyLevel = x));
                 SpawnForm<FormEntryFloat, float>("Chart Constant", () => chart.ChartConstant, 
