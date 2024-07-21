@@ -85,9 +85,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     [HideInInspector]
     public List<TMP_Text> StoryboardEntries;
 
-    int TimelineHeight = 5;
-    int TimelineExpandHeight = 5;
-    int TimelineRestoreHeight = 5;
+    int TimelineHeight = 8;
+    int TimelineExpandHeight = 8;
+    int TimelineRestoreHeight = 8;
     int ItemHeight = 0;
     bool lastPlayed;
     public IList DraggingItem;
@@ -181,8 +181,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void UpdateTabs()
     {
-        LaneStepTab.gameObject.SetActive(InspectorPanel.main.CurrentLane != null);
-        HitObjectTab.gameObject.SetActive(InspectorPanel.main.CurrentLane != null);
+        LaneStepTab.gameObject.SetActive(InspectorPanel.main.CurrentHierarchyObject is Lane);
+        HitObjectTab.gameObject.SetActive(InspectorPanel.main.CurrentHierarchyObject is Lane);
 
         StoryboardTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Storyboard;
         TimingTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Timing;
@@ -486,9 +486,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
         else if (CurrentMode == TimelineMode.LaneSteps)
         {
-            if (InspectorPanel.main.CurrentLane != null)
+            if (InspectorPanel.main.CurrentHierarchyObject is Lane lane)
             {
-                foreach (LaneStep step in InspectorPanel.main.CurrentLane.LaneSteps)
+                foreach (LaneStep step in lane.LaneSteps)
                 {
                     AddItemNormal(step, metronome.ToSeconds(step.Offset));
                 }
@@ -501,7 +501,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
         else if (CurrentMode == TimelineMode.HitObjects)
         {
-            if (InspectorPanel.main.CurrentLane != null)
+            if (InspectorPanel.main.CurrentHierarchyObject is Lane lane)
             {
                 float height = ItemsHolder.rect.height - 8;
                 float dOffset = 4 * density;
@@ -509,7 +509,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 float vpStart = .5f - VerticalScale * .5f + VerticalOffset;
                 float vpEnd = .5f + VerticalScale * .5f + VerticalOffset;
 
-                foreach (HitObject hit in InspectorPanel.main.CurrentLane.Objects)
+                foreach (HitObject hit in lane.Objects)
                 {
                     float time = metronome.ToSeconds(hit.Offset);
                     float timeEnd = metronome.ToSeconds(hit.Offset + hit.HoldLength);
@@ -1107,9 +1107,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
                 case TimelineMode.LaneSteps:
                 {
-                    if (InspectorPanel.main.CurrentLane == null) break;
+                    if (InspectorPanel.main.CurrentHierarchyObject is not Lane lane) break;
 
-                    list = InspectorPanel.main.CurrentLane.LaneSteps.FindAll(x =>
+                    list = lane.LaneSteps.FindAll(x =>
                     {
                         return x.Offset >= beatStart && x.Offset <= beatEnd;
                     });
@@ -1118,7 +1118,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
                 case TimelineMode.HitObjects:
                 {
-                    if (InspectorPanel.main.CurrentLane == null) break;
+                    if (InspectorPanel.main.CurrentHierarchyObject is not Lane lane) break;
 
                     float vpStart = .5f - VerticalScale * .5f + VerticalOffset;
                     float vpEnd = .5f + VerticalScale * .5f + VerticalOffset;
@@ -1126,7 +1126,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     float yStart = Mathf.Lerp(vpStart, vpEnd, Mathf.Clamp01(1 - (Mathf.Max(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)));
                     float yEnd = Mathf.Lerp(vpStart, vpEnd, Mathf.Clamp01(1 - (Mathf.Min(dragStart.y, dragEnd.y) - 4) / (ItemsHolder.rect.height - 8)));
 
-                    list = InspectorPanel.main.CurrentLane.Objects.FindAll(x =>
+                    list = lane.Objects.FindAll(x =>
                     {
                         return x.Offset >= beatStart && x.Offset <= beatEnd && x.Position <= yEnd && x.Position + x.Length >= yStart;
                     });
@@ -1197,8 +1197,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     {
                         if (isDragged) break;
 
-                        Lane lane = InspectorPanel.main.CurrentLane;
-                        if (lane == null) break;
+                        if (InspectorPanel.main.CurrentHierarchyObject is not Lane lane) break;
 
                         LanePosition basePos = ((Lane)lane.Get(timeEnd)).GetLanePosition(timeStart, timeStart, metronome);
                         LaneStep baseStep = new() {
@@ -1297,11 +1296,19 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         float maxHeight = SnapTimeline(Screen.height * 0.5f);
         height = Mathf.Round(Mathf.Clamp(height, 40, maxHeight));
         if (snap) height = SnapTimeline(height);
-        Chartmaker.main.TimelineHolder.anchoredPosition = new (Chartmaker.main.TimelineHolder.sizeDelta.x, 
-            -Mathf.Pow(Mathf.Max(104 - height, 0) / 64, 2) * 32);
-        Chartmaker.main.TimelineHolder.sizeDelta = new (Chartmaker.main.TimelineHolder.sizeDelta.x, 
-            height - Chartmaker.main.TimelineHolder.anchoredPosition.y);
+        Chartmaker.main.TimelineHolder.anchoredPosition = new (
+            Chartmaker.main.TimelineHolder.sizeDelta.x, 
+            -Mathf.Pow(Mathf.Max(104 - height, 0) / 64, 2) * 32
+        );
+        Chartmaker.main.TimelineHolder.sizeDelta = new (
+            Chartmaker.main.TimelineHolder.sizeDelta.x, 
+            height - Chartmaker.main.TimelineHolder.anchoredPosition.y
+        );
         Chartmaker.main.MainViewHolder.sizeDelta = new (Chartmaker.main.MainViewHolder.sizeDelta.x, - 33 - height);
+        Chartmaker.main.PickerHolder.sizeDelta = new (
+            Chartmaker.main.PickerHolder.sizeDelta.x, 
+            -32 - Chartmaker.main.TimelineHolder.anchoredPosition.y + Chartmaker.main.PickerHolder.anchoredPosition.y
+        );
         CurrentTimeCoonectorGroup.alpha = PeekSliderGroup.alpha = BlockerTextGroup.alpha =
             1 + Chartmaker.main.TimelineHolder.anchoredPosition.y / 32;
         TimelineHeight = height <= 40 ? 0 : Mathf.Max(Mathf.RoundToInt((height - 80) / 24), 1);

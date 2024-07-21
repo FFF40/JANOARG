@@ -203,7 +203,7 @@ public class Chartmaker : MonoBehaviour
         InformationBar.main.UpdateChartButton();
         InspectorPanel.main.UpdateButtons();
         InspectorPanel.main.SetObject(null);
-        InspectorPanel.main.CurrentLane = null;
+        InspectorPanel.main.CurrentHierarchyObject = null;
         HierarchyPanel.main.InitHierarchy();
         TimelinePanel.main.UpdatePeekLimit();
         TimelinePanel.main.UpdateItems();
@@ -252,7 +252,7 @@ public class Chartmaker : MonoBehaviour
         InformationBar.main.UpdateChartButton();
         InspectorPanel.main.UpdateButtons();
         InspectorPanel.main.UpdateForm();
-        InspectorPanel.main.CurrentLane = null;
+        InspectorPanel.main.CurrentHierarchyObject = null;
         HierarchyPanel.main.InitHierarchy();
         TimelinePanel.main.UpdateItems();
         PlayerView.main.UpdateObjects();
@@ -456,8 +456,8 @@ public class Chartmaker : MonoBehaviour
         HitStyle    => CurrentChart.Pallete.HitStyles,
         LaneGroup   => CurrentChart.Groups,
         Lane        => CurrentChart.Lanes,
-        LaneStep    => InspectorPanel.main.CurrentLane.LaneSteps,
-        HitObject   => InspectorPanel.main.CurrentLane.Objects,
+        LaneStep    => InspectorPanel.main.CurrentHierarchyObject is Lane lane ? lane.LaneSteps : new(),
+        HitObject   => InspectorPanel.main.CurrentHierarchyObject is Lane lane ? lane.Objects : new(),
         null        => throw new ArgumentException("Object can't be null"),
         _           => throw new ArgumentException("No list target found for " + obj.GetType()),
     };

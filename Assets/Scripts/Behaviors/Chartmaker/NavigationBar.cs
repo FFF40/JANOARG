@@ -160,9 +160,9 @@ public class NavigationBar : MonoBehaviour
         } else if (TimelinePanel.main.CurrentMode == TimelineMode.Lanes) {
             if (Chartmaker.main.CurrentChart != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentChart.Lanes.FindAll(x => !list.Contains(x)));
         } else if (TimelinePanel.main.CurrentMode == TimelineMode.LaneSteps) {
-            if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.LaneSteps.FindAll(x => !list.Contains(x)));
+            if (InspectorPanel.main.CurrentHierarchyObject is Lane lane) InspectorPanel.main.SetObject(lane.LaneSteps.FindAll(x => !list.Contains(x)));
         } else if (TimelinePanel.main.CurrentMode == TimelineMode.HitObjects) {
-            if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.Objects.FindAll(x => !list.Contains(x)));
+            if (InspectorPanel.main.CurrentHierarchyObject is Lane lane) InspectorPanel.main.SetObject(lane.Objects.FindAll(x => !list.Contains(x)));
         } else if (TimelinePanel.main.CurrentMode == TimelineMode.Timing) {
             if (Chartmaker.main.CurrentSong != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentSong.Timing.Stops.FindAll(x => !list.Contains(x)));
         }

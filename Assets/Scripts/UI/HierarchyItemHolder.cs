@@ -9,6 +9,7 @@ public class HierarchyItemHolder : MonoBehaviour
 {
     public Button Button;
     public Image Icon;
+    public GameObject SelectedBackground;
     public TMP_Text Text;
     public LayoutElement IndentBox;
     public Button ExpandButton;

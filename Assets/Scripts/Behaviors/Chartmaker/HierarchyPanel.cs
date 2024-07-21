@@ -48,11 +48,36 @@ public class HierarchyPanel : MonoBehaviour
                 Type = HierarchyItemType.Camera,
                 Target = chart.Camera
             });
-            Items.Add(new HierarchyItem {
+
+            HierarchyItem paletteItem;
+            Items.Add(paletteItem = new () {
                 Name = "Palette",
                 Type = HierarchyItemType.Palette,
                 Target = chart.Pallete
             });
+            
+            int index = 0;
+            foreach (var style in chart.Pallete.LaneStyles)
+            {
+                HierarchyItem item = new () {
+                    Name = "ID " + index,
+                    Type = HierarchyItemType.LaneStyle,
+                    Target = style,
+                };
+                paletteItem.Children.Add(item);
+                index++;
+            }
+            index = 0;
+            foreach (var style in chart.Pallete.HitStyles)
+            {
+                HierarchyItem item = new () {
+                    Name = "ID " + index,
+                    Type = HierarchyItemType.HitStyle,
+                    Target = style,
+                };
+                paletteItem.Children.Add(item);
+                index++;
+            }
 
             HierarchyItem worldItem;
             Items.Add(worldItem = new () {
@@ -125,11 +150,24 @@ public class HierarchyPanel : MonoBehaviour
             Destroy(Holders[count].gameObject);
             Holders.RemoveAt(count);
         }
+
+        UpdateHolderSelection();
+    }
+
+    public void UpdateHolderSelection()
+    {
+        foreach (var holder in Holders)
+        {
+            holder.SelectedBackground.SetActive(
+                holder.Target.Target != null
+                && holder.Target.Target == InspectorPanel.main.CurrentHierarchyObject
+            );
+        }
     }
 
     public void Select(HierarchyItem item) 
     {
-        InspectorPanel.main.SetObject(item.Target);
+        if (item.Target != null) InspectorPanel.main.SetObject(item.Target);
     }
 
     public void ToggleExpand(HierarchyItem item) 
@@ -196,7 +234,9 @@ public enum HierarchyItemType
 {
     Camera = 0,
     Palette = 1,
-    World = 2,
-    LaneGroup = 3,
-    Lane = 4,
+    LaneStyle = 2,
+    HitStyle = 3,
+    World = 4,
+    LaneGroup = 5,
+    Lane = 6,
 }

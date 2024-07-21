@@ -172,19 +172,21 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             return;
         }
 
-        if (Chartmaker.main.CurrentChart != null && InspectorPanel.main.CurrentLane != null)
         {
-            int index = Chartmaker.main.CurrentChart.Lanes.IndexOf(InspectorPanel.main.CurrentLane);
-            if (index < 0) goto endLane;
-            LaneManager man = Manager.Lanes[index];
-            if ((man.CurrentMesh?.vertexCount ?? 0) > 2)
+            if (Chartmaker.main.CurrentChart != null && InspectorPanel.main.CurrentHierarchyObject is Lane currentLane)
             {
-                Vector2 start = MainCamera.WorldToScreenPoint(man.StartPos);
-                Vector2 end = MainCamera.WorldToScreenPoint(man.EndPos);
-                CurrentLaneLine.gameObject.SetActive(true);
-                CurrentLaneLine.position = (start + end) / 2;
-                CurrentLaneLine.sizeDelta = new(Vector2.Distance(start, end), CurrentLaneLine.sizeDelta.y);
-                CurrentLaneLine.eulerAngles = new(0, 0, Vector2.SignedAngle(Vector2.left, end - start));
+                int index = Chartmaker.main.CurrentChart.Lanes.IndexOf(currentLane);
+                if (index < 0) goto endLane;
+                LaneManager man = Manager.Lanes[index];
+                if ((man.CurrentMesh?.vertexCount ?? 0) > 2)
+                {
+                    Vector2 start = MainCamera.WorldToScreenPoint(man.StartPos);
+                    Vector2 end = MainCamera.WorldToScreenPoint(man.EndPos);
+                    CurrentLaneLine.gameObject.SetActive(true);
+                    CurrentLaneLine.position = (start + end) / 2;
+                    CurrentLaneLine.sizeDelta = new(Vector2.Distance(start, end), CurrentLaneLine.sizeDelta.y);
+                    CurrentLaneLine.eulerAngles = new(0, 0, Vector2.SignedAngle(Vector2.left, end - start));
+                }
             }
         }
 
@@ -222,11 +224,13 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             } break;
             case LaneStep step: 
             {
-                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                if (InspectorPanel.main.CurrentHierarchyObject is not Lane currentLane) return;
+
+                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(currentLane);
                 if (lindex < 0) goto endSel;
                 LaneManager lman = Manager.Lanes[lindex];
 
-                int index = InspectorPanel.main.CurrentLane.LaneSteps.IndexOf(step);
+                int index = currentLane.LaneSteps.IndexOf(step);
                 if (index < 0) goto endSel;
                 LaneStepManager man = lman.Steps[index];
 
@@ -256,11 +260,13 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             } break;
             case HitObject hit: 
             {
-                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                if (InspectorPanel.main.CurrentHierarchyObject is not Lane currentLane) return;
+
+                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(currentLane);
                 if (lindex < 0) goto endSel;
                 LaneManager lman = Manager.Lanes[lindex];
 
-                int index = InspectorPanel.main.CurrentLane.Objects.IndexOf(hit);
+                int index = currentLane.Objects.IndexOf(hit);
                 if (index < 0) goto endSel;
                 HitObjectManager man = lman.Objects[index];
 
@@ -384,11 +390,13 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             
             case LaneStep step:
             {
-                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                if (InspectorPanel.main.CurrentHierarchyObject is not Lane currentLane) return;
+
+                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(currentLane);
                 if (lindex < 0) return;
                 LaneManager lman = Manager.Lanes[lindex];
 
-                int index = InspectorPanel.main.CurrentLane.LaneSteps.IndexOf(step);
+                int index = currentLane.LaneSteps.IndexOf(step);
                 if (index < 0) return;
                 LaneStepManager man = lman.Steps[index];
 
@@ -430,11 +438,13 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             
             case HitObject hit:
             {
-                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                if (InspectorPanel.main.CurrentHierarchyObject is not Lane lane) return;
+
+                int lindex = Chartmaker.main.CurrentChart.Lanes.IndexOf(lane);
                 if (lindex < 0) return;
                 LaneManager lman = Manager.Lanes[lindex];
 
-                int index = InspectorPanel.main.CurrentLane.Objects.IndexOf(hit);
+                int index = lane.Objects.IndexOf(hit);
                 if (index < 0) return;
                 HitObjectManager man = lman.Objects[index];
                 

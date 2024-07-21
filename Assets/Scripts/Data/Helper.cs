@@ -31,4 +31,9 @@ public static class Helper
         >=  600000 => Mathf.Lerp(0,                           Mathf.Max(constant - 10, 0), (score - 600000) / 200000),
                  _ => 0
     };
+
+    public static bool IsHierarchyObject(object obj)
+    {
+        return obj is CameraController or Pallete or LaneStyle or HitStyle or LaneGroup or Lane;
+    }
 }

@@ -14,10 +14,10 @@ public class InspectorPanel : MonoBehaviour
 
     public InspectorMode CurrentMode;
 
+    [NonSerialized]
+    public object CurrentHierarchyObject = null;
     public object CurrentObject;
     public List<Timestamp> CurrentTimestamp;
-    [NonSerialized]
-    public Lane CurrentLane = null;
 
     public TMP_Text FormTitle;
     public RectTransform FormHolder;
@@ -105,14 +105,22 @@ public class InspectorPanel : MonoBehaviour
             {
                 CurrentObject = obj;
                 CurrentTimestamp = new ();
-                if (obj is Lane lane) CurrentLane = lane;
+                if (Helper.IsHierarchyObject(obj)) 
+                {
+                    CurrentHierarchyObject = obj;
+                    HierarchyPanel.main.UpdateHolderSelection();
+                }
             }
         }
         else
         {
             CurrentObject = obj;
             CurrentTimestamp = new ();
-            if (obj is Lane lane) CurrentLane = lane;
+            if (Helper.IsHierarchyObject(obj)) 
+            {
+                CurrentHierarchyObject = obj;
+                HierarchyPanel.main.UpdateHolderSelection();
+            }
         }
         OnObjectChange();
     }
@@ -430,7 +438,7 @@ public class InspectorPanel : MonoBehaviour
             }
             else if (CurrentObject is LaneStep step)
             {
-                if (CurrentLane?.LaneSteps.Contains(step) != true)
+                if (CurrentHierarchyObject is not Lane l || l.LaneSteps.Contains(step))
                 {
                     SetObject(null);
                     return;
@@ -464,7 +472,7 @@ public class InspectorPanel : MonoBehaviour
             }
             else if (CurrentObject is HitObject hit)
             {
-                if (CurrentLane?.Objects.Contains(hit) != true)
+                if (CurrentHierarchyObject is not Lane l || l.Objects.Contains(hit))
                 {
                     SetObject(null);
                     return;

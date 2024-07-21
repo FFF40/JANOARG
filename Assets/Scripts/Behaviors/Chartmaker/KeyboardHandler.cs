@@ -70,9 +70,9 @@ public class KeyboardHandler : MonoBehaviour
                 } else if (TimelinePanel.main.CurrentMode == TimelineMode.Lanes) {
                     if (Chartmaker.main.CurrentChart != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentChart.Lanes.FindAll(x => true));
                 } else if (TimelinePanel.main.CurrentMode == TimelineMode.LaneSteps) {
-                    if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.LaneSteps.FindAll(x => true));
+                    if (InspectorPanel.main.CurrentHierarchyObject is Lane lane) InspectorPanel.main.SetObject(lane.LaneSteps.FindAll(x => true));
                 } else if (TimelinePanel.main.CurrentMode == TimelineMode.HitObjects) {
-                    if (InspectorPanel.main.CurrentLane != null) InspectorPanel.main.SetObject(InspectorPanel.main.CurrentLane.Objects.FindAll(x => true));
+                    if (InspectorPanel.main.CurrentHierarchyObject is Lane lane) InspectorPanel.main.SetObject(lane.Objects.FindAll(x => true));
                 } else if (TimelinePanel.main.CurrentMode == TimelineMode.Timing) {
                     if (Chartmaker.main.CurrentSong != null) InspectorPanel.main.SetObject(Chartmaker.main.CurrentSong.Timing.Stops.FindAll(x => true));
                 }
@@ -180,10 +180,10 @@ public class KeyboardHandler : MonoBehaviour
             Name = "Previous Lane",
             Keybind = new Keybind(KeyCode.UpArrow),
             Invoke = () => {
-                if (InspectorPanel.main.CurrentLane != null)
+                if (InspectorPanel.main.CurrentHierarchyObject is Lane lane)
                 {
                     var lanes = Chartmaker.main.CurrentChart.Lanes;
-                    int index = lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                    int index = lanes.IndexOf(lane);
                     InspectorPanel.main.SetObject(lanes[Mathf.Max(index - 1, 0)]);
                 }
             },
@@ -193,10 +193,10 @@ public class KeyboardHandler : MonoBehaviour
             Name = "Next Lane",
             Keybind = new Keybind(KeyCode.DownArrow),
             Invoke = () => {
-                if (InspectorPanel.main.CurrentLane != null)
+                if (InspectorPanel.main.CurrentHierarchyObject is Lane lane)
                 {
                     var lanes = Chartmaker.main.CurrentChart.Lanes;
-                    int index = lanes.IndexOf(InspectorPanel.main.CurrentLane);
+                    int index = lanes.IndexOf(lane);
                     InspectorPanel.main.SetObject(lanes[Mathf.Min(index + 1, lanes.Count - 1)]);
                 }
             },
