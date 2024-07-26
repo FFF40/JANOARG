@@ -23,9 +23,6 @@ public class InspectorPanel : MonoBehaviour
     public RectTransform FormHolder;
     public RectTransform OffsetFieldHolder;
 
-    public Button PaletteButton;
-    public Button GroupsButton;
-    public Button CameraButton;
     [Space]
     public Button PropertiesButton;
     public Button ExtraModesButton;
@@ -137,35 +134,9 @@ public class InspectorPanel : MonoBehaviour
         }
     }
 
-    public void FocusPalette()
-    {
-        if (Chartmaker.main.CurrentChart != null)
-            SetObject(Chartmaker.main.CurrentChart?.Pallete);
-    }
-
-    public void FocusGroups()
-    {
-        if (Chartmaker.main.CurrentChart != null)
-            SetObject(Chartmaker.main.CurrentChart?.Groups);
-    }
-
-    public void FocusCamera()
-    {
-        if (Chartmaker.main.CurrentChart != null)
-            SetObject(Chartmaker.main.CurrentChart?.Camera);
-    }
-
     public void UpdateButtons()
     {
-        PaletteButton.gameObject.SetActive(Chartmaker.main.CurrentChart != null);
-        GroupsButton.gameObject.SetActive(Chartmaker.main.CurrentChart != null);
-        CameraButton.gameObject.SetActive(Chartmaker.main.CurrentChart != null);
-
         BackButton.gameObject.SetActive(CurrentObject != null);
-
-        PaletteButton.interactable = CurrentObject is not Pallete;
-        GroupsButton.interactable = CurrentObject != Chartmaker.main.CurrentChart?.Groups;
-        CameraButton.interactable = CurrentObject is not CameraController;
 
         PropertiesButton.interactable = IsCollapsed || CurrentMode != InspectorMode.Properties;
     }

@@ -14,10 +14,11 @@ public class HierarchyPanel : MonoBehaviour
 
     [Space]
     public bool IsCollapsed;
+    public HierarchyMode CurrentMode;
     public RectTransform PanelHolder;
-
+    [Space]
     public Sprite[] Icons;
-
+    [Space]
     public HierarchyItemHolder HolderSample;
     public RectTransform HolderParent;
     List<HierarchyItem> Items = new();
@@ -34,96 +35,125 @@ public class HierarchyPanel : MonoBehaviour
     {
     }
 
+    public void SetMode(HierarchyMode mode)
+    {
+        CurrentMode = mode;
+        InspectorPanel.main.SetObject(null);
+        InformationBar.main.UpdateButtonActivity();
+        InitHierarchy();
+    }
+
     public void InitHierarchy() 
     {
         Items.Clear();
         foreach (var item in Holders) Destroy(item.gameObject);
+        Holders.Clear();
         GroupItems.Clear();
 
-        if (Chartmaker.main.CurrentChart != null) 
+        if (CurrentMode == HierarchyMode.PlayableSong)
         {
-            Chart chart = Chartmaker.main.CurrentChart;
-            HierarchyItem chartItem;
-            Items.Add(chartItem = new () {
-                Name = "Chart",
-                Type = HierarchyItemType.Chart,
-                Target = chart,
+            PlayableSong song = Chartmaker.main.CurrentSong;
+            HierarchyItem songItem;
+            Items.Add(songItem = new () {
+                Name = "Playable Song",
+                Type = HierarchyItemType.PlayableSong,
+                Target = song,
                 Expanded = true,
             });
-
-            chartItem.Children.Add(new HierarchyItem {
-                Name = "Camera",
-                Type = HierarchyItemType.Camera,
-                Target = chart.Camera
-            });
-
-            HierarchyItem paletteItem;
-            chartItem.Children.Add(paletteItem = new () {
-                Name = "Palette",
-                Type = HierarchyItemType.Palette,
-                Target = chart.Pallete
-            });
             
-            int index = 0;
-            foreach (var style in chart.Pallete.LaneStyles)
-            {
-                HierarchyItem item = new () {
-                    Name = "ID " + index,
-                    Type = HierarchyItemType.LaneStyle,
-                    Target = style,
-                };
-                paletteItem.Children.Add(item);
-                index++;
-            }
-            index = 0;
-            foreach (var style in chart.Pallete.HitStyles)
-            {
-                HierarchyItem item = new () {
-                    Name = "ID " + index,
-                    Type = HierarchyItemType.HitStyle,
-                    Target = style,
-                };
-                paletteItem.Children.Add(item);
-                index++;
-            }
-
-            HierarchyItem worldItem;
-            chartItem.Children.Add(worldItem = new () {
-                Name = "World",
-                Type = HierarchyItemType.World,
+            HierarchyItem coverItem;
+            songItem.Children.Add(coverItem = new HierarchyItem {
+                Name = "Cover",
+                Type = HierarchyItemType.Cover,
             });
-
-            // Add lane groups
-            foreach (var group in chart.Groups)
-            {
-                HierarchyItem item = new () {
-                    Name = group.Name,
-                    Type = HierarchyItemType.LaneGroup,
-                    Target = group,
-                };
-                GroupItems[group.Name] = item;
-            }
-            foreach (var group in GroupItems)
-            {
-                LaneGroup data = (LaneGroup)group.Value.Target;
-                if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(group.Value);
-                else worldItem.Children.Add(group.Value);
-            }
-            
-            // Add lanes
-            foreach (var lane in chart.Lanes)
-            {
-                HierarchyItem item = new () {
-                    Name = "Lane <alpha=#77>" + lane.LaneSteps[0].Offset + "~" + lane.LaneSteps[^1].Offset,
-                    Type = HierarchyItemType.Lane,
-                    Target = lane,
-                };
-
-                if (!string.IsNullOrEmpty(lane.Group) && GroupItems.ContainsKey(lane.Group)) GroupItems[lane.Group].Children.Add(item);
-                else worldItem.Children.Add(item);
-            }
         }
+        else if (CurrentMode == HierarchyMode.Chart)
+        {
+            if (Chartmaker.main.CurrentChart != null) 
+            {
+                Chart chart = Chartmaker.main.CurrentChart;
+                HierarchyItem chartItem;
+                Items.Add(chartItem = new () {
+                    Name = "Chart",
+                    Type = HierarchyItemType.Chart,
+                    Target = chart,
+                    Expanded = true,
+                });
 
+                chartItem.Children.Add(new HierarchyItem {
+                    Name = "Camera",
+                    Type = HierarchyItemType.Camera,
+                    Target = chart.Camera
+                });
+
+                HierarchyItem paletteItem;
+                chartItem.Children.Add(paletteItem = new () {
+                    Name = "Palette",
+                    Type = HierarchyItemType.Palette,
+                    Target = chart.Pallete
+                });
+                
+                int index = 0;
+                foreach (var style in chart.Pallete.LaneStyles)
+                {
+                    HierarchyItem item = new () {
+                        Name = "ID " + index,
+                        Type = HierarchyItemType.LaneStyle,
+                        Target = style,
+                    };
+                    paletteItem.Children.Add(item);
+                    index++;
+                }
+                index = 0;
+                foreach (var style in chart.Pallete.HitStyles)
+                {
+                    HierarchyItem item = new () {
+                        Name = "ID " + index,
+                        Type = HierarchyItemType.HitStyle,
+                        Target = style,
+                    };
+                    paletteItem.Children.Add(item);
+                    index++;
+                }
+
+                HierarchyItem worldItem;
+                chartItem.Children.Add(worldItem = new () {
+                    Name = "World",
+                    Type = HierarchyItemType.World,
+                });
+
+                // Add lane groups
+                foreach (var group in chart.Groups)
+                {
+                    HierarchyItem item = new () {
+                        Name = group.Name,
+                        Type = HierarchyItemType.LaneGroup,
+                        Target = group,
+                    };
+                    GroupItems[group.Name] = item;
+                }
+                foreach (var group in GroupItems)
+                {
+                    LaneGroup data = (LaneGroup)group.Value.Target;
+                    if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(group.Value);
+                    else worldItem.Children.Add(group.Value);
+                }
+                
+                // Add lanes
+                foreach (var lane in chart.Lanes)
+                {
+                    HierarchyItem item = new () {
+                        Name = "Lane <alpha=#77>" + lane.LaneSteps[0].Offset + "~" + lane.LaneSteps[^1].Offset,
+                        Type = HierarchyItemType.Lane,
+                        Target = lane,
+                    };
+
+                    if (!string.IsNullOrEmpty(lane.Group) && GroupItems.ContainsKey(lane.Group)) GroupItems[lane.Group].Children.Add(item);
+                    else worldItem.Children.Add(item);
+                }
+            }
+
+        }
         UpdateHolders();
     }
 
@@ -228,6 +258,12 @@ public class HierarchyPanel : MonoBehaviour
     }
 }
 
+public enum HierarchyMode 
+{
+    PlayableSong,
+    Chart,
+}
+
 public class HierarchyItem
 {
     public string Name;
@@ -248,4 +284,6 @@ public enum HierarchyItemType
     World = 5,
     LaneGroup = 6,
     Lane = 7,
+    PlayableSong = 8,
+    Cover = 9,
 }

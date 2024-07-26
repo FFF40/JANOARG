@@ -91,6 +91,7 @@
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryFloat.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryColor.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryLabel.cs" />
+     <Compile Include="Assets\Scripts\UI\GraphicParallelogram.cs" />
      <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryListHeader.cs" />
      <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\DialogModal.cs" />
      <Compile Include="Assets\Scripts\Data\ExternalChart.cs" />

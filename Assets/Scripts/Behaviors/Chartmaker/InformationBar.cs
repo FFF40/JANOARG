@@ -10,14 +10,16 @@ public class InformationBar : MonoBehaviour
     public static InformationBar main;
 
     [Header("Objects")]
+    public Button SongButton;
     public TMP_Text SongNameLabel;
+    public Button ChartButton;
     public TMP_Text ChartNameLabel;
     public GameObject PlayIcon;
     public GameObject PauseIcon;
     public TMP_Text BeatTimeLabel;
     public TMP_Text SecondTimeLabel;
     [Space]
-    public RectTransform ChartButton;
+    public RectTransform ChartButtonTransform;
     public RectTransform ChartDropdownButton;
     [Space]
     public AudioSource SoundPlayer;
@@ -46,6 +48,7 @@ public class InformationBar : MonoBehaviour
     {
         UpdateSongButton();
         UpdateChartButton();
+        UpdateButtonActivity();
     }
 
     public void Update()
@@ -69,8 +72,15 @@ public class InformationBar : MonoBehaviour
         }
     }
 
+    public void UpdateButtonActivity() 
+    {
+        SongButton.interactable = HierarchyPanel.main.CurrentMode != HierarchyMode.PlayableSong;
+        ChartButton.interactable = Chartmaker.main?.CurrentChart == null || HierarchyPanel.main.CurrentMode != HierarchyMode.Chart;
+    }
+
     public void UpdateSongButton()
     {
+        
         if (Chartmaker.main?.CurrentSong != null)
         {
             SongNameLabel.text = Chartmaker.main.CurrentSong.SongName;
@@ -80,34 +90,37 @@ public class InformationBar : MonoBehaviour
     public void UpdateChartButton()
     {
         Chart chart = Chartmaker.main?.CurrentChart;
+
         if (chart != null)
         {
             ChartNameLabel.text = chart.DifficultyName + " " + chart.DifficultyLevel;
-            ChartButton.sizeDelta = new Vector2(140, ChartButton.sizeDelta.y);
-            ChartDropdownButton.gameObject.SetActive(true);
+            ChartDropdownButton.sizeDelta = new Vector2(24, ChartDropdownButton.sizeDelta.y);
+            ChartDropdownButton.anchoredPosition = new Vector2(333, ChartDropdownButton.anchoredPosition.y); 
+            ChartButtonTransform.gameObject.SetActive(true);
         }
         else 
         {
             ChartNameLabel.text = "Select Chart...";
-            ChartButton.sizeDelta = new Vector2(160, ChartButton.sizeDelta.y);
-            ChartDropdownButton.gameObject.SetActive(false);
+            ChartDropdownButton.sizeDelta = new Vector2(160, ChartDropdownButton.sizeDelta.y);
+            ChartDropdownButton.anchoredPosition = new Vector2(174, ChartDropdownButton.anchoredPosition.y);
+            ChartButtonTransform.gameObject.SetActive(false);
         }
     }
 
     public void FocusSong()
     {
-        InspectorPanel.main.SetObject(Chartmaker.main.CurrentSong);
+        HierarchyPanel.main.SetMode(HierarchyMode.PlayableSong);
     }
 
     public void FocusChart()
     {
         if (Chartmaker.main.CurrentChart == null)
         {
-            ShowChartPopup(ChartButton);
+            ShowChartPopup(ChartButtonTransform);
         }
         else
         {
-            InspectorPanel.main.SetObject(Chartmaker.main.CurrentChart);
+            HierarchyPanel.main.SetMode(HierarchyMode.Chart);
         }
     }
 
