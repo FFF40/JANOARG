@@ -39,17 +39,17 @@ public class MetadataReader {
 		}
 	}
 
+	public class AttachmentData
+	{
+		public string Name;
+		public string Type;
+		public byte[] Data;
+	}
+
 	// ---- Embed tags ----
 
 	// Obsolete
-
-	/// Returns the audio length of the file in seconds.
-	[Obsolete("nah I think you can calculate it yourself. (Use 'LengthInMillisecond' to get the length in millisecond.)", true)]
-	public float LengthInSeconds;
-	/// Returns the attached image as Texture2D if have one, else returns a white 1x1 image.
-	[Obsolete("There can be multiple images in a single tag. Use 'AttachedTextures' for a list of texture images or 'ImageCover' for the cover.", true)]
-	public readonly Texture2D AttachedImage = new Texture2D (1, 1);
-
+	
 	// Usable
 
 	/// The audio's encoding. Returns a blank string if not declared.
@@ -90,6 +90,8 @@ public class MetadataReader {
 	public readonly int RecordedYear = -1;
 	/// The date that the file has been encoded.
 	public readonly DateTime EncodedDate = new DateTime();
+	/// A list of attached embeds 
+	public readonly List<AttachmentData> Attachments = new();
 	/// Returns the BPM rate of the audio file if declared, else returns -1.
 	public readonly float BeatsPerMinute = -1;
 	/// Returns the audio length of the file in milliseconds.
@@ -101,7 +103,7 @@ public class MetadataReader {
 	// ---- Reading tags ----
 
 	/// Generates an audio metadata list using the file from the given path.
-	public MetadataReader(string path, bool debugMode) {
+	public MetadataReader(string path, bool debugMode = false) {
 		if (!File.Exists (path))
 			throw new ArgumentException ("Path does not exist.");
 		// ready to read tags
@@ -218,7 +220,7 @@ public class MetadataReader {
 				reader.Read(id, 0, id.Length);
 				reader.Read(size, 0, size.Length);
 				reader.Read (frameFlag, 0, frameFlag.Length);
-				ulong dataSize = (ulong)size [0] << 21 | (ulong)size [1] << 14 | (ulong)size [2] << 7 | (ulong)size [3];
+				ulong dataSize = (ulong)size [0] << 24 | (ulong)size [1] << 16 | (ulong)size [2] << 8 | (ulong)size [3];
 				readedSize += dataSize + 10;
 				byte[] body = new byte[dataSize];
 				if (debugMode) Debug.Log(readedSize + " | " + dataSize + " | " + System.Text.Encoding.Default.GetString (id));
@@ -372,11 +374,63 @@ public class MetadataReader {
 					}
 					// "TCOP" = Copyright
 					else if (System.Text.Encoding.Default.GetString (id) == "TCOP" && body.Length > 1) {
-							if (body [0] == 0x01) {
+						if (body [0] == 0x01) {
 							Copyright = System.Text.Encoding.Unicode.GetString (body, 3, body.Length - 3).Trim();
 						} else {
 							Copyright = System.Text.Encoding.Default.GetString (body, 1, body.Length - 1).Trim();
 						}
+					}
+					// "APIC" = Attached image
+					else if (System.Text.Encoding.Default.GetString (id) == "APIC" && body.Length > 1) {
+						string type;
+						int cur = 1;
+						while (body[cur] != 0x00) cur++;
+						type = System.Text.Encoding.Default.GetString (body, 1, cur - 1).Trim();
+						cur++; 
+
+						byte location = body[cur]; cur++;
+						string[] locationMap = new string[] {
+							"Other",
+							"File icon",
+							"File icon",
+							"Cover (front)",
+							"Cover (back)",
+							"Leaflet",
+							"Media",
+							"Lead artist/Lead performer/Soloist",
+							"Artist/Performer",
+							"Conductor",
+							"Band/Orchestra",
+							"Composer",
+							"Lyricist/Text writer",
+							"Recording location",
+							"During recording",
+							"During performance",
+							"Movie/Video screen capture",
+							"🐟",
+							"Illustration",
+							"Band/Artist logotype",
+							"Publisher/Studio logotype",
+						};
+
+						string description;
+						int start = cur;
+						while (body[cur] != 0x00 && (body [0] == 0x00 || body [cur-1] != 0x00)) cur++;
+						if (body [start] == 0x01) {
+							description = System.Text.Encoding.Unicode.GetString (body, start, cur - start).Trim();
+						} else {
+							description = System.Text.Encoding.Default.GetString (body, start, cur - start).Trim();
+						}
+						cur++;
+
+						AttachmentData att = new () {
+							Name = string.IsNullOrWhiteSpace(description) 
+								? (location >= 0 && location < locationMap.Length ? locationMap[location] + ", " : "") + type 
+								: description,
+							Type = type,
+							Data = body[cur..],
+						};
+						Attachments.Add(att);
 					}
 					if (readedSize < totalSize) goto startReading;
 				}
@@ -387,7 +441,7 @@ public class MetadataReader {
 		}
 			
 		// close reading
-		doneReading:
+		// doneReading:
 		stream.Close();
 		reader.Close();
 		if (debugMode)

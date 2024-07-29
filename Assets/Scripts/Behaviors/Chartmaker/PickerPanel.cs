@@ -9,7 +9,7 @@ public class PickerPanel : MonoBehaviour
 
     public PickerMode CurrentMode;
     public List<Button> Buttons;
-
+    
     public GameObject hmmm;
     public GameObject hmmm2;
 
@@ -17,6 +17,7 @@ public class PickerPanel : MonoBehaviour
     {
         main = this;
     }
+
     public void Start()
     {
         for (int a = 0; a < Buttons.Count; a++)
@@ -35,6 +36,11 @@ public class PickerPanel : MonoBehaviour
     {
         CurrentMode = mode;
         UpdateButtons();
+    }
+
+    public void OpenCoverLayerModal() 
+    {
+        ModalHolder.main.Spawn<NewCoverLayerModal>();
     }
     
 

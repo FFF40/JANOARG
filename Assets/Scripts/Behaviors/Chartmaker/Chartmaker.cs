@@ -195,6 +195,25 @@ public class Chartmaker : MonoBehaviour
             }
         }
 
+        LoaderLabel.text = "Loading song cover images...";
+        
+        foreach (CoverLayer layer in CurrentSong.Cover.Layers)
+        {
+            ActiveTask = File.ReadAllBytesAsync(Path.Combine(Path.GetDirectoryName(path), layer.Target));
+            yield return new WaitUntil(() => ActiveTask.IsCompleted);
+            if (!ActiveTask.IsCompletedSuccessfully) 
+            {
+                Loader.SetActive(false);
+                DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+                modal.SetDialog("One of the cover layer image failed to load:\n", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+                yield break;
+            }
+
+            Texture2D texture = new (1, 1);
+            ImageConversion.LoadImage(texture, ((Task<byte[]>)ActiveTask).Result);
+            layer.Texture = texture;
+        }
+
         Loader.SetActive(false);
         if (HomeModal.main) HomeModal.main.Close();
 
@@ -603,7 +622,7 @@ public class Chartmaker : MonoBehaviour
     {
         if (InspectorPanel.main.CurrentTimestamp?.Count > 0) return true;
         object currentItem = InspectorPanel.main.CurrentObject;
-        return currentItem is not (null or PlayableSong or Chart or Pallete or CameraController) && currentItem != CurrentChart?.Groups;
+        return currentItem is not (null or PlayableSong or Cover or CoverLayer or Chart or Pallete or CameraController) && currentItem != CurrentChart?.Groups;
     }
 
     public bool CanPaste()

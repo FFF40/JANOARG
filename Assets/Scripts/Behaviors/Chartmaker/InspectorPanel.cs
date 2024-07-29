@@ -204,6 +204,45 @@ public class InspectorPanel : MonoBehaviour
                 SpawnForm<FormEntryColor, Color>("Background", () => song.BackgroundColor, x => Chartmaker.main.SetItem(song, "BackgroundColor", x));
                 SpawnForm<FormEntryColor, Color>("Interface", () => song.InterfaceColor, x => Chartmaker.main.SetItem(song, "InterfaceColor", x));
             }
+            else if (CurrentObject is Cover cover)
+            {
+                if (cover != Chartmaker.main.CurrentSong.Cover)
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Cover";
+
+                SpawnForm<FormEntryHeader>("Colors");
+                var bgColor = SpawnForm<FormEntryColor, Color>("Background", () => cover.BackgroundColor, x => Chartmaker.main.SetItem(cover, "BackgroundColor", x));
+                var copy = SpawnForm<FormEntryButton>("Copy from Playable Song");
+                copy.Button.onClick.AddListener(() => {
+                    Chartmaker.main.SetItem(cover, "BackgroundColor", Chartmaker.main.CurrentSong.BackgroundColor);
+                    bgColor.Start();
+                });
+
+                SpawnForm<FormEntryHeader>("Icon");
+                SpawnForm<FormEntryString, string>("Save Target", () => cover.IconTarget, x => Chartmaker.main.SetItem(cover, "IconTarget", x));
+                SpawnForm<FormEntryVector2, Vector2>("Center", () => cover.IconCenter, x => Chartmaker.main.SetItem(cover, "IconCenter", x));
+                SpawnForm<FormEntryFloat, float>("Size", () => cover.IconSize, x => Chartmaker.main.SetItem(cover, "IconSize", x));
+            }
+            else if (CurrentObject is CoverLayer layer)
+            {
+                if (!Chartmaker.main.CurrentSong.Cover.Layers.Contains(layer))
+                {
+                    SetObject(null);
+                    return;
+                }
+
+                FormTitle.text = "Cover Layer";
+
+                SpawnForm<FormEntryHeader>("Transform");
+                SpawnForm<FormEntryVector2, Vector2>("Position", () => layer.Position, x => Chartmaker.main.SetItem(layer, "Position", x));
+                SpawnForm<FormEntryFloat, float>("Scale", () => layer.Scale, x => Chartmaker.main.SetItem(layer, "Scale", x));
+                SpawnForm<FormEntryFloat, float>("Parallax Z", () => layer.ParallaxFactor, x => Chartmaker.main.SetItem(layer, "ParallaxFactor", x));
+                SpawnForm<FormEntryBool, bool>("Tiling", () => layer.Tiling, x => Chartmaker.main.SetItem(layer, "Tiling", x));
+            }
             else if (CurrentObject is BPMStop stop)
             {
                 if (!Chartmaker.main.CurrentSong.Timing.Stops.Contains(stop))
