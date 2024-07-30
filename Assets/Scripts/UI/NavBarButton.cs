@@ -30,4 +30,18 @@ public class NavBarButton : Button
             onClick.Invoke();
         }
     }
+
+    bool isMenuActive; 
+
+    public void SetMenuActive(bool active) 
+    {
+        isMenuActive = active;
+        DoStateTransition(currentSelectionState, instant: false);
+    }
+
+    protected override void DoStateTransition(SelectionState state, bool instant)
+    {
+        if (isMenuActive) state = SelectionState.Highlighted;
+        base.DoStateTransition(state, instant);
+    }
 }

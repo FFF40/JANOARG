@@ -9,7 +9,7 @@ public class NavigationBar : MonoBehaviour
     public RectTransform FileButton;
     public RectTransform EditButton;
     public RectTransform ToolsButton;
-    public RectTransform OptionsButton;
+    public RectTransform GlobalsButton;
     public RectTransform HelpButton;
     public RectTransform MenuButton;
 
@@ -30,9 +30,9 @@ public class NavigationBar : MonoBehaviour
         ContextMenuHolder.main.OpenRoot(GetToolsMenu(), ToolsButton);
     }
 
-    public void OpenOptionsMenu()
+    public void OpenGlobalsMenu()
     {
-        ContextMenuHolder.main.OpenRoot(GetOptionsMenu(), OptionsButton);
+        ContextMenuHolder.main.OpenRoot(GetGlobalsMenu(), GlobalsButton);
     }
 
     public void OpenHelpMenu()
@@ -47,7 +47,7 @@ public class NavigationBar : MonoBehaviour
             ContextMenuHolder.main.OpenRoot(new ContextMenuList(
                 new ContextMenuListSublist("File", GetFileMenu().Items.ToArray()),
                 new ContextMenuListSublist("Edit", GetEditMenu().Items.ToArray()),
-                new ContextMenuListSublist("Options", GetOptionsMenu().Items.ToArray()),
+                new ContextMenuListSublist("Globals", GetGlobalsMenu().Items.ToArray()),
                 new ContextMenuListSublist("Help", GetHelpMenu().Items.ToArray())
             ), MenuButton);
         }
@@ -55,7 +55,7 @@ public class NavigationBar : MonoBehaviour
         {
             ContextMenuHolder.main.OpenRoot(new ContextMenuList(
                 new ContextMenuListSublist("File", GetFileMenu().Items.ToArray()),
-                new ContextMenuListSublist("Options", GetOptionsMenu().Items.ToArray()),
+                new ContextMenuListSublist("Globals", GetGlobalsMenu().Items.ToArray()),
                 new ContextMenuListSublist("Help", GetHelpMenu().Items.ToArray())
             ), MenuButton);
         }
@@ -95,6 +95,10 @@ public class NavigationBar : MonoBehaviour
             //     new ContextMenuListAction("Bundle...", () => {})
             // ),
             // new ContextMenuListSeparator(),
+            new ContextMenuListAction("Render...", () => {}, _enabled: false),
+            new ContextMenuListSeparator(),
+            new ContextMenuListAction("Reveal Song Folder", () => Application.OpenURL("file://" + System.IO.Path.GetDirectoryName(Chartmaker.main.CurrentSongPath)), _enabled: Chartmaker.main.CurrentSong != null),
+            new ContextMenuListSeparator(),
             new ContextMenuListAction("Close Song", Chartmaker.main.TryCloseSong, _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListAction("Exit Chartmaker", Application.Quit)
         );
@@ -110,6 +114,7 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Paste", Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
             new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), _enabled: Chartmaker.main.CanCopy()),
+            new ContextMenuListSeparator(),
             new ContextMenuListAction("Select All", () => KeyboardHandler.main.Keybindings["ED:SelectAll"].Invoke(), KeyOf("ED:SelectAll")),
             new ContextMenuListAction("Invert Selection", InvertSelection)
         );
@@ -124,7 +129,7 @@ public class NavigationBar : MonoBehaviour
         );
     }
 
-    public ContextMenuList GetOptionsMenu()
+    public ContextMenuList GetGlobalsMenu()
     {
         return new ContextMenuList(
             new ContextMenuListAction("Preferences...", () => ModalHolder.main.Spawn<PreferencesModal>()),

@@ -2318,7 +2318,7 @@ GameObject:
   - component: {fileID: 95651235}
   - component: {fileID: 95651236}
   m_Layer: 5
-  m_Name: Options
+  m_Name: Globals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2455,7 +2455,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1445882522}
         m_TargetAssemblyTypeName: NavigationBar, Assembly-CSharp
-        m_MethodName: OpenOptionsMenu
+        m_MethodName: OpenGlobalsMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -15167,7 +15167,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 25, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 26}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &807960744
@@ -21520,7 +21520,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 65, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 26}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1150428897
@@ -27059,7 +27059,7 @@ MonoBehaviour:
   FileButton: {fileID: 1217243493}
   EditButton: {fileID: 931492228}
   ToolsButton: {fileID: 1242564916}
-  OptionsButton: {fileID: 95651229}
+  GlobalsButton: {fileID: 95651229}
   HelpButton: {fileID: 1557507902}
   MenuButton: {fileID: 1740044089}
 --- !u!114 &1445882523
@@ -27895,7 +27895,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 93, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 26}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1485762772
@@ -40352,7 +40352,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Options
+  m_text: Globals
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
   m_sharedMaterial: {fileID: -6645923801699503097, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}

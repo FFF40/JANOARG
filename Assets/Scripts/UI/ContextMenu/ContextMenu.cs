@@ -194,6 +194,8 @@ public class ContextMenu : MonoBehaviour
         if (justState == false || currentTarget != target) StartCoroutine(Intro());
 
         currentTarget = target;
+
+        SetParentMenuActive(true);
     }
 
     public void Close()
@@ -205,9 +207,18 @@ public class ContextMenu : MonoBehaviour
 
         gameObject.SetActive(false);
         isOpen = false;
+        SetParentMenuActive(false);
         
         ChildMenu?.Close();
         StopCoroutine(Intro());
+    }
+
+    public void SetParentMenuActive(bool active)
+    {
+        NavBarButton nbb;
+        ContextMenuButton cmb;
+        if (nbb = currentTarget.GetComponent<NavBarButton>()) nbb.SetMenuActive(active);
+        else if (cmb = currentTarget.GetComponent<ContextMenuButton>()) cmb.SetMenuActive(active);
     }
 
     IEnumerator Intro()
