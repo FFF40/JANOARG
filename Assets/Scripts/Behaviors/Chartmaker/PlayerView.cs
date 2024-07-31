@@ -255,6 +255,12 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 index++;
             }
 
+            while (CoverLayers.Count > Chartmaker.main.CurrentSong.Cover.Layers.Count)
+            {
+                Destroy(CoverLayers[^1].gameObject);
+                CoverLayers.RemoveAt(CoverLayers.Count - 1);
+            }
+
             UpdateCoverToolbar();
         }
         else 

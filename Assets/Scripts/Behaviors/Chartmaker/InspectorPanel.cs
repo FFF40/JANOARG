@@ -454,7 +454,7 @@ public class InspectorPanel : MonoBehaviour
             }
             else if (CurrentObject is LaneStep step)
             {
-                if (CurrentHierarchyObject is not Lane l || l.LaneSteps.Contains(step))
+                if (CurrentHierarchyObject is not Lane l || !l.LaneSteps.Contains(step))
                 {
                     SetObject(null);
                     return;
@@ -488,7 +488,7 @@ public class InspectorPanel : MonoBehaviour
             }
             else if (CurrentObject is HitObject hit)
             {
-                if (CurrentHierarchyObject is not Lane l || l.Objects.Contains(hit))
+                if (CurrentHierarchyObject is not Lane l || !l.Objects.Contains(hit))
                 {
                     SetObject(null);
                     return;

@@ -189,24 +189,31 @@ public class HierarchyPanel : MonoBehaviour
                 }
 
                 HierarchyItem worldItem = Items[0].Children[2];
+                worldItem.Children.Clear();
 
-                    // Add lane groups
-                    foreach (var group in chart.Groups)
-                    {
-                        HierarchyItem item = new () {
-                            Name = group.Name,
-                            Type = HierarchyItemType.LaneGroup,
-                            Target = group,
-                        };
-                        GroupItems[group.Name] = item;
-                    }
-                    foreach (var group in GroupItems)
-                    {
-                        LaneGroup data = (LaneGroup)group.Value.Target;
-                        if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(group.Value);
-                        else worldItem.Children.Add(group.Value);
-                    }
-                    
+                // Add lane groups
+                foreach (var group in chart.Groups)
+                {
+                    HierarchyItem item = new () {
+                        Name = group.Name,
+                        Type = HierarchyItemType.LaneGroup,
+                        Target = group,
+                        Expanded = GroupItems.ContainsKey(group.Name) ? GroupItems[group.Name].Expanded : false,
+                    };
+                    GroupItems[group.Name] = item;
+                }
+                foreach (var group in GroupItems)
+                {
+                    LaneGroup data = (LaneGroup)group.Value.Target;
+                    if (!chart.Groups.Contains(data)) GroupItems.Remove(group.Key);
+                }
+                foreach (var group in GroupItems)
+                {
+                    LaneGroup data = (LaneGroup)group.Value.Target;
+                    if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(group.Value);
+                    else worldItem.Children.Add(group.Value);
+                }
+
                 // Add lanes
                 foreach (var lane in chart.Lanes)
                 {
