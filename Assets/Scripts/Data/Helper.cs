@@ -35,7 +35,9 @@ public static class Helper
     public static bool IsHierarchyObject(object obj)
     {
         return obj 
-            is Chart 
+            is PlayableSong
+            or Cover or CoverLayer
+            or Chart 
             or CameraController or Pallete
             or LaneStyle or HitStyle 
             or LaneGroup or Lane

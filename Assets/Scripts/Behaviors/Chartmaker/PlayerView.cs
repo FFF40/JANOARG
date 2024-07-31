@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -14,6 +15,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     public ChartManager Manager;
     [Space]
     [Header("Cover")]
+    public CoverViewMode CurrentCoverViewMode;
     public GameObject DarkBackground;
     public Image CoverBackground;
     public RectMask2D CoverMask;
@@ -22,6 +24,8 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     [Space]
     public GameObject CoverToolbar;
     public GameObject MaskButtonHighlight;
+    public GameObject PanoramaButtonHighlight;
+    public GameObject IconButtonHighlight;
     [Space]
     [Header("World")]
     public Transform Holder;
@@ -58,7 +62,9 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public HandleDragMode CurrentDragMode;
     bool isDragged;
+    bool isAnimating;
     float lastTargetAspect;
+    Vector2 CoverPosition;
 
     public void Awake()
     {
@@ -98,7 +104,22 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             bound.height - 24
         );
 
-        float targetAspect = HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong ? 880 / 200f : 3 / 2f;
+        float targetAspect;
+        if (HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong) 
+        {
+            safeZone.yMin += 32;
+            switch (CurrentCoverViewMode)
+            {
+                case CoverViewMode.Panorama: targetAspect = 880 / 200f; break;
+                case CoverViewMode.Icon: targetAspect = 1; break;
+                default: targetAspect = 880 / 200f; break;
+            }
+            
+        }
+        else 
+        {
+            targetAspect = 3 / 2f;
+        }
 
         if (safeZone.width / safeZone.height > targetAspect)
         {
@@ -177,8 +198,24 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         {
             DarkBackground.SetActive(true);
             CoverToolbar.SetActive(true);
+
+            switch (CurrentCoverViewMode) 
+            {
+                case CoverViewMode.Panorama:
+                    CoverBackground.rectTransform.sizeDelta = new (880, 200);
+                    break;
+                case CoverViewMode.Icon:
+                    CoverBackground.rectTransform.sizeDelta = Vector2.one * Chartmaker.main.CurrentSong.Cover.IconSize;
+                    break;
+            }
+
+            float scale = CoverBackground.rectTransform.localScale.x;
+            Vector2 parallaxOffset = CoverPosition / scale;
+
             BoundingBox.color = NotificationText.color = NotificationBox.color = Color.white;
-            CoverBackground.rectTransform.localScale = Vector3.one * (BoundingBox.rectTransform.rect.width / 880);
+            BoundingBox.rectTransform.anchoredPosition = new Vector2 (0, 16) + CoverPosition;
+            CoverBackground.rectTransform.localScale = Vector3.one * (BoundingBox.rectTransform.rect.width / CoverBackground.rectTransform.sizeDelta.x);
+            CoverBackground.rectTransform.anchoredPosition = BoundingBox.rectTransform.anchoredPosition;
             CoverBackground.color = Chartmaker.main.CurrentSong.Cover.BackgroundColor;
 
             int index = 0;
@@ -193,9 +230,28 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 {
                     image = CoverLayers[index];
                 }
-                image.rectTransform.sizeDelta = new Vector2(1, layer.Texture.height / layer.Texture.width) * layer.Scale * 880;
-                image.rectTransform.anchoredPosition = layer.Position;
+
                 image.texture = layer.Texture;
+                if (layer.Tiling)
+                {
+                    image.rectTransform.sizeDelta = CoverBackground.rectTransform.sizeDelta;
+                    image.rectTransform.anchoredPosition = Vector2.zero;
+                    Vector2 imgSize = new Vector2(1, layer.Texture.height / layer.Texture.width) * 880 * layer.Scale;
+                    image.uvRect = Rect2UV(new (
+                        -CoverBackground.rectTransform.sizeDelta * .5f,
+                        CoverBackground.rectTransform.sizeDelta
+                    ), new (
+                        layer.Position - parallaxOffset * layer.ParallaxFactor - imgSize * .5f,
+                        imgSize
+                    ));
+                }
+                else 
+                {
+                    image.rectTransform.sizeDelta = new Vector2(1, layer.Texture.height / layer.Texture.width) * layer.Scale * 880;
+                    image.rectTransform.anchoredPosition = layer.Position - parallaxOffset * layer.ParallaxFactor;
+                    image.uvRect = new (0, 0, 1, 1);
+                }
+
                 index++;
             }
 
@@ -203,6 +259,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         }
         else 
         {
+            BoundingBox.rectTransform.anchoredPosition = new (0, 0);
             DarkBackground.SetActive(false);
             CoverToolbar.SetActive(false);
         }
@@ -211,6 +268,9 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     public void UpdateCoverToolbar()
     {
         MaskButtonHighlight.SetActive(CoverMask.enabled);
+
+        PanoramaButtonHighlight.SetActive(CurrentCoverViewMode == CoverViewMode.Panorama);
+        IconButtonHighlight.SetActive(CurrentCoverViewMode == CoverViewMode.Icon);
     }
 
     public void ToggleCoverMask()
@@ -230,6 +290,33 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         if (Chartmaker.main.SongSource.isPlaying)
         {
             return;
+        }
+        if (HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong)
+        {
+            
+            switch (InspectorPanel.main.CurrentObject)
+            {
+                case CoverLayer layer: 
+                {
+                    float scale = CoverBackground.rectTransform.localScale.x;
+                    Vector2 offset = new Vector2(0, 16) + CoverPosition * (1 - layer.ParallaxFactor);
+                    
+                    Vector2 center = layer.Position * scale + offset;
+                    CenterHandle.gameObject.SetActive(CurrentDragMode is HandleDragMode.None or HandleDragMode.Center);
+                    CenterHandle.anchoredPosition = center;
+                    
+                    Vector2 left = Vector2.right * 440 * layer.Scale * scale + center;
+                    StartHandle.gameObject.SetActive(CurrentDragMode is HandleDragMode.None or HandleDragMode.Start);
+                    StartHandle.anchoredPosition = left;
+                    
+                    SelectedItemLine.gameObject.SetActive(CurrentDragMode is HandleDragMode.None or HandleDragMode.Start);
+                    SelectedItemLine.anchoredPosition = (center + left) / 2;
+                    SelectedItemLine.sizeDelta = new(440 * layer.Scale * scale, SelectedItemLine.sizeDelta.y);
+                    SelectedItemLine.eulerAngles = Vector2.zero;
+                } break;
+            }
+                
+            endSel: ;
         }
         if (HierarchyPanel.main.CurrentMode == HierarchyMode.Chart) 
         {
@@ -394,18 +481,49 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (isAnimating) return;
+
         bool contains(RectTransform rt) => rt.gameObject.activeInHierarchy && RectTransformUtility.RectangleContainsScreenPoint(rt, eventData.pressPosition, eventData.pressEventCamera);
 
         CurrentDragMode = HandleDragMode.None;
 
-        if (contains(StartHandle)) CurrentDragMode = HandleDragMode.Start;
+        if (contains((RectTransform)CoverToolbar.transform)) CurrentDragMode = HandleDragMode.None;
+        else if (contains(StartHandle)) CurrentDragMode = HandleDragMode.Start;
         else if (contains(CenterHandle)) CurrentDragMode = HandleDragMode.Center;
         else if (contains(EndHandle)) CurrentDragMode = HandleDragMode.End;
+        else if (HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong) CurrentDragMode = HandleDragMode.Background;
 
         if (CurrentDragMode == HandleDragMode.None) return;
 
-        switch (InspectorPanel.main.CurrentObject)
+        if (HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong && CurrentDragMode == HandleDragMode.Background)
         {
+            OnDragEvent += (ev) => {
+                CoverPosition += ev.delta;
+            };
+        }
+        else switch (InspectorPanel.main.CurrentObject)
+        {
+            
+            case CoverLayer layer:
+            {
+                float scale = CoverBackground.rectTransform.localScale.x;
+                Vector2 offset = new (0, 16);
+
+                OnDragEvent += (ev) => {
+                    ChartmakerHistory history = Chartmaker.main.History;
+                    if (CurrentDragMode == HandleDragMode.Center)
+                    {
+                        history.SetItem(layer, "Position", layer.Position + ev.delta / scale);
+                    }
+                    else if (CurrentDragMode == HandleDragMode.Start)
+                    {
+                        history.SetItem(layer, "Scale", layer.Scale + ev.delta.x / 440 / scale);
+                    }
+                    Chartmaker.main.OnHistoryUpdate();
+                };
+            }
+            break;
+
             case Lane lane:
             {
                 int index = Chartmaker.main.CurrentChart.Lanes.IndexOf(lane);
@@ -577,7 +695,10 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         }
         else if (contains((RectTransform)transform)) 
         {
-            if (contains(StartHandle) || contains(CenterHandle) || contains(EndHandle)) Cursor = CursorType.Grab;
+            if (
+                (!contains((RectTransform)CoverToolbar.transform)) &&
+                (contains(StartHandle) || contains(CenterHandle) || contains(EndHandle))
+            ) Cursor = CursorType.Grab;
         }
 
         if (CurrentCursor != Cursor)
@@ -636,6 +757,16 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         return null;
     }
 
+    public Rect Rect2UV(Rect parent, Rect child) 
+    {
+        return new(
+            (parent.xMin - child.xMin) / child.width,
+            (parent.yMin - child.yMin) / child.height,
+            parent.width / child.width,
+            parent.height / child.height
+        );
+    }
+
     public void DoMove<TAction, TTarget>(TTarget item, Vector3 offset) where TAction : ChartmakerMoveAction<TTarget>, new()
     {
         if (offset == Vector3.zero) return;
@@ -665,6 +796,41 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
         Chartmaker.main.OnHistoryUpdate();
     }
+
+    public void SetCoverViewMode(int mode) 
+    {
+        SetCoverViewMode((CoverViewMode)mode);
+    }
+
+    public void SetCoverViewMode(CoverViewMode mode) 
+    {
+        CurrentCoverViewMode = mode;
+    }
+
+    public void MoveCoverToCenter()
+    {
+        if (!isAnimating) StartCoroutine(MoveCoverToCenterAnim());
+    }
+
+    IEnumerator MoveCoverToCenterAnim()
+    {
+        isAnimating = true;
+
+        Vector2 posStart = CoverPosition;
+
+        void Animate1(float t) 
+        {
+            float ease = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
+
+            CoverPosition = posStart * (1 - ease);
+            UpdateObjects();
+        }
+        for (float t = 0; t < 1; t += Time.deltaTime / .2f) { Animate1(t); yield return null; }
+        Animate1(1);
+
+        isAnimating = false;
+    }
+
 }
 
 public enum HandleDragMode
@@ -672,5 +838,12 @@ public enum HandleDragMode
     None,
     Start,
     Center,
-    End
+    End,
+    Background,
+}
+
+public enum CoverViewMode 
+{
+    Panorama = 0,
+    Icon = 1
 }

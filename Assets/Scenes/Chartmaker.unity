@@ -14306,12 +14306,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MainCamera: {fileID: 527984101}
   BoundingBox: {fileID: 159674517}
+  CurrentCoverViewMode: 0
   DarkBackground: {fileID: 12691146}
   CoverBackground: {fileID: 111276220}
   CoverMask: {fileID: 111276222}
   CoverLayerSample: {fileID: 2062554527}
   CoverToolbar: {fileID: 1195662710}
   MaskButtonHighlight: {fileID: 1206989908}
+  PanoramaButtonHighlight: {fileID: 888429814}
+  IconButtonHighlight: {fileID: 1317335136}
   Holder: {fileID: 1197890267}
   LanePlayerSample: {fileID: 8573064261925464373, guid: c38adea6150dcae4cb10586ae9a9df93, type: 3}
   HitPlayerSample: {fileID: 1984272375101724183, guid: 88f0c083d0ff7a646948dc74bc519fa4, type: 3}
@@ -15167,7 +15170,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 25, y: 0}
   m_SizeDelta: {x: 0, y: 26}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &807960744
@@ -21520,7 +21523,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 65, y: 0}
   m_SizeDelta: {x: 0, y: 26}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1150428897
@@ -27895,7 +27898,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 93, y: 0}
   m_SizeDelta: {x: 0, y: 26}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1485762772
@@ -33185,7 +33188,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1745652627}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 758002022}
+        m_TargetAssemblyTypeName: PlayerView, Assembly-CSharp
+        m_MethodName: SetCoverViewMode
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1745652627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37854,7 +37869,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1954392347}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 758002022}
+        m_TargetAssemblyTypeName: PlayerView, Assembly-CSharp
+        m_MethodName: MoveCoverToCenter
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1954392347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40254,7 +40281,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2081546023}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 758002022}
+        m_TargetAssemblyTypeName: PlayerView, Assembly-CSharp
+        m_MethodName: SetCoverViewMode
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2081546023
 MonoBehaviour:
   m_ObjectHideFlags: 0
