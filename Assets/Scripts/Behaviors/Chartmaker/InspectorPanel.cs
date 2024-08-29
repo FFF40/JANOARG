@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -795,6 +796,23 @@ public class InspectorPanel : MonoBehaviour
         ContextMenuHolder.main.OpenRoot(new ContextMenuList(
             new ContextMenuListAction("Debug Stats", () => SetMode(InspectorMode.DebugStats), _checked: !IsCollapsed && CurrentMode == InspectorMode.DebugStats)
         ), (RectTransform)ExtraModesButton.transform, ContextMenuDirection.Left); 
+    }
+
+    public string GetNewGroupName(string name) 
+    {
+        int index = 0;
+        name = name.Trim();
+        Match match = Regex.Match(name, @"^(.*) (\d+)$");
+        if (match != null && match.Success)
+        {
+            name = match.Groups[1].Value;
+            index = int.Parse(match.Groups[2].Value);
+        }
+
+        string newName() => index > 0 ? name + " " + index : name;
+
+        while (Chartmaker.main.CurrentChart.Groups.FindIndex(x => x.Name == newName()) >= 0) index++;
+        return newName();
     }
     
 

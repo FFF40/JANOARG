@@ -436,6 +436,7 @@ public class Chartmaker : MonoBehaviour
         InspectorPanel.main?.UpdateForm();
         TimelinePanel.main?.UpdateItems();
         PlayerView.main?.UpdateObjects();
+        HierarchyPanel.main?.UpdateHierarchy();
         IsDirty = true;
     }
 

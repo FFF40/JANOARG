@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
@@ -100,36 +101,6 @@ public class HierarchyPanel : MonoBehaviour
                     Name = "World",
                     Type = HierarchyItemType.World,
                 });
-
-                // Add lane groups
-                foreach (var group in chart.Groups)
-                {
-                    HierarchyItem item = new () {
-                        Name = group.Name,
-                        Type = HierarchyItemType.LaneGroup,
-                        Target = group,
-                    };
-                    GroupItems[group.Name] = item;
-                }
-                foreach (var group in GroupItems)
-                {
-                    LaneGroup data = (LaneGroup)group.Value.Target;
-                    if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(group.Value);
-                    else worldItem.Children.Add(group.Value);
-                }
-                
-                // Add lanes
-                foreach (var lane in chart.Lanes)
-                {
-                    HierarchyItem item = new () {
-                        Name = "Lane <alpha=#77>" + lane.LaneSteps[0].Offset + "~" + lane.LaneSteps[^1].Offset,
-                        Type = HierarchyItemType.Lane,
-                        Target = lane,
-                    };
-
-                    if (!string.IsNullOrEmpty(lane.Group) && GroupItems.ContainsKey(lane.Group)) GroupItems[lane.Group].Children.Add(item);
-                    else worldItem.Children.Add(item);
-                }
             }
         }
         UpdateHierarchy();
@@ -202,18 +173,14 @@ public class HierarchyPanel : MonoBehaviour
                     };
                     GroupItems[group.Name] = item;
                 }
-                foreach (var group in GroupItems)
+                var keys = GroupItems.Keys.ToList();
+                foreach (var key in keys)
                 {
-                    LaneGroup data = (LaneGroup)group.Value.Target;
-                    if (!chart.Groups.Contains(data)) GroupItems.Remove(group.Key);
+                    LaneGroup data = (LaneGroup)GroupItems[key].Target;
+                    if (!chart.Groups.Contains(data)) GroupItems.Remove(key);
+                    else if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(GroupItems[key]);
+                    else worldItem.Children.Add(GroupItems[key]);
                 }
-                foreach (var group in GroupItems)
-                {
-                    LaneGroup data = (LaneGroup)group.Value.Target;
-                    if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(group.Value);
-                    else worldItem.Children.Add(group.Value);
-                }
-
                 // Add lanes
                 foreach (var lane in chart.Lanes)
                 {

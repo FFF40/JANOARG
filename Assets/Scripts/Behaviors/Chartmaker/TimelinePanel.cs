@@ -832,7 +832,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         {
             if (eventData.button == PointerEventData.InputButton.Middle)
                 dragMode = TimelineDragMode.TimelineDrag;
-            else if (eventData.button == PointerEventData.InputButton.Right || PickerPanel.main.CurrentMode == PickerMode.Select)
+            else if (eventData.button == PointerEventData.InputButton.Right || PickerPanel.main.CurrentTimelinePickerMode == TimelinePickerMode.Select)
                 dragMode = TimelineDragMode.Select;
             else
                 dragMode = TimelineDragMode.Timeline;
@@ -1141,7 +1141,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         {
             if (!Chartmaker.main.SongSource.isPlaying)
             {
-                PickerMode pickMode = PickerPanel.main.CurrentMode;
+                TimelinePickerMode pickMode = PickerPanel.main.CurrentTimelinePickerMode;
                 
                 Metronome metronome = Chartmaker.main.CurrentSong.Timing;
 
@@ -1150,9 +1150,9 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 float step = Mathf.Pow(SeparationFactor, factor + 1);
                 float beat = Mathf.Round(metronome.ToBeat(timeEnd) / step) * step;
 
-                switch (PickerPanel.main.CurrentMode) 
+                switch (PickerPanel.main.CurrentTimelinePickerMode) 
                 {
-                    case PickerMode.Timestamp:
+                    case TimelinePickerMode.Timestamp:
                     {
                         if (InspectorPanel.main.CurrentObject is not IStoryboardable thing) break;
 
@@ -1167,7 +1167,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         });
                     }
                     break;
-                    case PickerMode.BPMStop:
+                    case TimelinePickerMode.BPMStop:
                     {
                         if (isDragged) break;
                         BPMStop baseStop = Chartmaker.main.CurrentSong.Timing.GetStop(timeStart, out _);
@@ -1175,7 +1175,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         Chartmaker.main.AddItem(new BPMStop(baseStop.BPM, timeStart) { Signature = baseStop.Signature });
                     }
                     break;
-                    case PickerMode.Lane:
+                    case TimelinePickerMode.Lane:
                     {
                         Lane lane = new Lane {
                             Position = new(0, -4, 0)
@@ -1193,7 +1193,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         Chartmaker.main.AddItem(lane);
                     }
                     break;
-                    case PickerMode.LaneStep:
+                    case TimelinePickerMode.LaneStep:
                     {
                         if (isDragged) break;
 
@@ -1209,7 +1209,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         Chartmaker.main.AddItem(baseStep);
                     }
                     break;
-                    case PickerMode.NormalHit or PickerMode.CatchHit:
+                    case TimelinePickerMode.NormalHit or TimelinePickerMode.CatchHit:
                     {
                         HitObject hit = null;
 
@@ -1236,7 +1236,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                             hit.HoldLength = 0;
                         }
 
-                        hit.Type = PickerPanel.main.CurrentMode == PickerMode.CatchHit ? HitObject.HitType.Catch : HitObject.HitType.Normal;
+                        hit.Type = PickerPanel.main.CurrentTimelinePickerMode == TimelinePickerMode.CatchHit ? HitObject.HitType.Catch : HitObject.HitType.Normal;
 
                         Chartmaker.main.AddItem(hit);
                     }

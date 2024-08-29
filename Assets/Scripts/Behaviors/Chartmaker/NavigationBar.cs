@@ -106,17 +106,22 @@ public class NavigationBar : MonoBehaviour
 
     public ContextMenuList GetEditMenu()
     {
+        bool canUndo = Chartmaker.main.History.ActionsBehind.TryPeek(out IChartmakerAction actionBehind);
+        bool canRedo = Chartmaker.main.History.ActionsAhead.TryPeek(out IChartmakerAction actionAhead);
+
         return new ContextMenuList(
-            new ContextMenuListAction("Undo", () => Chartmaker.main.Undo(), KeyOf("ED:Undo"), icon: "Undo", _enabled: Chartmaker.main.History.ActionsBehind.Count > 0),
-            new ContextMenuListAction("Redo", () => Chartmaker.main.Redo(), KeyOf("ED:Redo"), icon: "Redo", _enabled: Chartmaker.main.History.ActionsAhead.Count > 0),
+            new ContextMenuListAction("Undo <i>" + (actionBehind?.GetName() ?? ""), () => Chartmaker.main.Undo(), KeyOf("ED:Undo"), icon: "Undo", _enabled: canUndo),
+            new ContextMenuListAction("Redo <i>" + (actionAhead?.GetName() ?? ""), () => Chartmaker.main.Redo(), KeyOf("ED:Redo"), icon: "Redo", _enabled: canRedo),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
-            new ContextMenuListAction("Paste", Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
+            new ContextMenuListAction("Paste <i>" + (Chartmaker.main.CanPaste() ? Chartmaker.GetItemName(Chartmaker.main.ClipboardItem) : ""), Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
             new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListSeparator(),
-            new ContextMenuListAction("Select All", () => KeyboardHandler.main.Keybindings["ED:SelectAll"].Invoke(), KeyOf("ED:SelectAll")),
-            new ContextMenuListAction("Invert Selection", InvertSelection)
+            new ContextMenuListSublist("Timeline", 
+                new ContextMenuListAction("Select All", () => KeyboardHandler.main.Keybindings["ED:SelectAll"].Invoke(), KeyOf("ED:SelectAll")),
+                new ContextMenuListAction("Invert Selection", InvertSelection)
+            )
         );
     }
 

@@ -7,8 +7,12 @@ public class PickerPanel : MonoBehaviour
 {
     public static PickerPanel main;
 
-    public PickerMode CurrentMode;
-    public List<Button> Buttons;
+    public TimelinePickerMode CurrentTimelinePickerMode;
+    public List<Button> HierarchyButtons;
+    public List<Button> TimelineButtons;
+    
+    public GameObject HierarchySongItems;
+    public GameObject HierarchyChartItems;
     
     public GameObject hmmm;
     public GameObject hmmm2;
@@ -20,48 +24,127 @@ public class PickerPanel : MonoBehaviour
 
     public void Start()
     {
-        for (int a = 0; a < Buttons.Count; a++)
+        for (int a = 0; a < TimelineButtons.Count; a++)
         {
-            PickerMode mode = (PickerMode)a;
-            Buttons[a].onClick.AddListener(() => SetTabMode(mode));
-            TooltipTarget tt = Buttons[a].gameObject.AddComponent<TooltipTarget>();
-            tt.Text = Buttons[a].name;
+            TimelinePickerMode mode = (TimelinePickerMode)a;
+            TimelineButtons[a].onClick.AddListener(() => SetTimelinePickerMode(mode));
+            TooltipTarget tt = TimelineButtons[a].gameObject.AddComponent<TooltipTarget>();
+            tt.Text = TimelineButtons[a].name;
+            tt.PositionMode = TooltipPositionMode.Right;
+        }
+        for (int a = 0; a < HierarchyButtons.Count; a++)
+        {
+            HierarchyPickerItem mode = (HierarchyPickerItem)a;
+            HierarchyButtons[a].onClick.AddListener(() => ClickHierarchyPickerItem(mode));
+            TooltipTarget tt = HierarchyButtons[a].gameObject.AddComponent<TooltipTarget>();
+            tt.Text = HierarchyButtons[a].name;
             tt.PositionMode = TooltipPositionMode.Right;
         }
     }
 
-    public void SetTabMode(int mode) => SetTabMode((PickerMode)mode);
+    public void SetTabMode(int mode) => SetTimelinePickerMode((TimelinePickerMode)mode);
 
-    public void SetTabMode(PickerMode mode)
+    public void SetTimelinePickerMode(TimelinePickerMode mode)
     {
-        CurrentMode = mode;
+        CurrentTimelinePickerMode = mode;
         UpdateButtons();
     }
 
-    public void OpenCoverLayerModal() 
+    public void ClickHierarchyPickerItem(HierarchyPickerItem item) 
     {
-        ModalHolder.main.Spawn<NewCoverLayerModal>();
+        Chart chart = Chartmaker.main.CurrentChart;
+        PlayableSong song = Chartmaker.main.CurrentSong;
+        
+        if (item == HierarchyPickerItem.CoverLayer)
+        {
+            ModalHolder.main.Spawn<NewCoverLayerModal>();
+        }
+        else if (item == HierarchyPickerItem.LaneStyle) 
+        {
+            LaneStyle target = chart.Pallete.LaneStyles.Count > 0 ? chart.Pallete.LaneStyles[0] : new LaneStyle() {
+                LaneColor = song.InterfaceColor * new Color (1, 1, 1, .35f),
+                JudgeColor = song.InterfaceColor,
+            };
+            switch (InspectorPanel.main.CurrentObject) {
+                case LaneStyle ls: target = ls; break;
+            }
+            Chartmaker.main.AddItem(target.DeepClone());
+        }
+        else if (item == HierarchyPickerItem.HitStyle) 
+        {
+            HitStyle target = chart.Pallete.HitStyles.Count > 0 ? chart.Pallete.HitStyles[0] : new HitStyle() {
+                NormalColor = song.InterfaceColor,
+                CatchColor = Color.Lerp(song.InterfaceColor, song.BackgroundColor, .35f),
+                HoldTailColor = song.InterfaceColor * new Color (1, 1, 1, .35f),
+            };
+            switch (InspectorPanel.main.CurrentObject) {
+                case HitStyle ls: target = ls; break;
+            }
+            Chartmaker.main.AddItem(target.DeepClone());
+        }
+        else if (item == HierarchyPickerItem.Lane) 
+        {
+            string group = "";
+            switch (InspectorPanel.main.CurrentObject) {
+                case Lane l: group = l.Group; break;
+                case LaneGroup lg: group = lg.Group; break;
+            }
+
+            Lane lane = new Lane {
+                Position = new(0, -4, 0),
+                Group = group,
+            };
+            lane.LaneSteps.Add(new LaneStep { 
+                StartPos = new(-8, 0),
+                EndPos = new(8, 0),
+                Offset = (BeatPosition)InformationBar.main.beat
+            });
+            lane.LaneSteps.Add(new LaneStep { 
+                StartPos = new(-8, 0),
+                EndPos = new(8, 0),
+                Offset = (BeatPosition)(InformationBar.main.beat + 1),
+            });
+            Chartmaker.main.AddItem(lane);
+        }
+        else if (item == HierarchyPickerItem.LaneGroup) 
+        {
+            string parent = "";
+            switch (InspectorPanel.main.CurrentObject) {
+                case Lane l: parent = l.Group; break;
+                case LaneGroup lg: parent = lg.Group; break;
+            }
+            
+            LaneGroup group = new LaneGroup {
+                Group = parent,
+                Name = InspectorPanel.main.GetNewGroupName("Group 1"),
+            };
+            Chartmaker.main.AddItem(group);
+        }
     }
     
 
     public void UpdateButtons()
     {
-        TimelineMode mode = TimelinePanel.main.CurrentMode;
-        Buttons[3].gameObject.SetActive(mode == TimelineMode.Storyboard);
-        Buttons[4].gameObject.SetActive(mode == TimelineMode.Timing);
-        Buttons[5].gameObject.SetActive(mode == TimelineMode.Lanes);
-        Buttons[6].gameObject.SetActive(mode == TimelineMode.LaneSteps);
-        Buttons[7].gameObject.SetActive(mode == TimelineMode.HitObjects);
-        Buttons[8].gameObject.SetActive(mode == TimelineMode.HitObjects);
+        TimelineMode tMode = TimelinePanel.main.CurrentMode;
+        TimelineButtons[3].gameObject.SetActive(tMode == TimelineMode.Storyboard);
+        TimelineButtons[4].gameObject.SetActive(tMode == TimelineMode.Timing);
+        TimelineButtons[5].gameObject.SetActive(tMode == TimelineMode.Lanes);
+        TimelineButtons[6].gameObject.SetActive(tMode == TimelineMode.LaneSteps);
+        TimelineButtons[7].gameObject.SetActive(tMode == TimelineMode.HitObjects);
+        TimelineButtons[8].gameObject.SetActive(tMode == TimelineMode.HitObjects);
+
+        HierarchyMode hMode = HierarchyPanel.main.CurrentMode;
+        HierarchySongItems.gameObject.SetActive(hMode == HierarchyMode.PlayableSong);
+        HierarchyChartItems.gameObject.SetActive(hMode == HierarchyMode.Chart);
 
         bool isOkay = false;
-        for (int a = 0; a < Buttons.Count; a++)
+        for (int a = 0; a < TimelineButtons.Count; a++)
         {
-            Buttons[a].interactable = CurrentMode != (PickerMode)a;
-            if (Buttons[a].gameObject.activeSelf && !Buttons[a].interactable) isOkay = true;
+            TimelineButtons[a].interactable = CurrentTimelinePickerMode != (TimelinePickerMode)a;
+            if (TimelineButtons[a].gameObject.activeSelf && !TimelineButtons[a].interactable) isOkay = true;
         }
 
-        if (!isOkay) SetTabMode(PickerMode.Cursor);
+        if (!isOkay) SetTimelinePickerMode(TimelinePickerMode.Cursor);
 
         bool hmm = Random.value < 0.005;
         hmmm.SetActive(hmm);
@@ -70,14 +153,20 @@ public class PickerPanel : MonoBehaviour
 
     public void DoTheFunnyThing()
     {
-        Application.OpenURL("https://cdn.discordapp.com/attachments/845255908408950814/1143937770352545955/RPReplay_Final1681660404.mov");
+        Application.OpenURL("https://file.garden/X9Xrm_GIBmpbTDCZ/omnicharting");
         hmmm.SetActive(false);
         hmmm2.SetActive(false);
     }
 }
 
-public enum PickerMode
+public enum TimelinePickerMode
 {
     Cursor, Select, Delete,
     Timestamp, BPMStop, Lane, LaneStep, NormalHit, CatchHit
+}
+
+public enum HierarchyPickerItem
+{
+    CoverLayer,
+    Lane, LaneGroup, LaneStyle, HitStyle
 }

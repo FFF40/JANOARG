@@ -43,7 +43,7 @@ public class TimelineItem : Selectable, IPointerDownHandler, IPointerClickHandle
 
     public void SelectItem()
     {
-        if (PickerPanel.main.CurrentMode == PickerMode.Delete)
+        if (PickerPanel.main.CurrentTimelinePickerMode == TimelinePickerMode.Delete)
         {
             Chartmaker.main.DeleteItem(Item);
         }
