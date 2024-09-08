@@ -222,16 +222,16 @@ public class InformationBar : MonoBehaviour
             const float riseTime = .05f, fallTime = .5f;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
-            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, FFTWindow.Rectangular);
-            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, FFTWindow.Rectangular);
+            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, UnityEngine.FFTWindow.Rectangular);
+            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, UnityEngine.FFTWindow.Rectangular);
 
             float[] barsL = new float[barCount], barsR = new float[barCount];
             for (int a = 0; a < barCount; a++) 
             {
                 for (int i = 1 << a; i < 1 << (a + 1); i++) 
                 {
-                    barsL[a] += fftL[a] * (a + 1);
-                    barsR[a] += fftR[a] * (a + 1);
+                    barsL[a] += fftL[i] * (i + 1);
+                    barsR[a] += fftR[i] * (i + 1);
                 }
             }
             float sizeX = rect.width / barCount;    
@@ -290,8 +290,8 @@ public class InformationBar : MonoBehaviour
             const int fftCount = 1 << 8;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
-            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, FFTWindow.Rectangular);
-            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, FFTWindow.Rectangular);
+            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, UnityEngine.FFTWindow.Rectangular);
+            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, UnityEngine.FFTWindow.Rectangular);
 
             float[] notes = new float[12];
             for (int a = 0; a < fftCount; a++) 

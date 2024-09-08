@@ -9,7 +9,7 @@ public class TimelineOptionsPanel : MonoBehaviour
     public float Speed = 1;
     public int SeparationFactor = 2;
     public bool FollowSeekLine = true;
-    public int Waveform = 1;
+    public int WaveformIdle = 1;
     public int WaveformMode = 1;
     public float VerticalScale = 1;
     public float VerticalOffset = 0;
@@ -20,8 +20,8 @@ public class TimelineOptionsPanel : MonoBehaviour
     public TMP_InputField SpeedField;
     public TMP_InputField SeparatorField;
     public Toggle FollowSeekLineToggle;
-    public ToggleGroup WaveformToggleGroup;
-    public List<Toggle> WaveformToggles;
+    public ToggleGroup WaveformIdleToggleGroup;
+    public List<Toggle> WaveformIdleToggles;
     public ToggleGroup WaveformModeToggleGroup;
     public List<Toggle> WaveformModeToggles;
 
@@ -54,7 +54,8 @@ public class TimelineOptionsPanel : MonoBehaviour
             str.Set("TL:HOVerticalOffset", VerticalOffset);
 
             str.Set("TL:FollowSeekLine", FollowSeekLine);
-            str.Set("TL:Waveform", Waveform);
+            str.Set("TL:WaveformIdle", WaveformIdle);
+            str.Set("TL:WaveformMode", WaveformMode);
             Chartmaker.main.StartSavePrefsRoutine();
         }
     }
@@ -69,7 +70,7 @@ public class TimelineOptionsPanel : MonoBehaviour
         VerticalOffset = str.Get("TL:HOVerticalOffset", 0f);
 
         FollowSeekLine = str.Get("TL:FollowSeekLine", true);
-        Waveform = str.Get("TL:Waveform", 1);
+        WaveformIdle = str.Get("TL:WaveformIdle", 1);
         WaveformMode = str.Get("TL:WaveformMode", 1);
     }
 
@@ -102,7 +103,7 @@ public class TimelineOptionsPanel : MonoBehaviour
         VerticalScaleField.text = VerticalScale.ToString();
         VerticalOffsetField.text = VerticalOffset.ToString();
         FollowSeekLineToggle.isOn = FollowSeekLine;
-        for (int a = 0; a < WaveformToggles.Count; a++) WaveformToggles[a].isOn = a == Waveform;
+        for (int a = 0; a < WaveformIdleToggles.Count; a++) WaveformIdleToggles[a].isOn = a == WaveformIdle;
         for (int a = 0; a < WaveformModeToggles.Count; a++) WaveformModeToggles[a].isOn = a == WaveformMode;
     }
 
@@ -120,12 +121,17 @@ public class TimelineOptionsPanel : MonoBehaviour
         VerticalScale = VerticalScale <= 0 ? 1 : VerticalScale;
         FollowSeekLine = FollowSeekLineToggle.isOn;
 
-        bool thing = false;
-        if (!WaveformToggles[Waveform].isOn) thing = true;
-        for (int a = 0; a < WaveformToggles.Count; a++) if (WaveformToggles[a].isOn) Waveform = a;
-        if (!WaveformModeToggles[WaveformMode].isOn) thing = true;
+        bool waveformDirty = false;
+        if (!WaveformIdleToggles[WaveformIdle].isOn) waveformDirty = true;
+        for (int a = 0; a < WaveformIdleToggles.Count; a++) if (WaveformIdleToggles[a].isOn) WaveformIdle = a;
+        if (!WaveformModeToggles[WaveformMode].isOn) waveformDirty = true;
         for (int a = 0; a < WaveformModeToggles.Count; a++) if (WaveformModeToggles[a].isOn) WaveformMode = a;
-        if (thing && !Chartmaker.main.SongSource.isPlaying) TimelinePanel.main.UpdateTimeline(true);
+
+        if (waveformDirty)
+        {
+            TimelinePanel.main.DiscardWaveform();
+        } 
+
         SetValues();
         recursionBuster = false;
         isDirty = true;
