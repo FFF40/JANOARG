@@ -520,6 +520,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2280818151283814393, guid: dee69d5ed7562b04ebea71d2381a0385, type: 3}
+      propertyPath: m_Spacing
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2280818151283814393, guid: dee69d5ed7562b04ebea71d2381a0385, type: 3}
       propertyPath: m_Padding.m_Left
       value: 10
       objectReference: {fileID: 0}

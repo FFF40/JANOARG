@@ -189,6 +189,11 @@ public class ContextMenu : MonoBehaviour
             }
         }
 
+        rt.anchoredPosition = new (
+            Mathf.Max(rt.anchoredPosition.x, 0),
+            Mathf.Min(rt.anchoredPosition.y, Screen.height - (Chartmaker.Preferences.UseDefaultWindow ? 0 : 28))
+        );
+
         isOpen = true;
         StopCoroutine(Intro());
         if (justState == false || currentTarget != target) StartCoroutine(Intro());

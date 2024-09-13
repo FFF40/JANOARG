@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
-public class HueCircle : Graphic, IPointerDownHandler, IDragHandler
+public class HueCircle : MaskableGraphic, IPointerDownHandler, IDragHandler
 {
     public int Resolution = 90;
     [Range(0, 1)]

@@ -178,7 +178,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 LanePlayers.RemoveAt(Manager.Lanes.Count);
             }
             
-            if (!TimelinePanel.main.isDragged && PlayOptions.HitsoundsVolume > 0)
+            if (Chartmaker.main.SongSource.isPlaying && !TimelinePanel.main.isDragged && PlayOptions.HitsoundsVolume > 0)
             {
                 if (Manager.HitObjectsRemaining[0] < HitObjectsRemaining[0])
                 {

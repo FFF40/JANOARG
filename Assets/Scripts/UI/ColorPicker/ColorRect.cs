@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
-public class ColorRect : Graphic, IPointerDownHandler, IDragHandler
+public class ColorRect : MaskableGraphic, IPointerDownHandler, IDragHandler
 {
     public Vector2Int Resolution = new Vector2Int(5, 5);
     

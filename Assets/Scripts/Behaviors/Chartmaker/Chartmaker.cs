@@ -676,7 +676,8 @@ public class Chartmaker : MonoBehaviour
     }
 }
 
-public class ChartmakerPrefs {
+public class ChartmakerPrefs 
+{
     public bool MaximizeOnPlay;
     public bool SaveOnQuit;
     public bool SaveOnPlay;

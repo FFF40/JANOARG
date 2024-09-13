@@ -90,12 +90,7 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Save", Chartmaker.main.StartSaveRoutine, KeyOf("FL:Save"), _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListSeparator(),
-            // new ContextMenuListSublist("Export", 
-            //     new ContextMenuListAction("Record Video...", () => {}),
-            //     new ContextMenuListAction("Bundle...", () => {})
-            // ),
-            // new ContextMenuListSeparator(),
-            new ContextMenuListAction("Render...", () => {}, _enabled: false),
+            new ContextMenuListAction("Render...", () => ModalHolder.main.Spawn<RenderModal>(), _enabled: Chartmaker.main.CurrentChart != null),
             new ContextMenuListSeparator(),
             new ContextMenuListAction("Reveal Song Folder", () => Application.OpenURL("file://" + System.IO.Path.GetDirectoryName(Chartmaker.main.CurrentSongPath)), _enabled: Chartmaker.main.CurrentSong != null),
             new ContextMenuListSeparator(),

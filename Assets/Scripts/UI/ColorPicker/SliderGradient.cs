@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
-public class SliderGradient : Graphic
+public class SliderGradient : MaskableGraphic
 {
     public Color color2 = Color.black;
 
