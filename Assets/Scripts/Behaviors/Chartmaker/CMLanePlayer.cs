@@ -8,6 +8,8 @@ public class CMLanePlayer : MonoBehaviour
     public Transform Holder;
     public MeshRenderer Renderer;
     public MeshFilter Filter;
+    public MeshRenderer JudgeLine;
+    public MeshRenderer[] JudgeEnds;
 
     public List<CMHitPlayer> HitPlayers { get; private set; } = new();
 
@@ -22,6 +24,26 @@ public class CMLanePlayer : MonoBehaviour
         Renderer.enabled = index >= 0 && index < styles.Count;
         Renderer.sharedMaterial = Renderer.enabled ? styles[index].LaneMaterial : null;
         Filter.sharedMesh = Renderer.enabled ? lane.CurrentMesh : null;
+
+        if (InformationBar.main.sec >= lane.Steps[0].Offset)
+        {
+            JudgeLine.gameObject.SetActive(Renderer.enabled);
+            JudgeEnds[0].gameObject.SetActive(Renderer.enabled);
+            JudgeEnds[1].gameObject.SetActive(Renderer.enabled);
+            JudgeLine.sharedMaterial = JudgeEnds[0].sharedMaterial = JudgeEnds[1].sharedMaterial 
+                = Renderer.enabled ? styles[index].JudgeMaterial : null;
+            JudgeEnds[0].transform.localPosition = lane.StartPosLocal;
+            JudgeEnds[1].transform.localPosition = lane.EndPosLocal;
+            JudgeLine.transform.localPosition = (lane.StartPosLocal + lane.EndPosLocal) / 2;
+            JudgeLine.transform.localScale = new (Vector3.Distance(lane.StartPosLocal, lane.EndPosLocal), .05f, .05f);
+            JudgeLine.transform.localEulerAngles = Vector3.back * Vector2.SignedAngle(lane.EndPosLocal - lane.StartPosLocal, Vector2.left);
+        }
+        else 
+        {
+            JudgeLine.gameObject.SetActive(false);
+            JudgeEnds[0].gameObject.SetActive(false);
+            JudgeEnds[1].gameObject.SetActive(false);
+        }
         
         int count = 0;
         for (int a = 0; a < lane.Objects.Count; a++)

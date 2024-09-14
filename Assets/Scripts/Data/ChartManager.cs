@@ -247,6 +247,9 @@ public class LaneManager
     public float CurrentSpeed;
     public float CurrentDistance;
 
+    public Vector3 StartPosLocal;
+    public Vector3 EndPosLocal;
+
     public Vector3 StartPos;
     public Vector3 EndPos;
 
@@ -400,9 +403,9 @@ public class LaneManager
         if (!string.IsNullOrEmpty(CurrentLane.Group) && main.Groups.ContainsKey(CurrentLane.Group))
             main.Groups[CurrentLane.Group].Get(ref FinalPosition, ref FinalRotation);
         
-        StartPos = verts[stepCount * 2 - 2] - Vector3.forward * CurrentDistance;
+        StartPosLocal = StartPos = verts[stepCount * 2 - 2] - Vector3.forward * CurrentDistance;
         StartPos = FinalRotation * StartPos + FinalPosition;
-        EndPos = verts[stepCount * 2 - 1] - Vector3.forward * CurrentDistance;
+        EndPosLocal = EndPos = verts[stepCount * 2 - 1] - Vector3.forward * CurrentDistance;
         EndPos = FinalRotation * EndPos + FinalPosition;
 
 

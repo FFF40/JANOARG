@@ -181,13 +181,17 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void UpdateTabs()
     {
-        LaneStepTab.gameObject.SetActive(InspectorPanel.main.CurrentHierarchyObject is Lane);
-        HitObjectTab.gameObject.SetActive(InspectorPanel.main.CurrentHierarchyObject is Lane);
 
-        StoryboardTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Storyboard;
+        TimingTab.gameObject.SetActive(HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong);
         TimingTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Timing;
+        
+        StoryboardTab.gameObject.SetActive(HierarchyPanel.main.CurrentMode == HierarchyMode.Chart);
+        StoryboardTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Storyboard;
+        LaneTab.gameObject.SetActive(HierarchyPanel.main.CurrentMode == HierarchyMode.Chart);
         LaneTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.Lanes;
+        LaneStepTab.gameObject.SetActive(HierarchyPanel.main.CurrentMode == HierarchyMode.Chart && InspectorPanel.main.CurrentHierarchyObject is Lane);
         LaneStepTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.LaneSteps;
+        HitObjectTab.gameObject.SetActive(HierarchyPanel.main.CurrentMode == HierarchyMode.Chart && InspectorPanel.main.CurrentHierarchyObject is Lane);
         HitObjectTab.interactable = TimelineHeight <= 0 || CurrentMode != TimelineMode.HitObjects;
         
         VerticalScaleHolder.gameObject.SetActive(CurrentMode == TimelineMode.HitObjects);

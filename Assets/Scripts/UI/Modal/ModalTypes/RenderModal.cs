@@ -289,6 +289,7 @@ public class RenderModal : Modal
         while (time < TimeRange.y)
         {
             Chartmaker.main.SongSource.time = time;
+            InformationBar.main.Update();
             PlayerView.main.UpdateObjects();
             RenderTexture.active = rtex;
             camera.rect = new Rect(0, 0, tex.width, tex.height); 
@@ -320,7 +321,7 @@ public class RenderModal : Modal
             string args = 
                 $" -f concat -safe 0 " 
                 + "-i \"" + Path.Combine(sessionDir, $"demux.txt") + "\" "
-                + $"-itsoffset {-TimeRange.x} -t {TimeRange.y - TimeRange.x} " 
+                + $"-ss {TimeRange.x} -t {TimeRange.y - TimeRange.x} " 
                 + "-i \"" + Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.ClipPath) + "\" "
                 + $"-r {Prefs.FrameRate} "
                 + "\"" + Path.Combine(sessionDir, $"output.webm") + $"\" ";

@@ -29,16 +29,16 @@ public class CMHitPlayer : MonoBehaviour
 
         if (hit.CurrentHit.Type == HitObject.HitType.Normal)
         {
-            Renderer.transform.localScale = new (hit.Length - .3f, .3f, .3f);
-            IndicatohRenderers[0].transform.localScale = IndicatohRenderers[1].transform.localScale = new (.15f, .3f, .3f);
-            IndicatohRenderers[0].transform.localPosition = new (hit.Length / 2 + .075f, 0, 0);
+            Renderer.transform.localScale = new (hit.Length - .5f, .5f, .5f);
+            IndicatohRenderers[0].transform.localScale = IndicatohRenderers[1].transform.localScale = new (.25f, .5f, .5f);
+            IndicatohRenderers[0].transform.localPosition = new (hit.Length / 2 + .125f, 0, 0);
             IndicatohRenderers[1].transform.localPosition = -IndicatohRenderers[0].transform.localPosition;
             material = index >= 0 && index < styles.Count ? styles[index].NormalMaterial : null;
         } else if (hit.CurrentHit.Type == HitObject.HitType.Catch)
         {
-            Renderer.transform.localScale = new (hit.Length, .15f, .15f);
-            IndicatohRenderers[0].transform.localScale = IndicatohRenderers[1].transform.localScale = new (.15f, .3f, .3f);
-            IndicatohRenderers[0].transform.localPosition = new (hit.Length / 2 + .075f, 0, 0);
+            Renderer.transform.localScale = new (hit.Length, .25f, .25f);
+            IndicatohRenderers[0].transform.localScale = IndicatohRenderers[1].transform.localScale = new (.25f, .5f, .5f);
+            IndicatohRenderers[0].transform.localPosition = new (hit.Length / 2 + .125f, 0, 0);
             IndicatohRenderers[1].transform.localPosition = -IndicatohRenderers[0].transform.localPosition;
             material = index >= 0 && index < styles.Count ? styles[index].CatchMaterial : null;
         }

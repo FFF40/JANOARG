@@ -223,7 +223,7 @@ public class Chartmaker : MonoBehaviour
         InspectorPanel.main.UpdateButtons();
         InspectorPanel.main.SetObject(null);
         InspectorPanel.main.CurrentHierarchyObject = null;
-        HierarchyPanel.main.InitHierarchy();
+        HierarchyPanel.main.SetMode(HierarchyMode.PlayableSong);
         TimelinePanel.main.UpdatePeekLimit();
         TimelinePanel.main.UpdateItems();
         PlayerView.main.UpdateObjects();
@@ -272,7 +272,7 @@ public class Chartmaker : MonoBehaviour
         InspectorPanel.main.UpdateButtons();
         InspectorPanel.main.UpdateForm();
         InspectorPanel.main.CurrentHierarchyObject = null;
-        HierarchyPanel.main.InitHierarchy();
+        HierarchyPanel.main.SetMode(HierarchyMode.Chart);
         TimelinePanel.main.UpdateItems();
         PlayerView.main.UpdateObjects();
         History = new();
