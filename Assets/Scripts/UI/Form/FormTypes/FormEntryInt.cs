@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 
 public class FormEntryInt : FormEntry<int>
 {
@@ -14,13 +10,7 @@ public class FormEntryInt : FormEntry<int>
         Reset();
     }
 
-    public void Reset()
-    {
-        recursionBuster = true;
-        Field.text = CurrentValue.ToString();
-        recursionBuster = false;
-    }
-
+    public void Reset() => Field.SetTextWithoutNotify(CurrentValue.ToString());
     public void SetValue(string value)
     {
         if (int.TryParse(value, out int v)) SetValue(v);

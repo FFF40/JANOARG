@@ -10,3 +10,6 @@
 *.zip
 /Chartmaker/
 /Songs/
+/.vs
+/obj
+/bin

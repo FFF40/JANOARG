@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class FormEntryToggleFloat : FormEntry<float>
@@ -18,10 +14,9 @@ public class FormEntryToggleFloat : FormEntry<float>
 
     public void Reset()
     {
-        recursionBuster = true;
-        Field.gameObject.SetActive(Toggle.isOn = !float.IsNaN(CurrentValue));
+        Toggle.SetIsOnWithoutNotify(!float.IsNaN(CurrentValue));
+        Field.gameObject.SetActive(Toggle.isOn);
         Field.text = Toggle.isOn ? CurrentValue.ToString() : "0";
-        recursionBuster = false;
     }
 
     public void SetValue(bool value)
