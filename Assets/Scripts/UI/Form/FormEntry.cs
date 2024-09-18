@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -22,8 +20,6 @@ public class FormEntry<T> : FormEntry
     public Func<T> OnGet;
     public Action<T> OnSet;
 
-    protected bool recursionBuster;
-
     public new void Start() 
     {
         base.Start();
@@ -32,7 +28,6 @@ public class FormEntry<T> : FormEntry
 
     public void SetValue(T value)
     {
-        if (recursionBuster) return;
         CurrentValue = value;
         OnSet(value);
     }

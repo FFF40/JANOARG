@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -18,11 +15,9 @@ public class FormEntryVector3 : FormEntry<Vector3>
 
     public void Reset()
     {
-        recursionBuster = true;
-        FieldX.text = CurrentValue.x.ToString();
-        FieldY.text = CurrentValue.y.ToString();
-        FieldZ.text = CurrentValue.z.ToString();
-        recursionBuster = false;
+        FieldX.SetTextWithoutNotify(CurrentValue.x.ToString());
+        FieldY.SetTextWithoutNotify(CurrentValue.y.ToString());
+        FieldZ.SetTextWithoutNotify(CurrentValue.z.ToString());
     }
     
     public void SetValue(int index, string value)
