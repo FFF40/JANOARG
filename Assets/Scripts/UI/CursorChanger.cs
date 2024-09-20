@@ -68,13 +68,20 @@ public class CursorChanger : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
 
     public static void PushCursor(CursorType type)
     {
-        Cursors.Push(!Chartmaker.Preferences.CustomCursors && type > 0 ? LoadCursor(IntPtr.Zero, type) : IntPtr.Zero);
+        if (Platform.IsLinux())
+            Cursors.Push(IntPtr.Zero);
+        else
+            Cursors.Push(!Chartmaker.Preferences.CustomCursors && type > 0 ? LoadCursor(IntPtr.Zero, type) : IntPtr.Zero);
         CursorTypes.Push(type);
     }
 
     public static void PopCursor()
     {
-        DestroyCursor(Cursors.Pop());
+        if (Platform.IsLinux())
+            Cursors.Pop();
+        else
+            DestroyCursor(Cursors.Pop());
+
         CursorTypes.Pop();
     }
     
