@@ -113,7 +113,11 @@ Shader "UI/Triple Graph"
                 if (IN.texcoord.y < y3) color.a += 0.5;
 
                 color.a *= IN.texcoord.x * IN.texcoord.x * IN.texcoord.y;
-                if (IN.worldPos.y > _ScreenParams.y * 0.5 - 140) color.a *= _ScreenParams.y * 0.01 - 1.8 - IN.worldPos.y * 0.02;
+                if (IN.worldPos.y > _ScreenParams.y * 0.5 - 140) 
+                {
+                    float prog = _ScreenParams.y * 0.01 - 1.8 - IN.worldPos.y * 0.02;
+                    color.a *= 1 - (1 - prog) * (1 - prog);
+                }
 
                 #ifdef UNITY_UI_CLIP_RECT
                 color.a *= UnityGet2DClipping(IN.worldPos.xy, _ClipRect);

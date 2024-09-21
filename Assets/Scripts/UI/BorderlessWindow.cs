@@ -7,6 +7,8 @@ using System.Threading;
 using UnityEngine.SceneManagement;
 using System.Text;
 using UnityEngine.Events;
+using System.Collections;
+using System.Collections.Generic;
 
 public class BorderlessWindow
 {
@@ -95,6 +97,15 @@ public class BorderlessWindow
         public uint oldStyle, newStyle;
     }
 
+    public static List<LoggerEntry> Logger = new ();
+
+    public class LoggerEntry 
+    {
+        public string Message;
+        public string StackTrace;
+        public LogType LogType;
+    }
+
 
     const int GWL_WINPROC = -4;
     const int GWL_STYLE = -16;
@@ -147,6 +158,8 @@ public class BorderlessWindow
         Chartmaker.PreferencesStorage = new("cm_prefs");
         Chartmaker.Preferences.Load(Chartmaker.PreferencesStorage);
 
+        Application.logMessageReceived += RegisterLog;
+
         #if !UNITY_EDITOR && UNITY_STANDALONE_WIN 
             FindWindow();
             BorderlessWindow.HookWindowProc();
@@ -163,6 +176,15 @@ public class BorderlessWindow
                 ResizeWindow(screenSize.x + 14, screenSize.y + 7);
             }
         #endif
+    }
+
+    private static void RegisterLog(string condition, string stackTrace, LogType type)
+    {
+        Logger.Add(new LoggerEntry {
+            Message = condition,
+            StackTrace = stackTrace,
+            LogType = type,
+        });
     }
 
     public static void FindWindow () {

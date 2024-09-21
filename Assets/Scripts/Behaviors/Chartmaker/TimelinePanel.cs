@@ -655,69 +655,6 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         switch (Options.WaveformMode) 
         {
             case 1: {
-                int resolution = 512;
-
-                float[] data = new float[resolution * clip.channels];
-                float[][] fft = new float[clip.channels][];
-                float denY = 1f / tex.height * clip.channels;
-
-                for (int i = 0; i < clip.channels; i++) 
-                {
-                    fft[i] = new float[resolution];
-                }
-
-                float mel(float freq) 
-                {
-                    return 2595 * Mathf.Log10(1 + freq / 700);
-                }
-                float freq(float mel) 
-                {
-                    return 700 * Mathf.Pow(10, mel / 2595) - 700;
-                }
-
-                float minMel = mel(50);
-                float maxMel = mel(20000);
-                
-                for (int x = 0; x < tex.width; x++) 
-                {
-                    int sLine = ((x + waveOffset) % tex.width + tex.width) % tex.width;
-                    if (waveBaked[sLine]) continue;
-                    sec = waveTime + (x + waveOffset) * step;
-                    int pos = (int)(sec * clip.frequency - resolution / 2);
-                    if (pos >= 0 && pos < clip.samples - data.Length)
-                    {
-                        clip.GetData(data, pos);
-                        for (int y = 0; y < data.Length; y++) 
-                        {
-                            int chan = (pos + y) % clip.channels;
-                            int p = y / clip.channels;
-                            fft[chan][p] = data[y];
-                        }
-                        for (int y = 0; y < fft.Length; y++) 
-                        {
-                            FFT.Transform(fft[y]);
-                        }
-                    }
-                    float sPos = 0;
-                    for (int y = 0; y < tex.height; y++) 
-                    {
-                        int channel = Mathf.FloorToInt(sPos);
-                        float cPos = Mathf.Clamp(freq(Mathf.Lerp(minMel, maxMel, sPos % 1)) / clip.frequency * resolution, 0, resolution - 1);
-                        float value = Mathf.Sqrt(Mathf.Lerp(fft[channel][Mathf.FloorToInt(cPos)], fft[channel][Mathf.CeilToInt(cPos)], cPos % 1) / resolution * cPos);
-                        lineBuffer[y] = color * new Color(1, 1, 1, value);
-                        sPos += denY;
-                    }
-                    tex.SetPixels(sLine, 0, 1, tex.height, lineBuffer);
-                    waveBaked[sLine] = true;
-                    if (timeout())
-                    {
-                        waveTimeouted = true;
-                        break;
-                    }
-                }
-            } break;
-
-            case 2: {
                 float[] data = new float[Mathf.CeilToInt(Math.Min(density, 1024) / clip.channels) * clip.channels];
                 float denY = 1f / tex.height * clip.channels;
                 float[] lastMin = new float[clip.channels], lastMax = new float[clip.channels];
@@ -764,6 +701,69 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         int channel = Mathf.FloorToInt(sPos);
                         float window = 1 - (sPos % 1) * 2f;
                         lineBuffer[y] = window >= min[channel] - denY && window <= max[channel] + denY ? color : Color.clear;
+                        sPos += denY;
+                    }
+                    tex.SetPixels(sLine, 0, 1, tex.height, lineBuffer);
+                    waveBaked[sLine] = true;
+                    if (timeout())
+                    {
+                        waveTimeouted = true;
+                        break;
+                    }
+                }
+            } break;
+
+            case 2: {
+                int resolution = 512;
+
+                float[] data = new float[resolution * clip.channels];
+                float[][] fft = new float[clip.channels][];
+                float denY = 1f / tex.height * clip.channels;
+
+                for (int i = 0; i < clip.channels; i++) 
+                {
+                    fft[i] = new float[resolution];
+                }
+
+                float scale(float freq) 
+                {
+                    return 2595 * Mathf.Log10(1 + freq / 700);
+                }
+                float unscale(float mel) 
+                {
+                    return 700 * Mathf.Pow(10, mel / 2595) - 700;
+                }
+
+                float minMel = scale(50);
+                float maxMel = scale(20000);
+                
+                for (int x = 0; x < tex.width; x++) 
+                {
+                    int sLine = ((x + waveOffset) % tex.width + tex.width) % tex.width;
+                    if (waveBaked[sLine]) continue;
+                    sec = waveTime + (x + waveOffset) * step;
+                    int pos = (int)(sec * clip.frequency - resolution / 2);
+                    if (pos >= 0 && pos < clip.samples - data.Length)
+                    {
+                        clip.GetData(data, pos);
+                        for (int y = 0; y < data.Length; y++) 
+                        {
+                            int chan = (pos + y) % clip.channels;
+                            int p = y / clip.channels;
+                            fft[chan][p] = data[y];
+                        }
+                        for (int y = 0; y < fft.Length; y++) 
+                        {
+                            FFT.Transform(fft[y]);
+                        }
+                    }
+                    float sPos = 0;
+                    for (int y = 0; y < tex.height; y++) 
+                    {
+                        int channel = Mathf.FloorToInt(sPos);
+                        float cPos = Mathf.Clamp(unscale(Mathf.Lerp(minMel, maxMel, sPos % 1)) / clip.frequency * resolution, 0, resolution - 1);
+                        float value = Mathf.Sqrt(Mathf.Lerp(fft[channel][Mathf.FloorToInt(cPos)], fft[channel][Mathf.CeilToInt(cPos)], cPos % 1) / resolution * cPos);
+                        lineBuffer[y] = color * new Color(1, 1, 1, value);
                         sPos += denY;
                     }
                     tex.SetPixels(sLine, 0, 1, tex.height, lineBuffer);
@@ -932,7 +932,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             Metronome metronome = Chartmaker.main.CurrentSong.Timing;
             beatStart = RoundBeat(timeStart);
 
-            Chartmaker.main.SongSource.time = Mathf.Clamp(metronome.ToSeconds(beatStart), 0, Chartmaker.main.SongSource.clip.length);
+            if (eventData.button == PointerEventData.InputButton.Left)
+                Chartmaker.main.SongSource.time = Mathf.Clamp(metronome.ToSeconds(beatStart), 0, Chartmaker.main.SongSource.clip.length);
         }
         else if (contains(PeekStartSlider))
         {
@@ -1134,6 +1135,10 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     {
         if (!isDragged)
         {
+            Metronome metronome = Chartmaker.main.CurrentSong.Timing;
+            if (eventData.button == PointerEventData.InputButton.Right)
+                Chartmaker.main.SongSource.time = Mathf.Clamp(metronome.ToSeconds(beatStart), 0, Chartmaker.main.SongSource.clip.length);
+            
             OnEndDrag(eventData);
         }
     }

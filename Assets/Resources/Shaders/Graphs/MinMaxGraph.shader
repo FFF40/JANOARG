@@ -83,6 +83,7 @@ Shader "UI/Min Max Graph"
             float _Values[64];
             float _ValuesMin[64];
             float _ValuesMax[64];
+            float2 _Resolution;
 
             v2f vert(appdata_t v)
             {
@@ -107,16 +108,19 @@ Shader "UI/Min Max Graph"
                 float yVal = _Values[floor(colPos)] + (yValSlope) * (colPos % 1);
                 float yMin = _ValuesMin[floor(colPos)] + (_ValuesMin[ceil(colPos)] - _ValuesMin[floor(colPos)]) * (colPos % 1);
                 float yMax = _ValuesMax[floor(colPos)] + (_ValuesMax[ceil(colPos)] - _ValuesMax[floor(colPos)]) * (colPos % 1);
+
+                float colPrevPos = (IN.texcoord.x - 1 / + _Resolution.x) * 63;
+                float yPrevValSlope = _Values[ceil(colPrevPos)] - _Values[floor(colPrevPos)];
+                float yPrevVal = _Values[floor(colPrevPos)] + (yPrevValSlope) * (colPrevPos % 1);
                 
                 if (IN.texcoord.y < yMax) color.a = IN.texcoord.y;
                 else if (IN.texcoord.y < yMin) color.a = IN.texcoord.y * 0.5;
                 else color.a = 0;
+
+                float yLineCenter = (yVal + yPrevVal) / 2;
+                float yLineHeight = max(abs(yVal - yPrevVal), 1.0 / _Resolution.y) / 2;
                 
-                if (abs(IN.texcoord.y - yVal) < 0.01) color.a = 1;
-                else if (IN.texcoord.y - yVal > yValSlope * 0.4 && IN.texcoord.y - yVal < 0 
-                    && IN.texcoord.y > (yValSlope < 0 ? _Values[ceil(colPos)] : _Values[floor(colPos)]) - 0.005) color.a = 1;
-                else if (IN.texcoord.y - yVal < 0 && IN.texcoord.y - yVal > -yValSlope * 0.4 
-                    && IN.texcoord.y > (yValSlope < 0 ? _Values[ceil(colPos)] : _Values[floor(colPos)]) - 0.005) color.a = 1;
+                if (abs(IN.texcoord.y - yLineCenter) < yLineHeight) color.a = 1;
 
                 color.a *= IN.texcoord.x * IN.texcoord.x;
                 if (IN.worldPos.y > _ScreenParams.y * 0.5 - 140) color.a *= _ScreenParams.y * 0.01 - 1.8 - IN.worldPos.y * 0.02;

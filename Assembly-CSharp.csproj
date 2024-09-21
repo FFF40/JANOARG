@@ -59,7 +59,7 @@
     <UnityVersion>2022.3.46f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\ADMIN\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.0.3\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\ADMIN\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.0.4\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="D:\Unity\2022.3.46f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="D:\Unity\2022.3.46f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -112,6 +112,7 @@
     <Compile Include="Assets\Scripts\UI\HelpEntry.cs" />
     <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\PreferencesModal.cs" />
     <Compile Include="Assets\Scripts\UI\Themeable\Themeable.cs" />
+    <Compile Include="Assets\Scripts\UI\LoggerEntry.cs" />
     <Compile Include="Assets\Scripts\UI\NavBarButton.cs" />
     <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryVector3.cs" />
     <Compile Include="Assets\Scripts\UI\Form\FormTypes\FormEntryFloat.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="Assets\Scripts\UI\ColorPicker.cs" />
     <Compile Include="Assets\Scripts\Data\Chartmaker\ChartmakerMultiHandler.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Files\JACDecoder.cs" />
+    <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\LoggerModal.cs" />
     <Compile Include="Assets\Scripts\UI\Modal\ModalTypes\NewChartModal.cs" />
     <Compile Include="Assets\Scripts\Data\Storage.cs" />
     <Compile Include="Assets\Scripts\Behaviors\Chartmaker\PickerPanel.cs" />

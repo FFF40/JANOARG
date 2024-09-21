@@ -92,6 +92,7 @@ public class DebugStatsInspector : MonoBehaviour
             FPSGraphMaterial.SetFloatArray("_Values", fpslist);
             FPSGraphMaterial.SetFloatArray("_ValuesMin", fpsmin);
             FPSGraphMaterial.SetFloatArray("_ValuesMax", fpsmax);
+            FPSGraphMaterial.SetVector("_Resolution", new(FPSGraph.rectTransform.rect.width, FPSGraph.rectTransform.rect.height));
             
             FPSGraph.material = FPSGraphMaterial;
             FPSGraph.SetMaterialDirty();
@@ -130,5 +131,10 @@ public class DebugStatsInspector : MonoBehaviour
             ReservedMemoryLabel.text = ReservedMemory[^1].ToString("0.0");
             MonoMemoryLabel.text = MonoMemory[^1].ToString("0.0");
         }
+    }
+    
+    public void OpenLogger()
+    {
+        ModalHolder.main.Spawn<LoggerModal>();
     }
 }

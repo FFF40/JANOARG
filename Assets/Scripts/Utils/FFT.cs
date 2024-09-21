@@ -64,7 +64,9 @@ public class FFT
     {
         int ans = 0;
         for (int a = 0; a < bits; a++) {
-            if ((number & (1 << a)) != 0) ans |= 1 << (bits - 1 - a);
+            ans <<= 1;
+            ans |= number & 1;
+            number >>= 1;
         }
         return ans;
     }

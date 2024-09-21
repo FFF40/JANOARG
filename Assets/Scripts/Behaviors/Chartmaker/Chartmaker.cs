@@ -458,7 +458,6 @@ public class Chartmaker : MonoBehaviour
 
     public void SetItem(object target, string field, object value)
     {
-        Debug.Log(History.ActionsBehind.Count + " " + History.ActionsAhead.Count + " " + recursionBuster);
         if (recursionBuster) return;
         History.SetItem(target, field, value);
         if (field == "Offset") SortList(GetListTarget(target));

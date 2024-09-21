@@ -278,11 +278,11 @@ public class RenderModal : Modal
                 + "-i \"" + Path.Combine(framesDir, $"%d.png") + "\" "
                 + $"-vframes {end - start + 1} -r {Prefs.FrameRate} " 
                 + "\"" + Path.Combine(fragmentsDir, $"{frag}.mp4") + $"\" ";
-            Debug.Log(args);
+            // Debug.Log(args);
             Task<string> task = ffmpegAsync(args);
             yield return new WaitUntil(() => task.IsCompleted);
             for (int a = start; a <= end; a++) File.Delete(Path.Combine(framesDir, $"{a}.png"));
-            Debug.Log(start + " " + end + " " + task.IsCompletedSuccessfully + "\n" + task.Result);
+            // Debug.Log(start + " " + end + " " + task.IsCompletedSuccessfully + "\n" + task.Result);
             busyFrags--;
         }
 
@@ -325,7 +325,7 @@ public class RenderModal : Modal
                 + "-i \"" + Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.ClipPath) + "\" "
                 + $"-r {Prefs.FrameRate} "
                 + "\"" + Path.Combine(sessionDir, $"output.webm") + $"\" ";
-            Debug.Log(args);
+            // Debug.Log(args);
             Task<string> task = ffmpegAsync(args);
             yield return new WaitUntil(() => task.IsCompleted);
         }
