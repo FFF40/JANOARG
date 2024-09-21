@@ -1,8 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class FormEntryBool : FormEntry<bool>
@@ -15,10 +10,5 @@ public class FormEntryBool : FormEntry<bool>
         Reset();
     }
 
-    public void Reset()
-    {
-        recursionBuster = true;
-        Toggle.isOn = CurrentValue;
-        recursionBuster = false;
-    }
+    public void Reset() => Toggle.SetIsOnWithoutNotify(CurrentValue);
 }

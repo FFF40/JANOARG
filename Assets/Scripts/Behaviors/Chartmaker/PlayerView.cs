@@ -299,7 +299,6 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         }
         if (HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong)
         {
-            
             switch (InspectorPanel.main.CurrentObject)
             {
                 case CoverLayer layer: 
@@ -321,8 +320,11 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                     SelectedItemLine.eulerAngles = Vector2.zero;
                 } break;
             }
-                
-            endSel: ;
+
+        // TODO: Maybe implement this? What is this for?
+#pragma warning disable CS0164 // This label has not been referenced
+        endSel: ;
+#pragma warning restore CS0164 // This label has not been referenced
         }
         if (HierarchyPanel.main.CurrentMode == HierarchyMode.Chart) 
         {
