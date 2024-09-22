@@ -136,4 +136,10 @@ public class TimelineOptionsPanel : MonoBehaviour
         recursionBuster = false;
         isDirty = true;
     }
+
+    public void OpenAnalysisPrefs() 
+    {
+        ModalHolder.main.Spawn<PreferencesModal>().SetTab(5);
+        GetComponent<PopupPanel>().Close();
+    }
 }
