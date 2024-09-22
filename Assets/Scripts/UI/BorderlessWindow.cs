@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using System.Runtime.InteropServices;
 using UnityEngine.Rendering;
@@ -175,6 +175,10 @@ public class BorderlessWindow
                 SetFramelessWindow();
                 ResizeWindow(screenSize.x + 14, screenSize.y + 7);
             }
+        #elif !UNITY_STANDALONE_WIN
+            Chartmaker.Preferences.CustomCursors = true;
+            Chartmaker.Preferences.UseDefaultWindow = true;
+            IsFramed = true;
         #endif
     }
 
@@ -205,7 +209,6 @@ public class BorderlessWindow
 
     public static Rect GetWindowRect()
     {
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         return new Rect(winRect.left, winRect.top, winRect.right - winRect.left, winRect.bottom - winRect.top);
@@ -362,7 +365,6 @@ public class BorderlessWindow
 
     public static void MoveWindow(Vector2 pos, bool bRepaint = false)
     {
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         MoveWindow(CurrentWindow, (int)pos.x, (int)pos.y, winRect.right - winRect.left, winRect.bottom - winRect.top, bRepaint);
@@ -370,7 +372,6 @@ public class BorderlessWindow
 
     public static void MoveWindowDelta(Vector2 posDelta, bool bRepaint = false)
     {
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         var x = winRect.left + (int)posDelta.x;
@@ -380,7 +381,6 @@ public class BorderlessWindow
 
     public static void ResizeWindow(int width, int height)
     {
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         MoveWindow(CurrentWindow, winRect.left, winRect.top, width, height, false);
@@ -388,7 +388,6 @@ public class BorderlessWindow
 
     public static void ResizeWindowDelta(int dWidth, int dHeight)
     {
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         var w = winRect.right - winRect.left + dWidth;
@@ -398,7 +397,9 @@ public class BorderlessWindow
 
     public static void RenameWindow (string title) 
     {
-        SetWindowText(CurrentWindow, title);
+        #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
+            SetWindowText(CurrentWindow, title);
+        #endif
     }
 
     public static void UpdateCursor ()

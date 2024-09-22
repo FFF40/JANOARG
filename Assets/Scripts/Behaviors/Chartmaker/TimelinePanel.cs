@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler
+public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler, IScrollHandler
 {
     public static TimelinePanel main;
 
@@ -21,6 +21,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public int SeparationFactor;
     public float VerticalScale;
     public float VerticalOffset;
+    public float ResizeVelocity;
 
     [Header("Objects")]
     public Button StoryboardTab;
@@ -1508,6 +1509,57 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public void Restore()
     {
         if (TimelineHeight <= 0) ResizeTimeline(TimelineRestoreHeight * 24 + 80);
+    }
+
+    public void OnScroll(PointerEventData eventData)
+    {
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            float currentXRange = PeekRange.x - (eventData.scrollDelta.y * ResizeVelocity);
+            float currentYRange = PeekRange.y + (eventData.scrollDelta.y * ResizeVelocity);
+
+            if (currentYRange < currentXRange)
+            {
+                return;
+            }
+            
+            Debug.Log($"{PeekRange.x} -> {currentXRange}, {PeekRange.y} -> {currentYRange}");
+
+            PeekRange.x = Mathf.Clamp(currentXRange, 0, PeekRange.y);
+            PeekRange.y = Mathf.Clamp(currentYRange, PeekRange.x, Chartmaker.main.SongSource.clip.length);
+        }
+        else
+        {
+            Chartmaker cm = Chartmaker.main;
+
+            float time = cm.SongSource.time + (eventData.scrollDelta.y * (120 / cm.CurrentSong.Timing.GetStop(cm.SongSource.time, out int _).BPM));
+            if (cm.SongSource.time == 0 && !cm.SongSource.isPlaying)
+            {
+                cm.SongSource.Play();
+                cm.SongSource.Pause();
+            }
+            cm.SongSource.time = Mathf.Clamp(time, 0, cm.SongSource.clip.length);
+        }
+    }
+
+    public float GetPointerTimeAtTimeline(PointerEventData eventData)
+    {
+        Chartmaker cm = Chartmaker.main;
+
+        Vector2 limit = new(
+            Mathf.Min(PeekRange.x, PeekLimit.x),
+            Mathf.Max(PeekRange.y, PeekLimit.y)
+        );
+        float width = limit.y - limit.x;
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(TimeSliderHolder, eventData.position, eventData.pressEventCamera, out Vector2 mousePosition))
+        {
+            float sliderWidth = TimeSliderHolder.rect.width;
+            return ((mousePosition - dragStart).x / sliderWidth + TimeSliderHolder.pivot.x) * width + limit.x;
+        }
+        else
+        {
+            return cm.SongSource.time;
+        }
     }
 }
 

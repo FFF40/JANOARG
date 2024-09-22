@@ -9,11 +9,11 @@ using System;
 public class CursorChanger : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IEndDragHandler, IPointerUpHandler, IPointerExitHandler
 {
     public CursorType CursorType;
-    
+
     bool IsPointerInside;
     bool IsPointerHolding;
     bool IsShowingCursor;
-    
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         IsPointerInside = true;
@@ -32,7 +32,7 @@ public class CursorChanger : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
     public void OnPointerUp(PointerEventData eventData)
     {
         IsPointerHolding = false;
-        if (!IsPointerInside && IsShowingCursor) 
+        if (!IsPointerInside && IsShowingCursor)
         {
             PopCursor();
             IsShowingCursor = false;
@@ -48,7 +48,7 @@ public class CursorChanger : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
     public void OnPointerExit(PointerEventData eventData)
     {
         IsPointerInside = false;
-        if (!IsPointerHolding && IsShowingCursor) 
+        if (!IsPointerHolding && IsShowingCursor)
         {
             PopCursor();
             IsShowingCursor = false;
@@ -68,23 +68,30 @@ public class CursorChanger : MonoBehaviour, IPointerEnterHandler, IPointerDownHa
 
     public static void PushCursor(CursorType type)
     {
-        Cursors.Push(!Chartmaker.Preferences.CustomCursors && type > 0 ? LoadCursor(IntPtr.Zero, type) : IntPtr.Zero);
+        if (Platform.IsWin32APIApplicable())
+            Cursors.Push(!Chartmaker.Preferences.CustomCursors && type > 0 ? LoadCursor(IntPtr.Zero, type) : IntPtr.Zero);
+        else
+            Cursors.Push(IntPtr.Zero);
         CursorTypes.Push(type);
     }
 
     public static void PopCursor()
     {
-        DestroyCursor(Cursors.Pop());
+        if (Platform.IsWin32APIApplicable())
+            DestroyCursor(Cursors.Pop());
+        else
+            Cursors.Pop();
+
         CursorTypes.Pop();
     }
-    
+
     [DllImport("user32.dll")]
     static extern IntPtr LoadCursor(IntPtr hInstance, CursorType lpCursorName);
     [DllImport("user32.dll")]
     static extern bool DestroyCursor(IntPtr hCursor);
 }
 
-public enum CursorType 
+public enum CursorType
 {
     Arrow = 32512,
     Pointer = 32649,
@@ -93,7 +100,7 @@ public enum CursorType
     SizeHorizontal = 32644,
     SizeVertical = 32645,
     Blocked = 32648,
-    
+
     Grab = -1,
     Grabbing = -2,
 }
