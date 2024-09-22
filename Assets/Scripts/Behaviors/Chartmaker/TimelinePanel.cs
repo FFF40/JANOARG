@@ -725,17 +725,31 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     fft[i] = new float[resolution];
                 }
 
-                float scale(float freq) 
+                Func<float, float> scale, unscale;
+
+                switch (Chartmaker.Preferences.FrequencyScale)
                 {
-                    return 2595 * Mathf.Log10(1 + freq / 700);
-                }
-                float unscale(float mel) 
-                {
-                    return 700 * Mathf.Pow(10, mel / 2595) - 700;
+                    case FrequencyScale.Logarithmic: 
+                        scale = (x) => Mathf.Log10(1 + x);
+                        unscale = (x) => Mathf.Pow(10, x) - 1;
+                        break;
+                    case FrequencyScale.Mel: 
+                        scale = (x) => 2595 * Mathf.Log10(1 + x / 700);
+                        unscale = (x) => 700 * Mathf.Pow(10, x / 2595) - 700;
+                        break;
+                    case FrequencyScale.Bark: 
+                        scale = (x) => 6 * (float)Math.Asinh(x / 600);
+                        unscale = (x) => (float)Math.Sinh(x / 6) * 600;
+                        break;
+                    case FrequencyScale.Linear: default: 
+                        scale = (x) => x;
+                        unscale = (x) => x;
+                        break;
                 }
 
-                float minMel = scale(50);
-                float maxMel = scale(20000);
+
+                float minScale = scale(Chartmaker.Preferences.FrequencyMin);
+                float maxScale = scale(Chartmaker.Preferences.FrequencyMax);
                 
                 for (int x = 0; x < tex.width; x++) 
                 {
@@ -754,15 +768,85 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         }
                         for (int y = 0; y < fft.Length; y++) 
                         {
-                            FFT.Transform(fft[y]);
+                            FFT.Transform(fft[y], Chartmaker.Preferences.FFTWindow);
                         }
                     }
                     float sPos = 0;
                     for (int y = 0; y < tex.height; y++) 
                     {
                         int channel = Mathf.FloorToInt(sPos);
-                        float cPos = Mathf.Clamp(unscale(Mathf.Lerp(minMel, maxMel, sPos % 1)) / clip.frequency * resolution, 0, resolution - 1);
+                        float cPos = Mathf.Clamp(unscale(Mathf.Lerp(minScale, maxScale, sPos % 1)) / clip.frequency * resolution, 0, resolution - 1);
                         float value = Mathf.Sqrt(Mathf.Lerp(fft[channel][Mathf.FloorToInt(cPos)], fft[channel][Mathf.CeilToInt(cPos)], cPos % 1) / resolution * cPos);
+                        lineBuffer[y] = color * new Color(1, 1, 1, value);
+                        sPos += denY;
+                    }
+                    tex.SetPixels(sLine, 0, 1, tex.height, lineBuffer);
+                    waveBaked[sLine] = true;
+                    if (timeout())
+                    {
+                        waveTimeouted = true;
+                        break;
+                    }
+                }
+            } break;
+
+            case 3: {
+                int resolution = 512;
+
+                float[] data = new float[resolution * clip.channels];
+                float[][] fft = new float[clip.channels][];
+                float[][] chroma = new float[clip.channels][];
+                float denY = 1f / tex.height * clip.channels;
+
+                for (int i = 0; i < clip.channels; i++) 
+                {
+                    fft[i] = new float[resolution];
+                }
+
+                const float freqAnchor = 440;
+                // Mathf.Pow(2, 1 / 12f)
+                const float freqStep = 1.0594630943592953f;
+                
+                for (int x = 0; x < tex.width; x++) 
+                {
+                    int sLine = ((x + waveOffset) % tex.width + tex.width) % tex.width;
+                    if (waveBaked[sLine]) continue;
+                    sec = waveTime + (x + waveOffset) * step;
+                    int pos = (int)(sec * clip.frequency - resolution / 2);
+                    for (int y = 0; y < fft.Length; y++) chroma[y] = new float[12];
+                    if (pos >= 0 && pos < clip.samples - data.Length)
+                    {
+                        clip.GetData(data, pos);
+                        for (int y = 0; y < data.Length; y++) 
+                        {
+                            int chan = (pos + y) % clip.channels;
+                            int p = y / clip.channels;
+                            fft[chan][p] = data[y];
+                        }
+                        for (int y = 0; y < fft.Length; y++) 
+                        {
+                            FFT.Transform(fft[y], Chartmaker.Preferences.FFTWindow);
+                            chroma[y] = new float[12];
+                            for (int z = fft[y].Length / 128; z < fft[y].Length / 2; z++) 
+                            {
+                                float freq = (float)(z + 1) / resolution * clip.frequency;
+                                float pitch = Mathf.Log(freq / freqAnchor, freqStep);
+                                int chromaPos = (int)(pitch % 12 + 12) % 12;
+                                int octave = Mathf.FloorToInt(pitch / 12);
+                                float chromaOfs = (int)(pitch % 1 + 1) % 1;
+                                
+                                float multi = Mathf.Pow(1 / (1f - z / fft[y].Length), .25f) * Mathf.Pow(.5f, Mathf.Abs(octave - 1.5f)) * 1.418f;
+                                chroma[y][chromaPos] += fft[y][z] * multi * (1 - chromaOfs) / 240;
+                                chroma[y][(chromaPos + 1) % 12] += fft[y][z] * multi * chromaOfs / 240;
+                            }
+                        }
+                    }
+                    float sPos = 0;
+                    for (int y = 0; y < tex.height; y++) 
+                    {
+                        int channel = Mathf.FloorToInt(sPos);
+                        int cPos = Mathf.FloorToInt((sPos % 1 - 0.05f) * 1.1f * 12);
+                        float value = cPos >= 0 && cPos < 12 ? chroma[channel][cPos] : 0;
                         lineBuffer[y] = color * new Color(1, 1, 1, value);
                         sPos += denY;
                     }
@@ -1112,7 +1196,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                 cm.SongSource.Play();
                 cm.SongSource.Pause();
             }
-            cm.SongSource.time = Mathf.Clamp(time, 0, cm.SongSource.clip.length);
+            cm.SongSource.timeSamples = (int)Mathf.Clamp(time * cm.SongSource.clip.frequency, 0, cm.SongSource.clip.samples - 1);
         }
         else if (dragMode == TimelineDragMode.PeekRange)
         {
@@ -1449,4 +1533,12 @@ public enum TimelineDragMode
     Timeline = 3,
     Select = 5,
     ItemDrag = 7,
+}
+
+public enum FrequencyScale
+{
+    Linear,
+    Logarithmic,
+    Mel,
+    Bark,
 }

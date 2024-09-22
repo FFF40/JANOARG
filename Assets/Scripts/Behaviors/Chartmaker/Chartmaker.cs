@@ -685,6 +685,11 @@ public class ChartmakerPrefs
     public string Theme = "Prototype";
     public bool CustomCursors = true;
     public bool UseDefaultWindow;
+
+    public FFTWindow FFTWindow = FFTWindow.Hann;
+    public float FrequencyMin = 50;
+    public float FrequencyMax = 20000;
+    public FrequencyScale FrequencyScale = FrequencyScale.Mel;
     
     public bool PerfectHitsounds;
 
@@ -700,5 +705,10 @@ public class ChartmakerPrefs
         UseDefaultWindow = storage.Get("LA:UseDefaultWindow", UseDefaultWindow);
 
         PerfectHitsounds = storage.Get("BO:PerfectHitsounds", PerfectHitsounds);
+
+        FFTWindow = storage.Get("AL:FFTWindow", FFTWindow);
+        FrequencyMin = storage.Get("AL:FrequencyMin", FrequencyMin);
+        FrequencyMax = storage.Get("AL:FrequencyMax", FrequencyMax);
+        FrequencyScale = storage.Get("AL:FrequencyScale", FrequencyScale);
     }
 }

@@ -149,6 +149,57 @@ public class PreferencesModal : Modal
                 storage.Set("BO:PerfectHitsounds", prefs.PerfectHitsounds = x); IsDirty = true;
             });
         }
+        else if (tab == 4)
+        {
+            var prefs = Chartmaker.Preferences;
+            var storage = Chartmaker.PreferencesStorage;
+
+            SpawnForm<FormEntryHeader>("Display");
+            SpawnForm<FormEntryBool, bool>("Vertical Sync", () => QualitySettings.vSyncCount > 0, x => {
+                QualitySettings.vSyncCount = x ? 1 : 0; IsDirty = true;
+            });
+
+            SpawnForm<FormEntryHeader>("Quality");
+            var cursorDropdown = SpawnForm<FormEntryDropdown, object>("Anti-Aliasing", () => QualitySettings.antiAliasing, x => {
+                QualitySettings.antiAliasing = (int)x; IsDirty = true;
+            });
+            cursorDropdown.ValidValues.Add(0, "Disabled");
+            cursorDropdown.ValidValues.Add(2, "2x MSAA");
+            cursorDropdown.ValidValues.Add(4, "4x MSAA");
+            cursorDropdown.ValidValues.Add(8, "8x MSAA");
+        }
+        else if (tab == 5)
+        {
+            var prefs = Chartmaker.Preferences;
+            var storage = Chartmaker.PreferencesStorage;
+
+            SpawnForm<FormEntryHeader>("FFT");
+            var windowDropdown = SpawnForm<FormEntryDropdown, object>("Window Function", () => prefs.FFTWindow, x => {
+                storage.Set("AL:FFTWindow", prefs.FFTWindow = (FFTWindow)x); IsDirty = true;
+                if (TimelinePanel.main.Options.WaveformMode >= 2) TimelinePanel.main.DiscardWaveform();
+            });
+            windowDropdown.ValidValues.Add(FFTWindow.Rectangular, "Rectangular");
+            windowDropdown.ValidValues.Add(FFTWindow.Triangular, "Triangular");
+            windowDropdown.ValidValues.Add(FFTWindow.Hamming, "Hamming");
+            windowDropdown.ValidValues.Add(FFTWindow.Hann, "Hann");
+            windowDropdown.ValidValues.Add(FFTWindow.Blackman, "Blackman");
+            windowDropdown.ValidValues.Add(FFTWindow.BlackmanNuttal, "Blackman-Nuttal");
+            windowDropdown.ValidValues.Add(FFTWindow.BlackmanHarris, "Blackman-Harris");
+            windowDropdown.ValidValues.Add(FFTWindow.FlatTop, "Flat top");
+
+            SpawnForm<FormEntryHeader>("Spectrogram");
+            SpawnForm<FormEntryDropdown, object>("Frequency Scale", () => prefs.FrequencyScale, x => {
+                storage.Set("AL:FrequencyScale", prefs.FrequencyScale = (FrequencyScale)x); IsDirty = true;
+                if (TimelinePanel.main.Options.WaveformMode == 2) TimelinePanel.main.DiscardWaveform();
+            }).TargetEnum(typeof(FrequencyScale));
+
+            SpawnForm<FormEntryVector2, Vector2>("Frequency Range", () => new (prefs.FrequencyMin, prefs.FrequencyMax), x => {
+                if (prefs.FrequencyMin != x[0]) prefs.FrequencyMin = Math.Clamp(x[0], 0, prefs.FrequencyMax - 1);
+                else prefs.FrequencyMax = Math.Clamp(x[1], prefs.FrequencyMin + 1, 24000);
+                IsDirty = true;
+                if (TimelinePanel.main.Options.WaveformMode == 2) TimelinePanel.main.DiscardWaveform();
+            });
+        }
     }
     
     public void ClearForm()
