@@ -374,7 +374,9 @@ public class BorderlessWindow
 
     public static void RenameWindow (string title) 
     {
-        SetWindowText(CurrentWindow, title);
+        #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
+            SetWindowText(CurrentWindow, title);
+        #endif
     }
 
     public static void UpdateCursor ()
