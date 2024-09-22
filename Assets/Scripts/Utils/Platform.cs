@@ -2,5 +2,7 @@ using UnityEngine;
 
 public static class Platform
 {
-    public static bool IsLinux() => Application.platform == RuntimePlatform.LinuxEditor || Application.platform == RuntimePlatform.LinuxPlayer;
+    public static bool IsWin32APIApplicable() {
+        return Application.platform == RuntimePlatform.WindowsPlayer;
+    }
 }

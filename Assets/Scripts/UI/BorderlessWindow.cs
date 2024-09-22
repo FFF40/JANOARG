@@ -162,12 +162,13 @@ public class BorderlessWindow
                 SetFramelessWindow();
                 ResizeWindow(screenSize.x + 14, screenSize.y + 7);
             }
+        #elif !UNITY_STANDALONE_WIN
+            Chartmaker.Preferences.CustomCursors = true;
+            Chartmaker.Preferences.UseDefaultWindow = true;
         #endif
     }
 
     public static void FindWindow () {
-        if (Platform.IsLinux()) return;
-        
         const string TargetClassName = "UnityWndClass";
         EnumThreadWindows(GetCurrentThreadId(), (hWnd, lParam) =>
         {
@@ -185,9 +186,6 @@ public class BorderlessWindow
 
     public static Rect GetWindowRect()
     {
-        if (Platform.IsLinux()) 
-            return new Rect(0, 0, Screen.width, Screen.height);
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         return new Rect(winRect.left, winRect.top, winRect.right - winRect.left, winRect.bottom - winRect.top);
@@ -195,8 +193,6 @@ public class BorderlessWindow
 
     public static void HookWindowProc()
     {
-        if (Platform.IsLinux()) return;
-
         newWndProcDelegate = new WinProc(WindowProc);
         newWndProc = Marshal.GetFunctionPointerForDelegate(newWndProcDelegate);
         oldWndProc = SetWindowLong(CurrentWindow, GWL_WINPROC, newWndProc);
@@ -204,16 +200,11 @@ public class BorderlessWindow
 
     public static void UnhookWindowProc()
     {
-        if (Platform.IsLinux()) return;
-
         oldWndProc = SetWindowLong(CurrentWindow, GWL_WINPROC, oldWndProc);
     }
 
     static IntPtr WindowProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam)
     { 
-        if (Platform.IsLinux()) 
-            return IntPtr.Zero;
-
         if (msg == WM_SIZING) 
         {
             if (IsFramed) return CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
@@ -320,9 +311,6 @@ public class BorderlessWindow
 
     public static void SetFramelessWindow()
     {
-        if (Platform.IsLinux()) 
-            return;
-
         SetWindowLong(CurrentWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
         DwmExtendFrameIntoClientArea(CurrentWindow, new WinMargin { top = 0, left = 0, bottom = 0, right = 0 });
         IsFramed = false;
@@ -330,41 +318,30 @@ public class BorderlessWindow
 
     public static void SetFramedWindow()
     {
-        if (Platform.IsLinux()) 
-            return;
-
         SetWindowLong(CurrentWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
         IsFramed = true;
     }
 
     public static void MinimizeWindow()
     {
-        if (Platform.IsLinux()) 
-            return;
         IsMaximized = false;
         ShowWindow(CurrentWindow, SW_MINIMIZE);
     }
 
     public static void MaximizeWindow()
     {
-        if (Platform.IsLinux()) 
-            return;
         IsMaximized = true;
         ShowWindow(CurrentWindow, SW_MAXIMIZE);
     }
 
     public static void RestoreWindow()
     {
-        if (Platform.IsLinux()) 
-            return;
         IsMaximized = false;
         ShowWindow(CurrentWindow, SW_RESTORE);
     }
 
     public static void MoveWindow(Vector2 pos, bool bRepaint = false)
     {
-        if (Platform.IsLinux()) 
-            return;
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         MoveWindow(CurrentWindow, (int)pos.x, (int)pos.y, winRect.right - winRect.left, winRect.bottom - winRect.top, bRepaint);
@@ -372,8 +349,6 @@ public class BorderlessWindow
 
     public static void MoveWindowDelta(Vector2 posDelta, bool bRepaint = false)
     {
-        if (Platform.IsLinux()) 
-            return;
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         var x = winRect.left + (int)posDelta.x;
@@ -383,8 +358,6 @@ public class BorderlessWindow
 
     public static void ResizeWindow(int width, int height)
     {
-        if (Platform.IsLinux()) 
-            return;
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         MoveWindow(CurrentWindow, winRect.left, winRect.top, width, height, false);
@@ -392,9 +365,6 @@ public class BorderlessWindow
 
     public static void ResizeWindowDelta(int dWidth, int dHeight)
     {
-        if (Platform.IsLinux()) 
-            return;
-
         GetWindowRect(CurrentWindow, out WinRect winRect);
 
         var w = winRect.right - winRect.left + dWidth;
@@ -404,17 +374,11 @@ public class BorderlessWindow
 
     public static void RenameWindow (string title) 
     {
-        if (Platform.IsLinux()) 
-            return;
-
         SetWindowText(CurrentWindow, title);
     }
 
     public static void UpdateCursor ()
     {
-        if (Platform.IsLinux()) 
-            return;
-
         IntPtr cursor = CursorChanger.Cursors.Count > 0 ? CursorChanger.Cursors.Peek() : IntPtr.Zero;
         if (cursor == IntPtr.Zero && WindowHandler.main) 
         {
