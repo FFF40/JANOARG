@@ -32,7 +32,7 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public bool maximized { get; private set; }
     bool isFullScreen;
 
-    bool framed = true;
+    bool framed;
 
     // TODO: Do something with this variable or remove it
     float clickTime = float.NegativeInfinity;

@@ -28243,6 +28243,7 @@ MonoBehaviour:
   SeparationFactor: 2
   VerticalScale: 1
   VerticalOffset: 0
+  ResizeVelocity: 0
   StoryboardTab: {fileID: 2010444474}
   TimingTab: {fileID: 652992118}
   LaneTab: {fileID: 144098650}

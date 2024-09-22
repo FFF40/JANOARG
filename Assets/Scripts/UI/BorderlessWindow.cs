@@ -165,6 +165,7 @@ public class BorderlessWindow
         #elif !UNITY_STANDALONE_WIN
             Chartmaker.Preferences.CustomCursors = true;
             Chartmaker.Preferences.UseDefaultWindow = true;
+            IsFramed = true;
         #endif
     }
 
