@@ -273,6 +273,7 @@ public class Chartmaker : MonoBehaviour
         InspectorPanel.main.UpdateForm();
         InspectorPanel.main.CurrentHierarchyObject = null;
         HierarchyPanel.main.SetMode(HierarchyMode.Chart);
+        TimelinePanel.main.SetTabMode(TimelineMode.Lanes);
         TimelinePanel.main.UpdateItems();
         PlayerView.main.UpdateObjects();
         History = new();

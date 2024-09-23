@@ -11,7 +11,8 @@ public class FFT
         float[] re = array, im = new float[size];
         for (int a = 0; a < size; a++) re[a] *= getwin(window, (a + .5f) / size);
         ditfft(re, im);
-        for (int i = 0; i < size; i++) array[i] = re[i] * re[i] + im[i] * im[i];
+        float falloff = (getfall(window) - 1) / array.Length;
+        for (int i = 0; i < size; i++) array[i] = re[i] * re[i] + im[i] * im[i] * (1 + falloff * i);
     }
 
     // Cooley–Tukey FFT algorithm
@@ -94,6 +95,16 @@ public class FFT
             FFTWindow.BlackmanHarris => cossum(x, 0.35875f, 0.48829f, 0.14128f, 0.01168f),
             FFTWindow.FlatTop => cossum(x, 0.21557895f, 0.41663158f, 0.277263158f, 0.083578947f, 0.006947368f),
             _ => 1,
+        };
+    }
+
+    static float getfall(FFTWindow window) 
+    {
+        return window switch
+        {
+            FFTWindow.Rectangular => 1,
+            FFTWindow.Triangular => 25,
+            _ => 20,
         };
     }
 

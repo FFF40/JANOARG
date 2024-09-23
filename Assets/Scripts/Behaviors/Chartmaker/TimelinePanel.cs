@@ -777,7 +777,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     {
                         int channel = Mathf.FloorToInt(sPos);
                         float cPos = Mathf.Clamp(unscale(Mathf.Lerp(minScale, maxScale, sPos % 1)) / clip.frequency * resolution, 0, resolution - 1);
-                        float value = Mathf.Sqrt(Mathf.Lerp(fft[channel][Mathf.FloorToInt(cPos)], fft[channel][Mathf.CeilToInt(cPos)], cPos % 1) / resolution * cPos);
+                        float value = Mathf.Sqrt(Mathf.Lerp(fft[channel][Mathf.FloorToInt(cPos)], fft[channel][Mathf.CeilToInt(cPos)], cPos % 1) / resolution * cPos) / 4;
                         lineBuffer[y] = color * new Color(1, 1, 1, value);
                         sPos += denY;
                     }
@@ -847,7 +847,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     {
                         int channel = Mathf.FloorToInt(sPos);
                         int cPos = Mathf.FloorToInt((sPos % 1 - 0.05f) * 1.1f * 12);
-                        float value = cPos >= 0 && cPos < 12 ? chroma[channel][cPos] : 0;
+                        float value = cPos >= 0 && cPos < 12 ? chroma[channel][cPos] / 2 : 0;
                         lineBuffer[y] = color * new Color(1, 1, 1, value);
                         sPos += denY;
                     }
@@ -1513,26 +1513,62 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void OnScroll(PointerEventData eventData)
     {
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-        {
-            float currentXRange = PeekRange.x - (eventData.scrollDelta.y * ResizeVelocity);
-            float currentYRange = PeekRange.y + (eventData.scrollDelta.y * ResizeVelocity);
+        bool isShift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool isCtrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        bool isAlt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
-            if (currentYRange < currentXRange)
+        Chartmaker cm = Chartmaker.main;
+
+        // Ctrl+Shift modifier = Vertical zoom
+        if (isCtrl && isShift)
+        {
+            if (CurrentMode == TimelineMode.HitObjects)
             {
-                return;
+                float zoom = Mathf.Pow(2, ResizeVelocity * eventData.scrollDelta.y / 10f);
+                Options.VerticalScale = VerticalScale += zoom;
+                Options.UpdateFields();
             }
-            
+            UpdateTimeline(true);
+        }
+        // Shift modifier = Vertical scroll
+        else if (isShift)
+        {
+            if (CurrentMode == TimelineMode.HitObjects)
+            {
+                Options.VerticalOffset = VerticalOffset += eventData.scrollDelta.y * VerticalScale / 10;
+                Options.UpdateFields();
+            }
+            else 
+            {
+                ScrollOffset = Mathf.Max(Mathf.Min(ScrollOffset + (int)Mathf.Sign(eventData.scrollDelta.y), ItemHeight - TimelineHeight), 0);
+            }
+            UpdateTimeline(true);
+            UpdateScrollbar();
+        }
+        // Ctrl modifier = Horizontal zoom
+        else if (isCtrl)
+        {
+            float zoom = Mathf.Pow(2, ResizeVelocity * eventData.scrollDelta.y / 10f);
+            float center = GetPointerTimeAtTimeline(eventData);
+            float currentXRange = PeekRange.x - (center - PeekRange.x) * (zoom - 1);
+            float currentYRange = PeekRange.y - (center - PeekRange.y) * (zoom - 1);
+
             Debug.Log($"{PeekRange.x} -> {currentXRange}, {PeekRange.y} -> {currentYRange}");
 
-            PeekRange.x = Mathf.Clamp(currentXRange, 0, PeekRange.y);
-            PeekRange.y = Mathf.Clamp(currentYRange, PeekRange.x, Chartmaker.main.SongSource.clip.length);
+            PeekRange.x = Mathf.Clamp(currentXRange, PeekLimit.x, PeekRange.y);
+            PeekRange.y = Mathf.Clamp(currentYRange, PeekRange.x, PeekLimit.y);
         }
-        else
+        // Alt modifier = Seek current time
+        else if (isAlt || (Options.FollowSeekLine && cm.SongSource.isPlaying))
         {
-            Chartmaker cm = Chartmaker.main;
 
-            float time = cm.SongSource.time + (eventData.scrollDelta.y * (120 / cm.CurrentSong.Timing.GetStop(cm.SongSource.time, out int _).BPM));
+            Metronome metronome = cm.CurrentSong.Timing;
+            float bpm = metronome.GetStop(cm.SongSource.time, out _).BPM;
+            float density = (PeekRange.y - PeekRange.x) * bpm / TicksHolder.rect.width / 8;
+            float factor = Mathf.Floor(Mathf.Log(density, SeparationFactor));
+            float step = Mathf.Pow(SeparationFactor, factor + 1);
+
+            float time = cm.SongSource.time + (eventData.scrollDelta.y * step / bpm * 240);
             if (cm.SongSource.time == 0 && !cm.SongSource.isPlaying)
             {
                 cm.SongSource.Play();
@@ -1540,21 +1576,27 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             }
             cm.SongSource.time = Mathf.Clamp(time, 0, cm.SongSource.clip.length);
         }
+        // No modifier = Horizontal scroll
+        else
+        {
+            float offset = Mathf.Clamp(
+                (PeekRange.y - PeekRange.x) / TicksHolder.rect.width * 50 * eventData.scrollDelta.y,
+                PeekLimit.x - PeekRange.x,
+                PeekLimit.y - PeekRange.y
+            );
+
+            PeekRange.x += offset;
+            PeekRange.y += offset;
+        }
     }
 
     public float GetPointerTimeAtTimeline(PointerEventData eventData)
     {
         Chartmaker cm = Chartmaker.main;
 
-        Vector2 limit = new(
-            Mathf.Min(PeekRange.x, PeekLimit.x),
-            Mathf.Max(PeekRange.y, PeekLimit.y)
-        );
-        float width = limit.y - limit.x;
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(TimeSliderHolder, eventData.position, eventData.pressEventCamera, out Vector2 mousePosition))
         {
-            float sliderWidth = TimeSliderHolder.rect.width;
-            return ((mousePosition - dragStart).x / sliderWidth + TimeSliderHolder.pivot.x) * width + limit.x;
+            return Mathf.Lerp(PeekRange.x, PeekRange.y, mousePosition.x / ItemsHolder.rect.width + .5f);
         }
         else
         {

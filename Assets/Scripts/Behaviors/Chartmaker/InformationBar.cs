@@ -109,6 +109,7 @@ public class InformationBar : MonoBehaviour
 
     public void FocusSong()
     {
+        TimelinePanel.main.SetTabMode(TimelineMode.Timing);
         HierarchyPanel.main.SetMode(HierarchyMode.PlayableSong);
     }
 
@@ -121,6 +122,7 @@ public class InformationBar : MonoBehaviour
         else
         {
             HierarchyPanel.main.SetMode(HierarchyMode.Chart);
+            TimelinePanel.main.SetTabMode(TimelineMode.Lanes);
         }
     }
 
@@ -194,6 +196,8 @@ public class InformationBar : MonoBehaviour
 
         Rect rect = Visualizer.rect;
         Color color = Themer.main.Keys["ControlContent"];
+        AudioClip clip = Chartmaker.main.SongSource.clip;
+        int sampleOffset = (int)(sec * clip.frequency);
 
         if (VisualizerMode == VisualizerMode.Metronome)
         {
@@ -218,21 +222,34 @@ public class InformationBar : MonoBehaviour
         else if (VisualizerMode == VisualizerMode.FrequencyBars)
         {
             const int barCount = 8;
-            const int fftCount = 1 << barCount;
+            const int fftCount = 2 << barCount;
             const float riseTime = .05f, fallTime = .5f;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
-            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, UnityEngine.FFTWindow.Rectangular);
-            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, UnityEngine.FFTWindow.Rectangular);
+            float[] data = new float[fftCount * clip.channels];
+            clip.GetData(data, Mathf.Clamp(sampleOffset - fftCount / 2, 0, clip.samples - fftCount));
+            for (int a = 0; a < data.Length; a++) 
+            {
+                switch ((a + sampleOffset) % clip.channels)
+                {
+                    case 0: fftL[a / clip.channels] = data[a]; break;
+                    case 1: fftR[a / clip.channels] = data[a]; break;
+                }
+            }
+            FFT.Transform(fftL, Chartmaker.Preferences.FFTWindow);
+            if (clip.channels == 1) fftR = fftL;
+            else FFT.Transform(fftR, Chartmaker.Preferences.FFTWindow);
 
             float[] barsL = new float[barCount], barsR = new float[barCount];
             for (int a = 0; a < barCount; a++) 
             {
                 for (int i = 1 << a; i < 1 << (a + 1); i++) 
                 {
-                    barsL[a] += fftL[i] * (i + 1);
-                    barsR[a] += fftR[i] * (i + 1);
+                    barsL[a] += fftL[i] * (a + 1);
+                    barsR[a] += fftR[i] * (a + 1);
                 }
+                barsL[a] *= Mathf.Pow(1 / (1 - (float)a / barCount), 2) * (a + 1) / fftCount / 25;
+                barsR[a] *= Mathf.Pow(1 / (1 - (float)a / barCount), 2) * (a + 1) / fftCount / 25;
             }
             float sizeX = rect.width / barCount;    
             for (int a = 0; a < barCount; a++) 
@@ -265,8 +282,17 @@ public class InformationBar : MonoBehaviour
             int dataCount = (int)rect.width + 1;
 
             float[] dataL = new float[dataCount], dataR = new float[dataCount];
-            Chartmaker.main.SongSource.GetOutputData(dataL, 0);
-            Chartmaker.main.SongSource.GetOutputData(dataR, 1);
+            float[] data = new float[dataCount * clip.channels];
+            clip.GetData(data, Mathf.Clamp(sampleOffset - dataCount / 2, 0, clip.samples - dataCount));
+            for (int a = 0; a < data.Length; a++) 
+            {
+                switch ((a + sampleOffset) % clip.channels)
+                {
+                    case 0: dataL[a / clip.channels] = data[a]; break;
+                    case 1: dataR[a / clip.channels] = data[a]; break;
+                }
+            }
+            if (clip.channels == 1) dataR = dataL;
 
             for (int a = 0; a < dataCount - 1; a++) 
             {
@@ -290,14 +316,26 @@ public class InformationBar : MonoBehaviour
             const int fftCount = 1 << 8;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
-            Chartmaker.main.SongSource.GetSpectrumData(fftL, 0, UnityEngine.FFTWindow.Rectangular);
-            Chartmaker.main.SongSource.GetSpectrumData(fftR, 1, UnityEngine.FFTWindow.Rectangular);
+            float[] data = new float[fftCount * clip.channels];
+            clip.GetData(data, Mathf.Clamp(sampleOffset - fftCount / 2, 0, clip.samples - fftCount));
+            for (int a = 0; a < data.Length; a++) 
+            {
+                switch ((a + sampleOffset) % clip.channels)
+                {
+                    case 0: fftL[a / clip.channels] = data[a]; break;
+                    case 1: fftR[a / clip.channels] = data[a]; break;
+                }
+            }
+            FFT.Transform(fftL, Chartmaker.Preferences.FFTWindow);
+            if (clip.channels == 1) fftR = fftL;
+            else FFT.Transform(fftR, Chartmaker.Preferences.FFTWindow);
 
             float[] notes = new float[12];
-            for (int a = 0; a < fftCount; a++) 
+            for (int a = 0; a < fftCount / 2; a++) 
             {
                 int note = (Mathf.RoundToInt(Mathf.Log((a + 1f) / fftCount / 440 * Chartmaker.main.CurrentSong.Clip.frequency, 2) * 12) % 12 + 12) % 12;
-                notes[note] = Mathf.Max(notes[note], fftL[a] * (a + 1), fftR[a] * (a + 1));
+                float mul = (a + 1) / (float)fftCount * 2;
+                notes[note] = Mathf.Max(notes[note], Mathf.Sqrt(fftL[a]) * mul, Mathf.Sqrt(fftR[a]) * mul);
             }
             float sizeX = rect.width / 12;  
             int target = 0;  
