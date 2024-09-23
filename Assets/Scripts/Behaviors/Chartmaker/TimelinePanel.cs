@@ -1525,7 +1525,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             if (CurrentMode == TimelineMode.HitObjects)
             {
                 float zoom = Mathf.Pow(2, ResizeVelocity * eventData.scrollDelta.y / 10f);
-                Options.VerticalScale = VerticalScale += zoom;
+                Options.VerticalScale = VerticalScale *= zoom;
                 Options.UpdateFields();
             }
             UpdateTimeline(true);
