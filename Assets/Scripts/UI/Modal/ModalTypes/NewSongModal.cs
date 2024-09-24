@@ -157,7 +157,14 @@ public class NewSongModal : Modal
     
     public IEnumerator ExecuteRoutine() {
         Chartmaker.main.Loader.SetActive(true);
-        Chartmaker.main.LoaderLabel.text = "Creating Playable Song...";
+        Chartmaker.main.LoaderPanel.SetSong(InitialValues);
+        Chartmaker.main.LoaderPanel.ActionLabel.text = "Creating Playable Song...";
+        Chartmaker.main.LoaderPanel.ProgressBar.value = 0;
+
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = "Initializing...";
+        yield return new WaitForSeconds(0.5f);
+
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = "Creating .japs file...";
 
         Task<string> task = ExecuteAsync(); 
         yield return new WaitUntil(() => task.IsCompleted);

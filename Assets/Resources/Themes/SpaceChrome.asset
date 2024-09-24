@@ -123,3 +123,7 @@ MonoBehaviour:
     Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: HierarchyItemSelected
     Value: {r: 0.2, g: 0.6, b: 0.69803923, a: 0.2}
+  - Key: ProgressBackground
+    Value: {r: 0, g: 0, b: 0, a: 0.5019608}
+  - Key: ProgressFill
+    Value: {r: 1, g: 0.69803923, b: 0, a: 1}

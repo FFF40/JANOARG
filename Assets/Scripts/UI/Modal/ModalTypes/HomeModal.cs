@@ -28,7 +28,10 @@ public class HomeModal : Modal
             RecentSongItem item = Instantiate(RecentSongSample, RecentSongsHolder);
             item.DataLabel.text = "<alpha=#aa>" + recent.SongArtist + " - <alpha=#ff>" + recent.SongName; 
             item.PathLabel.text = recent.Path;
-            item.Button.onClick.AddListener(() => StartCoroutine(Chartmaker.main.OpenSongRoutine(recent.Path)));
+            item.Button.onClick.AddListener(() => {
+                Chartmaker.main.LoaderPanel.SetSong(recent.SongName, recent.SongArtist);
+                StartCoroutine(Chartmaker.main.OpenSongRoutine(recent.Path));
+            });
         }
     }
 

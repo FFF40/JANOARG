@@ -34,7 +34,7 @@ public class Chartmaker : MonoBehaviour
     public float NotificationFlashTime;
     [Space]
     public GameObject Loader;
-    public TMP_Text LoaderLabel;
+    public LoaderPanel LoaderPanel;
     public bool IsDirty;
 
     public PlayableSong CurrentSong { get; private set; } = null;
@@ -110,6 +110,7 @@ public class Chartmaker : MonoBehaviour
         modal.HeaderLabel.text = "Select a Playable Song...";
         modal.SelectLabel.text = "Open";
         modal.OnSelect.AddListener(() => {
+            LoaderPanel.SetNoSong();
             StartCoroutine(OpenSongRoutine(modal.SelectedEntry.Path));
         });
     }
@@ -152,7 +153,13 @@ public class Chartmaker : MonoBehaviour
         if (ActiveTask?.IsCompleted == false) yield break;
 
         Loader.SetActive(true);
-        LoaderLabel.text = "Parsing Playable Song data...";
+        LoaderPanel.ActionLabel.text = "Loading Playable Song...";
+        LoaderPanel.ProgressBar.value = 0;
+
+        LoaderPanel.ProgressLabel.text = "Initializing...";
+        yield return new WaitForSeconds(0.5f);
+
+        LoaderPanel.ProgressLabel.text = "Loading .japs file...";
 
         ActiveTask = OpenSongAsync(path);
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
@@ -167,11 +174,18 @@ public class Chartmaker : MonoBehaviour
         ActiveTask = AddToRecentAsync();
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
 
-        LoaderLabel.text = "Fetching audio file...";
+        LoaderPanel.SetSong(CurrentSong);
+        LoaderPanel.ProgressLabel.text = "Loading audio file...";
+        LoaderPanel.ProgressBar.value = .2f;
 
         UnityWebRequest stream = UnityWebRequestMultimedia.GetAudioClip("file://" + Path.Combine(Path.GetDirectoryName(path), CurrentSong.ClipPath), AudioType.UNKNOWN);
         Debug.Log(stream.url);
-        yield return stream.SendWebRequest();
+        stream.SendWebRequest();
+        while (!stream.isDone) 
+        {
+            LoaderPanel.ProgressLabel.text = $"Loading audio file... ({stream.downloadProgress:P})";
+            LoaderPanel.ProgressBar.value = .2f + stream.downloadProgress * 0.4f;
+        }
 
         if (stream.result != UnityWebRequest.Result.Success)
         {
@@ -195,8 +209,9 @@ public class Chartmaker : MonoBehaviour
             }
         }
 
-        LoaderLabel.text = "Loading song cover images...";
+        LoaderPanel.ProgressLabel.text = "Loading song cover images...";
         
+        int progress = 0;
         foreach (CoverLayer layer in CurrentSong.Cover.Layers)
         {
             ActiveTask = File.ReadAllBytesAsync(Path.Combine(Path.GetDirectoryName(path), layer.Target));
@@ -212,6 +227,10 @@ public class Chartmaker : MonoBehaviour
             Texture2D texture = new (1, 1);
             ImageConversion.LoadImage(texture, ((Task<byte[]>)ActiveTask).Result);
             layer.Texture = texture;
+            
+            progress++;
+            LoaderPanel.ProgressLabel.text = $"Loading song cover images... ({progress}/{CurrentSong.Cover.Layers.Count})";
+            LoaderPanel.ProgressBar.value = .6f + progress * 0.4f / CurrentSong.Cover.Layers.Count;
         }
 
         Loader.SetActive(false);
@@ -255,7 +274,14 @@ public class Chartmaker : MonoBehaviour
         if (ActiveTask?.IsCompleted == false) yield break;
         
         Loader.SetActive(true);
-        LoaderLabel.text = "Parsing Playable Song data...";
+        LoaderPanel.SetSong(CurrentSong);
+        LoaderPanel.ActionLabel.text = "Loading Chart...";
+        LoaderPanel.ProgressBar.value = 0;
+
+        LoaderPanel.ProgressLabel.text = "Initializing...";
+        yield return new WaitForSeconds(0.5f);
+
+        LoaderPanel.ProgressLabel.text = "Loading .jac file...";
 
         ActiveTask = OpenChartAsync(chart);
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
@@ -321,7 +347,9 @@ public class Chartmaker : MonoBehaviour
         if (CurrentSong == null) yield break;
 
         Loader.SetActive(true);
-        LoaderLabel.text = "Saving song before quitting...";
+        LoaderPanel.ActionLabel.text = "Cleaning up...";
+        LoaderPanel.ProgressLabel.text = "Saving song before quitting...";
+        LoaderPanel.ProgressBar.value = 0;
 
         yield return SaveRoutine();
 

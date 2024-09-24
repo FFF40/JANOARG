@@ -19,6 +19,8 @@ public class RenderModal : Modal
     public RenderPrefs Prefs = new();
     public bool PrefsDirty;
     [Space]
+    public string OutputPath;
+    public string OutputType = "mp4";
     public Vector2 TimeRange;
 
     [Space]
@@ -77,6 +79,15 @@ public class RenderModal : Modal
             new("FFmpeg executable", "exe"),
             new("All files"),
         };
+        SpawnForm<FormEntryString, string>("Output", () => OutputPath, x => {
+            OutputPath = x; 
+        });
+        var formatField = SpawnForm<FormEntryDropdown, object>("Format", () => OutputType, x => {
+            OutputType = (string)x; 
+        });
+        formatField.ValidValues.Add("mp4", ".mp4");
+        formatField.ValidValues.Add("mov", ".mov");
+        formatField.ValidValues.Add("webm", ".webm");
 
         SpawnForm<FormEntryHeader>("Time");
         var timeField = SpawnForm<FormEntryVector2, Vector2>("Range (sec)", () => TimeRange, x => {
@@ -245,6 +256,13 @@ public class RenderModal : Modal
     {
         IsAnimating = true;
 
+        Chartmaker.main.Loader.SetActive(true);
+        Chartmaker.main.LoaderPanel.ActionLabel.text = "Rendering...";
+        Chartmaker.main.LoaderPanel.ProgressBar.value = 0;
+
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = "Initializing...";
+        yield return new WaitForSeconds(.5f);
+
         // Initiate camera
         RenderTexture rtex = new (Prefs.Resolution.x, Prefs.Resolution.y, 24);
         Camera camera = Camera.main;
@@ -268,6 +286,10 @@ public class RenderModal : Modal
         float fov = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camHeight) * 2 * Mathf.Rad2Deg;
         int queuedFrames = 1, busyFrags = 0;
 
+        int totalFrames = (int)((TimeRange.y - TimeRange.x) * Prefs.FrameRate);
+
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Rendering frames... ({frames}/{totalFrames})";
+
         IEnumerator makeFragment(int start, int end)
         {
             int frag = frags;
@@ -282,7 +304,6 @@ public class RenderModal : Modal
             Task<string> task = ffmpegAsync(args);
             yield return new WaitUntil(() => task.IsCompleted);
             for (int a = start; a <= end; a++) File.Delete(Path.Combine(framesDir, $"{a}.png"));
-            // Debug.Log(start + " " + end + " " + task.IsCompletedSuccessfully + "\n" + task.Result);
             busyFrags--;
         }
 
@@ -307,9 +328,13 @@ public class RenderModal : Modal
                 StartCoroutine(makeFragment(frames - 100, frames - 1));
                 queuedFrames = frames;
             }
+            
+            Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Rendering frames... ({frames}/{totalFrames})";
+            Chartmaker.main.LoaderPanel.ProgressBar.value = (float)frames / totalFrames;
         }
         StartCoroutine(makeFragment(queuedFrames, frames - 1));
 
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Outputting video...";
         yield return new WaitUntil(() => busyFrags <= 0);
 
         using(var stream = File.OpenWrite(Path.Combine(sessionDir, $"demux.txt")))
@@ -318,13 +343,19 @@ public class RenderModal : Modal
             for (int a = 1; a < frags; a++) writer.WriteLine("file '" + Path.Combine(fragmentsDir, $"{a}.mp4") + "'");
         }
         {
+            string folder = Path.Combine(Application.dataPath, "../Renders");
+            Directory.CreateDirectory(folder);
+            string path = Path.Combine(
+                folder, 
+                (string.IsNullOrWhiteSpace(OutputPath) ? DateTimeOffset.UtcNow.ToUnixTimeSeconds() : OutputPath) + "." + OutputType
+            );
             string args = 
                 $" -f concat -safe 0 " 
                 + "-i \"" + Path.Combine(sessionDir, $"demux.txt") + "\" "
                 + $"-ss {TimeRange.x} -t {TimeRange.y - TimeRange.x} " 
                 + "-i \"" + Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.ClipPath) + "\" "
                 + $"-r {Prefs.FrameRate} "
-                + "\"" + Path.Combine(sessionDir, $"output.webm") + $"\" ";
+                + "\"" + path + $"\" ";
             // Debug.Log(args);
             Task<string> task = ffmpegAsync(args);
             yield return new WaitUntil(() => task.IsCompleted);
@@ -338,6 +369,7 @@ public class RenderModal : Modal
         RenderTexture.active = null;
         Destroy(rtex);
         Close();
+        Chartmaker.main.Loader.SetActive(false);
         IsAnimating = false;
     }
 

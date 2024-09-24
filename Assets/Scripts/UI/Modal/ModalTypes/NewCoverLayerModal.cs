@@ -140,7 +140,13 @@ public class NewCoverLayerModal : Modal
         }
 
         Chartmaker.main.Loader.SetActive(true);
-        Chartmaker.main.LoaderLabel.text = "Saving image...";
+        Chartmaker.main.LoaderPanel.ActionLabel.text = "Saving image...";
+        Chartmaker.main.LoaderPanel.ProgressBar.value = 0;
+
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = "Initializing...";
+        yield return new WaitForSeconds(0.5f);
+        
+        Chartmaker.main.LoaderPanel.ProgressLabel.text = "Saving image...";
 
         byte[] data = Extension == ".jpg" ? ImageConversion.EncodeToJPG(ImageData) : ImageConversion.EncodeToPNG(ImageData);
         Task task = File.WriteAllBytesAsync(path, data);

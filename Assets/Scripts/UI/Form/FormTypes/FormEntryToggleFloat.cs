@@ -16,7 +16,7 @@ public class FormEntryToggleFloat : FormEntry<float>
     {
         Toggle.SetIsOnWithoutNotify(!float.IsNaN(CurrentValue));
         Field.gameObject.SetActive(Toggle.isOn);
-        Field.text = Toggle.isOn ? CurrentValue.ToString() : "0";
+        Field.SetTextWithoutNotify(Toggle.isOn ? CurrentValue.ToString() : "0");
     }
 
     public void SetValue(bool value)

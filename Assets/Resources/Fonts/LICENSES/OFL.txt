@@ -1,17 +1,8 @@
-Copyright (c) 2011, Vernon Adams (vern@newtypography.co.uk),
-with Reserved Font Name "Michroma".
-
-Copyright (c) Google Inc.,
-with Reserved Font Names "Noto Sans" and "Noto Emoji".
-
-Copyright (c) 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk),
-with Reserved Font Name "Space Grotesk".
-
------------------------------------------------------------
+Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
-http://scripts.sil.org/OFL
+https://openfontlicense.org
 
 
 -----------------------------------------------------------
