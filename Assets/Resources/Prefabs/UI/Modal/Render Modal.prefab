@@ -311,7 +311,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1859089268011476551
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2673,7 +2673,7 @@ RectTransform:
   m_Father: {fileID: 1462324450593720596}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2968,6 +2968,22 @@ PrefabInstance:
       propertyPath: m_ChildForceExpandHeight
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7693551307906264919, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
+      propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7179794159435637814}
+    - target: {fileID: 7693551307906264919, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 7179794159435637814}
+    - target: {fileID: 7693551307906264919, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
+      propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnHeaderDrag
+      objectReference: {fileID: 0}
+    - target: {fileID: 7693551307906264919, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnHeaderDragStart
+      objectReference: {fileID: 0}
     - target: {fileID: 8114330190228983642, guid: bcdd53ef38e49e74db54ba2ebb6aa5e7, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3194,6 +3210,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PrefsDirty: 0
+  OutputPath: 
+  OutputType: mp4
   TimeRange: {x: 0, y: 0}
   FormHolder: {fileID: 4467754680063589914}
   FormHolderLayout: {fileID: 6114464751383771736}

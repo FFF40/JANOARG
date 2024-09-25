@@ -25,7 +25,7 @@ public class CMLanePlayer : MonoBehaviour
         Renderer.sharedMaterial = Renderer.enabled ? styles[index].LaneMaterial : null;
         Filter.sharedMesh = Renderer.enabled ? lane.CurrentMesh : null;
 
-        if (InformationBar.main.sec >= lane.Steps[0].Offset)
+        if (InformationBar.main.sec >= lane.Steps[0].Offset && InformationBar.main.sec < lane.Steps[^1].Offset)
         {
             JudgeLine.gameObject.SetActive(Renderer.enabled);
             JudgeEnds[0].gameObject.SetActive(Renderer.enabled);

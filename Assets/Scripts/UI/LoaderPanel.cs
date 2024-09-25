@@ -67,6 +67,14 @@ public class LoaderPanel : MonoBehaviour
         SongArtistLabel.text = artist;
     }
 
+    public void SetSong(string name, string artist, Color bg, Color fg) 
+    {
+        SongCoverBackground.color = bg;
+        SongTitleLabel.color = SongArtistLabel.color = fg;
+        SongTitleLabel.text = name;
+        SongArtistLabel.text = artist;
+    }
+
     public void SetNoSong() 
     {
         SongCoverBackground.color = Themer.main.Keys["Background1"];

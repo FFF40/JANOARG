@@ -121,7 +121,7 @@ public class Chartmaker : MonoBehaviour
         CurrentChartMeta = null;
         CurrentChartPath = "";
         CurrentSong = JAPSDecoder.Decode(File.ReadAllText(path));
-        CurrentSongPath = path;
+        CurrentSongPath = Path.GetFullPath(path);
     }
 
     public Task OpenSongAsync(string path)
@@ -132,13 +132,15 @@ public class Chartmaker : MonoBehaviour
     public void AddToRecent()
     {
         List<RecentSong> list = new(RecentSongsStorage.Get("List", new RecentSong[] {}));
-        int index = list.FindIndex(x => x.Path == CurrentSongPath);
+        int index = list.FindIndex(x => x.Path.ToLowerInvariant() == CurrentSongPath.ToLowerInvariant());
         if (index == 0 && list[0].SongName == CurrentSong.SongName && list[0].SongArtist == CurrentSong.SongArtist) return;
         else if (index >= 0) list.RemoveAt(index);
         list.Insert(0, new RecentSong {
             Path = CurrentSongPath,
             SongName = CurrentSong.SongName,
             SongArtist = CurrentSong.SongArtist,
+            BackgroundColor = CurrentSong.BackgroundColor,
+            InterfaceColor = CurrentSong.InterfaceColor,
         });
         RecentSongsStorage.Set("List", list.ToArray());
         RecentSongsStorage.Save();

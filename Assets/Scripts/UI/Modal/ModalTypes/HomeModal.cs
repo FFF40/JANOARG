@@ -26,10 +26,12 @@ public class HomeModal : Modal
         foreach (RecentSong recent in list) 
         {
             RecentSongItem item = Instantiate(RecentSongSample, RecentSongsHolder);
-            item.DataLabel.text = "<alpha=#aa>" + recent.SongArtist + " - <alpha=#ff>" + recent.SongName; 
-            item.PathLabel.text = recent.Path;
+            item.Background.color = recent.BackgroundColor;
+            item.SongArtistLabel.text = recent.SongArtist; 
+            item.SongNameLabel.text = recent.SongName;
+            item.Tooltip.Text = recent.Path;
             item.Button.onClick.AddListener(() => {
-                Chartmaker.main.LoaderPanel.SetSong(recent.SongName, recent.SongArtist);
+                Chartmaker.main.LoaderPanel.SetSong(recent.SongName, recent.SongArtist, recent.BackgroundColor, recent.InterfaceColor);
                 StartCoroutine(Chartmaker.main.OpenSongRoutine(recent.Path));
             });
         }
