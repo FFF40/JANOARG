@@ -566,14 +566,18 @@ public class InspectorPanel : MonoBehaviour
 
     public void MakeLaneGroupEntry(LaneGroup group)
     {
-        var dropdown = SpawnForm<FormEntryDropdown, object>("Parent", () => group.Group ?? "", x => Chartmaker.main.SetItem(group, "Group", x));
+        var dropdown = SpawnForm<FormEntryDropdown, object>("Parent", () => group.Group ?? "", x => {
+            Chartmaker.main.SetItem(group, "Group", x); HierarchyPanel.main.UpdateHierarchy();
+        });
         foreach (LaneGroup p in Chartmaker.main.CurrentChart.Groups) if (p != group) dropdown.ValidValues.Add(p.Name, p.Name);
         dropdown.ValidValues.Add("", "<i>None</i>");
     }
 
     public void MakeLaneGroupEntry(Lane lane)
     {
-        var dropdown = SpawnForm<FormEntryDropdown, object>("Group", () => lane.Group ?? "", x => Chartmaker.main.SetItem(lane, "Group", x));
+        var dropdown = SpawnForm<FormEntryDropdown, object>("Group", () => lane.Group ?? "", x => {
+            Chartmaker.main.SetItem(lane, "Group", x); HierarchyPanel.main.UpdateHierarchy();
+        });
         foreach (LaneGroup p in Chartmaker.main.CurrentChart.Groups) dropdown.ValidValues.Add(p.Name, p.Name);
         dropdown.ValidValues.Add("", "<i>None</i>");
     }

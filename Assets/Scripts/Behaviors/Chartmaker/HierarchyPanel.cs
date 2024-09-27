@@ -24,6 +24,11 @@ public class HierarchyPanel : MonoBehaviour
     public RectTransform HolderParent;
     List<HierarchyItem> Items = new();
     List<HierarchyItemHolder> Holders = new();
+    [Space]
+    public TMP_InputField SearchField;
+    public Button SearchButton;
+    public Image SearchIcon;
+    public Image SearchClearIcon;
 
     Dictionary<string, HierarchyItem> GroupItems = new();
 
@@ -140,7 +145,7 @@ public class HierarchyPanel : MonoBehaviour
                 foreach (var style in chart.Pallete.LaneStyles)
                 {
                     HierarchyItem item = new () {
-                        Name = "ID " + index,
+                        Name = "Lane Style " + index,
                         Type = HierarchyItemType.LaneStyle,
                         Target = style,
                     };
@@ -151,7 +156,7 @@ public class HierarchyPanel : MonoBehaviour
                 foreach (var style in chart.Pallete.HitStyles)
                 {
                     HierarchyItem item = new () {
-                        Name = "ID " + index,
+                        Name = "Hit Style " + index,
                         Type = HierarchyItemType.HitStyle,
                         Target = style,
                     };
@@ -185,7 +190,8 @@ public class HierarchyPanel : MonoBehaviour
                 foreach (var lane in chart.Lanes)
                 {
                     HierarchyItem item = new () {
-                        Name = "Lane <alpha=#77>" + lane.LaneSteps[0].Offset + "~" + lane.LaneSteps[^1].Offset,
+                        Name = "Lane",
+                        Subname = lane.LaneSteps[0].Offset + "~" + lane.LaneSteps[^1].Offset,
                         Type = HierarchyItemType.Lane,
                         Target = lane,
                     };
@@ -201,28 +207,60 @@ public class HierarchyPanel : MonoBehaviour
     public void UpdateHolders () 
     {
         int count = 0;
-        void AddHolder(HierarchyItem item, int indent) 
+
+        if (string.IsNullOrWhiteSpace(SearchField.text)) 
         {
-            HierarchyItemHolder holder;
-            if (count >= Holders.Count) 
+            void AddHolder(HierarchyItem item, int indent) 
             {
-                holder = Instantiate(HolderSample, HolderParent);
-                Holders.Add(holder);
-            }
-            else 
-            {
-                holder = Holders[count];
-            }
-            count++;
+                HierarchyItemHolder holder;
+                if (count >= Holders.Count) 
+                {
+                    holder = Instantiate(HolderSample, HolderParent);
+                    Holders.Add(holder);
+                }
+                else 
+                {
+                    holder = Holders[count];
+                }
+                count++;
 
-            holder.SetItem(item, indent);
-            holder.Icon.sprite = Icons[(int)item.Type];
-            holder.ExpandButton.gameObject.SetActive(item.Children.Count > 0);
+                holder.SetItem(item, indent);
+                holder.Icon.sprite = Icons[(int)item.Type];
+                holder.ExpandButton.gameObject.SetActive(item.Children.Count > 0);
 
-            if (item.Expanded) foreach (var child in item.Children) AddHolder(child, indent + 1);
+                if (item.Expanded) foreach (var child in item.Children) AddHolder(child, indent + 1);
+            }
+
+            foreach (var item in Items) AddHolder(item, 0);
         }
+        else 
+        {
+            void AddHolder(HierarchyItem item) 
+            {
+                if (item.Name.ContainsInsensitive(SearchField.text))
+                {
+                    HierarchyItemHolder holder;
+                    if (count >= Holders.Count) 
+                    {
+                        holder = Instantiate(HolderSample, HolderParent);
+                        Holders.Add(holder);
+                    }
+                    else 
+                    {
+                        holder = Holders[count];
+                    }
+                    count++;
 
-        foreach (var item in Items) AddHolder(item, 0);
+                    holder.SetItem(item, 0);
+                    holder.Icon.sprite = Icons[(int)item.Type];
+                    holder.ExpandButton.gameObject.SetActive(false);
+                }
+
+                foreach (var child in item.Children) AddHolder(child);
+            }
+
+            foreach (var item in Items) AddHolder(item);
+        }
 
         while (count < Holders.Count) 
         {
@@ -253,6 +291,20 @@ public class HierarchyPanel : MonoBehaviour
     {
         item.Expanded = !item.Expanded;
         UpdateHolders();
+    }
+
+    public void OnSearchFieldUpdate() 
+    {
+        UpdateHolders();
+        bool active = !string.IsNullOrEmpty(SearchField.text);
+        SearchButton.interactable = active;
+        SearchIcon.gameObject.SetActive(!active);
+        SearchClearIcon.gameObject.SetActive(active);
+    }
+
+    public void ClearSearch() 
+    {
+        SearchField.text = "";
     }
     
     public void OnResizerDrag()
@@ -308,6 +360,7 @@ public enum HierarchyMode
 public class HierarchyItem
 {
     public string Name;
+    public string Subname;
     public HierarchyItemType Type;
     public object Target;
     public List<HierarchyItem> Children = new();

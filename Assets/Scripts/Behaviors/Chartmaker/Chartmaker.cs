@@ -399,6 +399,7 @@ public class Chartmaker : MonoBehaviour
         if (!HomeModal.main) ModalHolder.main.Spawn<HomeModal>();
 
         SongSource.time = 0;
+        SongSource.Stop();
         SetEditorActive(false);
         PlayerView.main.MainCamera.rect = new (0, 0, 1, 1);
         Resources.UnloadUnusedAssets();

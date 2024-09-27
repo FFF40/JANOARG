@@ -25,7 +25,7 @@ public class HierarchyItemHolder : MonoBehaviour
     public void SetItem(HierarchyItem item, int indent)
     {
         Target = item;
-        Text.text = item.Name;
+        Text.text = item.Name + " <alpha=#77>" + item.Subname;
         IndentBox.minWidth = 12 * indent + 24;
         UpdateExpand();
     }

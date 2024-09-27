@@ -20,7 +20,6 @@ public class RenderModal : Modal
     public bool PrefsDirty;
     [Space]
     public string OutputPath;
-    public string OutputType = "mp4";
     public Vector2 TimeRange;
 
     [Space]
@@ -38,6 +37,24 @@ public class RenderModal : Modal
     public bool IsAnimating;
 
     string FFmpegVersion;
+
+    RenderFormat[] formats = new [] {
+        new RenderFormat () {
+            Extension = "mp4",
+            VideoFormat = "h264",
+            AudioFormat = "mp3",
+        },
+        new RenderFormat () {
+            Extension = "mp4",
+            VideoFormat = "h264",
+            AudioFormat = "aac",
+        },
+        new RenderFormat () {
+            Extension = "webm",
+            VideoFormat = "vp8",
+            AudioFormat = "libvorbis",
+        },
+    };
 
     public void Awake()
     {
@@ -82,12 +99,10 @@ public class RenderModal : Modal
         SpawnForm<FormEntryString, string>("Output", () => OutputPath, x => {
             OutputPath = x; 
         });
-        var formatField = SpawnForm<FormEntryDropdown, object>("Format", () => OutputType, x => {
-            OutputType = (string)x; 
+        var formatField = SpawnForm<FormEntryDropdown, object>("Format", () => Prefs.OutputType, x => {
+            Prefs.OutputType = (int)x; 
         });
-        formatField.ValidValues.Add("mp4", ".mp4");
-        formatField.ValidValues.Add("mov", ".mov");
-        formatField.ValidValues.Add("webm", ".webm");
+        for (int a = 0; a < formats.Length; a++) formatField.ValidValues.Add(a, formats[a].ToString());
 
         SpawnForm<FormEntryHeader>("Time");
         var timeField = SpawnForm<FormEntryVector2, Vector2>("Range (sec)", () => TimeRange, x => {
@@ -208,6 +223,11 @@ public class RenderModal : Modal
                 getItem(  "300fps", 300)
             ), (RectTransform)fpsPresets.Button.transform);
         });
+
+        SpawnForm<FormEntryHeader>("Other");
+        SpawnForm<FormEntryBool, bool>("Open on Complete", () => Prefs.OpenOnComplete, x => {
+            Prefs.OpenOnComplete = x; PrefsDirty = true;
+        });
         
         LayoutRebuilder.ForceRebuildLayoutImmediate(FormHolder);
     }
@@ -229,8 +249,8 @@ public class RenderModal : Modal
         FFmpegDisclaimer.SetActive(false);
         BusyDisclaimer.SetActive(true);
         BusyLabel.text = "Checking FFmpeg...";
-        Task task = Task.Run(() => {
-            output = ffmpeg("-version");
+        Task task = Task.Run(async () => {
+            output = await ffmpeg("-version");
             Debug.Log(output);
             Match m = Regex.Match(output, @"^ffmpeg version ([^\s]+)");
             if (!m.Success) throw new Exception("Executable doesn't seem to be FFmpeg");
@@ -301,7 +321,7 @@ public class RenderModal : Modal
                 + $"-vframes {end - start + 1} -r {Prefs.FrameRate} " 
                 + "\"" + Path.Combine(fragmentsDir, $"{frag}.mp4") + $"\" ";
             // Debug.Log(args);
-            Task<string> task = ffmpegAsync(args);
+            Task<string> task = ffmpeg(args);
             yield return new WaitUntil(() => task.IsCompleted);
             for (int a = start; a <= end; a++) File.Delete(Path.Combine(framesDir, $"{a}.png"));
             busyFrags--;
@@ -325,6 +345,7 @@ public class RenderModal : Modal
             frames++;
             if (frames % 100 == 1 && frames != 1) 
             {
+                if (busyFrags >= 3) yield return new WaitUntil(() => busyFrags < 3);
                 StartCoroutine(makeFragment(frames - 100, frames - 1));
                 queuedFrames = frames;
             }
@@ -336,6 +357,14 @@ public class RenderModal : Modal
 
         Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Outputting video...";
         yield return new WaitUntil(() => busyFrags <= 0);
+        
+        RenderFormat format = formats[Prefs.OutputType];
+        string folder = Path.Combine(Application.dataPath, "../Renders");
+        Directory.CreateDirectory(folder);
+        string outputPath = Path.Combine(
+            folder, 
+            (string.IsNullOrWhiteSpace(OutputPath) ? DateTimeOffset.UtcNow.ToUnixTimeSeconds() : OutputPath) + "." + format.Extension
+        );
 
         using(var stream = File.OpenWrite(Path.Combine(sessionDir, $"demux.txt")))
         using(var writer = new StreamWriter(stream))
@@ -343,22 +372,17 @@ public class RenderModal : Modal
             for (int a = 1; a < frags; a++) writer.WriteLine("file '" + Path.Combine(fragmentsDir, $"{a}.mp4") + "'");
         }
         {
-            string folder = Path.Combine(Application.dataPath, "../Renders");
-            Directory.CreateDirectory(folder);
-            string path = Path.Combine(
-                folder, 
-                (string.IsNullOrWhiteSpace(OutputPath) ? DateTimeOffset.UtcNow.ToUnixTimeSeconds() : OutputPath) + "." + OutputType
-            );
             string args = 
                 $" -f concat -safe 0 " 
                 + "-i \"" + Path.Combine(sessionDir, $"demux.txt") + "\" "
                 + $"-ss {TimeRange.x} -t {TimeRange.y - TimeRange.x} " 
                 + "-i \"" + Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.ClipPath) + "\" "
-                + $"-r {Prefs.FrameRate} "
-                + "\"" + path + $"\" ";
+                + $"-r {Prefs.FrameRate} -vcodec {format.VideoFormat} -acodec {format.AudioFormat} "
+                + "\"" + outputPath + $"\" ";
             // Debug.Log(args);
-            Task<string> task = ffmpegAsync(args);
+            Task<string> task = ffmpeg(args);
             yield return new WaitUntil(() => task.IsCompleted);
+            Debug.Log(task.Result);
         }
         Directory.Delete(framesDir, true);
         Directory.Delete(fragmentsDir, true);
@@ -370,17 +394,18 @@ public class RenderModal : Modal
         Destroy(rtex);
         Close();
         Chartmaker.main.Loader.SetActive(false);
+        if (Prefs.OpenOnComplete) Application.OpenURL("file://" + outputPath);
         IsAnimating = false;
     }
-
-    string cmd(string file, string args) 
+    async Task<string> cmd(string file, string args) 
     {
         ProcessStartInfo startInfo = new(file)
         {
             Arguments = args,
             UseShellExecute = false,
             RedirectStandardOutput = true,
-            CreateNoWindow = true
+            RedirectStandardError = true,
+            CreateNoWindow = false
         };
 
         Process process = new()
@@ -389,18 +414,33 @@ public class RenderModal : Modal
         };
         process.Start();
 
-        process.WaitForExit();
+        string output = "";
+
+        await Task.WhenAll(
+            Task.Run(() => {
+                string line = "";
+                while ((line = process.StandardOutput.ReadLine()) != null)
+                {
+                    // Debug.Log(line);
+                    output += line;
+                }     
+            }),
+            Task.Run(() => {
+                string line = "";
+                while ((line = process.StandardError.ReadLine()) != null)
+                {
+                    // Debug.Log(line);
+                    output += line;
+                }     
+            })
+        );
         
-        return process.StandardOutput.ReadToEnd();
+        return output;
     }
 
-    string ffmpeg(string args) 
+    async Task<string> ffmpeg(string args) 
     {
-        return cmd(Prefs.FFmpegPath, args);
-    }
-    async Task<string> ffmpegAsync(string args)
-    {
-        return await Task<string>.Run(() => cmd(Prefs.FFmpegPath, args));
+        return await cmd(Prefs.FFmpegPath, args);
     }
 
     T SpawnForm<T>(string title = "") where T : FormEntry
@@ -414,22 +454,39 @@ public class RenderModal : Modal
 public class RenderPrefs 
 {
     public string FFmpegPath;
+    public int OutputType;
     public Vector2Int Resolution = new(1024, 800);
     public float FrameRate = 30;
+    public bool OpenOnComplete = true;
 
     public void Load(Storage storage)
     {
         FFmpegPath = storage.Get("RD:FFmpegPath", FFmpegPath);
+        OutputType = storage.Get("RD:OutputType", OutputType);
         Resolution.x = storage.Get("RD:Resolution.X", Resolution.x);
         Resolution.y = storage.Get("RD:Resolution.Y", Resolution.y);
         FrameRate = storage.Get("RD:FrameRate", FrameRate);
+        OpenOnComplete = storage.Get("RD:OpenOnComplete", OpenOnComplete);
     }
 
     public void Save(Storage storage)
     {
         storage.Set("RD:FFmpegPath", FFmpegPath);
+        storage.Set("RD:OutputType", OutputType);
         storage.Set("RD:Resolution.X", Resolution.x);
         storage.Set("RD:Resolution.Y", Resolution.y);
         storage.Set("RD:FrameRate", FrameRate);
+        storage.Set("RD:OpenOnComplete", OpenOnComplete);
+    }
+}
+
+public class RenderFormat {
+    public string Extension;
+    public string AudioFormat;
+    public string VideoFormat;
+
+    public override string ToString() 
+    {
+        return $".{Extension} (audio {AudioFormat}, video {VideoFormat})";
     }
 }

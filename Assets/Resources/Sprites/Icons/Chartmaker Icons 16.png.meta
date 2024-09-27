@@ -1067,6 +1067,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Search
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 416
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40eb91cbc65b477438cbbbcb03c94203
+      internalID: -2128552433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Filter
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 416
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4a6c22f7d1f6b54ea58749111011ff3
+      internalID: -2139277041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -1093,6 +1135,7 @@ TextureImporter:
       Drive: 506822628
       Error: -900882941
       File: 1622769349
+      Filter: -2139277041
       Folder: -117557889
       Github Icon: 1533055934
       Group: 441202879
@@ -1114,6 +1157,7 @@ TextureImporter:
       Playable Song: 2108899617
       Reddit Icon: -1754122059
       Redo: -1018057754
+      Search: -2128552433
       Separator: -1993552242
       Speed: -401747491
       Twitter Icon: -654048039

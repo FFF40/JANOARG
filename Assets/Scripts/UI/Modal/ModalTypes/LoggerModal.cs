@@ -20,6 +20,7 @@ public class LoggerModal : Modal
     public LoggerEntry EntrySample;
     public RectTransform EntryHolder;
     public RectTransform EntryViewport;
+    public RectTransform EntryScroll;
     public List<LoggerEntry> Entries;
 
     public Toggle InfoToggle;
@@ -75,7 +76,11 @@ public class LoggerModal : Modal
             item.SetItem(entry, offset, active, this);
             if (active) 
             {
-                if (item.rectTransform.rect.height == itemHeight) LayoutRebuilder.ForceRebuildLayoutImmediate(item.rectTransform);
+                if (item.rectTransform.rect.height == itemHeight) 
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(item.rectTransform);
+                    LayoutRebuilder.MarkLayoutForRebuild(EntryScroll);
+                }
                 activeEntryHeight = item.rectTransform.rect.height;
             }
             offset += active ? activeEntryHeight : itemHeight;
@@ -126,6 +131,7 @@ public class LoggerModal : Modal
         activeEntry = entry;
         item.SetItem(entry, item.rectTransform.rect.y, true, this);
         LayoutRebuilder.ForceRebuildLayoutImmediate(item.rectTransform);
+        LayoutRebuilder.MarkLayoutForRebuild(EntryScroll);
         activeEntryHeight = item.rectTransform.rect.height;
         
         UpdateLogger();
