@@ -20,10 +20,10 @@ public class HierarchyPanel : MonoBehaviour
     [Space]
     public Sprite[] Icons;
     [Space]
-    public HierarchyItemHolder HolderSample;
+    public InspectorFilterItem HolderSample;
     public RectTransform HolderParent;
     List<HierarchyItem> Items = new();
-    List<HierarchyItemHolder> Holders = new();
+    List<InspectorFilterItem> Holders = new();
     [Space]
     public TMP_InputField SearchField;
     public Button SearchButton;
@@ -212,23 +212,29 @@ public class HierarchyPanel : MonoBehaviour
         {
             void AddHolder(HierarchyItem item, int indent) 
             {
-                HierarchyItemHolder holder;
-                if (count >= Holders.Count) 
-                {
-                    holder = Instantiate(HolderSample, HolderParent);
-                    Holders.Add(holder);
-                }
-                else 
-                {
-                    holder = Holders[count];
-                }
-                count++;
+                
+                if (
+                    HierarchyFiltersPanel.main.GetVisibility(item.Type, HierarchyContext.Hierarchy)
+                )
+                    {
+                    InspectorFilterItem holder;
+                    if (count >= Holders.Count) 
+                    {
+                        holder = Instantiate(HolderSample, HolderParent);
+                        Holders.Add(holder);
+                    }
+                    else 
+                    {
+                        holder = Holders[count];
+                    }
+                    count++;
 
-                holder.SetItem(item, indent);
-                holder.Icon.sprite = Icons[(int)item.Type];
-                holder.ExpandButton.gameObject.SetActive(item.Children.Count > 0);
+                    holder.SetItem(item, indent);
+                    holder.Icon.sprite = Icons[(int)item.Type];
+                    holder.ExpandButton.gameObject.SetActive(item.Children.Count > 0);
 
-                if (item.Expanded) foreach (var child in item.Children) AddHolder(child, indent + 1);
+                    if (item.Expanded) foreach (var child in item.Children) AddHolder(child, indent + 1);
+                }
             }
 
             foreach (var item in Items) AddHolder(item, 0);
@@ -237,9 +243,12 @@ public class HierarchyPanel : MonoBehaviour
         {
             void AddHolder(HierarchyItem item) 
             {
-                if (item.Name.ContainsInsensitive(SearchField.text))
+                if (
+                    item.Name.ContainsInsensitive(SearchField.text) 
+                    && HierarchyFiltersPanel.main.GetVisibility(item.Type, HierarchyContext.SearchResult)
+                )
                 {
-                    HierarchyItemHolder holder;
+                    InspectorFilterItem holder;
                     if (count >= Holders.Count) 
                     {
                         holder = Instantiate(HolderSample, HolderParent);
@@ -366,6 +375,12 @@ public class HierarchyItem
     public List<HierarchyItem> Children = new();
     
     public bool Expanded;
+}
+
+public enum HierarchyContext 
+{
+    Hierarchy,
+    SearchResult
 }
 
 public enum HierarchyItemType 

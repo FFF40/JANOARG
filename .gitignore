@@ -1,15 +1,15 @@
-Assets/Resources/Songs/*
-Assets/Resources/Songs~/
-Recordings/
-Chartmaker/
-Songs/
-Renders/
-Build/
-Library/
-Logs/
-UserSettings/
-Temp/
-obj/
+/Assets/Resources/Songs/*
+/Assets/Resources/Songs~/
+/Recordings/
+/Chartmaker/
+/Songs/
+/Renders/
+/Build/
+/Library/
+/Logs/
+/UserSettings/
+/Temp/
+/obj/
 
 .vscode/
 .vs/
@@ -20,3 +20,5 @@ obj/
 *.Thumbs.db
 *.csproj
 *.sln
+
+

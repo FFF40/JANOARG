@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class PopupPanel : MonoBehaviour
 {
+    public RectTransform HitTestRect;
     Rect worldRect;
 
     public void Start()
@@ -18,7 +19,8 @@ public class PopupPanel : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)) 
         {
-            if (!RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, Input.mousePosition, null))
+            RectTransform rt = HitTestRect ? HitTestRect : (RectTransform)transform;
+            if (!RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, null))
             {
                 Close();
             }

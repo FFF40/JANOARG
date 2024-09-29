@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HierarchyItemHolder : MonoBehaviour
+public class InspectorFilterItem : MonoBehaviour
 {
     public Button Button;
     public Image Icon;
