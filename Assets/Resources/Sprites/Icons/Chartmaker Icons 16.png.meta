@@ -1118,7 +1118,7 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -1126,6 +1126,27 @@ TextureImporter:
       bones: []
       spriteID: 22f9872eff0306c40b351e6586b9b26a
       internalID: -206182379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pencil
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 416
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 66df052cc79d09c48bac347b0983637e
+      internalID: -48574982
       vertices: []
       indices: 
       edges: []
@@ -1176,6 +1197,7 @@ TextureImporter:
       Palette: -844261610
       Panoram: -170275677
       Paste: -1684136540
+      Pencil: -48574982
       Playable Song: 2108899617
       Reddit Icon: -1754122059
       Redo: -1018057754

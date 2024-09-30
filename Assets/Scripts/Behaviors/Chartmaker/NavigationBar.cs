@@ -111,6 +111,8 @@ public class NavigationBar : MonoBehaviour
             new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListAction("Paste <i>" + (Chartmaker.main.CanPaste() ? Chartmaker.GetItemName(Chartmaker.main.ClipboardItem) : ""), Chartmaker.main.Paste, KeyOf("ED:Paste"), icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
+            new ContextMenuListSeparator(),
+            new ContextMenuListAction("Rename", () => HierarchyPanel.main.RenameCurrent(), KeyOf("ED:Rename"), _enabled: Chartmaker.main.CanRename()),
             new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), _enabled: Chartmaker.main.CanCopy()),
             new ContextMenuListSeparator(),
             new ContextMenuListSublist("Timeline", 

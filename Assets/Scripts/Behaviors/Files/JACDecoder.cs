@@ -250,21 +250,24 @@ public class JACDecoder
                     }
                     else if (currentObject is LaneStyle laneStyle)
                     {
-                             if (key == "Lane Material")   laneStyle.LaneMaterial = value;
+                             if (key == "Name")            laneStyle.Name = value;
+                        else if (key == "Lane Material")   laneStyle.LaneMaterial = value;
                         else if (key == "Lane Target")     laneStyle.LaneColorTarget = value;
                         else if (key == "Judge Material")  laneStyle.JudgeMaterial = value;
                         else if (key == "Judge Target")    laneStyle.JudgeColorTarget = value;
                     }
                     else if (currentObject is HitStyle hitStyle)
                     {
-                             if (key == "Main Material")       hitStyle.MainMaterial = value;
+                             if (key == "Name")                hitStyle.Name = value;
+                        else if (key == "Main Material")       hitStyle.MainMaterial = value;
                         else if (key == "Main Target")         hitStyle.MainColorTarget = value;
                         else if (key == "Hold Tail Material")  hitStyle.HoldTailMaterial = value;
                         else if (key == "Hold Tail Target")    hitStyle.HoldTailColorTarget = value;
                     }
                     else if (currentObject is Lane lane)
                     {
-                             if (key == "Group")  lane.Group = value;
+                             if (key == "Name")   lane.Name = value;
+                        else if (key == "Group")  lane.Group = value;
                     }
                 }
                 else if (currentObject?.ToString() == "version")

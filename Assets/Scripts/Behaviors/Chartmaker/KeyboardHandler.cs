@@ -60,6 +60,12 @@ public class KeyboardHandler : MonoBehaviour
             Keybind = new Keybind(KeyCode.V, EventModifiers.Command),
             Invoke = () => Chartmaker.main.Paste(),
         }},
+        { "ED:Rename", new KeybindAction {
+            Category = "Edit",
+            Name = "Rename",
+            Keybind = new Keybind(KeyCode.F2),
+            Invoke = () =>  HierarchyPanel.main.RenameCurrent(),
+        }},
         { "ED:Delete", new KeybindAction {
             Category = "Edit",
             Name = "Delete",

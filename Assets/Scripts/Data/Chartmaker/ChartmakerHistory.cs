@@ -446,7 +446,6 @@ public class ChartmakerMoveHitObjectEndAction : ChartmakerMoveAction<HitObject>
 
 public class ChartmakerGroupRenameAction: IChartmakerAction
 {
-    public Chart Target;
     public string From;
     public string To;
 
@@ -457,12 +456,13 @@ public class ChartmakerGroupRenameAction: IChartmakerAction
 
     public void Do(string from, string to) 
     {
-        foreach (LaneGroup group in Target.Groups)
+        Chart target = Chartmaker.main.CurrentChart;
+        foreach (LaneGroup group in target.Groups)
         {
             if (group.Name == from) group.Name = to;
             if (group.Group == from) group.Group = to;
         }
-        foreach (Lane lane in Target.Lanes)
+        foreach (Lane lane in target.Lanes)
         {
             if (lane.Group == from) lane.Group = to;
         }

@@ -104,6 +104,7 @@ public class JACEncoder
         string str = "\n" + indent + "+ LaneStyle"
             + " " + EncodeColor(style.LaneColor)
             + " " + EncodeColor(style.JudgeColor);
+        if (!string.IsNullOrEmpty(style.Name)) str += "\n" + indent2 + "Name: " + style.Name;
             
         string lanePath = style.LaneMaterial;
         string judgePath = style.JudgeMaterial;
@@ -132,6 +133,7 @@ public class JACEncoder
             + " " + EncodeColor(style.HoldTailColor)
             + " " + EncodeColor(style.NormalColor)
             + " " + EncodeColor(style.CatchColor);
+        if (!string.IsNullOrEmpty(style.Name)) str += "\n" + indent2 + "Name: " + style.Name;
             
         string mainPath = style.MainMaterial;
         string holdPath = style.HoldTailMaterial;
@@ -160,6 +162,7 @@ public class JACEncoder
             + " " + EncodeVector(lane.Position)
             + " " + EncodeVector(lane.Rotation)
             + " " + lane.StyleIndex.ToString(CultureInfo.InvariantCulture);
+        if (!string.IsNullOrEmpty(lane.Name)) str += "\n" + indent2 + "Name: " + lane.Name;
 
         if (!string.IsNullOrEmpty(lane.Group)) 
             str += "\n" + indent2 + "Group: " + lane.Group;

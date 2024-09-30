@@ -308,42 +308,6 @@ public class InspectorPanel : MonoBehaviour
                     Chartmaker.main.SetItem(pallete, "InterfaceColor", Chartmaker.main.CurrentSong.InterfaceColor);
                     fgColor.Start();
                 });
-
-                var laneStyles = SpawnForm<FormEntryListHeader>("Lane Styles");
-                laneStyles.Button.onClick.AddListener(() => {
-                    Chartmaker.main.AddItem(pallete.LaneStyles[0].DeepClone());
-                });
-                int index = 0;
-                foreach (LaneStyle style in pallete.LaneStyles)
-                {
-                    LaneStyle Style = style;
-                    var btn = SpawnForm<FormEntryListItem>("ID " + index);
-                    btn.Button.onClick.AddListener(() => {
-                        SetObject(Style);
-                    });
-                    btn.RemoveButton.onClick.AddListener(() => {
-                        Chartmaker.main.DeleteItem(Style, false);
-                    });
-                    index++;
-                }
-
-                var hitStyles = SpawnForm<FormEntryListHeader>("Hit Styles");
-                hitStyles.Button.onClick.AddListener(() => {
-                    Chartmaker.main.AddItem(pallete.HitStyles[0].DeepClone());
-                });
-                index = 0;
-                foreach (HitStyle style in pallete.HitStyles)
-                {
-                    HitStyle Style = style;
-                    var btn = SpawnForm<FormEntryListItem>("ID " + index);
-                    btn.Button.onClick.AddListener(() => {
-                        SetObject(Style);
-                    });
-                    btn.RemoveButton.onClick.AddListener(() => {
-                        Chartmaker.main.DeleteItem(Style, false);
-                    });
-                    index++;
-                }
             }
             else if (CurrentObject is LaneStyle laneStyle)
             {
@@ -553,14 +517,22 @@ public class InspectorPanel : MonoBehaviour
     public void MakeLaneStyleEntry(Lane lane)
     {
         var dropdown = SpawnForm<FormEntryDropdown, object>("Style Index", () => lane.StyleIndex, x => Chartmaker.main.SetItem(lane, "StyleIndex", x));
-        for (int a = 0; a < Chartmaker.main.CurrentChart.Pallete.LaneStyles.Count; a++) dropdown.ValidValues.Add(a, "ID " + a);
+        for (int a = 0; a < Chartmaker.main.CurrentChart.Pallete.LaneStyles.Count; a++) 
+        {
+            var item = Chartmaker.main.CurrentChart.Pallete.LaneStyles[a];
+            dropdown.ValidValues.Add(a, string.IsNullOrWhiteSpace(item.Name) ? "Lane Style " + a : item.Name);
+        }
         dropdown.ValidValues.Add(-1, "<i>Invisible</i>");
     }
 
     public void MakeHitStyleEntry(HitObject hit)
     {
         var dropdown = SpawnForm<FormEntryDropdown, object>("Style Index", () => hit.StyleIndex, x => Chartmaker.main.SetItem(hit, "StyleIndex", x));
-        for (int a = 0; a < Chartmaker.main.CurrentChart.Pallete.HitStyles.Count; a++) dropdown.ValidValues.Add(a, "ID " + a);
+        for (int a = 0; a < Chartmaker.main.CurrentChart.Pallete.HitStyles.Count; a++) 
+        {
+            var item = Chartmaker.main.CurrentChart.Pallete.HitStyles[a];
+            dropdown.ValidValues.Add(a, string.IsNullOrWhiteSpace(item.Name) ? "Hit Style " + a : item.Name);
+        }
         dropdown.ValidValues.Add(-1, "<i>Invisible</i>");
     }
 
@@ -802,7 +774,7 @@ public class InspectorPanel : MonoBehaviour
         ), (RectTransform)ExtraModesButton.transform, ContextMenuDirection.Left); 
     }
 
-    public string GetNewGroupName(string name) 
+    public string GetNewGroupName(string name, LaneGroup exclude = null) 
     {
         int index = 0;
         name = name.Trim();
@@ -815,7 +787,11 @@ public class InspectorPanel : MonoBehaviour
 
         string newName() => index > 0 ? name + " " + index : name;
 
-        while (Chartmaker.main.CurrentChart.Groups.FindIndex(x => x.Name == newName()) >= 0) index++;
+        int foundIndex = 0;
+        while (
+           (foundIndex = Chartmaker.main.CurrentChart.Groups.FindIndex(x => x.Name == newName())) >= 0
+           && (foundIndex < 0 || Chartmaker.main.CurrentChart.Groups[foundIndex] != exclude)
+        ) index++;
         return newName();
     }
     

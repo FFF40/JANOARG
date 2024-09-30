@@ -662,6 +662,14 @@ public class Chartmaker : MonoBehaviour
         return ClipboardItem != null;
     }
 
+    public bool CanRename()
+    {
+        if (InspectorPanel.main.CurrentTimestamp?.Count > 0) return false;
+        object currentItem = InspectorPanel.main.CurrentObject;
+        return currentItem is (LaneGroup or Lane or HitStyle or LaneStyle);
+    }
+
+
     public void OnClipboardUpdate()
     {
         TimelinePanel tl = TimelinePanel.main;

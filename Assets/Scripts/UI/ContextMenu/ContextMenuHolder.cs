@@ -81,4 +81,5 @@ public enum ContextMenuDirection
     Right,
     Up,
     Down,
+    Cursor,
 }

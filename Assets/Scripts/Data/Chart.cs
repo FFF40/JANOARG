@@ -204,6 +204,7 @@ public class Pallete : IStoryboardable, IDeepClonable<Pallete>  {
 [System.Serializable]
 public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle> 
 {
+    public string Name;
 
     public string LaneMaterial = "Default";
     public string LaneColorTarget = "_Color";
@@ -291,6 +292,8 @@ public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle>
 
 [System.Serializable]
 public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
+
+    public string Name;
 
     public string MainMaterial = "Default";
     public string MainColorTarget = "_Color";
@@ -482,6 +485,8 @@ public class LanePosition
 [System.Serializable]
 public class Lane : IStoryboardable, IDeepClonable<Lane>
 {
+    public string Name;
+    
     public List<HitObject> Objects = new List<HitObject>();
     public List<LaneStep> LaneSteps = new List<LaneStep>();
     [FormerlySerializedAs("Offset")]

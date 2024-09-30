@@ -130,7 +130,23 @@ public class ContextMenu : MonoBehaviour
 
         bool hasBeenFunnied = false;
         funny:
-        if (direction == ContextMenuDirection.Down) 
+        if (direction == ContextMenuDirection.Cursor) 
+        {
+            rt.anchoredPosition = new Vector2(
+                Mathf.Round(Input.mousePosition.x),
+                Mathf.Round(Input.mousePosition.y)
+            ) + offset;
+            if (rt.anchoredPosition.x + rt.sizeDelta.x > Screen.width) 
+            {
+                rt.anchoredPosition += Vector2.left * rt.rect.width;
+                Debug.Log(rt.rect.width - rect.width);
+            }
+            if (rt.anchoredPosition.y - rt.sizeDelta.y < 0) 
+            {
+                rt.anchoredPosition += Vector2.up * rt.rect.height;
+            }
+        }
+        else if (direction == ContextMenuDirection.Down) 
         {
             rt.anchoredPosition = new Vector2(
                 Mathf.Round(rect.xMin),

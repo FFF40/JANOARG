@@ -1795,6 +1795,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed56d101c9adff4da30e29819033ffa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HitTestRect: {fileID: 0}
 --- !u!114 &59132111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17957,7 +17958,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 28}
+  m_SizeDelta: {x: 0, y: 30}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &855518142
 MonoBehaviour:
@@ -17972,7 +17973,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 855518143}
-  ID: Content2
+  ID: Background2
 --- !u!114 &855518143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22011,8 +22012,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3761454}
   m_HandleRect: {fileID: 3761453}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.36363637
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -35335,9 +35336,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Clear
-
-'
+  m_text: Reset
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
   m_sharedMaterial: {fileID: -6645923801699503097, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
@@ -36238,6 +36237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed56d101c9adff4da30e29819033ffa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HitTestRect: {fileID: 718709543}
 --- !u!222 &1715776260
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -36437,7 +36437,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 0
     m_Right: 0
-    m_Top: 34
+    m_Top: 30
     m_Bottom: 10
   m_ChildAlignment: 0
   m_Spacing: 3
@@ -43049,7 +43049,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: 0
-  m_PreferredHeight: 16
+  m_PreferredHeight: 40
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -48452,6 +48452,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed56d101c9adff4da30e29819033ffa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HitTestRect: {fileID: 0}
 --- !u!114 &3896195485413425110
 MonoBehaviour:
   m_ObjectHideFlags: 0

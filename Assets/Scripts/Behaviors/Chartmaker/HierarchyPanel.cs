@@ -20,10 +20,10 @@ public class HierarchyPanel : MonoBehaviour
     [Space]
     public Sprite[] Icons;
     [Space]
-    public InspectorFilterItem HolderSample;
+    public HierarchyItemHolder HolderSample;
     public RectTransform HolderParent;
     List<HierarchyItem> Items = new();
-    List<InspectorFilterItem> Holders = new();
+    List<HierarchyItemHolder> Holders = new();
     [Space]
     public TMP_InputField SearchField;
     public Button SearchButton;
@@ -145,7 +145,7 @@ public class HierarchyPanel : MonoBehaviour
                 foreach (var style in chart.Pallete.LaneStyles)
                 {
                     HierarchyItem item = new () {
-                        Name = "Lane Style " + index,
+                        Name = string.IsNullOrWhiteSpace(style.Name) ? ("Lane Style " + index) : style.Name,
                         Type = HierarchyItemType.LaneStyle,
                         Target = style,
                     };
@@ -156,7 +156,7 @@ public class HierarchyPanel : MonoBehaviour
                 foreach (var style in chart.Pallete.HitStyles)
                 {
                     HierarchyItem item = new () {
-                        Name = "Hit Style " + index,
+                        Name = string.IsNullOrWhiteSpace(style.Name) ? ("Hit Style " + index) : style.Name,
                         Type = HierarchyItemType.HitStyle,
                         Target = style,
                     };
@@ -168,6 +168,7 @@ public class HierarchyPanel : MonoBehaviour
                 worldItem.Children.Clear();
 
                 // Add lane groups
+                Dictionary<string, HierarchyItem> newGroupItems = new ();
                 foreach (var group in chart.Groups)
                 {
                     HierarchyItem item = new () {
@@ -176,21 +177,23 @@ public class HierarchyPanel : MonoBehaviour
                         Target = group,
                         Expanded = GroupItems.ContainsKey(group.Name) ? GroupItems[group.Name].Expanded : false,
                     };
-                    GroupItems[group.Name] = item;
+                    newGroupItems[group.Name] = item;
                 }
+                GroupItems = newGroupItems;
                 var keys = GroupItems.Keys.ToList();
+                int keyindex = 0;
                 foreach (var key in keys)
                 {
                     LaneGroup data = (LaneGroup)GroupItems[key].Target;
-                    if (!chart.Groups.Contains(data)) GroupItems.Remove(key);
-                    else if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(GroupItems[key]);
+                    if (!string.IsNullOrEmpty(data.Group) && GroupItems.ContainsKey(data.Group)) GroupItems[data.Group].Children.Add(GroupItems[key]);
                     else worldItem.Children.Add(GroupItems[key]);
+                    keyindex++;
                 }
                 // Add lanes
                 foreach (var lane in chart.Lanes)
                 {
                     HierarchyItem item = new () {
-                        Name = "Lane",
+                        Name = string.IsNullOrWhiteSpace(lane.Name) ? "Lane" : lane.Name,
                         Subname = lane.LaneSteps[0].Offset + "~" + lane.LaneSteps[^1].Offset,
                         Type = HierarchyItemType.Lane,
                         Target = lane,
@@ -217,7 +220,7 @@ public class HierarchyPanel : MonoBehaviour
                     HierarchyFiltersPanel.main.GetVisibility(item.Type, HierarchyContext.Hierarchy)
                 )
                     {
-                    InspectorFilterItem holder;
+                    HierarchyItemHolder holder;
                     if (count >= Holders.Count) 
                     {
                         holder = Instantiate(HolderSample, HolderParent);
@@ -248,7 +251,7 @@ public class HierarchyPanel : MonoBehaviour
                     && HierarchyFiltersPanel.main.GetVisibility(item.Type, HierarchyContext.SearchResult)
                 )
                 {
-                    InspectorFilterItem holder;
+                    HierarchyItemHolder holder;
                     if (count >= Holders.Count) 
                     {
                         holder = Instantiate(HolderSample, HolderParent);
@@ -296,10 +299,38 @@ public class HierarchyPanel : MonoBehaviour
         if (item.Target != null) InspectorPanel.main.SetObject(item.Target);
     }
 
-    public void ToggleExpand(HierarchyItem item) 
+    public void RightClickSelect(HierarchyItem item, HierarchyItemHolder holder) 
     {
-        item.Expanded = !item.Expanded;
-        UpdateHolders();
+        if (item.Target != null) 
+        {
+            static string KeyOf(string id) => KeyboardHandler.main.Keybindings[id].Keybind.ToString();
+
+            InspectorPanel.main.SetObject(item.Target);
+            ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+                new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), 
+                    icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
+                new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), 
+                    icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
+                new ContextMenuListAction("Paste <i>" + (Chartmaker.main.CanPaste() ? Chartmaker.GetItemName(Chartmaker.main.ClipboardItem) : ""), Chartmaker.main.Paste, KeyOf("ED:Paste"), 
+                    icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
+                new ContextMenuListSeparator(),
+                new ContextMenuListAction("Rename", () => Rename(holder), KeyOf("ED:Rename"),
+                    _enabled: Chartmaker.main.CanRename()),
+                new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), 
+                    _enabled: Chartmaker.main.CanCopy())
+            ), (RectTransform)holder.transform, ContextMenuDirection.Cursor);
+        }
+    }
+
+    public void RenameCurrent() 
+    {
+        HierarchyItemHolder holder = Holders.Find(x => x.SelectedBackground.activeSelf);
+        if (holder) holder.Rename();
+    }
+
+    public void Rename(HierarchyItemHolder holder) 
+    {
+        holder.Rename();
     }
 
     public void OnSearchFieldUpdate() 
@@ -314,6 +345,12 @@ public class HierarchyPanel : MonoBehaviour
     public void ClearSearch() 
     {
         SearchField.text = "";
+    }
+
+    public void ToggleExpand(HierarchyItem item) 
+    {
+        item.Expanded = !item.Expanded;
+        UpdateHolders();
     }
     
     public void OnResizerDrag()

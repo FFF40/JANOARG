@@ -5,6 +5,12 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.UI;
+using System.Reflection;
+#endif
+
 public class RightClickButton : Button
 {
     public UnityEvent onRightClick;
@@ -18,3 +24,16 @@ public class RightClickButton : Button
         }
     }
 }
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(RightClickButton), true)]
+[CanEditMultipleObjects]
+public class RightClickButtonInspector : ButtonEditor {
+    public override void OnInspectorGUI(){
+        base.OnInspectorGUI();
+        serializedObject.Update();
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("onRightClick"));
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+#endif
