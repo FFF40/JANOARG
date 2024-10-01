@@ -17,21 +17,27 @@ public class TimelineItem : Selectable, IPointerDownHandler, IPointerClickHandle
     public virtual new void OnPointerDown(PointerEventData eventData)
     {
         base.OnPointerDown(eventData);
-        if (eventData.button != PointerEventData.InputButton.Left)
-            return;
-
-        IList list = (InspectorPanel.main.CurrentTimestamp?.Count ?? 0) > 0 ? InspectorPanel.main.CurrentTimestamp :
-            InspectorPanel.main.CurrentObject is IList li && li.Contains(Item) ? li : null;
-        if (list != null) TimelinePanel.main.BeginDragItem(list, eventData);
-        else TimelinePanel.main.BeginDragItem(new List<object>() { Item }, eventData);
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            IList list = (InspectorPanel.main.CurrentTimestamp?.Count ?? 0) > 0 ? InspectorPanel.main.CurrentTimestamp :
+                InspectorPanel.main.CurrentObject is IList li && li.Contains(Item) ? li : null;
+            if (list != null) TimelinePanel.main.BeginDragItem(list, eventData);
+            else TimelinePanel.main.BeginDragItem(new List<object>() { Item }, eventData);
+        }
     }
 
     public virtual void OnPointerClick(PointerEventData eventData)
     {
         if (TimelinePanel.main.isDragged) return;
-        if (eventData.button != PointerEventData.InputButton.Left) return;
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            SelectItem();
+        }
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            RightClickItem();
+        }
 
-        SelectItem();
     }
 
     public void SetItem(object item, Lane lane = null)
@@ -52,5 +58,10 @@ public class TimelineItem : Selectable, IPointerDownHandler, IPointerClickHandle
             if (Lane != null) InspectorPanel.main.SetObject(Lane);
             InspectorPanel.main.SetObject(Item);
         }
+    }
+
+    public void RightClickItem()
+    {
+        TimelinePanel.main.RightClickItem(this);
     }
 }

@@ -1603,6 +1603,25 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             return cm.SongSource.time;
         }
     }
+
+    public void RightClickItem(TimelineItem item)
+    {
+        static string KeyOf(string id) => KeyboardHandler.main.Keybindings[id].Keybind.ToString();
+
+        if (item.Lane != null) InspectorPanel.main.SetObject(item.Lane);
+        InspectorPanel.main.SetObject(item.Item);
+        ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+            new ContextMenuListAction("Cut", Chartmaker.main.Cut, KeyOf("ED:Cut"), 
+                icon: "Cut", _enabled: Chartmaker.main.CanCopy()),
+            new ContextMenuListAction("Copy", Chartmaker.main.Copy, KeyOf("ED:Copy"), 
+                icon: "Copy", _enabled: Chartmaker.main.CanCopy()),
+            new ContextMenuListAction("Paste <i>" + (Chartmaker.main.CanPaste() ? Chartmaker.GetItemName(Chartmaker.main.ClipboardItem) : ""), Chartmaker.main.Paste, KeyOf("ED:Paste"), 
+                icon: "Paste", _enabled: Chartmaker.main.CanPaste()),
+            new ContextMenuListSeparator(),
+            new ContextMenuListAction("Delete", () => KeyboardHandler.main.Keybindings["ED:Delete"].Invoke(), KeyOf("ED:Delete"), 
+                _enabled: Chartmaker.main.CanCopy())
+        ), (RectTransform)item.transform, ContextMenuDirection.Cursor);
+    }
 }
 
 public enum TimelineMode
