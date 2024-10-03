@@ -12,7 +12,7 @@ public class ContextMenuButton : Button
 
     Coroutine currentRoutine;
 
-    IEnumerator hoverRoutine()
+    IEnumerator HoverRoutine()
     {
         yield return new WaitForSecondsRealtime(hoverDelay);
         onHover.Invoke();
@@ -21,7 +21,7 @@ public class ContextMenuButton : Button
     public override void OnPointerEnter(PointerEventData eventData)
     {
         base.OnPointerEnter(eventData);
-        currentRoutine = StartCoroutine(hoverRoutine());
+        currentRoutine = StartCoroutine(HoverRoutine());
     }
 
     public override void OnPointerExit(PointerEventData eventData)

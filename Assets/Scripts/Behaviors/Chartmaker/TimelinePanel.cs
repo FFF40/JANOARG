@@ -1524,7 +1524,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         {
             if (CurrentMode == TimelineMode.HitObjects)
             {
-                float zoom = Mathf.Pow(2, ResizeVelocity * eventData.scrollDelta.y / 10f);
+                float zoom = Mathf.Pow(2, ResizeVelocity * -eventData.scrollDelta.y / 10f);
                 Options.VerticalScale = VerticalScale *= zoom;
                 Options.UpdateFields();
             }
@@ -1535,12 +1535,12 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         {
             if (CurrentMode == TimelineMode.HitObjects)
             {
-                Options.VerticalOffset = VerticalOffset += eventData.scrollDelta.y * VerticalScale / 10;
+                Options.VerticalOffset = VerticalOffset += -eventData.scrollDelta.y * VerticalScale / 10;
                 Options.UpdateFields();
             }
             else 
             {
-                ScrollOffset = Mathf.Max(Mathf.Min(ScrollOffset + (int)Mathf.Sign(eventData.scrollDelta.y), ItemHeight - TimelineHeight), 0);
+                ScrollOffset = Mathf.Max(Mathf.Min(ScrollOffset + (int)Mathf.Sign(-eventData.scrollDelta.y), ItemHeight - TimelineHeight), 0);
             }
             UpdateTimeline(true);
             UpdateScrollbar();
@@ -1548,7 +1548,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         // Ctrl modifier = Horizontal zoom
         else if (isCtrl)
         {
-            float zoom = Mathf.Pow(2, ResizeVelocity * eventData.scrollDelta.y / 10f);
+            float zoom = Mathf.Pow(2, ResizeVelocity * -eventData.scrollDelta.y / 10f);
             float center = GetPointerTimeAtTimeline(eventData);
             float currentXRange = PeekRange.x - (center - PeekRange.x) * (zoom - 1);
             float currentYRange = PeekRange.y - (center - PeekRange.y) * (zoom - 1);
@@ -1568,7 +1568,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             float factor = Mathf.Floor(Mathf.Log(density, SeparationFactor));
             float step = Mathf.Pow(SeparationFactor, factor + 1);
 
-            float time = cm.SongSource.time + (eventData.scrollDelta.y * step / bpm * 240);
+            float time = cm.SongSource.time + (-eventData.scrollDelta.y * step / bpm * 240);
             if (cm.SongSource.time == 0 && !cm.SongSource.isPlaying)
             {
                 cm.SongSource.Play();
@@ -1580,7 +1580,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         else
         {
             float offset = Mathf.Clamp(
-                (PeekRange.y - PeekRange.x) / TicksHolder.rect.width * 50 * eventData.scrollDelta.y,
+                (PeekRange.y - PeekRange.x) / TicksHolder.rect.width * 50 * -eventData.scrollDelta.y,
                 PeekLimit.x - PeekRange.x,
                 PeekLimit.y - PeekRange.y
             );

@@ -16,8 +16,7 @@ public class CMLanePlayer : MonoBehaviour
     public void UpdateObjects(LaneManager lane) 
     {
         CurrentLane = lane;
-        transform.localPosition = lane.FinalPosition;
-        transform.localRotation = lane.FinalRotation;
+        transform.SetLocalPositionAndRotation(lane.FinalPosition, lane.FinalRotation);
         Holder.localPosition = Vector3.back * lane.CurrentDistance;
         var styles = PlayerView.main.Manager.PalleteManager.LaneStyles;
         int index = lane.CurrentLane.StyleIndex;

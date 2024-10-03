@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -82,12 +84,25 @@ public class InspectorPanel : MonoBehaviour
 
     public void SetObject(object obj)
     {
-        if (obj == Chartmaker.main.CurrentChart?.Groups)
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
         {
-            CurrentObject = obj;
-            CurrentTimestamp = new ();
+            IList listIn = 
+                obj is List<Timestamp> lts ? lts
+              : obj is IList list ? list 
+              : obj is Timestamp tsp ? new List<Timestamp> { tsp }
+              : new List<object> () { obj };
+            IList listTarget = 
+                CurrentTimestamp?.Count > 0 ? CurrentTimestamp
+              : CurrentObject is IList list2 ? list2
+              : new List<object> () { CurrentObject };
+            Debug.Log(listIn[0]?.GetType() + " " + listTarget[0]?.GetType());
+            if (listIn[0]?.GetType() == listTarget[0]?.GetType()) 
+            {
+                foreach (object item in listTarget) if (!listTarget.Contains(item)) listIn.Add(item);
+            }
+            obj = listIn;
         }
-        else if (obj is Timestamp ts)
+        if (obj is Timestamp ts)
         {
             CurrentTimestamp = new () { ts };
         }

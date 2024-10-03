@@ -24,7 +24,7 @@ public class ContextMenu : MonoBehaviour
         if (isOpen && currentTarget == target) return;
         if (!isOpen && justState == true) return;
 
-        ChildMenu?.Close();
+        if (ChildMenu) ChildMenu.Close();
 
         int itemCount = 0;
         int sepCount = 0;

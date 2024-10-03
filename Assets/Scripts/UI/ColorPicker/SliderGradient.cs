@@ -20,7 +20,7 @@ public class SliderGradient : MaskableGraphic
 
         for (int a = 0; a <= 3; a++) 
         {
-            float angle = ((float)a + .5f) / 4 * Mathf.PI * 2;
+            float angle = (a + .5f) / 4 * Mathf.PI * 2;
             
             vert.color = a % 4 < 2 ? color2 : color;
             vert.position = new Vector2(Mathf.Sin(angle) * radius.x, Mathf.Cos(angle) * radius.y) + center;
