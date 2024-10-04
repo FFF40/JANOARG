@@ -95,10 +95,9 @@ public class InspectorPanel : MonoBehaviour
                 CurrentTimestamp?.Count > 0 ? CurrentTimestamp
               : CurrentObject is IList list2 ? list2
               : new List<object> () { CurrentObject };
-            Debug.Log(listIn[0]?.GetType() + " " + listTarget[0]?.GetType());
             if (listIn[0]?.GetType() == listTarget[0]?.GetType()) 
             {
-                foreach (object item in listTarget) if (!listTarget.Contains(item)) listIn.Add(item);
+                foreach (object item in listTarget) if (!listIn.Contains(item)) listIn.Add(item);
             }
             obj = listIn;
         }
@@ -112,17 +111,15 @@ public class InspectorPanel : MonoBehaviour
         }
         else if (obj is IList list)
         {
-            if (list.Count == 0) SetObject(null);
-            else if (list.Count == 1) SetObject(list[0]);
-            else
+            if (list.Count == 0) obj = null;
+            else if (list.Count == 1) obj = list[0];
+
+            CurrentObject = obj;
+            CurrentTimestamp = new ();
+            if (Helper.IsHierarchyObject(obj)) 
             {
-                CurrentObject = obj;
-                CurrentTimestamp = new ();
-                if (Helper.IsHierarchyObject(obj)) 
-                {
-                    CurrentHierarchyObject = obj;
-                    HierarchyPanel.main.UpdateHolderSelection();
-                }
+                CurrentHierarchyObject = obj;
+                HierarchyPanel.main.UpdateHolderSelection();
             }
         }
         else

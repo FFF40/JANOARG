@@ -288,8 +288,10 @@ public class HierarchyPanel : MonoBehaviour
         foreach (var holder in Holders)
         {
             holder.SelectedBackground.SetActive(
-                holder.Target.Target != null
-                && holder.Target.Target == InspectorPanel.main.CurrentHierarchyObject
+                holder.Target.Target != null && (
+                    InspectorPanel.main.CurrentHierarchyObject is IList list && list.Contains(holder.Target.Target)
+                    || holder.Target.Target == InspectorPanel.main.CurrentHierarchyObject
+                )
             );
         }
     }

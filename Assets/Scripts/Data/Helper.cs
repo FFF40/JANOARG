@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public static class Helper 
@@ -41,6 +42,7 @@ public static class Helper
             or CameraController or Pallete
             or LaneStyle or HitStyle 
             or LaneGroup or Lane
+            || (obj is IList list && IsHierarchyObject(list[0]))
         ;
     }
 }

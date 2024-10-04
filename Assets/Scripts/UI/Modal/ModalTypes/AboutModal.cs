@@ -42,7 +42,7 @@ public class AboutModal : Modal
     public void Update()
     {
         Content.anchoredPosition += Vector2.up * 15 * Time.deltaTime;
-        if (Content.anchoredPosition.y > Content.rect.height - 370) Content.anchoredPosition -= Vector2.up * Content.rect.height;
+        if (Content.anchoredPosition.y > Content.rect.height - 400) Content.anchoredPosition -= Vector2.up * Content.rect.height;
     }
 
     public void OpenGitHub()
