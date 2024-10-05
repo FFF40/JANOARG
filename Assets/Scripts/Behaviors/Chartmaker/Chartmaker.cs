@@ -129,6 +129,14 @@ public class Chartmaker : MonoBehaviour
         return Task.Run(() => OpenSong(path));
     }
 
+    public void RemoveFromRecent(int index) 
+    {
+        List<RecentSong> list = new(RecentSongsStorage.Get("List", new RecentSong[] {}));
+        list.RemoveAt(index);
+        RecentSongsStorage.Set("List", list.ToArray());
+        RecentSongsStorage.Save();
+    }
+
     public void AddToRecent()
     {
         List<RecentSong> list = new(RecentSongsStorage.Get("List", new RecentSong[] {}));

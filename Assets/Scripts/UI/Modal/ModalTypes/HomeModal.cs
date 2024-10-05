@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
-using UnityEditor.Search;
 using UnityEngine;
 
 public class HomeModal : Modal
@@ -37,6 +36,9 @@ public class HomeModal : Modal
             item.SongArtistLabel.text = recent.SongArtist; 
             item.SongNameLabel.text = recent.SongName;
             item.Tooltip.Text = recent.Path;
+            item.Button.onRightClick.AddListener(() => {
+                ShowRecentSongRightClickMenu(item, recent);
+            });
             item.Button.onClick.AddListener(() => {
                 Chartmaker.main.LoaderPanel.SetSong(recent.SongName, recent.SongArtist, recent.BackgroundColor, recent.InterfaceColor);
                 StartCoroutine(Chartmaker.main.OpenSongRoutine(recent.Path));
@@ -47,6 +49,27 @@ public class HomeModal : Modal
             }
             SongItems.Add(item);
         }
+    }
+
+    private void ShowRecentSongRightClickMenu(RecentSongItem item, RecentSong recent)
+    {
+        ContextMenuHolder.main.OpenRoot(new ContextMenuList(
+            new ContextMenuListAction("Open Song Path", () => {
+                Application.OpenURL("file://" + Path.GetDirectoryName(recent.Path));
+            }),
+            new ContextMenuListSeparator(),
+            new ContextMenuListAction("Remove from List", () => {
+                List<RecentSong> list = new(Chartmaker.main.RecentSongsStorage.Get("List", new RecentSong[] {}));
+                int index = list.IndexOf(recent);
+                if (index >= 0) 
+                {
+                    Chartmaker.main.RemoveFromRecent(index);
+                    Destroy(item.Icon.texture);
+                    Destroy(item.gameObject);
+                    SongItems.Remove(item);
+                }
+            })
+        ), (RectTransform)item.transform, ContextMenuDirection.Cursor);
     }
 
     private IEnumerator LoadIconImageRoutine(RecentSongItem item, string path)

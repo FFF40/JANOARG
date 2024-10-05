@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class RecentSongItem : MonoBehaviour
 {
-    public Button Button;
+    public RightClickButton Button;
     public RawImage Icon;
     public TooltipTarget Tooltip;
     public TMP_Text SongArtistLabel;

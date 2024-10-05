@@ -5742,6 +5742,7 @@ MonoBehaviour:
   BackButton: {fileID: 1478809413}
   DebugStatsSample: {fileID: 8311844125951479924, guid: 1fbd1f8b6fa14e84cb36b911454c948c, type: 3}
   IsCollapsed: 0
+  IsCoverDirty: 0
   PanelHolder: {fileID: 229728604}
 --- !u!114 &229728608
 MonoBehaviour:
@@ -9586,7 +9587,7 @@ GameObject:
   - component: {fileID: 411772793}
   - component: {fileID: 411772792}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Icon Render Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9643,7 +9644,7 @@ Canvas:
   serializedVersion: 3
   m_RenderMode: 1
   m_Camera: {fileID: 527984101}
-  m_PlaneDistance: 0.1
+  m_PlaneDistance: 0.301
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
