@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class RecentSongItem : MonoBehaviour
 {
     public Button Button;
+    public RawImage Icon;
     public TooltipTarget Tooltip;
     public TMP_Text SongArtistLabel;
     public TMP_Text SongNameLabel;
@@ -18,6 +19,7 @@ public class RecentSongItem : MonoBehaviour
 public struct RecentSong
 {
     public string Path;
+    public string IconPath;
     public string SongName;
     public string SongArtist;
     public Color BackgroundColor;

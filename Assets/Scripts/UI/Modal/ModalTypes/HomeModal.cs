@@ -1,6 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEditor.Search;
 using UnityEngine;
 
 public class HomeModal : Modal
@@ -11,6 +16,8 @@ public class HomeModal : Modal
     
     public RectTransform RecentSongsHolder;
     public RecentSongItem RecentSongSample;
+
+    readonly List<RecentSongItem> SongItems = new ();
 
     public void Awake()
     {
@@ -34,7 +41,33 @@ public class HomeModal : Modal
                 Chartmaker.main.LoaderPanel.SetSong(recent.SongName, recent.SongArtist, recent.BackgroundColor, recent.InterfaceColor);
                 StartCoroutine(Chartmaker.main.OpenSongRoutine(recent.Path));
             });
+            if (!string.IsNullOrWhiteSpace(recent.IconPath)) 
+            {
+                StartCoroutine(LoadIconImageRoutine(item, recent.IconPath));
+            }
+            SongItems.Add(item);
         }
+    }
+
+    private IEnumerator LoadIconImageRoutine(RecentSongItem item, string path)
+    {
+        Task<byte[]> activeTask = File.ReadAllBytesAsync(path);
+        yield return new WaitUntil(() => activeTask.IsCompleted);
+        if (activeTask.IsFaulted) 
+        {
+            Debug.LogWarning($"Icon for {item.SongArtistLabel.text} - {item.SongNameLabel.text} failed to load: ${activeTask.Exception}");
+            yield break;
+        }
+
+        Texture2D texture = new (1, 1);
+        ImageConversion.LoadImage(texture, activeTask.Result);
+        item.Icon.texture = texture;
+
+    }
+
+    public void OnDestroy() 
+    {
+        foreach (RecentSongItem item in SongItems) Destroy(item.Icon.texture);
     }
 
     public void OpenSong()

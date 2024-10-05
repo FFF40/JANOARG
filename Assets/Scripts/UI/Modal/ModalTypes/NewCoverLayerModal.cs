@@ -173,6 +173,19 @@ public class NewCoverLayerModal : Modal
             modal.SetDialog("Error", saveTask.Exception.Message, new string[] {"Ok"}, _ => {});
             yield break;
         }
+        
+        try 
+        {
+            PlayerView.main.UpdateIconFile();
+            InspectorPanel.main.IsCoverDirty = false;
+        }
+        catch (Exception)
+        {
+            Chartmaker.main.Loader.SetActive(false);
+            DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+            modal.SetDialog("Error", saveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            yield break;
+        }
 
         Chartmaker.main.Loader.SetActive(false);
         ImageData = null;

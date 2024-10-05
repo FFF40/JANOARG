@@ -137,6 +137,7 @@ public class Chartmaker : MonoBehaviour
         else if (index >= 0) list.RemoveAt(index);
         list.Insert(0, new RecentSong {
             Path = CurrentSongPath,
+            IconPath = Path.Combine(Path.GetDirectoryName(CurrentSongPath), CurrentSong.Cover.IconTarget),
             SongName = CurrentSong.SongName,
             SongArtist = CurrentSong.SongArtist,
             BackgroundColor = CurrentSong.BackgroundColor,
@@ -339,6 +340,12 @@ public class Chartmaker : MonoBehaviour
             yield break;
         }
 
+        if (InspectorPanel.main.IsCoverDirty) 
+        {
+            PlayerView.main.UpdateIconFile();
+            InspectorPanel.main.IsCoverDirty = false;
+        }
+
         NotificationLabel.text = "Song data saved!";
         NotificationFlashTime = 0.5f;
         NotificationTime = 3;
@@ -493,8 +500,8 @@ public class Chartmaker : MonoBehaviour
         if (recursionBuster) return;
         History.SetItem(target, field, value);
         if (field == "Offset") SortList(GetListTarget(target));
-        TimelinePanel.main?.UpdateItems();
-        PlayerView.main?.UpdateObjects();
+        TimelinePanel.main.UpdateItems();
+        PlayerView.main.UpdateObjects();
         IsDirty = true;
         OnHistoryUpdate();
     }

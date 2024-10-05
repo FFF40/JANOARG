@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -21,6 +22,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
     public RectMask2D CoverMask;
     public RawImage CoverLayerSample;
     public List<RawImage> CoverLayers { get; private set; } = new();
+    public RectTransform IconRenderCanvas;
     [Space]
     public GameObject CoverToolbar;
     public GameObject MaskButtonHighlight;
@@ -211,6 +213,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
             float scale = CoverBackground.rectTransform.localScale.x;
             Vector2 parallaxOffset = CoverPosition / scale;
+            if (CurrentCoverViewMode == CoverViewMode.Icon) parallaxOffset -= Chartmaker.main.CurrentSong.Cover.IconCenter / scale;
 
             BoundingBox.color = NotificationText.color = NotificationBox.color = Color.white;
             BoundingBox.rectTransform.anchoredPosition = new Vector2 (0, 16) + CoverPosition;
@@ -305,6 +308,8 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 {
                     float scale = CoverBackground.rectTransform.localScale.x;
                     Vector2 offset = new Vector2(0, 16) + CoverPosition * (1 - layer.ParallaxFactor);
+                    if (CurrentCoverViewMode == CoverViewMode.Icon) offset -=
+                        (1 - layer.ParallaxFactor) / scale * Chartmaker.main.CurrentSong.Cover.IconCenter;
                     
                     Vector2 center = layer.Position * scale + offset;
                     CenterHandle.gameObject.SetActive(CurrentDragMode is HandleDragMode.None or HandleDragMode.Center);
@@ -839,6 +844,75 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         isAnimating = false;
     }
 
+    public void UpdateIconFile() 
+    {
+        Transform originalParent = CoverBackground.rectTransform.parent;
+        IconRenderCanvas.gameObject.SetActive(true);
+        CoverBackground.rectTransform.SetParent(IconRenderCanvas);
+        CoverBackground.rectTransform.sizeDelta = Vector2.one * Chartmaker.main.CurrentSong.Cover.IconSize;
+        CoverBackground.rectTransform.localScale = Vector2.one * IconRenderCanvas.sizeDelta.x / Chartmaker.main.CurrentSong.Cover.IconSize;
+        CoverBackground.rectTransform.anchoredPosition3D = Vector3.zero;
+        
+        Vector2 parallaxOffset = Chartmaker.main.CurrentSong.Cover.IconCenter;
+        
+        int index = 0;
+        foreach (CoverLayer layer in Chartmaker.main.CurrentSong.Cover.Layers) {
+            RawImage image = CoverLayers[index];
+
+            image.texture = layer.Texture;
+            
+            if (layer.Tiling)
+            {
+                image.rectTransform.sizeDelta = CoverBackground.rectTransform.sizeDelta;
+                image.rectTransform.anchoredPosition = Vector2.zero;
+                Vector2 imgSize = new Vector2(1, layer.Texture.height / layer.Texture.width) * 880 * layer.Scale;
+                image.uvRect = Rect2UV(new (
+                    -CoverBackground.rectTransform.sizeDelta * .5f,
+                    CoverBackground.rectTransform.sizeDelta
+                ), new (
+                    layer.Position - parallaxOffset * layer.ParallaxFactor - imgSize * .5f,
+                    imgSize
+                ));
+            }
+            else 
+            {
+                image.rectTransform.sizeDelta = new Vector2(1, layer.Texture.height / layer.Texture.width) * layer.Scale * 880;
+                image.rectTransform.anchoredPosition = layer.Position - parallaxOffset * layer.ParallaxFactor;
+                image.uvRect = new (0, 0, 1, 1);
+            }
+
+            index++;
+        }
+
+        Vector2Int resolution = new (128, 128);
+
+        RenderTexture rtex = new (resolution.x, resolution.y, 24);
+        RenderTexture.active = rtex;
+        rtex.Create();
+
+        Camera camera = Camera.main;
+        camera.targetTexture = rtex;
+        camera.rect = new Rect(0, 0, resolution.x, resolution.y);
+        camera.Render();
+
+        Texture2D tex = new (resolution.x, resolution.y);
+        tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+        tex.Apply();
+        File.WriteAllBytes(
+            Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.Cover.IconTarget), 
+            tex.EncodeToPNG()
+        );
+        
+        
+        RenderTexture.active = camera.targetTexture = null;
+        Destroy(tex);
+        Destroy(rtex);
+
+        IconRenderCanvas.gameObject.SetActive(false);
+        CoverBackground.rectTransform.SetParent(originalParent);
+        CoverBackground.rectTransform.anchoredPosition3D = Vector3.zero;
+        UpdateObjects();
+    }
 }
 
 public enum HandleDragMode

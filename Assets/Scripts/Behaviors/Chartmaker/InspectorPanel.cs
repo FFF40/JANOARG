@@ -39,6 +39,7 @@ public class InspectorPanel : MonoBehaviour
     public DebugStatsInspector DebugStatsSample;
     [Space]
     public bool IsCollapsed;
+    public bool IsCoverDirty;
     public RectTransform PanelHolder;
 
     public void Awake()
@@ -228,7 +229,9 @@ public class InspectorPanel : MonoBehaviour
                 FormTitle.text = "Cover";
 
                 SpawnForm<FormEntryHeader>("Colors");
-                var bgColor = SpawnForm<FormEntryColor, Color>("Background", () => cover.BackgroundColor, x => Chartmaker.main.SetItem(cover, "BackgroundColor", x));
+                var bgColor = SpawnForm<FormEntryColor, Color>("Background", () => cover.BackgroundColor, x => {
+                    Chartmaker.main.SetItem(cover, "BackgroundColor", x); IsCoverDirty = true;
+                });
                 var copy = SpawnForm<FormEntryButton>("Copy from Playable Song");
                 copy.Button.onClick.AddListener(() => {
                     Chartmaker.main.SetItem(cover, "BackgroundColor", Chartmaker.main.CurrentSong.BackgroundColor);
@@ -236,9 +239,19 @@ public class InspectorPanel : MonoBehaviour
                 });
 
                 SpawnForm<FormEntryHeader>("Icon");
-                SpawnForm<FormEntryString, string>("Save Target", () => cover.IconTarget, x => Chartmaker.main.SetItem(cover, "IconTarget", x));
-                SpawnForm<FormEntryVector2, Vector2>("Center", () => cover.IconCenter, x => Chartmaker.main.SetItem(cover, "IconCenter", x));
-                SpawnForm<FormEntryFloat, float>("Size", () => cover.IconSize, x => Chartmaker.main.SetItem(cover, "IconSize", x));
+                SpawnForm<FormEntryString, string>("Save Target", () => cover.IconTarget, x => {
+                    Chartmaker.main.SetItem(cover, "IconTarget", x); IsCoverDirty = true;
+                });
+                SpawnForm<FormEntryVector2, Vector2>("Center", () => cover.IconCenter, x => {
+                    Chartmaker.main.SetItem(cover, "IconCenter", x); IsCoverDirty = true;
+                });
+                SpawnForm<FormEntryFloat, float>("Size", () => cover.IconSize, x => {
+                    Chartmaker.main.SetItem(cover, "IconSize", x); IsCoverDirty = true;
+                });
+                var update = SpawnForm<FormEntryButton>("Update Icon File");
+                update.Button.onClick.AddListener(() => {
+                    PlayerView.main.UpdateIconFile();
+                });
             }
             else if (CurrentObject is CoverLayer layer)
             {
@@ -251,10 +264,18 @@ public class InspectorPanel : MonoBehaviour
                 FormTitle.text = "Cover Layer";
 
                 SpawnForm<FormEntryHeader>("Transform");
-                SpawnForm<FormEntryVector2, Vector2>("Position", () => layer.Position, x => Chartmaker.main.SetItem(layer, "Position", x));
-                SpawnForm<FormEntryFloat, float>("Scale", () => layer.Scale, x => Chartmaker.main.SetItem(layer, "Scale", x));
-                SpawnForm<FormEntryFloat, float>("Parallax Z", () => layer.ParallaxFactor, x => Chartmaker.main.SetItem(layer, "ParallaxFactor", x));
-                SpawnForm<FormEntryBool, bool>("Tiling", () => layer.Tiling, x => Chartmaker.main.SetItem(layer, "Tiling", x));
+                SpawnForm<FormEntryVector2, Vector2>("Position", () => layer.Position, x => {
+                    Chartmaker.main.SetItem(layer, "Position", x); IsCoverDirty = true;
+                });
+                SpawnForm<FormEntryFloat, float>("Scale", () => layer.Scale, x => {
+                    Chartmaker.main.SetItem(layer, "Scale", x); IsCoverDirty = true;
+                });
+                SpawnForm<FormEntryFloat, float>("Parallax Z", () => layer.ParallaxFactor, x => {
+                    Chartmaker.main.SetItem(layer, "ParallaxFactor", x); IsCoverDirty = true;
+                });
+                SpawnForm<FormEntryBool, bool>("Tiling", () => layer.Tiling, x => {
+                    Chartmaker.main.SetItem(layer, "Tiling", x); IsCoverDirty = true;
+                });
             }
             else if (CurrentObject is BPMStop stop)
             {

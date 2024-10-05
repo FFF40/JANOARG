@@ -140,6 +140,7 @@ public class LoggerModal : Modal
     public void Clear() 
     {
         BorderlessWindow.Logger.Clear();
+        UpdateLogger();
     }
 
     public void OpenFile() 

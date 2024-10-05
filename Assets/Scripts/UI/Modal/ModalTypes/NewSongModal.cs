@@ -145,7 +145,8 @@ public class NewSongModal : Modal
         }
         string audioPath = Path.ChangeExtension(path + "/" + Codename, Path.GetExtension(AudioPath));
         File.Copy(AudioPath, audioPath);
-        InitialValues.ClipPath = Path.GetRelativePath(path, audioPath);;
+        InitialValues.ClipPath = Path.GetRelativePath(path, audioPath);
+        InitialValues.Cover.BackgroundColor = InitialValues.BackgroundColor;
         File.WriteAllText(path + "/" + Codename + ".japs", JAPSEncoder.Encode(InitialValues, InitialValues.ClipPath));
         return path;
     }
