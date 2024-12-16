@@ -14,5 +14,3 @@ assignees: ''
    + Add a `bug` or `enhancement` label at the sidebar
 - [ ] Is this issue for the chartmaker or the main game?  
    + Add a `for: chartmaker` or `for: player` label at the sidebar
-- [ ] If this issue is a bug report: How to reproduce it?
-- [ ] If this issue is a feature request: Describe
