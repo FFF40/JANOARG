@@ -146,7 +146,9 @@ public class KeyboardHandler : MonoBehaviour
             Name = "Playable Song Mode",
             Keybind = new Keybind(KeyCode.Alpha1, EventModifiers.Shift),
             Invoke = () => {
+                if (HierarchyPanel.main.CurrentMode == HierarchyMode.PlayableSong) return;
                 HierarchyPanel.main.SetMode(HierarchyMode.PlayableSong);
+                TimelinePanel.main.SetTabMode(TimelineMode.Timing);
             },
         }},
         { "HR:ChartView", new KeybindAction {
@@ -154,7 +156,9 @@ public class KeyboardHandler : MonoBehaviour
             Name = "Chart Mode",
             Keybind = new Keybind(KeyCode.Alpha2, EventModifiers.Shift),
             Invoke = () => {
+                if (HierarchyPanel.main.CurrentMode == HierarchyMode.Chart || Chartmaker.main.CurrentChart == null) return;
                 HierarchyPanel.main.SetMode(HierarchyMode.Chart);
+                TimelinePanel.main.SetTabMode(TimelineMode.Lanes);
             },
         }},
 

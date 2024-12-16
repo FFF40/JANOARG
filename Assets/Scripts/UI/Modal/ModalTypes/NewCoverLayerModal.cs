@@ -132,11 +132,11 @@ public class NewCoverLayerModal : Modal
         {
             int choice = 0;
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
-            modal.SetDialog("Overwrite File?", "There is already a file on this path. Would you like to overwrite this file?", new string[] {"Overwrite", "Cancel"}, x => {
+            modal.SetDialog("Overwrite File?", "There is already a file on this path. Would you like to overwrite this file?", new string[] {"Cancel", "", "Overwrite"}, x => {
                 choice = x;
             });
             yield return new WaitWhile(() => modal);
-            if (choice == 1) yield break;
+            if (choice == 0) yield break;
         }
 
         Chartmaker.main.Loader.SetActive(true);

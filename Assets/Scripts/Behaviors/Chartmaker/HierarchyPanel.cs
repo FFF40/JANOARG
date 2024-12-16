@@ -43,8 +43,7 @@ public class HierarchyPanel : MonoBehaviour
 
     public void SetMode(HierarchyMode mode)
     {
-        if (CurrentMode == mode) return;
-        if (CurrentMode == HierarchyMode.Chart && Chartmaker.main.CurrentChart == null) return;
+        if (mode == HierarchyMode.Chart && Chartmaker.main.CurrentChart == null) return;
         CurrentMode = mode;
         InspectorPanel.main.SetObject(null);
         InformationBar.main.UpdateButtonActivity();

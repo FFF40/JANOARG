@@ -453,9 +453,9 @@ public class Chartmaker : MonoBehaviour
         else if (IsDirty)
         {
             dirtyDialog = ModalHolder.main.Spawn<DialogModal>();
-            dirtyDialog.SetDialog("Close Song", "Would you like to save changes made to " + CurrentSong.SongName + "?", new [] {"Save", "Don't Save", "Cancel"}, a => {
-                if (a == 0) { Save(); action(); }
-                else if (a == 1) { action(); }
+            dirtyDialog.SetDialog("Close Song", "Would you like to save changes made to " + CurrentSong.SongName + "?", new [] {"Cancel", "", "Don't Save", "Save"}, a => {
+                if (a == 3) { Save(); action(); }
+                else if (a == 2) { action(); }
             });
         }
         else
@@ -731,6 +731,7 @@ public class ChartmakerPrefs
     public bool SaveOnQuit;
     public bool SaveOnPlay;
     public bool AutoUpdateCheck = true;
+    public bool ShowHiddenFiles;
 
     public string Theme = "Prototype";
     public bool CustomCursors = true;
@@ -750,6 +751,7 @@ public class ChartmakerPrefs
         SaveOnPlay = storage.Get("AS:SaveOnPlay", SaveOnPlay);
         SaveOnQuit = storage.Get("AS:SaveOnQuit", SaveOnQuit);
         AutoUpdateCheck = storage.Get("UP:AutoUpdateCheck", AutoUpdateCheck);
+        ShowHiddenFiles = storage.Get("FI:ShowHiddenFiles", ShowHiddenFiles);
 
         Theme = storage.Get("AP:Theme", Theme);
         CustomCursors = storage.Get("AP:CustomCursors", CustomCursors);

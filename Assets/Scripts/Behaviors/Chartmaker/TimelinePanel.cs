@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -44,6 +43,8 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public RectTransform TicksHolder;
     public RectTransform ItemsHolder;
     public RectTransform TailsHolder;
+    public RectTransform LabelsHolder;
+    public RectTransform GraphsHolder;
     public RectTransform StoryboardEntryHolder;
     public RectTransform CurrentTimeTick;
     public RectTransform CurrentTimeConnector;
@@ -82,12 +83,23 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     public TimelineTick TickSample;
     [HideInInspector]
     public List<TimelineTick> Ticks;
+
     public TimelineItem ItemSample;
     [HideInInspector]
     public List<TimelineItem> Items;
+
     public Image ItemTailSample;
     [HideInInspector]
     public List<Image> ItemTails;
+
+    public TMP_Text LabelSample;
+    [HideInInspector]
+    public List<TMP_Text> Labels;
+
+    public LineGraph GraphSample;
+    [HideInInspector]
+    public List<LineGraph> Graphs;
+    
     public TMP_Text StoryboardEntrySample;
     public Material StoryboardEntryMaterial;
     [HideInInspector]
@@ -320,6 +332,20 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         else item = ItemTails[index];
         return item;
     }
+    TMP_Text GetItemLabel(int index)
+    {
+        TMP_Text item;
+        if (Labels.Count <= index) Labels.Add(item = Instantiate(LabelSample, LabelsHolder));
+        else item = Labels[index];
+        return item;
+    }
+    LineGraph GetItemGraph(int index)
+    {
+        LineGraph item;
+        if (Graphs.Count <= index) Graphs.Add(item = Instantiate(GraphSample, GraphsHolder));
+        else item = Graphs[index];
+        return item;
+    }
     TMP_Text GetStoryboardEntry(int index)
     {
         TMP_Text item;
@@ -332,9 +358,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     {
         if (TimelineHeight <= 0) return;
 
-        int count = 0;
-        int tcount = 0;
-        int sbcount = 0;
+        int count = 0, tcount = 0, lbcount = 0, gcount = 0, sbcount = 0;
         Metronome metronome = Chartmaker.main.CurrentSong.Timing;
         
         float density = (PeekRange.y - PeekRange.x) / TicksHolder.rect.width;
@@ -381,8 +405,20 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             }
             return item;
         }
+        TMP_Text AddLabel(string text)
+        {
+            var label = GetItemLabel(lbcount);
+            label.text = text;
+            label.overflowMode = TextOverflowModes.Truncate;
+            label.alignment = TextAlignmentOptions.CaplineLeft;
+            return label;
+        }
 
-        if (CurrentMode == TimelineMode.Storyboard)
+        if (PeekRange.x == PeekRange.y)
+        {
+            /* Do nothing */
+        }
+        else if (CurrentMode == TimelineMode.Storyboard)
         {
             if (InspectorPanel.main.CurrentObject is Storyboardable thing)
             {
@@ -400,7 +436,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         TMP_Text label = GetStoryboardEntry(index);
                         RectTransform rt = label.rectTransform;
                         label.text = types[a].Name;
-                        rt.anchoredPosition = new(0, -24 * index - 4);
+                        rt.anchoredPosition = new(0, -24 * index - 5);
                         sbcount++;
                     }
                 }
@@ -416,9 +452,10 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     if (index < -1 || index >= TimelineHeight + 1) continue;
 
                     float posX = InverseLerpUnclamped(PeekRange.x, PeekRange.y, time);
+                    Image tail = null;
                     if (time != timeEnd)
                     {
-                        var tail = GetItemTail(tcount);
+                        tail = GetItemTail(tcount);
                         RectTransform trt = tail.rectTransform;
                         trt.anchorMin = new (InverseLerpUnclamped(PeekRange.x, PeekRange.y, time), 1);
                         trt.anchorMax = new (InverseLerpUnclamped(PeekRange.x, PeekRange.y, timeEnd), 1);
@@ -426,6 +463,54 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         trt.sizeDelta = new(0, 20);
                         posX = Mathf.Max(posX, Mathf.Min(8 / ItemsHolder.rect.width, Mathf.Max(trt ? trt.anchorMax.x - 4 / ItemsHolder.rect.width : posX, posX)));
                         tcount++;
+
+                        TMP_Text endLabel = AddLabel("");
+                        endLabel.alignment = TextAlignmentOptions.CaplineRight;
+                        RectTransform lrt = endLabel.rectTransform;
+                        lrt.anchorMin = trt.anchorMin;
+                        lrt.anchorMax = trt.anchorMax;
+                        lrt.anchoredPosition = new(0, -24 * index - 5);
+                        lbcount++;
+
+                        TMP_Text startLabel = null;
+
+                        if (timeEnd - time > 8 * density) 
+                        {
+                            var graph = GetItemGraph(gcount);
+                            graph.rectTransform.anchorMin = trt.anchorMin;
+                            graph.rectTransform.anchorMax = trt.anchorMax;
+                            graph.rectTransform.anchoredPosition = trt.anchoredPosition;
+                            graph.rectTransform.sizeDelta = trt.sizeDelta;
+                            graph.Values = GetEaseGraphValues(ts.Easing);
+                            gcount++;
+                        }
+                        if (!float.IsNaN(ts.From))
+                        {
+
+                            startLabel = AddLabel("");
+                            RectTransform slrt = startLabel.rectTransform;
+                            slrt.anchorMin = trt.anchorMin;
+                            slrt.anchorMax = trt.anchorMax;
+                            slrt.anchoredPosition = new(0, -24 * index - 5);
+                            lbcount++;
+                        }
+
+                        if (startLabel) NumberLabelTest(ts.From, startLabel, ts.Target, endLabel, lrt.rect.width - startLabel.margin.x * 2.5f);
+                        else NumberLabelTest(ts.Target, endLabel, lrt.rect.width - endLabel.margin.x * 3f);
+                        
+                        if (string.IsNullOrEmpty(endLabel.text)) lbcount -= startLabel ? 2 : 1;
+                    }
+                    else 
+                    {
+
+                        TMP_Text endLabel = AddLabel(ts.Target.ToString("0.##"));
+                        endLabel.alignment = TextAlignmentOptions.CaplineRight;
+                        endLabel.overflowMode = TextOverflowModes.Overflow;
+                        RectTransform lrt = endLabel.rectTransform;
+                        lrt.anchorMax = new (InverseLerpUnclamped(PeekRange.x, PeekRange.y, time), 1);
+                        lrt.anchorMin = lrt.anchorMax - new Vector2(1, 0);
+                        lrt.anchoredPosition = new(0, -24 * index - 5);
+                        lbcount++;
                     }
 
                     var item = GetTimelineItem(count);
@@ -518,6 +603,17 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         trt.sizeDelta = new(0, 20);
                         posX = Mathf.Max(posX, Mathf.Min(15 / ItemsHolder.rect.width, Mathf.Max(trt ? trt.anchorMax.x - 16 / ItemsHolder.rect.width : posX, posX)));
                         tcount++;
+
+                        if (!String.IsNullOrWhiteSpace(lane.Name))
+                        {
+                            TMP_Text label = AddLabel(lane.Name);
+                            label.overflowMode = TextOverflowModes.Ellipsis;
+                            RectTransform lrt = label.rectTransform;
+                            lrt.anchorMin = new (Math.Max(15 / TicksHolder.rect.width, trt.anchorMin.x), 1);
+                            lrt.anchorMax = trt.anchorMax;
+                            lrt.anchoredPosition = new(8, -24 * pos - 5);
+                            lbcount++;
+                        }
                     }
 
                     var item = GetTimelineItem(count);
@@ -614,6 +710,16 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             Destroy(ItemTails[^1].gameObject);
             ItemTails.RemoveAt(ItemTails.Count - 1);
         }
+        while (Labels.Count > lbcount)
+        {
+            Destroy(Labels[^1].gameObject);
+            Labels.RemoveAt(Labels.Count - 1);
+        }
+        while (Graphs.Count > gcount)
+        {
+            Destroy(Graphs[^1].gameObject);
+            Graphs.RemoveAt(Graphs.Count - 1);
+        }
         while (StoryboardEntries.Count > sbcount)
         {
             Destroy(StoryboardEntries[^1].gameObject);
@@ -643,6 +749,14 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             LaneStartRect.anchorMax = SongStartRect.anchorMax;
             LaneEndRect.anchorMin = SongEndRect.anchorMin;
         }
+    }
+
+    private float[] GetEaseGraphValues(IEaseDirective easing)
+    {
+        float[] values = new float[64];
+        float interval = 1f / (values.Length - 1);
+        for (int i = 0; i < values.Length; i++) values[i] = easing.Get(i * interval);
+        return values;
     }
 
     private List<Lane> GetLanesInTimeline()
@@ -957,6 +1071,78 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         WaveformImage.texture = new Texture2D((int)waveRT.rect.width, (int)waveRT.rect.height);
         waveBaked = new bool[waveBaked.Length];
         waveTimeouted = true;
+    }
+
+    string FormatNumber(float number, int type) 
+    {
+        return type switch
+        {
+            0 => number.ToString("0.###"),
+            1 => number.ToString("0.##"),
+            2 => number.ToString("0.#"),
+            3 => number.ToString("0"),
+            4 => number.ToString("0.###e0"),
+            5 => number.ToString("0.##e0"),
+            6 => number.ToString("0.#e0"),
+            7 => number.ToString("0e0"),
+            _ => "…",
+        };
+    }
+
+    public void NumberLabelTest(float number, TMP_Text label, float targetSize) 
+    {
+        int type = 0;
+        label.text = FormatNumber(number, type);
+        label.ForceMeshUpdate();
+        while (true) 
+        {
+            if (label.textBounds.size.x <= targetSize) break;
+            if (type >= 7)
+            {
+                label.text = "…";
+                label.ForceMeshUpdate();
+                if (label.textBounds.size.x > targetSize) label.text = "";
+                break;
+            }
+            type++;
+            label.text = FormatNumber(number, type);
+            label.ForceMeshUpdate();
+        }
+    }
+
+    public void NumberLabelTest(float number1, TMP_Text label1, float number2, TMP_Text label2, float targetSize) 
+    {
+        int type1 = 0, type2 = 0;
+        label1.text = FormatNumber(number1, type1);
+        label1.ForceMeshUpdate();
+        label2.text = FormatNumber(number2, type2);
+        label2.ForceMeshUpdate();
+        while (true) 
+        {
+            float width1 = label1.textBounds.size.x;
+            float width2 = label2.textBounds.size.x;
+            if (width1 + width2 <= targetSize) break;
+            if (type1 >= 7 && type2 >= 7)
+            {
+                label1.text = label2.text = "…";
+                label1.ForceMeshUpdate(); label2.ForceMeshUpdate();
+                if (label1.textBounds.size.x + label2.textBounds.size.x > targetSize) 
+                    label1.text = label2.text = "";
+                break;
+            }
+            if ((width1 > width2 && type1 < 7) || type2 >= 7) 
+            {
+                type1++;
+                label1.text = FormatNumber(number1, type1);
+                label1.ForceMeshUpdate();
+            }
+            else
+            {
+                type2++;
+                label2.text = FormatNumber(number2, type2);
+                label2.ForceMeshUpdate();
+            }
+        }
     }
 
     public void UpdateScrollbar()
@@ -1422,12 +1608,19 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                         TimestampType[] types = (TimestampType[])thing.GetType().GetField("TimestampTypes").GetValue(null);
                         Storyboard sb = thing.Storyboard;
                         TimestampType type = types[Math.Clamp(Mathf.FloorToInt((ItemsHolder.rect.height - dragEnd.y - 3) / 24) + ScrollOffset, 0, types.Length - 1)];
-                        Chartmaker.main.AddItem(new Timestamp {
+                        
+                        Timestamp ts = new Timestamp {
                             ID = type.ID,
                             Offset = (BeatPosition)(isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart),
                             Duration = isDragged ? Mathf.Abs(beatStart - beatEnd) : 0,
                             Target = type.Get(thing.Get(isDragged ? Mathf.Min(beatStart, beatEnd) : beatStart)),
-                        });
+                        };
+                        if (sb.Timestamps.FindIndex(
+                            x => x.ID == ts.ID && (
+                                (x.Offset < ts.Offset + ts.Duration && ts.Offset < x.Offset + x.Duration)
+                                || (x.Duration == 0 && ts.Duration == 0 && x.Offset == ts.Offset)
+                            )
+                        ) < 0) Chartmaker.main.AddItem(ts);
                     }
                     break;
                     case TimelinePickerMode.BPMStop:

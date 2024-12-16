@@ -19,6 +19,12 @@ public class LineGraph : MaskableGraphic
         base.Start();
     }
 
+    protected override void OnRectTransformDimensionsChange()
+    {
+        if (base.gameObject.activeInHierarchy) SetMaterialDirty();
+        base.OnRectTransformDimensionsChange();
+    }
+
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();

@@ -59,6 +59,11 @@ public class PreferencesModal : Modal
             SpawnForm<FormEntryBool, bool>("Save on Quit", () => prefs.SaveOnQuit, x => {
                 storage.Set("AS:SaveOnQuit", prefs.SaveOnQuit = x); IsDirty = true;
             });
+            
+            SpawnForm<FormEntryHeader>("File Picker");
+            SpawnForm<FormEntryBool, bool>("Show Hidden Files", () => prefs.ShowHiddenFiles, x => {
+                storage.Set("FI:ShowHiddenFiles", prefs.ShowHiddenFiles = x); IsDirty = true;
+            });
 
             SpawnForm<FormEntryHeader>("Updates");
             SpawnForm<FormEntryBool, bool>("Auto-Check on Start", () => prefs.AutoUpdateCheck, x => {

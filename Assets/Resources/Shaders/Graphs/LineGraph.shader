@@ -115,7 +115,7 @@ Shader "UI/Line Graph"
                 float yLineHeight = max(abs(yVal - yPrevVal), lres.y) / 2;
                 
                 if (abs(IN.texcoord.y - yLineCenter) < yLineHeight) color.a *= 1;
-                else if (abs(IN.texcoord.y - yLineCenter) * 0.5 < yLineHeight) color.a *= 0.5;
+                else if (abs(IN.texcoord.y - yLineCenter) * 0.66 < yLineHeight) color.a *= 0.5;
                 else color.a *= 0;
 
                 #ifdef UNITY_UI_CLIP_RECT

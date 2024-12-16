@@ -453,7 +453,7 @@ public class Tutorials
             dm.SetDialog(
                 "Start this Tutorial?", 
                 "This action will close the song.",
-                new [] {"Cancel", "Start"},
+                new [] {"Cancel", "", "Start"},
                 (x) => {
                     if (x == 0) return;
                     Chartmaker.main.DirtyModal(() => {

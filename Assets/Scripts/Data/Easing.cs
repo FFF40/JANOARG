@@ -102,7 +102,7 @@ public class Ease
             Out = (x) => {
                 const float c3 = Mathf.PI * 2 / 3;
                 return x == 0 ? 0 : x == 1 ? 1
-                    : -Mathf.Pow(2, -10 * x) * Mathf.Sin((x * 10 - 0.75f) * c3) + 1;
+                    : Mathf.Pow(2, -10 * x) * Mathf.Sin((x * 10 - 0.75f) * c3) + 1;
             },
             InOut = (x) => {
                 const float c5 = Mathf.PI * 2 / 4.5f;

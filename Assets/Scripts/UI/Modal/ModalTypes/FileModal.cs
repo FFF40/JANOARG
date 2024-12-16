@@ -25,6 +25,7 @@ public class FileModal : Modal
     public RectTransform ItemViewport;
     public RectTransform ItemHolder;
     public FileModalItem ItemSample;
+    public GameObject SeparatorSample;
     public TMP_Text MessageLabel;
 
     [Space]
@@ -36,6 +37,7 @@ public class FileModal : Modal
     public Sprite UserHomeIcon;
     public Sprite FileIcon;
     public Sprite FolderIcon;
+    public Sprite LinkFolderIcon;
     public Sprite DriveIcon;
     public Sprite AudioFileIcon;
     public Sprite ImageFileIcon;
@@ -89,10 +91,7 @@ public class FileModal : Modal
         }
         GameObject GetSpace() 
         {
-            GameObject obj = new GameObject("Space");
-            obj.AddComponent<RectTransform>().sizeDelta = new Vector2(0, 4);
-            obj.transform.SetParent(BookmarkHolder);
-            return obj;
+            return Instantiate(SeparatorSample, BookmarkHolder);
         }
 
         FileModalItem item;
@@ -108,7 +107,7 @@ public class FileModal : Modal
 
         Dictionary<string, string> localFolders = new () {
             {"Songs", "Songs"},
-            {"Recordings", "Recordings"},
+            {"Renders", "Renders"},
         };
 
         foreach (var specialFolder in localFolders) 
@@ -168,7 +167,9 @@ public class FileModal : Modal
         {
             SetBookmark(GetItem(), new FileModalEntry {
                 Path = drive.RootDirectory.FullName,
-                Text = drive.VolumeLabel,
+                Text = String.IsNullOrWhiteSpace(drive.VolumeLabel) || drive.VolumeLabel == drive.Name
+                    ? drive.Name
+                    : drive.VolumeLabel + " (" + drive.Name + ")",
                 IsFolder = true,
             });
         }
@@ -187,41 +188,62 @@ public class FileModal : Modal
 
         try 
         {
-            var folders = Directory.GetDirectories(path);
-            var files = Directory.GetFiles(path);
-
             PathField.text = path;
+            TargetField.text = "";
 
-            foreach (string folder in folders)
+            var pathInfo = new DirectoryInfo(path);
+            if (!pathInfo.Exists) throw new Exception("Path does not point to an existing folder.");
+
+            var folders = pathInfo.GetDirectories();
+            var files = pathInfo.GetFiles();
+
+            bool isEmpty = true, isHiddenEmpty = true;
+
+            foreach (DirectoryInfo folder in folders)
             {
+                if (!Chartmaker.Preferences.ShowHiddenFiles && (folder.Attributes & FileAttributes.Hidden) != 0) continue;
+                isHiddenEmpty = false;
+
                 entries.Add(new FileModalEntry {
-                    Path = folder,
-                    Text = "<alpha=#77>" + Path.DirectorySeparatorChar + "<alpha=#ff>" + Path.GetFileName(folder),
+                    Path = folder.FullName,
+                    Text = "<alpha=#77>" + Path.DirectorySeparatorChar + "<alpha=#ff>" + folder.Name,
                     IsFolder = true,
+                    Icon = (folder.Attributes & FileAttributes.ReparsePoint) != 0 ? LinkFolderIcon : FolderIcon,
                 });
+                isEmpty = false;
             }
-            foreach (string file in files)
+            foreach (FileInfo file in files)
             {
+                if (!Chartmaker.Preferences.ShowHiddenFiles && (file.Attributes & FileAttributes.Hidden) != 0) continue;
+                isHiddenEmpty = false;
+
                 bool valid = CurrentType.Filter.Length <= 0;
-                if (!valid) foreach (string ext in CurrentType.Filter) if (file.EndsWith("." + ext))
+                if (!valid) foreach (string ext in CurrentType.Filter) if (file.Extension.ToLower() == "." + ext)
                 {
                     valid = true;
                     break;
                 }
-                if (valid) entries.Add(new FileModalEntry {
-                    Path = file,
-                    Text = Path.GetFileName(file),
+                if (!valid)  continue;
+
+                entries.Add(new FileModalEntry {
+                    Path = file.FullName,
+                    Text = file.Name,
                     IsFolder = false,
+                    Icon = GetIcon(file.FullName),
                 });
+                isEmpty = false;
             }
 
-            MessageLabel.gameObject.SetActive(false);
+            MessageLabel.gameObject.SetActive(isEmpty);
+            MessageLabel.text = isHiddenEmpty
+                ? "This folder is empty." 
+                : "No items in this folder matched your filters.";
         }
         catch (Exception e)
         {
             MessageLabel.gameObject.SetActive(true);
             
-            MessageLabel.text = e.Message;
+            MessageLabel.text = "There was an error:\n" + e.Message;
         }
 
         CurrentDirectory = path;
@@ -315,7 +337,7 @@ public class FileModal : Modal
             ((RectTransform)item.transform).anchoredPosition = new Vector2(0, index * -itemHeight);
             item.Entry = entries[index];
             item.Text.text = entries[index].Text;
-            item.Icon.sprite = entries[index].IsFolder ? FolderIcon : GetIcon(entries[index].Text);
+            item.Icon.sprite = entries[index].Icon;
         }
     }
 
@@ -440,4 +462,5 @@ public class FileModalEntry
     public string Path;
     public string Text;
     public bool IsFolder;
+    public Sprite Icon;
 }

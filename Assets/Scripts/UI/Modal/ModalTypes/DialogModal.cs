@@ -11,9 +11,10 @@ public class DialogModal : Modal
     public TMP_Text BodyLabel;
     public RectTransform ActionHolder;
     public DialogModalAction ActionSample;
+    public GameObject SeparatorSample;
     public GameObject CloseButton;
     
-    List<DialogModalAction> Actions = new();
+    List<GameObject> Items = new();
 
     public new void Start() 
     {
@@ -27,18 +28,25 @@ public class DialogModal : Modal
         BodyLabel.text = body;
         CloseButton.SetActive(allowX);
         
-        foreach (DialogModalAction act in Actions) Destroy(act.gameObject);
-        Actions.Clear();
+        foreach (GameObject item in Items) Destroy(item);
+        Items.Clear();
 
         int index = 0;
         foreach (string act in actions) 
         {
             int i = index;
+            if (string.IsNullOrEmpty(act))
+            {
+                Items.Add(Instantiate(SeparatorSample, ActionHolder));
+            }
+            else 
+            {
+                DialogModalAction action = Instantiate(ActionSample, ActionHolder);
+                action.Text.text = act;
+                action.Button.onClick.AddListener(() => { onSelect(i); Close(); });
+                Items.Add(action.gameObject);
+            }
             index++;
-            DialogModalAction action = Instantiate(ActionSample, ActionHolder);
-            action.Text.text = act;
-            action.Button.onClick.AddListener(() => { onSelect(i); Close(); });
-            Actions.Add(action);
         }
     }
 }
