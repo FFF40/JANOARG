@@ -721,6 +721,9 @@ public class InspectorPanel : MonoBehaviour
         } else if (MultiHandler is ChartmakerMultiHandler<string> stringHandler) {
             MultiHandler.To ??= "";
             SpawnForm<FormEntryString, string>("To", () => (string)stringHandler.To, x => { stringHandler.To = x; });
+        } else if (MultiHandler is ChartmakerMultiHandler<IEaseDirective> easeHandler) {
+            MultiHandler.To ??= new BasicEaseDirective();
+            SpawnForm<FormEntryEasing, IEaseDirective>("To", () => (IEaseDirective)easeHandler.To, x => { easeHandler.To = x; });
         } else if (MultiHandler.TargetType.IsEnum) {
             MultiHandler.To ??= MultiHandler.TargetType.GetEnumValues().GetValue(0);
             SpawnForm<FormEntryDropdown, object>("To", () => MultiHandler.To, x => {
