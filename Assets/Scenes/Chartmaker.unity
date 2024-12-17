@@ -23241,6 +23241,7 @@ MonoBehaviour:
   ItemSample: {fileID: 6732241780356526584, guid: 49297218ad201d54396964e8889b4d80, type: 3}
   EaseFunctionsHolder: {fileID: 715571572}
   EaseModesHolder: {fileID: 1918440999}
+  EaseModesCanvasGroup: {fileID: 1918441005}
   BezierEasingTab: {fileID: 726885112}
   BezierEasingFields: {fileID: 1164187187}
   P1XField: {fileID: 532599028}
@@ -48122,6 +48123,7 @@ GameObject:
   - component: {fileID: 1918441004}
   - component: {fileID: 1918441003}
   - component: {fileID: 1918441002}
+  - component: {fileID: 1918441005}
   m_Layer: 5
   m_Name: Modes
   m_TagString: Untagged
@@ -48240,6 +48242,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1918440998}
   m_CullTransparentMesh: 1
+--- !u!225 &1918441005
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918440998}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1919396126
 GameObject:
   m_ObjectHideFlags: 0

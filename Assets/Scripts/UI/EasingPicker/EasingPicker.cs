@@ -37,6 +37,7 @@ public class EasingPicker : MonoBehaviour, IPointerMoveHandler, IPointerDownHand
     List<ContextMenuItem> EaseFunctions = new();
     public RectTransform EaseModesHolder;
     List<ContextMenuItem> EaseModes = new();
+    public CanvasGroup EaseModesCanvasGroup;
 
     [Space]
     public Button BezierEasingTab;
@@ -180,6 +181,11 @@ public class EasingPicker : MonoBehaviour, IPointerMoveHandler, IPointerDownHand
         {
             BasicEasingFields.SetActive(true);
             BasicEasingTab.interactable = false;
+            bool isLinear = bed.Function == EaseFunction.Linear;
+            
+            EaseModesCanvasGroup.interactable = !isLinear;
+            EaseModesCanvasGroup.alpha = isLinear ? 0.5f : 1;
+
             string name = Enum.GetName(typeof(EaseFunction), bed.Function);
             foreach (var item in EaseFunctions)
             {
@@ -189,7 +195,7 @@ public class EasingPicker : MonoBehaviour, IPointerMoveHandler, IPointerDownHand
             name = Enum.GetName(typeof(EaseMode), bed.Mode);
             foreach (var item in EaseModes)
             {
-                item.CheckedIndicator.SetActive(item.ContentLabel.text == name);
+                item.CheckedIndicator.SetActive(!isLinear && item.ContentLabel.text == name);
             }
         }
         else 

@@ -1,10 +1,12 @@
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class FormEntryToggleFloat : FormEntry<float>
 {
     public Toggle Toggle;
     public TMP_InputField Field;
+    public GameObject NotField;
 
     public new void Start() 
     {
@@ -16,12 +18,14 @@ public class FormEntryToggleFloat : FormEntry<float>
     {
         Toggle.SetIsOnWithoutNotify(!float.IsNaN(CurrentValue));
         Field.gameObject.SetActive(Toggle.isOn);
+        NotField.SetActive(!Toggle.isOn);
         Field.SetTextWithoutNotify(Toggle.isOn ? CurrentValue.ToString() : "0");
     }
 
     public void SetValue(bool value)
     {
         Field.gameObject.SetActive(value);
+        NotField.SetActive(!value);
         SetValue(value ? Field.text : "NaN");
     }
     
