@@ -262,7 +262,7 @@ public class RenderModal : Modal
         BusyDisclaimer.SetActive(true);
         BusyLabel.text = "Checking FFmpeg...";
         Task task = Task.Run(async () => {
-            output = await ffmpeg("-version");
+            output = (await ffmpeg("-version")).Output;
             Debug.Log(output);
             Match m = Regex.Match(output, @"^ffmpeg version ([^\s]+)");
             if (!m.Success) throw new Exception("Executable doesn't seem to be FFmpeg");
@@ -310,8 +310,9 @@ public class RenderModal : Modal
             fragmentsDir = Path.Combine(sessionDir, $"Fragments"),
             outputPath = "";
 
-        bool isError = false;
-        string error = "";
+        // TODO: handle rendering errors
+        // bool isError = false;
+        // string error = "";
     
         try 
         {
@@ -346,7 +347,7 @@ public class RenderModal : Modal
                     + $"-crf {crf} " 
                     + "\"" + Path.Combine(fragmentsDir, $"{frag}.{format.Extension}") + $"\" ";
                 // Debug.Log(args);
-                Task<string> task = ffmpeg(args, x => Debug.Log(x));
+                Task<ProcessOutput> task = ffmpeg(args, x => Debug.Log(x));
                 yield return new WaitUntil(() => task.IsCompleted);
                 for (int a = start; a <= end; a++) File.Delete(Path.Combine(framesDir, $"{a}.png"));
                 busyFrags--;
@@ -405,7 +406,7 @@ public class RenderModal : Modal
                     + $"-vcodec {format.VideoFormat} -acodec {format.AudioFormat} "
                     + $"-crf {crf} -b:a {Prefs.AudioBitRate}k "
                     + "\"" + outputPath + $"\" ";
-                Task<string> task = ffmpeg(args, x => Debug.Log(x));
+                Task<ProcessOutput> task = ffmpeg(args, x => Debug.Log(x));
                 yield return new WaitUntil(() => task.IsCompleted);
                 Debug.Log(task.Result);
             }
@@ -427,7 +428,7 @@ public class RenderModal : Modal
             Chartmaker.main.Notify("Render completed!");
         }
     }
-    async Task<string> cmd(string file, string args, Action<string> onLineRead = null) 
+    async Task<ProcessOutput> cmd(string file, string args, Action<string> onLineRead = null) 
     {
         ProcessStartInfo startInfo = new(file)
         {
@@ -444,7 +445,7 @@ public class RenderModal : Modal
         };
         process.Start();
 
-        string output = "";
+        ProcessOutput output = new();
 
         await Task.WhenAll(
             Task.Run(() => {
@@ -452,7 +453,7 @@ public class RenderModal : Modal
                 while ((line = process.StandardOutput.ReadLine()) != null)
                 {
                     onLineRead?.Invoke(line);
-                    output += line;
+                    output.Output += line;
                 }     
             }),
             Task.Run(() => {
@@ -460,15 +461,17 @@ public class RenderModal : Modal
                 while ((line = process.StandardError.ReadLine()) != null)
                 {
                     onLineRead?.Invoke(line);
-                    output += line;
+                    output.Output += line;
                 }     
             })
         );
+
+        output.ExitCode = process.ExitCode;
         
         return output;
     }
 
-    async Task<string> ffmpeg(string args, Action<string> onLineRead = null) 
+    async Task<ProcessOutput> ffmpeg(string args, Action<string> onLineRead = null) 
     {
         return await cmd(Prefs.FFmpegPath, args, onLineRead);
     }
@@ -532,4 +535,10 @@ public class RenderFormat {
     {
         return $".{Extension} (audio {AudioFormat}, video {VideoFormat})";
     }
+}
+
+public class ProcessOutput 
+{
+    public string Output = "";
+    public int ExitCode;
 }

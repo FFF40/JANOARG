@@ -283,6 +283,7 @@ public class Chartmaker : MonoBehaviour
                 else if (choice == 2) 
                 {
                     CurrentSong.Cover.Layers.RemoveAt(i);
+                    InspectorPanel.main.IsCoverDirty = false;
                     i--;
                 }
                 else if (choice == 3) 

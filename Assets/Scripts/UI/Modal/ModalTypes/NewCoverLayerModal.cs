@@ -163,6 +163,16 @@ public class NewCoverLayerModal : Modal
         Chartmaker.main.LoaderPanel.ProgressLabel.text = "Saving image...";
 
         byte[] data = Extension == ".jpg" ? ImageConversion.EncodeToJPG(ImageData) : ImageConversion.EncodeToPNG(ImageData);
+        try { Directory.CreateDirectory(Path.GetDirectoryName(path)); }
+        catch (Exception e) 
+        {
+            Chartmaker.main.Loader.SetActive(false);
+            DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+            modal.SetDialog("Error", e.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(e);
+            yield break;
+        }
+
         Task task = File.WriteAllBytesAsync(path, data);
         yield return new WaitUntil(() => task.IsCompleted);
         if (!task.IsCompletedSuccessfully) 
@@ -192,6 +202,7 @@ public class NewCoverLayerModal : Modal
         
         try 
         {
+            PlayerView.main.UpdateObjects();
             PlayerView.main.UpdateIconFile();
             InspectorPanel.main.IsCoverDirty = false;
         }
@@ -205,6 +216,8 @@ public class NewCoverLayerModal : Modal
         }
 
         Chartmaker.main.Loader.SetActive(false);
+        HierarchyPanel.main.UpdateHierarchy();
+        InspectorPanel.main.SetObject(song.Cover.Layers[^1]);
         ImageData = null;
         Close();
     }
