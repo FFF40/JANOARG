@@ -43,16 +43,19 @@ public class RenderModal : Modal
             Extension = "mp4",
             VideoFormat = "h264",
             AudioFormat = "mp3",
+            CRFRange = new (26, 16),
         },
         new RenderFormat () {
             Extension = "mp4",
             VideoFormat = "h264",
             AudioFormat = "aac",
+            CRFRange = new (26, 16),
         },
         new RenderFormat () {
             Extension = "webm",
             VideoFormat = "vp8",
             AudioFormat = "libvorbis",
+            CRFRange = new (63, 4),
         },
     };
 
@@ -152,19 +155,19 @@ public class RenderModal : Modal
 
             ContextMenuHolder.main.OpenRoot(new ContextMenuList(
                 new ContextMenuListAction("Standard", () => {}, _enabled: false),
-                getItem(   "5:4", 5 / 4f),
-                getItem(   "4:3", 4 / 3f),
+                getItem(   "5:4",       5 / 4f),
+                getItem(   "4:3",       4 / 3f),
                 new ContextMenuListSeparator(),
                 new ContextMenuListAction("Wide", () => {}, _enabled: false),
-                getItem(   "16:10", 16 / 10f),
-                getItem(   "16:9", 16 / 9f),
+                getItem(   "16:10",    16 / 10f),
+                getItem(   "16:9",     16 / 9f),
                 new ContextMenuListSeparator(),
                 new ContextMenuListAction("Ultra-wide", () => {}, _enabled: false),
                 getItem(   "256:135", 256 / 135f),
-                getItem(   "21:9", 21 / 9f),
-                getItem(   "64:27", 64 / 27f),
-                getItem(   "12:5", 12 / 5f),
-                getItem(   "32:9", 32 / 9f)
+                getItem(   "21:9",     21 / 9f),
+                getItem(   "64:27",    64 / 27f),
+                getItem(   "12:5",     12 / 5f),
+                getItem(   "32:9",     32 / 9f)
             ), (RectTransform)ratioBtn.transform); 
         });
         // --
@@ -224,8 +227,17 @@ public class RenderModal : Modal
             ), (RectTransform)fpsPresets.Button.transform);
         });
 
+        SpawnForm<FormEntrySpace>("");
+        var vqualField = SpawnForm<FormEntryRange, float>("Video Quality", () => Prefs.VideoQuality * 100, x => {
+            Prefs.VideoQuality = x / 100; PrefsDirty = true;
+        });
+        vqualField.Range.maxValue = 100; vqualField.Range.wholeNumbers = true;
+        SpawnForm<FormEntryInt, int>("Audio Bitrate (kbps)", () => Prefs.AudioBitRate, x => {
+            Prefs.AudioBitRate = x; PrefsDirty = true;
+        });
+
         SpawnForm<FormEntryHeader>("Other");
-        SpawnForm<FormEntryBool, bool>("Open on Complete", () => Prefs.OpenOnComplete, x => {
+        SpawnForm<FormEntryBool, bool>("Open File on Complete", () => Prefs.OpenOnComplete, x => {
             Prefs.OpenOnComplete = x; PrefsDirty = true;
         });
         
@@ -290,114 +302,132 @@ public class RenderModal : Modal
         rtex.Create();
 
         Texture2D tex = new (Prefs.Resolution.x, Prefs.Resolution.y);
-        
-        // Initiate temp folder
+
         long sessionID = Random.Range(0, 2147483647) << 32 | Random.Range(0, 2147483647);
-        string sessionDir, framesDir, fragmentsDir;
-        sessionDir = Path.Combine(Path.GetTempPath(), $"JANOARG Chartmaker/Render_{sessionID:X16}");
-        Directory.CreateDirectory(framesDir = Path.Combine(sessionDir, $"Frames"));
-        Directory.CreateDirectory(fragmentsDir = Path.Combine(sessionDir, $"Fragments"));
+        string 
+            sessionDir = Path.Combine(Path.GetTempPath(), $"JANOARG Chartmaker/Render_{sessionID:X16}"),
+            framesDir = Path.Combine(sessionDir, $"Frames"),
+            fragmentsDir = Path.Combine(sessionDir, $"Fragments"),
+            outputPath = "";
 
-        // Render frames
-        float time = TimeRange.x;
-        int frames = 1, frags = 1;
-        float delta = 1 / Prefs.FrameRate;
-        float camHeight = Math.Min(1, 3 / 2f * tex.width / tex.height) * 0.9f;
-        float fov = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camHeight) * 2 * Mathf.Rad2Deg;
-        int queuedFrames = 1, busyFrags = 0;
-
-        int totalFrames = (int)((TimeRange.y - TimeRange.x) * Prefs.FrameRate);
-
-        Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Rendering frames... ({frames}/{totalFrames})";
-
-        IEnumerator makeFragment(int start, int end)
+        bool isError = false;
+        string error = "";
+    
+        try 
         {
-            int frag = frags;
-            frags++;
-            busyFrags++;
-            string args = 
-                $"-start_number {start} -r {Prefs.FrameRate} "
-                + "-i \"" + Path.Combine(framesDir, $"%d.png") + "\" "
-                + $"-vframes {end - start + 1} -r {Prefs.FrameRate} " 
-                + "\"" + Path.Combine(fragmentsDir, $"{frag}.mp4") + $"\" ";
-            // Debug.Log(args);
-            Task<string> task = ffmpeg(args);
-            yield return new WaitUntil(() => task.IsCompleted);
-            for (int a = start; a <= end; a++) File.Delete(Path.Combine(framesDir, $"{a}.png"));
-            busyFrags--;
-        }
+            // Initiate temp folder
+            Directory.CreateDirectory(framesDir);
+            Directory.CreateDirectory(fragmentsDir);
 
-        while (time < TimeRange.y)
-        {
-            Chartmaker.main.SongSource.time = Mathf.Clamp(time, 0, Chartmaker.main.SongSource.clip.length);
-            InformationBar.main.Update();
-            PlayerView.main.UpdateObjects();
-            yield return null;
-            RenderTexture.active = rtex;
-            camera.rect = new Rect(0, 0, tex.width, tex.height); 
-            camera.fieldOfView = fov;
-            camera.Render();
-            tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
-            tex.Apply();
-            File.WriteAllBytes(Path.Combine(framesDir, $"{frames}.png"), tex.EncodeToPNG());
+            // Render frames
+            float time = TimeRange.x;
+            int frames = 1, frags = 1;
+            float delta = 1 / Prefs.FrameRate;
+            float camHeight = Math.Min(1, 3 / 2f * tex.width / tex.height) * 0.9f;
+            float fov = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camHeight) * 2 * Mathf.Rad2Deg;
+            int queuedFrames = 1, busyFrags = 0;
+            RenderFormat format = formats[Prefs.OutputType];
 
-            time += delta;
-            frames++;
-            if (frames % 100 == 1 && frames != 1) 
-            {
-                if (busyFrags >= 3) yield return new WaitUntil(() => busyFrags < 3);
-                StartCoroutine(makeFragment(frames - 100, frames - 1));
-                queuedFrames = frames;
-            }
-            
+            int totalFrames = (int)((TimeRange.y - TimeRange.x) * Prefs.FrameRate);
+            int crf = Mathf.RoundToInt(Mathf.Lerp(format.CRFRange.x, format.CRFRange.y, Prefs.VideoQuality));
+
             Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Rendering frames... ({frames}/{totalFrames})";
-            Chartmaker.main.LoaderPanel.ProgressBar.value = (float)frames / totalFrames;
+
+            IEnumerator makeFragment(int start, int end)
+            {
+                int frag = frags;
+                frags++;
+                busyFrags++;
+                string args = 
+                    $"-start_number {start} -r {Prefs.FrameRate} "
+                    + "-i \"" + Path.Combine(framesDir, $"%d.png") + "\" "
+                    + $"-vframes {end - start + 1} -r {Prefs.FrameRate} -pix_fmt yuv420p "
+                    + $"-vcodec {format.VideoFormat} "
+                    + $"-crf {crf} " 
+                    + "\"" + Path.Combine(fragmentsDir, $"{frag}.{format.Extension}") + $"\" ";
+                // Debug.Log(args);
+                Task<string> task = ffmpeg(args, x => Debug.Log(x));
+                yield return new WaitUntil(() => task.IsCompleted);
+                for (int a = start; a <= end; a++) File.Delete(Path.Combine(framesDir, $"{a}.png"));
+                busyFrags--;
+            }
+
+            while (time < TimeRange.y)
+            {
+                Chartmaker.main.SongSource.time = Mathf.Clamp(time, 0, Chartmaker.main.SongSource.clip.length);
+                InformationBar.main.Update();
+                PlayerView.main.UpdateObjects();
+                yield return null;
+                RenderTexture.active = rtex;
+                camera.rect = new Rect(0, 0, tex.width, tex.height); 
+                camera.fieldOfView = fov;
+                camera.Render();
+                tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
+                tex.Apply();
+                File.WriteAllBytes(Path.Combine(framesDir, $"{frames}.png"), tex.EncodeToPNG());
+
+                time += delta;
+                frames++;
+                if (frames % 100 == 1 && frames != 1) 
+                {
+                    if (busyFrags >= 3) yield return new WaitUntil(() => busyFrags < 3);
+                    StartCoroutine(makeFragment(frames - 100, frames - 1));
+                    queuedFrames = frames;
+                }
+                
+                Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Rendering frames... ({frames}/{totalFrames})";
+                Chartmaker.main.LoaderPanel.ProgressBar.value = (float)frames / totalFrames;
+            }
+            StartCoroutine(makeFragment(queuedFrames, frames - 1));
+
+            Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Outputting video...";
+            yield return new WaitUntil(() => busyFrags <= 0);
+            
+            string folder = Path.Combine(Application.dataPath, "../Renders");
+            Directory.CreateDirectory(folder);
+            outputPath = Path.Combine(
+                folder, 
+                (string.IsNullOrWhiteSpace(OutputPath) ? DateTimeOffset.UtcNow.ToUnixTimeSeconds() : OutputPath) + "." + format.Extension
+            );
+
+            using(var stream = File.OpenWrite(Path.Combine(sessionDir, $"demux.txt")))
+            using(var writer = new StreamWriter(stream))
+            {
+                for (int a = 1; a < frags; a++) writer.WriteLine("file '" + Path.Combine(fragmentsDir, $"{a}.{format.Extension}") + "'");
+            }
+            {
+                string args = 
+                    $" -f concat -safe 0 " 
+                    + "-i \"" + Path.Combine(sessionDir, $"demux.txt") + "\" "
+                    + $"-ss {TimeRange.x} -t {TimeRange.y - TimeRange.x} " 
+                    + "-i \"" + Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.ClipPath) + "\" "
+                    + $"-r {Prefs.FrameRate} "
+                    + $"-vcodec {format.VideoFormat} -acodec {format.AudioFormat} "
+                    + $"-crf {crf} -b:a {Prefs.AudioBitRate}k "
+                    + "\"" + outputPath + $"\" ";
+                Task<string> task = ffmpeg(args, x => Debug.Log(x));
+                yield return new WaitUntil(() => task.IsCompleted);
+                Debug.Log(task.Result);
+            }
         }
-        StartCoroutine(makeFragment(queuedFrames, frames - 1));
-
-        Chartmaker.main.LoaderPanel.ProgressLabel.text = $"Outputting video...";
-        yield return new WaitUntil(() => busyFrags <= 0);
-        
-        RenderFormat format = formats[Prefs.OutputType];
-        string folder = Path.Combine(Application.dataPath, "../Renders");
-        Directory.CreateDirectory(folder);
-        string outputPath = Path.Combine(
-            folder, 
-            (string.IsNullOrWhiteSpace(OutputPath) ? DateTimeOffset.UtcNow.ToUnixTimeSeconds() : OutputPath) + "." + format.Extension
-        );
-
-        using(var stream = File.OpenWrite(Path.Combine(sessionDir, $"demux.txt")))
-        using(var writer = new StreamWriter(stream))
+        finally 
         {
-            for (int a = 1; a < frags; a++) writer.WriteLine("file '" + Path.Combine(fragmentsDir, $"{a}.mp4") + "'");
-        }
-        {
-            string args = 
-                $" -f concat -safe 0 " 
-                + "-i \"" + Path.Combine(sessionDir, $"demux.txt") + "\" "
-                + $"-ss {TimeRange.x} -t {TimeRange.y - TimeRange.x} " 
-                + "-i \"" + Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), Chartmaker.main.CurrentSong.ClipPath) + "\" "
-                + $"-r {Prefs.FrameRate} -vcodec {format.VideoFormat} -acodec {format.AudioFormat} "
-                + "\"" + outputPath + $"\" ";
-            // Debug.Log(args);
-            Task<string> task = ffmpeg(args);
-            yield return new WaitUntil(() => task.IsCompleted);
-            Debug.Log(task.Result);
-        }
-        Directory.Delete(framesDir, true);
-        Directory.Delete(fragmentsDir, true);
+            Directory.Delete(framesDir, true);
+            Directory.Delete(fragmentsDir, true);
 
+            camera.targetTexture = null;
+            RenderTexture.active = null;
+            Destroy(rtex);
 
-        // Clean up
-        camera.targetTexture = null;
-        RenderTexture.active = null;
-        Destroy(rtex);
-        Close();
-        Chartmaker.main.Loader.SetActive(false);
-        if (Prefs.OpenOnComplete) Application.OpenURL("file://" + outputPath);
-        IsAnimating = false;
+            Close();
+            Chartmaker.main.Loader.SetActive(false);
+            if (Prefs.OpenOnComplete && !string.IsNullOrEmpty(outputPath)) Application.OpenURL("file://" + outputPath);
+            IsAnimating = false;
+
+            Chartmaker.main.Notify("Render completed!");
+        }
     }
-    async Task<string> cmd(string file, string args) 
+    async Task<string> cmd(string file, string args, Action<string> onLineRead = null) 
     {
         ProcessStartInfo startInfo = new(file)
         {
@@ -421,7 +451,7 @@ public class RenderModal : Modal
                 string line = "";
                 while ((line = process.StandardOutput.ReadLine()) != null)
                 {
-                    // Debug.Log(line);
+                    onLineRead?.Invoke(line);
                     output += line;
                 }     
             }),
@@ -429,7 +459,7 @@ public class RenderModal : Modal
                 string line = "";
                 while ((line = process.StandardError.ReadLine()) != null)
                 {
-                    // Debug.Log(line);
+                    onLineRead?.Invoke(line);
                     output += line;
                 }     
             })
@@ -438,9 +468,9 @@ public class RenderModal : Modal
         return output;
     }
 
-    async Task<string> ffmpeg(string args) 
+    async Task<string> ffmpeg(string args, Action<string> onLineRead = null) 
     {
-        return await cmd(Prefs.FFmpegPath, args);
+        return await cmd(Prefs.FFmpegPath, args, onLineRead);
     }
 
     T SpawnForm<T>(string title = "") where T : FormEntry
@@ -455,17 +485,25 @@ public class RenderPrefs
 {
     public string FFmpegPath;
     public int OutputType;
+
     public Vector2Int Resolution = new(1024, 800);
     public float FrameRate = 30;
+    public float VideoQuality = 0.6f;
+    public int AudioBitRate = 128;
+
     public bool OpenOnComplete = true;
 
     public void Load(Storage storage)
     {
         FFmpegPath = storage.Get("RD:FFmpegPath", FFmpegPath);
         OutputType = storage.Get("RD:OutputType", OutputType);
+
         Resolution.x = storage.Get("RD:Resolution.X", Resolution.x);
         Resolution.y = storage.Get("RD:Resolution.Y", Resolution.y);
         FrameRate = storage.Get("RD:FrameRate", FrameRate);
+        VideoQuality = storage.Get("RD:VideoQuality", VideoQuality);
+        AudioBitRate = storage.Get("RD:AudioBitRate", AudioBitRate);
+
         OpenOnComplete = storage.Get("RD:OpenOnComplete", OpenOnComplete);
     }
 
@@ -473,9 +511,13 @@ public class RenderPrefs
     {
         storage.Set("RD:FFmpegPath", FFmpegPath);
         storage.Set("RD:OutputType", OutputType);
+
         storage.Set("RD:Resolution.X", Resolution.x);
         storage.Set("RD:Resolution.Y", Resolution.y);
         storage.Set("RD:FrameRate", FrameRate);
+        storage.Set("RD:VideoQuality", VideoQuality);
+        storage.Set("RD:AudioBitRate", AudioBitRate);
+
         storage.Set("RD:OpenOnComplete", OpenOnComplete);
     }
 }
@@ -484,6 +526,7 @@ public class RenderFormat {
     public string Extension;
     public string AudioFormat;
     public string VideoFormat;
+    public Vector2 CRFRange;
 
     public override string ToString() 
     {

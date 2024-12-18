@@ -60,6 +60,14 @@ public class NewSongModal : Modal
                 modal.SetDialog("Error", "Please select an audio file first in order to use auto-fill.", new[] { "Ok" }, _ => {});
                 return;
             }
+            string extension = Path.GetExtension(AudioPath);
+            if (Array.IndexOf(new string[] {".mp3", ".ogg"}, extension) < 0) 
+            {
+                var modal = ModalHolder.main.Spawn<DialogModal>();
+                modal.SetDialog("Error", "Reading metadata from " + extension + " files is unsupported.\n(Current supported file types are .mp3 and .ogg)", new[] { "Ok" }, _ => {});
+                return;
+            }
+
 
             SongMetadata = new(AudioPath, false);
             bool helpful = false;
@@ -174,6 +182,7 @@ public class NewSongModal : Modal
             Chartmaker.main.Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", task.Exception.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(task.Exception);
             yield break;
         }
         

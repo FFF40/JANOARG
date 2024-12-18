@@ -127,7 +127,21 @@ public class NewCoverLayerModal : Modal
             modal.SetDialog("Error", "There is already a cover layer with the same file target.", new string[] {"Ok"}, _ => {});
             yield break;
         }
-        string path = Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), target);
+
+        string path = "";
+        try 
+        {
+            path = Path.Combine(Path.GetDirectoryName(Chartmaker.main.CurrentSongPath), target);
+        }
+        catch (Exception e)
+        {
+            Chartmaker.main.Loader.SetActive(false);
+            DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+            modal.SetDialog("Error", e.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(e);
+            yield break;
+        }
+
         if (File.Exists(path))
         {
             int choice = 0;
@@ -156,6 +170,7 @@ public class NewCoverLayerModal : Modal
             Chartmaker.main.Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", task.Exception.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(task.Exception);
             yield break;
         }
 
@@ -171,6 +186,7 @@ public class NewCoverLayerModal : Modal
             Chartmaker.main.Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", saveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(saveTask.Exception);
             yield break;
         }
         
@@ -179,11 +195,12 @@ public class NewCoverLayerModal : Modal
             PlayerView.main.UpdateIconFile();
             InspectorPanel.main.IsCoverDirty = false;
         }
-        catch (Exception)
+        catch (Exception e)
         {
             Chartmaker.main.Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
-            modal.SetDialog("Error", saveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            modal.SetDialog("Error", e.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(e);
             yield break;
         }
 

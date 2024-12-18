@@ -164,6 +164,14 @@ public class Chartmaker : MonoBehaviour
     public IEnumerator OpenSongRoutine(string path) {
         if (ActiveTask?.IsCompleted == false) yield break;
 
+        if (CurrentSong != null) 
+        {
+            DirtyModal(() => { 
+                CloseSong(); StartCoroutine(OpenSongRoutine(path));
+            });
+            yield break;
+        }
+
         Loader.SetActive(true);
         LoaderPanel.ActionLabel.text = "Loading Playable Song...";
         LoaderPanel.ProgressBar.value = 0;
@@ -223,26 +231,68 @@ public class Chartmaker : MonoBehaviour
 
         LoaderPanel.ProgressLabel.text = "Loading song cover images...";
         
-        int progress = 0;
-        foreach (CoverLayer layer in CurrentSong.Cover.Layers)
+        for (int i = 0; i < CurrentSong.Cover.Layers.Count; i++)
         {
-            ActiveTask = File.ReadAllBytesAsync(Path.Combine(Path.GetDirectoryName(path), layer.Target));
+            CoverLayer layer = CurrentSong.Cover.Layers[i];
+            bool isError = false;
+            string error = "";
+
+            string coverPath = Path.Combine(Path.GetDirectoryName(path), layer.Target);
+            if (!File.Exists(coverPath))
+            {
+                error = "The target file does not exist in song folder. Are you trying to delete it?";
+                isError = true;
+                goto layerLoadEnd;
+            }
+
+            ActiveTask = File.ReadAllBytesAsync(coverPath);
             yield return new WaitUntil(() => ActiveTask.IsCompleted);
             if (!ActiveTask.IsCompletedSuccessfully) 
             {
-                Loader.SetActive(false);
-                DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
-                modal.SetDialog("One of the cover layer image failed to load:\n", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
-                yield break;
+                error = ActiveTask.Exception.Message;
+                isError = true;
+                goto layerLoadEnd;
             }
 
             Texture2D texture = new (1, 1);
             ImageConversion.LoadImage(texture, ((Task<byte[]>)ActiveTask).Result);
             layer.Texture = texture;
+
+            // I tried to use a try-catch block but id didn't go well with yield statements
+            layerLoadEnd:
+            if (isError) 
+            {
+                DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
+                IEnumerator thing()
+                {
+                    yield return null;
+                    modal.transform.SetParent(Loader.transform);
+                }
+                StartCoroutine(thing());
+                int choice = 0;
+                modal.SetDialog("Error", 
+                    "Cover Layer \"" + layer.Target + "\" failed to load:\n" + error + "\n\nWhat would you like to do?", 
+                    new string[] {"Cancel Loading", "", "Remove Layer", "Try Again"}, 
+                    x => choice = x);
+                yield return new WaitUntil(() => !modal);
+                if (choice == 0) 
+                {
+                    Loader.SetActive(false);
+                    yield break;
+                }
+                else if (choice == 2) 
+                {
+                    CurrentSong.Cover.Layers.RemoveAt(i);
+                    i--;
+                }
+                else if (choice == 3) 
+                {
+                    i--;
+                }
+            }
             
-            progress++;
-            LoaderPanel.ProgressLabel.text = $"Loading song cover images... ({progress}/{CurrentSong.Cover.Layers.Count})";
-            LoaderPanel.ProgressBar.value = .6f + progress * 0.4f / CurrentSong.Cover.Layers.Count;
+            LoaderPanel.ProgressLabel.text = $"Loading song cover images... ({i}/{CurrentSong.Cover.Layers.Count})";
+            LoaderPanel.ProgressBar.value = .6f + i * 0.4f / CurrentSong.Cover.Layers.Count;
         }
 
         Loader.SetActive(false);
@@ -336,8 +386,7 @@ public class Chartmaker : MonoBehaviour
         if (ActiveTask?.IsCompleted == false) yield break;
         if (CurrentSong == null) yield break;
         
-        NotificationLabel.text = "Saving song data...";
-        NotificationTime = float.PositiveInfinity;
+        NotifyPending("Saving song data...");
 
         ActiveTask = SaveAsync();
         yield return new WaitUntil(() => ActiveTask.IsCompleted);
@@ -346,6 +395,7 @@ public class Chartmaker : MonoBehaviour
         Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(ActiveTask.Exception);
             yield break;
         }
 
@@ -355,9 +405,7 @@ public class Chartmaker : MonoBehaviour
             InspectorPanel.main.IsCoverDirty = false;
         }
 
-        NotificationLabel.text = "Song data saved!";
-        NotificationFlashTime = 0.5f;
-        NotificationTime = 3;
+        Notify("Song data saved!");
     }
     
     public IEnumerator SaveThenQuit() {
@@ -381,8 +429,7 @@ public class Chartmaker : MonoBehaviour
     public IEnumerator SavePrefsRoutine() {
         if (ActiveTask?.IsCompleted == false) yield break;
         
-        NotificationLabel.text = "Saving preferences...";
-        NotificationTime = float.PositiveInfinity;
+        NotifyPending("Saving preferences...");
 
         ActiveTask = Task.Run(() => {
             PreferencesStorage.Save();
@@ -394,12 +441,11 @@ public class Chartmaker : MonoBehaviour
             Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", ActiveTask.Exception.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(ActiveTask.Exception);
             yield break;
         }
 
-        NotificationLabel.text = "Preferences saved!";
-        NotificationFlashTime = 0.5f;
-        NotificationTime = 3;
+        Notify("Preferences saved!");
     }
     
     public void StartSavePrefsRoutine() {
@@ -722,6 +768,19 @@ public class Chartmaker : MonoBehaviour
             AddItem(obj, TimelinePanel.main.ToRoundedBeat(CurrentSong.Timing.ToBeat(SongSource.time)));
         }
         InspectorPanel.main.SetObject(obj, false);
+    }
+
+    public void NotifyPending(string text, float time = float.PositiveInfinity)
+    {
+        NotificationLabel.text = text;
+        NotificationTime = time;
+    }
+
+    public void Notify(string text, float time = 3, float flashTime = 0.5f)
+    {
+        NotificationLabel.text = text;
+        NotificationTime = time;
+        NotificationFlashTime = flashTime;
     }
 }
 

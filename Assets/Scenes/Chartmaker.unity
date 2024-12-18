@@ -27865,6 +27865,7 @@ MonoBehaviour:
   - {fileID: 4121358708025041799, guid: 5783d46b3e7527f47bd074fb254c1f91, type: 3}
   - {fileID: 34773266778403783, guid: c416037e83bd3fb418c70b845e662ca0, type: 3}
   - {fileID: 792987215404438124, guid: 3a55de772fd2a9240aa0726b86608ed9, type: 3}
+  - {fileID: 1989203748, guid: e571e76c8148dcc49af4f7116d212e24, type: 3}
   - {fileID: 164413347704432702, guid: 9f652b6a52e3f384082ddf97f0ae1742, type: 3}
   - {fileID: 1479100885, guid: b43d745778418c749b43b79b3b3f3406, type: 3}
   - {fileID: 1088483099, guid: dba99d72df53a2441b1c484f9ba6cb59, type: 3}
@@ -44000,23 +44001,25 @@ MonoBehaviour:
   defaultWindowSize: {x: 960, y: 600}
   borderSize: {x: 0, y: 0}
   windowMargin: {x: 14, y: 14}
-  CursorMapping: 007f0000897f0000027f0000017f0000847f0000857f0000fffffffffeffffff
+  CursorMapping: 007f0000897f0000027f0000017f0000847f0000857f0000fffffffffeffffff887f0000
   Cursors:
   - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
-  - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
+  - {fileID: 2800000, guid: 03340adb613ce8ef0a6fef62be393fdd, type: 3}
   - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
   - {fileID: 2800000, guid: a53338b85652f3d49b1259bdc358edc5, type: 3}
   - {fileID: 2800000, guid: a6af4aabfe1cdf747b9b7014c7647857, type: 3}
   - {fileID: 2800000, guid: 58b61e66913e9d2429edc41c78b8c298, type: 3}
   - {fileID: 2800000, guid: 45114074ad2c57546811fd37ec04f7d7, type: 3}
   - {fileID: 2800000, guid: c8b29236e8a6e2a48b7da558a040f0fa, type: 3}
+  - {fileID: 2800000, guid: 9e334d1a591bc233ca1d791833efddd9, type: 3}
   CursorPivots:
   - {x: 8, y: 6}
-  - {x: 8, y: 6}
+  - {x: 9, y: 5}
   - {x: 8, y: 6}
   - {x: 8, y: 16}
   - {x: 15, y: 15}
   - {x: 15, y: 15}
+  - {x: 14, y: 14}
   - {x: 14, y: 14}
   - {x: 14, y: 14}
 --- !u!114 &1769234555

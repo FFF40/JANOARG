@@ -1165,8 +1165,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.4, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 5}
-  m_SizeDelta: {x: 0, y: 10}
+  m_AnchoredPosition: {x: -30, y: 5}
+  m_SizeDelta: {x: 30, y: 10}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &238947386622790017
 CanvasRenderer:
@@ -3211,7 +3211,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PrefsDirty: 0
   OutputPath: 
-  OutputType: mp4
   TimeRange: {x: 0, y: 0}
   FormHolder: {fileID: 4467754680063589914}
   FormHolderLayout: {fileID: 6114464751383771736}

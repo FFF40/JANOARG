@@ -154,6 +154,7 @@ public class NewChartModal : Modal
             Chartmaker.main.Loader.SetActive(false);
             DialogModal modal = ModalHolder.main.Spawn<DialogModal>();
             modal.SetDialog("Error", task.Exception.Message, new string[] {"Ok"}, _ => {});
+            Debug.LogException(task.Exception);
             yield break;
         }
         
