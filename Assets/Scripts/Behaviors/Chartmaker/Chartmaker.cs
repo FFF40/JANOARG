@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
@@ -27,6 +28,7 @@ public class Chartmaker : MonoBehaviour
     public RectTransform HierarchyHolder;
     public RectTransform MainViewHolder;
     public RectTransform PlayerViewHolder;
+    public GameObject HomeBackground;
     [Space]
     public TMP_Text NotificationLabel;
     public CanvasGroup NotificationText;
@@ -88,6 +90,24 @@ public class Chartmaker : MonoBehaviour
             StartSaveRoutine();
         }
         lastPlayed = SongSource.isPlaying;
+
+        if (HomeBackground.activeSelf)
+        {
+            float lerp = 1 - Mathf.Pow(0.9f, Time.deltaTime);
+            Camera camera = PlayerView.main.MainCamera;
+            camera.backgroundColor = Color.Lerp(
+                camera.backgroundColor, 
+                new (0, 0.05f, 0.15f), lerp
+            );
+            camera.transform.position = Vector3.Lerp(
+                camera.transform.position,
+                Vector3.zero, lerp
+            );
+            camera.transform.rotation = Quaternion.Lerp(
+                camera.transform.rotation, 
+                Quaternion.identity, lerp
+            );
+        }
     }
 
     public void SetEditorActive(bool value)
@@ -99,6 +119,7 @@ public class Chartmaker : MonoBehaviour
         PickerHolder.gameObject.SetActive(value);
         HierarchyHolder.gameObject.SetActive(value);
         PlayerViewHolder.gameObject.SetActive(value);
+        HomeBackground.SetActive(!value);
     }
 
     public void OpenSongModal() 
@@ -466,6 +487,8 @@ public class Chartmaker : MonoBehaviour
         SetEditorActive(false);
         PlayerView.main.MainCamera.rect = new (0, 0, 1, 1);
         Resources.UnloadUnusedAssets();
+
+        PlayerView.main.ClearObjects();
         
         BorderlessWindow.RenameWindow("JANOARG Chartmaker");
 

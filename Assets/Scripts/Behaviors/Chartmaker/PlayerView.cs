@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -849,6 +850,17 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         Animate1(1);
 
         isAnimating = false;
+    }
+
+    public void ClearObjects()
+    {
+        Manager.Dispose();
+        Manager = null;
+        foreach (CMLanePlayer lane in LanePlayers) {
+            foreach (CMHitPlayer hit in lane.HitPlayers) Destroy (hit.gameObject);
+            Destroy(lane.gameObject);
+        }
+        LanePlayers.Clear();
     }
 
     public void UpdateIconFile() 

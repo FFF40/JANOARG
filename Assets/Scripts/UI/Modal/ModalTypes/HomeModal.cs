@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HomeModal : Modal
 {
     public static HomeModal main;
     
     public TMP_Text VersionLabel;
+
+    public List<GameObject> Tabs;
+    public List<Button> TabButtons;
     
     public RectTransform RecentSongsHolder;
     public RecentSongItem RecentSongSample;
@@ -48,6 +52,18 @@ public class HomeModal : Modal
                 StartCoroutine(LoadIconImageRoutine(item, recent.IconPath));
             }
             SongItems.Add(item);
+        }
+
+        SetTab(list.Count > 0 ? 1 : 0);
+    }
+
+    public void SetTab(int tab) 
+    {
+        for (int i = 0; i < Tabs.Count; i++) 
+        {
+            bool isActive = i == tab;
+            Tabs[i].SetActive(isActive);
+            TabButtons[i].interactable = !isActive;
         }
     }
 
@@ -107,4 +123,15 @@ public class HomeModal : Modal
     {
         Application.Quit();
     }
+
+    public void InteractiveTutorial()
+    {
+        ModalHolder.main.Spawn<TutorialModal>();
+    }
+
+    public void OpenHelp()
+    {
+        ModalHolder.main.Spawn<HelpModal>();
+    }
+
 }
