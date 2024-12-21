@@ -57,14 +57,13 @@ public class Tutorials
                 ),
                 new (
                     "Here is the Metadata section, the place where you'd enter information like the name of the song and the name of the people who composed it."
-                    + "\n\nYou might've noticed that there are two fields for the song name. That's because a song in JANOARG can have two names! For songs whose names aren't in Latin characters (like Japanese) those are the original name and the alternative Latinized name. JANOARG will display one of them depending on the player's language and name preferences."
-                    + "\n\nIf the song actually doesn't have an alternative name you can leave the alt name field blank.",
+                    + "\n\nBy the way, the Chartmaker can also extract metadata from the song file and populate the fields automatically. (Only .mp3 and .ogg files are supported at the moment.)",
                     "New Song Modal(Clone)->Metadata"
                 ),
                 new (
-                    "If you want to skip these, you can press the conveniently placed \"Auto-fill\" button and JANOARG will try to fill some of the fields if there is metadata information in the audio file."
-                    + "\n\nOnly \".mp3\" and \".ogg\" files are supported for now, hence the \"Experimental\" label.",
-                    "New Song Modal(Clone)->Auto-fill (Experimental)"
+                    "You might've noticed that there are two fields for the song name. That's because a song in JANOARG can have two names! For songs whose names aren't in Latin characters (like Japanese) those are the original name and the alternative Latinized name. JANOARG will display one of them depending on the player's language and name preferences."
+                    + "\n\nIf the song actually doesn't have an alternative name you can leave the alt name field blank.",
+                    "New Song Modal(Clone)->Song Name"
                 ),
                 new (
                     "The Colors here is used for a number of things, for example the background color here will be used as the default background color of the song illustration."

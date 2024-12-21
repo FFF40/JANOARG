@@ -14,9 +14,9 @@ public class Modal : MonoBehaviour, IPointerDownHandler
     IEnumerator Intro()
     {
         RectTransform rt = (RectTransform)transform;
-        rt.anchoredPosition -= new Vector2(-2, 2);
+        rt.anchoredPosition -= new Vector2(-4, 4);
         yield return new WaitForSecondsRealtime(0.05f);
-        rt.anchoredPosition += new Vector2(-2, 2);
+        rt.anchoredPosition += new Vector2(-4, 4);
     }
 
     public void Close()

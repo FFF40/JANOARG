@@ -204,6 +204,14 @@ public class PreferencesModal : Modal
             var prefs = Chartmaker.Preferences;
             var storage = Chartmaker.PreferencesStorage;
 
+            SpawnForm<FormEntryHeader>("Formatting");
+            var fsbDropdown = SpawnForm<FormEntryDropdown, object>("File Size Base", () => prefs.FileSizeBase, x => {
+                storage.Set("FM:FileSizeBase", (int)x); IsDirty = true;
+                prefs.FileSizeBase = (FileSizeBase)x;
+            });
+            fsbDropdown.ValidValues.Add(FileSizeBase.Decimal, "Decimal (1 KB = 1,000 B)");
+            fsbDropdown.ValidValues.Add(FileSizeBase.Binary, "Binary (1 KiB = 1,024 B)");
+
             SpawnForm<FormEntryHeader>("FFT");
             var windowDropdown = SpawnForm<FormEntryDropdown, object>("Window Function", () => prefs.FFTWindow, x => {
                 storage.Set("AL:FFTWindow", prefs.FFTWindow = (FFTWindow)x); IsDirty = true;

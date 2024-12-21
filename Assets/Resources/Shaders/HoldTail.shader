@@ -7,7 +7,7 @@ Shader "JANOARG/Styles/Default - Hold Tail"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Fade" }
         ZWrite Off
         Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
@@ -53,8 +53,7 @@ Shader "JANOARG/Styles/Default - Hold Tail"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv) * _Color;
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                col.a *= max(i.fogCoord.x, 0);
                 return col;
             }
             ENDCG

@@ -854,6 +854,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void ClearObjects()
     {
+        if (Manager == null) return;
         Manager.Dispose();
         Manager = null;
         foreach (CMLanePlayer lane in LanePlayers) {

@@ -3,9 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
@@ -17,6 +20,19 @@ public class NewSongModal : Modal
     public LayoutElement FormLayout;
     public RectTransform FormHolder;
     public VerticalLayoutGroup FormHolderLayout;
+    [Space]
+    public AudioSource PreviewSource;
+    public TMP_Text PreviewMessage;
+    public GameObject PreviewPlayer;
+    public Slider PreviewSlider;
+    public TMP_Text PreviewSongPositionLabel;
+    public TMP_Text PreviewSongLengthLabel;
+    public GameObject PreviewPlayIcon;
+    public GameObject PreviewPauseIcon;
+    [Space]
+    public TMP_Text SongFileSizeLabel;
+    public TooltipTarget SongFileSizeTooltip;
+    public TMP_Text SongInfoLabel;
 
     [Header("Data")]
     public string Codename;
@@ -24,6 +40,8 @@ public class NewSongModal : Modal
 
     public MetadataReader SongMetadata;
     public PlayableSong InitialValues;
+
+    Action<MetadataReader> OnMetadataRead;
 
     public void Awake()
     {
@@ -35,6 +53,28 @@ public class NewSongModal : Modal
     {
         base.Start();
         InitForm();
+        SetPlayerActive(false);
+    }
+
+    public void OnDestroy() 
+    {
+        Destroy(PreviewSource.clip);
+    }
+
+    public void Update() 
+    {
+        if (PreviewPlayer.activeSelf) 
+        {
+            static string formatTime(float seconds) => 
+                        Mathf.Floor(seconds / 60).ToString("00") 
+                + ":" + Mathf.Floor(seconds % 60).ToString("00") 
+                + "s" + Mathf.Floor(seconds * 1000 % 1000).ToString("000");
+            PreviewSlider.SetValueWithoutNotify(PreviewSource.time / PreviewSource.clip.length);
+            PreviewSongLengthLabel.text = formatTime(PreviewSource.clip.length);
+            PreviewSongPositionLabel.text = formatTime(PreviewSource.time);
+            PreviewPlayIcon.SetActive(!PreviewSource.isPlaying);
+            PreviewPauseIcon.SetActive(PreviewSource.isPlaying);
+        }
     }
 
     public void InitForm()
@@ -44,67 +84,16 @@ public class NewSongModal : Modal
 
         var codename = SpawnForm<FormEntryString, string>("Codename", () => Codename, x => Codename = x);
         codename.Field.contentType = TMP_InputField.ContentType.Alphanumeric;
-        var audio = SpawnForm<FormEntryFile, string>("Audio File", () => AudioPath, x => AudioPath = x);
+        var audio = SpawnForm<FormEntryFile, string>("Audio File", () => AudioPath, x => {
+            StartCoroutine(LoadAudio(x));
+            AudioPath = x;
+        });
         audio.AcceptedTypes = new List<FileModalFileType> {
             new("Supported audio files", "mp3", "wav", "ogg"),
             new("All files"),
         };
 
         SpawnForm<FormEntryHeader>("Metadata");
-
-        var autofill = SpawnForm<FormEntryButton>("Auto-fill (Experimental)");
-        autofill.Button.onClick.AddListener(() => {
-            if (string.IsNullOrEmpty(AudioPath)) 
-            {
-                var modal = ModalHolder.main.Spawn<DialogModal>();
-                modal.SetDialog("Error", "Please select an audio file first in order to use auto-fill.", new[] { "Ok" }, _ => {});
-                return;
-            }
-            string extension = Path.GetExtension(AudioPath);
-            if (Array.IndexOf(new string[] {".mp3", ".ogg"}, extension) < 0) 
-            {
-                var modal = ModalHolder.main.Spawn<DialogModal>();
-                modal.SetDialog("Error", "Reading metadata from " + extension + " files is unsupported.\n(Current supported file types are .mp3 and .ogg)", new[] { "Ok" }, _ => {});
-                return;
-            }
-
-
-            SongMetadata = new(AudioPath, false);
-            bool helpful = false;
-
-            if (!string.IsNullOrEmpty(SongMetadata.Title))
-            {
-                InitialValues.SongName = SongMetadata.Title;
-                title.Start();
-                helpful = true;
-            }
-            if (!string.IsNullOrEmpty(SongMetadata.Artist))
-            {
-                InitialValues.SongArtist = SongMetadata.Artist;
-                artist.Start();
-                helpful = true;
-            }
-            if (!string.IsNullOrEmpty(SongMetadata.Type))
-            {
-                InitialValues.Genre = SongMetadata.Type;
-                genre.Start();
-                helpful = true;
-            }
-            if (SongMetadata.BeatsPerMinute > 0)
-            {
-                InitialValues.Timing.Stops[0].BPM = SongMetadata.BeatsPerMinute;
-                bpm.Start();
-                helpful = true;
-            }
-
-            if (!helpful) 
-            {
-                var modal = ModalHolder.main.Spawn<DialogModal>();
-                modal.SetDialog("Error", "Couldn't find any metadata.", new[] { "Ok" }, _ => {});
-                return;
-            }
-        });
-        
         
         title = SpawnForm<FormEntryString, string>("Song Name", () => InitialValues.SongName, x => InitialValues.SongName = x);
         SpawnForm<FormEntryString, string>("Alt Song Name", () => InitialValues.AltSongName, x => InitialValues.AltSongName = x);
@@ -124,6 +113,17 @@ public class NewSongModal : Modal
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(FormHolder);
         FormLayout.preferredHeight = FormHolderLayout.preferredHeight;
+
+        OnMetadataRead = (SongMetadata) => {
+            InitialValues.SongName = string.IsNullOrEmpty(SongMetadata.Title) ? "" : SongMetadata.Title;
+            title.Start();
+            InitialValues.SongArtist = string.IsNullOrEmpty(SongMetadata.Artist) ? "" : SongMetadata.Artist;
+            artist.Start();
+            InitialValues.Genre = string.IsNullOrEmpty(SongMetadata.Type) ? "Genreless" : SongMetadata.Type;
+            genre.Start();
+            InitialValues.Timing.Stops[0].BPM = SongMetadata.BeatsPerMinute <= 0 ? 140 : SongMetadata.BeatsPerMinute;
+            bpm.Start();
+        };
     }
 
     public string Execute()
@@ -200,5 +200,71 @@ public class NewSongModal : Modal
     T SpawnForm<T, U>(string title, Func<U> get, Action<U> set) where T : FormEntry<U>
         => Formmaker.main.Spawn<T, U>(FormHolder, title, get, set);
 
+    public void SetPlayerActive(bool value) 
+    {
+        PreviewPlayer.SetActive(value);
+        PreviewMessage.gameObject.SetActive(!value);
+    }
 
+    public IEnumerator LoadAudio (string path) 
+    {
+        Destroy(PreviewSource.clip);
+        SetPlayerActive(false);
+        PreviewMessage.text = "Loading audio...";
+
+        UnityWebRequest stream = UnityWebRequestMultimedia.GetAudioClip("file://" + path, AudioType.UNKNOWN);
+        Debug.Log(stream.url);
+        stream.SendWebRequest();
+        while (!stream.isDone) 
+        {
+            yield return null;
+        }
+
+        if (stream.result != UnityWebRequest.Result.Success)
+        {
+            PreviewMessage.text = "Error: " + stream.error;
+            yield break;
+        }
+        else
+        {
+            try
+            {
+                PreviewSource.clip = DownloadHandlerAudioClip.GetContent(stream);
+                if (!PreviewSource.clip) throw new Exception(stream.error);
+                SetPlayerActive(true);
+            }
+            catch (Exception e)
+            {
+                PreviewMessage.text = "Error: " + e.Message;
+                yield break;
+            }
+        }
+
+        if (PreviewSource.clip)
+        {
+            AudioClip clip = PreviewSource.clip;
+
+            FileInfo fileInfo = new (path);
+            long fileSize = fileInfo.Length;
+
+            SongFileSizeLabel.text = Format.FileSize(fileSize);
+            SongFileSizeTooltip.Text = fileSize.ToString("#,##0") + " bytes";
+            SongInfoLabel.text = 
+                (clip.channels == 1 ? "Mono" : clip.channels == 2 ? "Stereo" : clip.channels + " channels")
+                + " / " + PreviewSource.clip.frequency + "Hz";
+
+            OnMetadataRead(new (path));
+        }
+    }
+
+    public void TogglePlay()
+    {
+        if (PreviewSource.isPlaying) PreviewSource.Pause();
+        else PreviewSource.Play();
+    }
+
+    public void SetPlayerTime(float time) 
+    {
+        PreviewSource.time = time * PreviewSource.clip.length;
+    }
 }
