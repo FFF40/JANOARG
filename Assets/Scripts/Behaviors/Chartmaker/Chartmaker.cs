@@ -639,10 +639,16 @@ public class Chartmaker : MonoBehaviour
     public void AddItem(object obj, float startingOffset)
     {
         IList list = obj is IList l ? l : new [] { obj };
-        FieldInfo field = list[0].GetType().GetField("Offset");
         if (list[0] is BPMStop fbs)
         {
-            float offset = startingOffset - fbs.Offset;
+            float minOffset = float.PositiveInfinity;
+            foreach (object item in list)
+            {
+                BPMStop stop = (BPMStop)item;
+                stop.Offset += Mathf.Min(minOffset, stop.Offset);
+            }
+
+            float offset = startingOffset - minOffset;
             foreach (object item in list)
             {
                 BPMStop stop = (BPMStop)item;
@@ -651,14 +657,21 @@ public class Chartmaker : MonoBehaviour
         }
         AddItem(list);
     }
-
     public void AddItem(object obj, BeatPosition startingOffset)
     {
         IList list = obj is IList l ? l : new [] { obj };
         FieldInfo field = list[0].GetType().GetField("Offset");
         if (list[0] is Lane fl)
         {
-            BeatPosition offset = startingOffset - fl.LaneSteps[0].Offset;
+            BeatPosition minOffset = new (int.MaxValue, int.MaxValue - 1, int.MaxValue);
+
+            foreach (object item in list)
+            {
+                Lane lane = (Lane)item;
+                minOffset = BeatPosition.Min(minOffset, lane.LaneSteps[0].Offset);
+            }
+
+            BeatPosition offset = startingOffset - minOffset;
             foreach (object item in list)
             {
                 Lane lane = (Lane)item;
@@ -676,7 +689,13 @@ public class Chartmaker : MonoBehaviour
         }
         else if (field != null)
         {
-            BeatPosition offset = startingOffset - (BeatPosition)field.GetValue(list[0]);
+            BeatPosition minOffset = new (int.MaxValue, int.MaxValue - 1, int.MaxValue);
+            foreach (object item in list)
+            {
+                minOffset = BeatPosition.Min(minOffset, (BeatPosition)field.GetValue(item));
+            }
+
+            BeatPosition offset = startingOffset - minOffset;
             foreach (object item in list)
             {
                 field.SetValue(item, (BeatPosition)field.GetValue(item) + offset);
