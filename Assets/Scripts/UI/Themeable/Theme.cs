@@ -29,4 +29,10 @@ public struct ThemeKey
 {
     public string Key;
     public Color Value;
+
+    public ThemeKey(string key, Color value)
+    {
+        Key = key;
+        Value = value;
+    }
 }

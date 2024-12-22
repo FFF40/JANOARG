@@ -225,12 +225,13 @@ public class PreferencesModal : Modal
             windowDropdown.ValidValues.Add(FFTWindow.BlackmanNuttal, "Blackman-Nuttal");
             windowDropdown.ValidValues.Add(FFTWindow.BlackmanHarris, "Blackman-Harris");
             windowDropdown.ValidValues.Add(FFTWindow.FlatTop, "Flat top");
-
-            SpawnForm<FormEntryHeader>("Spectrogram");
+            
             SpawnForm<FormEntryDropdown, object>("Frequency Scale", () => prefs.FrequencyScale, x => {
                 storage.Set("AL:FrequencyScale", prefs.FrequencyScale = (FrequencyScale)x); IsDirty = true;
                 if (TimelinePanel.main.Options.WaveformMode == 2) TimelinePanel.main.DiscardWaveform();
             }).TargetEnum(typeof(FrequencyScale));
+
+            SpawnForm<FormEntryHeader>("Spectrogram");
 
             SpawnForm<FormEntryVector2, Vector2>("Frequency Range", () => new (prefs.FrequencyMin, prefs.FrequencyMax), x => {
                 if (prefs.FrequencyMin != x[0]) prefs.FrequencyMin = Math.Clamp(x[0], 0, prefs.FrequencyMax - 1);

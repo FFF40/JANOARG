@@ -925,28 +925,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                     fft[i] = new float[resolution];
                 }
 
-                Func<float, float> scale, unscale;
-
-                switch (Chartmaker.Preferences.FrequencyScale)
-                {
-                    case FrequencyScale.Logarithmic: 
-                        scale = (x) => Mathf.Log10(1 + x);
-                        unscale = (x) => Mathf.Pow(10, x) - 1;
-                        break;
-                    case FrequencyScale.Mel: 
-                        scale = (x) => 2595 * Mathf.Log10(1 + x / 700);
-                        unscale = (x) => 700 * Mathf.Pow(10, x / 2595) - 700;
-                        break;
-                    case FrequencyScale.Bark: 
-                        scale = (x) => 6 * (float)Math.Asinh(x / 600);
-                        unscale = (x) => (float)Math.Sinh(x / 6) * 600;
-                        break;
-                    case FrequencyScale.Linear: default: 
-                        scale = (x) => x;
-                        unscale = (x) => x;
-                        break;
-                }
-
+                FrequencyScaling.GetScalingFunctions(Chartmaker.Preferences.FrequencyScale, out var scale, out var unscale);
 
                 float minScale = scale(Chartmaker.Preferences.FrequencyMin);
                 float maxScale = scale(Chartmaker.Preferences.FrequencyMax);
@@ -1035,7 +1014,7 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
                                 int octave = Mathf.FloorToInt(pitch / 12);
                                 float chromaOfs = (int)(pitch % 1 + 1) % 1;
                                 
-                                float multi = Mathf.Pow(1 / (1f - z / fft[y].Length), .25f) * Mathf.Pow(.5f, Mathf.Abs(octave - 1.5f)) * 1.418f;
+                                float multi = FrequencyScaling.AWeight(freq);
                                 chroma[y][chromaPos] += fft[y][z] * multi * (1 - chromaOfs) / 240;
                                 chroma[y][(chromaPos + 1) % 12] += fft[y][z] * multi * chromaOfs / 240;
                             }
