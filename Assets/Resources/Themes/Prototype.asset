@@ -51,8 +51,14 @@ MonoBehaviour:
     Value: {r: 0.6, g: 1, b: 0.6, a: 1}
   - Key: BorderSelectedZ
     Value: {r: 0.75, g: 0.75, b: 1, a: 1}
+  - Key: DangerHighlighted
+    Value: {r: 1, g: 0.5, b: 0.5, a: 0.4}
+  - Key: DangerPressed
+    Value: {r: 1, g: 0.5, b: 0.5, a: 0.5}
   - Key: ShadowNormal
     Value: {r: 0, g: 0, b: 0, a: 0.5}
+  - Key: PopupNormal
+    Value: {r: 0.15, g: 0.15, b: 0.15, a: 1}
   - Key: FieldSelection
     Value: {r: 0.5, g: 0.85, b: 0.95, a: 0.5}
   - Key: FieldSelectionX
@@ -61,12 +67,6 @@ MonoBehaviour:
     Value: {r: 0.6, g: 1, b: 0.6, a: 0.5}
   - Key: FieldSelectionZ
     Value: {r: 0.75, g: 0.75, b: 1, a: 0.5}
-  - Key: PopupNormal
-    Value: {r: 0.15, g: 0.15, b: 0.15, a: 1}
-  - Key: DangerHighlighted
-    Value: {r: 1, g: 0.5, b: 0.5, a: 0.4}
-  - Key: DangerPressed
-    Value: {r: 1, g: 0.5, b: 0.5, a: 0.5}
   - Key: SliderThumbNormal
     Value: {r: 0.2, g: 0.2, b: 0.2, a: 1}
   - Key: SliderThumbHighlighted
@@ -77,6 +77,14 @@ MonoBehaviour:
     Value: {r: 0.4, g: 0.4, b: 0.4, a: 1}
   - Key: TimelineBackground
     Value: {r: 0, g: 0, b: 0, a: 0.5}
+  - Key: TimelineBackgroundStart
+    Value: {r: 0.010196081, g: 0.03313726, b: 0.101960786, a: 0.5019608}
+  - Key: TimelineBackgroundEnd
+    Value: {r: 0.1, g: 0, b: 0, a: 0.5019608}
+  - Key: TimelineBorderStart
+    Value: {r: 0, g: 0, b: 0, a: 0.7490196}
+  - Key: TimelineBorderEnd
+    Value: {r: 0, g: 0, b: 0, a: 0.7490196}
   - Key: TimelineHandleNormal
     Value: {r: 0.2, g: 0.2, b: 0.2, a: 0.8}
   - Key: TimelineHandleBorder
@@ -117,25 +125,17 @@ MonoBehaviour:
     Value: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   - Key: InspectorHeader
     Value: {r: 1, g: 1, b: 1, a: 0.1}
+  - Key: HierarchyItemSelected
+    Value: {r: 0.5019608, g: 0.8509804, b: 0.9490196, a: 0.2}
   - Key: BlockerBackground
     Value: {r: 0, g: 0, b: 0, a: 0.5}
   - Key: BlockerContent
     Value: {r: 1, g: 1, b: 1, a: 1}
-  - Key: HierarchyItemSelected
-    Value: {r: 0.5019608, g: 0.8509804, b: 0.9490196, a: 0.2}
   - Key: ProgressBackground
     Value: {r: 0, g: 0, b: 0, a: 0.69803923}
   - Key: ProgressFill
     Value: {r: 1, g: 0.69803923, b: 0, a: 1}
-  - Key: HeaderInactiveBackground
-    Value: {r: 0.29803923, g: 0.29803923, b: 0.29803923, a: 1}
   - Key: GraphLine
     Value: {r: 1, g: 0.69803923, b: 0, a: 1}
-  - Key: TimelineBackgroundStart
-    Value: {r: 0.010196081, g: 0.03313726, b: 0.101960786, a: 0.5019608}
-  - Key: TimelineBackgroundEnd
-    Value: {r: 0.1, g: 0, b: 0, a: 0.5019608}
-  - Key: TimelineBorderStart
-    Value: {r: 0, g: 0, b: 0, a: 0.7490196}
-  - Key: TimelineBorderEnd
-    Value: {r: 0, g: 0, b: 0, a: 0.7490196}
+  - Key: HeaderInactiveBackground
+    Value: {r: 0.29803923, g: 0.29803923, b: 0.29803923, a: 1}

@@ -51,8 +51,14 @@ MonoBehaviour:
     Value: {r: 0, g: 1, b: 0, a: 1}
   - Key: BorderSelectedZ
     Value: {r: 0, g: 0, b: 1, a: 1}
+  - Key: DangerHighlighted
+    Value: {r: 1, g: 0, b: 0, a: 1}
+  - Key: DangerPressed
+    Value: {r: 1, g: 0, b: 0, a: 1}
   - Key: ShadowNormal
     Value: {r: 0, g: 0, b: 0, a: 1}
+  - Key: PopupNormal
+    Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: FieldSelection
     Value: {r: 0, g: 0, b: 1, a: 0.5}
   - Key: FieldSelectionX
@@ -61,12 +67,6 @@ MonoBehaviour:
     Value: {r: 0, g: 1, b: 0, a: 0.5}
   - Key: FieldSelectionZ
     Value: {r: 0, g: 0, b: 1, a: 0.5}
-  - Key: PopupNormal
-    Value: {r: 0, g: 0.75, b: 1, a: 1}
-  - Key: DangerHighlighted
-    Value: {r: 1, g: 0, b: 0, a: 1}
-  - Key: DangerPressed
-    Value: {r: 1, g: 0, b: 0, a: 1}
   - Key: SliderThumbNormal
     Value: {r: 1, g: 1, b: 1, a: 1}
   - Key: SliderThumbHighlighted
@@ -77,6 +77,14 @@ MonoBehaviour:
     Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: TimelineBackground
     Value: {r: 1, g: 0.9, b: 1, a: 1}
+  - Key: TimelineBackgroundStart
+    Value: {r: 0.100000024, g: 0.32617804, b: 1, a: 0.101960786}
+  - Key: TimelineBackgroundEnd
+    Value: {r: 1, g: 0, b: 0, a: 0.101960786}
+  - Key: TimelineBorderStart
+    Value: {r: 0.100000024, g: 0.32500002, b: 1, a: 1}
+  - Key: TimelineBorderEnd
+    Value: {r: 1, g: 0, b: 0, a: 1}
   - Key: TimelineHandleNormal
     Value: {r: 1, g: 1, b: 1, a: 1}
   - Key: TimelineHandleBorder
@@ -117,25 +125,17 @@ MonoBehaviour:
     Value: {r: 0, g: 0.75, b: 1, a: 0.5}
   - Key: InspectorHeader
     Value: {r: 1, g: 0.9, b: 1, a: 1}
+  - Key: HierarchyItemSelected
+    Value: {r: 0, g: 1, b: 1, a: 0.2}
   - Key: BlockerBackground
     Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: BlockerContent
     Value: {r: 1, g: 1, b: 1, a: 1}
-  - Key: HierarchyItemSelected
-    Value: {r: 0, g: 1, b: 1, a: 0.2}
   - Key: ProgressBackground
     Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: ProgressFill
     Value: {r: 0, g: 1, b: 1, a: 1}
-  - Key: HeaderInactiveBackground
-    Value: {r: 1, g: 1, b: 1, a: 1}
   - Key: GraphLine
     Value: {r: 1, g: 1, b: 1, a: 1}
-  - Key: TimelineBackgroundStart
-    Value: {r: 0.100000024, g: 0.32617804, b: 1, a: 0.101960786}
-  - Key: TimelineBackgroundEnd
-    Value: {r: 1, g: 0, b: 0, a: 0.101960786}
-  - Key: TimelineBorderStart
-    Value: {r: 0.100000024, g: 0.32500002, b: 1, a: 1}
-  - Key: TimelineBorderEnd
-    Value: {r: 1, g: 0, b: 0, a: 1}
+  - Key: HeaderInactiveBackground
+    Value: {r: 1, g: 1, b: 1, a: 1}
