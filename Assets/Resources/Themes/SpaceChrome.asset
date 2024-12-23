@@ -141,3 +141,11 @@ MonoBehaviour:
     Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: HeaderInactiveBackground
     Value: {r: 1, g: 0.78725487, b: 0.3, a: 1}
+  - Key: VisualizerHighlighted
+    Value: {r: 0, g: 0.14901961, b: 0, a: 1}
+  - Key: VisualizerPressed
+    Value: {r: 0, g: 0.25, b: 0, a: 1}
+  - Key: VisualizerBorder
+    Value: {r: 1, g: 1, b: 1, a: 1}
+  - Key: VisualizerContent
+    Value: {r: 0, g: 1, b: 0, a: 1}

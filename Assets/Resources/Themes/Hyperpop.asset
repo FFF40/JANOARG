@@ -84,9 +84,9 @@ MonoBehaviour:
   - Key: VisualizerHighlighted
     Value: {r: 0, g: 0.15, b: 0, a: 1}
   - Key: VisualizerPressed
-    Value: {r: 0, g: 0.2, b: 0, a: 1}
+    Value: {r: 0, g: 0.25, b: 0, a: 1}
   - Key: VisualizerBorder
-    Value: {r: 0, g: 1, b: 0, a: 1}
+    Value: {r: 1, g: 1, b: 1, a: 1}
   - Key: VisualizerContent
     Value: {r: 0, g: 1, b: 0, a: 1}
   - Key: HierarchyItemSelected
