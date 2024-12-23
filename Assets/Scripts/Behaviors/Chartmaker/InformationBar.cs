@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -195,7 +196,7 @@ public class InformationBar : MonoBehaviour
         }
 
         Rect rect = Visualizer.rect;
-        Color color = Themer.main.Keys["ControlContent"];
+        Color color = Themer.main.Keys["VisualizerContent"];
         AudioClip clip = Chartmaker.main.SongSource.clip;
         int sampleOffset = (int)(sec * clip.frequency);
 
@@ -223,7 +224,7 @@ public class InformationBar : MonoBehaviour
         }
         else if (VisualizerMode == VisualizerMode.LoudnessMeter)
         {
-            const int fftCount = 1 << 8;
+            const int fftCount = 2 << 8;
             const float riseTime = .3f, fallTime = .3f;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
@@ -254,7 +255,6 @@ public class InformationBar : MonoBehaviour
             int segmentCount = 19;
             float barHeight = (rect.height + 1) / loudness.Length;
             float segmentWidth = (rect.width + 1) / segmentCount;
-            Debug.Log(loudness[0] + " " + loudness[1]);
             for (int a = 0; a < loudness.Length; a++) 
             {
                 Image bar = AddBar();
@@ -345,7 +345,7 @@ public class InformationBar : MonoBehaviour
         }
         else if (VisualizerMode == VisualizerMode.FrequencyFlame)
         {
-            const int fftCount = 64;
+            const int fftCount = 2 << 8;
             const float riseTime = .02f, fallTime = .4f;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
@@ -363,30 +363,34 @@ public class InformationBar : MonoBehaviour
             if (clip.channels == 1) fftR = fftL;
             else FFT.Transform(fftR, Chartmaker.Preferences.FFTWindow);
 
+
             FrequencyScaling.GetScalingFunctions(Chartmaker.Preferences.FrequencyScale, out var scale, out var unscale);
 
-            float scaleMin = scale(.5f / fftCount * clip.frequency);
-            float scaleMax = scale((.5f + .25f / fftCount) * clip.frequency);
+            float minScale = scale(Chartmaker.Preferences.FrequencyMin);
+            float maxScale = scale(Chartmaker.Preferences.FrequencyMax);
              
-            for (int a = 0; a < fftCount / 2; a++) 
+            for (int a = 0; a < rect.width; a++) 
             {
-                Image barL = AddBar();
-
-                float xMin = Mathf.InverseLerp(scaleMin, scaleMax, scale((a + 0.5f) / fftCount * clip.frequency)) * rect.width;
-                float xMax = Mathf.InverseLerp(scaleMin, scaleMax, scale((a + 1.5f) / fftCount * clip.frequency)) * rect.width;
-                float factor = (a + .5f) / fftCount;
                 
+                float cPos = Mathf.Clamp(unscale(Mathf.Lerp(minScale, maxScale, (a + .5f) / rect.width)) / clip.frequency * fftCount, 0, fftCount - 1);
+                int cPosFloor = Mathf.FloorToInt(cPos);
+                int cPosCeil = Mathf.CeilToInt(cPos);
+                float factor = (cPos + .5f) / fftCount / fftCount * 40;
+                
+                Image barL = AddBar();
                 float heightL = barL.rectTransform.rect.height / rect.height;
-                heightL = rect.height * Mathf.Min(Mathf.Clamp(Mathf.Sqrt(fftL[a] * factor), heightL - Time.deltaTime / fallTime, heightL + Time.deltaTime / riseTime), 1);
-                barL.rectTransform.sizeDelta = new Vector2(xMax - xMin, heightL);
-                barL.rectTransform.anchoredPosition = new Vector2(xMin, 0);
+                float fftLVal = Mathf.Sqrt(Mathf.Lerp(fftL[cPosFloor], fftL[cPosCeil], cPos % 1) * factor);
+                heightL = rect.height * Mathf.Min(Mathf.Clamp(fftLVal * 0.7f, heightL - Time.deltaTime / fallTime, heightL + Time.deltaTime / riseTime), 1);
+                barL.rectTransform.sizeDelta = new Vector2(1, heightL);
+                barL.rectTransform.anchoredPosition = new Vector2(a, 0);
                 barL.color = color * new Color(1, 1, 1, .5f);
 
                 Image barR = AddBar();
                 float heightR = barR.rectTransform.rect.height / rect.height;
-                heightR = rect.height * Mathf.Min(Mathf.Clamp(Mathf.Sqrt(fftR[a] * factor), heightR - Time.deltaTime / fallTime, heightR + Time.deltaTime / riseTime), 1);
-                barR.rectTransform.sizeDelta = new Vector2(xMax - xMin, heightR);
-                barR.rectTransform.anchoredPosition = new Vector2(xMin, 0);
+                float fftRVal = Mathf.Sqrt(Mathf.Lerp(fftR[cPosFloor], fftR[cPosCeil], cPos % 1) * factor);
+                heightR = rect.height * Mathf.Min(Mathf.Clamp(fftRVal * 0.7f, heightR - Time.deltaTime / fallTime, heightR + Time.deltaTime / riseTime), 1);
+                barR.rectTransform.sizeDelta = new Vector2(1, heightR);
+                barR.rectTransform.anchoredPosition = new Vector2(a, 0);
                 barR.color = color * new Color(1, 1, 1, .5f);
 
                 Image barC = AddBar();
@@ -403,8 +407,8 @@ public class InformationBar : MonoBehaviour
                     heightC = Mathf.Max(fallCTarget, 0);
                     fallC += Time.deltaTime;
                 }
-                barC.rectTransform.sizeDelta = new Vector2(xMax - xMin, 1);
-                barC.rectTransform.anchoredPosition3D = new Vector3(xMin, heightC, fallC);
+                barC.rectTransform.sizeDelta = new Vector2(1, 1);
+                barC.rectTransform.anchoredPosition3D = new Vector3(a, heightC, fallC);
                 barC.color = color * new Color(1, 1, 1, 1);
             }
         }
@@ -440,6 +444,58 @@ public class InformationBar : MonoBehaviour
                 barR.rectTransform.sizeDelta = new Vector2(1, (maxR - minR) / 2 * (rect.height - 1) + 1);
                 barR.rectTransform.anchoredPosition = new Vector2(a, (minR / 2 + .5f) * (rect.height - 1));
                 barR.color = color * new Color(1, 1, 1, .65f);
+            }
+        }
+        else if (VisualizerMode == VisualizerMode.Vectorscope)
+        {
+            int dataCount = 1024;
+
+            float[] dataL = new float[dataCount], dataR = new float[dataCount];
+            float[] data = new float[dataCount * clip.channels];
+            clip.GetData(data, Mathf.Clamp(sampleOffset - dataCount / 2, 0, clip.samples - dataCount));
+            for (int a = 0; a < data.Length; a++) 
+            {
+                switch ((a + sampleOffset) % clip.channels)
+                {
+                    case 0: dataL[a / clip.channels] = data[a]; break;
+                    case 1: dataR[a / clip.channels] = data[a]; break;
+                }
+            }
+            if (clip.channels == 1) dataR = dataL;
+
+            float opacity = 1;
+            Dictionary<int, Image> images = new();
+            Rect testRect = new Rect(0, 0, rect.width - 1, rect.height - 1);
+
+            Image barH = AddBar();
+            barH.rectTransform.sizeDelta = new (rect.width, 1);
+            barH.rectTransform.anchoredPosition = new (0, rect.height / 2);
+            barH.color = color * new Color(1, 1, 1, .25f);
+
+            Image barV = AddBar();
+            barV.rectTransform.sizeDelta = new (1, rect.height);
+            barV.rectTransform.anchoredPosition = new (rect.width / 2, 0);
+            barV.color = color * new Color(1, 1, 1, .25f);
+
+            for (int a = 0; a < dataCount - 1; a++) 
+            {
+                Vector2 pos = Quaternion.Euler(0, 0, 45) * new Vector2(dataL[a], dataR[a]);
+                pos = rect.width * pos / 2.82842712f + rect.size / 2;
+                if (!testRect.Contains(pos)) continue;
+                int hash = (int)pos.y * (int)rect.width + (int)pos.x;
+                if (images.TryGetValue(hash, out Image dot)) 
+                {
+                    dot.color = color * new Color(1, 1, 1, 1 - (1 - opacity) * (1 - dot.color.a));
+                }
+                else 
+                {
+                    dot = AddBar();
+                    dot.rectTransform.sizeDelta = new Vector2(1, 1);
+                    dot.rectTransform.anchoredPosition = pos;
+                    dot.color = color * new Color(1, 1, 1, opacity);
+                    images.Add(hash, dot);
+                }
+                opacity *= 0.995f;
             }
         }
         else if (VisualizerMode == VisualizerMode.PitchLines)
@@ -508,7 +564,6 @@ public class InformationBar : MonoBehaviour
 
     public void ShowVisualizerMenu()
     {
-        print("Showing visualizer menu");
         ContextMenuHolder.main.OpenRoot(new ContextMenuList(GetVisualizerMenu()), Visualizer, offset: new (2, -4));
     }
 
@@ -521,10 +576,10 @@ public class InformationBar : MonoBehaviour
             VisItem("Metronome", VisualizerMode.Metronome),
             new ContextMenuListSeparator(),
             VisItem("Loudness Meter", VisualizerMode.LoudnessMeter),
-            new ContextMenuListSeparator(),
             VisItem("Classic Bars", VisualizerMode.FrequencyBars),
             VisItem("Classic Flame", VisualizerMode.FrequencyFlame),
             VisItem("Oscilloscope", VisualizerMode.SoundWaves),
+            VisItem("Vectorscope", VisualizerMode.Vectorscope),
             new ContextMenuListSeparator(),
             VisItem("Glowing Piano", VisualizerMode.PitchLines),
             new ContextMenuListSeparator(),
@@ -540,6 +595,7 @@ public enum VisualizerMode
     FrequencyBars,
     FrequencyFlame,
     SoundWaves,
+    Vectorscope,
     PitchLines,
     None,
 }

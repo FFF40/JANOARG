@@ -43905,10 +43905,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 1018931127}
-  NormalID: ControlNormal
-  HighlightedID: ControlHighlighted
+  NormalID: VisualizerNormal
+  HighlightedID: VisualizerHighlighted
   SelectedID: 
-  PressedID: ControlPressed
+  PressedID: VisualizerPressed
   DisabledID: ControlDisabled
 --- !u!114 &1018931127
 MonoBehaviour:
@@ -57807,7 +57807,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 1349159543}
-  ID: BorderNormal
+  ID: VisualizerBorder
 --- !u!1 &1351454556
 GameObject:
   m_ObjectHideFlags: 0
