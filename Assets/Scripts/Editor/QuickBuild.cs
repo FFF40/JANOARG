@@ -8,8 +8,8 @@ using System;
 
 public class QuickBuild
 {
-    [MenuItem("JANOARG/Quick Build")]
-    public static async void BuildGame ()
+    [MenuItem("JANOARG/Quick Build", priority = 1000)]
+    public static void Build ()
     {
         string path = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Builds");
 

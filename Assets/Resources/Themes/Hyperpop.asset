@@ -73,6 +73,16 @@ MonoBehaviour:
     Value: {r: 0, g: 1, b: 1, a: 1}
   - Key: SliderThumbPressed
     Value: {r: 0, g: 0.75, b: 1, a: 1}
+  - Key: GraphLine
+    Value: {r: 1, g: 1, b: 1, a: 1}
+  - Key: ProgressBackground
+    Value: {r: 0, g: 0, b: 0, a: 1}
+  - Key: ProgressFill
+    Value: {r: 0, g: 1, b: 1, a: 1}
+  - Key: HierarchyItemSelected
+    Value: {r: 0, g: 1, b: 1, a: 0.2}
+  - Key: InspectorHeader
+    Value: {r: 1, g: 0.9, b: 1, a: 1}
   - Key: PickerItemActive
     Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: TimelineBackground
@@ -123,19 +133,9 @@ MonoBehaviour:
     Value: {r: 0, g: 0.75, b: 1, a: 1}
   - Key: TimelineItemTail
     Value: {r: 0, g: 0.75, b: 1, a: 0.5}
-  - Key: InspectorHeader
-    Value: {r: 1, g: 0.9, b: 1, a: 1}
-  - Key: HierarchyItemSelected
-    Value: {r: 0, g: 1, b: 1, a: 0.2}
   - Key: BlockerBackground
     Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: BlockerContent
-    Value: {r: 1, g: 1, b: 1, a: 1}
-  - Key: ProgressBackground
-    Value: {r: 0, g: 0, b: 0, a: 1}
-  - Key: ProgressFill
-    Value: {r: 0, g: 1, b: 1, a: 1}
-  - Key: GraphLine
     Value: {r: 1, g: 1, b: 1, a: 1}
   - Key: HeaderInactiveBackground
     Value: {r: 1, g: 1, b: 1, a: 1}
