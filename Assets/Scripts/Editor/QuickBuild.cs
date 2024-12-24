@@ -32,5 +32,7 @@ public class QuickBuild
         // TODO: figure out how to automate creating a .tar.gz archive
         // UnityEngine.Debug.Log(await cmd("/bin/bash", "tar -czvf '" + Path.Combine(path, "Chartmaker-linux-x86_64.tar.gz").Replace("'", "''") + "' '"
         //     + Path.Combine(path, "Chartmaker-linux-x86_64/").Replace("'", "''")));
+
+        Application.OpenURL("file://" + path);
     }
 }

@@ -169,7 +169,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             MainCamera.transform.eulerAngles = Manager.Camera.CameraRotation; 
             MainCamera.transform.Translate(Vector3.back * Manager.Camera.PivotDistance);
 
-            RenderSettings.ambientLight = RenderSettings.fogColor = MainCamera.backgroundColor = Manager.PalleteManager.CurrentPallete.BackgroundColor;
+            RenderSettings.fogColor = MainCamera.backgroundColor = Manager.PalleteManager.CurrentPallete.BackgroundColor;
             BoundingBox.color = NotificationText.color = NotificationBox.color = Manager.PalleteManager.CurrentPallete.InterfaceColor;
 
             for (int a = 0; a < Manager.Lanes.Count; a++)
