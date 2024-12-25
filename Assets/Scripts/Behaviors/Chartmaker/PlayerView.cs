@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -550,29 +551,37 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 int index = Chartmaker.main.CurrentChart.Lanes.IndexOf(lane);
                 if (index < 0) return;
                 LaneManager man = Manager.Lanes[index];
+                LaneGroupManager group = null;
+                bool hasGroup = !string.IsNullOrEmpty(man.CurrentLane.Group) 
+                    && Manager.Groups.TryGetValue(man.CurrentLane.Group, out group);
                 
-                Vector3 inv(Vector3 x) => Quaternion.Inverse(Quaternion.Euler(man.CurrentLane.Rotation)) * (x - man.CurrentLane.Position);
+                Vector3 inv(Vector3 x) => Quaternion.Inverse(man.FinalRotation) * (x - man.FinalPosition);
+                Vector3 groupInv(Vector3 x) => hasGroup ? Quaternion.Inverse(group.FinalRotation) * (x - group.FinalPosition) : x;
 
                 Func<Vector3> get = 
                     CurrentDragMode == HandleDragMode.Start ? (() => inv(man.StartPos)) : 
-                    CurrentDragMode == HandleDragMode.Center ? (() => man.CurrentLane.Position) : 
+                    CurrentDragMode == HandleDragMode.Center ? (() => groupInv(man.FinalPosition)) : 
                     CurrentDragMode == HandleDragMode.End ? (() => inv(man.EndPos)) : null;
                     
                 Vector3 gizmoAnchor = get();
                 
                 OnDragEvent += (ev) => {
-                    Vector3? dragPos = CurrentDragMode == HandleDragMode.Center ? 
-                        RaycastScreenToPlane(ev.position, Vector3.forward * get().z, Quaternion.identity) :
-                        RaycastScreenToPlane(ev.position, man.CurrentLane.Position, Quaternion.Euler(man.CurrentLane.Rotation));
-                    if (dragPos != null)
+                    Vector3? dragPosNull = CurrentDragMode == HandleDragMode.Center 
+                        ? (hasGroup
+                            ? RaycastScreenToPlane(ev.position, group.FinalPosition + group.FinalRotation * Vector3.forward * get().z, group.FinalRotation)
+                            : RaycastScreenToPlane(ev.position, Vector3.forward * get().z, Quaternion.identity))
+                        : RaycastScreenToPlane(ev.position, man.FinalPosition + man.FinalRotation * Vector3.forward * get().z, man.FinalRotation);
+                    Vector3 dragPos;
+                    if (dragPosNull != null)
                     {
-                        if (CurrentDragMode is not HandleDragMode.Center) dragPos = inv((Vector3)dragPos);
+                        if (CurrentDragMode is HandleDragMode.Center) dragPos = groupInv((Vector3)dragPosNull);
+                        else dragPos = inv((Vector3)dragPosNull);
                         if (GridSize[0] > 0)
                         {
-                            Vector3 des = new Vector3();
-                            for (int x = 0; x < 3; x++) des[x] = Mathf.Round((dragPos?[x] ?? 0) / GridSize[0]) * GridSize[0];
+                            Vector3 des = new();
+                            for (int x = 0; x < 3; x++) des[x] = Mathf.Round(dragPos[x] / GridSize[0]) * GridSize[0];
                             dragPos = des;
-                        } 
+                        }
                     }
                     else
                     {
@@ -652,7 +661,7 @@ public class PlayerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
                 Vector3 inv(Vector3 x)
                 {
                     Vector3 point = Quaternion.Inverse(lman.FinalRotation) * (x - lman.FinalPosition) - Vector3.forward * (man.Position.z - lman.CurrentDistance);
-                    return Vector3.right * (Quaternion.Euler(0, 0, Vector2.SignedAngle(lman.EndPos - lman.StartPos, Vector2.right)) * (point - lman.StartPos)).x / Vector2.Distance(lman.StartPos, lman.EndPos);
+                    return Vector3.right * (Quaternion.Euler(0, 0, Vector2.SignedAngle(lman.EndPosLocal - lman.StartPosLocal, Vector2.right)) * (point - lman.StartPosLocal)).x / Vector2.Distance(lman.StartPosLocal, lman.EndPosLocal);
                 }
 
                 Func<Vector3> get = 

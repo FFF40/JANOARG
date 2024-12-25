@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteInEditMode][RequireComponent(typeof(CanvasRenderer))]
-public class GraphicCircle : Graphic
+public class GraphicCircle : MaskableGraphic
 {
     public int Resolution = 90;
     [Range(0, 1)]
