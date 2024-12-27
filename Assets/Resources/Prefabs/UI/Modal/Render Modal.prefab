@@ -1221,11 +1221,11 @@ MonoBehaviour:
   m_Content: {fileID: 4467754680063589914}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 4653708359198199802}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 7593207437459880691}

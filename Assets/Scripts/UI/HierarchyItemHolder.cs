@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class HierarchyItemHolder : MonoBehaviour
+public class HierarchyItemHolder : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public Button Button;
     public Image Icon;
@@ -101,5 +102,20 @@ public class HierarchyItemHolder : MonoBehaviour
     public void UpdateExpand()
     {
         ExpandIcon.localEulerAngles = Vector3.forward * (Target.Expanded ? 180 : -90);
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        HierarchyPanel.main.OnItemBeginDrag(this, eventData);
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        HierarchyPanel.main.OnItemDrag(this, eventData);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        HierarchyPanel.main.OnItemEndDrag(this, eventData);
     }
 }

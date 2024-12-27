@@ -1196,6 +1196,10 @@ MonoBehaviour:
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 30
   FillAmount: 1
   InsideRadius: 0
@@ -1318,7 +1322,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -3864,11 +3868,11 @@ MonoBehaviour:
   m_Content: {fileID: 380970397}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 158193763}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1028128972}
@@ -4417,6 +4421,10 @@ MonoBehaviour:
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 3
   FillAmount: 1
   InsideRadius: 0
@@ -5055,6 +5063,10 @@ MonoBehaviour:
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 4
   FillAmount: 1
   InsideRadius: 0
@@ -6796,11 +6808,11 @@ MonoBehaviour:
   m_Content: {fileID: 1926610595}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 270393914}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 0}
@@ -9035,6 +9047,7 @@ GameObject:
   - component: {fileID: 380970397}
   - component: {fileID: 380970399}
   - component: {fileID: 380970398}
+  - component: {fileID: 380970400}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -9053,7 +9066,9 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 920191761}
+  - {fileID: 1923566125}
   m_Father: {fileID: 158193763}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -9101,6 +9116,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!225 &380970400
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 380970396}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &381622493
 GameObject:
   m_ObjectHideFlags: 0
@@ -15514,7 +15541,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -21709,7 +21736,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -25210,6 +25237,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 4
   FillAmount: 1
   InsideRadius: 0
@@ -25275,6 +25306,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 30
   FillAmount: 1
   InsideRadius: 0
@@ -25963,7 +25998,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -31209,7 +31244,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -31821,11 +31856,11 @@ MonoBehaviour:
   m_Content: {fileID: 715571572}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 1669722902}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1341514416}
@@ -36379,6 +36414,117 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 905950763}
   m_CullTransparentMesh: 1
+--- !u!1 &920191760
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 920191761}
+  - component: {fileID: 920191765}
+  - component: {fileID: 920191764}
+  - component: {fileID: 920191763}
+  - component: {fileID: 920191762}
+  m_Layer: 5
+  m_Name: Drag Into
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &920191761
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920191760}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 380970397}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 24}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &920191762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920191760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 920191763}
+  ID: ControlHighlighted
+--- !u!114 &920191763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920191760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.101960786}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &920191764
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920191760}
+  m_CullTransparentMesh: 1
+--- !u!114 &920191765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920191760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &925312825
 GameObject:
   m_ObjectHideFlags: 0
@@ -45665,6 +45811,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 3
   FillAmount: 1
   InsideRadius: 0
@@ -47621,6 +47771,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 20
   FillAmount: 1
   InsideRadius: 0.8
@@ -51708,6 +51862,10 @@ MonoBehaviour:
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 20
   FillAmount: 1
   InsideRadius: 0.83
@@ -65660,7 +65818,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -66191,6 +66349,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 4
   FillAmount: 1
   InsideRadius: 0
@@ -67348,7 +67510,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -69785,6 +69947,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 20
   FillAmount: 1
   InsideRadius: 0.8
@@ -73170,7 +73336,7 @@ MonoBehaviour:
   defaultWindowSize: {x: 960, y: 600}
   borderSize: {x: 0, y: 0}
   windowMargin: {x: 14, y: 14}
-  CursorMapping: 007f0000897f0000027f0000017f0000847f0000857f0000fffffffffeffffff887f0000
+  CursorMapping: 007f0000897f0000027f0000017f0000847f0000857f0000fffffffffeffffff887f0000fdffffff
   Cursors:
   - {fileID: 2800000, guid: ee9300c0d18d6df43b5feb39164f62e2, type: 3}
   - {fileID: 2800000, guid: 03340adb613ce8ef0a6fef62be393fdd, type: 3}
@@ -73181,6 +73347,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 45114074ad2c57546811fd37ec04f7d7, type: 3}
   - {fileID: 2800000, guid: c8b29236e8a6e2a48b7da558a040f0fa, type: 3}
   - {fileID: 2800000, guid: 9e334d1a591bc233ca1d791833efddd9, type: 3}
+  - {fileID: 2800000, guid: f5473d559877c3f7eb6050e5a2a739f5, type: 3}
   CursorPivots:
   - {x: 8, y: 6}
   - {x: 9, y: 5}
@@ -73191,6 +73358,7 @@ MonoBehaviour:
   - {x: 14, y: 14}
   - {x: 14, y: 14}
   - {x: 14, y: 14}
+  - {x: 14, y: 12}
 --- !u!114 &1769234555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74109,11 +74277,11 @@ MonoBehaviour:
   m_Content: {fileID: 940577864}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 1811044649}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 0}
@@ -74790,6 +74958,10 @@ MonoBehaviour:
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 20
   FillAmount: 1
   InsideRadius: 0.83
@@ -75247,6 +75419,10 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
   Resolution: 3
   FillAmount: 1
   InsideRadius: 0
@@ -77595,6 +77771,117 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1919396126}
   m_CullTransparentMesh: 1
+--- !u!1 &1923566124
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1923566125}
+  - component: {fileID: 1923566129}
+  - component: {fileID: 1923566128}
+  - component: {fileID: 1923566127}
+  - component: {fileID: 1923566126}
+  m_Layer: 5
+  m_Name: Drag Between
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1923566125
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923566124}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 380970397}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 2}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1923566126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923566124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Target: {fileID: 1923566127}
+  ID: Content0
+--- !u!114 &1923566127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923566124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1923566128
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923566124}
+  m_CullTransparentMesh: 1
+--- !u!114 &1923566129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923566124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &1926011756
 GameObject:
   m_ObjectHideFlags: 0
@@ -78174,11 +78461,11 @@ MonoBehaviour:
   m_Content: {fileID: 941380708}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 1780595790}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1108758304}
@@ -79584,11 +79871,11 @@ MonoBehaviour:
   m_Content: {fileID: 1726298138}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 24
+  m_ScrollSensitivity: 96
   m_Viewport: {fileID: 644302172}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1042271169}
@@ -82409,7 +82696,11 @@ MonoBehaviour:
   - {fileID: 542016300, guid: 737471944d29b5f4abcc815aaa64f6ae, type: 3}
   HolderSample: {fileID: 4639647102278667026, guid: 6bfa88725e378e846a5c2d5138ce9dc6, type: 3}
   HolderParent: {fileID: 380970397}
+  HolderGroup: {fileID: 380970400}
+  HolderLayoutGroup: {fileID: 380970399}
   Holders: []
+  DragIntoIndicator: {fileID: 920191761}
+  DragBetweenIndicator: {fileID: 1923566125}
   SearchField: {fileID: 6077236004433072150}
   SearchButton: {fileID: 1830860462}
   SearchIcon: {fileID: 768702153}
@@ -84785,7 +85076,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 3
   m_InputType: 0
   m_AsteriskChar: 42
@@ -86482,7 +86773,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 0
   m_InputType: 0
   m_AsteriskChar: 42

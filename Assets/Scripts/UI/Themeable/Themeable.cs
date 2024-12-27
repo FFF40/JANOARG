@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
-public class Themeable : MonoBehaviour
+public abstract class Themeable : MonoBehaviour
 {
     public virtual void SetColors() {}
 }

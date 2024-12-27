@@ -489,7 +489,7 @@ MonoBehaviour:
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 96
   m_ContentType: 0
   m_InputType: 0
   m_AsteriskChar: 42

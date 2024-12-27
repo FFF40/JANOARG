@@ -1269,7 +1269,14 @@ public class TimelinePanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             beatStart = RoundBeat(timeStart);
 
             if (eventData.button == PointerEventData.InputButton.Left)
-                Chartmaker.main.SongSource.time = Mathf.Clamp(metronome.ToSeconds(beatStart), 0, Chartmaker.main.SongSource.clip.length);
+            {
+                AudioSource source = Chartmaker.main.SongSource;
+                float time = Mathf.Clamp(metronome.ToSeconds(beatStart), 0, Chartmaker.main.SongSource.clip.length);
+                if (source.time == 0) { source.Play(); source.Pause(); }
+                source.time = time;
+                
+            }
+                
         }
         else if (contains(PeekStartSlider))
         {

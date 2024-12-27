@@ -103,4 +103,5 @@ public enum CursorType
 
     Grab = -1,
     Grabbing = -2,
+    GrabbingBlocked = -3,
 }

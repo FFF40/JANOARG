@@ -22,8 +22,13 @@ public class HierarchyPanel : MonoBehaviour
     [Space]
     public HierarchyItemHolder HolderSample;
     public RectTransform HolderParent;
+    public CanvasGroup HolderGroup;
+    public LayoutGroup HolderLayoutGroup;
     List<HierarchyItem> Items = new();
     public List<HierarchyItemHolder> Holders = new();
+    [Space]
+    public RectTransform DragIntoIndicator;
+    public RectTransform DragBetweenIndicator;
     [Space]
     public TMP_InputField SearchField;
     public Button SearchButton;
@@ -39,6 +44,8 @@ public class HierarchyPanel : MonoBehaviour
 
     public void Start()
     {
+        DragIntoIndicator.gameObject.SetActive(false);
+        DragBetweenIndicator.gameObject.SetActive(false);
     }
 
     public void SetMode(HierarchyMode mode)
@@ -299,11 +306,15 @@ public class HierarchyPanel : MonoBehaviour
 
     public void Select(HierarchyItem item) 
     {
+        if (isDragging) return;
+        
         if (item.Target != null) InspectorPanel.main.SetObject(item.Target);
     }
 
     public void SelectAdjacent(int direction)
     {
+        if (isDragging) return;
+
         int i = Holders.FindIndex(x => x.SelectedBackground.activeSelf);
         if (i < 0) return;
         var a = Holders[i];
@@ -420,6 +431,129 @@ public class HierarchyPanel : MonoBehaviour
     public void Restore()
     {
         ResizeHierarchy(240, true);
+    }
+
+    // -------------------------------------------------- Dragging
+
+    bool isDragging = false;
+
+    bool isDragInto;
+    HierarchyItemHolder item1 = null, item2 = null;
+
+    bool CanDrag(HierarchyItemHolder item) 
+    {
+        return item.Target.Type is HierarchyItemType.CoverLayer or HierarchyItemType.LaneGroup or HierarchyItemType.Lane;
+    }
+
+    bool CanDragInto(HierarchyItemHolder item, HierarchyItemHolder target) 
+    {
+        return item != target 
+            && (target.Target.Type is HierarchyItemType.LaneGroup && item.Target.Type is HierarchyItemType.Lane or HierarchyItemType.LaneGroup);
+    }
+
+    bool CanDragBetween(HierarchyItemHolder item, HierarchyItemHolder before, HierarchyItemHolder after) 
+    {
+        return (item.Target.Type is HierarchyItemType.Lane && (before.Target.Type is HierarchyItemType.World or HierarchyItemType.Lane || after.Target.Type is HierarchyItemType.Lane))
+            || (item.Target.Type is HierarchyItemType.LaneGroup && (before.Target.Type is HierarchyItemType.World or HierarchyItemType.LaneGroup));
+    }
+
+    public void OnItemBeginDrag(HierarchyItemHolder item, PointerEventData eventData)
+    {
+        foreach (var i in Holders) i.SelectedBackground.SetActive(i == item);
+        HolderGroup.blocksRaycasts = false;
+        isDragging = true;
+    }
+
+    public void OnItemDrag(HierarchyItemHolder item, PointerEventData eventData)
+    {
+        if (CanDrag(item))
+        {
+            DragIntoIndicator.gameObject.SetActive(false);
+            DragBetweenIndicator.gameObject.SetActive(false);
+            item1 = null; item2 = null;
+
+            float itemHeight = ((RectTransform)Holders[0].transform).rect.height;
+            RectOffset padding = HolderLayoutGroup.padding;
+            Vector3[] corners = new Vector3[4];
+            HolderParent.GetWorldCorners(corners);
+            float pos = (corners[2].y - eventData.position.y - padding.top) / itemHeight;
+            pos = Mathf.Clamp(pos, 0, Holders.Count) - 0.5f;
+
+            int intPos = Mathf.RoundToInt(pos);
+            float snapDist = Math.Abs(pos - Mathf.Round(pos));
+            var intItem = intPos > Holders.Count - 1 ? null : Holders[intPos];
+            bool canDragInto = intItem && CanDragInto(item, intItem);
+
+            float snapDistThres = 0.25f;
+            dragInto:
+            if (snapDist < snapDistThres && canDragInto) 
+            {
+                isDragInto = true; item1 = intItem; item2 = null;
+                DragIntoIndicator.gameObject.SetActive(true);
+                DragIntoIndicator.anchoredPosition = new Vector2(
+                    intItem.IndentBox.minWidth + padding.left - 24,
+                    -intPos * itemHeight - padding.top
+                );
+                UpdateCursor(CursorType.Grabbing);
+            }
+            else 
+            {
+                int beforePos = Mathf.RoundToInt(pos - 0.5f);
+                var before = beforePos < 0 ? null : Holders[beforePos];
+                var afterPos = Mathf.RoundToInt(pos + 0.5f);
+                var after = afterPos > Holders.Count - 1 ? null : Holders[afterPos];
+
+                if (CanDragBetween(item, before, after)) 
+                {
+                    isDragInto = false; item1 = before; item2 = after;
+                    DragBetweenIndicator.gameObject.SetActive(true);
+                    DragBetweenIndicator.anchoredPosition = new Vector2(
+                        Math.Max(after ? after.IndentBox.minWidth : 0, before ? before.IndentBox.minWidth : 0) + padding.left - 24,
+                        -Mathf.Round(pos + 0.5f) * itemHeight - padding.top
+                    );
+                    UpdateCursor(CursorType.Grabbing);
+                }
+                else if (canDragInto)
+                {
+                    snapDistThres = 1;
+                    // gaming
+                    goto dragInto;
+                }
+                else
+                {
+                    UpdateCursor(CursorType.GrabbingBlocked);
+                }
+            }
+        }
+        else 
+        {
+            UpdateCursor(CursorType.GrabbingBlocked);
+        }
+    }
+
+    public void OnItemEndDrag(HierarchyItemHolder item, PointerEventData eventData)
+    {
+        //TODO add drop handling mechanic
+
+        UpdateHolders();
+        UpdateCursor(0);
+        isDragging = false;
+        DragIntoIndicator.gameObject.SetActive(false);
+        DragBetweenIndicator.gameObject.SetActive(false);
+        HolderGroup.blocksRaycasts = true;
+    }
+
+    CursorType CurrentCursor = 0;
+
+    public void UpdateCursor(CursorType cursor)
+    {
+        if (CurrentCursor != cursor)
+        {
+            if (CurrentCursor != 0) CursorChanger.PopCursor();
+            if (cursor != 0) CursorChanger.PushCursor(cursor);
+            CurrentCursor = cursor;
+            BorderlessWindow.UpdateCursor();
+        }
     }
 }
 
