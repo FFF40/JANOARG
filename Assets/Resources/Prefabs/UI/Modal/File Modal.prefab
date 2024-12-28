@@ -813,7 +813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7063299314552663665
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1733,7 +1733,7 @@ RectTransform:
   m_Father: {fileID: 3816944210423787304}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1863,7 +1863,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4807090711338146693}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
+  m_Script: {fileID: 11500000, guid: 348bead37c2b74466a731dc0bf405b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 6992206160604708861}
@@ -1884,6 +1884,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+  m_SmoothScrollDuration: 0.15
 --- !u!114 &3820359261845115204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3560,7 +3561,7 @@ RectTransform:
   m_Father: {fileID: 8325001819765786114}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3853,7 +3854,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5153235038374746565
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3956,7 +3957,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 397039105256978578}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.22680412
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4287,7 +4288,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6955356459582323519}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
+  m_Script: {fileID: 11500000, guid: 348bead37c2b74466a731dc0bf405b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 4116584949074310653}
@@ -4320,6 +4321,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_SmoothScrollDuration: 0.15
 --- !u!114 &4986356056158394435
 MonoBehaviour:
   m_ObjectHideFlags: 0
