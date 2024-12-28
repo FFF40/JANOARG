@@ -577,6 +577,14 @@ public class Chartmaker : MonoBehaviour
         tl.ActionsAheadCounter.text = Mathf.Min(History.ActionsAhead.Count, 999).ToString();
     }
 
+    public void DoAction(IChartmakerAction action)
+    {
+        action.Redo();
+        History.AddAction(action);
+        OnHistoryDo();
+        OnHistoryUpdate();
+    }
+
     public void SetItem(object target, string field, object value)
     {
         if (recursionBuster) return;
@@ -617,10 +625,7 @@ public class Chartmaker : MonoBehaviour
             Target = GetListTarget(obj),
             Item = obj,
         };
-        action.Redo();
-        History.AddAction(action);
-        OnHistoryDo();
-        OnHistoryUpdate();
+        DoAction(action);
         if (setNull) InspectorPanel.main.UnsetObject();
     }
 
@@ -630,10 +635,7 @@ public class Chartmaker : MonoBehaviour
             Target = GetListTarget(obj),
             Item = obj,
         };
-        action.Redo();
-        History.AddAction(action);
-        OnHistoryDo();
-        OnHistoryUpdate();
+        DoAction(action);
         InspectorPanel.main.SetObject(obj, false);
     }
     public void AddItem(object obj, float startingOffset)

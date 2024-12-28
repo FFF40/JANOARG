@@ -190,7 +190,6 @@ public class InspectorPanel : MonoBehaviour
                 MakeOffsetEntry(() => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
 
                 SpawnForm<FormEntryHeader>("General");
-                SpawnForm<FormEntryFloat, float>("Offset", () => ts.Offset, x => Chartmaker.main.SetItem(ts, "Offset", x));
                 SpawnForm<FormEntryFloat, float>("Duration", () => ts.Duration, x => Chartmaker.main.SetItem(ts, "Duration", x));
                 SpawnForm<FormEntryToggleFloat, float>("From", () => ts.From, x => Chartmaker.main.SetItem(ts, "From", x));
                 SpawnForm<FormEntryFloat, float>("To", () => ts.Target, x => Chartmaker.main.SetItem(ts, "Target", x));
@@ -430,7 +429,6 @@ public class InspectorPanel : MonoBehaviour
                 SpawnForm<FormEntryHeader>("Transform");
                 SpawnForm<FormEntryVector3, Vector3>("Position", () => group.Position, x => Chartmaker.main.SetItem(group, "Position", x));
                 SpawnForm<FormEntryVector3, Vector3>("Rotation", () => group.Rotation, x => Chartmaker.main.SetItem(group, "Rotation", x));
-                MakeLaneGroupEntry(group);
             }
             else if (CurrentObject is CameraController camera)
             {
@@ -460,7 +458,6 @@ public class InspectorPanel : MonoBehaviour
                 SpawnForm<FormEntryHeader>("Transform");
                 SpawnForm<FormEntryVector3, Vector3>("Position", () => lane.Position, x => Chartmaker.main.SetItem(lane, "Position", x));
                 SpawnForm<FormEntryVector3, Vector3>("Rotation", () => lane.Rotation, x => Chartmaker.main.SetItem(lane, "Rotation", x));
-                MakeLaneGroupEntry(lane);
                 SpawnForm<FormEntryHeader>("Appearance");
                 MakeLaneStyleEntry(lane);
             }
@@ -588,32 +585,6 @@ public class InspectorPanel : MonoBehaviour
         dropdown.LinkButton.onClick.AddListener(() => {
             if (hit.StyleIndex >= 0 && hit.StyleIndex < Chartmaker.main.CurrentChart.Pallete.HitStyles.Count)
                 SetObject(Chartmaker.main.CurrentChart.Pallete.HitStyles[hit.StyleIndex]);
-        });
-    }
-
-    public void MakeLaneGroupEntry(LaneGroup group)
-    {
-        var dropdown = SpawnForm<FormEntryLinkedDropdown, object>("Parent", () => group.Group ?? "", x => {
-            Chartmaker.main.SetItem(group, "Group", x); HierarchyPanel.main.UpdateHierarchy();
-        });
-        foreach (LaneGroup p in Chartmaker.main.CurrentChart.Groups) if (p != group) dropdown.ValidValues.Add(p.Name, p.Name);
-        dropdown.ValidValues.Add("", "<i>None</i>");
-        dropdown.LinkButton.onClick.AddListener(() => {
-            if (!string.IsNullOrEmpty(group.Group))
-                SetObject(Chartmaker.main.CurrentChart.Groups.Find(x => x.Name == group.Group));
-        });
-    }
-
-    public void MakeLaneGroupEntry(Lane lane)
-    {
-        var dropdown = SpawnForm<FormEntryLinkedDropdown, object>("Group", () => lane.Group ?? "", x => {
-            Chartmaker.main.SetItem(lane, "Group", x); HierarchyPanel.main.UpdateHierarchy();
-        });
-        foreach (LaneGroup p in Chartmaker.main.CurrentChart.Groups) dropdown.ValidValues.Add(p.Name, p.Name);
-        dropdown.ValidValues.Add("", "<i>None</i>");
-        dropdown.LinkButton.onClick.AddListener(() => {
-            if (!string.IsNullOrEmpty(lane.Group))
-                SetObject(Chartmaker.main.CurrentChart.Groups.Find(x => x.Name == lane.Group));
         });
     }
 

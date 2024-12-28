@@ -1,27 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class ChartmakerRearrangeLaneAction: IChartmakerAction
+public class ChartmakerRearrangeLaneGroupAction: IChartmakerAction
 {
-    public Lane Target;
+    public LaneGroup Target;
 
-    public Lane BeforeAdjacent;
+    public LaneGroup BeforeAdjacent;
     public string BeforeGroup;
-    public Lane AfterAdjacent;
+    public LaneGroup AfterAdjacent;
     public string AfterGroup;
 
     public string GetName()
     {
-        return "Rearrange Lane";
+        return "Rearrange Lane Group";
     }
 
-    public void Do(Lane adjacent, string group) 
+    public void Do(LaneGroup adjacent, string group) 
     {
-        List<Lane> list = Chartmaker.main.CurrentChart.Lanes;
+        List<LaneGroup> list = Chartmaker.main.CurrentChart.Groups;
         Target.Group = group;
         list.Remove(Target);
         list.Insert(list.IndexOf(adjacent) + 1, Target);
-        list.Sort((x, y) => x.LaneSteps[0].Offset.CompareTo(y.LaneSteps[0].Offset));
     }
 
     public void Redo()

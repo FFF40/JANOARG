@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -457,6 +458,127 @@ public class HierarchyPanel : MonoBehaviour
             || (item.Target.Type is HierarchyItemType.LaneGroup && (before.Target.Type is HierarchyItemType.World or HierarchyItemType.LaneGroup));
     }
 
+    bool IsLaneGroupDraggingIntoSelf(LaneGroup dragging, string target)
+    {
+        if (dragging.Name == target) return true;
+        while (!String.IsNullOrEmpty(target))
+        {
+            LaneGroup group = PlayerView.main.Manager.Groups[target].CurrentGroup;
+            if (group.Group == dragging.Name) return true;
+            if (group.Group == dragging.Group) return false;
+            target = group.Group;
+        }
+        return false;
+    }
+
+    IChartmakerAction GetDragAction(HierarchyItemHolder item)
+    {
+        if (isDragInto)
+        {
+            if (item.Target.Target is Lane lane)
+            {
+                List<Lane> list = Chartmaker.main.CurrentChart.Lanes;
+                int index = list.IndexOf(lane);
+
+                ChartmakerRearrangeLaneAction rearrangeLaneAction(Lane adjacent, string group) => new () {
+                    Target = lane,
+                    BeforeAdjacent = index > 0 ? list[index - 1] : null,
+                    BeforeGroup = lane.Group,
+                    AfterAdjacent = adjacent,
+                    AfterGroup = group
+                };
+
+                if (item1.Target.Target is LaneGroup group1)
+                {
+                    return rearrangeLaneAction(list[^1], group1.Name);
+                }
+            }
+            else if (item.Target.Target is LaneGroup group) 
+            {
+                List<LaneGroup> list = Chartmaker.main.CurrentChart.Groups;
+                int index = list.IndexOf(group);
+
+                ChartmakerRearrangeLaneGroupAction rearrangeGroupAction(LaneGroup adjacent, string parent) => new () {
+                    Target = group,
+                    BeforeAdjacent = index > 0 ? list[index - 1] : null,
+                    BeforeGroup = group.Group,
+                    AfterAdjacent = adjacent,
+                    AfterGroup = parent
+                };
+
+
+                if (item1.Target.Target is LaneGroup group1)
+                {
+                    if (IsLaneGroupDraggingIntoSelf(group, group1.Group)) return null;
+                    return rearrangeGroupAction(list[^1], group1.Name);
+                }
+            }
+        }
+        else
+        {
+            if (item1 == item || item2 == item) return null;
+
+            if (item.Target.Target is Lane lane)
+            {
+                List<Lane> list = Chartmaker.main.CurrentChart.Lanes;
+                int index = list.IndexOf(lane);
+
+                ChartmakerRearrangeLaneAction rearrangeLaneAction(Lane adjacent, string group) => new () {
+                    Target = lane,
+                    BeforeAdjacent = index > 0 ? list[index - 1] : null,
+                    BeforeGroup = lane.Group,
+                    AfterAdjacent = adjacent,
+                    AfterGroup = group
+                };
+
+                if (item1.Target.Type == HierarchyItemType.World)
+                {
+                    return rearrangeLaneAction(list[^1], "");
+                }
+                if (item1.Target.Target is Lane lane1)
+                {
+                    return rearrangeLaneAction(lane1, lane1.Group);
+                }
+                if (item1.Target.Target is LaneGroup group1)
+                {
+                    if (item1.Target.Children.Count > 0 && item1.Target.Expanded)
+                        return rearrangeLaneAction(null, group1.Name);
+                    else 
+                        return rearrangeLaneAction(null, group1.Group);
+                }
+            }
+            else if (item.Target.Target is LaneGroup group) 
+            {
+                List<LaneGroup> list = Chartmaker.main.CurrentChart.Groups;
+                int index = list.IndexOf(group);
+
+                ChartmakerRearrangeLaneGroupAction rearrangeGroupAction(LaneGroup adjacent, string parent) => 
+                    IsLaneGroupDraggingIntoSelf(group, parent) ? null : new () {
+                        Target = group,
+                        BeforeAdjacent = index > 0 ? list[index - 1] : null,
+                        BeforeGroup = group.Group,
+                        AfterAdjacent = adjacent,
+                        AfterGroup = parent
+                    };
+
+
+                if (item1.Target.Type == HierarchyItemType.World)
+                {
+                    return rearrangeGroupAction(list[^1], "");
+                }
+                if (item1.Target.Target is LaneGroup group1)
+                {
+                    if (item1.Target.Children.Count > 0 && item1.Target.Expanded)
+                        return rearrangeGroupAction(null, group1.Name);
+                    else 
+                        return rearrangeGroupAction(group1, group1.Group);
+                }
+            }
+        }
+
+        return null;
+    }
+
     public void OnItemBeginDrag(HierarchyItemHolder item, PointerEventData eventData)
     {
         foreach (var i in Holders) i.SelectedBackground.SetActive(i == item);
@@ -533,7 +655,11 @@ public class HierarchyPanel : MonoBehaviour
 
     public void OnItemEndDrag(HierarchyItemHolder item, PointerEventData eventData)
     {
-        //TODO add drop handling mechanic
+        IChartmakerAction action = GetDragAction(item);
+        if (action != null) 
+        {
+            Chartmaker.main.DoAction(action);
+        }
 
         UpdateHolders();
         UpdateCursor(0);
