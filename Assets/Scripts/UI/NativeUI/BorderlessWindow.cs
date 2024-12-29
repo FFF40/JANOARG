@@ -422,19 +422,20 @@ public class BorderlessWindow
         IntPtr cursor = CursorChanger.Cursors.Count > 0 ? CursorChanger.Cursors.Peek() : IntPtr.Zero;
         if (cursor == IntPtr.Zero && WindowHandler.main) 
         {
+            var cursorMap = WindowHandler.main.CursorMap;
             if (CursorChanger.CursorTypes.Count > 0)
             {
                 CursorType target = CursorChanger.CursorTypes.Peek();
                 if (WindowHandler.main.CursorMap.ContainsKey(target)) 
                 {
-                    int index = WindowHandler.main.CursorMap[target];
-                    Cursor.SetCursor(WindowHandler.main.Cursors[index], WindowHandler.main.CursorPivots[index], CursorMode.Auto);
+                    CursorDefinition cursorDef = WindowHandler.main.CursorMap[target];
+                    WindowHandler.main.SetCustomCursor(cursorDef);
                 }
-                else Cursor.SetCursor(WindowHandler.main.Cursors[0], WindowHandler.main.CursorPivots[0], CursorMode.Auto);
+                else WindowHandler.main.SetCustomCursor(cursorMap[CursorType.Arrow]);
             }
             else 
             {
-                Cursor.SetCursor(WindowHandler.main.Cursors[0], WindowHandler.main.CursorPivots[0], CursorMode.Auto);
+                WindowHandler.main.SetCustomCursor(cursorMap[CursorType.Arrow]);
             }
         }
         else 

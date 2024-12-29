@@ -31,10 +31,12 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public Vector2Int borderSize;
     public Vector2Int windowMargin;
     [Header("Window")]
-    public List<CursorType> CursorMapping;
-    public List<Texture2D> Cursors;
-    public List<Vector2> CursorPivots;
-    public Dictionary<CursorType, int> CursorMap;
+    public List<CursorDefinition> CursorDefinitions;
+    public Dictionary<CursorType, CursorDefinition> CursorMap;
+
+    CursorDefinition activeCustomCursor;
+    int currentCursorFrame;
+    float currentCursorFrameTime;
 
     Vector2 mousePos = Vector2.zero;
     public bool maximized { get; private set; }
@@ -50,14 +52,10 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         main = this;
         CursorMap = new();
-        for (int a = 0; a < CursorMapping.Count; a++)
+        for (int a = 0; a < CursorDefinitions.Count; a++)
         {
-            CursorMap.Add(CursorMapping[a], a);
+            CursorMap.Add(CursorDefinitions[a].CursorType, CursorDefinitions[a]);
         }
-    }
-
-    public void Start()
-    {
     }
 
     public void Quit()
@@ -89,6 +87,21 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         {
             framed = BorderlessWindow.IsFramed;
             OnFrameChanged();
+        }
+
+        if (activeCustomCursor && activeCustomCursor.Frames.Count > 1) 
+        {
+            currentCursorFrameTime += Time.unscaledDeltaTime;
+            int lastFrame = currentCursorFrame;
+            int a = 1000;
+            while (currentCursorFrameTime >= activeCustomCursor.Frames[currentCursorFrame].Duration && a > 0)
+            {
+                currentCursorFrameTime -= activeCustomCursor.Frames[currentCursorFrame].Duration;
+                currentCursorFrame = (currentCursorFrame + 1) % activeCustomCursor.Frames.Count;
+                a--;
+            }
+            if (lastFrame != currentCursorFrame)
+                Cursor.SetCursor(activeCustomCursor.Frames[currentCursorFrame].Texture, activeCustomCursor.Pivot, CursorMode.Auto);
         }
     }
 
@@ -164,7 +177,6 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         LeftGroup.alpha = CenterGroup.alpha = RightGroup.alpha = active ? 1 : 0.5f;
     }
 
-
     public void OnPointerEnter(PointerEventData data)
     {
         if (!framed) BorderlessWindow.CurrentWindowZone = WindowZone.TitleBar;
@@ -173,5 +185,12 @@ public class WindowHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnPointerExit(PointerEventData data)
     {
         BorderlessWindow.CurrentWindowZone = WindowZone.Client;
+    }
+
+    public void SetCustomCursor(CursorDefinition cursor) 
+    {
+        activeCustomCursor = cursor;
+        currentCursorFrame = 0;
+        Cursor.SetCursor(cursor.Frames[0].Texture, cursor.Pivot, CursorMode.Auto);
     }
 }

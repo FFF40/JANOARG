@@ -1,11 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
-using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -189,7 +186,7 @@ public class HierarchyPanel : MonoBehaviour
                     newGroupItems[group.Name] = item;
                 }
                 GroupItems = newGroupItems;
-                var keys = GroupItems.Keys.ToList();
+                var keys = GroupItems.Keys;
                 int keyindex = 0;
                 foreach (var key in keys)
                 {
