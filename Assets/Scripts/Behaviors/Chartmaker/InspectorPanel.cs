@@ -475,7 +475,7 @@ public class InspectorPanel : MonoBehaviour
                 SpawnForm<FormEntryHeader>("Transform");
                 SpawnForm<FormEntryVector2, Vector2>("Start Pos", () => step.StartPos, x => Chartmaker.main.SetItem(step, "StartPos", x));
                 SetEase2(
-                    SpawnForm<FormEntryEasing, IEaseDirective>("", () => step.StartEaseX, 
+                    SpawnForm<FormEntryEasing, IEaseDirective>("Start Ease", () => step.StartEaseX, 
                         x => Chartmaker.main.SetItem(step, "StartEaseX", x) 
                     ),
                     SpawnForm<FormEntryEasing, IEaseDirective>("", () => step.StartEaseY, 
@@ -485,7 +485,7 @@ public class InspectorPanel : MonoBehaviour
 
                 SpawnForm<FormEntryVector2, Vector2>("End Pos", () => step.EndPos, x => Chartmaker.main.SetItem(step, "EndPos", x));
                 SetEase2(
-                    SpawnForm<FormEntryEasing, IEaseDirective>("", () => step.EndEaseX, 
+                    SpawnForm<FormEntryEasing, IEaseDirective>("End Ease", () => step.EndEaseX, 
                         x => Chartmaker.main.SetItem(step, "EndEaseX", x) 
                     ),
                     SpawnForm<FormEntryEasing, IEaseDirective>("", () => step.EndEaseY, 
@@ -560,7 +560,7 @@ public class InspectorPanel : MonoBehaviour
 
     public void MakeLaneStyleEntry(Lane lane)
     {
-        var dropdown = SpawnForm<FormEntryLinkedDropdown, object>("Style Index", () => lane.StyleIndex, x => Chartmaker.main.SetItem(lane, "StyleIndex", x));
+        var dropdown = SpawnForm<FormEntryLinkedDropdown, object>("Style", () => lane.StyleIndex, x => Chartmaker.main.SetItem(lane, "StyleIndex", x));
         for (int a = 0; a < Chartmaker.main.CurrentChart.Pallete.LaneStyles.Count; a++) 
         {
             var item = Chartmaker.main.CurrentChart.Pallete.LaneStyles[a];
@@ -575,7 +575,7 @@ public class InspectorPanel : MonoBehaviour
 
     public void MakeHitStyleEntry(HitObject hit)
     {
-        var dropdown = SpawnForm<FormEntryLinkedDropdown, object>("Style Index", () => hit.StyleIndex, x => Chartmaker.main.SetItem(hit, "StyleIndex", x));
+        var dropdown = SpawnForm<FormEntryLinkedDropdown, object>("Style", () => hit.StyleIndex, x => Chartmaker.main.SetItem(hit, "StyleIndex", x));
         for (int a = 0; a < Chartmaker.main.CurrentChart.Pallete.HitStyles.Count; a++) 
         {
             var item = Chartmaker.main.CurrentChart.Pallete.HitStyles[a];

@@ -345,8 +345,8 @@ public class InformationBar : MonoBehaviour
         }
         else if (VisualizerMode == VisualizerMode.FrequencyFlame)
         {
-            const int fftCount = 2 << 8;
-            const float riseTime = .02f, fallTime = .4f;
+            const int fftCount = 1024;
+            const float riseTime = .03f, fallTime = .5f;
 
             float[] fftL = new float[fftCount], fftR = new float[fftCount];
             float[] data = new float[fftCount * clip.channels];
@@ -375,7 +375,7 @@ public class InformationBar : MonoBehaviour
                 float cPos = Mathf.Clamp(unscale(Mathf.Lerp(minScale, maxScale, (a + .5f) / rect.width)) / clip.frequency * fftCount, 0, fftCount - 1);
                 int cPosFloor = Mathf.FloorToInt(cPos);
                 int cPosCeil = Mathf.CeilToInt(cPos);
-                float factor = (cPos + .5f) / fftCount / fftCount * 40;
+                float factor = (cPos + .5f) / fftCount / fftCount * 50;
                 
                 Image barL = AddBar();
                 float heightL = barL.rectTransform.rect.height / rect.height;

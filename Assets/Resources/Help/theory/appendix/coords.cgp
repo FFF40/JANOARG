@@ -1,0 +1,15 @@
+$title
+Coordinate System
+
+$t2
+Position
+$
+JANOARG uses the left-handed coordinate system: if you hold your left hand like an L with the middle 
+finger pointing perpendicular to the index finger and thumb. the X axis will be your thumb pointing left-wards, 
+the Y axis is your index finger pointing up-wards, and the Z axis is your middle finger pointing for-wards.
+
+$t2
+Rotation
+$
+Rotations are done by rotating counter-clockwise on the direction of the 3 axes, in the order of the Z axis first, 
+then the X axis, and finally the Y axis.

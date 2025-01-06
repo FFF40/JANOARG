@@ -129,8 +129,9 @@ public class TutorialModal : Modal
                 int index = Array.IndexOf(Tutorials.tutorials, CurrentTutorial);
                 bool isLastTutorial = index + 1 >= Tutorials.tutorials.Length;
 
-                NextTutorialButton.SetActive(!isLastTutorial);
-                if (!isLastTutorial) NextTutorialLabel.text = "Continue to " + Tutorials.tutorials[index + 1].Name;
+                NextTutorialButton.SetActive(true);
+                if (isLastTutorial) NextTutorialLabel.text = "Close Tutorial";
+                else NextTutorialLabel.text = "Continue to " + Tutorials.tutorials[index + 1].Name;
             }
         }
     }
@@ -148,7 +149,7 @@ public class TutorialModal : Modal
     public void StartNextTutorial()
     {
         int index = Array.IndexOf(Tutorials.tutorials, CurrentTutorial);
-        if (index + 1 >= Tutorials.tutorials.Length) return;
+        if (index + 1 >= Tutorials.tutorials.Length) { Close(); return; }
         StartTutorial(Tutorials.tutorials[index + 1]);
     }
 

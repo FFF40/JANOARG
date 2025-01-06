@@ -124,7 +124,7 @@ public class HomeModal : Modal
         Application.Quit();
     }
 
-    public void InteractiveTutorial()
+    public void OpenInteractiveTutorial()
     {
         ModalHolder.main.Spawn<TutorialModal>();
     }
@@ -133,5 +133,16 @@ public class HomeModal : Modal
     {
         ModalHolder.main.Spawn<HelpModal>();
     }
+
+    public void OpenGitHubIssueTracker()
+    {
+        Application.OpenURL("https://github.com/FFF40/JANOARG/issues");
+    }
+
+    public void OpenDiscordServer()
+    {
+        Application.OpenURL("https://discord.gg/vXJTPFQBHm");
+    }
+
 
 }

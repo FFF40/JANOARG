@@ -20,7 +20,9 @@ theory Chart Theory
   theory/pattern/difficulty Difficulty Analysis
   theory/pattern/patterns Common Patterns
   theory/pattern/patternshort Patterns Cheat Sheet
- theory/richtext Rich Text
+ theory/appendix Appendix
+  theory/appendix/richtext Rich Text
+  theory/appendix/coords Coordinate System
 anatomy Chartmaker Anatomy
  anatomy/quickstart Quick Start
  anatomy/elements UI Elements

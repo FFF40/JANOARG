@@ -563,6 +563,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+  m_ScrollSpeed: 50
 --- !u!114 &3236898444238163831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2864,7 +2865,7 @@ MonoBehaviour:
     to their respective owners.\n\n----------\n\nThe brand icons below belong to\ntheir
     respective trademark holders.\n\nI basically drew all of the other icons.\n                          
     <b><i>-duducat</i></b>\n\n----------\n\nSpecial thanks to\n<b>GitHub contributors</b>\n<b>Phigros
-    Fanmade Discord server</b>\n<b>This snail -> \U0001F40C</b>\n\n----------\n\nAnd
+    Fanmade Discord server</b>\n<b>This snail \u2192 \U0001F40C</b>\n\n----------\n\nAnd
     lastly:\n<b>Thank You for Chartmaking</b>"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}

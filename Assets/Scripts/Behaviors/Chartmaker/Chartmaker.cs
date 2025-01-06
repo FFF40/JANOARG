@@ -222,7 +222,7 @@ public class Chartmaker : MonoBehaviour
         LoaderPanel.ProgressLabel.text = "Loading audio file...";
         LoaderPanel.ProgressBar.value = .2f;
 
-        UnityWebRequest stream = UnityWebRequestMultimedia.GetAudioClip("file://" + Path.Combine(Path.GetDirectoryName(path), CurrentSong.ClipPath), AudioType.UNKNOWN);
+        UnityWebRequest stream = UnityWebRequestMultimedia.GetAudioClip("file://" + Path.Combine(Path.GetDirectoryName(path), CurrentSong.ClipPath).Replace("+", "%2B"), AudioType.UNKNOWN);
         Debug.Log(stream.url);
         stream.SendWebRequest();
         while (!stream.isDone) 

@@ -442,6 +442,253 @@ public class Tutorials
                 ),
             }
         ),
+        new Tutorial (
+            "Basic Charting",
+            onChartCondition,
+            new TutorialStep[] {
+                new (
+                    "Alright, this is finally the part where we get to do the charting!"
+                    + "\n\nYou might want to buckle up — there'll be a lot of things to take at once!"
+                ),
+                new (
+                    "Since this is a tutorial about editing a Chart, you'll have to switch to the Chart view in order to continue.",
+                    "Info Bar->Song Details/Chart",
+                    () => HierarchyPanel.main.CurrentMode == HierarchyMode.Chart,
+                    "(press this tab to continue)"
+                ),
+                new (
+                    "Let's learn about the anatomy of a Chart file!"
+                    + "\n\nAs you can see, a Chart file keeps track of three things: the Camera, the Palette, and the World.",
+                    "Content/View/Hierarchy"
+                ),
+                new (
+                    "The Camera is the thing the player use to see the gameplay field through."
+                    + "\n\nYou can select the Camera in the Hierarchy panel to change its position and rotation.",
+                    "Content/View/Hierarchy->Content/Camera"
+                ),
+                new (
+                    "The Palette defines the look and feel of the Chart."
+                    + "\n\nWith it you can recolor the background and the objects.",
+                    "Content/View/Hierarchy->Content/Palette"
+                ),
+                new (
+                    "And lastly, the World is the place where all of the object in the Chart belongs."
+                    + "\n\nIf you added a thing that the Camera can view, it can be found here.",
+                    "Content/View/Hierarchy->Content/World"
+                ),
+                new (
+                    "We should take this time to learn about how a JANOARG chart works."
+                    + "\n\nA JANOARG chart consist of Lanes with Hit Objects on them. During the song, each Lane spawn a judgment line (called a <i>Lane Judge</i>) that approach its Hit Objects."
+                    + "\n\nWhen a Lane Judge hits a Hit Object, the players should perform an action based on which type the Hit Object is. Points are awarded based on how on time the player did them, which are on time with the playing background music."
+                ),
+                new (
+                    "Placing a Lane is easy, you can just click this Lane button and a Lane will be placed at the time position the seek line is currenly at.",
+                    "Content/Picker/Hierarchy Items->Lane"
+                ),
+                new (
+                    "",
+                    () => {
+                        TimelinePanel.main.SetTabMode(TimelineMode.Lanes);
+                        return true;
+                    },
+                    ""
+                ),
+                new (
+                    "Alternatively, you can also select the Lane here...",
+                    "Content/Picker/Timeline Items->Lane"
+                ),
+                new (
+                    "...and left-mouse-click or drag on the Timeline to place a Lane with more control on when the Lane starts and ends in time position.",
+                    "Content/Timeline/Timeline"
+                ),
+                new (
+                    "It's your turn!"
+                    + "\n\nCreate (or select) a Lane to advance the tutorial.",
+                    () => InspectorPanel.main.CurrentObject is Lane,
+                    "(select a Lane to continue)"
+                ),
+                new (
+                    "You selected a Lane!"
+                    + "\n\nLet's look at the inspector for a moment.",
+                    "Content/View/Inspector"
+                ),
+                new (
+                    "Each Lane has a Position and Rotation attributes, which determines its place in the play field and where it'll face, respectively."
+                    + "\n\n<i><size=8>(for more information on the coordinate system, take a look at Chart Theory→Appendix→Coordinate System page in the Chartmaker Manual)</size></i>",
+                    "Content/View/Inspector->Content->Transform"
+                ),
+                new (
+                    "This here is the Style of the Lane. The Lane Style determines the color of a Lane's body and its judgment line."
+                    + "\n\nYou can find Lane Styles by expanding the Palette object in the Hierarchy, or you can press the link button next to the dropdown to quickly select the Lane Style object."
+                    + "\n\nYou can also set the Lane to use no Lane Styles, in which the Lane simply becomes invisible.",
+                    "Content/View/Inspector->Content->Style"
+                ),
+                new (
+                    "Also, once you selected a Lane, two tabs in the Timeline will pop up inorder to let you edit the Lane's Lane Steps and Hit Objects respectively.",
+                    "Content/Timeline/Tabs"
+                ),
+                new (
+                    "",
+                    () => {
+                        TimelinePanel.main.SetTabMode(TimelineMode.LaneSteps);
+                        return true;
+                    },
+                    ""
+                ),
+                new (
+                    "Each Lane has a list of Lane Steps define its shape. With this you can make the Lane bend and have different shapes!",
+                    "Content/Timeline/Timeline"
+                ),
+                new (
+                    "",
+                    () => {
+                        TimelinePanel.main.SetTabMode(TimelineMode.HitObjects);
+                        return true;
+                    },
+                    ""
+                ),
+                new (
+                    "The Hit Object tab lets you place, well, Hit Objects! This is where you get to define the gameplay.",
+                    "Content/Timeline/Timeline"
+                ),
+                new (
+                    "Now let us go back to the Lane Steps tab...",
+                    "Content/Timeline/Tabs->Lane Steps",
+                    () => TimelinePanel.main.CurrentMode == TimelineMode.LaneSteps,
+                    "(press this tab to continue)"
+                ),
+                new (
+                    "...and select a Lane Step so we can see its properties and advance the tutorial.",
+                    () => InspectorPanel.main.CurrentObject is LaneStep,
+                    "(select a Lane Step to continue)"
+                ),
+                new (
+                    "As you can see here, each Lane Step is defined by a start point and an end point in a 2D plane facing in the same direction of that of the Lane."
+                    +"\n\nThere is also a Speed attribute which determines how fast the Lane's judgment line approaches this Lane Step. Note that only the nearest Lane Step forward of the judgment line have its Speed attribute applied.",
+                    "Content/View/Inspector->Content->Transform"
+                ),
+                new (
+                    "For each axis of each point you can also set the easing function that determines the shape of the Lane when it connects the previous Lane Step to this one.",
+                    "Content/View/Inspector->Content->Start Ease"
+                ),
+                new (
+                    "Now let us explain about Hit Objects.",
+                    "Content/Timeline/Tabs->Hit Objects",
+                    () => TimelinePanel.main.CurrentMode == TimelineMode.HitObjects,
+                    "(go to the Hit Objects tab to continue)"
+                ),
+                new (
+                    "There are two main types of Hit Objects: <i>Normal Hit Objects</i> and <i>Catch Hit Objects</i>"
+                    + "\n\nNormal Hit Objects (<i>Normal Hits</i> for short) require the player to tap the screen at the exact time to hit, while Catch Hits can still be hit even when the player's finger is still touching the screen beforehand."
+                    + "\n\nBoth types of Hit Objects require the player to do it at the exact place where they and the judgment line meet, though."
+                ),
+                new (
+                    "You can place Hit Objects by selecting the type here in the Picker and place them on to the Timeline.",
+                    "Content/Picker/Timeline Items"
+                ),
+                new (
+                    "Let's try it out for ourselves!"
+                    + "\n\nPlace down a Hit Object or select an existing one so we can take a look at a Hit Object's properties.",
+                    () => InspectorPanel.main.CurrentObject is HitObject,
+                    "(select a Hit Object to continue)"
+                ),
+                new (
+                    "Each Hit Object has a Position and Length attribute which determines where the Hit Object will hit the Lane Judge."
+                    + "\n\nThese values ranges from 0 to 1 with 0 being the start point of the Lane Step, 1 being the end point, and intermediate values mean somewhere in between."
+                    + "\n\nThe range of 0~1 can be exceeded too, if this happens the Hit Object will overshoot the Lane's edge."
+                    + "\n\nNote that Position attribute's value corresponds the the start point of the Hit Object, and the end point is equal to the sum of Position + Length attributes.",
+                    "Content/View/Inspector->Content->Transform"
+                ),
+                new (
+                    "...and of course, since each Hit Object corresponds to an audible cue in the song, they also have time positions.",
+                    "Content/View/Inspector->Header/Offset"
+                ),
+                new (
+                    "Well, there's one more thing. Do you remember about the two main types of Hit Objects?"
+                    + "\n\nIn JANOARG, each Hit Object can be \"transformed\" so they can represent more complex actions too!"
+                ),
+                new (
+                    "For example, by making the Hold Length attribute of a Hit Object a number greater than 0, a Hold Tail will show up signaling that the player needs to additionally hold their finger for the duration of the hold."
+                    + "\n\nHold duration are specified in beats, so a value of 2 means the hold is 2 beats long.",
+                    "Content/View/Inspector->Content->Hold Length"
+                ),
+                new (
+                    "And if this Flickable attribute of a Hit Object is on, an arrow-like symbol will show up on the Hit Object signaling that the player needs to additionally swipe their finger in a certain direction."
+                    + "\n\nThe angle of the flick can be deterministic (Directional Flicks) or not (Free Flicks), in the latter case a swipe in any direction can trigger the Hit Object.",
+                    "Content/View/Inspector->Content->Flickable"
+                ),
+                new (
+                    "Well, after we've covered Lanes and Hit Objects, what else do we have to cover?"
+                    + "\n\nWell, there's just one more thing..."
+                ),
+                new (
+                    "...the storyboarding feature...",
+                    "Content/Timeline/Tabs->Storyboard",
+                    () => TimelinePanel.main.CurrentMode == TimelineMode.Storyboard,
+                    "(press this tab to continue)"
+                ),
+                new (
+                    "This one Storyboard tab here allows you to animate just about anything that can be animatable!"
+                    + "\n\nThat includes positions, rotations, speeds, colors, and much more!"
+                ),
+                new (
+                    "To do that you just need to place Timestamps into the correct rows on the where-you-know-by-now.",
+                    "Content/Picker/Timeline Items->Lane"
+                ),
+                new (
+                    "It's practice time!"
+                    + "\n\nYou know what to do by now.",
+                    () => InspectorPanel.main.CurrentTimestamp?.Count > 0,
+                    "(select a Timestamp to continue)"
+                ),
+                new (
+                    "These are the attributes a Timestamp object has. Seems like there's not a lot of it, right?"
+                    + "\n\nA Timestamp corresponds to a moment in the song that a certain object's attribute changes value from one to another. Each one keeps track of when the change starts (in beat position), how long would it take (in beats), the final value, an optional start value (which if it is not defined will default to the current value when it is triggered), and an easing function that tells the game how to interpolate between the two values.",
+                    "Content/View/Inspector"
+                ),
+                new (
+                    "This covers pretty much most of the charting features you can do, though there are a few more things that I want to tell you about."
+                ),
+                new (
+                    "The first thing is the Lane Group feature. With it you can group multiple Lanes into a Lane Group that can be manipulated in batch together.",
+                    "Content/Picker/Hierarchy Items->Lane Group"
+                ),
+                new (
+                    "The other ones are these controls right here. There are some controls that only appears when a specifc Timeline tab is active.",
+                    "Content/Timeline/Bottom Items->Options"
+                ),
+                new (
+                    "",
+                    () => {
+                        TimelinePanel.main.SetTabMode(TimelineMode.Lanes);
+                        return true;
+                    },
+                    ""
+                ),
+                new (
+                    "For example, the ones in the Lanes tab here allows you to filter out which Lanes to show up on the Timeline based on certain criterias.",
+                    "Content/Timeline/Bottom Items->Lane Options"
+                ),
+                new (
+                    "",
+                    () => {
+                        TimelinePanel.main.SetTabMode(TimelineMode.HitObjects);
+                        return true;
+                    },
+                    ""
+                ),
+                new (
+                    "...and the ones in the Hit Objects tab here allows you to adjust the vertical viewport of the Timeline.",
+                    "Content/Timeline/Bottom Items->Hit Object Options"
+                ),
+                new (
+                    "This covers up all of the tutorials!"
+                    + "\n\nIf you want to read more, there are more things to read on the Chartmaker Manual that you can access by clicking on the Help item on the title bar, or on the Getting Started tab on the Home modal."
+                    + "\n\nYou can also find the invite to our Discord server too-come take a visit to exchange tips between other charters like you!"
+                    + "\n\nAlright, it's time for me to go!\nBye!"
+                ),
+            }
+        ),
     };
 
     static bool onHomeCondition(Action start) 
@@ -473,6 +720,21 @@ public class Tutorials
             dm.SetDialog(
                 "Missing Requirement", 
                 "This tutorial requires an active Playable Song.",
+                new [] {"Ok"},
+                _ => {}
+            );
+            return false;
+        }
+        return true;
+    }
+    static bool onChartCondition(Action start) 
+    {
+        if (Chartmaker.main.CurrentChart == null) 
+        {
+            DialogModal dm = ModalHolder.main.Spawn<DialogModal>();
+            dm.SetDialog(
+                "Missing Requirement", 
+                "This tutorial requires an active Chart.",
                 new [] {"Ok"},
                 _ => {}
             );

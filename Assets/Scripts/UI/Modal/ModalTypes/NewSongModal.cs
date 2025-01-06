@@ -29,6 +29,7 @@ public class NewSongModal : Modal
     public TMP_Text PreviewSongLengthLabel;
     public GameObject PreviewPlayIcon;
     public GameObject PreviewPauseIcon;
+    public Image PreviewCover;
     [Space]
     public TMP_Text SongFileSizeLabel;
     public TooltipTarget SongFileSizeTooltip;
@@ -123,6 +124,21 @@ public class NewSongModal : Modal
             genre.Start();
             InitialValues.Timing.Stops[0].BPM = SongMetadata.BeatsPerMinute <= 0 ? 140 : SongMetadata.BeatsPerMinute;
             bpm.Start();
+
+            Destroy(PreviewCover.sprite);
+            Debug.Log("attachment count = " + SongMetadata.Attachments.Count);
+            if (SongMetadata.Attachments.Count > 0) 
+            {
+                Texture2D tex = new (1, 1);
+                tex.LoadImage(SongMetadata.Attachments[0].Data);
+                Sprite spr = Sprite.Create(tex, new (0, 0, tex.width, tex.height), new (.5f, .5f));
+                PreviewCover.sprite = spr;
+                PreviewCover.gameObject.SetActive(true);
+            }
+            else 
+            {
+                PreviewCover.gameObject.SetActive(false);
+            }
         };
     }
 
@@ -212,7 +228,7 @@ public class NewSongModal : Modal
         SetPlayerActive(false);
         PreviewMessage.text = "Loading audio...";
 
-        UnityWebRequest stream = UnityWebRequestMultimedia.GetAudioClip("file://" + path, AudioType.UNKNOWN);
+        UnityWebRequest stream = UnityWebRequestMultimedia.GetAudioClip("file://" + path.Replace("+", "%2B"), AudioType.UNKNOWN);
         Debug.Log(stream.url);
         stream.SendWebRequest();
         while (!stream.isDone) 
