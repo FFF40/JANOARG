@@ -66,8 +66,24 @@ public class ResultScreen : MonoBehaviour
     IEnumerator EndingAnim()
     {
         Fanfare.LoadAudioData();
-
         PlayerScreen.main.PlayerHUD.SetActive(false);
+        
+        //Added logic to display ALL FLAWLESS or FULL COMBO
+        PlayerScreen ps = PlayerScreen.main;
+        Transform childTransform = ps.transform.Find("End Flash/Result");
+        TMP_Text childTMP = childTransform.GetComponent<TMP_Text>();
+
+        if (ps.TotalCombo == ps.PerfectCount) { } // ALL FLAWLESS
+        else if (ps.BadCount == 0 && ps.GoodCount != 0) {
+            childTMP.text = "FULL STREAK!";
+        } else if (ps.GoodCount == ps.TotalCombo) {
+            childTMP.text = "ALL MISALIGNED...!?";
+        } else if (ps.BadCount == ps.TotalCombo) {
+            childTMP.text = "ALL BROKEN...?";
+        } else {
+            childTMP.text = "TRACK CLEARED";
+        }
+
         Flash.gameObject.SetActive(true);
         ResultText.gameObject.SetActive(false);
         ResultTextBig.alpha = 0;
