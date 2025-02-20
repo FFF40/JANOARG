@@ -8,7 +8,7 @@ using System.IO;
 public class JAPSDecoder
 {
 
-    public const int FormatVersion = 1;
+    public const int FormatVersion = 2;
     public const int IndentSize = 2;
 
     public static PlayableSong Decode(string str)
@@ -45,6 +45,10 @@ public class JAPSDecoder
                     {
                         currentObject = song;
                     }
+                    else if (mode == "COVER")
+                    {
+                        currentObject = song.Cover;
+                    }
                     else if (mode == "COLORS")
                     {
                         currentObject = song;
@@ -68,6 +72,23 @@ public class JAPSDecoder
                     if (tokens.Length < 2)
                     { 
                         throw new System.Exception("Object token expected but not found.");
+                    }
+                    else if (tokens[1] == "Layer")
+                    {
+                        if (tokens.Length >= 6)
+                        {
+                            CoverLayer layer = new() {
+                                Scale = ParseFloat(tokens[2]),
+                                Position = new Vector2(ParseFloat(tokens[3]), ParseFloat(tokens[4])),
+                                ParallaxFactor = ParseFloat(tokens[5]),
+                            };
+                            song.Cover.Layers.Add(layer);
+                            currentObject = layer;
+                        }
+                        else 
+                        {
+                            throw new System.Exception("Not enough tokens (minimum 6, got " + tokens.Length + ").");
+                        }
                     }
                     else if (tokens[1] == "BPM")
                     {
@@ -117,6 +138,17 @@ public class JAPSDecoder
                              if (key == "Background")  song.BackgroundColor = ParseColor(value);
                              if (key == "Interface")   song.InterfaceColor = ParseColor(value);
                     }
+                    else if (currentObject is Cover cover)
+                    {
+                             if (key == "Background")   cover.BackgroundColor = ParseColor(value);
+                        else if (key == "Icon")         cover.IconTarget = value;
+                        else if (key == "Icon Center")  cover.IconCenter = ParseVector(value);
+                        else if (key == "Icon Size")    cover.IconSize = ParseFloat(value);
+                    }
+                    else if (currentObject is CoverLayer layer)
+                    {
+                             if (key == "Target")  layer.Target = value;
+                    }
                     else if (currentObject is ExternalChartMeta chart)
                     {
                              if (key == "Target")    chart.Target = value;
@@ -126,6 +158,10 @@ public class JAPSDecoder
                         else if (key == "Level")     chart.DifficultyLevel = value;
                         else if (key == "Constant")  chart.ChartConstant = ParseFloat(value);
                     }
+                }
+                else if (currentObject is CoverLayer layer)
+                {
+                         if (line == "Tiling")  layer.Tiling = true;
                 }
                 else if (currentObject?.ToString() == "version")
                 {
@@ -176,11 +212,10 @@ public class JAPSDecoder
     {
         return float.Parse(number, CultureInfo.InvariantCulture);
     }
-
     static Vector3 ParseVector(string str)
     {
         string[] tokens = str.Split(' ');
-        return new Vector3(ParseFloat(tokens[0]), ParseFloat(tokens[1]), ParseFloat(tokens[2]));
+        return new Vector3(ParseFloat(tokens[0]), ParseFloat(tokens[1]), tokens.Length < 3 ? 0 : ParseFloat(tokens[2]));
     }
 
     static Color ParseColor(string str)

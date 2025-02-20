@@ -83,6 +83,7 @@ Material:
     - _StencilWriteMask: 255
     - _StripeBalance: 0.3333
     - _StripeSize: 9
+    - _StripeSpeed: 2
     - _StripeVis: 0
     - _StripeVisAlpha: 0
     - _StripeVisibility: 0.27

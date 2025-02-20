@@ -14,7 +14,7 @@ public class Storage
 
     public Storage(string path)
     {
-        SaveName = path;
+        SaveName = Application.persistentDataPath + "/" + path;
         Load();
     }
 
@@ -108,10 +108,10 @@ public class Storage
         XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
         FileStream fs;
 
-        fs = new FileStream(Application.persistentDataPath + "/" + SaveName + ".jas", FileMode.Create);
+        fs = new FileStream(SaveName + ".jas", FileMode.Create);
         serializer.Serialize(fs, list);
         fs.Close();
-        fs = new FileStream(Application.persistentDataPath + "/" + SaveName + ".backup.jas", FileMode.Create);
+        fs = new FileStream(SaveName + ".backup.jas", FileMode.Create);
         serializer.Serialize(fs, list);
         fs.Close();
 
@@ -126,7 +126,7 @@ public class Storage
         FileStream fs = null;
         try 
         {
-            fs = new FileStream(Application.persistentDataPath + "/" + SaveName + ".jas", FileMode.OpenOrCreate);
+            fs = new FileStream(SaveName + ".jas", FileMode.OpenOrCreate);
             list = (SerializeProxyList)serializer.Deserialize(fs);
             fs.Close();
         }
@@ -135,7 +135,7 @@ public class Storage
             try 
             {
                 fs?.Close();
-                fs = new FileStream(Application.persistentDataPath + "/" + SaveName + ".backup.jas", FileMode.OpenOrCreate);
+                fs = new FileStream(SaveName + ".backup.jas", FileMode.OpenOrCreate);
                 list = (SerializeProxyList)serializer.Deserialize(fs);
                 fs.Close();
             }

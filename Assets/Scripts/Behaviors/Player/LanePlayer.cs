@@ -125,12 +125,12 @@ public class LanePlayer : MonoBehaviour
             {
                 AddLine(
                     new Vector3(
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, Ease.Get(progress, cur.StartEaseX, cur.StartEaseXMode)), 
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, Ease.Get(progress, cur.StartEaseY, cur.StartEaseYMode)),
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, cur.StartEaseX.Get(progress)), 
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, cur.StartEaseY.Get(progress)),
                     position), 
                     new Vector3(
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, Ease.Get(progress, cur.EndEaseX, cur.EndEaseXMode)), 
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, Ease.Get(progress, cur.EndEaseY, cur.EndEaseYMode)),
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, cur.EndEaseX.Get(progress)), 
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, cur.EndEaseY.Get(progress)),
                     position));
             }
         }
@@ -175,12 +175,12 @@ public class LanePlayer : MonoBehaviour
                 {
                     AddLine(
                         new Vector3(
-                            Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, Ease.Get(x, cur.StartEaseX, cur.StartEaseXMode)), 
-                            Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, Ease.Get(x, cur.StartEaseY, cur.StartEaseYMode)),
+                            Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, cur.StartEaseY.Get(x)),
                         Mathf.Lerp(Positions[a - 1], pos, x)), 
                         new Vector3(
-                            Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, Ease.Get(x, cur.EndEaseX, cur.EndEaseXMode)), 
-                            Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, Ease.Get(x, cur.EndEaseY, cur.EndEaseYMode)),
+                            Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, cur.EndEaseY.Get(x)),
                         Mathf.Lerp(Positions[a - 1], pos, x))
                     );
                 }
@@ -281,11 +281,11 @@ public class LanePlayer : MonoBehaviour
             else 
             {
                 start = new Vector2(
-                    Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, Ease.Get(progress, cur.StartEaseX, cur.StartEaseXMode)), 
-                    Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, Ease.Get(progress, cur.StartEaseY, cur.StartEaseYMode)));
+                    Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, cur.StartEaseY.Get(progress)));
                 end = new Vector2(
-                    Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, Ease.Get(progress, cur.EndEaseX, cur.EndEaseXMode)), 
-                    Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, Ease.Get(progress, cur.EndEaseY, cur.EndEaseYMode)));
+                    Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, cur.EndEaseY.Get(progress)));
             }
         }
     }
@@ -343,12 +343,12 @@ public class LanePlayer : MonoBehaviour
             {
                 AddLine(
                     new Vector3(
-                        Mathf.LerpUnclamped(preStartPos.x, curStartPos.x, Ease.Get(progress, cur.StartEaseX, cur.StartEaseXMode)), 
-                        Mathf.LerpUnclamped(preStartPos.y, curStartPos.y, Ease.Get(progress, cur.StartEaseY, cur.StartEaseYMode)),
+                        Mathf.LerpUnclamped(preStartPos.x, curStartPos.x, cur.StartEaseX.Get(progress)), 
+                        Mathf.LerpUnclamped(preStartPos.y, curStartPos.y, cur.StartEaseY.Get(progress)),
                     position), 
                     new Vector3(
-                        Mathf.LerpUnclamped(preEndPos.x, curEndPos.x, Ease.Get(progress, cur.EndEaseX, cur.EndEaseXMode)), 
-                        Mathf.LerpUnclamped(preEndPos.y, curEndPos.y, Ease.Get(progress, cur.EndEaseY, cur.EndEaseYMode)),
+                        Mathf.LerpUnclamped(preEndPos.x, curEndPos.x, cur.EndEaseX.Get(progress)), 
+                        Mathf.LerpUnclamped(preEndPos.y, curEndPos.y, cur.EndEaseY.Get(progress)),
                     position));
             }
         }
@@ -377,12 +377,12 @@ public class LanePlayer : MonoBehaviour
                 {
                     AddLine(
                         new Vector3(
-                            Mathf.LerpUnclamped(preStartPos.x, curStartPos.x, Ease.Get(x, cur.StartEaseX, cur.StartEaseXMode)), 
-                            Mathf.LerpUnclamped(preStartPos.y, curStartPos.y, Ease.Get(x, cur.StartEaseY, cur.StartEaseYMode)),
+                            Mathf.LerpUnclamped(preStartPos.x, curStartPos.x, cur.StartEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(preStartPos.y, curStartPos.y, cur.StartEaseY.Get(x)),
                         Mathf.Lerp(Positions[index - 1], Positions[index], x)), 
                         new Vector3(
-                            Mathf.LerpUnclamped(preEndPos.x, curEndPos.x, Ease.Get(x, cur.EndEaseX, cur.EndEaseXMode)), 
-                            Mathf.LerpUnclamped(preEndPos.y, curEndPos.y, Ease.Get(x, cur.EndEaseY, cur.EndEaseYMode)),
+                            Mathf.LerpUnclamped(preEndPos.x, curEndPos.x, cur.EndEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(preEndPos.y, curEndPos.y, cur.EndEaseY.Get(x)),
                         Mathf.Lerp(Positions[index - 1], Positions[index], x))
                     );
                     if (x >= Mathf.Min(endProg, 1)) break;

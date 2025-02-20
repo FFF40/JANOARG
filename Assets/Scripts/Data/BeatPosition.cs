@@ -41,7 +41,6 @@ public struct BeatPosition : IComparable<BeatPosition>
         else return (Numerator < 0 ? "-" : "") + Math.Abs(Number).ToString(cultureInfo) + "b" + Math.Abs(Numerator).ToString(cultureInfo) + "/" + Denominator.ToString(cultureInfo);
     }
 
-
     public static BeatPosition Parse(string number, CultureInfo culture = null)
     {
         int slashPos = number.IndexOf('/');
@@ -235,5 +234,15 @@ public struct BeatPosition : IComparable<BeatPosition>
     public readonly int CompareTo(BeatPosition other)
     {
         return ((float)this).CompareTo((float)other);
+    }
+
+    // -------------------- Math functions
+    static public BeatPosition Min(BeatPosition a, BeatPosition b)
+    {
+        return a < b ? a : b;
+    }
+    static public BeatPosition Max(BeatPosition a, BeatPosition b)
+    {
+        return a > b ? a : b;
     }
 }

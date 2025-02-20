@@ -19,4 +19,5 @@ public class ExternalChartMeta
     public float ChartConstant = 6;
 
     public string CharterName = "";
+    public string AltCharterName = "";
 }

@@ -8,7 +8,7 @@ using System.IO;
 public class JAPSEncoder
 {
 
-    public const int FormatVersion = 1;
+    public const int FormatVersion = 2;
     public const int IndentSize = 2;
 
     public static string Encode(PlayableSong song, string clipName)
@@ -32,6 +32,15 @@ public class JAPSEncoder
         
         str += "\n\n[RESOURCES]";
         str += "\nClip: " + clipName;
+        
+        str += "\n\n[COVER]";
+        str += "\nBackground: " + EncodeColor(song.Cover.BackgroundColor);
+        str += "\nIcon: " + song.Cover.IconTarget;
+        str += "\nIcon Center: " + EncodeVector(song.Cover.IconCenter);
+        str += "\nIcon Size: " + song.Cover.IconSize.ToString(CultureInfo.InvariantCulture);
+        foreach (CoverLayer layer in song.Cover.Layers) {
+            str += EncodeCoverLayer(layer);
+        }
 
         str += "\n\n[COLORS]";
         str += "\nBackground: " + EncodeColor(song.BackgroundColor);
@@ -47,6 +56,21 @@ public class JAPSEncoder
             str += EncodeExternalChartMeta(chart);
         }
 
+
+        return str;
+    }
+
+    public static string EncodeCoverLayer(CoverLayer layer, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ Layer"
+            + " " + layer.Scale.ToString(CultureInfo.InvariantCulture)
+            + " " + EncodeVector(layer.Position)
+            + " " + layer.ParallaxFactor.ToString(CultureInfo.InvariantCulture)
+            + "\n" + indent2 + "Target: " + layer.Target
+            + (layer.Tiling ? "\n" + indent2 + "Tiling" : "");
 
         return str;
     }
@@ -79,6 +103,12 @@ public class JAPSEncoder
             + "\n" + indent2 + "Constant: " + chart.ChartConstant.ToString(CultureInfo.InvariantCulture);
 
         return str;
+    }
+
+    public static string EncodeVector(Vector2 vec)
+    {
+        return vec.x.ToString(CultureInfo.InvariantCulture)
+            + " " + vec.y.ToString(CultureInfo.InvariantCulture);
     }
 
     public static string EncodeColor(Color col)

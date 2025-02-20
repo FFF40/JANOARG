@@ -108,6 +108,11 @@ public class SongSelectScreen : MonoBehaviour
         {
             ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
             yield return new WaitUntil(() => req.isDone);
+            if (!req.asset) 
+            {
+                Debug.LogWarning("Couldn't load Playable Song at " + path);
+                continue;
+            }
             PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
             SongList.Add(song);
 

@@ -18,15 +18,16 @@ public class Chart : IDeepClonable<Chart>
     public float ChartConstant = 6;
 
     public string CharterName = "";
+    public string AltCharterName = "";
 
-    public List<LaneGroup> Groups = new List<LaneGroup>();
-    public List<Lane> Lanes = new List<Lane>();
+    public List<LaneGroup> Groups = new();
+    public List<Lane> Lanes = new();
 
-    public CameraController Camera = new CameraController();
+    public CameraController Camera = new();
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
 
-    public Pallete Pallete = new Pallete();
+    public Pallete Pallete = new();
 
     public Chart() 
     {
@@ -35,7 +36,7 @@ public class Chart : IDeepClonable<Chart>
     
     public Chart DeepClone()
     {
-        Chart clone = new Chart()
+        Chart clone = new()
         {
             DifficultyName = DifficultyName,
             DifficultyLevel = DifficultyLevel,
@@ -53,57 +54,50 @@ public class Chart : IDeepClonable<Chart>
 }
 
 [System.Serializable]
-public class CameraController : IStoryboardable, IDeepClonable<CameraController> {
+public class CameraController : Storyboardable, IDeepClonable<CameraController> {
     public Vector3 CameraPivot;
     public float PivotDistance = 10;
     public Vector3 CameraRotation;
     
     public new static TimestampType[] TimestampTypes = 
     {
-        new TimestampType
-        {
+        new() {
             ID = "CameraPivot_X",
             Name = "Camera Pivot X",
             Get = (x) => ((CameraController)x).CameraPivot.x,
             Set = (x, a) => { ((CameraController)x).CameraPivot.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CameraPivot_Y",
             Name = "Camera Pivot Y",
             Get = (x) => ((CameraController)x).CameraPivot.y,
             Set = (x, a) => { ((CameraController)x).CameraPivot.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CameraPivot_Z",
             Name = "Camera Pivot Z",
             Get = (x) => ((CameraController)x).CameraPivot.z,
             Set = (x, a) => { ((CameraController)x).CameraPivot.z = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "PivotDistance",
             Name = "Pivot Distance",
             Get = (x) => ((CameraController)x).PivotDistance,
             Set = (x, a) => { ((CameraController)x).PivotDistance = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CameraRotation_X",
             Name = "Camera Rotation X",
             Get = (x) => ((CameraController)x).CameraRotation.x,
             Set = (x, a) => { ((CameraController)x).CameraRotation.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CameraRotation_Y",
             Name = "Camera Rotation Y",
             Get = (x) => ((CameraController)x).CameraRotation.y,
             Set = (x, a) => { ((CameraController)x).CameraRotation.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CameraRotation_Z",
             Name = "Camera Rotation Z",
             Get = (x) => ((CameraController)x).CameraRotation.z,
@@ -113,7 +107,7 @@ public class CameraController : IStoryboardable, IDeepClonable<CameraController>
     
     public CameraController DeepClone()
     {
-        CameraController clone = new CameraController()
+        CameraController clone = new()
         {
             Storyboard = Storyboard.DeepClone(),
             CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
@@ -125,60 +119,53 @@ public class CameraController : IStoryboardable, IDeepClonable<CameraController>
 
 // Style 
 [System.Serializable]
-public class Pallete : IStoryboardable, IDeepClonable<Pallete>  {
+public class Pallete : Storyboardable, IDeepClonable<Pallete>  {
 
     public Color BackgroundColor = Color.black;
     public Color InterfaceColor = Color.white;
 
-    public List<LaneStyle> LaneStyles = new List<LaneStyle>();
-    public List<HitStyle> HitStyles = new List<HitStyle>();
+    public List<LaneStyle> LaneStyles = new();
+    public List<HitStyle> HitStyles = new();
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new TimestampType
-        {
+        new() {
             ID = "BackgroundColor_R",
             Name = "Background Color R",
             Get = (x) => ((Pallete)x).BackgroundColor.r,
             Set = (x, a) => { ((Pallete)x).BackgroundColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "BackgroundColor_G",
             Name = "Background Color G",
             Get = (x) => ((Pallete)x).BackgroundColor.g,
             Set = (x, a) => { ((Pallete)x).BackgroundColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "BackgroundColor_B",
             Name = "Background Color B",
             Get = (x) => ((Pallete)x).BackgroundColor.b,
             Set = (x, a) => { ((Pallete)x).BackgroundColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "InterfaceColor_R",
             Name = "Interface Color R",
             Get = (x) => ((Pallete)x).InterfaceColor.r,
             Set = (x, a) => { ((Pallete)x).InterfaceColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "InterfaceColor_G",
             Name = "Interface Color G",
             Get = (x) => ((Pallete)x).InterfaceColor.g,
             Set = (x, a) => { ((Pallete)x).InterfaceColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "InterfaceColor_B",
             Name = "Interface Color B",
             Get = (x) => ((Pallete)x).InterfaceColor.b,
             Set = (x, a) => { ((Pallete)x).InterfaceColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "InterfaceColor_A",
             Name = "Interface Color A",
             Get = (x) => ((Pallete)x).InterfaceColor.a,
@@ -188,7 +175,7 @@ public class Pallete : IStoryboardable, IDeepClonable<Pallete>  {
 
     public Pallete DeepClone()
     {
-        Pallete clone = new Pallete()
+        Pallete clone = new()
         {
             BackgroundColor = new Color(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.a),
             InterfaceColor = new Color(InterfaceColor.r, InterfaceColor.g, InterfaceColor.b, InterfaceColor.a),
@@ -201,8 +188,9 @@ public class Pallete : IStoryboardable, IDeepClonable<Pallete>  {
 }
 
 [System.Serializable]
-public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle> 
+public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle> 
 {
+    public string Name;
 
     public string LaneMaterial = "Default";
     public string LaneColorTarget = "_Color";
@@ -214,57 +202,49 @@ public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle>
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new TimestampType
-        {
+        new() {
             ID = "LaneColor_R",
             Name = "Lane Color R",
             Get = (x) => ((LaneStyle)x).LaneColor.r,
             Set = (x, a) => { ((LaneStyle)x).LaneColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "LaneColor_G",
             Name = "Lane Color G",
             Get = (x) => ((LaneStyle)x).LaneColor.g,
             Set = (x, a) => { ((LaneStyle)x).LaneColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "LaneColor_B",
             Name = "Lane Color B",
             Get = (x) => ((LaneStyle)x).LaneColor.b,
             Set = (x, a) => { ((LaneStyle)x).LaneColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "LaneColor_A",
             Name = "Lane Color A",
             Get = (x) => ((LaneStyle)x).LaneColor.a,
             Set = (x, a) => { ((LaneStyle)x).LaneColor.a = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "JudgeColor_R",
             Name = "Judge Color R",
             Get = (x) => ((LaneStyle)x).JudgeColor.r,
             Set = (x, a) => { ((LaneStyle)x).JudgeColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "JudgeColor_G",
             Name = "Judge Color G",
             Get = (x) => ((LaneStyle)x).JudgeColor.g,
             Set = (x, a) => { ((LaneStyle)x).JudgeColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "JudgeColor_B",
             Name = "Judge Color B",
             Get = (x) => ((LaneStyle)x).JudgeColor.b,
             Set = (x, a) => { ((LaneStyle)x).JudgeColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "JudgeColor_A",
             Name = "Judge Color A",
             Get = (x) => ((LaneStyle)x).JudgeColor.a,
@@ -274,7 +254,7 @@ public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle>
 
     public LaneStyle DeepClone()
     {
-        LaneStyle clone = new LaneStyle()
+        LaneStyle clone = new()
         {
             LaneMaterial = LaneMaterial,
             LaneColorTarget = LaneColorTarget,
@@ -289,7 +269,9 @@ public class LaneStyle : IStoryboardable, IDeepClonable<LaneStyle>
 }
 
 [System.Serializable]
-public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
+public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
+
+    public string Name;
 
     public string MainMaterial = "Default";
     public string MainColorTarget = "_Color";
@@ -301,85 +283,73 @@ public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
     public Color HoldTailColor = Color.black;
 
     public new static TimestampType[] TimestampTypes = {
-        new TimestampType
-        {
+        new() {
             ID = "NormalColor_R",
             Name = "Normal Color R",
             Get = (x) => ((HitStyle)x).NormalColor.r,
             Set = (x, a) => { ((HitStyle)x).NormalColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "NormalColor_G",
             Name = "Normal Color G",
             Get = (x) => ((HitStyle)x).NormalColor.g,
             Set = (x, a) => { ((HitStyle)x).NormalColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "NormalColor_B",
             Name = "Normal Color B",
             Get = (x) => ((HitStyle)x).NormalColor.b,
             Set = (x, a) => { ((HitStyle)x).NormalColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "NormalColor_A",
             Name = "Normal Color A",
             Get = (x) => ((HitStyle)x).NormalColor.a,
             Set = (x, a) => { ((HitStyle)x).NormalColor.a = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CatchColor_R",
             Name = "Catch Color R",
             Get = (x) => ((HitStyle)x).CatchColor.r,
             Set = (x, a) => { ((HitStyle)x).CatchColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CatchColor_G",
             Name = "Catch Color G",
             Get = (x) => ((HitStyle)x).CatchColor.g,
             Set = (x, a) => { ((HitStyle)x).CatchColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CatchColor_B",
             Name = "Catch Color B",
             Get = (x) => ((HitStyle)x).CatchColor.b,
             Set = (x, a) => { ((HitStyle)x).CatchColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "CatchColor_A",
             Name = "Catch Color A",
             Get = (x) => ((HitStyle)x).CatchColor.a,
             Set = (x, a) => { ((HitStyle)x).CatchColor.a = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "HoldTailColor_R",
             Name = "Hold Tail Color R",
             Get = (x) => ((HitStyle)x).HoldTailColor.r,
             Set = (x, a) => { ((HitStyle)x).HoldTailColor.r = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "HoldTailColor_G",
             Name = "Hold Tail Color G",
             Get = (x) => ((HitStyle)x).HoldTailColor.g,
             Set = (x, a) => { ((HitStyle)x).HoldTailColor.g = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "HoldTailColor_B",
             Name = "Hold Tail Color B",
             Get = (x) => ((HitStyle)x).HoldTailColor.b,
             Set = (x, a) => { ((HitStyle)x).HoldTailColor.b = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "HoldTailColor_A",
             Name = "Hold Tail Color A",
             Get = (x) => ((HitStyle)x).HoldTailColor.a,
@@ -389,7 +359,7 @@ public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
 
     public HitStyle DeepClone()
     {
-        HitStyle clone = new HitStyle()
+        HitStyle clone = new()
         {
             MainMaterial = MainMaterial,
             MainColorTarget = MainColorTarget,
@@ -405,7 +375,7 @@ public class HitStyle : IStoryboardable, IDeepClonable<HitStyle> {
 }
 
 [System.Serializable]
-public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup> 
+public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup> 
 {
     public string Name;
     public Vector3 Position;
@@ -413,43 +383,37 @@ public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup>
     public string Group;
 
     public new static TimestampType[] TimestampTypes = {
-        new TimestampType
-        {
+        new() {
             ID = "Position_X",
             Name = "Position X",
             Get = (x) => ((LaneGroup)x).Position.x,
             Set = (x, a) => { ((LaneGroup)x).Position.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Position_Y",
             Name = "Position Y",
             Get = (x) => ((LaneGroup)x).Position.y,
             Set = (x, a) => { ((LaneGroup)x).Position.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Position_Z",
             Name = "Position Z",
             Get = (x) => ((LaneGroup)x).Position.z,
             Set = (x, a) => { ((LaneGroup)x).Position.z = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Rotation_X",
             Name = "Rotation X",
             Get = (x) => ((LaneGroup)x).Rotation.x,
             Set = (x, a) => { ((LaneGroup)x).Rotation.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Rotation_Y",
             Name = "Rotation Y",
             Get = (x) => ((LaneGroup)x).Rotation.y,
             Set = (x, a) => { ((LaneGroup)x).Rotation.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Rotation_Z",
             Name = "Rotation Z",
             Get = (x) => ((LaneGroup)x).Rotation.z,
@@ -459,7 +423,7 @@ public class LaneGroup : IStoryboardable, IDeepClonable<LaneGroup>
 
     public LaneGroup DeepClone()
     {
-        LaneGroup clone = new LaneGroup()
+        LaneGroup clone = new()
         {
             Name = Name,
             Position = new Vector3(Position.x, Position.y, Position.z),
@@ -479,10 +443,12 @@ public class LanePosition
 }
 
 [System.Serializable]
-public class Lane : IStoryboardable, IDeepClonable<Lane>
+public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
 {
-    public List<HitObject> Objects = new List<HitObject>();
-    public List<LaneStep> LaneSteps = new List<LaneStep>();
+    public string Name;
+    
+    public List<HitObject> Objects = new();
+    public List<LaneStep> LaneSteps = new();
     [FormerlySerializedAs("Offset")]
     public Vector3 Position;
     [FormerlySerializedAs("OffsetRotation")]
@@ -491,16 +457,13 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 
     public int StyleIndex = 0;
 
-    [NonSerialized]
-    public bool IsDirty = false;
-
     public LanePosition GetLanePosition(float time, float laneTime, Metronome timing) 
     {
         float offset = 0;
         float timeT = timing.ToSeconds(time);
         float laneTimeT = timing.ToSeconds(laneTime);
         float curtime = laneTimeT;
-        List<LaneStep> steps = new List<LaneStep>();
+        List<LaneStep> steps = new();
         for (int a = 0; a < LaneSteps.Count; a++) 
         {
             LaneStep step = (LaneStep)LaneSteps[a].Get(laneTime);
@@ -542,10 +505,10 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
                     
                     return new LanePosition 
                     {
-                        StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, Ease.Get(p, step.StartEaseX, step.StartEaseXMode)),
-                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, Ease.Get(p, step.StartEaseY, step.StartEaseYMode))),
-                        EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, Ease.Get(p, step.EndEaseX, step.EndEaseXMode)),
-                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, Ease.Get(p, step.EndEaseY, step.EndEaseYMode))),
+                        StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, step.StartEaseX.Get(p)),
+                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, step.StartEaseY.Get(p))),
+                        EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, step.EndEaseX.Get(p)),
+                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, step.EndEaseY.Get(p))),
                         Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
                     };
                 }
@@ -565,53 +528,47 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new TimestampType
-        {
+        new() {
             ID = "Offset_X",
             Name = "Position X",
             Get = (x) => ((Lane)x).Position.x,
-            Set = (x, a) => { ((Lane)x).Position.x = a; ((Lane)x).IsDirty = true; },
+            Set = (x, a) => { ((Lane)x).Position.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Offset_Y",
             Name = "Position Y",
             Get = (x) => ((Lane)x).Position.y,
-            Set = (x, a) => { ((Lane)x).Position.y = a; ((Lane)x).IsDirty = true; },
+            Set = (x, a) => { ((Lane)x).Position.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Offset_Z",
             Name = "Position Z",
             Get = (x) => ((Lane)x).Position.z,
-            Set = (x, a) => { ((Lane)x).Position.z = a; ((Lane)x).IsDirty = true; },
+            Set = (x, a) => { ((Lane)x).Position.z = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "OffsetRotation_X",
             Name = "Rotation X",
             Get = (x) => ((Lane)x).Rotation.x,
-            Set = (x, a) => { ((Lane)x).Rotation.x = a; ((Lane)x).IsDirty = true; },
+            Set = (x, a) => { ((Lane)x).Rotation.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "OffsetRotation_Y",
             Name = "Rotation Y",
             Get = (x) => ((Lane)x).Rotation.y,
-            Set = (x, a) => { ((Lane)x).Rotation.y = a; ((Lane)x).IsDirty = true; },
+            Set = (x, a) => { ((Lane)x).Rotation.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "OffsetRotation_Z",
             Name = "Rotation Z",
             Get = (x) => ((Lane)x).Rotation.z,
-            Set = (x, a) => { ((Lane)x).Rotation.z = a; ((Lane)x).IsDirty = true; },
+            Set = (x, a) => { ((Lane)x).Rotation.z = a; },
         },
     };
 
     public Lane DeepClone()
     {
-        Lane clone = new Lane()
+        Lane clone = new()
         {
             Position = new Vector3(Position.x, Position.y, Position.z),
             Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
@@ -626,80 +583,70 @@ public class Lane : IStoryboardable, IDeepClonable<Lane>
 }
 
 [System.Serializable]
-public class LaneStep : IStoryboardable, IDeepClonable<LaneStep> 
+public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep> 
 {
     public BeatPosition Offset = new();
     public Vector2 StartPos;
-    public EaseFunction StartEaseX = EaseFunction.Linear;
-    public EaseMode StartEaseXMode;
-    public EaseFunction StartEaseY = EaseFunction.Linear;
-    public EaseMode StartEaseYMode;
+    [SerializeReference]
+    public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference]
+    public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
     public Vector2 EndPos;
-    public EaseFunction EndEaseX = EaseFunction.Linear;
-    public EaseMode EndEaseXMode;
-    public EaseFunction EndEaseY = EaseFunction.Linear;
-    public EaseMode EndEaseYMode;
+    [SerializeReference]
+    public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference]
+    public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
     public float Speed = 1;
 
-    [NonSerialized]
-    public bool IsDirty = false;
-
-    public bool IsLinear => StartEaseX == EaseFunction.Linear && StartEaseY == EaseFunction.Linear && EndEaseX == EaseFunction.Linear && EndEaseY == EaseFunction.Linear;
+    public bool IsLinear => 
+        StartEaseX is BasicEaseDirective sx && StartEaseY is BasicEaseDirective sy && EndEaseX is BasicEaseDirective ex && EndEaseY is BasicEaseDirective ey &&
+        sx.Function == EaseFunction.Linear && sy.Function == EaseFunction.Linear && ex.Function == EaseFunction.Linear && ey.Function == EaseFunction.Linear;
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new TimestampType
-        {
+        new() {
             ID = "StartPos_X",
             Name = "Start Position X",
             Get = (x) => ((LaneStep)x).StartPos.x,
-            Set = (x, a) => { ((LaneStep)x).StartPos.x = a; ((LaneStep)x).IsDirty = true; },
+            Set = (x, a) => { ((LaneStep)x).StartPos.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "StartPos_Y",
             Name = "Start Position Y",
             Get = (x) => ((LaneStep)x).StartPos.y,
-            Set = (x, a) => { ((LaneStep)x).StartPos.y = a; ((LaneStep)x).IsDirty = true; },
+            Set = (x, a) => { ((LaneStep)x).StartPos.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "EndPos_X",
             Name = "End Position X",
             Get = (x) => ((LaneStep)x).EndPos.x,
-            Set = (x, a) => { ((LaneStep)x).EndPos.x = a; ((LaneStep)x).IsDirty = true; },
+            Set = (x, a) => { ((LaneStep)x).EndPos.x = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "EndPos_Y",
             Name = "End Position Y",
             Get = (x) => ((LaneStep)x).EndPos.y,
-            Set = (x, a) => { ((LaneStep)x).EndPos.y = a; ((LaneStep)x).IsDirty = true; },
+            Set = (x, a) => { ((LaneStep)x).EndPos.y = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Speed",
             Name = "Speed",
             Get = (x) => ((LaneStep)x).Speed,
-            Set = (x, a) => { ((LaneStep)x).Speed = a; ((LaneStep)x).IsDirty = true; },
+            Set = (x, a) => { ((LaneStep)x).Speed = a; },
         },
     };
     
     public LaneStep DeepClone()
     {
-        LaneStep clone = new LaneStep()
+        LaneStep clone = new()
         {
             Offset = Offset,
             StartPos = new Vector2(StartPos.x, StartPos.y),
             StartEaseX = StartEaseX,
-            StartEaseXMode = StartEaseXMode,
             StartEaseY = StartEaseY,
-            StartEaseYMode = StartEaseYMode,
             EndPos = new Vector2(EndPos.x, EndPos.y),
             EndEaseX = EndEaseX,
-            EndEaseXMode = EndEaseXMode,
             EndEaseY = EndEaseY,
-            EndEaseYMode = EndEaseYMode,
             Speed = Speed,
             Storyboard = Storyboard.DeepClone(),
         };
@@ -708,7 +655,7 @@ public class LaneStep : IStoryboardable, IDeepClonable<LaneStep>
 }
 
 [System.Serializable]
-public class HitObject : IStoryboardable, IDeepClonable<HitObject>
+public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
 {
     public HitType Type;
     public BeatPosition Offset = new();
@@ -719,9 +666,6 @@ public class HitObject : IStoryboardable, IDeepClonable<HitObject>
     public float FlickDirection = -1;
 
     public int StyleIndex = 0;
-
-    [NonSerialized]
-    public bool IsDirty = false;
     
     public enum HitType
     {
@@ -731,25 +675,23 @@ public class HitObject : IStoryboardable, IDeepClonable<HitObject>
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new TimestampType
-        {
+        new() {
             ID = "Position",
             Name = "Position",
             Get = (x) => ((HitObject)x).Position,
-            Set = (x, a) => { ((HitObject)x).Position = a; ((HitObject)x).IsDirty = true; },
+            Set = (x, a) => { ((HitObject)x).Position = a; },
         },
-        new TimestampType
-        {
+        new() {
             ID = "Length",
             Name = "Length",
             Get = (x) => ((HitObject)x).Length,
-            Set = (x, a) => { ((HitObject)x).Length = a; ((HitObject)x).IsDirty = true; },
+            Set = (x, a) => { ((HitObject)x).Length = a; },
         },
     };
     
     public HitObject DeepClone()
     {
-        HitObject clone = new HitObject()
+        HitObject clone = new()
         {
             Type = Type,
             Offset = Offset,

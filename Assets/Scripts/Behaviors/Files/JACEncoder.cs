@@ -21,6 +21,8 @@ public class JACEncoder
         str += "\nIndex: " + chart.DifficultyIndex.ToString(CultureInfo.InvariantCulture);
         str += "\nName: " + chart.DifficultyName;
         str += "\nCharter: " + chart.CharterName;
+        if (!string.IsNullOrWhiteSpace(chart.AltCharterName))
+            str += "\nAlt Charter: " + chart.AltCharterName;
         str += "\nLevel: " + chart.DifficultyLevel;
         str += "\nConstant: " + chart.ChartConstant.ToString(CultureInfo.InvariantCulture);
 
@@ -54,7 +56,7 @@ public class JACEncoder
         return str;
     }
 
-    public static string EncodeStoryboard(IStoryboardable storyboard, int depth = 0)
+    public static string EncodeStoryboard(Storyboardable storyboard, int depth = 0)
     {
         return EncodeStoryboard(storyboard.Storyboard, depth);
     }
@@ -71,7 +73,7 @@ public class JACEncoder
                 + " " + t.Duration.ToString(CultureInfo.InvariantCulture)
                 + " " + t.Target.ToString(CultureInfo.InvariantCulture)
                 + " " + (float.IsFinite(t.From) ? t.From.ToString(CultureInfo.InvariantCulture) : "_")
-                + " " + EncodeEase(t.Easing, t.EaseMode);
+                + " " + EncodeEase(t.Easing);
         }
         return str;
     }
@@ -102,6 +104,7 @@ public class JACEncoder
         string str = "\n" + indent + "+ LaneStyle"
             + " " + EncodeColor(style.LaneColor)
             + " " + EncodeColor(style.JudgeColor);
+        if (!string.IsNullOrEmpty(style.Name)) str += "\n" + indent2 + "Name: " + style.Name;
             
         string lanePath = style.LaneMaterial;
         string judgePath = style.JudgeMaterial;
@@ -130,6 +133,7 @@ public class JACEncoder
             + " " + EncodeColor(style.HoldTailColor)
             + " " + EncodeColor(style.NormalColor)
             + " " + EncodeColor(style.CatchColor);
+        if (!string.IsNullOrEmpty(style.Name)) str += "\n" + indent2 + "Name: " + style.Name;
             
         string mainPath = style.MainMaterial;
         string holdPath = style.HoldTailMaterial;
@@ -158,6 +162,7 @@ public class JACEncoder
             + " " + EncodeVector(lane.Position)
             + " " + EncodeVector(lane.Rotation)
             + " " + lane.StyleIndex.ToString(CultureInfo.InvariantCulture);
+        if (!string.IsNullOrEmpty(lane.Name)) str += "\n" + indent2 + "Name: " + lane.Name;
 
         if (!string.IsNullOrEmpty(lane.Group)) 
             str += "\n" + indent2 + "Group: " + lane.Group;
@@ -183,11 +188,11 @@ public class JACEncoder
         string str = "\n" + indent + "+ LaneStep"
             + " " + step.Offset.ToString(CultureInfo.InvariantCulture)
             + " " + EncodeVector(step.StartPos)
-            + " " + EncodeEase(step.StartEaseX, step.StartEaseXMode)
-            + " " + EncodeEase(step.StartEaseY, step.StartEaseYMode)
+            + " " + EncodeEase(step.StartEaseX)
+            + " " + EncodeEase(step.StartEaseY)
             + " " + EncodeVector(step.EndPos)
-            + " " + EncodeEase(step.EndEaseX, step.EndEaseXMode)
-            + " " + EncodeEase(step.EndEaseY, step.EndEaseYMode)
+            + " " + EncodeEase(step.EndEaseX)
+            + " " + EncodeEase(step.EndEaseY)
             + " " + step.Speed.ToString(CultureInfo.InvariantCulture);
 
         str += EncodeStoryboard(step, depth + IndentSize);
@@ -214,9 +219,25 @@ public class JACEncoder
         return str;
     }
 
-    public static string EncodeEase(EaseFunction ease, EaseMode mode)
+    public static string EncodeEase(IEaseDirective ease)
     {
-        return ease + "/" + mode;
+        if (ease is BasicEaseDirective bed) 
+        {
+            if (bed.Function == EaseFunction.Linear) return "Linear";
+            return bed.Function + "/" + bed.Mode;
+        }
+        else if (ease is CubicBezierEaseDirective cbed) 
+        {
+            return "Bezier/" 
+                + cbed.P1.x.ToString(CultureInfo.InvariantCulture) 
+                + ";" + cbed.P1.y.ToString(CultureInfo.InvariantCulture) 
+                + ";" + cbed.P2.x.ToString(CultureInfo.InvariantCulture) 
+                + ";" + cbed.P2.y.ToString(CultureInfo.InvariantCulture);
+        }
+        else 
+        {
+            throw new System.Exception("Unknown ease directive " + ease.GetType().ToString());
+        }
     }
 
     public static string EncodeVector(Vector2 vec)
