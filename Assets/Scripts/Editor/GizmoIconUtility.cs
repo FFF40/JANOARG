@@ -21,7 +21,7 @@ public class GizmoIconUtility
         else rect.width = rect.height;
         if (rect.height == 16) rect.x += 3;
 
-		if (obj is PlayableSong)
+		if (obj is ExternalPlayableSong)
 		{
 			EditorGUI.DrawRect(rect, Color.black);
 		}
