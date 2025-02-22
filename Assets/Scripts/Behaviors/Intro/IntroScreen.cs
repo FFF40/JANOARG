@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 public class IntroScreen : MonoBehaviour
 {
@@ -48,6 +49,11 @@ public class IntroScreen : MonoBehaviour
         yield return IntroEnterRoutine();
         yield return IntroExitRoutine();
     }
+
+    bool ScreenTouchedThisFrame() 
+    {
+        return (Touchscreen.current?.primaryTouch?.phase.value == UnityEngine.InputSystem.TouchPhase.Began);
+    }
     
     public IEnumerator DisclaimerRoutine()
     {
@@ -58,7 +64,7 @@ public class IntroScreen : MonoBehaviour
         {
             for (float a = 0; a < 1; a += Time.deltaTime * 5)
             {
-                if (Input.GetMouseButtonDown(0)) isTouched = true;
+                if (ScreenTouchedThisFrame()) isTouched = true;
                 if (isTouched && !isFirstStart) break;
                 DisclaimerTitle.alpha = Mathf.Min(a, 1);
                 yield return null;
@@ -67,7 +73,7 @@ public class IntroScreen : MonoBehaviour
             {
                 for (float a = 0; a < 1; a += Time.deltaTime * 5)
                 {
-                    if (Input.GetMouseButtonDown(0)) isTouched = true;
+                    if (ScreenTouchedThisFrame()) isTouched = true;
                     if (isTouched && !isFirstStart) break;
                     p.alpha = Mathf.Min(a, 1);
                     yield return null;
@@ -77,7 +83,7 @@ public class IntroScreen : MonoBehaviour
             isTouched = false;
             for (float a = 0; a < 1; a += Time.deltaTime * 5)
             {
-                if (Input.GetMouseButtonDown(0)) isTouched = true;
+                if (ScreenTouchedThisFrame()) isTouched = true;
                 if (isTouched) break;
                 DisclaimerActionLabel.alpha = Mathf.Min(a, 1);
                 yield return null;
@@ -85,7 +91,7 @@ public class IntroScreen : MonoBehaviour
 
             while (!isTouched) 
             {
-                if (Input.GetMouseButtonDown(0)) isTouched = true;
+                if (ScreenTouchedThisFrame()) isTouched = true;
                 yield return null;
             }
         }
@@ -93,7 +99,7 @@ public class IntroScreen : MonoBehaviour
         {
             for (float a = 0; a < 1; a += Time.deltaTime * 2)
             {
-                if (Input.GetMouseButtonDown(0)) isTouched = true;
+                if (ScreenTouchedThisFrame()) isTouched = true;
                 if (isTouched && !isFirstStart) break;
                 DisclaimerTitle.alpha = Mathf.Min(a, 1);
                 foreach (TMP_Text p in DisclaimerParagraphs) p.alpha = Mathf.Min(a, 1);
@@ -102,7 +108,7 @@ public class IntroScreen : MonoBehaviour
 
             for (float a = 0; a < 1; a += Time.deltaTime / 2)
             {
-                if (Input.GetMouseButtonDown(0)) isTouched = true;
+                if (ScreenTouchedThisFrame()) isTouched = true;
                 if (isTouched) break;
                 yield return null;
             }
@@ -110,7 +116,7 @@ public class IntroScreen : MonoBehaviour
         
         for (float speed = 1;; speed = isFirstStart ? 3 : isTouched ? 5 : 2)
         {
-            if (Input.GetMouseButtonDown(0)) isTouched = true;
+            if (ScreenTouchedThisFrame()) isTouched = true;
             float subSpeed = Time.deltaTime * speed / 3;
             float max = DisclaimerTitle.alpha -= subSpeed;
             foreach (TMP_Text p in DisclaimerParagraphs) max = Mathf.Max(max, p.alpha -= subSpeed);
@@ -172,7 +178,7 @@ public class IntroScreen : MonoBehaviour
         }
         for (float a = 0; a < 1; a += Time.deltaTime / 2)
         {
-            if (Input.GetMouseButtonDown(0)) isTouched = true;
+            if (ScreenTouchedThisFrame()) isTouched = true;
             if (isTouched) break;
             Animate(a);
             yield return null;
@@ -181,7 +187,7 @@ public class IntroScreen : MonoBehaviour
         float waitTime = 0;
         while (!isTouched)
         {
-            if (Input.GetMouseButtonDown(0)) isTouched = true;
+            if (ScreenTouchedThisFrame()) isTouched = true;
             waitTime += Time.deltaTime;
             TitleActionLabel.rectTransform.anchoredPosition = new (TitleActionLabel.rectTransform.anchoredPosition.x, -33 - 3 * Mathf.Cos(waitTime));
             yield return null;
