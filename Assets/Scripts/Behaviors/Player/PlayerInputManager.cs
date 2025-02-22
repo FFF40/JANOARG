@@ -338,7 +338,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         {
                             var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
                             effect.SetAccuracy(null);
-                            effect.SetColor(PlayerScreen.CurrentChart.Pallete.InterfaceColor);
+                            effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
                             var rt = (RectTransform)effect.transform;
                             rt.position = hold.Hit.HitCoord.Position;
                         }

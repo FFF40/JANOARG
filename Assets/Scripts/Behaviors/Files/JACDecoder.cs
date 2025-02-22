@@ -17,8 +17,8 @@ public class JACDecoder
     {
         Chart chart = new Chart();
 
-        chart.Pallete.LaneStyles.Clear();
-        chart.Pallete.HitStyles.Clear();
+        chart.Palette.LaneStyles.Clear();
+        chart.Palette.HitStyles.Clear();
 
         string mode = "";
 
@@ -53,8 +53,8 @@ public class JACDecoder
                     }
                     else if (mode == "PALLETE")
                     {
-                        currentObject = chart.Pallete;
-                        currentStoryboard = chart.Pallete.Storyboard;
+                        currentObject = chart.Palette;
+                        currentStoryboard = chart.Palette.Storyboard;
                     }
                     else if (mode == "GROUPS")
                     {
@@ -125,7 +125,7 @@ public class JACDecoder
                             };
                             currentObject = style;
                             currentStoryboard = style.Storyboard;
-                            chart.Pallete.LaneStyles.Add(style);
+                            chart.Palette.LaneStyles.Add(style);
                         }
                         else 
                         {
@@ -143,7 +143,7 @@ public class JACDecoder
                             };
                             currentObject = style;
                             currentStoryboard = style.Storyboard;
-                            chart.Pallete.HitStyles.Add(style);
+                            chart.Palette.HitStyles.Add(style);
                         }
                         else 
                         {
@@ -240,7 +240,7 @@ public class JACDecoder
                         else if (key == "Rotation")  camera.CameraRotation = ParseVector(value);
                         else if (key == "Distance")  camera.PivotDistance = ParseFloat(value);
                     }
-                    else if (currentObject is Pallete pallete)
+                    else if (currentObject is Palette pallete)
                     {
                              if (key == "Background")  pallete.BackgroundColor = ParseColor(value);
                         else if (key == "Interface")   pallete.InterfaceColor = ParseColor(value);

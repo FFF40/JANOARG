@@ -52,7 +52,7 @@ public class IntroScreen : MonoBehaviour
 
     bool ScreenTouchedThisFrame() 
     {
-        return (Touchscreen.current?.primaryTouch?.phase.value == UnityEngine.InputSystem.TouchPhase.Began);
+        return Touchscreen.current?.primaryTouch?.phase.value == UnityEngine.InputSystem.TouchPhase.Began;
     }
     
     public IEnumerator DisclaimerRoutine()

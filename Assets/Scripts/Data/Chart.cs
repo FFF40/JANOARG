@@ -27,7 +27,7 @@ public class Chart : IDeepClonable<Chart>
     public Vector3 CameraPivot;
     public Vector3 CameraRotation;
 
-    public Pallete Pallete = new();
+    public Palette Palette = new();
 
     public Chart() 
     {
@@ -43,7 +43,7 @@ public class Chart : IDeepClonable<Chart>
             DifficultyIndex = DifficultyIndex,
             ChartConstant = ChartConstant,
             Camera = Camera.DeepClone(),
-            Pallete = Pallete.DeepClone(),
+            Palette = Palette.DeepClone(),
             CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
             CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z),
         };
@@ -119,7 +119,7 @@ public class CameraController : Storyboardable, IDeepClonable<CameraController> 
 
 // Style 
 [System.Serializable]
-public class Pallete : Storyboardable, IDeepClonable<Pallete>  {
+public class Palette : Storyboardable, IDeepClonable<Palette>  {
 
     public Color BackgroundColor = Color.black;
     public Color InterfaceColor = Color.white;
@@ -132,50 +132,50 @@ public class Pallete : Storyboardable, IDeepClonable<Pallete>  {
         new() {
             ID = "BackgroundColor_R",
             Name = "Background Color R",
-            Get = (x) => ((Pallete)x).BackgroundColor.r,
-            Set = (x, a) => { ((Pallete)x).BackgroundColor.r = a; },
+            Get = (x) => ((Palette)x).BackgroundColor.r,
+            Set = (x, a) => { ((Palette)x).BackgroundColor.r = a; },
         },
         new() {
             ID = "BackgroundColor_G",
             Name = "Background Color G",
-            Get = (x) => ((Pallete)x).BackgroundColor.g,
-            Set = (x, a) => { ((Pallete)x).BackgroundColor.g = a; },
+            Get = (x) => ((Palette)x).BackgroundColor.g,
+            Set = (x, a) => { ((Palette)x).BackgroundColor.g = a; },
         },
         new() {
             ID = "BackgroundColor_B",
             Name = "Background Color B",
-            Get = (x) => ((Pallete)x).BackgroundColor.b,
-            Set = (x, a) => { ((Pallete)x).BackgroundColor.b = a; },
+            Get = (x) => ((Palette)x).BackgroundColor.b,
+            Set = (x, a) => { ((Palette)x).BackgroundColor.b = a; },
         },
         new() {
             ID = "InterfaceColor_R",
             Name = "Interface Color R",
-            Get = (x) => ((Pallete)x).InterfaceColor.r,
-            Set = (x, a) => { ((Pallete)x).InterfaceColor.r = a; },
+            Get = (x) => ((Palette)x).InterfaceColor.r,
+            Set = (x, a) => { ((Palette)x).InterfaceColor.r = a; },
         },
         new() {
             ID = "InterfaceColor_G",
             Name = "Interface Color G",
-            Get = (x) => ((Pallete)x).InterfaceColor.g,
-            Set = (x, a) => { ((Pallete)x).InterfaceColor.g = a; },
+            Get = (x) => ((Palette)x).InterfaceColor.g,
+            Set = (x, a) => { ((Palette)x).InterfaceColor.g = a; },
         },
         new() {
             ID = "InterfaceColor_B",
             Name = "Interface Color B",
-            Get = (x) => ((Pallete)x).InterfaceColor.b,
-            Set = (x, a) => { ((Pallete)x).InterfaceColor.b = a; },
+            Get = (x) => ((Palette)x).InterfaceColor.b,
+            Set = (x, a) => { ((Palette)x).InterfaceColor.b = a; },
         },
         new() {
             ID = "InterfaceColor_A",
             Name = "Interface Color A",
-            Get = (x) => ((Pallete)x).InterfaceColor.a,
-            Set = (x, a) => { ((Pallete)x).InterfaceColor.a = a; },
+            Get = (x) => ((Palette)x).InterfaceColor.a,
+            Set = (x, a) => { ((Palette)x).InterfaceColor.a = a; },
         },
     };
 
-    public Pallete DeepClone()
+    public Palette DeepClone()
     {
-        Pallete clone = new()
+        Palette clone = new()
         {
             BackgroundColor = new Color(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.a),
             InterfaceColor = new Color(InterfaceColor.r, InterfaceColor.g, InterfaceColor.b, InterfaceColor.a),

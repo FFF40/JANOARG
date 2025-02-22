@@ -100,7 +100,7 @@ public class ResultScreen : MonoBehaviour
         ResultText.rectTransform.localScale = Vector3.one;
         ResultText.rectTransform.anchoredPosition = Vector2.zero;
         ResultTextBig.text = ResultText.text;
-        ResultTextBig.color = PlayerScreen.CurrentChart.Pallete.InterfaceColor;
+        ResultTextBig.color = PlayerScreen.CurrentChart.Palette.InterfaceColor;
 
         yield return Ease.Animate(4, (x) => {
             FlashBackground.color = new Color (
@@ -146,7 +146,7 @@ public class ResultScreen : MonoBehaviour
         FanfareSource.loop = true;
 
         yield return Ease.Animate(1, (x) => {
-            PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Pallete.InterfaceColor * new Color(1, 1, 1, 1 - x));;
+            PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 1 - x));;
             FanfareSource.volume = x * .3f;
         });
 
@@ -176,7 +176,7 @@ public class ResultScreen : MonoBehaviour
         int rankNum = System.Array.IndexOf(ranks, rank);
         
         ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
-            PlayerScreen.CurrentChart.Pallete.InterfaceColor * new Color(1, 1, 1, 0.5f);
+            PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
         yield return Ease.Animate(2.5f, (x) => {
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Circle, EaseMode.Out), 2);

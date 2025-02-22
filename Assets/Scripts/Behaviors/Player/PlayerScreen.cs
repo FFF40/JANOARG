@@ -139,16 +139,16 @@ public class PlayerScreen : MonoBehaviour
             ScoreCounter.SetNumber(0);
             SongProgress.value = 0;
 
-            for (int a = 0; a < LaneStyles.Count; a++) LaneStyles[a].Update(CurrentChart.Pallete.LaneStyles[a]);
-            for (int a = 0; a < HitStyles.Count; a++) HitStyles[a].Update(CurrentChart.Pallete.HitStyles[a]);
+            for (int a = 0; a < LaneStyles.Count; a++) LaneStyles[a].Update(CurrentChart.Palette.LaneStyles[a]);
+            for (int a = 0; a < HitStyles.Count; a++) HitStyles[a].Update(CurrentChart.Palette.HitStyles[a]);
             for (int a = 0; a < TargetChart.Data.Groups.Count; a++) LaneGroups[a].Current = CurrentChart.Groups[a];
             foreach (LanePlayer lane in Lanes) Destroy(lane.gameObject);
             Lanes.Clear();
         } 
         else 
         {
-            foreach (LaneStyle style in CurrentChart.Pallete.LaneStyles) LaneStyles.Add(new(style));
-            foreach (HitStyle style in CurrentChart.Pallete.HitStyles) HitStyles.Add(new(style));
+            foreach (LaneStyle style in CurrentChart.Palette.LaneStyles) LaneStyles.Add(new(style));
+            foreach (HitStyle style in CurrentChart.Palette.HitStyles) HitStyles.Add(new(style));
 
             for (int a = 0; a < TargetChart.Data.Groups.Count; a++)
             {
@@ -312,18 +312,18 @@ public class PlayerScreen : MonoBehaviour
             float visualBeat = TargetSong.Timing.ToBeat(visualTime);
             
             // Update palette
-            CurrentChart.Pallete.Advance(visualBeat);
-            if (Common.main.MainCamera.backgroundColor != CurrentChart.Pallete.BackgroundColor) SetBackgroundColor(CurrentChart.Pallete.BackgroundColor);
-            if (SongNameLabel.color != CurrentChart.Pallete.InterfaceColor) SetInterfaceColor(CurrentChart.Pallete.InterfaceColor);
+            CurrentChart.Palette.Advance(visualBeat);
+            if (Common.main.MainCamera.backgroundColor != CurrentChart.Palette.BackgroundColor) SetBackgroundColor(CurrentChart.Palette.BackgroundColor);
+            if (SongNameLabel.color != CurrentChart.Palette.InterfaceColor) SetInterfaceColor(CurrentChart.Palette.InterfaceColor);
             for (int a = 0; a < LaneStyles.Count; a++)
             {
-                CurrentChart.Pallete.LaneStyles[a].Advance(visualBeat);
-                LaneStyles[a].Update(CurrentChart.Pallete.LaneStyles[a]);
+                CurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
+                LaneStyles[a].Update(CurrentChart.Palette.LaneStyles[a]);
             }
             for (int a = 0; a < HitStyles.Count; a++)
             {
-                CurrentChart.Pallete.HitStyles[a].Advance(visualBeat);
-                HitStyles[a].Update(CurrentChart.Pallete.HitStyles[a]);
+                CurrentChart.Palette.HitStyles[a].Advance(visualBeat);
+                HitStyles[a].Update(CurrentChart.Palette.HitStyles[a]);
             }
 
             // Update camera
@@ -421,7 +421,7 @@ public class PlayerScreen : MonoBehaviour
         {
             var effect = Instantiate(JudgeScreenSample, JudgeScreenHolder);
             effect.SetAccuracy(acc);
-            effect.SetColor(CurrentChart.Pallete.InterfaceColor);
+            effect.SetColor(CurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hit.HitCoord.Position;
         }

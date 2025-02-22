@@ -36,7 +36,7 @@ public class ChartManager
 
     public void Update(float time, float pos)
     {
-        PalleteManager.Update(CurrentChart.Pallete, pos);
+        PalleteManager.Update(CurrentChart.Palette, pos);
         Camera = (CameraController)CurrentChart.Camera.Get(pos);
         HitObjectsRemaining = new [] { 0, 0 };
         FlicksRemaining = 0;
@@ -81,14 +81,14 @@ public class ChartManager
 
 public class PalleteManager
 {
-    public Pallete CurrentPallete;
+    public Palette CurrentPallete;
 
     public List<LaneStyleManager> LaneStyles = new ();
     public List<HitStyleManager> HitStyles = new ();
 
-    public void Update(Pallete pallete, float pos)
+    public void Update(Palette pallete, float pos)
     {
-        CurrentPallete = pallete = (Pallete)pallete.Get(pos);
+        CurrentPallete = pallete = (Palette)pallete.Get(pos);
 
         for (int a = 0; a < pallete.LaneStyles.Count; a++)
         {

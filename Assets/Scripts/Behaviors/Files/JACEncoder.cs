@@ -38,13 +38,13 @@ public class JACEncoder
         }
 
         str += "\n\n[PALLETE]";
-        str += "\nBackground: " + EncodeColor(chart.Pallete.BackgroundColor);
-        str += "\nInterface: " + EncodeColor(chart.Pallete.InterfaceColor);
-        str += EncodeStoryboard(chart.Pallete);
-        foreach (LaneStyle style in chart.Pallete.LaneStyles) {
+        str += "\nBackground: " + EncodeColor(chart.Palette.BackgroundColor);
+        str += "\nInterface: " + EncodeColor(chart.Palette.InterfaceColor);
+        str += EncodeStoryboard(chart.Palette);
+        foreach (LaneStyle style in chart.Palette.LaneStyles) {
             str += EncodeLaneStyle(style);
         }
-        foreach (HitStyle style in chart.Pallete.HitStyles) {
+        foreach (HitStyle style in chart.Palette.HitStyles) {
             str += EncodeHitStyle(style);
         }
         
