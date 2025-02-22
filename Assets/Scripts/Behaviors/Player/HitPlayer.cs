@@ -35,7 +35,8 @@ public class HitPlayer : MonoBehaviour
         if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.main.HitStyles.Count)
         {
             HitStyleManager style = PlayerScreen.main.HitStyles[Current.StyleIndex];
-            Center.sharedMaterial = Left.sharedMaterial = Right.sharedMaterial =
+            Left.sharedMaterial = Right.sharedMaterial = style.NormalMaterial;
+            Center.sharedMaterial = 
                 Current.Type == HitObject.HitType.Catch ? style.CatchMaterial : style.NormalMaterial;
 
             if (HoldRenderer) HoldRenderer.sharedMaterial = style.HoldTailMaterial;
@@ -89,8 +90,8 @@ public class HitPlayer : MonoBehaviour
         float width = Vector2.Distance(start, end) * Current.Length; 
         if (Current.Type == HitObject.HitType.Catch)
         {
-            Center.transform.localScale = new (width, .1f, .1f);
-            Left.transform.localScale = Right.transform.localScale = new (.1f, .2f, .2f);
+            Center.transform.localScale = new (width, .2f, .2f);
+            Left.transform.localScale = Right.transform.localScale = new (.2f, .4f, .4f);
             Right.transform.localPosition = Vector3.right * (width / 2);
             Left.transform.localPosition = -Right.transform.localPosition;
         }

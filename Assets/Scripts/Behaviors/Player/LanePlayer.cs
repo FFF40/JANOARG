@@ -13,6 +13,10 @@ public class LanePlayer : MonoBehaviour
     public MeshFilter MeshFilter;
     public MeshRenderer MeshRenderer;
     public LaneGroupPlayer Group;
+    [Space]
+    public MeshRenderer JudgeLine;
+    public MeshRenderer JudgeLeft;
+    public MeshRenderer JudgeRight;
 
     public List<float> Positions = new();
     public List<float> Times = new();
@@ -34,10 +38,15 @@ public class LanePlayer : MonoBehaviour
         {
             LaneStyleManager style = PlayerScreen.main.LaneStyles[Current.StyleIndex];
             MeshRenderer.sharedMaterial = style.LaneMaterial;
+            JudgeLine.sharedMaterial = JudgeLeft.sharedMaterial = JudgeRight.sharedMaterial
+                = style.JudgeMaterial;
         }
         else 
         {
             MeshRenderer.enabled = false;
+            JudgeLine.gameObject.SetActive(false);
+            JudgeLeft.gameObject.SetActive(false);
+            JudgeRight.gameObject.SetActive(false);
         }
     }
 
@@ -114,24 +123,36 @@ public class LanePlayer : MonoBehaviour
 
             float position = Mathf.Lerp(Positions[0], Positions[1], progress);
             var cur = Current.LaneSteps[1];
+            Vector3 start, end;
 
             if (cur.IsLinear)
             {
-                AddLine(
-                    Vector3.Lerp(Current.LaneSteps[0].StartPos, Current.LaneSteps[1].StartPos, progress) + Vector3.forward * position, 
-                    Vector3.Lerp(Current.LaneSteps[0].EndPos, Current.LaneSteps[1].EndPos, progress) + Vector3.forward * position);
+                start = Vector3.Lerp(Current.LaneSteps[0].StartPos, Current.LaneSteps[1].StartPos, progress) + Vector3.forward * position;
+                end = Vector3.Lerp(Current.LaneSteps[0].EndPos, Current.LaneSteps[1].EndPos, progress) + Vector3.forward * position;
             }
             else 
             {
-                AddLine(
-                    new Vector3(
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, cur.StartEaseX.Get(progress)), 
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, cur.StartEaseY.Get(progress)),
-                    position), 
-                    new Vector3(
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, cur.EndEaseX.Get(progress)), 
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, cur.EndEaseY.Get(progress)),
-                    position));
+                start = new Vector3(
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, cur.StartEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, cur.StartEaseY.Get(progress)),
+                    position
+                );
+                end = new Vector3(
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, cur.EndEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, cur.EndEaseY.Get(progress)),
+                    position
+                );
+            }
+
+            AddLine(start, end);
+            JudgeLine.enabled = JudgeLeft.enabled = JudgeRight.enabled = Times.Count >= 2 && time >= Times[0] && time < Times[1];
+            if (JudgeLine.enabled && JudgeLine.gameObject.activeSelf) 
+            {
+                JudgeLine.transform.localPosition = (start + end) / 2;
+                JudgeLine.transform.localScale = new(Vector2.Distance(start, end), .05f, .05f);
+                JudgeLine.transform.localEulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.right, end - start);
+                JudgeLeft.transform.localPosition = start;
+                JudgeRight.transform.localPosition = end;
             }
         }
 
