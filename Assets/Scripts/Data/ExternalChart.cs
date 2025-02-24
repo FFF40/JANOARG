@@ -17,6 +17,4 @@ public class ExternalChartMeta
     public string DifficultyLevel = "6";
     public int DifficultyIndex = 1;
     public float ChartConstant = 6;
-
-    public string CharterName = "";
 }
