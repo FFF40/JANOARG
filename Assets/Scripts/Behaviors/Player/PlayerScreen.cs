@@ -234,6 +234,7 @@ public class PlayerScreen : MonoBehaviour
         }
 
         Music.clip = TargetSong.Clip;
+        Music.volume = Settings.BGMusicVolume;
         CurrentTime = -5;
         IsReady = true;
         HasPlayedBefore = true;
@@ -487,12 +488,14 @@ public class PlayerScreen : MonoBehaviour
 
 public class PlayerSettings 
 {
+    public float BGMusicVolume;
     public float JudgmentOffset;
     public float VisualOffset;
 
     public PlayerSettings ()
     {
         Storage prefs = Common.main.Preferences;
+        BGMusicVolume = prefs.Get("PLYR_BGMusicVolume", 0f) / 100;
         JudgmentOffset = prefs.Get("PLYR_JudgmentOffset", 0f) / 1000;
         VisualOffset = prefs.Get("PLYR_VisualOffset", 0f) / 1000;
     }
