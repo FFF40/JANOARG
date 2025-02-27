@@ -50,6 +50,12 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     {
                         Player.AddScore(1, null);
                         hit.HoldTicks.RemoveAt(0);
+                        
+                        var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
+                        effect.SetAccuracy(null);
+                        effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                        var rt = (RectTransform)effect.transform;
+                        rt.position = Common.main.MainCamera.WorldToScreenPoint(hit.transform.position);
                     }
                     if (hit.HoldTicks.Count <= 0)
                     {
