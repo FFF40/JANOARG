@@ -462,6 +462,11 @@ public class PlayerScreen : MonoBehaviour
             verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2), new(0, -.5f), new(1, 0), new(0, -2), new(0, .5f) });
             tris.AddRange(new [] {0, 1, 2, 3, 4, 5});
 
+            for (int i = 0; i < verts.Count; i++)
+            {
+                verts[i] = verts[i] * Settings.FlickScale;
+            }
+
             mesh.SetVertices(verts);
             mesh.SetUVs(0, verts);
             mesh.SetTriangles(tris, 0);
@@ -477,6 +482,11 @@ public class PlayerScreen : MonoBehaviour
             verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2.2f), new(1, 0), new(.71f, -.71f), new(0, -1), new(-.71f, -.71f) });
             tris.AddRange(new [] {0, 1, 2, 2, 3, 0, 3, 4, 0, 4, 5, 0});
 
+            for (int i = 0; i < verts.Count; i++)
+            {
+                verts[i] *= Settings.FlickScale;
+            }
+
             mesh.SetVertices(verts);
             mesh.SetUVs(0, verts);
             mesh.SetTriangles(tris, 0);
@@ -489,6 +499,10 @@ public class PlayerScreen : MonoBehaviour
 public class PlayerSettings 
 {
     public float BGMusicVolume;
+    public float HitsoundVolume;
+
+    public float FlickScale;
+
     public float JudgmentOffset;
     public float VisualOffset;
 
@@ -496,6 +510,9 @@ public class PlayerSettings
     {
         Storage prefs = Common.main.Preferences;
         BGMusicVolume = prefs.Get("PLYR_BGMusicVolume", 0f) / 100;
+
+        FlickScale = prefs.Get("PLYR_FlickScale", 1f);
+
         JudgmentOffset = prefs.Get("PLYR_JudgmentOffset", 0f) / 1000;
         VisualOffset = prefs.Get("PLYR_VisualOffset", 0f) / 1000;
     }
