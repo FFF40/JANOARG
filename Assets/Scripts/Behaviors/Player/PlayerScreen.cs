@@ -509,7 +509,7 @@ public class PlayerSettings
     public PlayerSettings ()
     {
         Storage prefs = Common.main.Preferences;
-        BGMusicVolume = prefs.Get("PLYR_BGMusicVolume", 0f) / 100;
+        BGMusicVolume = prefs.Get("PLYR_BGMusicVolume", 100f) / 100;
 
         FlickScale = prefs.Get("PLYR_FlickScale", 1f);
 
