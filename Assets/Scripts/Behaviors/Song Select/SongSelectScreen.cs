@@ -45,6 +45,7 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text LaunchText;
     [Space]
     public SongSelectReadyScreen ReadyScreen;
+    public ScoreManager ScoreManager;
     [Space]
     public float ScrollOffset;
     public float TargetScrollOffset;
@@ -57,6 +58,9 @@ public class SongSelectScreen : MonoBehaviour
     public bool IsAnimating;
     public bool IsInit;
 
+    public bool IsPlaylistInitialized { get; private set; } = false;
+    private Coroutine initPlaylistCoroutine = null;
+
     public void Awake()
     {
         main = this;
@@ -65,7 +69,11 @@ public class SongSelectScreen : MonoBehaviour
 
     public void Start()
     {
-        StartCoroutine(InitPlaylist());
+        if (!IsPlaylistInitialized && initPlaylistCoroutine == null)
+        {
+           initPlaylistCoroutine = StartCoroutine(InitPlaylist());
+        }
+        
     }
 
     public void Update() 
@@ -102,6 +110,8 @@ public class SongSelectScreen : MonoBehaviour
 
     public IEnumerator InitPlaylist()
     {
+        if (IsPlaylistInitialized) yield break;
+
         int index = 0;
         int pos = 0;
         foreach (string path in Playlist.ItemPaths)
@@ -121,8 +131,11 @@ public class SongSelectScreen : MonoBehaviour
             ItemList.Add(item);
             index++;
             pos += 48;
+            
         }
         IsInit = true;
+        IsPlaylistInitialized = true;
+        initPlaylistCoroutine = null;
         if (!LoadingBar.main.gameObject.activeSelf) Intro();
     }
 

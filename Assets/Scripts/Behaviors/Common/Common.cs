@@ -14,6 +14,7 @@ public class Common : MonoBehaviour
     public LoadingBar LoadingBar;
     public Storage Storage;
     public Storage Preferences;
+    public Storage Scores;
 
     public void Awake()
     {
@@ -28,6 +29,8 @@ public class Common : MonoBehaviour
         Storage.Save();
 
         Preferences = new Storage("prefs");
+        Scores = new Storage("scores");
+        Scores.Save();
 
         Application.targetFrameRate = 60;
 

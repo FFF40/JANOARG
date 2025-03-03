@@ -94,6 +94,8 @@ public class Storage
 
     [XmlRoot("ItemList")]
     [XmlInclude(typeof(CollectionProxy))]
+    [XmlInclude(typeof(TrackData))]
+    [XmlInclude(typeof(DifficultyData))]
     public class SerializeProxyList
     {
         [XmlElement("Item")]
