@@ -348,6 +348,8 @@ public class SongSelectScreen : MonoBehaviour
         Common.main.MainCamera.backgroundColor = TargetSong.Song.BackgroundColor;
         ReadyScreen.BeginLaunch();
 
+        yield return new WaitForSeconds(2);
+
         Common.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
             SongSelectReadyScreen.main.EndLaunch();
         }, false);
