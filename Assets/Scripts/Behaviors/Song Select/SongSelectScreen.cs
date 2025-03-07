@@ -45,7 +45,7 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text LaunchText;
     [Space]
     public SongSelectReadyScreen ReadyScreen;
-    public ScoreManager ScoreManager;
+    public StorageManager ScoreManager;
     [Space]
     public float ScrollOffset;
     public float TargetScrollOffset;
