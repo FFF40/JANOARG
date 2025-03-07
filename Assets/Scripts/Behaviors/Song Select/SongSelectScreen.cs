@@ -136,6 +136,10 @@ public class SongSelectScreen : MonoBehaviour
         IsInit = true;
         IsPlaylistInitialized = true;
         initPlaylistCoroutine = null;
+
+        StorageManager ScoreManager = FindObjectOfType<StorageManager>();
+        ScoreManager.Load();
+
         if (!LoadingBar.main.gameObject.activeSelf) Intro();
     }
 

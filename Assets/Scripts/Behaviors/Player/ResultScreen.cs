@@ -49,10 +49,9 @@ public class ResultScreen : MonoBehaviour
     [Space]
     public Image RetryBackground;
     public Image RetryFlash;
-
     [HideInInspector]
     public bool IsAnimating;
-
+    
     void Awake() 
     {
         main = this;
@@ -230,7 +229,9 @@ public class ResultScreen : MonoBehaviour
         BadCountText.text = PlayerScreen.main.BadCount.ToString();
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
             + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
-            
+
+        SaveScoreEntry(score);
+
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
 
@@ -377,5 +378,22 @@ public class ResultScreen : MonoBehaviour
     {
         if (source.Length >= length) return source;
         return "<alpha=#80>" + new string(pad, length - source.Length) + "<alpha=#ff>" + source;
+    }
+
+    void SaveScoreEntry(int score)
+    {
+        ScoreStoreEntry entry = new ScoreStoreEntry();
+
+        entry.SongID = PlayerScreen.TargetSong.SongName;
+        entry.ChartID = PlayerScreen.TargetChartMeta.DifficultyName;
+
+        entry.Score = score;
+        entry.PerfectCount = PlayerScreen.main.PerfectCount;
+        entry.GoodCount = PlayerScreen.main.GoodCount;
+        entry.BadCount = PlayerScreen.main.BadCount;  
+        entry.MaxCombo = PlayerScreen.main.MaxCombo;
+
+        StorageManager.main.Scores.Register(entry);
+        StorageManager.main.Save();
     }
 }
