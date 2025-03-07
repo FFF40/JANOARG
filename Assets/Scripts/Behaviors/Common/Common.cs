@@ -30,7 +30,6 @@ public class Common : MonoBehaviour
 
         Preferences = new Storage("prefs");
         Scores = new Storage("scores");
-        Scores.Save();
 
         Application.targetFrameRate = 60;
 
