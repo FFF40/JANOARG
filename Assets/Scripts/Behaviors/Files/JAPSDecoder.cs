@@ -132,12 +132,9 @@ public class JAPSDecoder
                              if (key == "Alt Artist")  song.AltSongArtist = value;
                              if (key == "Genre")       song.Genre = value;
                              if (key == "Location")    song.Location = value;
-
-                            if (key == "Clip")
-                                                      {
-                                                       song.ClipPath = value;
-                                                       song.Clip = Resources.Load<AudioClip>(value);
-                                                      }
+                             if (key == "Clip")      { song.ClipPath = value;
+                                                    // song.Clip = Resources.Load<AudioClip>(value);
+                                                     }
                              
                              if (key == "Background")  song.BackgroundColor = ParseColor(value);
                              if (key == "Interface")   song.InterfaceColor = ParseColor(value);
