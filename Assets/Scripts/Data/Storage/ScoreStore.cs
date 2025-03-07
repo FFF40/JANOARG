@@ -1,5 +1,4 @@
-
-
+using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -27,11 +26,11 @@ public class ScoreStore
         return null;
     }
 
-    public void Register(ScoreStoreEntry entry) 
+    public void Register(ScoreStoreEntry entry)
     {
         ScoreStoreEntry oldEntry = Get(entry.SongID, entry.ChartID);
         if (
-            oldEntry == null && oldEntry.Score < entry.Score
+            oldEntry == null || oldEntry.Score < entry.Score
         ) 
         {
             Entries[entry.SongID + "/" + entry.ChartID] = entry;

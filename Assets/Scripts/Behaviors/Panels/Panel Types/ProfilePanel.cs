@@ -7,8 +7,7 @@ using System.IO;
 public class ProfilePanel : MonoBehaviour
 {
     public Camera ScreenshotCamera;
-
-    
+    [Space]
     public TMP_Text PlayerName;
     public TMP_Text PlayerTitle;
     public TMP_Text LevelContent;
@@ -22,7 +21,6 @@ public class ProfilePanel : MonoBehaviour
     public void Awake()
     {
         Storage Storage = Common.main.Storage;
-
 
         PlayerName.text = Storage.Get("INFO_Name", "JANOARG");
     }
