@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public class ResultScreen : MonoBehaviour
 {
@@ -31,6 +32,9 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text SongArtistText;
     public TMP_Text SongDifficultyText;
     [Space]
+    public TMP_Text BestScoreText;
+    public TMP_Text ScoreDifferenceText;
+    [Space]
     public CanvasGroup DetailsHolder;
     public RectTransform DetailsTransform;
     public TMP_Text PerfectCountText;
@@ -49,10 +53,9 @@ public class ResultScreen : MonoBehaviour
     [Space]
     public Image RetryBackground;
     public Image RetryFlash;
-
     [HideInInspector]
     public bool IsAnimating;
-
+    
     void Awake() 
     {
         main = this;
@@ -174,7 +177,7 @@ public class ResultScreen : MonoBehaviour
         string rank = Helper.GetRank(score);
         string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA", "AA", "A", "B", "C", "D", "?"};
         int rankNum = System.Array.IndexOf(ranks, rank);
-        
+
         ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
             PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
@@ -230,7 +233,12 @@ public class ResultScreen : MonoBehaviour
         BadCountText.text = PlayerScreen.main.BadCount.ToString();
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
             + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
-            
+
+        BestScoreText.text       = GetBestScore(score).ToString();
+        ScoreDifferenceText.text = (GetScoreDifference(score) >= 0 ? "+" : "") + GetScoreDifference(score).ToString("0000000");
+
+        SaveScoreEntry(score);
+
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
 
@@ -377,5 +385,43 @@ public class ResultScreen : MonoBehaviour
     {
         if (source.Length >= length) return source;
         return "<alpha=#80>" + new string(pad, length - source.Length) + "<alpha=#ff>" + source;
+    }
+
+    void SaveScoreEntry(int score)
+    {
+        ScoreStoreEntry entry = new ScoreStoreEntry();
+
+        entry.SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        entry.ChartID = PlayerScreen.TargetChartMeta.Target;
+
+        entry.Score = score;
+        entry.PerfectCount = PlayerScreen.main.PerfectCount;
+        entry.GoodCount = PlayerScreen.main.GoodCount;
+        entry.BadCount = PlayerScreen.main.BadCount;  
+        entry.MaxCombo = PlayerScreen.main.MaxCombo;
+
+        StorageManager.main.Scores.Register(entry);
+        StorageManager.main.Save();
+    }
+
+    int GetScoreDifference(int currentScore)
+    {
+        string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        string chartID = PlayerScreen.TargetChartMeta.Target;
+
+        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID,chartID);
+        if (entry == null) return 0;
+        return currentScore - entry.Score ;
+    }
+
+    int GetBestScore(int currentScore)
+    {
+        string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        string chartID = PlayerScreen.TargetChartMeta.Target;
+
+        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID, chartID);
+        if (entry == null)                          return currentScore;
+        if (entry.Score > currentScore)             return entry.Score;
+                                                    return currentScore;
     }
 }

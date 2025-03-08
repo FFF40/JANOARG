@@ -45,6 +45,7 @@ public class Storage
 
     public UnityEvent OnLoad = new UnityEvent();
 
+    [XmlInclude(typeof(ScoreStoreEntry))]
     public class SerializeProxy
     {
         [XmlAttribute]

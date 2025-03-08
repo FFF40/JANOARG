@@ -9,6 +9,7 @@ public class SongSelectDifficulty : MonoBehaviour
 {
     public TMP_Text ChartDifficultyLabel;
     public TMP_Text ChartNameLabel;
+    public TMP_Text ScoreText;
     public Button Button;
 
     public Image CoverImage;
