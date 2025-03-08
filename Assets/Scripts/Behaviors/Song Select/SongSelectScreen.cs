@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.IO;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
@@ -220,6 +221,8 @@ public class SongSelectScreen : MonoBehaviour
                 dist = chartDiff;
                 TargetDifficulty = diff;
             }
+            
+            diff.ScoreText.text = GetBestScore(TargetSong).ToString("######0") + "<size=60%><b>ppm";
         }
         TargetDifficulty.SetSelectability(1);
 
@@ -399,6 +402,17 @@ public class SongSelectScreen : MonoBehaviour
             UpdateItems(false);
             IsReady = x > 0.6f;
         }));
+    }
+
+    int GetBestScore(SongSelectItem TargetSong)
+    {
+        string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
+        string songID = Path.GetFileNameWithoutExtension(songPath);
+        string chartID = Path.GetFileNameWithoutExtension(TargetDifficulty.Chart.Target);
+
+        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID, chartID);
+        if (entry == null) return 0000000;
+        return entry.Score;
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
