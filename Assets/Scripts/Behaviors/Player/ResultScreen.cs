@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public class ResultScreen : MonoBehaviour
 {
@@ -384,8 +385,8 @@ public class ResultScreen : MonoBehaviour
     {
         ScoreStoreEntry entry = new ScoreStoreEntry();
 
-        entry.SongID = PlayerScreen.TargetSong.SongName;
-        entry.ChartID = PlayerScreen.TargetChartMeta.DifficultyName;
+        entry.SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        entry.ChartID = PlayerScreen.TargetChartMeta.Target;
 
         entry.Score = score;
         entry.PerfectCount = PlayerScreen.main.PerfectCount;

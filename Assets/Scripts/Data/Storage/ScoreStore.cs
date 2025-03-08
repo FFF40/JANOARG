@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using System;
+using System.Linq;
 
 public class ScoreStore 
 {
@@ -8,7 +10,7 @@ public class ScoreStore
 
     public void Load() 
     {
-        List<ScoreStoreEntry> entryList = Common.main.Storage.Get("ScoreStore", new List<ScoreStoreEntry> {});
+        ScoreStoreEntry[] entryList = Common.main.Storage.Get("ScoreStore", new ScoreStoreEntry[0]);
         foreach (ScoreStoreEntry entry in entryList) 
         {
             Entries[entry.SongID + "/" + entry.ChartID] = entry;
@@ -17,7 +19,7 @@ public class ScoreStore
 
     public void Save() 
     {
-        Common.main.Storage.Set("ScoreStore", Entries.Values);
+        Common.main.Storage.Set("ScoreStore", Entries.Values.ToArray());
     }
 
     public ScoreStoreEntry Get(string SongID, string ChartID)

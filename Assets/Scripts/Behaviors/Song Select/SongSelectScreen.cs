@@ -58,9 +58,6 @@ public class SongSelectScreen : MonoBehaviour
     public bool IsAnimating;
     public bool IsInit;
 
-    public bool IsPlaylistInitialized { get; private set; } = false;
-    private Coroutine initPlaylistCoroutine = null;
-
     public void Awake()
     {
         main = this;
@@ -69,11 +66,7 @@ public class SongSelectScreen : MonoBehaviour
 
     public void Start()
     {
-        if (!IsPlaylistInitialized && initPlaylistCoroutine == null)
-        {
-           initPlaylistCoroutine = StartCoroutine(InitPlaylist());
-        }
-        
+        StartCoroutine(InitPlaylist());
     }
 
     public void Update() 
@@ -110,8 +103,6 @@ public class SongSelectScreen : MonoBehaviour
 
     public IEnumerator InitPlaylist()
     {
-        if (IsPlaylistInitialized) yield break;
-
         int index = 0;
         int pos = 0;
         foreach (string path in Playlist.ItemPaths)
@@ -134,12 +125,7 @@ public class SongSelectScreen : MonoBehaviour
             
         }
         IsInit = true;
-        IsPlaylistInitialized = true;
-        initPlaylistCoroutine = null;
-
-        StorageManager ScoreManager = FindObjectOfType<StorageManager>();
-        ScoreManager.Load();
-
+        
         if (!LoadingBar.main.gameObject.activeSelf) Intro();
     }
 
