@@ -32,6 +32,9 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text SongArtistText;
     public TMP_Text SongDifficultyText;
     [Space]
+    public TMP_Text BestScoreText;
+    public TMP_Text ScoreDifferenceText;
+    [Space]
     public CanvasGroup DetailsHolder;
     public RectTransform DetailsTransform;
     public TMP_Text PerfectCountText;
@@ -174,7 +177,7 @@ public class ResultScreen : MonoBehaviour
         string rank = Helper.GetRank(score);
         string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA", "AA", "A", "B", "C", "D", "?"};
         int rankNum = System.Array.IndexOf(ranks, rank);
-        
+
         ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
             PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
@@ -230,6 +233,9 @@ public class ResultScreen : MonoBehaviour
         BadCountText.text = PlayerScreen.main.BadCount.ToString();
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
             + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
+
+        BestScoreText.text       = GetBestScore(score).ToString();
+        ScoreDifferenceText.text = (GetScoreDifference(score) >= 0 ? "+" : "") + GetScoreDifference(score).ToString("0000000");
 
         SaveScoreEntry(score);
 
@@ -396,5 +402,26 @@ public class ResultScreen : MonoBehaviour
 
         StorageManager.main.Scores.Register(entry);
         StorageManager.main.Save();
+    }
+
+    int GetScoreDifference(int currentScore)
+    {
+        string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        string chartID = PlayerScreen.TargetChartMeta.Target;
+
+        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID,chartID);
+        if (entry == null) return 0;
+        return currentScore - entry.Score ;
+    }
+
+    int GetBestScore(int currentScore)
+    {
+        string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        string chartID = PlayerScreen.TargetChartMeta.Target;
+
+        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID, chartID);
+        if (entry == null)                          return currentScore;
+        if (entry.Score > currentScore)             return entry.Score;
+                                                    return currentScore;
     }
 }
