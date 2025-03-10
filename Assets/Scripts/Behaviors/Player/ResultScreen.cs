@@ -410,7 +410,7 @@ public class ResultScreen : MonoBehaviour
         string chartID = PlayerScreen.TargetChartMeta.Target;
 
         ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID,chartID);
-        if (entry == null) return 0;
+        if (entry == null) return currentScore;
         return currentScore - entry.Score ;
     }
 
