@@ -5799,6 +5799,9 @@ MonoBehaviour:
   SongNameText: {fileID: 1400112301}
   SongArtistText: {fileID: 1400112302}
   SongDifficultyText: {fileID: 1400112300}
+  BestScoreText: {fileID: 1634619773}
+  PersonalRecordLabel: {fileID: 584738830}
+  ScoreDifferenceText: {fileID: 730139970}
   DetailsHolder: {fileID: 965466276}
   DetailsTransform: {fileID: 965466271}
   PerfectCountText: {fileID: 958974018}
