@@ -175,7 +175,7 @@ public class ResultScreen : MonoBehaviour
         ResultText.rectTransform.localScale = Vector3.one;
         int score = Mathf.RoundToInt(PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
         string rank = Helper.GetRank(score);
-        string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA", "AA", "A", "B", "C", "D", "?"};
+        string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA+", "AAA", "AA+", "AA", "A+", "A", "B", "C", "D", "?"};
         int rankNum = System.Array.IndexOf(ranks, rank);
 
         ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
@@ -191,7 +191,7 @@ public class ResultScreen : MonoBehaviour
             ScoreHolder.localScale = Vector3.one * (1.1f - ease2 * .1f);
             ScoreHolder.anchoredPosition = Vector2.down * (1 - ease1) * 40;
 
-            ScoreText.text = PadAlpha((score * x).ToString("######0"), '0', 7);
+            ScoreText.text = Helper.PadScore((score * x).ToString("#0"));
             RankText.text = ranks[Mathf.CeilToInt(Mathf.Lerp(ranks.Length - 2, rankNum, x))];
             ScoreRings[0].FillAmount = score * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) / 1e6f;
             ScoreRings[0].SetVerticesDirty();
@@ -234,8 +234,12 @@ public class ResultScreen : MonoBehaviour
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
             + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
 
-        BestScoreText.text       = GetBestScore(score).ToString();
-        ScoreDifferenceText.text = (GetScoreDifference(score) >= 0 ? "+" : "") + GetScoreDifference(score).ToString("0000000");
+        var record = GetBestScore();
+        var recordScore = record?.Score ?? 0;
+        var recordDiff = score - recordScore;
+
+        BestScoreText.text       = Helper.PadScore(recordScore.ToString("#0"));
+        ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "") + Helper.PadScore(recordDiff.ToString("#0"));
 
         SaveScoreEntry(score);
 
@@ -381,47 +385,28 @@ public class ResultScreen : MonoBehaviour
         IsAnimating = false;
     }
 
-    string PadAlpha(string source, char pad, int length)
-    {
-        if (source.Length >= length) return source;
-        return "<alpha=#80>" + new string(pad, length - source.Length) + "<alpha=#ff>" + source;
-    }
-
     void SaveScoreEntry(int score)
     {
-        ScoreStoreEntry entry = new ScoreStoreEntry();
+        ScoreStoreEntry entry = new ScoreStoreEntry
+        {
+            SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath),
+            ChartID = PlayerScreen.TargetChartMeta.Target,
 
-        entry.SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
-        entry.ChartID = PlayerScreen.TargetChartMeta.Target;
-
-        entry.Score = score;
-        entry.PerfectCount = PlayerScreen.main.PerfectCount;
-        entry.GoodCount = PlayerScreen.main.GoodCount;
-        entry.BadCount = PlayerScreen.main.BadCount;  
-        entry.MaxCombo = PlayerScreen.main.MaxCombo;
+            Score = score,
+            PerfectCount = PlayerScreen.main.PerfectCount,
+            GoodCount = PlayerScreen.main.GoodCount,
+            BadCount = PlayerScreen.main.BadCount,
+            MaxCombo = PlayerScreen.main.MaxCombo
+        };
 
         StorageManager.main.Scores.Register(entry);
         StorageManager.main.Save();
     }
 
-    int GetScoreDifference(int currentScore)
+    ScoreStoreEntry GetBestScore()
     {
         string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
         string chartID = PlayerScreen.TargetChartMeta.Target;
-
-        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID,chartID);
-        if (entry == null) return 0;
-        return currentScore - entry.Score ;
-    }
-
-    int GetBestScore(int currentScore)
-    {
-        string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
-        string chartID = PlayerScreen.TargetChartMeta.Target;
-
-        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID, chartID);
-        if (entry == null)                          return currentScore;
-        if (entry.Score > currentScore)             return entry.Score;
-                                                    return currentScore;
+        return StorageManager.main.Scores.Get(songID, chartID);
     }
 }

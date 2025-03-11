@@ -38,6 +38,9 @@ public class SongSelectScreen : MonoBehaviour
     public List<SongSelectDifficulty> DifficultyList { get; private set; } = new();
     public int SelectedDifficulty;
     public SongSelectDifficulty TargetDifficulty;
+    public TMP_Text TargetDifficultyName;
+    public TMP_Text TargetDifficultyScore;
+    public GameObject TargetDifficultyNewIndicator;
     [Space]
     public CanvasGroup LeftActionsHolder;
     public CanvasGroup RightActionsHolder;
@@ -46,7 +49,6 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text LaunchText;
     [Space]
     public SongSelectReadyScreen ReadyScreen;
-    public StorageManager ScoreManager;
     [Space]
     public float ScrollOffset;
     public float TargetScrollOffset;
@@ -206,13 +208,18 @@ public class SongSelectScreen : MonoBehaviour
         }
         TargetSongCoverHolder.gameObject.SetActive(true);
 
+        string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
+        string songID = Path.GetFileNameWithoutExtension(songPath);
         foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
         DifficultyList.Clear();
         int dist = int.MaxValue;
         foreach (ExternalChartMeta chart in TargetSong.Song.Charts) 
         {
+            string chartID = Path.GetFileNameWithoutExtension(chart.Target);
+            var record = StorageManager.main.Scores.Get(songID, chartID);
+
             SongSelectDifficulty diff = Instantiate(DifficultySample, DifficultyListHolder);
-            diff.SetItem(chart);
+            diff.SetItem(chart, record);
             diff.Button.onClick.AddListener(() => ChangeDiff(diff));
             DifficultyList.Add(diff);
             int chartDiff = Mathf.Abs((chart.DifficultyIndex - SelectedDifficulty + 100) % 100);
@@ -221,10 +228,11 @@ public class SongSelectScreen : MonoBehaviour
                 dist = chartDiff;
                 TargetDifficulty = diff;
             }
-            
-            diff.ScoreText.text = GetBestScore(TargetSong).ToString("######0") + "<size=60%><b>ppm";
         }
+
         TargetDifficulty.SetSelectability(1);
+        SetScoreInfo(TargetDifficulty);
+        LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
 
         yield return Ease.Animate(.6f, a => {
             float lerp = Ease.Get(a * 2 - 1, EaseFunction.Cubic, EaseMode.Out);
@@ -283,14 +291,24 @@ public class SongSelectScreen : MonoBehaviour
         SongSelectDifficulty oldTarget = TargetDifficulty;
         TargetDifficulty = target;
 
-        yield return Ease.Animate(.15f, a => {
+        SetScoreInfo(target);
+
+        yield return Ease.Animate(.1f, a => {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
             oldTarget.SetSelectability(1 - lerp);
             target.SetSelectability(lerp);
-            LayoutRebuilder.MarkLayoutForRebuild(DifficultyListHolder);
+            LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
         });
         IsAnimating = false;
 
+    }
+
+    public void SetScoreInfo(SongSelectDifficulty target)
+    {
+        TargetDifficultyName.text = target.Chart.DifficultyName;
+        TargetDifficultyNewIndicator.SetActive(target.Record == null);
+        TargetDifficultyScore.text = Helper.PadScore((target.Record?.Score ?? 0).ToString("#0"))
+            + "<size=60%><b>ppm";
     }
 
     public void LerpCover(float a) 
@@ -402,17 +420,6 @@ public class SongSelectScreen : MonoBehaviour
             UpdateItems(false);
             IsReady = x > 0.6f;
         }));
-    }
-
-    int GetBestScore(SongSelectItem TargetSong)
-    {
-        string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
-        string songID = Path.GetFileNameWithoutExtension(songPath);
-        string chartID = Path.GetFileNameWithoutExtension(TargetDifficulty.Chart.Target);
-
-        ScoreStoreEntry entry = StorageManager.main.Scores.Get(songID, chartID);
-        if (entry == null) return 0000000;
-        return entry.Score;
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
