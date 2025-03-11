@@ -55,7 +55,9 @@ public class ResultScreen : MonoBehaviour
     public Image RetryFlash;
     [HideInInspector]
     public bool IsAnimating;
-    
+
+    public PlayerSettings Settings = new();
+
     void Awake() 
     {
         main = this;
@@ -150,7 +152,7 @@ public class ResultScreen : MonoBehaviour
 
         yield return Ease.Animate(1, (x) => {
             PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 1 - x));;
-            FanfareSource.volume = x * .3f;
+            FanfareSource.volume = (x * .3f) * Settings.BGMusicVolume;
         });
 
         yield return Ease.Animate(1, (x) => {
@@ -162,7 +164,7 @@ public class ResultScreen : MonoBehaviour
             );
             ResultText.rectTransform.localScale = Vector3.one * (1 - ease2 * .1f);
             ResultText.rectTransform.anchoredPosition = Vector2.up * (ease1 * 40);
-            FanfareSource.volume = x * .3f + .3f;
+            FanfareSource.volume = (x * .3f + .3f) * Settings.BGMusicVolume;
         });
 
         ResultText.gameObject.SetActive(false);
@@ -210,7 +212,7 @@ public class ResultScreen : MonoBehaviour
             ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (900 / ease1 * (1 - ease3) + 100);
             ScoreExplosionRings[1].rectTransform.position = ScoreRings[0].rectTransform.position;
             
-            FanfareSource.volume = x * .4f + .6f;
+            FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
 
         ScoreExplosionRings[2].rectTransform.position = ScoreRings[0].rectTransform.position;
@@ -279,7 +281,7 @@ public class ResultScreen : MonoBehaviour
             ScoreExplosionRings[2].InsideRadius = ease1;
             ScoreExplosionRings[2].rectTransform.sizeDelta = Vector2.one * (1600 * ease2 + 100);
             
-            FanfareSource.volume = x * .4f + .6f;
+            FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
     }
 
