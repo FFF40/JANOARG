@@ -1,11 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using System.IO;
 
 public class ProfilePanel : MonoBehaviour
 {
     public Camera ScreenshotCamera;
+    [Space]
+    public TMP_Text PlayerName;
+    public TMP_Text PlayerTitle;
+    public TMP_Text LevelContent;
+    public TMP_Text LevelProgress;
+    public TMP_Text AbilityRatingContent;
+    public TMP_Text AllFlawlessCount;
+    public TMP_Text FullStreakCount;
+    public TMP_Text ClearedCount;
+    public TMP_Text UnlockedCount;
+
+    public void Awake()
+    {
+        Storage Storage = Common.main.Storage;
+
+        PlayerName.text = Storage.Get("INFO_Name", "JANOARG");
+    }
+    
 
     public bool IsAnimating { get; private set; }
 

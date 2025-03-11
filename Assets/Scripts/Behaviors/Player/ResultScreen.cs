@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 public class ResultScreen : MonoBehaviour
 {
@@ -31,6 +32,9 @@ public class ResultScreen : MonoBehaviour
     public TMP_Text SongArtistText;
     public TMP_Text SongDifficultyText;
     [Space]
+    public TMP_Text BestScoreText;
+    public TMP_Text ScoreDifferenceText;
+    [Space]
     public CanvasGroup DetailsHolder;
     public RectTransform DetailsTransform;
     public TMP_Text PerfectCountText;
@@ -49,9 +53,10 @@ public class ResultScreen : MonoBehaviour
     [Space]
     public Image RetryBackground;
     public Image RetryFlash;
-
     [HideInInspector]
     public bool IsAnimating;
+
+    public PlayerSettings Settings = new();
 
     void Awake() 
     {
@@ -147,7 +152,7 @@ public class ResultScreen : MonoBehaviour
 
         yield return Ease.Animate(1, (x) => {
             PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 1 - x));;
-            FanfareSource.volume = x * .3f;
+            FanfareSource.volume = (x * .3f) * Settings.BGMusicVolume;
         });
 
         yield return Ease.Animate(1, (x) => {
@@ -159,7 +164,7 @@ public class ResultScreen : MonoBehaviour
             );
             ResultText.rectTransform.localScale = Vector3.one * (1 - ease2 * .1f);
             ResultText.rectTransform.anchoredPosition = Vector2.up * (ease1 * 40);
-            FanfareSource.volume = x * .3f + .3f;
+            FanfareSource.volume = (x * .3f + .3f) * Settings.BGMusicVolume;
         });
 
         ResultText.gameObject.SetActive(false);
@@ -172,9 +177,9 @@ public class ResultScreen : MonoBehaviour
         ResultText.rectTransform.localScale = Vector3.one;
         int score = Mathf.RoundToInt(PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
         string rank = Helper.GetRank(score);
-        string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA", "AA", "A", "B", "C", "D", "?"};
+        string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA+", "AAA", "AA+", "AA", "A+", "A", "B", "C", "D", "?"};
         int rankNum = System.Array.IndexOf(ranks, rank);
-        
+
         ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
             PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
@@ -188,7 +193,7 @@ public class ResultScreen : MonoBehaviour
             ScoreHolder.localScale = Vector3.one * (1.1f - ease2 * .1f);
             ScoreHolder.anchoredPosition = Vector2.down * (1 - ease1) * 40;
 
-            ScoreText.text = PadAlpha((score * x).ToString("######0"), '0', 7);
+            ScoreText.text = Helper.PadScore((score * x).ToString("#0"));
             RankText.text = ranks[Mathf.CeilToInt(Mathf.Lerp(ranks.Length - 2, rankNum, x))];
             ScoreRings[0].FillAmount = score * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) / 1e6f;
             ScoreRings[0].SetVerticesDirty();
@@ -207,7 +212,7 @@ public class ResultScreen : MonoBehaviour
             ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (900 / ease1 * (1 - ease3) + 100);
             ScoreExplosionRings[1].rectTransform.position = ScoreRings[0].rectTransform.position;
             
-            FanfareSource.volume = x * .4f + .6f;
+            FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
 
         ScoreExplosionRings[2].rectTransform.position = ScoreRings[0].rectTransform.position;
@@ -230,7 +235,16 @@ public class ResultScreen : MonoBehaviour
         BadCountText.text = PlayerScreen.main.BadCount.ToString();
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
             + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
-            
+
+        var record = GetBestScore();
+        var recordScore = record?.Score ?? 0;
+        var recordDiff = score - recordScore;
+
+        BestScoreText.text       = Helper.PadScore(recordScore.ToString("#0"));
+        ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "") + Helper.PadScore(recordDiff.ToString("#0"));
+
+        SaveScoreEntry(score);
+
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
 
@@ -267,7 +281,7 @@ public class ResultScreen : MonoBehaviour
             ScoreExplosionRings[2].InsideRadius = ease1;
             ScoreExplosionRings[2].rectTransform.sizeDelta = Vector2.one * (1600 * ease2 + 100);
             
-            FanfareSource.volume = x * .4f + .6f;
+            FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
     }
 
@@ -373,9 +387,28 @@ public class ResultScreen : MonoBehaviour
         IsAnimating = false;
     }
 
-    string PadAlpha(string source, char pad, int length)
+    void SaveScoreEntry(int score)
     {
-        if (source.Length >= length) return source;
-        return "<alpha=#80>" + new string(pad, length - source.Length) + "<alpha=#ff>" + source;
+        ScoreStoreEntry entry = new ScoreStoreEntry
+        {
+            SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath),
+            ChartID = PlayerScreen.TargetChartMeta.Target,
+
+            Score = score,
+            PerfectCount = PlayerScreen.main.PerfectCount,
+            GoodCount = PlayerScreen.main.GoodCount,
+            BadCount = PlayerScreen.main.BadCount,
+            MaxCombo = PlayerScreen.main.MaxCombo
+        };
+
+        StorageManager.main.Scores.Register(entry);
+        StorageManager.main.Save();
+    }
+
+    ScoreStoreEntry GetBestScore()
+    {
+        string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
+        string chartID = PlayerScreen.TargetChartMeta.Target;
+        return StorageManager.main.Scores.Get(songID, chartID);
     }
 }

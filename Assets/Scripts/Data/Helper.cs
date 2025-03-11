@@ -33,6 +33,13 @@ public static class Helper
                  _ => 0
     };
 
+    public static string PadAlpha(string source, char pad, int length)
+    {
+        if (source.Length >= length) return source;
+        return "<alpha=#40>" + new string(pad, length - source.Length) + "<alpha=#ff>" + source;
+    }
+    public static string PadScore(string source, int digits = 7) => PadAlpha(source, '0', digits);
+
     public static string FormatDifficulty(string str)
     {
         if (str.EndsWith("*")) str = str[..^1] + "<sub>*</sub>";
