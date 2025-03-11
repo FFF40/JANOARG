@@ -5,6 +5,7 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using UnityEngine.InputSystem;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
+using Unity.VisualScripting;
 
 public class PlayerInputManager : UnityEngine.MonoBehaviour
 {
@@ -202,13 +203,14 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                         Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position) < hit.HitCoord.Radius
                                     )
                                     {
+                                        finger.QueuedHit = hit;
                                         hit.IsQueuedHit = true;
                                         isHit = true;
                                     }
                                 }
                             }
                         }
-                        else 
+                        else
                         {
                             foreach (FingerHandler finger in Fingers)
                             {
@@ -367,7 +369,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
             for (int a = 0; a < Fingers.Count; a++) 
             {
                 var finger = Fingers[a];
-                if (finger.QueuedHit && !finger.QueuedHit.Current.Flickable)
+                if (finger.QueuedHit && finger.QueuedHit.Current.Type == HitObject.HitType.Normal && !finger.QueuedHit.Current.Flickable)
                 {
                     Player.Hit(finger.QueuedHit, finger.StartTime - finger.QueuedHit.Time);
 
