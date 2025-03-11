@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.IO;
+using System;
 
 public class PlayerScreen : MonoBehaviour
 {
@@ -396,6 +397,8 @@ public class PlayerScreen : MonoBehaviour
 
     public void Hit(HitPlayer hit, float offset, bool spawnEffect = true)
     {
+        Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
+
         int score = hit.Current.Type == HitObject.HitType.Normal ? 3 : 1;
         if (hit.Current.Flickable)
         {
@@ -415,7 +418,7 @@ public class PlayerScreen : MonoBehaviour
             acc = 0;
             if (offsetAbs > GoodWindow) acc = Mathf.Sign(offset);
             else if (offsetAbs > PerfectWindow) acc = Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
-            AddScore(score * (1 - (float)acc), acc);
+            AddScore(score * (1 - Mathf.Abs((float)acc)), acc);
         }
 
         if (spawnEffect)
