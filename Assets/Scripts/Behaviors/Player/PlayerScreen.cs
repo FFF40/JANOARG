@@ -512,11 +512,11 @@ public class PlayerSettings
     public PlayerSettings ()
     {
         Storage prefs = Common.main.Preferences;
-        BGMusicVolume = prefs.Get("PLYR_BGMusicVolume", 100f) / 100;
+        BGMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
 
-        FlickScale = prefs.Get("PLYR_FlickScale", 1f);
+        FlickScale = prefs.Get("PLYR:FlickScale", 1f);
 
-        JudgmentOffset = prefs.Get("PLYR_JudgmentOffset", 0f) / 1000;
-        VisualOffset = prefs.Get("PLYR_VisualOffset", 0f) / 1000;
+        JudgmentOffset = prefs.Get("PLYR:JudgmentOffset", 0f) / 1000;
+        VisualOffset = prefs.Get("PLYR:VisualOffset", 0f) / 1000;
     }
 }
