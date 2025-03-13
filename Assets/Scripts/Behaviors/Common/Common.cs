@@ -10,6 +10,7 @@ public class Common : MonoBehaviour
 
     public Camera MainCamera;
     public RectTransform CommonCanvas;
+    public CommonConstants CommonConstants;
 
     public LoadingBar LoadingBar;
     public Storage Storage;
@@ -32,7 +33,6 @@ public class Common : MonoBehaviour
         Application.targetFrameRate = 60;
 
         CommonScene.LoadAlt("Intro");
-        
     }
 
     void OnDestroy()

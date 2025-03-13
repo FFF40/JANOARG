@@ -5541,6 +5541,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MainCamera: {fileID: 309085665}
   CommonCanvas: {fileID: 1562277642}
+  CommonConstants: {fileID: 11400000, guid: 6bb282cef15c64caa8efbf043edeec3e, type: 2}
   LoadingBar: {fileID: 1508486259}
 --- !u!114 &1562277644
 MonoBehaviour:

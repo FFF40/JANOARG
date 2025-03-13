@@ -22,7 +22,7 @@ public class ProfilePanel : MonoBehaviour
     {
         Storage Storage = Common.main.Storage;
 
-        PlayerName.text = Storage.Get("INFO_Name", "JANOARG");
+        PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
     }
     
 

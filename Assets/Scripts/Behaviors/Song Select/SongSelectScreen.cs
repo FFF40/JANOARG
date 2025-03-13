@@ -175,7 +175,8 @@ public class SongSelectScreen : MonoBehaviour
 
     public void OnListPointerUp(BaseEventData data) 
     {
-        ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+        if (ItemList.Count < 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
+        else ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
         IsPointerDown = false;
     }
 
@@ -219,7 +220,7 @@ public class SongSelectScreen : MonoBehaviour
             var record = StorageManager.main.Scores.Get(songID, chartID);
 
             SongSelectDifficulty diff = Instantiate(DifficultySample, DifficultyListHolder);
-            diff.SetItem(chart, record);
+            diff.SetItem(chart, record, Common.main.CommonConstants.GetDifficultyColor(chart.DifficultyIndex));
             diff.Button.onClick.AddListener(() => ChangeDiff(diff));
             DifficultyList.Add(diff);
             int chartDiff = Mathf.Abs((chart.DifficultyIndex - SelectedDifficulty + 100) % 100);
@@ -231,6 +232,7 @@ public class SongSelectScreen : MonoBehaviour
         }
 
         TargetDifficulty.SetSelectability(1);
+        rt(TargetDifficulty.Holder).anchoredPosition = new(0, 5);
         SetScoreInfo(TargetDifficulty);
         LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
 
@@ -293,11 +295,16 @@ public class SongSelectScreen : MonoBehaviour
 
         SetScoreInfo(target);
 
-        yield return Ease.Animate(.1f, a => {
+        StartCoroutine(Ease.Animate(.1f, a => {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
             oldTarget.SetSelectability(1 - lerp);
             target.SetSelectability(lerp);
-            LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
+            rt(oldTarget.Holder).anchoredPosition = new(0, 5 * (1 - lerp));
+        }));
+        yield return Ease.Animate(.15f, a => {
+            float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+            rt(target.Holder).anchoredPosition = new(0, 7 - 2 * lerp);
+            rt(target.Holder).localEulerAngles = 10 * (1 - lerp) * Vector3.back;
         });
         IsAnimating = false;
 

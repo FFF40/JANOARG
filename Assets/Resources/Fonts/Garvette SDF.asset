@@ -133,7 +133,7 @@ MonoBehaviour:
     m_FamilyName: Garvette
     m_StyleName: Regular
     m_PointSize: 88
-    m_Scale: 1
+    m_Scale: 1.25
     m_UnitsPerEM: 1024
     m_LineHeight: 95.90625
     m_AscentLine: 66
