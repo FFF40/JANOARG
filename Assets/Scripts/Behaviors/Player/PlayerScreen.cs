@@ -402,7 +402,7 @@ public class PlayerScreen : MonoBehaviour
 
     public void Hit(HitPlayer hit, float offset, bool spawnEffect = true)
     {
-        Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
+        // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
 
         int score = hit.Current.Type == HitObject.HitType.Normal ? 3 : 1;
         if (hit.Current.Flickable)
