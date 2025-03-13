@@ -192,7 +192,7 @@ public class OptionsPanel : MonoBehaviour
                     x => Preferences.Set("PLYR:BGMusicVolume", x)
                 );
                 Spawn<MultiFloatOptionInput, float[]>("Hitsound Volume", 
-                    () => Preferences.Get("PLYR:HitsoundVolume", new [] {100f}),
+                    () => Preferences.Get("PLYR:HitsoundVolume", new [] {60f}),
                     x => Preferences.Set("PLYR:HitsoundVolume", x)
                 );
 

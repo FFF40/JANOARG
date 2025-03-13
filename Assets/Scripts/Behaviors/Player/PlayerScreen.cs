@@ -20,6 +20,7 @@ public class PlayerScreen : MonoBehaviour
 
     [Space]
     public AudioSource Music;
+    public AudioSource Hitsounds;
     public Camera Pseudocamera;
     [Space]
     public Transform Holder;
@@ -53,6 +54,10 @@ public class PlayerScreen : MonoBehaviour
     [Space]
     public Mesh FreeFlickIndicator;
     public Mesh ArrowFlickIndicator;
+    [Space]
+    public AudioClip NormalHitsound;
+    public AudioClip CatchHitsound;
+    public AudioClip FlickHitsound;
     [Header("Values")]
     public float Speed = 121;
     [Space]
@@ -428,6 +433,17 @@ public class PlayerScreen : MonoBehaviour
             effect.SetColor(CurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hit.HitCoord.Position;
+
+            float hsVol = Settings.HitsoundVolume[0];
+            if (Settings.HitsoundVolume.Length > 1 && acc != null) 
+            {
+                if (Mathf.Abs((float)acc) >= 1) hsVol = Settings.HitsoundVolume[2];
+                else if (Mathf.Abs((float)acc) > 0) hsVol = Settings.HitsoundVolume[1];
+            }
+
+            if (hit.Current.Type == HitObject.HitType.Normal) Hitsounds.PlayOneShot(NormalHitsound, hsVol);
+            else Hitsounds.PlayOneShot(CatchHitsound, hsVol);
+            if (hit.Current.Flickable) Hitsounds.PlayOneShot(FlickHitsound, hsVol);
         }
 
         if (hit.Time == hit.EndTime)
@@ -502,7 +518,7 @@ public class PlayerScreen : MonoBehaviour
 public class PlayerSettings 
 {
     public float BGMusicVolume;
-    public float HitsoundVolume;
+    public float[] HitsoundVolume;
 
     public float FlickScale;
 
@@ -513,6 +529,8 @@ public class PlayerSettings
     {
         Storage prefs = Common.main.Preferences;
         BGMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
+        HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new [] { 60f });
+        for (int a = 0; a < HitsoundVolume.Length; a++) HitsoundVolume[a] /= 100;
 
         FlickScale = prefs.Get("PLYR:FlickScale", 1f);
 

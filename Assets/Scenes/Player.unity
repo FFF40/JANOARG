@@ -5800,7 +5800,6 @@ MonoBehaviour:
   SongArtistText: {fileID: 1400112302}
   SongDifficultyText: {fileID: 1400112300}
   BestScoreText: {fileID: 1634619773}
-  PersonalRecordLabel: {fileID: 584738830}
   ScoreDifferenceText: {fileID: 730139970}
   DetailsHolder: {fileID: 965466276}
   DetailsTransform: {fileID: 965466271}
@@ -6444,6 +6443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Music: {fileID: 1395341278}
+  Hitsounds: {fileID: 1395341278}
   Pseudocamera: {fileID: 939693537}
   Holder: {fileID: 1854443385}
   PlayerHUD: {fileID: 150717746}
@@ -6483,6 +6483,9 @@ MonoBehaviour:
   JudgeScreenSample: {fileID: 423507467669762518, guid: 8a7d01df89b0588429a2a71d4f1c8272, type: 3}
   FreeFlickIndicator: {fileID: 0}
   ArrowFlickIndicator: {fileID: 0}
+  NormalHitsound: {fileID: 8300000, guid: f90a4d2bd33f55e48bda9625f2ee1601, type: 3}
+  CatchHitsound: {fileID: 8300000, guid: d68bd3e4706d98743a96de5b314d4921, type: 3}
+  FlickHitsound: {fileID: 8300000, guid: 28adaf7812f2cc554ae85e70929de788, type: 3}
   Speed: 121
   PerfectWindow: 0.05
   GoodWindow: 0.2
