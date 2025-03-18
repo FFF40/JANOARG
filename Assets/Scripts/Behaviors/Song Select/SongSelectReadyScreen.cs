@@ -51,6 +51,7 @@ public class SongSelectReadyScreen : MonoBehaviour
         SongArtistText.text = PlayerScreen.TargetSong.SongArtist;
         SongNameText.text = PlayerScreen.TargetSong.SongName;
         CharterNameText.text = PlayerScreen.TargetChartMeta.CharterName;
+        CoverArtistNameText.text = PlayerScreen.TargetSong.Cover.ArtistName;
 
         Vector2 diffStart = DifficultyLayout.anchoredPosition;
         Vector2 songStart = SongLayout.anchoredPosition;
