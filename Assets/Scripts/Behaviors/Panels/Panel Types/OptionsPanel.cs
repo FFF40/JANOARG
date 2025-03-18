@@ -107,6 +107,15 @@ public class OptionsPanel : MonoBehaviour
                     () => Storage.Get("INFO:Name", "JANOARG"),
                     x => Storage.Set("INFO:Name", x)
                 );
+                
+                Spawn<OptionCategoryTitle>("Audio");
+                FloatOptionInput sample = GetOptionItemSample<FloatOptionInput>();
+                sample.Min = 0; sample.Max = 100;
+                sample.Step = 5; sample.Unit = "%";
+                Spawn<FloatOptionInput, float>("UI Music Volume", 
+                    () => Preferences.Get("GENR:UIMusicVolume", 100f),
+                    x => Preferences.Set("GENR:UIMusicVolume", x)
+                );
 
                 // Spawn<OptionCategoryTitle>("Localization");
                 // var lang = Spawn<ListOptionInput, string>("🌐 Language", 

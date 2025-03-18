@@ -68,6 +68,12 @@ public class SongSelectScreen : MonoBehaviour
     public float TargetSongOffset;
     public bool IsAnimating;
     public bool IsInit;
+    [Space]
+    public AudioSource PreviewSource;
+    public float PreviewVolume;
+    public float PreviewVolumeMulti;
+    public AudioClip CurrentPreviewClip;
+    public Vector2 CurrentPreviewRange;
 
     public Coroutine TargetSongAnim;
 
@@ -81,6 +87,7 @@ public class SongSelectScreen : MonoBehaviour
 
     public void Start()
     {
+        PreviewVolumeMulti = Common.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
         StartCoroutine(InitPlaylist());
     }
 
@@ -115,6 +122,40 @@ public class SongSelectScreen : MonoBehaviour
             UpdateItems();
             IsDirty = false;
         }
+
+        float previewVolumeSpeed = 1;
+        if (ReadyScreen.IsAnimating) previewVolumeSpeed = -0.5f;
+        if (CurrentPreviewClip != PreviewSource.clip) previewVolumeSpeed = -2;
+        else if (!CurrentPreviewClip) previewVolumeSpeed = -2;
+        else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded) previewVolumeSpeed = -1;
+        else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume) previewVolumeSpeed = -1;
+        else if (IsTargetSongHidden) previewVolumeSpeed = -0.4f;
+        PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
+        PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
+        if (PreviewVolume <= 0) 
+        {
+            if (CurrentPreviewClip != PreviewSource.clip)
+            {
+                if (!PreviewSource.clip) 
+                {
+                    PreviewSource.clip = CurrentPreviewClip;
+                    PreviewSource.Play();
+                    PreviewSource.time = CurrentPreviewRange.x;
+                }
+                else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
+                {
+                    PreviewSource.clip.UnloadAudioData();
+                    PreviewSource.clip = CurrentPreviewClip;
+                    PreviewSource.Play();
+                    PreviewSource.time = CurrentPreviewRange.x;
+                }
+            }
+            else if (PreviewSource.time > CurrentPreviewRange.y) 
+            {
+                PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
+            }
+        }
+        
     }
 
     public IEnumerator InitPlaylist()
@@ -218,6 +259,9 @@ public class SongSelectScreen : MonoBehaviour
 
             TargetSongInfoInfo.text += " - " + TargetSong.Song.Genre.ToUpper();
         }
+
+        CurrentPreviewClip = TargetSong.Song.Clip;
+        CurrentPreviewRange = TargetSong.Song.PreviewRange;
 
         string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
         string songID = Path.GetFileNameWithoutExtension(songPath);
