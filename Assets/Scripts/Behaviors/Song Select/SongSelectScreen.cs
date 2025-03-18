@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using System.IO;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using System;
+using Random = UnityEngine.Random;
 
 public class SongSelectScreen : MonoBehaviour
 {
@@ -28,14 +30,20 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text TargetSongInfoName;
     public TMP_Text TargetSongInfoArtist;
     public TMP_Text TargetSongInfoInfo;
+    [Space]
     public RectTransform TargetSongCoverHolder;
     public Image TargetSongCoverBackground;
+    public Shadow TargetSongCoverShadow;
     public Image TargetSongCoverFlash;
+    public CoverLayerImage CoverLayerSample;
+    public RectTransform TargetSongCoverLayerHolder;
+    public List<CoverLayerImage> TargetSongCoverLayers;
     [Space]
     public CanvasGroup DifficultyHolder;
     public RectTransform DifficultyListHolder;
     public SongSelectDifficulty DifficultySample;
     public List<SongSelectDifficulty> DifficultyList { get; private set; } = new();
+
     public int SelectedDifficulty;
     public SongSelectDifficulty TargetDifficulty;
     public TMP_Text TargetDifficultyName;
@@ -60,6 +68,10 @@ public class SongSelectScreen : MonoBehaviour
     public float TargetSongOffset;
     public bool IsAnimating;
     public bool IsInit;
+
+    public Coroutine TargetSongAnim;
+
+    [NonSerialized] public Cover CurrentCover;
 
     public void Awake()
     {
@@ -94,8 +106,9 @@ public class SongSelectScreen : MonoBehaviour
         if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden) 
         {
             IsTargetSongHidden = TargetSongHiddenTarget;
-            if (IsTargetSongHidden) StartCoroutine(TargetSongHideAnim());
-            else StartCoroutine(TargetSongShowAnim());
+            if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+            if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(TargetSongHideAnim());
+            else TargetSongAnim = StartCoroutine(TargetSongShowAnim());
         }
         if (IsDirty) 
         {
@@ -121,7 +134,7 @@ public class SongSelectScreen : MonoBehaviour
             SongList.Add(song);
 
             SongSelectItem item = Instantiate(ItemSample, ItemHolder);
-            item.SetItem(song, index, pos);
+            item.SetItem(path, song, index, pos);
             ItemList.Add(item);
             index++;
             pos += 48;
@@ -143,7 +156,7 @@ public class SongSelectScreen : MonoBehaviour
             rt.anchoredPosition = new Vector2(-.26795f, -1) * (item.Position + item.PositionOffset - scrollOfs);
         }
         ItemCursor.rectTransform.anchoredPosition = new(ItemCursor.rectTransform.anchoredPosition.x, scrollOfs - TargetScrollOffset);
-        if (!IsAnimating)
+        if (!IsAnimating && TargetSongAnim == null)
         {
             float offset = scrollOfs - TargetSongOffset;
             TargetSongCoverHolder.anchoredPosition = new(0, offset / 2);
@@ -182,8 +195,6 @@ public class SongSelectScreen : MonoBehaviour
 
     public IEnumerator TargetSongShowAnim()
     {
-        IsAnimating = true;
-
         TargetSongOffset = TargetScrollOffset;
         SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
         if (TargetSong)
@@ -207,7 +218,6 @@ public class SongSelectScreen : MonoBehaviour
 
             TargetSongInfoInfo.text += " - " + TargetSong.Song.Genre.ToUpper();
         }
-        TargetSongCoverHolder.gameObject.SetActive(true);
 
         string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
         string songID = Path.GetFileNameWithoutExtension(songPath);
@@ -236,40 +246,74 @@ public class SongSelectScreen : MonoBehaviour
         SetScoreInfo(TargetDifficulty);
         LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
 
-        yield return Ease.Animate(.6f, a => {
-            float lerp = Ease.Get(a * 2 - 1, EaseFunction.Cubic, EaseMode.Out);
+        TargetSongCoverBackground.color = TargetSong.Song.Cover.BackgroundColor;
+        TargetSongCoverHolder.gameObject.SetActive(false);
+        if (CurrentCover != TargetSong.Song.Cover) 
+        {
+            CurrentCover = TargetSong.Song.Cover;
+            foreach (var layer in TargetSongCoverLayers) 
+            {
+                Resources.UnloadAsset(layer.Image.texture);
+                Destroy(layer.gameObject);
+            }
+            TargetSongCoverLayers.Clear();
+            foreach (CoverLayer layer in CurrentCover.Layers)
+            {
+                string path = Path.Combine(Path.GetDirectoryName(TargetSong.SongPath), layer.Target);
+                if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                var req = Resources.LoadAsync<Texture2D>(path);
+                yield return new WaitUntil(() => req.isDone);
+                if (req.asset)
+                {
+                    Texture2D tex = (Texture2D)req.asset;
+                    var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
+                    layerImage.Layer = layer;
+                    layerImage.Image.texture = tex;
+                    TargetSongCoverLayers.Add(layerImage);
+                }
+            }
+        }
+        TargetSongCoverHolder.gameObject.SetActive(true);
+
+        yield return Ease.Animate(.9f, a => {
+            float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
             LerpInfo(lerp);
 
-            float lerp3 = Ease.Get(a * 2, EaseFunction.Cubic, EaseMode.Out);
-            LerpUI(lerp3);
-
-            float lerp2 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+            float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
+                * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
             LerpCover(lerp2);
+
+            float lerp3 = Ease.Get(a * 3, EaseFunction.Cubic, EaseMode.Out);
+            LerpUI(lerp3);
+            
+            float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
             foreach (SongSelectItem item in ItemList)
             {
-                item.PositionOffset = 45 * lerp2 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
+                item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1)
+                     * (lerp2 * .5f + lerp4 * .5f);
             }
             IsDirty = true;
         });
-        IsAnimating = false;
 
         if (TargetSongOffset != TargetScrollOffset) 
         {
             IsTargetSongHidden = true;
             StartCoroutine(TargetSongHideAnim());
         }
+
+        TargetSongAnim = null;
     }
 
     public IEnumerator TargetSongHideAnim()
     {
-        IsAnimating = true;
-        yield return Ease.Animate(.2f, a => {
+        float lerpCoverStart = coverLerp;
+        yield return Ease.Animate(.3f, a => {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
             LerpInfo(1 - lerp); 
             LerpUI(1 - lerp);
 
             float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
-            LerpCover(1 - lerp2);
+            LerpCover((1 - lerp2) * lerpCoverStart);
             foreach (SongSelectItem item in ItemList)
             {
                 item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
@@ -277,7 +321,8 @@ public class SongSelectScreen : MonoBehaviour
             IsDirty = true;
         });
         TargetSongCoverHolder.gameObject.SetActive(false);
-        IsAnimating = false;
+
+        TargetSongAnim = null;
     }
     
     public void ChangeDiff(SongSelectDifficulty target)
@@ -318,18 +363,59 @@ public class SongSelectScreen : MonoBehaviour
             + "<size=60%><b>ppm";
     }
 
+    float coverLerp = 0;
     public void LerpCover(float a) 
     {
+        coverLerp = a;
         float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
         float offset = scrollOfs - TargetSongOffset;
         TargetSongCoverHolder.anchorMin = Vector2.Lerp(new(0, .5f), new(0, .5f), a);
         TargetSongCoverHolder.anchorMax = Vector2.Lerp(new(0, .5f), new(1, .5f), a);
         TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new(180 + .26795f * offset, offset), new(0, offset / 2), a);
-        TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(0, 128), a);
+        TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4, 128), a);
+        TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
+        TargetSongCoverLayerHolder.anchoredPosition = new (-4 * a, 0);
+        UpdateCover();
+    }
+
+    public void UpdateCover() 
+    {
+        Vector2 parallaxOffset = CurrentCover.IconCenter * (1 - coverLerp);
+
+        float coverScale = TargetSongCoverLayerHolder.rect.width
+            / Mathf.Lerp(CurrentCover.IconSize, 880, coverLerp);
+
+        foreach (var layer in TargetSongCoverLayers) 
+        {
+            RawImage image = layer.Image;
+
+            Vector2 position = layer.Layer.Position + parallaxOffset * layer.Layer.ParallaxFactor;
+            Vector2 size = 880 * layer.Layer.Scale * new Vector2(1, (float)image.texture.height / image.texture.width);
+            
+            if (layer.Layer.Tiling)
+            {
+                Vector2 coverSize = TargetSongCoverLayerHolder.rect.size;
+                image.rectTransform.sizeDelta = coverSize;
+                image.rectTransform.anchoredPosition = Vector2.zero;
+                image.rectTransform.localScale = Vector3.one;
+                image.uvRect = new Rect (
+                    ((size - coverSize / coverScale) / 2 - position) / size,
+                    coverSize / coverScale / size
+                );
+            }
+            else 
+            {
+                image.rectTransform.sizeDelta = size;
+                image.rectTransform.anchoredPosition = position * coverScale;
+                image.rectTransform.localScale = Vector3.one * coverScale;
+                image.uvRect = new Rect(0, 0, 1, 1);
+            }
+        }
     }
 
     public void Launch() 
     {
+        if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
         StartCoroutine(LaunchAnim());
     }
 
@@ -342,8 +428,7 @@ public class SongSelectScreen : MonoBehaviour
             "LET'S DO THIS",
             "HERE WE GO",
             "NOW LAUNCHING",
-            "YOU ARE ABOUT TO EXPERIENCE",
-            "YOU ARE NOW EXPERIENCING",
+            "NOW APPROACHING",
             "NEXT DESTINATION",
         };
         LaunchText.text = launchTextList[Random.Range(0, launchTextList.Length)];
@@ -351,6 +436,7 @@ public class SongSelectScreen : MonoBehaviour
         LerpInfo(0);
 
         SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+        TargetSongCoverLayerHolder.gameObject.SetActive(false);
         TargetSongCoverBackground.color = TargetSong.Song.BackgroundColor;
 
         yield return Ease.Animate(1, a => {
@@ -412,6 +498,8 @@ public class SongSelectScreen : MonoBehaviour
 
     public IEnumerator IntroAnim() 
     {
+        IsAnimating = true;
+
         ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x;
         UpdateItems(false);
 
@@ -427,6 +515,8 @@ public class SongSelectScreen : MonoBehaviour
             UpdateItems(false);
             IsReady = x > 0.6f;
         }));
+
+        IsAnimating = false;
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;

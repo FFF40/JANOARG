@@ -70,6 +70,7 @@
     <Compile Include="Assets/Scripts/Behaviors/Player/JudgeScreenEffect.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Storyboardable.cs" />
     <Compile Include="Assets/Scripts/UI/Themer.cs" />
+    <Compile Include="Assets/Scripts/UI/CoverLayerImage.cs" />
     <Compile Include="Assets/Scripts/UI/OptionsPanelTabButton.cs" />
     <Compile Include="Assets/Scripts/UI/ScrollingCounter.cs" />
     <Compile Include="Assets/Scripts/Debug/FPSCounter.cs" />

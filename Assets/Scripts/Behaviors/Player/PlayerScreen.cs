@@ -280,7 +280,7 @@ public class PlayerScreen : MonoBehaviour
     {
         if (IsPlaying)
         {
-            double delta = System.Math.Min(AudioSettings.dspTime - lastDSPTime, PerfectWindow);
+            double delta = Math.Min(AudioSettings.dspTime - lastDSPTime, PerfectWindow);
             CurrentTime += (float)delta;
             lastDSPTime += delta;
             
