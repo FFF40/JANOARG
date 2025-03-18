@@ -126,22 +126,24 @@ public class JAPSDecoder
 
                     if (currentObject is PlayableSong Song)
                     {
-                             if (key == "Name")        song.SongName = value;
-                             if (key == "Alt Name")    song.AltSongName = value;
-                             if (key == "Artist")      song.SongArtist = value;
-                             if (key == "Alt Artist")  song.AltSongArtist = value;
-                             if (key == "Genre")       song.Genre = value;
-                             if (key == "Location")    song.Location = value;
-                             if (key == "Clip")      { song.ClipPath = value;
-                                                    // song.Clip = Resources.Load<AudioClip>(value);
-                                                     }
+                             if (key == "Name")           song.SongName = value;
+                             if (key == "Alt Name")       song.AltSongName = value;
+                             if (key == "Artist")         song.SongArtist = value;
+                             if (key == "Alt Artist")     song.AltSongArtist = value;
+                             if (key == "Genre")          song.Genre = value;
+                             if (key == "Location")       song.Location = value;
+                             if (key == "Preview Range")  song.PreviewRange = ParseVector(value);
                              
-                             if (key == "Background")  song.BackgroundColor = ParseColor(value);
-                             if (key == "Interface")   song.InterfaceColor = ParseColor(value);
+                             if (key == "Clip")           song.ClipPath = value;
+                             
+                             if (key == "Background")     song.BackgroundColor = ParseColor(value);
+                             if (key == "Interface")      song.InterfaceColor = ParseColor(value);
                     }
                     else if (currentObject is Cover cover)
                     {
-                             if (key == "Background")   cover.BackgroundColor = ParseColor(value);
+                             if (key == "Artist")       cover.ArtistName = value;
+                        else if (key == "Alt Artist")   cover.AltArtistName = value;
+                        else if (key == "Background")   cover.BackgroundColor = ParseColor(value);
                         else if (key == "Icon")         cover.IconTarget = value;
                         else if (key == "Icon Center")  cover.IconCenter = ParseVector(value);
                         else if (key == "Icon Size")    cover.IconSize = ParseFloat(value);

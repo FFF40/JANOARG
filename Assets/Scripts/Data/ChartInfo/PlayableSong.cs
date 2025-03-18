@@ -16,6 +16,7 @@ public class PlayableSong
     
     public string ClipPath;
     public AudioClip Clip;
+    public Vector2 PreviewRange = new (15, 30);
 
     public Color BackgroundColor = Color.black;
     public Color InterfaceColor = Color.white;
@@ -32,6 +33,9 @@ public class PlayableSong
 [Serializable]
 public class Cover
 {
+    public string ArtistName = "";
+    public string AltArtistName = "";
+
     public string IconTarget = "icon.png";
     public Sprite IconCover;
     public Vector2 IconCenter;
