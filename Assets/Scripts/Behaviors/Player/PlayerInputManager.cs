@@ -84,6 +84,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
             for (int a = 0; a < fingerCount; a++)
             {
                 Finger finger = Touch.activeFingers[a];
+                if (!finger.isActive) continue;
                 Touch touch = finger.currentTouch;
                 if (Fingers.Find(x => x.Finger.index == finger.index) == null)
                 {
@@ -99,6 +100,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
             {
                 var finger = Fingers[a];
                 Touch touch = finger.Finger.currentTouch;
+                if (!touch.inProgress) continue;
                 if (touch.phase == TouchPhase.Moved)
                 {
                     if (Vector2.Distance(touch.screenPosition, finger.FlickCenter) > flickThres)
@@ -149,27 +151,29 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             }
                             else if (hit.Current.Flickable)
                             {
+                                float distance = 0;
                                 bool IsInRange(Vector2 screenPos) => 
                                     hit.Current.Type == HitObject.HitType.Normal && float.IsFinite(hit.Current.FlickDirection)
-                                        ? Mathf.Abs((Quaternion.Euler(0, 0, hit.Current.FlickDirection) * (screenPos - hit.HitCoord.Position)).x) < hit.HitCoord.Radius
-                                        : Vector2.Distance(screenPos, hit.HitCoord.Position) < hit.HitCoord.Radius + dpi * 0.5f;
+                                        ? (distance = Mathf.Abs((Quaternion.Euler(0, 0, hit.Current.FlickDirection) * (screenPos - hit.HitCoord.Position)).x)) < hit.HitCoord.Radius
+                                        : (distance = Vector2.Distance(screenPos, hit.HitCoord.Position)) < hit.HitCoord.Radius + dpi * 1f;
                                 
                                 if (hit.Current.Type == HitObject.HitType.Normal && !hit.IsTapped)
                                 {
                                     foreach (FingerHandler finger in Fingers)
                                     {
-
+                                        float timeDiff = 0;
                                         if 
                                         (
                                             finger.TapEligible && 
                                             IsInRange(finger.Finger.screenPosition) && 
                                             (!finger.QueuedHit || 
-                                                hit.Time < finger.QueuedHit.Time ||
-                                                hit.HitCoord.Radius < finger.QueuedHit.HitCoord.Radius
+                                                (timeDiff = hit.Time - finger.QueuedHit.Time) < -0.0001f ||
+                                                (timeDiff < 0.0001f && distance < finger.QueuedHitDistance)
                                             )
                                         )
                                         {
                                             finger.QueuedHit = hit;
+                                            finger.QueuedHitDistance = distance;
                                             hit.IsTapped = true;
                                             isHit = true;
                                         }
@@ -203,7 +207,6 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                         Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position) < hit.HitCoord.Radius
                                     )
                                     {
-                                        finger.QueuedHit = hit;
                                         hit.IsQueuedHit = true;
                                         isHit = true;
                                     }
@@ -214,17 +217,18 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         {
                             foreach (FingerHandler finger in Fingers)
                             {
-
+                                float distance = 0, timeDiff = 0;
                                 if 
                                 (
                                     finger.TapEligible && 
-                                    Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position) < hit.HitCoord.Radius && 
+                                    (distance = Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position)) < hit.HitCoord.Radius && 
                                     (!finger.QueuedHit || 
-                                        hit.Time < finger.QueuedHit.Time ||
-                                        hit.HitCoord.Radius < finger.QueuedHit.HitCoord.Radius
+                                        (timeDiff = hit.Time - finger.QueuedHit.Time) < -0.0001f ||
+                                        (timeDiff < 0.0001f && distance < finger.QueuedHitDistance)
                                     )
                                 )
                                 {
+                                    finger.QueuedHitDistance = distance;
                                     finger.QueuedHit = hit;
                                     isHit = true;
                                 }
@@ -420,6 +424,7 @@ public class FingerHandler
     public float FlickTime;
     public Vector2 FlickCenter;
     public HitPlayer QueuedHit;
+    public float QueuedHitDistance;
 }
 
 public class HoldHandler 

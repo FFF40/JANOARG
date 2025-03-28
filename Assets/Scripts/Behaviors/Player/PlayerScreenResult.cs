@@ -7,9 +7,9 @@ using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 using System.IO;
 
-public class ResultScreen : MonoBehaviour
+public class PlayerScreenResult : MonoBehaviour
 {
-    public static ResultScreen main;
+    public static PlayerScreenResult main;
 
     public GameObject Flash;
     public Image FlashBackground;
@@ -317,6 +317,8 @@ public class ResultScreen : MonoBehaviour
             float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
             RetryFlash.color = new (1, 1, 1, 1 - lerp3);
         });
+
+        yield return new WaitForSeconds(1);
 
         RetryBackground.gameObject.SetActive(false);
         SongInfoHolder.gameObject.SetActive(false);

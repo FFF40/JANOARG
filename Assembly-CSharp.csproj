@@ -59,7 +59,7 @@
     <UnityVersion>2022.3.46f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/home/ducdat0507/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.1.0/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/home/ducdat0507/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.1.1/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/mnt/duducat/Unity/2022.3.46f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/mnt/duducat/Unity/2022.3.46f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -86,7 +86,6 @@
     <Compile Include="Assets/Scripts/Behaviors/Panels/Panel Types/OptionsPanel.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/QuickMenu.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Intro/IntroScreen.cs" />
-    <Compile Include="Assets/Scripts/Behaviors/Player/ResultScreen.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInputListItem.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/Common.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/BooleanOptionInput.cs" />
@@ -115,6 +114,7 @@
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/StringOptionInput.cs" />
     <Compile Include="Assets/Scripts/Data/Storage/ScoreStore.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Easing.cs" />
+    <Compile Include="Assets/Scripts/Behaviors/Player/PlayerScreenPause.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/StorageManager.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/LoadingBar.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Storage.cs" />
@@ -125,6 +125,7 @@
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/MultiFloatOptionInput.cs" />
     <Compile Include="Assets/Scripts/UI/GraphicCircle.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/CommonScene.cs" />
+    <Compile Include="Assets/Scripts/Behaviors/Player/PlayerScreenResult.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/OptionText.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInputField.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Panels/Panel.cs" />

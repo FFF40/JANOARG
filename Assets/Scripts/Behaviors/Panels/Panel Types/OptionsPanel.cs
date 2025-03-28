@@ -163,7 +163,7 @@ public class OptionsPanel : MonoBehaviour
 
             case 1:
             {
-                SubtitleLabel.text = " > Player";
+                SubtitleLabel.text = " > Gameplay";
                 SetScrollerWidth(400);
 
                 Spawn<OptionCategoryTitle>("Syncronization");

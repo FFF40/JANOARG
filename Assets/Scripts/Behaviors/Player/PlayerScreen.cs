@@ -98,6 +98,7 @@ public class PlayerScreen : MonoBehaviour
 
     double lastDSPTime;
 
+    [NonSerialized]
     public PlayerSettings Settings = new();
 
     public void Awake() 
@@ -242,6 +243,7 @@ public class PlayerScreen : MonoBehaviour
         Music.clip = TargetSong.Clip;
         Music.volume = Settings.BGMusicVolume;
         CurrentTime = -5;
+        PlayerScreenPause.main.PauseTime = -10;
         IsReady = true;
         HasPlayedBefore = true;
         lastDSPTime = AudioSettings.dspTime;
@@ -281,6 +283,7 @@ public class PlayerScreen : MonoBehaviour
         if (IsPlaying)
         {
             double delta = Math.Min(AudioSettings.dspTime - lastDSPTime, PerfectWindow);
+            if (delta <= 0) delta = Time.unscaledDeltaTime;
             CurrentTime += (float)delta;
             lastDSPTime += delta;
             
@@ -295,7 +298,7 @@ public class PlayerScreen : MonoBehaviour
                     }
                     else 
                     {
-                        CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
+                        // CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
                     }
                 }
                 else
@@ -344,6 +347,11 @@ public class PlayerScreen : MonoBehaviour
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
         }
+    }
+
+    public void Resync() 
+    {
+        lastDSPTime = AudioSettings.dspTime;
     }
 
     public void CheckHitObjects() 
@@ -396,7 +404,7 @@ public class PlayerScreen : MonoBehaviour
         HitsRemaining--;
         if (HitsRemaining <= 0) 
         {
-            ResultScreen.main.StartEndingAnim();
+            PlayerScreenResult.main.StartEndingAnim();
         }
     }
 
@@ -435,7 +443,7 @@ public class PlayerScreen : MonoBehaviour
             rt.position = hit.HitCoord.Position;
 
             float hsVol = Settings.HitsoundVolume[0];
-            if (Settings.HitsoundVolume.Length > 1 && acc != null) 
+            if (Settings.HitsoundVolume.Length >= 3 && acc != null) 
             {
                 if (Mathf.Abs((float)acc) >= 1) hsVol = Settings.HitsoundVolume[2];
                 else if (Mathf.Abs((float)acc) > 0) hsVol = Settings.HitsoundVolume[1];
@@ -527,7 +535,8 @@ public class PlayerSettings
 
     public PlayerSettings ()
     {
-        Storage prefs = Common.main.Preferences;
+        Storage prefs = Common.main != null ? Common.main.Preferences : null;
+        if (prefs == null) return;
         BGMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
         HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new [] { 60f });
         for (int a = 0; a < HitsoundVolume.Length; a++) HitsoundVolume[a] /= 100;
