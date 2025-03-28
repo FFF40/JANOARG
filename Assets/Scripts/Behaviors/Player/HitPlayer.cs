@@ -71,8 +71,12 @@ public class HitPlayer : MonoBehaviour
         if (FlickMesh.gameObject.activeSelf)
         {
             Quaternion rot = Common.main.MainCamera.transform.rotation;
-            float angle = float.IsFinite(Current.FlickDirection) ? Current.FlickDirection : 0;
-            FlickMesh.transform.rotation = Quaternion.Euler(0, 0, angle) * rot;
+            float angle = float.IsFinite(Current.FlickDirection) 
+                ? Current.FlickDirection 
+                : Vector2.SignedAngle(Vector2.right, 
+                    Common.main.MainCamera.WorldToScreenPoint(Left.transform.position) - 
+                    Common.main.MainCamera.WorldToScreenPoint(Right.transform.position));
+            FlickMesh.transform.rotation = rot * Quaternion.Euler(0, 0, angle);
         }
     }
 
