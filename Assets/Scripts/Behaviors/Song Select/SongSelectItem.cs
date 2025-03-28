@@ -27,7 +27,6 @@ public class SongSelectItem : MonoBehaviour
     {
         SongNameLabel.text = song.SongName;
         SongArtistLabel.text = song.SongArtist;
-        ChartDifficultyLabel.text = song.Charts[0].DifficultyLevel;
         CoverBorder.color = Color.white;
         CoverStatusBorder.gameObject.SetActive(false);
         Index = index;
@@ -35,7 +34,14 @@ public class SongSelectItem : MonoBehaviour
         Song = song;
         SongPath = path;
 
+        SetDifficulty(SongSelectScreen.main.GetNearestDifficulty(song.Charts));
         LoadCoverImage();
+    }
+
+    public void SetDifficulty(ExternalChartMeta chart) 
+    {
+        ChartDifficultyLabel.text = chart.DifficultyLevel;
+        ChartDifficultyLabel.color = Common.main.CommonConstants.GetDifficultyColor(chart.DifficultyIndex);
     }
 
     public Coroutine CoverLoadRoutine = null;

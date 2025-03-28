@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using System;
 using Random = UnityEngine.Random;
+using Unity.VisualScripting;
 
 public class SongSelectScreen : MonoBehaviour
 {
@@ -267,7 +268,7 @@ public class SongSelectScreen : MonoBehaviour
         string songID = Path.GetFileNameWithoutExtension(songPath);
         foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
         DifficultyList.Clear();
-        int dist = int.MaxValue;
+        var target = GetNearestDifficulty(TargetSong.Song.Charts);
         foreach (ExternalChartMeta chart in TargetSong.Song.Charts) 
         {
             string chartID = Path.GetFileNameWithoutExtension(chart.Target);
@@ -277,14 +278,8 @@ public class SongSelectScreen : MonoBehaviour
             diff.SetItem(chart, record, Common.main.CommonConstants.GetDifficultyColor(chart.DifficultyIndex));
             diff.Button.onClick.AddListener(() => ChangeDiff(diff));
             DifficultyList.Add(diff);
-            int chartDiff = Mathf.Abs((chart.DifficultyIndex - SelectedDifficulty + 100) % 100);
-            if (dist > chartDiff)
-            {
-                dist = chartDiff;
-                TargetDifficulty = diff;
-            }
+            if (chart == target) TargetDifficulty = diff;
         }
-
         TargetDifficulty.SetSelectability(1);
         rt(TargetDifficulty.Holder).anchoredPosition = new(0, 5);
         SetScoreInfo(TargetDifficulty);
@@ -348,6 +343,23 @@ public class SongSelectScreen : MonoBehaviour
         TargetSongAnim = null;
     }
 
+    public ExternalChartMeta GetNearestDifficulty(List<ExternalChartMeta> charts)
+    {
+        int dist = int.MaxValue;
+        ExternalChartMeta target = null;
+        foreach (var chart in charts)
+        {
+            int chartDiff = Mathf.Abs((chart.DifficultyIndex - SelectedDifficulty + 100) % 100);
+            if (dist > chartDiff)
+            {
+                dist = chartDiff;
+                target = chart;
+            }
+
+        }
+        return target;
+    }
+
     public IEnumerator TargetSongHideAnim()
     {
         float lerpCoverStart = coverLerp;
@@ -381,6 +393,11 @@ public class SongSelectScreen : MonoBehaviour
 
         SongSelectDifficulty oldTarget = TargetDifficulty;
         TargetDifficulty = target;
+
+        foreach (var item in ItemList) 
+        {
+            item.SetDifficulty(GetNearestDifficulty(item.Song.Charts));
+        }
 
         SetScoreInfo(target);
 
