@@ -238,7 +238,7 @@ public class OptionsPanel : MonoBehaviour
                 entry.BodyLabel.text = "Insert name of a famous artist here";
 
                 entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                entry.BodyLabel.text = "Sound Souler  •  mrcool909090";
+                entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality";
                 
                 entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
                 entry.BodyLabel.text = "duducat";
@@ -247,7 +247,7 @@ public class OptionsPanel : MonoBehaviour
                 entry.BodyLabel.text = ":blobcat:";
 
                 entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                entry.BodyLabel.text = "duducat";
+                entry.BodyLabel.text = "duducat  •  M3galodon";
             }
             break;
         }
