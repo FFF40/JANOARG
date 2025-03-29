@@ -7489,7 +7489,7 @@ MonoBehaviour:
   RightActionsTransform: {fileID: 1626705435}
   Fanfare: {fileID: 8300000, guid: ba39980239a27fc46ae6785d52d3b05e, type: 3}
   FanfareSource: {fileID: 1395341278}
-  FanfareStart: 22.1
+  FanfareStart: 21.334
   RetryBackground: {fileID: 1228674027}
   RetryFlash: {fileID: 1487925347}
   IsAnimating: 0

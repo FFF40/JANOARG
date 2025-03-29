@@ -234,14 +234,14 @@ public class PlayerScreenResult : MonoBehaviour
         GoodCountText.text = PlayerScreen.main.GoodCount.ToString();
         BadCountText.text = PlayerScreen.main.BadCount.ToString();
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
-            + " <size=75%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
+            + " <size=60%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
 
         var record = GetBestScore();
         var recordScore = record?.Score ?? 0;
         var recordDiff = score - recordScore;
 
         BestScoreText.text       = Helper.PadScore(recordScore.ToString("#0"));
-        ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "") + Helper.PadScore(recordDiff.ToString("#0"));
+        ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "−") + Helper.PadScore(Mathf.Abs(recordDiff).ToString("#0"));
 
         SaveScoreEntry(score);
 
@@ -303,6 +303,8 @@ public class PlayerScreenResult : MonoBehaviour
             ProfileBar.main.SetVisibilty(1 - lerp);
             BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
+
+            FanfareSource.volume = (1 - a) * Settings.BGMusicVolume;
             
             SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);
             DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, -10 * lerp - 40);
@@ -351,6 +353,8 @@ public class PlayerScreenResult : MonoBehaviour
             ProfileBar.main.SetVisibilty(1 - lerp);
             SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
+
+            FanfareSource.volume = (1 - a) * Settings.BGMusicVolume;
             
             SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);
             DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, -10 * lerp - 40);
