@@ -10,7 +10,7 @@ public class Common : MonoBehaviour
 
     public Camera MainCamera;
     public RectTransform CommonCanvas;
-    public CommonConstants CommonConstants;
+    public CommonConstants Constants;
 
     public LoadingBar LoadingBar;
     public Storage Storage;

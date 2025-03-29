@@ -31,6 +31,7 @@ public class PlayerScreenResult : MonoBehaviour
     public TMP_Text SongNameText;
     public TMP_Text SongArtistText;
     public TMP_Text SongDifficultyText;
+    public RawImage SongCoverImage;
     [Space]
     public TMP_Text BestScoreText;
     public TMP_Text ScoreDifferenceText;
@@ -89,7 +90,7 @@ public class PlayerScreenResult : MonoBehaviour
             childTMP.text = "TRACK CLEARED";
         }
 
-        Flash.gameObject.SetActive(true);
+        Flash.SetActive(true);
         ResultText.gameObject.SetActive(false);
         ResultTextBig.alpha = 0;
 
@@ -224,6 +225,12 @@ public class PlayerScreenResult : MonoBehaviour
         SongNameText.text = PlayerScreen.TargetSong.SongName;
         SongArtistText.text = PlayerScreen.TargetSong.SongArtist;
         SongDifficultyText.text = Helper.FormatDifficulty(PlayerScreen.TargetChart.Data.DifficultyLevel);
+        SongDifficultyText.color = Common.main.Constants.GetDifficultyColor(PlayerScreen.TargetChartMeta.DifficultyIndex);
+
+        if (!SongCoverImage.texture) 
+        {
+            StartCoroutine(LoadCoverImageRoutine());
+        }
 
         yield return Ease.Animate(1, (x) => {
             RankText.color = new Color(1 - x, 1 - x, 1 - x);
@@ -284,6 +291,18 @@ public class PlayerScreenResult : MonoBehaviour
             FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
     }
+    private IEnumerator LoadCoverImageRoutine() 
+    {
+        string path = Path.Combine(Path.GetDirectoryName(PlayerScreen.TargetSongPath), PlayerScreen.TargetSong.Cover.IconTarget);
+        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+        ResourceRequest req = Resources.LoadAsync<Texture2D>(path);
+        yield return new WaitUntil(() => req.isDone);
+        if (req.asset) 
+        {
+            Texture2D tex = (Texture2D)req.asset;
+            SongCoverImage.texture = tex;
+        }
+    }
 
     public void Retry() 
     {
@@ -327,7 +346,7 @@ public class PlayerScreenResult : MonoBehaviour
         LeftActionsHolder.gameObject.SetActive(false);
         RightActionsHolder.gameObject.SetActive(false);
         DetailsHolder.gameObject.SetActive(false);
-        Flash.gameObject.SetActive(false);
+        Flash.SetActive(false);
         Common.main.MainCamera.backgroundColor = PlayerScreen.TargetSong.BackgroundColor;
 
         yield return PlayerScreen.main.InitChart();
@@ -335,6 +354,7 @@ public class PlayerScreenResult : MonoBehaviour
         PlayerScreen.main.BeginReadyAnim();
 
         IsAnimating = false;
+
     }
 
     public void Continue() 

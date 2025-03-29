@@ -275,7 +275,7 @@ public class SongSelectScreen : MonoBehaviour
             var record = StorageManager.main.Scores.Get(songID, chartID);
 
             SongSelectDifficulty diff = Instantiate(DifficultySample, DifficultyListHolder);
-            diff.SetItem(chart, record, Common.main.CommonConstants.GetDifficultyColor(chart.DifficultyIndex));
+            diff.SetItem(chart, record, Common.main.Constants.GetDifficultyColor(chart.DifficultyIndex));
             diff.Button.onClick.AddListener(() => ChangeDiff(diff));
             DifficultyList.Add(diff);
             if (chart == target) TargetDifficulty = diff;

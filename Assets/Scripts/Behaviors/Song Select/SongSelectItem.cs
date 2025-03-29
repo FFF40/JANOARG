@@ -41,7 +41,7 @@ public class SongSelectItem : MonoBehaviour
     public void SetDifficulty(ExternalChartMeta chart) 
     {
         ChartDifficultyLabel.text = chart.DifficultyLevel;
-        ChartDifficultyLabel.color = Common.main.CommonConstants.GetDifficultyColor(chart.DifficultyIndex);
+        ChartDifficultyLabel.color = Common.main.Constants.GetDifficultyColor(chart.DifficultyIndex);
     }
 
     public Coroutine CoverLoadRoutine = null;

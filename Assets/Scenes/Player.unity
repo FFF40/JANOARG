@@ -3954,7 +3954,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 7860dd1c992687342aaea8c5b0101096, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -4326,6 +4326,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 865264220}
   m_CullTransparentMesh: 1
+--- !u!114 &875832414 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5044666199115690453, guid: 70ce51dbf68132e49a34eb0db328beb2, type: 3}
+  m_PrefabInstance: {fileID: 1400112297}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &935425966
 GameObject:
   m_ObjectHideFlags: 0
@@ -6790,7 +6801,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.32941177}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -7475,6 +7486,7 @@ MonoBehaviour:
   SongNameText: {fileID: 1400112301}
   SongArtistText: {fileID: 1400112302}
   SongDifficultyText: {fileID: 1400112300}
+  SongCoverImage: {fileID: 875832414}
   BestScoreText: {fileID: 1634619773}
   ScoreDifferenceText: {fileID: 730139970}
   DetailsHolder: {fileID: 965466276}
@@ -8395,7 +8407,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.32941177}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
