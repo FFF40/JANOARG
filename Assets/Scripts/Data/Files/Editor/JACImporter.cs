@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor.AssetImporters;
 using System.IO;
 
-[ScriptedImporter(2, "jac", 1)]
+[ScriptedImporter(2, "jac", 2)]
 public class JACImporter : ScriptedImporter
 {
     public override void OnImportAsset(AssetImportContext ctx)
