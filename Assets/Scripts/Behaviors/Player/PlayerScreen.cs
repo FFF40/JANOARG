@@ -528,6 +528,7 @@ public class PlayerSettings
     public float BGMusicVolume;
     public float[] HitsoundVolume;
 
+    public float[] HitObjectScale;
     public float FlickScale;
 
     public float JudgmentOffset;
@@ -540,6 +541,9 @@ public class PlayerSettings
         BGMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
         HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new [] { 60f });
         for (int a = 0; a < HitsoundVolume.Length; a++) HitsoundVolume[a] /= 100;
+        
+        HitObjectScale = prefs.Get("PLYR:HitScale", new [] { 1f });
+        if (HitObjectScale.Length < 2) HitObjectScale = new [] { HitObjectScale[0], HitObjectScale[0] };
 
         FlickScale = prefs.Get("PLYR:FlickScale", 1f);
 

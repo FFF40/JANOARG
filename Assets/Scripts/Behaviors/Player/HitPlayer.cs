@@ -91,19 +91,22 @@ public class HitPlayer : MonoBehaviour
         transform.localPosition = Vector3.LerpUnclamped(start, end, Current.Position + Current.Length / 2) + Vector3.forward * z;
         transform.localEulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.right, end - start);
 
+
         float width = Vector2.Distance(start, end) * Current.Length; 
         if (Current.Type == HitObject.HitType.Catch)
         {
-            Center.transform.localScale = new (width, .2f, .2f);
-            Left.transform.localScale = Right.transform.localScale = new (.2f, .4f, .4f);
+            float scale = PlayerScreen.main.Settings.HitObjectScale[1];
+            Center.transform.localScale = new (width, .2f * scale, .2f * scale);
+            Left.transform.localScale = Right.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
             Right.transform.localPosition = Vector3.right * (width / 2);
             Left.transform.localPosition = -Right.transform.localPosition;
         }
         else 
         {
-            Center.transform.localScale = new (width - .2f, .4f, .4f);
-            Left.transform.localScale = Right.transform.localScale = new (.2f, .4f, .4f);
-            Right.transform.localPosition = Vector3.right * (width / 2 + .2f);
+            float scale = PlayerScreen.main.Settings.HitObjectScale[0];
+            Center.transform.localScale = new (width - .2f * scale, .4f * scale, .4f * scale);
+            Left.transform.localScale = Right.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
+            Right.transform.localPosition = Vector3.right * (width / 2 + .2f * scale);
             Left.transform.localPosition = -Right.transform.localPosition;
         }
     }
