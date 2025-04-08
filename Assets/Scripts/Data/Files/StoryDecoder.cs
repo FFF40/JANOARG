@@ -2,14 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Globalization;
-using UnityEditor;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Linq;
 using System;
-using UnityEngine.Windows.Speech;
 using System.Reflection;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class StoryDecoder
 {
@@ -18,7 +20,9 @@ public class StoryDecoder
 
     static Dictionary<string, StoryTagInfo> StoryTags;
 
+    #if UNITY_EDITOR
     [MenuItem("JANOARG/Story/Reset Story Tags")]
+    #endif
     public static void InitiateStoryTags() 
     {
         StoryTags = new ();

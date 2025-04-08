@@ -1,13 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
 using TMPro;
-using Unity.PlasticSCM.Editor.WebApi;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class Storyteller : MonoBehaviour
