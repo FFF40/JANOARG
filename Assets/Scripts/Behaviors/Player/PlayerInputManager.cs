@@ -375,7 +375,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 var finger = Fingers[a];
                 if (finger.QueuedHit && finger.QueuedHit.Current.Type == HitObject.HitType.Normal && !finger.QueuedHit.Current.Flickable)
                 {
-                    Player.Hit(finger.QueuedHit, finger.StartTime - finger.QueuedHit.Time);
+                    Player.Hit(finger.QueuedHit, finger.StartTime + Player.Settings.JudgmentOffset - finger.QueuedHit.Time);
 
                     if (finger.QueuedHit.IsHit)
                     {
