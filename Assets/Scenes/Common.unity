@@ -5183,6 +5183,7 @@ GameObject:
   - component: {fileID: 1562277639}
   - component: {fileID: 1562277643}
   - component: {fileID: 1562277644}
+  - component: {fileID: 1562277645}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -5304,6 +5305,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05804187897a53ce8b357505fb4a3fa0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1562277645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562277638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ededecdba1dfc5e1b1d7716efc7dc47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioMixer: {fileID: 24100000, guid: 606287d1c8c9886669e259bcd1fd7af4, type: 2}
 --- !u!1 &1574698829
 GameObject:
   m_ObjectHideFlags: 0
@@ -6734,6 +6748,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Background: {fileID: 424176363}
   MainBackground: {fileID: 424176361}
+  AudioMixer: {fileID: 24100000, guid: 606287d1c8c9886669e259bcd1fd7af4, type: 2}
   LeftPanel: {fileID: 849918770}
   LeftPanelGroup: {fileID: 849918771}
   IsAnimating: 0

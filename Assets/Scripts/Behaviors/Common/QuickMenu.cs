@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Audio;
 
 public class QuickMenu : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class QuickMenu : MonoBehaviour
 
     public CanvasGroup Background;
     public Graphic MainBackground;
+
+    [Space]
+    public AudioMixer AudioMixer;
 
     [Space]
     public RectTransform LeftPanel;
@@ -39,6 +43,8 @@ public class QuickMenu : MonoBehaviour
 
         MainBackground.color = Common.main.MainCamera.backgroundColor * new Color(1, 1, 1, 0) + new Color(0, 0, 0, 0.75f);
 
+        AudioManager.main.SetSceneLayerLowPassCutoff(1000, 0.5f);
+
         yield return Ease.Animate(.2f, a => {
             ProfileBar.main.SetVisibilty(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             Background.alpha = a;
@@ -64,6 +70,8 @@ public class QuickMenu : MonoBehaviour
     public IEnumerator HideLeftAnim() 
     {
         IsAnimating = true;
+
+        AudioManager.main.SetSceneLayerLowPassCutoff(22050, 0.5f);
 
         yield return Ease.Animate(.2f, a => {
             SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
@@ -119,6 +127,8 @@ public class QuickMenu : MonoBehaviour
     {
         IsAnimating = true;
 
+        AudioManager.main.SetSceneLayerLowPassCutoff(9, 1.5f);
+
         yield return Ease.Animate(.2f, a => {
             SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
         });
@@ -128,7 +138,7 @@ public class QuickMenu : MonoBehaviour
         AsyncOperation sceneReq = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         float time = 0;
 
-        while (time < .2f || (!sceneReq.isDone && time < 1))
+        while (time < .5f || (!sceneReq.isDone && time < 1))
         {
             yield return null;
             time += Time.deltaTime;

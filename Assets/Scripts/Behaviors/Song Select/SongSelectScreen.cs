@@ -89,7 +89,18 @@ public class SongSelectScreen : MonoBehaviour
     public void Start()
     {
         PreviewVolumeMulti = Common.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+        Common.main.Storage.OnSave.AddListener(OnSave);
         StartCoroutine(InitPlaylist());
+    }
+
+    public void OnDestroy()
+    {
+        Common.main.Storage.OnSave.RemoveListener(OnSave);
+    }
+
+    public void OnSave() 
+    {
+        PreviewVolumeMulti = Common.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
     }
 
     public void Update() 
@@ -126,7 +137,7 @@ public class SongSelectScreen : MonoBehaviour
 
         float previewVolumeSpeed = 1;
         if (ReadyScreen.IsAnimating) previewVolumeSpeed = -0.5f;
-        if (CurrentPreviewClip != PreviewSource.clip) previewVolumeSpeed = -2;
+        else if (CurrentPreviewClip != PreviewSource.clip) previewVolumeSpeed = -2;
         else if (!CurrentPreviewClip) previewVolumeSpeed = -2;
         else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded) previewVolumeSpeed = -1;
         else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume) previewVolumeSpeed = -1;
@@ -549,7 +560,7 @@ public class SongSelectScreen : MonoBehaviour
         rt(LeftActionsHolder).anchoredPosition = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
         rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
         rt(DifficultyHolder).anchoredPosition = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
-        ProfileBar.main.SetVisibilty(a);
+        if (!QuickMenu.main || !QuickMenu.main.gameObject.activeSelf) ProfileBar.main.SetVisibilty(a);
     }
 
     public void Intro()

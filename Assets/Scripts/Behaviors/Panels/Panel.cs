@@ -60,6 +60,8 @@ public class Panel : MonoBehaviour
         
         HolderGroup.blocksRaycasts = false;
 
+        if (Panels.Count <= 1) AudioManager.main.SetSceneLayerLowPassCutoff(22050, 0.6f);
+
         yield return Ease.Animate(.2f, a => {
             SetPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
         });
