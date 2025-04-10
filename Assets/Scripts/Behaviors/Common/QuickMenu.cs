@@ -100,6 +100,8 @@ public class QuickMenu : MonoBehaviour
     {
         IsAnimating = true;
 
+        AudioManager.main.SetSceneLayerLowPassCutoff(22050, 0.5f);
+
         yield return Ease.Animate(.2f, a => {
             ProfileBar.main.SetVisibilty(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             Background.alpha = 1 - a;
@@ -127,7 +129,7 @@ public class QuickMenu : MonoBehaviour
     {
         IsAnimating = true;
 
-        AudioManager.main.SetSceneLayerLowPassCutoff(9, 1.5f);
+        AudioManager.main.SetSceneLayerLowPassCutoff(9, 2);
 
         yield return Ease.Animate(.2f, a => {
             SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
