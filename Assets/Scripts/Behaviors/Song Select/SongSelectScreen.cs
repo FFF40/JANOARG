@@ -60,7 +60,9 @@ public class SongSelectScreen : MonoBehaviour
     public SongSelectReadyScreen ReadyScreen;
     [Space]
     public float ScrollOffset;
+    public float ScrollVelocity;
     public float TargetScrollOffset;
+    float lastScrollOffset;
     public bool IsReady;
     public bool IsDirty;
     public bool IsPointerDown;
@@ -119,17 +121,50 @@ public class SongSelectScreen : MonoBehaviour
 
         if (IsPointerDown) 
         {
+            ScrollVelocity = (lastScrollOffset - ScrollOffset) / Time.deltaTime;
+            lastScrollOffset = ScrollOffset;
+        }
+        else 
+        {
+            if (Mathf.Abs(ScrollVelocity) > 10)
+            {
+                ScrollOffset -= ScrollVelocity * Time.deltaTime;
+                ScrollVelocity *= Mathf.Pow(0.2f, Time.deltaTime);
+
+                float minBound = ItemList[0].Position - 20; 
+                float maxBound = ItemList[^1].Position + 20;
+                if (ScrollOffset < minBound) 
+                {
+                    ScrollOffset = minBound;
+                    ScrollVelocity = 0;
+                }
+                else if (ScrollOffset > maxBound) 
+                {
+                    ScrollOffset = maxBound;
+                    ScrollVelocity = 0;
+                }
+
+                UpdateTarget();
+                IsDirty = true;
+            }
+            else 
+            {
+                if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f) 
+                {
+                    ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
+                    IsDirty = true;
+                }
+                TargetSongHiddenTarget = false;
+            }
+        }
+
+        if (TargetSongHiddenTarget) 
+        {
             ItemCursor.color += new Color(0, 0, 0, (1 - ItemCursor.color.a) * Mathf.Pow(5e-3f, Time.deltaTime));
         }
         else 
         {
             ItemCursor.color *= new Color(1, 1, 1, Mathf.Pow(.001f, Time.deltaTime));
-            if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f) 
-            {
-                ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
-                IsDirty = true;
-            }
-            TargetSongHiddenTarget = false;
         }
 
         if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden) 
@@ -226,14 +261,8 @@ public class SongSelectScreen : MonoBehaviour
         }
     }
 
-    public void OnListPointerDown(BaseEventData data) 
+    public void UpdateTarget() 
     {
-        IsPointerDown = true;
-    }
-
-    public void OnListDrag(BaseEventData data) 
-    {
-        ScrollOffset += ((PointerEventData)data).delta.y / transform.lossyScale.x;
         float lastTarget = TargetScrollOffset;
         float tsDist = float.PositiveInfinity;
         foreach (SongSelectItem item in ItemList)
@@ -250,6 +279,19 @@ public class SongSelectScreen : MonoBehaviour
             TargetSongHiddenTarget = true;
             SFXSource.PlayOneShot(SFXTickClip, SFXVolume);
         }
+    }
+
+    public void OnListPointerDown(BaseEventData data) 
+    {
+        lastScrollOffset = ScrollOffset;
+        ScrollVelocity = 0;
+        IsPointerDown = true;
+    }
+
+    public void OnListDrag(BaseEventData data) 
+    {
+        ScrollOffset += ((PointerEventData)data).delta.y / transform.lossyScale.x;
+        UpdateTarget();
         IsDirty = true;
     }
 
