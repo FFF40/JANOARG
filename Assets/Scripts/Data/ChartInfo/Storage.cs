@@ -1,15 +1,15 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
-using System.IO;
-using System.Collections.Generic;
 using UnityEngine;
-using System;
 using UnityEngine.Events;
-using System.Linq;
 
 public class Storage 
 {
-    public Dictionary<string, object> values = new Dictionary<string, object>();
+    public Dictionary<string, object> values = new();
     public string SaveName;
 
     public Storage(string path)
@@ -41,9 +41,9 @@ public class Storage
         values[key] = value;
     }
 
-    public UnityEvent OnSave = new UnityEvent();
+    public UnityEvent OnSave = new();
 
-    public UnityEvent OnLoad = new UnityEvent();
+    public UnityEvent OnLoad = new();
 
     [XmlInclude(typeof(ScoreStoreEntry))]
     public class SerializeProxy
@@ -53,7 +53,7 @@ public class Storage
         public object Value;
         public static implicit operator SerializeProxy(KeyValuePair<string, object> item)
         {
-            SerializeProxy proxy = new SerializeProxy
+            SerializeProxy proxy = new()
             {
                 Key = item.Key,
                 Value = item.Value,
@@ -66,7 +66,7 @@ public class Storage
         {
             object value = item.Value;
             if (value is CollectionProxy) value = ((CollectionProxy)value).Value;
-            KeyValuePair<string, object> pair = new KeyValuePair<string, object>(item.Key, value);
+            KeyValuePair<string, object> pair = new(item.Key, value);
             return pair;
         }
 
@@ -98,57 +98,82 @@ public class Storage
     public class SerializeProxyList
     {
         [XmlElement("Item")]
-        public List<SerializeProxy> Items = new List<SerializeProxy>();
+        public List<SerializeProxy> Items = new();
     }
 
     public void Save()
     {
-        SerializeProxyList list = new SerializeProxyList();
+        SerializeProxyList list = new();
         foreach (KeyValuePair<string, object> pair in values) if (pair.Value != null) list.Items.Add(pair);
 
-        XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
-        FileStream fs;
-
-        fs = new FileStream(SaveName + ".jas", FileMode.Create);
-        serializer.Serialize(fs, list);
-        fs.Close();
-        fs = new FileStream(SaveName + ".backup.jas", FileMode.Create);
-        serializer.Serialize(fs, list);
-        fs.Close();
+        TrySaveToFile(SaveName + ".jas", list);
+        TrySaveToFile(SaveName + ".backup.jas", list);
 
         OnSave.Invoke();
     }
 
     public void Load()
     {
-        SerializeProxyList list = new SerializeProxyList();
+        SerializeProxyList list = new();
 
-        XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
-        FileStream fs = null;
-        try 
-        {
-            fs = new FileStream(SaveName + ".jas", FileMode.OpenOrCreate);
-            list = (SerializeProxyList)serializer.Deserialize(fs);
-            fs.Close();
-        }
-        catch (Exception e)
-        {
-            try 
-            {
-                fs?.Close();
-                fs = new FileStream(SaveName + ".backup.jas", FileMode.OpenOrCreate);
-                list = (SerializeProxyList)serializer.Deserialize(fs);
-                fs.Close();
-            }
-            catch (Exception ee)
-            {
-                fs?.Close();
-                Debug.Log(e + "\n" + ee);
-            }
+        if (File.Exists(SaveName + ".jas")) {
+            list = TryLoadFromFile<SerializeProxyList>(SaveName + ".jas", new());
+        } else if (File.Exists(SaveName + ".backup.jas")) {
+            list = TryLoadFromFile<SerializeProxyList>(SaveName + ".backup.jas", new());
         }
 
         foreach (SerializeProxy pair in list.Items) pair.AddPair(values);
 
         OnLoad.Invoke();
+    }
+
+    /// <summary>
+    /// Let's not use try catch anymore to know if a file exists or not. Loads an XML file into a C# class. Also, I hate XML
+    /// </summary>
+    /// <typeparam name="T">The C# representation of the XML Structure</typeparam>
+    /// <param name="path">The file path</param>
+    /// <param name="defaultValue">
+    /// This will be returned if anything goes wrong, 
+    /// such as if the file doesn't exist, or if there's no data yet, 
+    /// or if the deserializer failed to load the XML. By default it's probably "null"
+    /// </param>
+    /// <returns>Either the XML data as T or the default value</returns>
+    private T TryLoadFromFile<T>(string path, T defaultValue = default) where T : class
+    {
+        if (!File.Exists(path)) return defaultValue;
+
+        try
+        {
+            using FileStream fs = new(path, FileMode.Open);
+            if (fs.Length == 0) return defaultValue;
+            
+            XmlSerializer serializer = new(typeof(T));
+            var result = serializer.Deserialize(fs);
+            return result == null ? defaultValue : (T)result;
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+            return defaultValue;
+        }
+    }
+
+    /// <summary>
+    /// Not sure why I made this, just use it if you want to, just in case something goes wrong when saving.
+    /// I don't wanna risk modifying code too much even though I am lol
+    /// </summary>
+    /// <typeparam name="T">The C# representation of the XML Structure</typeparam>
+    /// <param name="path">The file path</param>
+    /// <param name="data">The C# data you want to put on the file</param>
+    private void TrySaveToFile<T>(string path, T data) where T : class {
+        try 
+        {
+            using FileStream fs = new(path, FileMode.Create);
+            XmlSerializer serializer = new(typeof(T));
+            serializer.Serialize(fs, data);
+        }
+        catch (Exception e) {
+            Debug.LogException(e);
+        }
     }
 }
