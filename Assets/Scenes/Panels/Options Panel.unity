@@ -4845,7 +4845,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: cf9c838e4b42c8448b4aa3c9fc32d427, type: 3}
+  m_Sprite: {fileID: 3286163911610860551, guid: 55052ccaa91ab3c4f8d60e6636fa2896, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5255,7 +5255,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 27b98ae262d029f45825c92cffd565ad, type: 3}
+  m_Sprite: {fileID: 3286163911610860551, guid: f7b2efc325eb07c48970c9a100358fce, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5532,7 +5532,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ea4d6e26f33ea6a419af16ff49f8384a, type: 3}
+  m_Sprite: {fileID: 3286163911610860551, guid: 828fc02ef0cb6b44c97aa43677795ecc, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6224,6 +6224,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Panel
       objectReference: {fileID: 0}
+    - target: {fileID: 3366629259041449946, guid: fe027bbc71a34d942a7e8b884020f928, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 3286163911610860551, guid: c45ade96d6e49044a840cfb2d71a380e, type: 3}
     - target: {fileID: 3366629259332133469, guid: fe027bbc71a34d942a7e8b884020f928, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
