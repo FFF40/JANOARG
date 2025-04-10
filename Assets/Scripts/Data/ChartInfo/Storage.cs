@@ -117,9 +117,9 @@ public class Storage
         SerializeProxyList list = new();
 
         if (File.Exists(SaveName + ".jas")) {
-            list = TryLoadFromFile<SerializeProxyList>(SaveName + ".jas");
+            list = TryLoadFromFile<SerializeProxyList>(SaveName + ".jas", new());
         } else if (File.Exists(SaveName + ".backup.jas")) {
-            list = TryLoadFromFile<SerializeProxyList>(SaveName + ".backup.jas");
+            list = TryLoadFromFile<SerializeProxyList>(SaveName + ".backup.jas", new());
         }
 
         foreach (SerializeProxy pair in list.Items) pair.AddPair(values);
@@ -145,6 +145,8 @@ public class Storage
         try
         {
             using FileStream fs = new(path, FileMode.Open);
+            if (fs.Length == 0) return defaultValue;
+            
             XmlSerializer serializer = new(typeof(T));
             var result = serializer.Deserialize(fs);
             return result == null ? defaultValue : (T)result;
