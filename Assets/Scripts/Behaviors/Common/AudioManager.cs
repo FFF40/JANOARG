@@ -11,6 +11,7 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager main;
 
+
     [Space]
     public AudioMixer AudioMixer;
 
@@ -35,7 +36,7 @@ public class AudioManager : MonoBehaviour
             float cutoffLog = Mathf.Lerp(fromLog, toLog, a);
             float cutoff = Mathf.Pow(10, cutoffLog);
             AudioMixer.SetFloat("SceneLayerLowPassCutoff", cutoff);
-            AudioMixer.SetFloat("SceneLayerVolume", cutoff <= 10 ? -80 : Mathf.Clamp01(Mathf.Pow(cutoffLog / Mathf.Log10(22000), .3f)) * 80 - 80);
+            AudioMixer.SetFloat("SceneLayerVolume", cutoff <= 10 ? -80 : Mathf.Clamp01(Mathf.Pow(cutoffLog / Mathf.Log10(22000), .2f)) * 80 - 80);
         });
     }
 }

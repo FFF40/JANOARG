@@ -116,6 +116,10 @@ public class OptionsPanel : MonoBehaviour
                     () => Preferences.Get("GENR:UIMusicVolume", 100f),
                     x => Preferences.Set("GENR:UIMusicVolume", x)
                 );
+                Spawn<FloatOptionInput, float>("UI SFX Volume", 
+                    () => Preferences.Get("GENR:UISFXVolume", 100f),
+                    x => Preferences.Set("GENR:UISFXVolume", x)
+                );
 
                 // Spawn<OptionCategoryTitle>("Localization");
                 // var lang = Spawn<ListOptionInput, string>("🌐 Language", 

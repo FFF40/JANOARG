@@ -75,6 +75,10 @@ public class SongSelectScreen : MonoBehaviour
     public float PreviewVolumeMulti;
     public AudioClip CurrentPreviewClip;
     public Vector2 CurrentPreviewRange;
+    [Space]
+    public AudioSource SFXSource;
+    public AudioClip SFXTickClip;
+    public float SFXVolume;
 
     public Coroutine TargetSongAnim;
 
@@ -88,7 +92,7 @@ public class SongSelectScreen : MonoBehaviour
 
     public void Start()
     {
-        PreviewVolumeMulti = Common.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+        OnSettingDirty();
         Common.main.Storage.OnSave.AddListener(OnSave);
         StartCoroutine(InitPlaylist());
     }
@@ -100,7 +104,13 @@ public class SongSelectScreen : MonoBehaviour
 
     public void OnSave() 
     {
+        OnSettingDirty();
+    }
+
+    public void OnSettingDirty() 
+    {
         PreviewVolumeMulti = Common.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+        SFXVolume = Common.main.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
     }
 
     public void Update() 
@@ -235,7 +245,11 @@ public class SongSelectScreen : MonoBehaviour
             }
             else break;
         }
-        if (lastTarget != TargetScrollOffset) TargetSongHiddenTarget = true;
+        if (lastTarget != TargetScrollOffset) 
+        {
+            TargetSongHiddenTarget = true;
+            SFXSource.PlayOneShot(SFXTickClip, SFXVolume);
+        }
         IsDirty = true;
     }
 
