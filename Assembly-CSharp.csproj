@@ -109,6 +109,7 @@
     <Compile Include="Assets/Scripts/Behaviors/Panels/Panel Types/ProfilePanel.cs" />
     <Compile Include="Assets/Scripts/Data/Story/Instructions/DelayStoryInstruction.cs" />
     <Compile Include="Assets/Scripts/Data/Files/JACDecoder.cs" />
+    <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/JudgmentOffsetOptionInput.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Song Select/SongSelectScreen.cs" />
     <Compile Include="Assets/Scripts/Data/Files/JAPSEncoder.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInputHandler.cs" />
@@ -119,12 +120,14 @@
     <Compile Include="Assets/Scripts/UI/TabbedSidebar.cs" />
     <Compile Include="Assets/Scripts/Data/Constant/StoryConstants.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInputListHandler.cs" />
+    <Compile Include="Assets/Scripts/Behaviors/Options/OptionCalibrationWizard.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Player/HitPlayer.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/StringOptionInput.cs" />
     <Compile Include="Assets/Scripts/Data/Storage/ScoreStore.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Easing.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Player/PlayerScreenPause.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/StorageManager.cs" />
+    <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/VisualOffsetOptionInput.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Common/LoadingBar.cs" />
     <Compile Include="Assets/Scripts/Data/Story/TypeEffects/StoryTypeEffect.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Storage.cs" />
@@ -1021,16 +1024,16 @@
       <HintPath>Library/ScriptAssemblies/Unity.Toolchain.Linux-x86_64.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.AI.Navigation">
-      <HintPath>Library/ScriptAssemblies/Unity.AI.Navigation.dll</HintPath>
+    <Reference Include="Unity.VectorGraphics">
+      <HintPath>Library/ScriptAssemblies/Unity.VectorGraphics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.PlasticSCM.Editor">
       <HintPath>Library/ScriptAssemblies/Unity.PlasticSCM.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.VectorGraphics">
-      <HintPath>Library/ScriptAssemblies/Unity.VectorGraphics.dll</HintPath>
+    <Reference Include="Unity.AI.Navigation">
+      <HintPath>Library/ScriptAssemblies/Unity.AI.Navigation.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
@@ -1081,12 +1084,12 @@
       <HintPath>Library/ScriptAssemblies/Unity.InternalAPIEditorBridge.003.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.VisualScripting.Flow">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Flow.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualScripting.Flow.Editor">
       <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Flow.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.Flow">
+      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Flow.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Timeline">
