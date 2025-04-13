@@ -9,13 +9,15 @@ public class LoadingBar : MonoBehaviour
 {
     public static LoadingBar main;
 
-    public Image Background;
-
+    public RectTransform StatusHolder;
     public TMP_Text StatusText;
-    public Image StatusBackground;
+    public RectTransform StatusCompletedHolder;
+    public TMP_Text StatusCompletedText;
+    [Space]
     public TMP_Text FlavorText;
     public Image FlavorBackground;
-
+    public Image FlavorBackground2;
+    [Space]
     public Slider ProgressBar;
     public RectTransform ProgressBarHolder;
     public Image ProgressBarFill;
@@ -59,7 +61,7 @@ public class LoadingBar : MonoBehaviour
     public static readonly FlavorTextEntry[] CompletedStatuses = new[] {
 
         // Always shown
-        new FlavorTextEntry("LOADING COMPLETED"),
+        new FlavorTextEntry("LOADING COMPLETE"),
         new FlavorTextEntry("LOADING SUCCESS"),
         new FlavorTextEntry("APPROACHING DESTINATION"),
         new FlavorTextEntry("CONNECTION ESTABLISHED"),
@@ -70,8 +72,6 @@ public class LoadingBar : MonoBehaviour
     {
         main = this;
         self = GetComponent<RectTransform>();
-        FlavorText.alpha = StatusText.alpha = 0;
-        Background.color = Color.clear;
         gameObject.SetActive(false);
     }
 
@@ -89,18 +89,17 @@ public class LoadingBar : MonoBehaviour
     {
         IsAnimating = true;
         StatusText.text = "NOW LOADING...";
-
-        Color background = Color.black;
+        StatusCompletedHolder.sizeDelta = new (0, 0);
 
         yield return Ease.Animate(3f, (a) => {
-            float lerp = Mathf.Pow(Ease.Get(a * 3f, EaseFunction.Circle, EaseMode.Out), 2);
-            FlavorText.alpha = lerp;
-            float lerp2 = Mathf.Pow(Ease.Get(a * 3f - 0.5f, EaseFunction.Circle, EaseMode.Out), 2);
-            StatusText.alpha = lerp2;
-            float lerp3 = Ease.Get(a * 1.5f, EaseFunction.Quartic, EaseMode.Out);
-            FlavorBackground.color = background * new Color(1, 1, 1, .5f * lerp3);
-            float lerp4 = Ease.Get(a, EaseFunction.Quartic, EaseMode.Out);
-            Background.color = background * new Color(1, 1, 1, .5f * lerp4);
+            float lerp = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
+            FlavorBackground.rectTransform.sizeDelta = new (FlavorBackground.rectTransform.sizeDelta.x, lerp * 100);
+            float lerp2 = Ease.Get(a * 3f - 0.15f, EaseFunction.Exponential, EaseMode.Out);
+            FlavorBackground2.rectTransform.sizeDelta = new (FlavorBackground2.rectTransform.sizeDelta.x, lerp2 * 96);
+            float lerp3 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
+            StatusHolder.anchoredPosition = new (1000 + (StatusHolder.rect.width - 1000 + self.sizeDelta.x / -2) * (1 - lerp3), 0);
+            float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+            FlavorText.rectTransform.anchoredPosition = new (1200 - 100 * lerp4, 0);
         });
         IsAnimating = false;
     }
@@ -114,19 +113,25 @@ public class LoadingBar : MonoBehaviour
     public IEnumerator HideAnim()
     {
         IsAnimating = true;
-        StatusText.text = FlavorTextEntry.GetRandom(CompletedStatuses).Message;
-
-        Color background = Color.black;
+        StatusCompletedText.text = FlavorTextEntry.GetRandom(CompletedStatuses).Message;
+        StatusCompletedText.ForceMeshUpdate();
+        float width = StatusCompletedText.preferredWidth + 70;
+        float padding = -self.sizeDelta.x / 2;
+        StatusCompletedText.rectTransform.anchoredPosition = new (-padding / 2, 0);
 
         yield return Ease.Animate(1, (a) => {
-            float lerp = Mathf.Pow(Ease.Get(a * 4f, EaseFunction.Circle, EaseMode.Out), 2);
-            StatusBackground.color = StatusText.color * new Color(1, 1, 1, 1 - lerp);
-            float lerp2 = Mathf.Pow(Ease.Get(a * 4f - 3, EaseFunction.Circle, EaseMode.Out), 2);
-            StatusText.alpha = 1 - lerp2;
-            float lerp3 = Mathf.Clamp01(a * 4);
-            FlavorBackground.color = FlavorText.color * new Color(1, 1, 1, .5f * (1 - lerp3));
-            Background.color = background * new Color(1, 1, 1, .5f * (1 - lerp3));
-            FlavorText.alpha = Background.color.a * 2;
+            float lerp = Ease.Get(a * 1.2f - 0.1f, EaseFunction.Exponential, EaseMode.In);
+            float lerp2 = Ease.Get(a * 1.2f, EaseFunction.Exponential, EaseMode.In);
+            float lerp3 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.Out);
+            float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
+            float lerp5 = Ease.Get(a * 1.5f - 0.5f, EaseFunction.Exponential, EaseMode.In);
+
+            FlavorBackground.rectTransform.sizeDelta = new (FlavorBackground.rectTransform.sizeDelta.x, (1 - lerp) * 100 * (1 - .3f * lerp3));
+            FlavorBackground2.rectTransform.sizeDelta = new (FlavorBackground2.rectTransform.sizeDelta.x, (1 - lerp2) * 96 * (1 - .5f * lerp3));
+            StatusHolder.anchoredPosition = new (1000 - (width - StatusHolder.rect.width + 1000) * lerp3, 0);
+            StatusCompletedHolder.sizeDelta = new ((width + padding) * lerp3, 0);
+            FlavorText.rectTransform.anchoredPosition = new (1100 - 300 * lerp4, 0);
+            StatusHolder.anchoredPosition += new Vector2((width + padding) * lerp5, 0);
         });
 
         gameObject.SetActive(false);
@@ -148,8 +153,6 @@ public class LoadingBar : MonoBehaviour
     public void SetFlavorText(string text) 
     {
         FlavorText.text = text;
-        FlavorText.ForceMeshUpdate();
-        FlavorText.rectTransform.localPosition = -FlavorText.textBounds.center;
     }
 }
 

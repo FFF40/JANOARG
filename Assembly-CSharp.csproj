@@ -144,6 +144,7 @@
     <Compile Include="Assets/Scripts/Data/Files/JACEncoder.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInputField.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Panels/Panel.cs" />
+    <Compile Include="Assets/Scripts/UI/LoadingSpinner.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInput.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Chart.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Song Select/SongSelectReadyScreen.cs" />

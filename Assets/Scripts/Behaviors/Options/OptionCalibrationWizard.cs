@@ -1,14 +1,11 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using Unity.VisualScripting;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
-using Unity.VisualScripting.Dependencies.Sqlite;
 
 public class OptionCalibrationWizard : MonoBehaviour
 {
@@ -51,6 +48,7 @@ public class OptionCalibrationWizard : MonoBehaviour
     {
         JudgmentOffsetHolder.SetActive(false);
         VisualOffsetHolder.SetActive(false);
+        InputHolder.SetActive(false);
         gameObject.SetActive(false);  
     }
 
