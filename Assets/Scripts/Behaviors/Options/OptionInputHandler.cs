@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using UnityEngine.Windows;
-using Unity.VisualScripting;
-using UnityEngine.EventSystems;
 using System.Linq;
 
 public class OptionInputHandler : MonoBehaviour
@@ -38,6 +35,8 @@ public class OptionInputHandler : MonoBehaviour
     public List<OptionInputField> CurrentInputs;
     public LayoutGroup InputLayout;
     public CanvasGroup InputGroup;
+    [Space]
+    public OptionCalibrationWizard CalibrationWizard;
     [Space]
     public TMP_Text TextAnimSample;
     public RectTransform TextAnimHolder;
@@ -103,7 +102,54 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            case FloatOptionInput:
+            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
+                {
+                    FloatOptionInput i = (FloatOptionInput)item;
+
+                    AdvancedInputGroup.gameObject.SetActive(false);
+                    BeforeText.gameObject.SetActive(false);
+                    AfterText.gameObject.SetActive(false);
+                    CalibrationWizard.IntializeWizard((FloatOptionInput)item);
+
+                    TMP_InputField field = CalibrationWizard.InputField;
+                    field.text = i.CurrentValue.ToString();
+
+                    TMP_Text unit = CalibrationWizard.InputFieldUnit;
+                    unit.text = "<alpha=#77>" + i.Unit;
+
+                    TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    Vector3[] corners = new Vector3[4];
+                    i.ValueHolder.rectTransform.GetWorldCorners(corners);
+                    textAnim.rectTransform.position = corners[3];
+                    textAnim.text = i.ValueHolder.text;
+                    TextAnimLabels.Add(textAnim);
+
+                    TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    i.UnitLabel.rectTransform.GetWorldCorners(corners);
+                    unitAnim.rectTransform.position = corners[3];
+                    unitAnim.font = i.UnitLabel.font;
+                    unitAnim.text = i.UnitLabel.text;
+                    TextAnimLabels.Add(unitAnim);
+                    field.onEndEdit.AddListener(value =>
+                    {
+                        if (recursionBuster) return;
+                        recursionBuster = true;
+                        bool valid = float.TryParse(value, out float val);
+                        if (valid)
+                        {
+                            val = Mathf.Clamp(val, i.Min, i.Max);
+                            if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
+                            i.Set(val);
+                            i.UpdateValue();
+                        }
+                        textAnim.text = field.text = i.CurrentValue.ToString();
+                        recursionBuster = false;
+                    });
+
+                    break;
+                }
+
+            case FloatOptionInput: 
                 {
                     FloatOptionInput i = (FloatOptionInput)item;
 
@@ -309,6 +355,17 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
+            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput:
+                {
+                    FloatOptionInput input = (FloatOptionInput)item;
+                    inputLerp = x => {
+                        LerpText(TextAnimLabels[0], input.ValueHolder, CalibrationWizard.InputField.textComponent, x);
+                        LerpText(TextAnimLabels[1], input.UnitLabel, CalibrationWizard.InputFieldUnit, x);
+                    };
+                    endLerp = () => {
+                    };
+                    break;
+                }
             case FloatOptionInput: 
                 {
                     FloatOptionInput input = (FloatOptionInput)item;
@@ -358,6 +415,14 @@ public class OptionInputHandler : MonoBehaviour
     {
         switch (item) 
         {
+            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
+                {
+                    onFinish = () => {
+                        CalibrationWizard.HideWizard();
+                    };
+                    break;
+                }
+
             case ListOptionInput: 
                 {
                     onFinish = () => {

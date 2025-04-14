@@ -11,6 +11,7 @@ using System.Reflection;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.Callbacks;
 #endif
 
 public class StoryDecoder
@@ -21,7 +22,7 @@ public class StoryDecoder
     static Dictionary<string, StoryTagInfo> StoryTags;
 
     #if UNITY_EDITOR
-    [MenuItem("JANOARG/Story/Reset Story Tags")]
+	[DidReloadScripts]
     #endif
     public static void InitiateStoryTags() 
     {

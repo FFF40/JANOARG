@@ -26,6 +26,7 @@ public class QuickMenu : MonoBehaviour
     public void Awake() 
     {
         main = this;
+        gameObject.SetActive(false);
     }
 
     public void ShowLeft() 

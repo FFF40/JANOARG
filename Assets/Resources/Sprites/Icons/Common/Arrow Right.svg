@@ -8,8 +8,8 @@
    version="1.1"
    id="svg1"
    inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
-   sodipodi:docname="Profile.svg"
-   inkscape:export-filename="Triangle Right.png"
+   sodipodi:docname="Arrow Right.svg"
+   inkscape:export-filename="Arrow Right.png"
    inkscape:export-xdpi="384"
    inkscape:export-ydpi="384"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -28,8 +28,8 @@
      inkscape:document-units="px"
      showgrid="true"
      inkscape:zoom="26.34375"
-     inkscape:cx="16.01898"
-     inkscape:cy="21.086595"
+     inkscape:cx="16"
+     inkscape:cy="12.469751"
      inkscape:window-width="1920"
      inkscape:window-height="1080"
      inkscape:window-x="0"
@@ -59,28 +59,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
-       d="M 4,8 H 28 V 24 H 4 Z"
-       id="path1"
-       sodipodi:nodetypes="ccccc" />
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 3,16 H 29 L 22,9"
+       id="path5"
+       sodipodi:nodetypes="ccc" />
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
-       d="m 8,20 c 0,0 4,-4 8,0"
-       id="path2" />
-    <circle
-       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
-       id="path3"
-       inkscape:label="path3"
-       cx="12"
-       cy="14"
-       r="2" />
-    <path
-       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
-       d="m 17,12 h 7"
-       id="path4" />
-    <path
-       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
-       d="m 17,15 h 6"
-       id="path5" />
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 29,16 -7,7"
+       id="path6"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>

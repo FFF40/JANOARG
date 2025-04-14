@@ -177,11 +177,11 @@ public class OptionsPanel : MonoBehaviour
                 sample.Max = 500;
                 sample.Step = 1;
                 sample.Unit = "ms";
-                Spawn<FloatOptionInput, float>("Judgment Offset", 
+                Spawn<JudgmentOffsetOptionInput, float>("Judgment Offset", 
                     () => Preferences.Get("PLYR:JudgmentOffset", 0f),
                     x => Preferences.Set("PLYR:JudgmentOffset", x)
                 );
-                Spawn<FloatOptionInput, float>("Visual Offset", 
+                Spawn<VisualOffsetOptionInput, float>("Visual Offset", 
                     () => Preferences.Get("PLYR:VisualOffset", 0f),
                     x => Preferences.Set("PLYR:VisualOffset", x)
                 );

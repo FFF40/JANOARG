@@ -17,10 +17,4 @@ public class SafeAreaManager : MonoBehaviour
             -Mathf.Max(sc.xMax - sa.xMax, sa.xMin - sc.xMin) * 2 / scale, 
             0 /* (sa.height - sc.height) / scale */ );
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
