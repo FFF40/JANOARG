@@ -82,7 +82,7 @@ public class HitPlayer : MonoBehaviour
 
     public void UpdateMesh() 
     {
-        float time = Mathf.Max(Time, PlayerScreen.main.CurrentTime);
+        float time = Mathf.Max(Time, PlayerScreen.main.CurrentTime + PlayerScreen.main.Settings.VisualOffset);
         float z;
         try { z = CurrentPosition = Lane.GetZPosition(time); }
         catch { return; }
