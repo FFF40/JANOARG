@@ -46,7 +46,7 @@ public class TextPrintStoryInstruction : StoryInstruction
             while (teller.TimeBuffer < waitTime) yield return null;
             teller.TimeBuffer -= waitTime;
 
-            if (!char.IsWhiteSpace(charInfo.character))
+            if (charInfo.isVisible)
             {
                 teller.CurrentVertexIndexes[charInfo.materialReferenceIndex] = charInfo.vertexIndex + 4;
                 teller.RegisterCoroutine(teller.currentRevealEffect.OnCharacterReveal(

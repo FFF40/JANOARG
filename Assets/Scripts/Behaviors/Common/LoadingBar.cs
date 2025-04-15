@@ -95,7 +95,7 @@ public class LoadingBar : MonoBehaviour
             float lerp = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
             FlavorBackground.rectTransform.sizeDelta = new (FlavorBackground.rectTransform.sizeDelta.x, lerp * 100);
             float lerp2 = Ease.Get(a * 3f - 0.15f, EaseFunction.Exponential, EaseMode.Out);
-            FlavorBackground2.rectTransform.sizeDelta = new (FlavorBackground2.rectTransform.sizeDelta.x, lerp2 * 96);
+            FlavorBackground2.rectTransform.sizeDelta = new (FlavorBackground2.rectTransform.sizeDelta.x, lerp2 * 100);
             float lerp3 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
             StatusHolder.anchoredPosition = new (1000 + (StatusHolder.rect.width - 1000 + self.sizeDelta.x / -2) * (1 - lerp3), 0);
             float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
@@ -122,15 +122,15 @@ public class LoadingBar : MonoBehaviour
         yield return Ease.Animate(1, (a) => {
             float lerp = Ease.Get(a * 1.2f - 0.1f, EaseFunction.Exponential, EaseMode.In);
             float lerp2 = Ease.Get(a * 1.2f, EaseFunction.Exponential, EaseMode.In);
-            float lerp3 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.Out);
+            float lerp3 = Ease.Get(a * 2f, EaseFunction.Exponential, EaseMode.Out);
             float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
             float lerp5 = Ease.Get(a * 1.5f - 0.5f, EaseFunction.Exponential, EaseMode.In);
 
             FlavorBackground.rectTransform.sizeDelta = new (FlavorBackground.rectTransform.sizeDelta.x, (1 - lerp) * 100 * (1 - .3f * lerp3));
-            FlavorBackground2.rectTransform.sizeDelta = new (FlavorBackground2.rectTransform.sizeDelta.x, (1 - lerp2) * 96 * (1 - .5f * lerp3));
-            StatusHolder.anchoredPosition = new (1000 - (width - StatusHolder.rect.width + 1000) * lerp3, 0);
+            FlavorBackground2.rectTransform.sizeDelta = new (FlavorBackground2.rectTransform.sizeDelta.x, (1 - lerp2) * 100 * (1 - .35f * lerp3));
             StatusCompletedHolder.sizeDelta = new ((width + padding) * lerp3, 0);
             FlavorText.rectTransform.anchoredPosition = new (1100 - 300 * lerp4, 0);
+            StatusHolder.anchoredPosition = new (1000 - (width - StatusHolder.rect.width + 1000) * lerp3, 0);
             StatusHolder.anchoredPosition += new Vector2((width + padding) * lerp5, 0);
         });
 

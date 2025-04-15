@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using TMPro;
 
 [Serializable]
 public enum EaseMode 
@@ -50,6 +51,43 @@ public class Ease
             yield return null;
         }
         callback(1);
+    }
+
+    public static IEnumerator AnimateText(TMP_Text text, float duration, float xOffset, Action<TMP_CharacterInfo, float> letterCallback)
+    {
+        float minPos = float.NaN;
+
+        bool finished;
+        void update(float x)
+        {
+            text.ForceMeshUpdate();
+            finished = true;
+            minPos = float.NaN;
+            foreach (var charInfo in text.textInfo.characterInfo) 
+            {
+                if (!charInfo.isVisible) continue;
+                if (!float.IsFinite(minPos)) minPos = charInfo.vertex_BL.position.x;
+                float prog = Mathf.Clamp01((x - xOffset * (charInfo.vertex_BL.position.x - minPos)) / duration);
+                letterCallback(charInfo, prog);
+                if (prog < 1) finished = false;
+            }
+            int index = 0;
+            foreach (var meshInfo in text.textInfo.meshInfo) 
+            {
+                meshInfo.mesh.vertices = meshInfo.vertices;
+                text.UpdateGeometry(meshInfo.mesh, index);
+                index++;
+            }
+        }
+
+        float a = 0;
+        while (true)
+        {
+            update(a);
+            if (finished) break;
+            yield return null;
+            a += Time.deltaTime;
+        }
     }
 
     public static Dictionary<EaseFunction, Ease> Eases = new () {
