@@ -251,6 +251,7 @@ public class PlayerScreenResult : MonoBehaviour
         ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "−") + Helper.PadScore(Mathf.Abs(recordDiff).ToString("#0"));
 
         SaveScoreEntry(score);
+        UpdateStat();
 
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
@@ -447,5 +448,6 @@ public class PlayerScreenResult : MonoBehaviour
     void UpdateStat()
     {
         //call some function in ProfileBar.cs
+        ProfileBar.main.UpdateAbilityRating();
     }
 }

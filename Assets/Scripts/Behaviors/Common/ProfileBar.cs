@@ -87,21 +87,21 @@ public class ProfileBar : MonoBehaviour
 
         foreach (float ratingEntry in ratingEntries)
         {
-            newAbilityRating = ratingEntry + newAbilityRating;
+            newAbilityRating += ratingEntry;
         }
 
-        // Compute
         float ratingDiff = newAbilityRating - currentAbilityRating;
-        //Debug.Log(newAbilityRating);
-        //Debug.Log(ratingDiff);
-
-
+        
         if (ratingDiff > 0)
         {
             Common.main.Storage.Set("INFO:AbilityRating", newAbilityRating);
             Common.main.Storage.Save();
+            AbilityRatingLabel.text = Common.main.Storage.Get("INFO:AbilityRating", 0.00f).ToString("f2");
+
+            // If has difference animate to show diff then the new rating
+            StartCoroutine(AnimateRating(ratingDiff));
         }
-        // If has difference animate to show diff then the new rating
+
 
     }
 
@@ -144,19 +144,29 @@ public class ProfileBar : MonoBehaviour
         rt(RightPane).anchoredPosition = new (10 * (1 - a), rt(RightPane).anchoredPosition.y);
     }
 
-    void AnimateRating(float difference)
+    IEnumerator AnimateRating(float difference)
     {
-        // diff = difference
-        // rating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
+        while (true)
+        {
+            float diff = difference;
+            float rating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
 
-        // loop
+            yield return Ease.Animate(1f, (x) =>
+            {
+                AbilityRatingLabel.color = new Color(1, 1, 1, 1 - x);
+            });
 
-        // show diff
-        // transition
-        // show rating
+            AbilityRatingLabel.text = "+" + difference.ToString("f2");
 
+            yield return Ease.Animate(1f, (x) =>
+            {
+                AbilityRatingLabel.color = new Color(1, 1, 1, 1 - x);
+            });
+
+            AbilityRatingLabel.text = rating.ToString("f2");
+
+        }
     }
-
     RectTransform rt (Component obj) => obj.transform as RectTransform;
 
 }
