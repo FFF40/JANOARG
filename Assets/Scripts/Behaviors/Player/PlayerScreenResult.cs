@@ -429,7 +429,8 @@ public class PlayerScreenResult : MonoBehaviour
             Rating = Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore),
             ChartConstant = PlayerScreen.TargetChartMeta.ChartConstant
         };
-
+        Debug.Log(Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore));
+        Debug.Log(PlayerScreen.TargetChartMeta.ChartConstant);
         StorageManager.main.Scores.Register(entry);
         StorageManager.main.Save();
     }

@@ -4826,6 +4826,8 @@ MonoBehaviour:
   EssenceCount: 0
   LeftPane: {fileID: 6479797661661859790}
   NameLabel: {fileID: 6479797661813592346}
+  LevelLabel: {fileID: 1901909508}
+  AbilityRatingLabel: {fileID: 55746461}
   RightPane: {fileID: 1342322692}
   CoinLabel: {fileID: 1665669658}
   OrbLabel: {fileID: 245450634}

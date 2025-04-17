@@ -22,6 +22,7 @@ public class ProfilePanel : MonoBehaviour
     {
         Storage Storage = Common.main.Storage;
 
+        Debug.Log(Storage.Get("INFO:Name", "JANOARG"));
         PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
         PlayerTitle.text = Storage.Get("INFO:Title", "Perfectly Generic Player");
 
@@ -33,11 +34,13 @@ public class ProfilePanel : MonoBehaviour
 
         LevelProgress.text = LevelProgressGained + " / " + LevelProgressLimit;
 
-        // TODO: AR Calucation 
-        AbilityRatingContent.text = Storage.Get("INFO:AbilityRating", "0.00");
+        // TODO: AR Calucation (Check ProfileBar)
+        AbilityRatingContent.text = (Storage.Get("INFO:AbilityRating", 0.00)).ToString("f2"); //getting some errors for some reason
 
         // TODO: Remember last filter option 
         // TODO: Dropdown menu for filter
+        // -> Simple, Normal, Complex, Overdrive, Special, All
+
         AllFlawlessCount.text = Storage.Get("INFO:AllFlawlessCount", "0");
         FullStreakCount.text = Storage.Get("INFO:FullStreakCount", "0");
         ClearedCount.text = Storage.Get("INFO:ClearedCount", "0");

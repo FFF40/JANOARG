@@ -45,35 +45,64 @@ public class ProfileBar : MonoBehaviour
 
     public void UpdateAbilityRating()
     {
-        ScoreStore scores = new ScoreStore();
-        float rating = 0.00f;
+        // Get AR from Save
+        float currentAbilityRating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
+        //Debug.Log(currentAbilityRating);
+        AbilityRatingLabel.text = currentAbilityRating.ToString("f2");
+        float newAbilityRating = 0.00f;
 
+        // Get all records in save
+        ScoreStore scores = new ScoreStore();
+        List<float> ratingEntries = new List<float>();
         scores.Load();
 
         foreach (var entry in scores.Entries)
         {
-            var key = entry.Key;
-            var value = entry.Value;
+            string key = entry.Key;
+            int slashIndex = key.LastIndexOf('/');
+            string SongID = key.Substring(0, slashIndex); 
+            string ChartID = key.Substring(slashIndex + 1);
 
-            var record = scores.Get(key + "/" + value);
+            var record = scores.Get(SongID, ChartID);
 
             if (record == null)
             {
+                Debug.LogWarning("Record of " + key + " is missing!");
                 continue;
             }
-            if (record.Rating == null)
+
+            if (record.Rating > 0.00f)
             {
-
+                ratingEntries.Add(record.Rating);
             }
-
-            rating = record.Rating + rating;
         }
 
-        // Get all records in save
         // Get best 30
-        // Compute
+        if (ratingEntries.Count > 30)
+        {
+            ratingEntries.Sort();
+            ratingEntries.Reverse();
+            ratingEntries.RemoveRange(30, ratingEntries.Count - 30);
+        }
 
+        foreach (float ratingEntry in ratingEntries)
+        {
+            newAbilityRating = ratingEntry + newAbilityRating;
+        }
+
+        // Compute
+        float ratingDiff = newAbilityRating - currentAbilityRating;
+        //Debug.Log(newAbilityRating);
+        //Debug.Log(ratingDiff);
+
+
+        if (ratingDiff > 0)
+        {
+            Common.main.Storage.Set("INFO:AbilityRating", newAbilityRating);
+            Common.main.Storage.Save();
+        }
         // If has difference animate to show diff then the new rating
+
     }
 
     public void UpdateCurrencies()
@@ -115,10 +144,17 @@ public class ProfileBar : MonoBehaviour
         rt(RightPane).anchoredPosition = new (10 * (1 - a), rt(RightPane).anchoredPosition.y);
     }
 
-    void AnimateRating()
+    void AnimateRating(float difference)
     {
-        // diff = 
-        // rating = 
+        // diff = difference
+        // rating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
+
+        // loop
+
+        // show diff
+        // transition
+        // show rating
+
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
