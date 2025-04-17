@@ -23,19 +23,39 @@ public class ProfilePanel : MonoBehaviour
         Storage Storage = Common.main.Storage;
 
         PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
+        PlayerTitle.text = Storage.Get("INFO:Title", "Perfectly Generic Player");
+
+        // TODO: Leveling Stuff
+        LevelContent.text = Storage.Get("INFO:Level", 1).ToString();
+        
+        int LevelProgressGained = Storage.Get("INFO:LevelProgressNumerator", 1);
+        int LevelProgressLimit = Storage.Get("INFO:LevelProgressDenominator", 100);
+
+        LevelProgress.text = LevelProgressGained + " / " + LevelProgressLimit;
+
+        // TODO: AR Calucation 
+        AbilityRatingContent.text = Storage.Get("INFO:AbilityRating", "0.00");
+
+        // TODO: Remember last filter option 
+        // TODO: Dropdown menu for filter
+        AllFlawlessCount.text = Storage.Get("INFO:AllFlawlessCount", "0");
+        FullStreakCount.text = Storage.Get("INFO:FullStreakCount", "0");
+        ClearedCount.text = Storage.Get("INFO:ClearedCount", "0");
+        UnlockedCount.text = Storage.Get("INFO:UnlockedCount", "0");
+
     }
-    
+
 
     public bool IsAnimating { get; private set; }
 
-    public Texture2D Screenshot(int width, int height) 
+    public Texture2D Screenshot(int width, int height)
     {
         RenderTexture rTex = new (width, height, 16, RenderTextureFormat.ARGB32);
         rTex.Create();
 
         ScreenshotCamera.targetTexture = rTex;
         ScreenshotCamera.Render();
-        
+
         Texture2D tex2D = new (width, height, TextureFormat.ARGB32, false);
         RenderTexture.active = rTex;
         tex2D.ReadPixels(new Rect(0, 0, width, height), 0, 0);
@@ -47,12 +67,12 @@ public class ProfilePanel : MonoBehaviour
         return tex2D;
     }
 
-    public void ScreenshotRatingBreakdown() 
+    public void ScreenshotRatingBreakdown()
     {
         if (!IsAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
     }
 
-    public IEnumerator ScreenshotRatingBreakdownAnim() 
+    public IEnumerator ScreenshotRatingBreakdownAnim()
     {
         IsAnimating = true;
         Texture2D image = Screenshot(3072, 1280);
@@ -60,7 +80,7 @@ public class ProfilePanel : MonoBehaviour
         IsAnimating = false;
     }
 
-    public IEnumerator Share(Texture2D image) 
+    public IEnumerator Share(Texture2D image)
     {
         var task = File.WriteAllBytesAsync(Application.persistentDataPath + "/screenshot.png", ImageConversion.EncodeToPNG(image));
         yield return new WaitUntil(() => task.IsCompleted);

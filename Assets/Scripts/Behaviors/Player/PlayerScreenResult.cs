@@ -415,6 +415,7 @@ public class PlayerScreenResult : MonoBehaviour
 
     void SaveScoreEntry(int score)
     {
+        float accurateScore = (PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
         ScoreStoreEntry entry = new ScoreStoreEntry
         {
             SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath),
@@ -424,7 +425,9 @@ public class PlayerScreenResult : MonoBehaviour
             PerfectCount = PlayerScreen.main.PerfectCount,
             GoodCount = PlayerScreen.main.GoodCount,
             BadCount = PlayerScreen.main.BadCount,
-            MaxCombo = PlayerScreen.main.MaxCombo
+            MaxCombo = PlayerScreen.main.MaxCombo,
+            Rating = Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore),
+            ChartConstant = PlayerScreen.TargetChartMeta.ChartConstant
         };
 
         StorageManager.main.Scores.Register(entry);
@@ -436,5 +439,12 @@ public class PlayerScreenResult : MonoBehaviour
         string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
         string chartID = PlayerScreen.TargetChartMeta.Target;
         return StorageManager.main.Scores.Get(songID, chartID);
+    }
+
+    //TODO: Update Level / Progress, Rating, and currency stuff
+
+    void UpdateStat()
+    {
+        //call some function in ProfileBar.cs
     }
 }

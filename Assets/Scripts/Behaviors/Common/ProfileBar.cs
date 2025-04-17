@@ -15,6 +15,8 @@ public class ProfileBar : MonoBehaviour
 
     public CanvasGroup LeftPane;
     public TMP_Text NameLabel;
+    public TMP_Text LevelLabel;
+    public TMP_Text AbilityRatingLabel;
 
     public CanvasGroup RightPane;
     public TMP_Text CoinLabel;
@@ -34,6 +36,46 @@ public class ProfileBar : MonoBehaviour
         NameLabel.text = Common.main.Storage.Get("INFO:Name", "JANOARG");
     }
 
+    public void UpdateLevel()
+    {
+        // Adjust Fill for level
+        // briefly show level progression
+        // back to show the level
+    }
+
+    public void UpdateAbilityRating()
+    {
+        ScoreStore scores = new ScoreStore();
+        float rating = 0.00f;
+
+        scores.Load();
+
+        foreach (var entry in scores.Entries)
+        {
+            var key = entry.Key;
+            var value = entry.Value;
+
+            var record = scores.Get(key + "/" + value);
+
+            if (record == null)
+            {
+                continue;
+            }
+            if (record.Rating == null)
+            {
+
+            }
+
+            rating = record.Rating + rating;
+        }
+
+        // Get all records in save
+        // Get best 30
+        // Compute
+
+        // If has difference animate to show diff then the new rating
+    }
+
     public void UpdateCurrencies()
     {
         CoinLabel.text = Common.main.Storage.Get("CURR:Coins", 0L).ToString(CultureInfo.InvariantCulture);
@@ -41,11 +83,11 @@ public class ProfileBar : MonoBehaviour
         EssenceLabel.text = "+" + (Common.main.Storage.Get("CURR:Essence", 0L) / 10f).ToString("F1", CultureInfo.InvariantCulture) + "%";
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         UpdateName();
         UpdateCurrencies();
+        UpdateAbilityRating();
         Common.main.Storage.OnSave.AddListener(OnSave);
         SetVisibilty(0);
     }
@@ -60,7 +102,6 @@ public class ProfileBar : MonoBehaviour
         UpdateName();
     }
 
-    // Update is called once per frame
     void Update()
     {
         
@@ -72,6 +113,12 @@ public class ProfileBar : MonoBehaviour
         LeftPane.blocksRaycasts = RightPane.blocksRaycasts = a == 1;
         rt(LeftPane).anchoredPosition = new (-10 * (1 - a), rt(LeftPane).anchoredPosition.y);
         rt(RightPane).anchoredPosition = new (10 * (1 - a), rt(RightPane).anchoredPosition.y);
+    }
+
+    void AnimateRating()
+    {
+        // diff = 
+        // rating = 
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
