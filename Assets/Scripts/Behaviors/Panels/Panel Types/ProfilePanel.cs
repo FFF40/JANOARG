@@ -31,23 +31,26 @@ public class ProfilePanel : MonoBehaviour
         
         int LevelProgressGained = Storage.Get("INFO:LevelProgressNumerator", 1);
         int LevelProgressLimit = Storage.Get("INFO:LevelProgressDenominator", 100);
-
+        
         LevelProgress.text = LevelProgressGained + " / " + LevelProgressLimit;
 
         // TODO: AR Calucation (Check ProfileBar)
-        AbilityRatingContent.text = (Storage.Get("INFO:AbilityRating", 0.00)).ToString("f2"); //getting some errors for some reason
+        AbilityRatingContent.text = (Storage.Get("INFO:AbilityRating", 0.00f)).ToString("f2");
 
         // TODO: Remember last filter option 
         // TODO: Dropdown menu for filter
         // -> Simple, Normal, Complex, Overdrive, Special, All
 
-        AllFlawlessCount.text = Storage.Get("INFO:AllFlawlessCount", "0");
+
+        // Temporary 
+        AllFlawlessCount.text = Storage.Get("INFO:AllFlawlessCount", "0"); 
         FullStreakCount.text = Storage.Get("INFO:FullStreakCount", "0");
         ClearedCount.text = Storage.Get("INFO:ClearedCount", "0");
         UnlockedCount.text = Storage.Get("INFO:UnlockedCount", "0");
 
     }
 
+    // Add a function for dropdown stuff
 
     public bool IsAnimating { get; private set; }
 

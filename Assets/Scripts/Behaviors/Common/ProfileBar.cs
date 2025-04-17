@@ -48,13 +48,13 @@ public class ProfileBar : MonoBehaviour
         int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
 
         float levelProgress = (float)levelProgressGained / levelProgressLimit;
-        Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress);
+        //Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress);
 
         fill.value = levelProgress ;
 
         if (experiencePoints > 0)
         {
-             StartCoroutine(AnimateLevel(experiencePoints));
+             //StartCoroutine(AnimateLevel(experiencePoints));
         }
 
     }
@@ -179,61 +179,61 @@ public class ProfileBar : MonoBehaviour
 
     }
 
-    IEnumerator AnimateLevel(int difference)
-    {
-        int buffer = difference;
+    //IEnumerator AnimateLevel(int difference)
+    //{
+    //    int buffer = difference;
         
 
-        while (buffer > 0)
-        {
-            int level = Common.main.Storage.Get("INFO:Level", 1);
-            int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
-            int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
-            float levelProgress = (float)levelProgressGained / levelProgressLimit;
+    //    while (buffer > 0)
+    //    {
+    //        int level = Common.main.Storage.Get("INFO:Level", 1);
+    //        int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
+    //        int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
+    //        float levelProgress = (float)levelProgressGained / levelProgressLimit;
 
-            // get remaining exp needed
-            int remainingEXPneed = levelProgressLimit - levelProgressGained;
+    //        // get remaining exp needed
+    //        int remainingEXPneed = levelProgressLimit - levelProgressGained;
 
-            // if level up 
-            if (buffer > remainingEXPneed)
-            {
-                // animate fill
-                yield return Ease.Animate(2.5f, (x) =>
-                {
-                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                    fill.value = 1 * lerp;
-                });
+    //        // if level up 
+    //        if (buffer > remainingEXPneed)
+    //        {
+    //            // animate fill
+    //            yield return Ease.Animate(2.5f, (x) =>
+    //            {
+    //                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+    //                fill.value = 1 * lerp;
+    //            });
 
-                // show level up text
+    //            // show level up text
 
-                // rainbow effect
-                // animate fill back to 0
-                RectTransform fillRect = fill.fillRect;
-                yield return Ease.Animate(2f, (x) =>
-                {
-                    fillRect.color = new Color.HSVToRGB(t, 1f, 1f);
-                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                    fill.value = 1 - lerp;
-                });
+    //            // rainbow effect
+    //            Transform fillObject= transform.Find("Fill");
+    //            Color fillObjectColor = GetComponent<GraphicParallelogram>().color;
+    //            yield return Ease.Animate(2f, (x) =>
+    //            {
+    //                fillObjectColor = Color.HSVToRGB(x, 1f, 1f);
+    //                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+    //                fill.value = 1 - lerp;
+    //            });
 
-                yield return Ease.Animate(1f, (x) =>
-                {
-                    fillRect.color = new Color(1,1,1,1);
-                });
+    //            yield return Ease.Animate(1f, (x) =>
+    //            {
+    //                fillObjectColor = new Color(1,1,1,1);
+    //            });
  
-            }
+    //        }
 
-            // while showing the level progress
-            yield return Ease.Animate(2.5f, (x) =>
-            {
-                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                fill.value = levelProgress * lerp;
-            });
+    //        // while showing the level progress
+    //        yield return Ease.Animate(2.5f, (x) =>
+    //        {
+    //            float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+    //            fill.value = levelProgress * lerp;
+    //        });
 
-            // save
-            Common.main.Storage.Set("INFO:Level", 1);
-        }
-    }
+    //        // save
+    //        Common.main.Storage.Set("INFO:Level", 1);
+    //    }
+    //}
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
 
