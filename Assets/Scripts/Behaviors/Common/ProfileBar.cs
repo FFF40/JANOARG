@@ -98,11 +98,8 @@ public class ProfileBar : MonoBehaviour
             Common.main.Storage.Save();
             AbilityRatingLabel.text = Common.main.Storage.Get("INFO:AbilityRating", 0.00f).ToString("f2");
 
-            // If has difference animate to show diff then the new rating
             StartCoroutine(AnimateRating(ratingDiff));
         }
-
-
     }
 
     public void UpdateCurrencies()
@@ -146,26 +143,28 @@ public class ProfileBar : MonoBehaviour
 
     IEnumerator AnimateRating(float difference)
     {
-        while (true)
+        
+        float diff = difference;
+        float rating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
+
+        AbilityRatingLabel.text = (diff > 0 ? "+" : "-") + diff.ToString("f2");
+
+        yield return Ease.Animate(2f, (x) =>
         {
-            float diff = difference;
-            float rating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
+            float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+            AbilityRatingLabel.color = new Color(1, 1, 1, 1 - lerp);
+        });
 
-            yield return Ease.Animate(1f, (x) =>
-            {
-                AbilityRatingLabel.color = new Color(1, 1, 1, 1 - x);
-            });
 
-            AbilityRatingLabel.text = "+" + difference.ToString("f2");
+        AbilityRatingLabel.text = rating.ToString("f2");
+        yield return Ease.Animate(1f, (x) =>
+        {
+            AbilityRatingLabel.color = new Color(1, 1, 1, 0 + x);
+        });
 
-            yield return Ease.Animate(1f, (x) =>
-            {
-                AbilityRatingLabel.color = new Color(1, 1, 1, 1 - x);
-            });
-
-            AbilityRatingLabel.text = rating.ToString("f2");
-
-        }
+        
+            
+        
     }
     RectTransform rt (Component obj) => obj.transform as RectTransform;
 
