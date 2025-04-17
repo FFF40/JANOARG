@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using System;
 
 public class SongSelectReadyScreen : MonoBehaviour
 {
@@ -49,6 +50,7 @@ public class SongSelectReadyScreen : MonoBehaviour
 
         DifficultyLevelText.text = Helper.FormatDifficulty(PlayerScreen.TargetChartMeta.DifficultyLevel);
         DifficultyNameText.text = PlayerScreen.TargetChartMeta.DifficultyName.ToUpper();
+        SongInfoHolder.anchoredPosition += new Vector2(1000, 0);
         SongArtistText.text = PlayerScreen.TargetSong.SongArtist + " <alpha=#77>»";
         SongNameText.text = PlayerScreen.TargetSong.SongName;
         CharterNameText.text = PlayerScreen.TargetChartMeta.CharterName;
@@ -65,11 +67,15 @@ public class SongSelectReadyScreen : MonoBehaviour
             meshInfo.vertices[index + 2] += offset;
             meshInfo.vertices[index + 3] += offset;
         }));
-        StartCoroutine(Ease.AnimateText(SongNameText, 1.5f, 1 / 800f, (info2, x) => {
+        StartCoroutine(Ease.AnimateText(SongNameText, 1.5f, 1 / 400f, (info2, x) => {
             var meshInfo = SongNameText.textInfo.meshInfo[info2.materialReferenceIndex];
             int index = info2.vertexIndex;
-            float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2f);
-            Vector3 offset = 1000 * (1 - ease) * Vector2.right;
+            float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Circle, EaseMode.In), 3.5f);
+            float ease2 = Ease.Get(x * .8f + .2f, EaseFunction.Bounce, EaseMode.Out);
+            Vector3 offset = new (
+                1000 * (1 - ease),
+                30 * (1 - ease2)
+            );
             meshInfo.vertices[index] += offset;
             meshInfo.vertices[index + 1] += offset;
             meshInfo.vertices[index + 2] += offset;
@@ -102,6 +108,8 @@ public class SongSelectReadyScreen : MonoBehaviour
                 -210 + 200 * Ease.Get(x * 1.1f, EaseFunction.Exponential, EaseMode.Out));
         }));
         
+        yield return null;
+        SongInfoHolder.anchoredPosition -= new Vector2(1000, 0);
         yield return new WaitForSeconds(4);
 
         IsAnimating = false;
@@ -147,7 +155,7 @@ public class SongSelectReadyScreen : MonoBehaviour
         }));
 
         // Extra info
-        StartCoroutine(Ease.Animate(1.3f, x => {
+        StartCoroutine(Ease.Animate(1f, x => {
             ExtraInfoBackground.sizeDelta = new (ExtraInfoBackground.sizeDelta.x, 
                 100 * (1 - Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.In)));
             ExtraInfoBackground2.sizeDelta = new (ExtraInfoBackground2.sizeDelta.x, 

@@ -567,7 +567,7 @@ public class SongSelectScreen : MonoBehaviour
         TargetSongCoverLayerHolder.gameObject.SetActive(false);
         TargetSongCoverBackground.color = TargetSong.Song.BackgroundColor;
 
-        yield return Ease.Animate(1, a => {
+        yield return Ease.Animate(0.8f, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
             LerpUI(1 - lerp);
             foreach (SongSelectItem item in ItemList) item.SetVisibilty(1 - lerp);
