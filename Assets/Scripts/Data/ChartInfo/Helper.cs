@@ -45,4 +45,24 @@ public static class Helper
         if (str.EndsWith("*")) str = str[..^1] + "<sub>*</sub>";
         return str;
     }
+
+    // Temporary EXP system (pls change it as you want)
+    public static int GetEXP(float score, int level) => score switch
+    {
+        >= 1000000 => level * 100,
+        >= 975000 => level * 90,
+        >= 950000 => level * 85,
+        >= 900000 => level * 80,
+        >= 800000 => level * 70,
+        >= 700000 => level * 50,
+        >= 1 => level * 25,
+        _ => 1
+    };
+
+    // Temporary Level EXP Limit System 
+    // I'm referring to the "100" in "1 / 100"
+    public static int GetEXPLimit(int level) 
+    {
+        return (int)(100 * Mathf.Pow(2, level/10) ) + 40 * level;
+    }
 }

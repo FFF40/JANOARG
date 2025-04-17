@@ -2549,7 +2549,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.298
+  m_Value: 0.404
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -4827,6 +4827,7 @@ MonoBehaviour:
   LeftPane: {fileID: 6479797661661859790}
   NameLabel: {fileID: 6479797661813592346}
   LevelLabel: {fileID: 1901909508}
+  fill: {fileID: 721221227}
   AbilityRatingLabel: {fileID: 55746461}
   RightPane: {fileID: 1342322692}
   CoinLabel: {fileID: 1665669658}

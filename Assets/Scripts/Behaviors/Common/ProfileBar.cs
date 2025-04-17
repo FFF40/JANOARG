@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 using System.Globalization;
 
 public class ProfileBar : MonoBehaviour
@@ -16,6 +17,7 @@ public class ProfileBar : MonoBehaviour
     public CanvasGroup LeftPane;
     public TMP_Text NameLabel;
     public TMP_Text LevelLabel;
+    public Slider fill;
     public TMP_Text AbilityRatingLabel;
 
     public CanvasGroup RightPane;
@@ -36,18 +38,30 @@ public class ProfileBar : MonoBehaviour
         NameLabel.text = Common.main.Storage.Get("INFO:Name", "JANOARG");
     }
 
-    public void UpdateLevel()
+    public void UpdateLevel(int experiencePoints = 0)
     {
-        // Adjust Fill for level
-        // briefly show level progression
-        // back to show the level
+        LevelLabel.text = Common.main.Storage.Get("INFO:Level", 1).ToString();
+
+        // Adjust Fill 
+        int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
+        int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
+
+        float levelProgress = (float)levelProgressGained / levelProgressLimit;
+        Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress);
+
+        fill.value = levelProgress ;
+
+        if (experiencePoints > 0)
+        {
+            // StartCoroutine(AnimateLevel());
+        }
+
     }
 
     public void UpdateAbilityRating()
     {
         // Get AR from Save
         float currentAbilityRating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
-        //Debug.Log(currentAbilityRating);
         AbilityRatingLabel.text = currentAbilityRating.ToString("f2");
         float newAbilityRating = 0.00f;
 
@@ -112,8 +126,9 @@ public class ProfileBar : MonoBehaviour
     void Start()
     {
         UpdateName();
-        UpdateCurrencies();
+        UpdateLevel();
         UpdateAbilityRating();
+        UpdateCurrencies();
         Common.main.Storage.OnSave.AddListener(OnSave);
         SetVisibilty(0);
     }
@@ -166,6 +181,7 @@ public class ProfileBar : MonoBehaviour
             
         
     }
+    
     RectTransform rt (Component obj) => obj.transform as RectTransform;
 
 }
