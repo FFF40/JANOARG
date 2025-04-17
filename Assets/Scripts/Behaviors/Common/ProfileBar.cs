@@ -27,6 +27,7 @@ public class ProfileBar : MonoBehaviour
 
     public RectTransform self { get; private set; }
 
+
     public void Awake()
     {
         main = this;
@@ -53,7 +54,7 @@ public class ProfileBar : MonoBehaviour
 
         if (experiencePoints > 0)
         {
-            // StartCoroutine(AnimateLevel());
+             StartCoroutine(AnimateLevel(experiencePoints));
         }
 
     }
@@ -158,7 +159,6 @@ public class ProfileBar : MonoBehaviour
 
     IEnumerator AnimateRating(float difference)
     {
-        
         float diff = difference;
         float rating = Common.main.Storage.Get("INFO:AbilityRating", 0.00f);
 
@@ -177,11 +177,64 @@ public class ProfileBar : MonoBehaviour
             AbilityRatingLabel.color = new Color(1, 1, 1, 0 + x);
         });
 
-        
-            
-        
     }
-    
+
+    IEnumerator AnimateLevel(int difference)
+    {
+        int buffer = difference;
+        
+
+        while (buffer > 0)
+        {
+            int level = Common.main.Storage.Get("INFO:Level", 1);
+            int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
+            int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
+            float levelProgress = (float)levelProgressGained / levelProgressLimit;
+
+            // get remaining exp needed
+            int remainingEXPneed = levelProgressLimit - levelProgressGained;
+
+            // if level up 
+            if (buffer > remainingEXPneed)
+            {
+                // animate fill
+                yield return Ease.Animate(2.5f, (x) =>
+                {
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    fill.value = 1 * lerp;
+                });
+
+                // show level up text
+
+                // rainbow effect
+                // animate fill back to 0
+                RectTransform fillRect = fill.fillRect;
+                yield return Ease.Animate(2f, (x) =>
+                {
+                    fillRect.color = new Color.HSVToRGB(t, 1f, 1f);
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    fill.value = 1 - lerp;
+                });
+
+                yield return Ease.Animate(1f, (x) =>
+                {
+                    fillRect.color = new Color(1,1,1,1);
+                });
+ 
+            }
+
+            // while showing the level progress
+            yield return Ease.Animate(2.5f, (x) =>
+            {
+                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                fill.value = levelProgress * lerp;
+            });
+
+            // save
+            Common.main.Storage.Set("INFO:Level", 1);
+        }
+    }
+
     RectTransform rt (Component obj) => obj.transform as RectTransform;
 
 }
