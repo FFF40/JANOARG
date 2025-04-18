@@ -17,7 +17,9 @@ public class ProfileBar : MonoBehaviour
     public CanvasGroup LeftPane;
     public TMP_Text NameLabel;
     public TMP_Text LevelLabel;
-    public Slider fill;
+    public TMP_Text LevelValueLabel;
+    public Slider slider;
+    public GameObject sliderFill;
     public TMP_Text AbilityRatingLabel;
 
     public CanvasGroup RightPane;
@@ -41,20 +43,21 @@ public class ProfileBar : MonoBehaviour
 
     public void UpdateLevel(int experiencePoints = 0)
     {
-        LevelLabel.text = Common.main.Storage.Get("INFO:Level", 1).ToString();
+        LevelValueLabel.text = Common.main.Storage.Get("INFO:Level", 1).ToString();
 
-        // Adjust Fill 
+        // Adjust slider 
         int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
         int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
 
         float levelProgress = (float)levelProgressGained / levelProgressLimit;
-        //Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress);
+        
 
-        fill.value = levelProgress ;
-
+        slider.value = levelProgress ;
+        Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress);
+        Debug.Log(slider.value);
         if (experiencePoints > 0)
         {
-             //StartCoroutine(AnimateLevel(experiencePoints));
+             StartCoroutine(AnimateLevel(experiencePoints));
         }
 
     }
@@ -179,61 +182,115 @@ public class ProfileBar : MonoBehaviour
 
     }
 
-    //IEnumerator AnimateLevel(int difference)
-    //{
-    //    int buffer = difference;
-        
+    // Change it if you want
+    IEnumerator AnimateLevel(int difference)
+    {
+        int buffer = difference;
 
-    //    while (buffer > 0)
-    //    {
-    //        int level = Common.main.Storage.Get("INFO:Level", 1);
-    //        int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
-    //        int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
-    //        float levelProgress = (float)levelProgressGained / levelProgressLimit;
 
-    //        // get remaining exp needed
-    //        int remainingEXPneed = levelProgressLimit - levelProgressGained;
+        while (buffer > 0)
+        {
+            int level = Common.main.Storage.Get("INFO:Level", 1);
+            int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
+            int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
+            float levelProgress = (float)levelProgressGained / levelProgressLimit;
 
-    //        // if level up 
-    //        if (buffer > remainingEXPneed)
-    //        {
-    //            // animate fill
-    //            yield return Ease.Animate(2.5f, (x) =>
-    //            {
-    //                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-    //                fill.value = 1 * lerp;
-    //            });
+            // get remaining exp needed
+            int remainingEXPneed = levelProgressLimit - levelProgressGained;
 
-    //            // show level up text
+            // Switch Lv. 1 to + (exp) for 1 second
+            LevelLabel.text = "+";
+            LevelValueLabel.text = buffer.ToString();
 
-    //            // rainbow effect
-    //            Transform fillObject= transform.Find("Fill");
-    //            Color fillObjectColor = GetComponent<GraphicParallelogram>().color;
-    //            yield return Ease.Animate(2f, (x) =>
-    //            {
-    //                fillObjectColor = Color.HSVToRGB(x, 1f, 1f);
-    //                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-    //                fill.value = 1 - lerp;
-    //            });
+            // Fade Out
+            yield return Ease.Animate(2.5f, (x) =>
+            {
+                float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                LevelLabel.color = new Color(0, 0, 0, 1 - lerp);
+                LevelValueLabel.color = new Color(0, 0, 0, 1 - lerp);
+            });
 
-    //            yield return Ease.Animate(1f, (x) =>
-    //            {
-    //                fillObjectColor = new Color(1,1,1,1);
-    //            });
- 
-    //        }
+            // Fade In
+            LevelLabel.text = "Lv.";
+            LevelValueLabel.text = level.ToString();
+            yield return Ease.Animate(1f, (x) =>
+            {
+                LevelLabel.color = new Color(0, 0, 0, 0 + x);
+                LevelValueLabel.color = new Color(0, 0, 0, 0 + x);
+            });
 
-    //        // while showing the level progress
-    //        yield return Ease.Animate(2.5f, (x) =>
-    //        {
-    //            float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-    //            fill.value = levelProgress * lerp;
-    //        });
+            // if level up 
+            if (buffer > remainingEXPneed)
+            {
+                // animate slider
+                yield return Ease.Animate(2.5f, (x) =>
+                {
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    slider.value = 1 * lerp;
+                });
 
-    //        // save
-    //        Common.main.Storage.Set("INFO:Level", 1);
-    //    }
-    //}
+                // show level up text
+                LevelValueLabel.color = new Color(1, 1, 1, 0);
+                LevelLabel.text = "LEVEL UP";
+                LevelLabel.alignment = TextAlignmentOptions.Center;
+                level += 1;
+
+                yield return new WaitForSeconds(1f);
+
+                // rainbow effect
+                var graphic = sliderFill.GetComponent<GraphicParallelogram>();
+                Color fillObjectColor = graphic.color;
+
+                yield return Ease.Animate(2f, (x) =>
+                {
+                    fillObjectColor = Color.HSVToRGB(x, 1f, 1f);
+                    graphic.color = fillObjectColor;
+                    
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    slider.value = 1 - lerp;
+                });
+
+                // Back to White
+                yield return Ease.Animate(1f, (x) =>
+                {
+                    fillObjectColor = new Color(1, 1, 1, 1);
+                });
+
+                //Back to Default Values
+                LevelValueLabel.color = new Color(1, 1, 1, 1);
+                LevelLabel.text = "Lv.";
+                LevelLabel.alignment = TextAlignmentOptions.Left;
+                LevelValueLabel.text = level.ToString();
+                yield return Ease.Animate(1f, (x) =>
+                {
+                    LevelLabel.color = new Color(0, 0, 0, 0 + x);
+                    LevelValueLabel.color = new Color(0, 0, 0, 0 + x);
+                });
+
+                buffer = buffer - remainingEXPneed;
+                levelProgressGained = 0;
+                levelProgressLimit = Helper.GetEXPLimit(level);
+            }
+            else
+            {
+                yield return Ease.Animate(2.5f, (x) =>
+                {
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    slider.value = levelProgress * lerp;
+                });
+
+                buffer = 0;
+            }
+
+
+            // save
+            Common.main.Storage.Set("INFO:Level", level);
+            Common.main.Storage.Set("INFO:LevelProgressNumerator", levelProgressGained);
+            Common.main.Storage.Set("INFO:LevelProgressDenominator", levelProgressLimit);
+        }
+
+        Common.main.Storage.Save();
+    }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
 

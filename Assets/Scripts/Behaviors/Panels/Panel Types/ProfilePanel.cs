@@ -22,7 +22,6 @@ public class ProfilePanel : MonoBehaviour
     {
         Storage Storage = Common.main.Storage;
 
-        Debug.Log(Storage.Get("INFO:Name", "JANOARG"));
         PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
         PlayerTitle.text = Storage.Get("INFO:Title", "Perfectly Generic Player");
 
