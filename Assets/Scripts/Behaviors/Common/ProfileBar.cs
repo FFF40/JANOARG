@@ -226,7 +226,7 @@ public class ProfileBar : MonoBehaviour
                 yield return Ease.Animate(2.5f, (x) =>
                 {
                     float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                    slider.value = 1 * lerp;
+                    slider.value = Mathf.Lerp(levelProgress,1f,lerp);
                 });
 
                 // show level up text
@@ -234,8 +234,6 @@ public class ProfileBar : MonoBehaviour
                 LevelLabel.text = "LEVEL UP";
                 LevelLabel.alignment = TextAlignmentOptions.Center;
                 level += 1;
-
-                yield return new WaitForSeconds(1f);
 
                 // rainbow effect
                 var graphic = sliderFill.GetComponent<GraphicParallelogram>();
@@ -245,15 +243,17 @@ public class ProfileBar : MonoBehaviour
                 {
                     fillObjectColor = Color.HSVToRGB(x, 1f, 1f);
                     graphic.color = fillObjectColor;
-                    
-                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                    slider.value = 1 - lerp;
+
                 });
+
+                yield return new WaitForSeconds(1f);
 
                 // Back to White
                 yield return Ease.Animate(1f, (x) =>
                 {
-                    fillObjectColor = new Color(1, 1, 1, 1);
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    slider.value = 1 - lerp;
+                    graphic.color = Color.Lerp(graphic.color,Color.white, lerp);
                 });
 
                 //Back to Default Values
@@ -273,10 +273,14 @@ public class ProfileBar : MonoBehaviour
             }
             else
             {
+                levelProgressGained = buffer;
+                levelProgress = (float)levelProgressGained / levelProgressLimit;
+                Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress + "Animating");
+
                 yield return Ease.Animate(2.5f, (x) =>
                 {
                     float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                    slider.value = levelProgress * lerp;
+                    slider.value = Mathf.Lerp(0,levelProgress,lerp);
                 });
 
                 buffer = 0;
@@ -287,9 +291,10 @@ public class ProfileBar : MonoBehaviour
             Common.main.Storage.Set("INFO:Level", level);
             Common.main.Storage.Set("INFO:LevelProgressNumerator", levelProgressGained);
             Common.main.Storage.Set("INFO:LevelProgressDenominator", levelProgressLimit);
+            Common.main.Storage.Save();
         }
 
-        Common.main.Storage.Save();
+        
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
