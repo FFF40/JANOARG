@@ -41,13 +41,85 @@ public class ProfilePanel : MonoBehaviour
         // -> Simple, Normal, Complex, Overdrive, Special, All
 
 
-        // Temporary 
-        AllFlawlessCount.text = Storage.Get("INFO:AllFlawlessCount", "0"); 
-        FullStreakCount.text = Storage.Get("INFO:FullStreakCount", "0");
-        ClearedCount.text = Storage.Get("INFO:ClearedCount", "0");
-        UnlockedCount.text = Storage.Get("INFO:UnlockedCount", "0");
+        // All 
+        int[] trackStatusCount = TrackStatus("all");
+
+        AllFlawlessCount.text = trackStatusCount[0].ToString();
+        FullStreakCount.text = trackStatusCount[1].ToString();
+        ClearedCount.text = trackStatusCount[2].ToString();
+        UnlockedCount.text = trackStatusCount[3].ToString();
 
     }
+
+    // Function that gets no of AF,FL,CLR and UNL
+    // will return [AF,FL,CLR,UNL]
+    public int[] TrackStatus(string diff)
+    {
+        int[] trackCount = new int[4];
+        ScoreStore scores = new ScoreStore();
+        scores.Load();
+
+        foreach (var entry in scores.Entries)
+        {
+            string key = entry.Key;
+            int slashIndex = key.LastIndexOf('/');
+            string SongID = key.Substring(0, slashIndex);
+            string ChartID = key.Substring(slashIndex + 1);
+
+            var record = scores.Get(SongID, ChartID);
+
+            if (record == null)
+            {
+                Debug.LogWarning("Record of " + key + " is missing!");
+                continue;
+            }
+
+            if (record.ChartID == diff || diff == "all")
+            {
+                int[] trackStat = CountStatus(record, diff);
+
+                for (int i = 0; i < trackCount.Length; i++)
+                {
+                    trackCount[i] += trackStat[i];
+                }
+            }
+
+           
+        }
+        return trackCount;
+    }
+
+    public int[] CountStatus(ScoreStoreEntry record, string diff)
+    {
+        int AllFlawlessCount = 0;
+        int FullStreakCount = 0;
+        int ClearedCount = 0;
+        int UnlockedCount = 0;
+
+        
+        if (record.PerfectCount == record.MaxCombo)
+        {
+            AllFlawlessCount++;
+            FullStreakCount++;
+               
+        }
+        else if (record.BadCount == 0)
+        {
+            FullStreakCount++;              
+        }
+        else
+        {
+
+        }
+
+        ClearedCount++;
+        UnlockedCount++;
+
+        return new int[] { AllFlawlessCount, FullStreakCount, ClearedCount, UnlockedCount };
+        
+    }
+        
+
 
     // Add a function for dropdown stuff
 
