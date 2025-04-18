@@ -167,7 +167,7 @@ public class ProfileBar : MonoBehaviour
 
         AbilityRatingLabel.text = (diff > 0 ? "+" : "-") + diff.ToString("f2");
 
-        yield return Ease.Animate(2f, (x) =>
+        yield return Ease.Animate(2.5f, (x) =>
         {
             float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
             AbilityRatingLabel.color = new Color(1, 1, 1, 1 - lerp);
@@ -225,7 +225,7 @@ public class ProfileBar : MonoBehaviour
                 // animate slider
                 yield return Ease.Animate(2.5f, (x) =>
                 {
-                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.Out);
                     slider.value = Mathf.Lerp(levelProgress,1f,lerp);
                 });
 
@@ -241,7 +241,7 @@ public class ProfileBar : MonoBehaviour
 
                 yield return Ease.Animate(2f, (x) =>
                 {
-                    fillObjectColor = Color.HSVToRGB(x, 1f, 1f);
+                    fillObjectColor = Color.HSVToRGB(x, 0.5f, 1f);
                     graphic.color = fillObjectColor;
 
                 });
@@ -273,14 +273,15 @@ public class ProfileBar : MonoBehaviour
             }
             else
             {
-                levelProgressGained = buffer;
+                float initLevelProgress = (float)levelProgressGained / levelProgressLimit;
+                levelProgressGained += buffer;
                 levelProgress = (float)levelProgressGained / levelProgressLimit;
                 Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress + "Animating");
 
                 yield return Ease.Animate(2.5f, (x) =>
                 {
-                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.In);
-                    slider.value = Mathf.Lerp(0,levelProgress,lerp);
+                    float lerp = Ease.Get(x * 1, EaseFunction.Cubic, EaseMode.Out);
+                    slider.value = Mathf.Lerp(initLevelProgress, levelProgress,lerp);
                 });
 
                 buffer = 0;
