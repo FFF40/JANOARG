@@ -25,30 +25,21 @@ public class ProfilePanel : MonoBehaviour
         PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
         PlayerTitle.text = Storage.Get("INFO:Title", "Perfectly Generic Player");
 
-        // TODO: Leveling Stuff
         LevelContent.text = Storage.Get("INFO:Level", 1).ToString();
         
-        int LevelProgressGained = Storage.Get("INFO:LevelProgressNumerator", 1);
-        int LevelProgressLimit = Storage.Get("INFO:LevelProgressDenominator", 100);
+        int LevelProgressGained = Storage.Get("INFO:LevelEXPGained", 1);
+        int LevelProgressLimit = Storage.Get("INFO:LevelEXPRequirement", 100);
         
         LevelProgress.text = LevelProgressGained + " / " + LevelProgressLimit;
 
-        // TODO: AR Calucation (Check ProfileBar)
         AbilityRatingContent.text = (Storage.Get("INFO:AbilityRating", 0.00f)).ToString("f2");
 
-        // TODO: Remember last filter option 
-        // TODO: Dropdown menu for filter
-        // -> Simple, Normal, Complex, Overdrive, Special, All
-
-
-        // All 
         int[] trackStatusCount = TrackStatus("all");
 
         AllFlawlessCount.text = trackStatusCount[0].ToString();
         FullStreakCount.text = trackStatusCount[1].ToString();
         ClearedCount.text = trackStatusCount[2].ToString();
         UnlockedCount.text = trackStatusCount[3].ToString();
-
     }
 
     // Function that gets no of AF,FL,CLR and UNL
@@ -83,8 +74,6 @@ public class ProfilePanel : MonoBehaviour
                     trackCount[i] += trackStat[i];
                 }
             }
-
-           
         }
         return trackCount;
     }
@@ -96,7 +85,6 @@ public class ProfilePanel : MonoBehaviour
         int ClearedCount = 0;
         int UnlockedCount = 0;
 
-        
         if (record.PerfectCount == record.MaxCombo)
         {
             AllFlawlessCount++;
@@ -107,10 +95,7 @@ public class ProfilePanel : MonoBehaviour
         {
             FullStreakCount++;              
         }
-        else
-        {
-
-        }
+        else {}
 
         ClearedCount++;
         UnlockedCount++;
@@ -118,10 +103,6 @@ public class ProfilePanel : MonoBehaviour
         return new int[] { AllFlawlessCount, FullStreakCount, ClearedCount, UnlockedCount };
         
     }
-        
-
-
-    // Add a function for dropdown stuff
 
     public bool IsAnimating { get; private set; }
 

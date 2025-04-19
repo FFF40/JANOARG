@@ -46,12 +46,11 @@ public class ProfileBar : MonoBehaviour
         LevelValueLabel.text = Common.main.Storage.Get("INFO:Level", 1).ToString();
 
         // Adjust slider 
-        int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
-        int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
+        int levelProgressGained = Common.main.Storage.Get("INFO:LevelEXPGained", 1);
+        int levelProgressLimit = Common.main.Storage.Get("INFO:LevelEXPRequirement", 100);
 
         float levelProgress = (float)levelProgressGained / levelProgressLimit;
         
-
         slider.value = levelProgress ;
         Debug.Log(levelProgressGained + "/" + levelProgressLimit + " =" + levelProgress);
         Debug.Log(slider.value);
@@ -70,25 +69,24 @@ public class ProfileBar : MonoBehaviour
         float newAbilityRating = 0.00f;
 
         // Get all records in save
-        ScoreStore scores = new ScoreStore();
+        StorageManager.main.Scores.Load();
+        Dictionary<string, ScoreStoreEntry> Entries = StorageManager.main.Scores.Entries;
         List<float> ratingEntries = new List<float>();
-        scores.Load();
-
-        foreach (var entry in scores.Entries)
+        
+        foreach (var entry in Entries)
         {
             string key = entry.Key;
             int slashIndex = key.LastIndexOf('/');
             string SongID = key.Substring(0, slashIndex); 
             string ChartID = key.Substring(slashIndex + 1);
 
-            var record = scores.Get(SongID, ChartID);
+            var record = StorageManager.main.Scores.Get(SongID, ChartID);
 
             if (record == null)
             {
                 Debug.LogWarning("Record of " + key + " is missing!");
                 continue;
             }
-
             if (record.Rating > 0.00f)
             {
                 ratingEntries.Add(record.Rating);
@@ -113,7 +111,7 @@ public class ProfileBar : MonoBehaviour
         if (ratingDiff > 0)
         {
             Common.main.Storage.Set("INFO:AbilityRating", newAbilityRating);
-            Common.main.Storage.Save();
+            StorageManager.main.Save();
             AbilityRatingLabel.text = Common.main.Storage.Get("INFO:AbilityRating", 0.00f).ToString("f2");
 
             StartCoroutine(AnimateRating(ratingDiff));
@@ -191,8 +189,8 @@ public class ProfileBar : MonoBehaviour
         while (buffer > 0)
         {
             int level = Common.main.Storage.Get("INFO:Level", 1);
-            int levelProgressGained = Common.main.Storage.Get("INFO:LevelProgressNumerator", 1);
-            int levelProgressLimit = Common.main.Storage.Get("INFO:LevelProgressDenominator", 100);
+            int levelProgressGained = Common.main.Storage.Get("INFO:LevelEXPGained", 1);
+            int levelProgressLimit = Common.main.Storage.Get("INFO:LevelEXPRequirement", 100);
             float levelProgress = (float)levelProgressGained / levelProgressLimit;
 
             // get remaining exp needed
@@ -269,7 +267,7 @@ public class ProfileBar : MonoBehaviour
 
                 buffer = buffer - remainingEXPneed;
                 levelProgressGained = 0;
-                levelProgressLimit = Helper.GetEXPLimit(level);
+                levelProgressLimit = Helper.GetEXPRequirement(level);
             }
             else
             {
@@ -290,8 +288,8 @@ public class ProfileBar : MonoBehaviour
 
             // save
             Common.main.Storage.Set("INFO:Level", level);
-            Common.main.Storage.Set("INFO:LevelProgressNumerator", levelProgressGained);
-            Common.main.Storage.Set("INFO:LevelProgressDenominator", levelProgressLimit);
+            Common.main.Storage.Set("INFO:LevelEXPGained", levelProgressGained);
+            Common.main.Storage.Set("INFO:LevelEXPRequirement", levelProgressLimit);
             Common.main.Storage.Save();
         }
 

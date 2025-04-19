@@ -59,9 +59,8 @@ public static class Helper
         _ => 1
     };
 
-    // Temporary Level EXP Limit System 
-    // I'm referring to the "100" in "1 / 100"
-    public static int GetEXPLimit(int level) 
+    // Temporary Level EXP Requirement System 
+    public static int GetEXPRequirement(int level) 
     {
         return (int)(100 * Mathf.Pow(2, level/10) ) + 40 * level;
     }
