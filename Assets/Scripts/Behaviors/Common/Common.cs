@@ -23,8 +23,8 @@ public class Common : MonoBehaviour
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
         Storage = new Storage("save");
-        int count = Storage.Get("STAT_Count", 0) + 1;
-        Storage.Set("STAT_Count", count);
+        int count = Storage.Get("STAT:Count", 0) + 1;
+        Storage.Set("STAT:Count", count);
         Debug.Log(count);
         Storage.Save();
 

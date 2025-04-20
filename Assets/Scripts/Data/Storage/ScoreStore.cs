@@ -52,5 +52,4 @@ public class ScoreStoreEntry
     [XmlAttribute("MaxCombo")] public int MaxCombo;
 
     [XmlAttribute("Rating")] public float Rating;
-    [XmlAttribute("ChartConstant")] public float ChartConstant;
 }

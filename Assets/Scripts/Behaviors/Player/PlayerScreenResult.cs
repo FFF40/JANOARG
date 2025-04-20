@@ -250,11 +250,7 @@ public class PlayerScreenResult : MonoBehaviour
         BestScoreText.text       = Helper.PadScore(recordScore.ToString("#0"));
         ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "−") + Helper.PadScore(Mathf.Abs(recordDiff).ToString("#0"));
 
-        int playerLevel = Common.main.Storage.Get("INFO:Level", 1);
-        int exp = Helper.GetEXP(score,playerLevel);
-        
-        SaveScoreEntry(score);
-        UpdateStat(exp);
+        CalculateGainsAndSave(score);
 
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
@@ -277,6 +273,26 @@ public class PlayerScreenResult : MonoBehaviour
             RightActionsTransform.anchoredPosition = new (10 * (1 - ease3), RightActionsTransform.anchoredPosition.y);
         });
     }
+
+    void CalculateGainsAndSave(int score)
+    {
+        float baseOrbs = Helper.CalculateBaseSongGain(PlayerScreen.TargetSong, PlayerScreen.CurrentChart, score);
+        float baseCoins = baseOrbs / 5 + 10;
+        if (PlayerScreen.main.BadCount == 0) 
+        {
+            baseOrbs *= 1.2f;
+            baseCoins *= 1.05f;
+            if (PlayerScreen.main.GoodCount == 0) 
+            {
+                baseOrbs *= 1.2f;
+                baseCoins *= 1.05f;
+            }
+        }
+        SaveScoreEntry(score);
+        ProfileBar.main.CompleteSong((long)baseOrbs, (long)baseCoins);
+        StorageManager.main.Save();
+    }
+
     IEnumerator RankExplosionAnim()
     {
         yield return Ease.Animate(2.5f, (x) => {
@@ -431,12 +447,8 @@ public class PlayerScreenResult : MonoBehaviour
             BadCount = PlayerScreen.main.BadCount,
             MaxCombo = PlayerScreen.main.MaxCombo,
             Rating = Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore),
-            ChartConstant = PlayerScreen.TargetChartMeta.ChartConstant
         };
-        Debug.Log(Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore));
-        Debug.Log(PlayerScreen.TargetChartMeta.ChartConstant);
         StorageManager.main.Scores.Register(entry);
-        StorageManager.main.Save();
     }
 
     ScoreStoreEntry GetBestScore()
@@ -444,15 +456,5 @@ public class PlayerScreenResult : MonoBehaviour
         string songID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath);
         string chartID = PlayerScreen.TargetChartMeta.Target;
         return StorageManager.main.Scores.Get(songID, chartID);
-    }
-
-    //TODO: Update Level / Progress, Rating, and currency stuff
-
-    void UpdateStat(int EXPpoints)
-    {   
-        
-        //call some function in ProfileBar.cs
-        ProfileBar.main.UpdateAbilityRating();
-        ProfileBar.main.UpdateLevel(EXPpoints);
     }
 }

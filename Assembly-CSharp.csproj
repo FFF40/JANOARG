@@ -81,6 +81,7 @@
     <Compile Include="Assets/Scripts/Behaviors/Player/PlayerScreen.cs" />
     <Compile Include="Assets/Scripts/Data/Constant/CommonConstants.cs" />
     <Compile Include="Assets/Scripts/Data/Files/JAPSDecoder.cs" />
+    <Compile Include="Assets/Scripts/UI/CollectingParticle.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Song Select/SongSelectItem.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/ChartManager.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/FloatOptionInput.cs" />
@@ -97,8 +98,8 @@
     <Compile Include="Assets/Scripts/Data/ChartInfo/Metronome.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Player/PlayerInputManager.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Player/LanePlayer.cs" />
+    <Compile Include="Assets/Scripts/Utils/Helper.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Storyteller/StorytellerScreen.cs" />
-    <Compile Include="Assets/Scripts/Data/ChartInfo/Helper.cs" />
     <Compile Include="Assets/Scripts/Data/Story/Instructions/TextPrintStoryInstruction.cs" />
     <Compile Include="Assets/Scripts/UI/GraphicParallelogram.cs" />
     <Compile Include="Assets/Scripts/UI/SafeAreaManager.cs" />

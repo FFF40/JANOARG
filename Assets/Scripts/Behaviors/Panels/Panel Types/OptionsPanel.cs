@@ -40,6 +40,7 @@ public class OptionsPanel : MonoBehaviour
     {
         Common.main.Storage.Save();
         Common.main.Preferences.Save();
+        ProfileBar.main.UpdateLabels();
         CurrentPanel.Close();
     }
 

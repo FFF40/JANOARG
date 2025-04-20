@@ -25,12 +25,10 @@ public class ProfilePanel : MonoBehaviour
         PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
         PlayerTitle.text = Storage.Get("INFO:Title", "Perfectly Generic Player");
 
-        LevelContent.text = Storage.Get("INFO:Level", 1).ToString();
-        
-        int LevelProgressGained = Storage.Get("INFO:LevelEXPGained", 1);
-        int LevelProgressLimit = Storage.Get("INFO:LevelEXPRequirement", 100);
-        
-        LevelProgress.text = LevelProgressGained + " / " + LevelProgressLimit;
+        // TODO: Leveling Stuff
+        int level = Common.main.Storage.Get("INFO:Level", 1);
+        LevelContent.text = level.ToString();
+        LevelProgress.text = Common.main.Storage.Get("INFO:LevelProgress", 0L) + " / " + Helper.GetLevelGoal(level);
 
         AbilityRatingContent.text = (Storage.Get("INFO:AbilityRating", 0.00f)).ToString("f2");
 
