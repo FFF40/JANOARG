@@ -6,7 +6,7 @@ using System.Linq;
 
 public class ScoreStore 
 {
-    private Dictionary<string, ScoreStoreEntry> Entries = new ();
+    public Dictionary<string, ScoreStoreEntry> Entries { get; private set; } = new();
 
     public void Load() 
     {
@@ -50,4 +50,6 @@ public class ScoreStoreEntry
     [XmlAttribute("GoodCount")] public int GoodCount;
     [XmlAttribute("BadCount")] public int BadCount;
     [XmlAttribute("MaxCombo")] public int MaxCombo;
+
+    [XmlAttribute("Rating")] public float Rating;
 }

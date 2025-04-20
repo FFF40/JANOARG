@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Globalization;
 using UnityEngine;
 
 public static class Helper 
@@ -40,9 +42,28 @@ public static class Helper
     }
     public static string PadScore(string source, int digits = 7) => PadAlpha(source, '0', digits);
 
+    public static string FormatCurrency(long count)
+    {
+        if (count >= 1_000_000_000_000) return (count / 1e12).ToString("#.##0", CultureInfo.InvariantCulture) + " T";
+        if (count >= 1_000_000_000) return (count / 1e9).ToString("#.##0", CultureInfo.InvariantCulture) + " B";
+        if (count >= 1_000_000) return (count / 1e6).ToString("#.##0", CultureInfo.InvariantCulture) + " M";
+        return count.ToString("#,##0", CultureInfo.InvariantCulture);
+    }
     public static string FormatDifficulty(string str)
     {
         if (str.EndsWith("*")) str = str[..^1] + "<sub>*</sub>";
         return str;
+    }
+
+    public static float CalculateBaseSongGain(PlayableSong song, Chart chart, float score) 
+    {
+        return Math.Max(0, (long)(
+            (GetRating(chart.ChartConstant, score) + 20) * ((score - 7e5) / 3e5) * (song.Clip.length / 60 + 3)
+        )) + 10;
+    }
+
+    public static long GetLevelGoal(int level) 
+    {
+        return 200L + 200L * level + 100L * level * level;
     }
 }

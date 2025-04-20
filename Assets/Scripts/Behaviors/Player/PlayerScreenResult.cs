@@ -250,7 +250,7 @@ public class PlayerScreenResult : MonoBehaviour
         BestScoreText.text       = Helper.PadScore(recordScore.ToString("#0"));
         ScoreDifferenceText.text = (recordDiff >= 0 ? "+" : "−") + Helper.PadScore(Mathf.Abs(recordDiff).ToString("#0"));
 
-        SaveScoreEntry(score);
+        CalculateGainsAndSave(score);
 
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
@@ -273,6 +273,26 @@ public class PlayerScreenResult : MonoBehaviour
             RightActionsTransform.anchoredPosition = new (10 * (1 - ease3), RightActionsTransform.anchoredPosition.y);
         });
     }
+
+    void CalculateGainsAndSave(int score)
+    {
+        float baseOrbs = Helper.CalculateBaseSongGain(PlayerScreen.TargetSong, PlayerScreen.CurrentChart, score);
+        float baseCoins = baseOrbs / 5 + 10;
+        if (PlayerScreen.main.BadCount == 0) 
+        {
+            baseOrbs *= 1.2f;
+            baseCoins *= 1.05f;
+            if (PlayerScreen.main.GoodCount == 0) 
+            {
+                baseOrbs *= 1.2f;
+                baseCoins *= 1.05f;
+            }
+        }
+        SaveScoreEntry(score);
+        ProfileBar.main.CompleteSong((long)baseOrbs, (long)baseCoins);
+        StorageManager.main.Save();
+    }
+
     IEnumerator RankExplosionAnim()
     {
         yield return Ease.Animate(2.5f, (x) => {
@@ -415,6 +435,7 @@ public class PlayerScreenResult : MonoBehaviour
 
     void SaveScoreEntry(int score)
     {
+        float accurateScore = (PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
         ScoreStoreEntry entry = new ScoreStoreEntry
         {
             SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath),
@@ -424,11 +445,10 @@ public class PlayerScreenResult : MonoBehaviour
             PerfectCount = PlayerScreen.main.PerfectCount,
             GoodCount = PlayerScreen.main.GoodCount,
             BadCount = PlayerScreen.main.BadCount,
-            MaxCombo = PlayerScreen.main.MaxCombo
+            MaxCombo = PlayerScreen.main.MaxCombo,
+            Rating = Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore),
         };
-
         StorageManager.main.Scores.Register(entry);
-        StorageManager.main.Save();
     }
 
     ScoreStoreEntry GetBestScore()
