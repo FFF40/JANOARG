@@ -115,7 +115,7 @@ public class QuickMenu : MonoBehaviour
     public void SetLeftPanelVisibility(float a)
     {
         LeftPanelGroup.alpha = a * a;
-        LeftPanel.anchoredPosition = new (-10 * (1 - a), LeftPanel.anchoredPosition.y);
+        LeftPanel.anchoredPosition *= new Vector2Frag(-10 * (1 - a), null);
     }
 
     public void ShowPanel(string sceneName) 

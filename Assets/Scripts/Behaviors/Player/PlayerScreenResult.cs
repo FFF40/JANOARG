@@ -277,7 +277,7 @@ public class PlayerScreenResult : MonoBehaviour
     void CalculateGainsAndSave(int score)
     {
         float baseOrbs = Helper.CalculateBaseSongGain(PlayerScreen.TargetSong, PlayerScreen.CurrentChart, score);
-        float baseCoins = baseOrbs / 5 + 10;
+        float baseCoins = baseOrbs / 5 + PlayerScreen.TargetSong.Clip.length / 6 + 10;
         if (PlayerScreen.main.BadCount == 0) 
         {
             baseOrbs *= 1.2f;
@@ -396,14 +396,11 @@ public class PlayerScreenResult : MonoBehaviour
 
             FanfareSource.volume = (1 - a) * Settings.BGMusicVolume;
             
-            SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);
-            DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, -10 * lerp - 40);
-            LeftActionsTransform.anchoredPosition = new (-10 * lerp, LeftActionsTransform.anchoredPosition.y);
-            RightActionsTransform.anchoredPosition = new (10 * lerp, RightActionsTransform.anchoredPosition.y);
-            ResultBackground.rectTransform.sizeDelta = new (
-                ResultBackground.rectTransform.sizeDelta.x,
-                80 * (1 - lerp)
-            );
+            SongInfoTransform.anchoredPosition *= new Vector2Frag(null, 30 + 10 * lerp);
+            DetailsTransform.anchoredPosition *= new Vector2Frag(null, -10 * lerp - 40);
+            LeftActionsTransform.anchoredPosition *= new Vector2Frag(-10 * lerp, null);
+            RightActionsTransform.anchoredPosition *= new Vector2Frag(10 * lerp, null);
+            ResultBackground.rectTransform.sizeDelta *= new Vector2Frag(null, 80 * (1 - lerp));
 
             float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
             ScoreHolder.pivot = new(lerp2, .5f);
@@ -435,7 +432,7 @@ public class PlayerScreenResult : MonoBehaviour
 
     void SaveScoreEntry(int score)
     {
-        float accurateScore = (PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
+        float accurateScore = PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f;
         ScoreStoreEntry entry = new ScoreStoreEntry
         {
             SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath),

@@ -58,12 +58,12 @@ public static class Helper
     public static float CalculateBaseSongGain(PlayableSong song, Chart chart, float score) 
     {
         return Math.Max(0, (long)(
-            (GetRating(chart.ChartConstant, score) + 20) * ((score - 7e5) / 3e5) * (song.Clip.length / 60 + 3)
+            (GetRating(chart.ChartConstant, score) + 30) * ((score - 5e5) / 5e5) * (song.Clip.length / 60 + 3)
         )) + 10;
     }
 
     public static long GetLevelGoal(int level) 
     {
-        return 200L + 200L * level + 100L * level * level;
+        return 200L + 250L * level + 50L * level * level;
     }
 }

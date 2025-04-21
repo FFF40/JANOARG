@@ -31,11 +31,14 @@ public class ScoreStore
     public void Register(ScoreStoreEntry entry)
     {
         ScoreStoreEntry oldEntry = Get(entry.SongID, entry.ChartID);
-        if (
-            oldEntry == null || oldEntry.Score < entry.Score
-        ) 
+        if (oldEntry == null || oldEntry.Score < entry.Score) 
         {
             Entries[entry.SongID + "/" + entry.ChartID] = entry;
+        }
+        else 
+        {
+            oldEntry.Rating = Mathf.Max(oldEntry.Rating, entry.Rating);
+            oldEntry.MaxCombo = Mathf.Max(oldEntry.MaxCombo, entry.MaxCombo);
         }
     }
 }

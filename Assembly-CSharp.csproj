@@ -65,11 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Behaviors/Song Select/SongSelectDifficulty.cs" />
+    <Compile Include="Assets/Scripts/Utils/Vector2Frag.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/OptionCategoryTitle.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/PlayableSong.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Player/JudgeScreenEffect.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Storyboardable.cs" />
     <Compile Include="Assets/Scripts/UI/Themer.cs" />
+    <Compile Include="Assets/Scripts/Utils/Vector4Frag.cs" />
     <Compile Include="Assets/Scripts/UI/CoverLayerImage.cs" />
     <Compile Include="Assets/Scripts/UI/OptionsPanelTabButton.cs" />
     <Compile Include="Assets/Scripts/UI/ScrollingCounter.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Assets/Scripts/Data/Story/TypeEffects/FloatInTypeEffect.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Player/LaneGroupPlayer.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Intro/IntroScene.cs" />
+    <Compile Include="Assets/Scripts/Utils/ColorFrag.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Panels/Panel Types/ProfilePanel.cs" />
     <Compile Include="Assets/Scripts/Data/Story/Instructions/DelayStoryInstruction.cs" />
     <Compile Include="Assets/Scripts/Data/Files/JACDecoder.cs" />
@@ -132,6 +135,7 @@
     <Compile Include="Assets/Scripts/Behaviors/Common/LoadingBar.cs" />
     <Compile Include="Assets/Scripts/Data/Story/TypeEffects/StoryTypeEffect.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Storage.cs" />
+    <Compile Include="Assets/Scripts/Utils/Vector3Frag.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Intro/IntroFlick.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/Input Types/ListOptionInput.cs" />
     <Compile Include="Assets/Scripts/UI/PlaylistScrollItem.cs" />

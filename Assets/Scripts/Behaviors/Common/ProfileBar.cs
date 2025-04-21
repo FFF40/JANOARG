@@ -65,8 +65,13 @@ public class ProfileBar : MonoBehaviour
     public RectTransform CollectingParticleHolder;
     public CollectingParticle CoinParticleSample;
     public CollectingParticle OrbParticleSample;
+    public CollectingParticle EssenceParticleSample;
     public RectTransform ParticleCoinTarget;
     public RectTransform ParticleOrbTarget;
+    public RectTransform ParticleEssenceTarget;
+    public Graphic ParticleCoinFlash;
+    public Graphic ParticleOrbFlash;
+    public Graphic ParticleEssenceFlash;
 
     public RectTransform self { get; private set; }
 
@@ -152,7 +157,7 @@ public class ProfileBar : MonoBehaviour
 
         AbilityRating = 0;
         foreach (float rating in ratingEntries) AbilityRating += rating;
-        SongEssence /= 30;
+        AbilityRating /= 30;
     }
 
     void Start()
@@ -182,7 +187,7 @@ public class ProfileBar : MonoBehaviour
         float essenceOld = TotalEssence;
         UpdateRatingInfo();
         float arChange = AbilityRating - arOld;
-        float essenceChange = AbilityRating - arOld;
+        float essenceChange = TotalEssence - essenceOld;
 
         // TODO daily bonus
         long finalCoins = baseCoins;
@@ -215,6 +220,8 @@ public class ProfileBar : MonoBehaviour
         Common.main.Storage.Save();
 
         // Animation setup
+        yield return new WaitForSeconds(.8f);
+
         ChangeARLabel.gameObject.SetActive(arOld != AbilityRating);
         ChangeARIcon.SetActive(arOld != AbilityRating);
         ChangeEssenceLabel.gameObject.SetActive(essenceOld != TotalEssence);
@@ -241,6 +248,7 @@ public class ProfileBar : MonoBehaviour
 
         int pCount;
         // Coin particles
+        Coroutine coinAnim = null;
         pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseCoins), 1, 15);
         while (baseCoins > 0)
         {
@@ -251,10 +259,16 @@ public class ProfileBar : MonoBehaviour
                 coinsOld += amount;
                 CoinLabel.text = Helper.FormatCurrency(coinsOld);
                 SetRewardLerp(1);
+                if (coinAnim != null) StopCoroutine(coinAnim);
+                coinAnim = StartCoroutine(Ease.Animate(.2f, (x) => {
+                    CoinLabel.margin *= new Vector4Frag(null, 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out), null, null);
+                    ParticleCoinFlash.color *= new ColorFrag(null, null, null, 1 - x);
+                }));
             });
         } 
         // Orb particles
-        pCount = (int)Mathf.Clamp(Mathf.Sqrt(finalOrbs), 1, 15);
+        Coroutine orbAnim = null;
+        pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseOrbs), 1, 25);
         while (finalOrbs > 0)
         {
             long amount = finalOrbs / pCount;
@@ -275,6 +289,30 @@ public class ProfileBar : MonoBehaviour
                 LevelProgressBar.maxValue = levelGoal;
                 LevelProgressBar.value = progOld;
                 SetRewardLerp(1);
+
+                if (orbAnim != null) StopCoroutine(orbAnim);
+                orbAnim = StartCoroutine(Ease.Animate(.2f, (x) => {
+                    OrbLabel.margin *= new Vector4Frag(null, 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out), null, null);
+                    ParticleOrbFlash.color *= new ColorFrag(null, null, null, 1 - x);
+                }));
+            });
+        } 
+        // Essence particles
+        Coroutine essenceAnim = null;
+        pCount = essenceChange == 0 ? 0 : (int)Mathf.Clamp(essenceChange * 10, 1, 15);
+        for (int i = 0; i < pCount; i++)
+        {
+            SpawnParticle(EssenceParticleSample, rt(ChangeEssenceIcon.transform), ParticleEssenceTarget, () => {
+                essenceOld += essenceChange / pCount;
+                arOld += arChange / pCount;
+
+                AbilityRatingText.text = arOld.ToString("F2", CultureInfo.InvariantCulture);
+                EssenceLabel.text = "+" + essenceOld.ToString("F1", CultureInfo.InvariantCulture) + "%";
+
+                if (essenceAnim != null) StopCoroutine(essenceAnim);
+                essenceAnim = StartCoroutine(Ease.Animate(.2f, (x) => {
+                    ParticleEssenceFlash.color *= new ColorFrag(null, null, null, 1 - x);
+                }));
             });
         } 
 
@@ -299,8 +337,9 @@ public class ProfileBar : MonoBehaviour
         var particle = Instantiate(sample, CollectingParticleHolder);
         particle.transform.position = source.position;
         particle.Target = target;
-        particle.Velocity = Random.insideUnitCircle * 100;
-        particle.Lifetime = Random.Range(0.8f, 1.5f);
+        particle.Velocity = Random.insideUnitCircle * Random.value * 600;
+        particle.Lifetime = Mathf.Pow(Random.Range(0.8f, 1.5f), 2);
+        particle.SpinVelocity = Random.Range(-100, 100f);
         particle.OnComplete.AddListener(() => onComplete());
     }
 
@@ -308,16 +347,16 @@ public class ProfileBar : MonoBehaviour
     {
         LeftPane.alpha = RightPane.alpha = a * a;
         LeftPane.blocksRaycasts = RightPane.blocksRaycasts = a == 1;
-        rt(LeftPane).anchoredPosition = new (-10 * (1 - a), rt(LeftPane).anchoredPosition.y);
-        rt(RightPane).anchoredPosition = new (10 * (1 - a), rt(RightPane).anchoredPosition.y);
+        rt(LeftPane).anchoredPosition *= new Vector2Frag(-10 * (1 - a), null);
+        rt(RightPane).anchoredPosition *= new Vector2Frag(10 * (1 - a), null);
     }
 
     public void SetRewardLerp(float lerp) 
     {
 
-        AbilityRatingHolder.sizeDelta = new (60 + 20 * lerp, AbilityRatingHolder.sizeDelta.y);
-        LevelHolder.anchoredPosition = new (AbilityRatingHolder.rect.xMin - 1, LevelHolder.anchoredPosition.y);
-        LevelHolder.sizeDelta = new (60 + 60 * lerp, LevelHolder.sizeDelta.y);
+        AbilityRatingHolder.sizeDelta *= new Vector2Frag(60 + 20 * lerp, null);
+        LevelHolder.anchoredPosition *= new Vector2Frag(AbilityRatingHolder.rect.xMin - 1, null);
+        LevelHolder.sizeDelta *= new Vector2Frag(60 + 60 * lerp, null);
         LevelLabel.rectTransform.sizeDelta = new (-12 - 80 * lerp, 0);
         AbilityRatingLabel.rectTransform.sizeDelta = new (-12 - 6 * lerp, 0);
         LevelText.rectTransform.sizeDelta = new (-12 - 6 * lerp, -2 * lerp);
@@ -333,7 +372,7 @@ public class ProfileBar : MonoBehaviour
 
         float width = 300 + RightLayout.preferredWidth - RightLayout.minWidth;
         float safeOffset = -rt(this).sizeDelta.x / 2;
-        rt(LeftLayout).anchoredPosition = new (Mathf.Lerp(-1000, -450 - safeOffset - width / 2 - (LeftLayout.preferredWidth - LeftLayout.minWidth), lerp), 0);
+        rt(LeftLayout).anchoredPosition = new (Mathf.Lerp(-1000, -500 - safeOffset - width / 2 - (LeftLayout.preferredWidth - LeftLayout.minWidth), lerp), 0);
         rt(RightLayout).anchoredPosition = new (Mathf.Lerp(1000, 600 + safeOffset + width / 2, lerp), 0);
     }
 
@@ -343,8 +382,8 @@ public class ProfileBar : MonoBehaviour
         ChangeAREssencePane.padding.left = ChangeAREssencePane.padding.right
             = ChangeCurrencyPane.padding.left = ChangeCurrencyPane.padding.right
             = 10;
-        rt(ChangeAREssencePane).sizeDelta = new(ChangeAREssencePane.preferredWidth * lerp, rt(ChangeAREssencePane).sizeDelta.y);
-        rt(ChangeCurrencyPane).sizeDelta = new(ChangeCurrencyPane.preferredWidth * lerp, rt(ChangeCurrencyPane).sizeDelta.y);
+        rt(ChangeAREssencePane).sizeDelta *= new Vector2Frag(ChangeAREssencePane.preferredWidth * lerp, null);
+        rt(ChangeCurrencyPane).sizeDelta *= new Vector2Frag(ChangeCurrencyPane.preferredWidth * lerp, null);
         LayoutRebuilder.ForceRebuildLayoutImmediate(rt(ChangeHeader));
     }
 
@@ -358,14 +397,14 @@ class ProfileBarHelperEditor : Editor
 {
     public override void OnInspectorGUI() 
     {
-        DrawDefaultInspector();
-        GUILayout.Space(10);
-        GUILayout.Label("Test", EditorStyles.boldLabel);
+        GUILayout.Label("Testing", EditorStyles.boldLabel);
         if (GUILayout.Button("Do EXP Animation"))
         {
             if (EditorApplication.isPlaying)
-                ((ProfileBar)serializedObject.targetObject).CompleteSong(10, 2);
+                ((ProfileBar)serializedObject.targetObject).CompleteSong(408, 128);
         }
+
+        DrawDefaultInspector();
     }
 }
 #endif
