@@ -12,16 +12,18 @@ public class CollectingParticle : MonoBehaviour
     public float SpinVelocity;
     public float Lifetime;
     public UnityEvent OnComplete;
-    public Graphic Tail;
+    public CanvasGroup Tail;
 
     bool IsCompleted;
 
     float time;
     RectTransform rt;
+    float size = 0;
 
     void Awake()
     {
         rt = (RectTransform)transform;
+        size = rt.sizeDelta.x;
     }
 
     public void Update()
@@ -72,10 +74,15 @@ public class CollectingParticle : MonoBehaviour
                 Target.position, rt.position, 
                 prog == 0 ? 0 : Mathf.Pow(prog, Time.deltaTime * 2)
             );
-            rt.sizeDelta = (12 - 6 * Ease.Get(1 - prog, EaseFunction.Exponential, EaseMode.In)) * Vector2.one;
-            Tail.color *= new ColorFrag(null, null, null, 1 - prog);
-            Tail.rectTransform.localEulerAngles = (Vector2.SignedAngle(Vector2.down, rt.anchoredPosition - oldPos) - rt.localEulerAngles.z) * Vector3.forward;
-            Tail.rectTransform.sizeDelta *= new Vector2Frag(null, Vector2.Distance(oldPos, rt.anchoredPosition));
+            rt.sizeDelta = size * (1 - .5f * Ease.Get(1 - prog, EaseFunction.Exponential, EaseMode.In)) * Vector2.one;
+            Tail.alpha = 1 - prog;
+            ((RectTransform)Tail.transform).localEulerAngles = (Vector2.SignedAngle(Vector2.down, rt.anchoredPosition - oldPos) - rt.localEulerAngles.z) * Vector3.forward;
+            ((RectTransform)Tail.transform).sizeDelta = new (0.5f * rt.sizeDelta.x, Vector2.Distance(oldPos, rt.anchoredPosition));
         }
+    }
+
+    public void Reset()
+    {
+        time = 0;
     }
 }

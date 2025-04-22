@@ -8,7 +8,7 @@ public struct Vector3Frag
     public float? y { get; set; }
     public float? z { get; set; }
 
-    public Vector3Frag(float? x, float? y, float? z) 
+    public Vector3Frag(float? x = null, float? y = null, float? z = null) 
     {
         this.x = x;
         this.y = y;

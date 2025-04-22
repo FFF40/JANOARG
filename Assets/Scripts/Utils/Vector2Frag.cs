@@ -7,7 +7,7 @@ public struct Vector2Frag
     public float? x { get; set; }
     public float? y { get; set; }
 
-    public Vector2Frag(float? x, float? y) 
+    public Vector2Frag(float? x = null, float? y = null) 
     {
         this.x = x;
         this.y = y;

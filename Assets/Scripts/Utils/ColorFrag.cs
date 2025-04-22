@@ -9,7 +9,7 @@ public struct ColorFrag
     public float? b { get; set; }
     public float? a { get; set; }
 
-    public ColorFrag(float? r, float? g, float? b, float? a = null) 
+    public ColorFrag(float? r = null, float? g = null, float? b = null, float? a = null) 
     {
         this.r = r;
         this.g = g;

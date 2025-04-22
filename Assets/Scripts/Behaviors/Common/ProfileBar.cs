@@ -19,6 +19,9 @@ public class ProfileBar : MonoBehaviour
     public float AbilityRating;
     public float SongEssence;
     public float TotalEssence => SongEssence;
+    [Space]
+    public int bonusCount;
+    public long bonusReset;
 
     [Header("Left Pane")]
     public CanvasGroup LeftPane;
@@ -36,6 +39,12 @@ public class ProfileBar : MonoBehaviour
     public Graphic LevelBackgroundGraphic;
     public Graphic LevelFillGraphic;
     [Space]
+    public GameObject LevelUpHolder;
+    public Graphic LevelUpLevelGraphic;
+    public TMP_Text LevelUpLevelText;
+    public Graphic LevelUpLabelGraphic;
+    public TMP_Text LevelUpLabelText;
+    [Space]
     public RectTransform AbilityRatingHolder;
     public TMP_Text AbilityRatingLabel;
     public TMP_Text AbilityRatingText;
@@ -46,6 +55,8 @@ public class ProfileBar : MonoBehaviour
     public TMP_Text CoinLabel;
     public TMP_Text OrbLabel;
     public TMP_Text EssenceLabel;
+    public TMP_Text BonusLabel;
+    public Graphic[] BonusBlocks;
 
     [Header("Change Header")]
     public CanvasGroup ChangeHeader;
@@ -74,7 +85,9 @@ public class ProfileBar : MonoBehaviour
     public Graphic ParticleEssenceFlash;
 
     public RectTransform self { get; private set; }
+    public float LastBonusUpdate = 0;
 
+    public const int BonusCap = 5;
 
     public void Awake()
     {
@@ -114,6 +127,19 @@ public class ProfileBar : MonoBehaviour
         // AR & Essence
         AbilityRatingText.text = AbilityRating.ToString("F2", CultureInfo.InvariantCulture);
         EssenceLabel.text = "+" + TotalEssence.ToString("F1", CultureInfo.InvariantCulture) + "%";
+
+        UpdateDailyCoinBonus();
+        UpdateBonusLabels();
+    }
+
+    public void UpdateBonusLabels() 
+    {
+        if (bonusCount < BonusCap) BonusLabel.text = (BonusCap - bonusCount) + " / " + BonusCap;
+        else BonusLabel.text = "<alpha=#77><i>"
+            + (DateTimeOffset.FromUnixTimeSeconds(bonusReset) - DateTimeOffset.UtcNow).ToString("%h'h 'mm'm'");
+
+        for (int i = 0; i < BonusBlocks.Length; i++) SetBonusBlock(BonusBlocks[i], i >= bonusCount ? 1 : 0);
+        LastBonusUpdate = 0;
     }
 
     public void UpdateRatingInfo()
@@ -145,7 +171,7 @@ public class ProfileBar : MonoBehaviour
         }
 
         SongEssence = 0;
-        foreach (float rating in ratingEntries) SongEssence += rating;
+        foreach (float rating in ratingEntries) SongEssence += Mathf.Floor(rating);
         SongEssence /= 10;
 
         // Get best 30
@@ -170,13 +196,17 @@ public class ProfileBar : MonoBehaviour
         ChangeHeader.gameObject.SetActive(false);
     }
 
-    void OnDestroy()
-    {
-    }
-
     void Update()
     {
-        
+        if (bonusCount >= BonusCap)
+        {
+            LastBonusUpdate += Time.deltaTime;
+            if (LastBonusUpdate >= 20 && RightPane.alpha > 0)
+            {
+                UpdateDailyCoinBonus();
+                UpdateBonusLabels();
+            }
+        }
     }
 
     // Change it if you want
@@ -190,7 +220,8 @@ public class ProfileBar : MonoBehaviour
         float essenceChange = TotalEssence - essenceOld;
 
         // TODO daily bonus
-        long finalCoins = baseCoins;
+        int bonusMult = GetDailyCoinBonus();
+        long finalCoins = baseCoins * bonusMult;
         long finalOrbs = (long)(baseOrbs * (1 + TotalEssence / 100));
 
         // Increase coins and orbs
@@ -218,6 +249,10 @@ public class ProfileBar : MonoBehaviour
         Common.main.Storage.Set("INFO:Level", levelNew);
         Common.main.Storage.Set("INFO:LevelProgress", progNew);
         Common.main.Storage.Save();
+
+        // For testing
+        // arChange += 1; AbilityRating += 1; 
+        // essenceChange += 10; SongEssence += 10; 
 
         // Animation setup
         yield return new WaitForSeconds(.8f);
@@ -250,25 +285,26 @@ public class ProfileBar : MonoBehaviour
         // Coin particles
         Coroutine coinAnim = null;
         pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseCoins), 1, 15);
+        List<CollectingParticle> coinParticles = new();
         while (baseCoins > 0)
         {
             long amount = baseCoins / pCount;
             baseCoins -= amount;
             pCount--;
-            SpawnParticle(CoinParticleSample, rt(ChangeCoinIcon.transform), ParticleCoinTarget, () => {
+            coinParticles.Add(SpawnParticle(CoinParticleSample, rt(ChangeCoinIcon.transform), ParticleCoinTarget, () => {
                 coinsOld += amount;
                 CoinLabel.text = Helper.FormatCurrency(coinsOld);
                 SetRewardLerp(1);
                 if (coinAnim != null) StopCoroutine(coinAnim);
                 coinAnim = StartCoroutine(Ease.Animate(.2f, (x) => {
-                    CoinLabel.margin *= new Vector4Frag(null, 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out), null, null);
-                    ParticleCoinFlash.color *= new ColorFrag(null, null, null, 1 - x);
+                    CoinLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+                    ParticleCoinFlash.color *= new ColorFrag(a: 1 - x);
                 }));
-            });
+            }));
         } 
         // Orb particles
         Coroutine orbAnim = null;
-        pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseOrbs), 1, 25);
+        pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseOrbs), 1, 30);
         while (finalOrbs > 0)
         {
             long amount = finalOrbs / pCount;
@@ -284,6 +320,8 @@ public class ProfileBar : MonoBehaviour
                     progOld -= levelGoal;
                     levelGoal = Helper.GetLevelGoal(levelNew);
                     LevelText.text = levelOld.ToString();
+                    if (currentLevelUpAnim != null) StopCoroutine(currentLevelUpAnim);
+                    currentLevelUpAnim = StartCoroutine(LevelUpAnim(levelOld));
                 }
                 LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
                 LevelProgressBar.maxValue = levelGoal;
@@ -292,14 +330,14 @@ public class ProfileBar : MonoBehaviour
 
                 if (orbAnim != null) StopCoroutine(orbAnim);
                 orbAnim = StartCoroutine(Ease.Animate(.2f, (x) => {
-                    OrbLabel.margin *= new Vector4Frag(null, 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out), null, null);
-                    ParticleOrbFlash.color *= new ColorFrag(null, null, null, 1 - x);
+                    OrbLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+                    ParticleOrbFlash.color *= new ColorFrag(a: 1 - x);
                 }));
             });
         } 
         // Essence particles
         Coroutine essenceAnim = null;
-        pCount = essenceChange == 0 ? 0 : (int)Mathf.Clamp(essenceChange * 10, 1, 15);
+        pCount = essenceOld == TotalEssence ? 0 : (int)Mathf.Clamp(essenceChange * 10, 1, 50);
         for (int i = 0; i < pCount; i++)
         {
             SpawnParticle(EssenceParticleSample, rt(ChangeEssenceIcon.transform), ParticleEssenceTarget, () => {
@@ -311,13 +349,53 @@ public class ProfileBar : MonoBehaviour
 
                 if (essenceAnim != null) StopCoroutine(essenceAnim);
                 essenceAnim = StartCoroutine(Ease.Animate(.2f, (x) => {
-                    ParticleEssenceFlash.color *= new ColorFrag(null, null, null, 1 - x);
+                    ParticleEssenceFlash.color *= new ColorFrag(a: 1 - x);
                 }));
             });
         } 
 
+        // Bonus
+        if (bonusMult > 1)
+        {
+            yield return new WaitForSeconds(0.3f);
+            foreach (var sourceParticle in coinParticles)
+            {
+                sourceParticle.Velocity = 1200 * Random.value * Random.insideUnitCircle;
+                for (int i = 1; i < bonusMult; i++) 
+                {
+                    var particle = Instantiate(sourceParticle, CollectingParticleHolder);
+                    particle.Velocity = 1200 * Random.value * Random.insideUnitCircle;
+                    particle.Lifetime *= Mathf.Pow(Random.Range(1f, 1.2f), 2);
+                    particle.SpinVelocity = Random.Range(-100, 100f);
+                    particle.OnComplete = sourceParticle.OnComplete;
+                    particle.Reset();
+                }
+            }
+
+            int index = Common.main.Storage.Get("INFO:BonusCount", 0) - 1;
+            BonusLabel.text = bonusMult + "×";
+            ChangeCoinLabel.text = "+" + Helper.FormatCurrency(finalCoins) + " (×" +bonusMult + ")";
+            yield return Ease.Animate(1f, (x) => {
+                float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                SetBonusBlock(BonusBlocks[index], 1 - lerp);
+                SetChangeLerp(1);
+                rt(LeftLayout).anchoredPosition = (1 - lerp) * (10) * Vector2.right;
+                rt(RightLayout).anchoredPosition = (1 - lerp) * (10) * Vector2.left;
+                SetRewardLerp(1);
+
+                float lerp2 = Ease.Get(x * 2 - 1, EaseFunction.Exponential, EaseMode.In);
+                BonusLabel.alpha = 1 - lerp2;
+            });
+            UpdateBonusLabels();
+            yield return Ease.Animate(0.5f, (x) => {
+                float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                BonusLabel.alpha = lerp2;
+            });
+        }
+
         yield return null;
         yield return new WaitUntil(() => CollectingParticleHolder.childCount == 0);
+        yield return new WaitUntil(() => currentLevelUpAnim == null);
         yield return new WaitForSeconds(1);
 
         yield return Ease.Animate(0.5f, (x) => {
@@ -332,31 +410,89 @@ public class ProfileBar : MonoBehaviour
         yield return null;
     }
 
-    void SpawnParticle(CollectingParticle sample, RectTransform source, RectTransform target, Action onComplete) 
+    Coroutine currentLevelUpAnim;
+    IEnumerator LevelUpAnim(int level)
+    {
+        LevelUpHolder.SetActive(true);
+        LevelUpLabelGraphic.rectTransform.anchorMin = new (0, 0);
+        yield return Ease.Animate(1, (x) => {
+            float lerp = Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.Out);
+            LevelUpLevelGraphic.rectTransform.anchorMax = new (lerp, 1);
+            LevelUpLevelText.text = $"<alpha=#{(int)Math.Clamp((x * 2 + Random.value) * 256, 0, 255):x2}>" + (level - 1) 
+                + $"<alpha=#{(int)Math.Clamp((x * 2 - .5 + Random.value) * 256, 0, 255):x2}>" + " → " 
+                + $"<alpha=#{(int)Math.Clamp((x * 2 - 1 + Random.value) * 256, 0, 255):x2}>" + level;
+
+            float lerp2 = Ease.Get(x * 1.2f - .2f, EaseFunction.Exponential, EaseMode.Out);
+            LevelUpLabelText.rectTransform.anchoredPosition = new (0, -50 * (1 - lerp2));
+        });
+        yield return Ease.Animate(0.8f, (x) => {
+            float lerp = Ease.Get(Mathf.Pow(x, 1.2f), EaseFunction.Exponential, EaseMode.In);
+            LevelUpLevelGraphic.rectTransform.anchorMin = LevelUpLabelGraphic.rectTransform.anchorMin = new (lerp, 0);
+        });
+        LevelUpHolder.SetActive(false);
+        currentLevelUpAnim = null;
+    }
+
+    void UpdateDailyCoinBonus() 
+    {
+        bonusCount = Common.main.Storage.Get("INFO:BonusCount", 0);
+        bonusReset = Common.main.Storage.Get("INFO:BonusReset", 0L);
+        long now = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+        if (now >= bonusReset) 
+        {
+            bonusCount = 0;
+            var resetTime = new DateTimeOffset(DateTime.Today.AddDays(1));
+            bonusReset = resetTime.ToUnixTimeSeconds();
+        }
+    }
+
+    int GetDailyCoinBonus() 
+    {
+        UpdateDailyCoinBonus();
+
+        int multi = 1;
+        if (bonusCount < BonusCap)
+        {
+            multi = Random.value switch {
+                < .5f => 3,
+                < .9f => 5,
+                _ => 7,
+            };
+            bonusCount++;
+        }
+
+        Common.main.Storage.Set("INFO:BonusCount", bonusCount);
+        Common.main.Storage.Set("INFO:BonusReset", bonusReset);
+        return multi;
+    }
+
+    CollectingParticle SpawnParticle(CollectingParticle sample, RectTransform source, RectTransform target, Action onComplete) 
     {
         var particle = Instantiate(sample, CollectingParticleHolder);
         particle.transform.position = source.position;
         particle.Target = target;
-        particle.Velocity = Random.insideUnitCircle * Random.value * 600;
+        particle.Velocity = 600 * Random.value * Random.insideUnitCircle;
         particle.Lifetime = Mathf.Pow(Random.Range(0.8f, 1.5f), 2);
         particle.SpinVelocity = Random.Range(-100, 100f);
         particle.OnComplete.AddListener(() => onComplete());
+        return particle;
     }
 
     public void SetVisibilty(float a)
     {
         LeftPane.alpha = RightPane.alpha = a * a;
         LeftPane.blocksRaycasts = RightPane.blocksRaycasts = a == 1;
-        rt(LeftPane).anchoredPosition *= new Vector2Frag(-10 * (1 - a), null);
-        rt(RightPane).anchoredPosition *= new Vector2Frag(10 * (1 - a), null);
+        rt(LeftPane).anchoredPosition *= new Vector2Frag(x: -10 * (1 - a));
+        rt(RightPane).anchoredPosition *= new Vector2Frag(x: 10 * (1 - a));
     }
 
     public void SetRewardLerp(float lerp) 
     {
 
-        AbilityRatingHolder.sizeDelta *= new Vector2Frag(60 + 20 * lerp, null);
-        LevelHolder.anchoredPosition *= new Vector2Frag(AbilityRatingHolder.rect.xMin - 1, null);
-        LevelHolder.sizeDelta *= new Vector2Frag(60 + 60 * lerp, null);
+        AbilityRatingHolder.sizeDelta *= new Vector2Frag(x: 60 + 20 * lerp);
+        LevelHolder.anchoredPosition *= new Vector2Frag(x: AbilityRatingHolder.rect.xMin - 1);
+        LevelHolder.sizeDelta *= new Vector2Frag(x: 60 + 60 * lerp);
         LevelLabel.rectTransform.sizeDelta = new (-12 - 80 * lerp, 0);
         AbilityRatingLabel.rectTransform.sizeDelta = new (-12 - 6 * lerp, 0);
         LevelText.rectTransform.sizeDelta = new (-12 - 6 * lerp, -2 * lerp);
@@ -382,9 +518,15 @@ public class ProfileBar : MonoBehaviour
         ChangeAREssencePane.padding.left = ChangeAREssencePane.padding.right
             = ChangeCurrencyPane.padding.left = ChangeCurrencyPane.padding.right
             = 10;
-        rt(ChangeAREssencePane).sizeDelta *= new Vector2Frag(ChangeAREssencePane.preferredWidth * lerp, null);
-        rt(ChangeCurrencyPane).sizeDelta *= new Vector2Frag(ChangeCurrencyPane.preferredWidth * lerp, null);
+        rt(ChangeAREssencePane).sizeDelta *= new Vector2Frag(x: ChangeAREssencePane.preferredWidth * lerp);
+        rt(ChangeCurrencyPane).sizeDelta *= new Vector2Frag(x: ChangeCurrencyPane.preferredWidth * lerp);
         LayoutRebuilder.ForceRebuildLayoutImmediate(rt(ChangeHeader));
+    }
+
+    public void SetBonusBlock(Graphic target, float lerp) 
+    {
+        target.rectTransform.sizeDelta *= new Vector2Frag(y: 1 + 7 * lerp);
+        target.color *= new ColorFrag(a: .6f + .4f * lerp);
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;

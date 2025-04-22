@@ -9,7 +9,7 @@ public struct Vector4Frag
     public float? z { get; set; }
     public float? w { get; set; }
 
-    public Vector4Frag(float? x, float? y, float? z, float? w) 
+    public Vector4Frag(float? x = null, float? y = null, float? z = null, float? w = null) 
     {
         this.x = x;
         this.y = y;

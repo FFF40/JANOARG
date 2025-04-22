@@ -277,7 +277,7 @@ public class PlayerScreenResult : MonoBehaviour
     void CalculateGainsAndSave(int score)
     {
         float baseOrbs = Helper.CalculateBaseSongGain(PlayerScreen.TargetSong, PlayerScreen.CurrentChart, score);
-        float baseCoins = baseOrbs / 5 + PlayerScreen.TargetSong.Clip.length / 6 + 10;
+        float baseCoins = baseOrbs / 5 + PlayerScreen.TargetSong.Clip.length / 6;
         if (PlayerScreen.main.BadCount == 0) 
         {
             baseOrbs *= 1.2f;
