@@ -142,7 +142,7 @@ public class ProfileBar : MonoBehaviour
     {
         if (bonusCount <= 0) BonusLabel.text = "Full!";
         else BonusLabel.text = "<alpha=#aa><i>"
-            + (DateTimeOffset.FromUnixTimeSeconds(bonusReset) - DateTimeOffset.UtcNow).ToString("%h'h 'mm'm'");
+            + (DateTimeOffset.FromUnixTimeSeconds(bonusReset) - DateTimeOffset.UtcNow).ToString("%h\\:mm");
 
         for (int i = 0; i < BonusBlocks.Length; i++) SetBonusBlock(BonusBlocks[i], i >= bonusCount ? 1 : 0);
         LastBonusUpdate = 0;

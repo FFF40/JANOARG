@@ -28,9 +28,10 @@ public class ProfilePanel : MonoBehaviour
         // TODO: Leveling Stuff
         int level = Common.main.Storage.Get("INFO:Level", 1);
         LevelContent.text = level.ToString();
-        LevelProgress.text = Common.main.Storage.Get("INFO:LevelProgress", 0L) + " / " + Helper.GetLevelGoal(level);
+        LevelProgress.text = Helper.FormatCurrency(Common.main.Storage.Get("INFO:LevelProgress", 0L)) 
+            + " / " + Helper.FormatCurrency(Helper.GetLevelGoal(level));
 
-        AbilityRatingContent.text = (Storage.Get("INFO:AbilityRating", 0.00f)).ToString("f2");
+        AbilityRatingContent.text = ProfileBar.main.AbilityRating.ToString("F2");
 
         int[] trackStatusCount = TrackStatus("all");
 
