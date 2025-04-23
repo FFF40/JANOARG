@@ -277,7 +277,7 @@ public class PlayerScreenResult : MonoBehaviour
     void CalculateGainsAndSave(int score)
     {
         float baseOrbs = Helper.CalculateBaseSongGain(PlayerScreen.TargetSong, PlayerScreen.CurrentChart, score);
-        float baseCoins = baseOrbs / 5 + PlayerScreen.TargetSong.Clip.length / 6;
+        float baseCoins = baseOrbs / 5 + PlayerScreen.TargetSong.Clip.length * PlayerScreen.CurrentChart.ChartConstant * score / 600e6f;
         if (PlayerScreen.main.BadCount == 0) 
         {
             baseOrbs *= 1.2f;
@@ -432,7 +432,6 @@ public class PlayerScreenResult : MonoBehaviour
 
     void SaveScoreEntry(int score)
     {
-        float accurateScore = PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f;
         ScoreStoreEntry entry = new ScoreStoreEntry
         {
             SongID = Path.GetFileNameWithoutExtension(PlayerScreen.TargetSongPath),
@@ -443,7 +442,7 @@ public class PlayerScreenResult : MonoBehaviour
             GoodCount = PlayerScreen.main.GoodCount,
             BadCount = PlayerScreen.main.BadCount,
             MaxCombo = PlayerScreen.main.MaxCombo,
-            Rating = Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, accurateScore),
+            Rating = Helper.GetRating(PlayerScreen.TargetChartMeta.ChartConstant, score),
         };
         StorageManager.main.Scores.Register(entry);
     }

@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using System.Globalization;
 using System;
 using Random = UnityEngine.Random;
+using UnityEngine.InputSystem;
+
 
 
 #if UNITY_EDITOR
@@ -85,7 +87,13 @@ public class ProfileBar : MonoBehaviour
     public Graphic ParticleEssenceFlash;
 
     public RectTransform self { get; private set; }
-    public float LastBonusUpdate = 0;
+    public float LastBonusUpdate { get; private set; } = 0;
+
+
+    Coroutine songGainAnim;
+    Coroutine levelUpAnim;
+    bool SongGainSkipLock;
+    bool SongGainSkipQueued;
 
     public const int BonusCap = 5;
 
@@ -95,18 +103,16 @@ public class ProfileBar : MonoBehaviour
         self = GetComponent<RectTransform>();
     }
 
-    Coroutine levelAnim;
-
     public void CompleteSong(long baseExp, long baseCoins) 
     {
-        if (levelAnim != null) StopCoroutine(levelAnim);
-        levelAnim = StartCoroutine(SongGainRoutine(baseExp, baseCoins));
+        if (songGainAnim != null) StopCoroutine(songGainAnim);
+        songGainAnim = StartCoroutine(SongGainRoutine(baseExp, baseCoins));
     }
 
     public void AddEXP(long exp)
     {
-        if (levelAnim != null) StopCoroutine(levelAnim);
-        levelAnim = StartCoroutine(SongGainRoutine(exp, 0));
+        if (songGainAnim != null) StopCoroutine(songGainAnim);
+        songGainAnim = StartCoroutine(SongGainRoutine(exp, 0));
     }
 
     public void UpdateLabels()
@@ -134,8 +140,8 @@ public class ProfileBar : MonoBehaviour
 
     public void UpdateBonusLabels() 
     {
-        if (bonusCount < BonusCap) BonusLabel.text = (BonusCap - bonusCount) + " / " + BonusCap;
-        else BonusLabel.text = "<alpha=#77><i>"
+        if (bonusCount <= 0) BonusLabel.text = "Full!";
+        else BonusLabel.text = "<alpha=#aa><i>"
             + (DateTimeOffset.FromUnixTimeSeconds(bonusReset) - DateTimeOffset.UtcNow).ToString("%h'h 'mm'm'");
 
         for (int i = 0; i < BonusBlocks.Length; i++) SetBonusBlock(BonusBlocks[i], i >= bonusCount ? 1 : 0);
@@ -198,7 +204,7 @@ public class ProfileBar : MonoBehaviour
 
     void Update()
     {
-        if (bonusCount >= BonusCap)
+        if (bonusCount > 0)
         {
             LastBonusUpdate += Time.deltaTime;
             if (LastBonusUpdate >= 20 && RightPane.alpha > 0)
@@ -207,11 +213,17 @@ public class ProfileBar : MonoBehaviour
                 UpdateBonusLabels();
             }
         }
+        if (songGainAnim != null)
+        {
+            if (Touchscreen.current?.primaryTouch?.phase.value == UnityEngine.InputSystem.TouchPhase.Began) SongGainSkipQueued = true;
+            if (SongGainSkipQueued && SongGainSkipLock) SkipSongGain();
+        }
     }
 
-    // Change it if you want
     IEnumerator SongGainRoutine(long baseOrbs, long baseCoins)
     {
+        SongGainSkipQueued = SongGainSkipLock = false;
+        
         // Calculate AR and essence
         float arOld = AbilityRating;
         float essenceOld = TotalEssence;
@@ -319,9 +331,8 @@ public class ProfileBar : MonoBehaviour
                     levelOld++;
                     progOld -= levelGoal;
                     levelGoal = Helper.GetLevelGoal(levelNew);
-                    LevelText.text = levelOld.ToString();
-                    if (currentLevelUpAnim != null) StopCoroutine(currentLevelUpAnim);
-                    currentLevelUpAnim = StartCoroutine(LevelUpAnim(levelOld));
+                    if (levelUpAnim != null) StopCoroutine(levelUpAnim);
+                    levelUpAnim = StartCoroutine(LevelUpAnim(levelOld));
                 }
                 LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
                 LevelProgressBar.maxValue = levelGoal;
@@ -354,17 +365,19 @@ public class ProfileBar : MonoBehaviour
             });
         } 
 
+        SongGainSkipLock = true;
+
         // Bonus
         if (bonusMult > 1)
         {
             yield return new WaitForSeconds(0.3f);
             foreach (var sourceParticle in coinParticles)
             {
-                sourceParticle.Velocity = 1200 * Random.value * Random.insideUnitCircle;
+                sourceParticle.Velocity = 600 * Random.insideUnitCircle.normalized;
                 for (int i = 1; i < bonusMult; i++) 
                 {
                     var particle = Instantiate(sourceParticle, CollectingParticleHolder);
-                    particle.Velocity = 1200 * Random.value * Random.insideUnitCircle;
+                    particle.Velocity = 600 * Random.insideUnitCircle.normalized;
                     particle.Lifetime *= Mathf.Pow(Random.Range(1f, 1.2f), 2);
                     particle.SpinVelocity = Random.Range(-100, 100f);
                     particle.OnComplete = sourceParticle.OnComplete;
@@ -373,7 +386,7 @@ public class ProfileBar : MonoBehaviour
             }
 
             int index = Common.main.Storage.Get("INFO:BonusCount", 0) - 1;
-            BonusLabel.text = bonusMult + "×";
+            BonusLabel.text = bonusMult + "× BONUS!";
             ChangeCoinLabel.text = "+" + Helper.FormatCurrency(finalCoins) + " (×" +bonusMult + ")";
             yield return Ease.Animate(1f, (x) => {
                 float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
@@ -395,7 +408,7 @@ public class ProfileBar : MonoBehaviour
 
         yield return null;
         yield return new WaitUntil(() => CollectingParticleHolder.childCount == 0);
-        yield return new WaitUntil(() => currentLevelUpAnim == null);
+        yield return new WaitUntil(() => levelUpAnim == null);
         yield return new WaitForSeconds(1);
 
         yield return Ease.Animate(0.5f, (x) => {
@@ -407,34 +420,65 @@ public class ProfileBar : MonoBehaviour
         });
 
         ChangeHeader.gameObject.SetActive(false);
+        songGainAnim = null;
         yield return null;
     }
 
-    Coroutine currentLevelUpAnim;
+    public void SkipSongGain() 
+    {
+        StopCoroutine(songGainAnim);
+        StartCoroutine(SkipSongGainAnim());
+    }
+
+    IEnumerator SkipSongGainAnim()
+    {
+        foreach (var particle in CollectingParticleHolder.GetComponentsInChildren<CollectingParticle>())
+        {
+            particle.Lifetime = 0;
+        }
+
+        yield return null;
+        UpdateLabels();
+        BonusLabel.alpha = 1;
+
+        yield return Ease.Animate(0.8f, (x) => {
+            float lerp = Ease.Get(Mathf.Pow(x, 0.5f), EaseFunction.Exponential, EaseMode.Out);
+            SetRewardLerp(1 - lerp);
+
+            float lerp2 = Ease.Get(x * 3 - 2, EaseFunction.Quintic, EaseMode.Out);
+            SetChangeLerp(1 - lerp2);
+        });
+    }
+
     IEnumerator LevelUpAnim(int level)
     {
         LevelUpHolder.SetActive(true);
+        LevelUpLevelGraphic.rectTransform.anchorMin = new (0, 0);
         LevelUpLabelGraphic.rectTransform.anchorMin = new (0, 0);
-        yield return Ease.Animate(1, (x) => {
-            float lerp = Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.Out);
-            LevelUpLevelGraphic.rectTransform.anchorMax = new (lerp, 1);
+        StartCoroutine(Ease.Animate(1.2f, (x) => {
             LevelUpLevelText.text = $"<alpha=#{(int)Math.Clamp((x * 2 + Random.value) * 256, 0, 255):x2}>" + (level - 1) 
                 + $"<alpha=#{(int)Math.Clamp((x * 2 - .5 + Random.value) * 256, 0, 255):x2}>" + " → " 
                 + $"<alpha=#{(int)Math.Clamp((x * 2 - 1 + Random.value) * 256, 0, 255):x2}>" + level;
-
-            float lerp2 = Ease.Get(x * 1.2f - .2f, EaseFunction.Exponential, EaseMode.Out);
+        }));
+        yield return Ease.Animate(.7f, (x) => {
+            float lerp = Ease.Get(Mathf.Pow(x, .7f), EaseFunction.Exponential, EaseMode.Out);
+            LevelUpLevelGraphic.rectTransform.anchorMax = new (lerp, 1);
+            float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
             LevelUpLabelText.rectTransform.anchoredPosition = new (0, -50 * (1 - lerp2));
         });
-        yield return Ease.Animate(0.8f, (x) => {
-            float lerp = Ease.Get(Mathf.Pow(x, 1.2f), EaseFunction.Exponential, EaseMode.In);
+         LevelText.text = level.ToString();
+        yield return Ease.Animate(0.7f, (x) => {
+            float lerp = Ease.Get(Mathf.Pow(x, 1.5f), EaseFunction.Exponential, EaseMode.In);
             LevelUpLevelGraphic.rectTransform.anchorMin = LevelUpLabelGraphic.rectTransform.anchorMin = new (lerp, 0);
         });
         LevelUpHolder.SetActive(false);
-        currentLevelUpAnim = null;
+        levelUpAnim = null;
     }
 
     void UpdateDailyCoinBonus() 
     {
+        SongGainSkipQueued = SongGainSkipLock = false;
+
         bonusCount = Common.main.Storage.Get("INFO:BonusCount", 0);
         bonusReset = Common.main.Storage.Get("INFO:BonusReset", 0L);
         long now = DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -525,7 +569,7 @@ public class ProfileBar : MonoBehaviour
 
     public void SetBonusBlock(Graphic target, float lerp) 
     {
-        target.rectTransform.sizeDelta *= new Vector2Frag(y: 1 + 7 * lerp);
+        target.rectTransform.sizeDelta *= new Vector2Frag(y: 1 + 6 * lerp);
         target.color *= new ColorFrag(a: .6f + .4f * lerp);
     }
 
