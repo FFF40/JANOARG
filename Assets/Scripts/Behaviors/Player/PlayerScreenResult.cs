@@ -23,6 +23,8 @@ public class PlayerScreenResult : MonoBehaviour
     public List<GraphicCircle> ScoreRings;
     public List<GraphicCircle> ScoreExplosionRings;
     [Space]
+    public PlayerScreenResultDetails Details;
+    [Space]
     public CanvasGroup BestScoreHolder;
     public RectTransform BestScoreTransform;
     [Space]
@@ -56,6 +58,8 @@ public class PlayerScreenResult : MonoBehaviour
     public Image RetryFlash;
     [HideInInspector]
     public bool IsAnimating;
+    [HideInInspector]
+    public bool IsDetailsShowing;
 
     public PlayerSettings Settings = new();
 
@@ -173,7 +177,12 @@ public class PlayerScreenResult : MonoBehaviour
         ScoreHolder.anchorMin = ScoreHolder.anchorMax = ScoreHolder.pivot = Vector2.one * .5f;
         ScoreHolder.anchoredPosition = Vector2.zero;
         ScoreText.rectTransform.anchoredPosition = new (ScoreText.rectTransform.anchoredPosition.x, -20);
+        SongInfoTransform.anchoredPosition *= new Vector2Frag(x: 150);
         BestScoreHolder.alpha = 0;
+
+        Details.gameObject.SetActive(true);
+        Details.Reset();
+        IsDetailsShowing = false;
         
         ResultText.rectTransform.localScale = Vector3.one;
         int score = Mathf.RoundToInt(PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
@@ -193,6 +202,7 @@ public class PlayerScreenResult : MonoBehaviour
             );
             ScoreHolder.localScale = Vector3.one * (1.1f - ease2 * .1f);
             ScoreHolder.anchoredPosition = Vector2.down * (1 - ease1) * 40;
+            Details.SpawnPins(ease2);
 
             ScoreText.text = Helper.PadScore((score * x).ToString("#0"));
             RankText.text = ranks[Mathf.CeilToInt(Mathf.Lerp(ranks.Length - 2, rankNum, x))];
@@ -237,11 +247,11 @@ public class PlayerScreenResult : MonoBehaviour
         });
 
         DetailsHolder.gameObject.SetActive(true);
-        PerfectCountText.text = PlayerScreen.main.PerfectCount.ToString();
-        GoodCountText.text = PlayerScreen.main.GoodCount.ToString();
-        BadCountText.text = PlayerScreen.main.BadCount.ToString();
-        MaxComboText.text = PlayerScreen.main.MaxCombo.ToString() 
-            + " <size=60%><b>/ " + PlayerScreen.main.TotalCombo.ToString();
+        PerfectCountText.text = PlayerScreen.main.PerfectCount.ToString("N0");
+        GoodCountText.text = PlayerScreen.main.GoodCount.ToString("N0");
+        BadCountText.text = PlayerScreen.main.BadCount.ToString("N0");
+        MaxComboText.text = PlayerScreen.main.MaxCombo.ToString("N0") 
+            + " <size=60%><b>/ " + PlayerScreen.main.TotalCombo.ToString("N0");
 
         var record = GetBestScore();
         var recordScore = record?.Score ?? 0;
@@ -335,6 +345,7 @@ public class PlayerScreenResult : MonoBehaviour
 
         ScoreHolder.gameObject.SetActive(false);
         RetryBackground.gameObject.SetActive(true);
+        Details.gameObject.SetActive(false);
         RetryBackground.color = PlayerScreen.TargetSong.BackgroundColor;
 
         yield return Ease.Animate(1, a => {
@@ -387,6 +398,7 @@ public class PlayerScreenResult : MonoBehaviour
         IsAnimating = true;
         
         Color backColor = FlashBackground.color;
+        Details.gameObject.SetActive(false);
 
         yield return Ease.Animate(1, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
@@ -426,6 +438,32 @@ public class PlayerScreenResult : MonoBehaviour
         }, false);
         SceneManager.UnloadSceneAsync("Player");
         Resources.UnloadUnusedAssets();
+
+        IsAnimating = false;
+    }
+
+    public void ToggleDetails() 
+    {
+        if (!IsAnimating) StartCoroutine(ToggleDetailAnim());
+    }
+
+    IEnumerator ToggleDetailAnim()
+    {
+        IsAnimating = true;
+
+        IsDetailsShowing = !IsDetailsShowing;
+        float target = IsDetailsShowing ? 0 : 1;
+
+        if (target == 0) Details.UpdateLabels();
+
+        yield return Ease.Animate(0.6f, (x) => {
+            float ease1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+            float prog1 = 1 - Mathf.Abs(target - 1 + ease1);
+            SongInfoTransform.anchoredPosition *= new Vector2Frag(x: 150 - 1150 * prog1);
+            ScoreHolder.anchoredPosition *= new Vector2Frag(x: 50 - 1150 * prog1);
+
+            Details.LerpDetailed(target - 1 + (target == 0 ? x : ease1));
+        });
 
         IsAnimating = false;
     }

@@ -152,6 +152,7 @@
     <Compile Include="Assets/Scripts/UI/LoadingSpinner.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Options/OptionInput.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Chart.cs" />
+    <Compile Include="Assets/Scripts/Behaviors/Player/PlayerScreenResultDetails.cs" />
     <Compile Include="Assets/Scripts/Behaviors/Song Select/SongSelectReadyScreen.cs" />
     <Compile Include="Assets/Scripts/Data/ChartInfo/Playlist.cs" />
   </ItemGroup>

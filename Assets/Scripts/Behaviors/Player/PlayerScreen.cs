@@ -85,6 +85,8 @@ public class PlayerScreen : MonoBehaviour
     public int MaxCombo = 0;
     public int TotalCombo = 0;
     [Space]
+    public List<HitObjectHistoryItem> HitObjectHistory;
+    [Space]
     public int HitsRemaining = 0;
     
     [HideInInspector]
@@ -138,6 +140,7 @@ public class PlayerScreen : MonoBehaviour
     public IEnumerator InitChart()
     {
         CurrentChart = TargetChart.Data.DeepClone();
+        HitObjectHistory = new();
 
         if (HasPlayedBefore) 
         {
@@ -423,8 +426,16 @@ public class PlayerScreen : MonoBehaviour
         float? acc = null;
         if (hit.Current.Flickable || hit.Current.Type == HitObject.HitType.Catch)
         {
-            if (offsetAbs <= PassWindow) AddScore(score, null);
-            else AddScore(0, null);
+            if (offsetAbs <= PassWindow) 
+            {
+                AddScore(score, null);
+                HitObjectHistory.Add(new (hit, 0));
+            }
+            else 
+            {
+                AddScore(0, null);
+                HitObjectHistory.Add(new (hit, float.PositiveInfinity));
+            }
         }
         else 
         {
@@ -432,6 +443,7 @@ public class PlayerScreen : MonoBehaviour
             if (offsetAbs > GoodWindow) acc = Mathf.Sign(offset);
             else if (offsetAbs > PerfectWindow) acc = Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
             AddScore(score * (1 - Mathf.Abs((float)acc)), acc);
+            HitObjectHistory.Add(new (hit, offset));
         }
 
         if (spawnEffect)
@@ -550,4 +562,32 @@ public class PlayerSettings
         JudgmentOffset = prefs.Get("PLYR:JudgmentOffset", 0f) / 1000;
         VisualOffset = prefs.Get("PLYR:VisualOffset", 0f) / 1000;
     }
+}
+
+public class HitObjectHistoryItem
+{
+    public float Time;
+    public HitObjectHistoryType Type;
+    public float Offset;
+
+    public HitObjectHistoryItem(HitPlayer hit, float offset)
+    {
+        Time = hit.Time;
+        Type = hit.Current.Flickable ? HitObjectHistoryType.Flick :
+            hit.Current.Type == HitObject.HitType.Catch ? HitObjectHistoryType.Catch :
+            HitObjectHistoryType.Timing;
+        Offset = offset;
+    }
+
+    public HitObjectHistoryItem(float time, HitObjectHistoryType type, float offset)
+    {
+        Time = time;
+        Type = type;
+        Offset = offset;
+    }
+}
+
+public enum HitObjectHistoryType 
+{
+    Timing, Catch, Flick
 }

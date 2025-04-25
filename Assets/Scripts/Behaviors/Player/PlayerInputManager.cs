@@ -50,6 +50,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     while (hit.HoldTicks.Count > 0 && hit.HoldTicks[0] <= Player.CurrentTime) 
                     {
                         Player.AddScore(1, null);
+                        Player.HitObjectHistory.Add(new (hit.HoldTicks[0], HitObjectHistoryType.Catch, 0));
                         hit.HoldTicks.RemoveAt(0);
                         
                         var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
@@ -345,6 +346,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     while (hold.Hit.HoldTicks.Count > 0 && hold.Hit.HoldTicks[0] <= Player.CurrentTime) 
                     {
                         Player.AddScore(hold.IsHolding ? 1 : 0, null);
+                        Player.HitObjectHistory.Add(new (hold.Hit.HoldTicks[0], HitObjectHistoryType.Catch, hold.IsHolding ? 0 : float.PositiveInfinity));
                         hold.Hit.HoldTicks.RemoveAt(0);
                         if (hold.IsHolding) 
                         {
