@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 using System.IO;
 
@@ -19,9 +18,13 @@ public class PlayerScreenResult : MonoBehaviour
     [Space]
     public RectTransform ScoreHolder;
     public TMP_Text ScoreText;
+    public RectTransform RankHolder;
     public TMP_Text RankText;
-    public List<GraphicCircle> ScoreRings;
+    public List<Image> ScoreRings;
     public List<GraphicCircle> ScoreExplosionRings;
+    public RectTransform ScoreBarHolder;
+    public RectTransform ScoreBarFill;
+    public List<RectTransform> ScoreBarMarks;
     [Space]
     public PlayerScreenResultDetails Details;
     [Space]
@@ -78,28 +81,39 @@ public class PlayerScreenResult : MonoBehaviour
         Fanfare.LoadAudioData();
         PlayerScreen.main.PlayerHUD.SetActive(false);
         
-        //Added logic to display ALL FLAWLESS or FULL COMBO
         PlayerScreen ps = PlayerScreen.main;
-        Transform childTransform = ps.transform.Find("End Flash/Result");
-        TMP_Text childTMP = childTransform.GetComponent<TMP_Text>();
 
-        if (ps.TotalCombo == ps.PerfectCount) { } // ALL FLAWLESS
-        else if (ps.BadCount == 0 && ps.GoodCount != 0) {
-            childTMP.text = "FULL STREAK!";
+        if (ps.TotalCombo == ps.PerfectCount) {
+            ResultText.text = "ALL FLAWLESS!!!";
+        } else if (ps.BadCount == 0 && ps.GoodCount != 0) {
+            ResultText.text = "FULL STREAK!";
         } else if (ps.GoodCount == ps.TotalCombo) {
-            childTMP.text = "ALL MISALIGNED...!?";
+            ResultText.text = "ALL MISALIGNED...!?";
         } else if (ps.BadCount == ps.TotalCombo) {
-            childTMP.text = "ALL BROKEN...?";
+            ResultText.text = "ALL BROKEN...?";
         } else {
-            childTMP.text = "TRACK CLEARED";
+            ResultText.text = "TRACK CLEARED";
         }
 
         Flash.SetActive(true);
         ResultText.gameObject.SetActive(false);
+        ResultText.fontSize = 50;
+        ResultTextBig.text = ResultText.text;
         ResultTextBig.alpha = 0;
 
-        yield return Ease.Animate(1, (x) => {
+        foreach (var ring in ScoreExplosionRings) ring.rectTransform.localPosition = Vector2.zero;
+        ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
+            PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
+
+        StartCoroutine(Ease.Animate(2, x => {
             FlashBackground.color = new (1, 1, 1, .2f * (1 - x));
+            ScoreExplosionRings[0].InsideRadius = 0.9f * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
+            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (200 * Ease.Get(x, EaseFunction.Circle, EaseMode.Out));
+            ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+        }));
+
+        yield return Ease.Animate(1, (x) => {
+
             ResultBackground.rectTransform.sizeDelta = new (
                 ResultBackground.rectTransform.sizeDelta.y,
                 Ease.Get(x, EaseFunction.Circle, EaseMode.In) * 50
@@ -130,6 +144,10 @@ public class PlayerScreenResult : MonoBehaviour
                 ResultBackground.rectTransform.sizeDelta.y,
                 Mathf.Pow(Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 2) * 50 + 50
             );
+
+            ScoreExplosionRings[1].InsideRadius = 0.95f * Ease.Get(x * 2f, EaseFunction.Quintic, EaseMode.Out);
+            ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (500 * Ease.Get(x * 2f, EaseFunction.Circle, EaseMode.Out));
+            ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward * (-90 + 360 * Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out));
         });
 
         yield return new WaitWhile(() => PlayerScreen.main.CurrentTime < PlayerScreen.main.Music.clip.length);
@@ -156,76 +174,97 @@ public class PlayerScreenResult : MonoBehaviour
         FanfareSource.loop = true;
 
         yield return Ease.Animate(1, (x) => {
-            PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 1 - x));;
+            PlayerScreen.main.SetInterfaceColor(PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 1 - x));
             FanfareSource.volume = (x * .3f) * Settings.BGMusicVolume;
         });
 
+        Details.gameObject.SetActive(true);
+        Details.Reset();
+        IsDetailsShowing = false;
+
         yield return Ease.Animate(1, (x) => {
-            float ease1 = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.In), 2);
+            float ease1 = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.InOut), 2);
             float ease2 = Ease.Get(x, EaseFunction.Quadratic, EaseMode.In);
             ResultBackground.rectTransform.sizeDelta = new (
                 ResultBackground.rectTransform.sizeDelta.x,
                 ease1 * -10 + 100
             );
-            ResultText.rectTransform.localScale = Vector3.one * (1 - ease2 * .1f);
-            ResultText.rectTransform.anchoredPosition = Vector2.up * (ease1 * 40);
+            ResultText.fontSize = 50 * (1 - ease1);
+            ResultText.characterSpacing = 15 / Mathf.Pow(1 - ease1, 3);
             FanfareSource.volume = (x * .3f + .3f) * Settings.BGMusicVolume;
+            Details.Container.rectTransform.localScale = new (1, .5f * ease2, 1);
+
+            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (200 / (1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.In)));
+            ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 + 360 * Ease.Get(x, EaseFunction.Cubic, EaseMode.In));
+            ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (500 / (1 - Ease.Get(x, EaseFunction.Circle, EaseMode.In)));
         });
 
         ResultText.gameObject.SetActive(false);
         ScoreHolder.gameObject.SetActive(true);
-        ScoreHolder.anchorMin = ScoreHolder.anchorMax = ScoreHolder.pivot = Vector2.one * .5f;
         ScoreHolder.anchoredPosition = Vector2.zero;
-        ScoreText.rectTransform.anchoredPosition = new (ScoreText.rectTransform.anchoredPosition.x, -20);
+        ScoreText.rectTransform.anchoredPosition *= new Vector2Frag(x: 0);
+        ScoreBarHolder.anchoredPosition *= new Vector2Frag(x: 100);
         SongInfoTransform.anchoredPosition *= new Vector2Frag(x: 150);
+        RankHolder.localScale = Vector2.zero;
         BestScoreHolder.alpha = 0;
-
-        Details.gameObject.SetActive(true);
-        Details.Reset();
-        IsDetailsShowing = false;
         
         ResultText.rectTransform.localScale = Vector3.one;
         int score = Mathf.RoundToInt(PlayerScreen.main.CurrentExScore / PlayerScreen.main.TotalExScore * 1e6f);
         string rank = Helper.GetRank(score);
-        string[] ranks = new [] {"1", "SSS+", "SSS", "SS+", "SS", "S+", "S", "AAA+", "AAA", "AA+", "AA", "A+", "A", "B", "C", "D", "?"};
-        int rankNum = System.Array.IndexOf(ranks, rank);
 
         ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
             PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
+        
+        int markIndex = 0;
+        foreach (var mark in ScoreBarMarks) mark.gameObject.SetActive(false);
 
         yield return Ease.Animate(2.5f, (x) => {
             float ease1 = 1 - Mathf.Pow(1 - Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Circle, EaseMode.Out), 2);
             float ease2 = Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Quadratic, EaseMode.Out);
+            float ease3 = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             ResultBackground.rectTransform.sizeDelta = new (
                 ResultBackground.rectTransform.sizeDelta.x,
                 ease1 * -10 + 90
             );
-            ScoreHolder.localScale = Vector3.one * (1.1f - ease2 * .1f);
-            ScoreHolder.anchoredPosition = Vector2.down * (1 - ease1) * 40;
+            ScoreHolder.anchoredPosition = new (50 - 550 * (1 - ease1) * (1 - ease1), 0);
+            ScoreText.rectTransform.anchoredPosition *= new Vector2Frag(x: 150 * ease3 - 100);
             Details.SpawnPins(ease2);
-
-            ScoreText.text = Helper.PadScore((score * x).ToString("#0"));
-            RankText.text = ranks[Mathf.CeilToInt(Mathf.Lerp(ranks.Length - 2, rankNum, x))];
-            ScoreRings[0].FillAmount = score * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) / 1e6f;
-            ScoreRings[0].SetVerticesDirty();
+            Details.Container.rectTransform.anchoredPosition *= new Vector2Frag(x: 500 * (1 - ease1));
+            Details.Container.rectTransform.localScale = new (1, .5f + .5f * ease1, 1);
+            
+            float scoreLerp = score * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
+            ScoreText.text = Helper.PadScore(scoreLerp.ToString("#0"));
+            scoreLerp /= 1e6f;
+            ScoreRings[0].fillAmount = scoreLerp;
             for (int a = 1; a < ScoreRings.Count; a++) 
             {
-                ScoreRings[a].FillAmount = ScoreRings[a - 1].FillAmount * 10 - 9;
-                ScoreRings[a].SetVerticesDirty();
+                ScoreRings[a].fillAmount = ScoreRings[a - 1].fillAmount * 10 - 9;
             }
+            ScoreBarHolder.anchorMin *= new Vector2Frag(x: -4 * Mathf.Pow(scoreLerp, 6));
+            ScoreBarFill.anchorMax *= new Vector2Frag(x: scoreLerp);
 
-            float ease3 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
-            ScoreExplosionRings[0].InsideRadius = 1 - ease3 - x * .01f;
-            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (600 / ease1 * (1 - ease3) + 100);
+            float ease4 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+            ScoreExplosionRings[0].InsideRadius = 1 - ease4 - x * .01f;
+            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (600 / ease1 * (1 - ease4) + 100);
             ScoreExplosionRings[0].rectTransform.position = ScoreRings[0].rectTransform.position;
-            float ease4 = Ease.Get(x * 1.5f - .5f, EaseFunction.Exponential, EaseMode.In);
-            ScoreExplosionRings[1].InsideRadius = 1 - ease4 - x * .01f;
-            ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (900 / ease1 * (1 - ease3) + 100);
+            ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 + 360 * Ease.Get(x * 1.2f, EaseFunction.Cubic, EaseMode.Out));
+            float ease5 = Ease.Get(x * 1.5f - .5f, EaseFunction.Exponential, EaseMode.In);
+            ScoreExplosionRings[1].InsideRadius = 1 - ease5 - x * .01f;
+            ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (900 / ease1 * (1 - ease4) + 100);
             ScoreExplosionRings[1].rectTransform.position = ScoreRings[0].rectTransform.position;
+            ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward * (55 + 360 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+
+            if (markIndex < ScoreBarMarks.Count && scoreLerp >= ScoreBarMarks[markIndex].anchorMin.x)
+            {
+                ScoreBarMarks[markIndex].gameObject.SetActive(true);
+                StartCoroutine(AnimateScoreBarMark(ScoreBarMarks[markIndex]));
+                markIndex++;
+            }
             
             FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
 
+        RankText.text = rank.Replace("+", "<size=70%><voffset=.5em>+");
         ScoreExplosionRings[2].rectTransform.position = ScoreRings[0].rectTransform.position;
         StartCoroutine(RankExplosionAnim());
         
@@ -242,8 +281,15 @@ public class PlayerScreenResult : MonoBehaviour
             StartCoroutine(LoadCoverImageRoutine());
         }
 
-        yield return Ease.Animate(1, (x) => {
+        yield return Ease.Animate(1.2f, (x) => {
+            float ease1 = Ease.Get(Mathf.Pow(x, .3f), EaseFunction.Back, EaseMode.Out);
+            float ease2 = Ease.Get(Mathf.Pow(x, 2), EaseFunction.Exponential, EaseMode.In);
+            float ease3 = Ease.Get(Mathf.Pow(x, .4f), EaseFunction.Exponential, EaseMode.Out);
+            RankHolder.localScale = Vector2.one * (ease1 * 1.1f - ease2 * .1f);
+            RankHolder.localEulerAngles = -(RankText.rectTransform.localEulerAngles *= new Vector3Frag(z: -10 + 90 * (1 - ease3)));
             RankText.color = new Color(1 - x, 1 - x, 1 - x);
+            ScoreBarHolder.anchoredPosition *= new Vector2Frag(x: 100 - 1000 * ease2);
+            ScoreText.rectTransform.anchoredPosition *= new Vector2Frag(x: 50 + 110 * ease3);
         });
 
         DetailsHolder.gameObject.SetActive(true);
@@ -265,14 +311,8 @@ public class PlayerScreenResult : MonoBehaviour
         LeftActionsHolder.gameObject.SetActive(true);
         RightActionsHolder.gameObject.SetActive(true);
 
-        yield return Ease.Animate(0.8f, (x) => {
-            float ease1 = 1 - Mathf.Pow(1 - Ease.Get(x, EaseFunction.Circle, EaseMode.Out), 2);
-            float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            ScoreHolder.anchorMin = ScoreHolder.anchorMax = ScoreHolder.pivot = new(.5f * (1 - ease1), .5f);
-            ScoreHolder.anchoredPosition = Vector2.right * 50 * ease1;
-            ScoreText.rectTransform.anchoredPosition = new (ScoreText.rectTransform.anchoredPosition.x, -20 * (1 - ease2));
-            
-            float ease3 = Ease.Get(Mathf.Clamp01(x * 2 - 1), EaseFunction.Cubic, EaseMode.Out);
+        yield return Ease.Animate(0.4f, (x) => {
+            float ease3 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
             BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = ease3;
             ProfileBar.main.SetVisibilty(ease3);
@@ -281,6 +321,15 @@ public class PlayerScreenResult : MonoBehaviour
             DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, 10 * ease3 - 50);
             LeftActionsTransform.anchoredPosition = new (-10 * (1 - ease3), LeftActionsTransform.anchoredPosition.y);
             RightActionsTransform.anchoredPosition = new (10 * (1 - ease3), RightActionsTransform.anchoredPosition.y);
+        });
+    }
+
+    IEnumerator AnimateScoreBarMark(RectTransform mark)
+    {
+        yield return Ease.Animate(0.6f, a => {
+            float ease1 = Ease.Get(Mathf.Pow(a, .5f), EaseFunction.Back, EaseMode.Out);
+            mark.localScale = Vector3.one * ease1;
+            mark.localEulerAngles = Vector3.back * (90 * (1 - ease1));
         });
     }
 
@@ -316,7 +365,7 @@ public class PlayerScreenResult : MonoBehaviour
             ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (1400 * ease4 + 100);
             float ease1 = Ease.Get(x * 1.2f - .2f, EaseFunction.Exponential, EaseMode.Out);
             ScoreExplosionRings[2].InsideRadius = ease1;
-            ScoreExplosionRings[2].rectTransform.sizeDelta = Vector2.one * (1600 * ease2 + 100);
+            ScoreExplosionRings[2].rectTransform.sizeDelta = Vector2.one * (2400 * ease2 + 100);
             
             FanfareSource.volume = (x * .4f + .6f) * Settings.BGMusicVolume;
         });
@@ -398,7 +447,10 @@ public class PlayerScreenResult : MonoBehaviour
         IsAnimating = true;
         
         Color backColor = FlashBackground.color;
-        Details.gameObject.SetActive(false);
+        if (IsDetailsShowing) StartCoroutine(Ease.Animate(0.4f, (x) => {
+            float ease1 = Ease.Get(Mathf.Pow(x, .4f), EaseFunction.Exponential, EaseMode.Out);
+            Details.LerpDetailed(ease1);
+        }));
 
         yield return Ease.Animate(1, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
@@ -417,11 +469,15 @@ public class PlayerScreenResult : MonoBehaviour
             float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
             ScoreHolder.pivot = new(lerp2, .5f);
             ScoreHolder.anchorMin = ScoreHolder.anchorMax = new(-lerp2, .5f);
+            Details.Container.rectTransform.localScale = new (1, 1 - lerp2, 1);
+            Details.Container.rectTransform.anchoredPosition *= new Vector2Frag(x: -500 * lerp2);
             
             float lerp3 = Ease.Get(a, EaseFunction.Exponential, EaseMode.InOut);
             FlashBackground.color = Color.Lerp(backColor, Common.main.MainCamera.backgroundColor, lerp3);
+            IsAnimating = true;
         });
 
+        Details.gameObject.SetActive(false);
         RetryBackground.gameObject.SetActive(false);
         SongInfoHolder.gameObject.SetActive(false);
         LeftActionsHolder.gameObject.SetActive(false);
@@ -456,7 +512,7 @@ public class PlayerScreenResult : MonoBehaviour
 
         if (target == 0) Details.UpdateLabels();
 
-        yield return Ease.Animate(0.6f, (x) => {
+        yield return Ease.Animate(0.4f, (x) => {
             float ease1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
             float prog1 = 1 - Mathf.Abs(target - 1 + ease1);
             SongInfoTransform.anchoredPosition *= new Vector2Frag(x: 150 - 1150 * prog1);

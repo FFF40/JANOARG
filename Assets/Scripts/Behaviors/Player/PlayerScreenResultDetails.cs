@@ -147,7 +147,7 @@ public class PlayerScreenResultDetails : MonoBehaviour
     IEnumerator AnimatePin(Graphic pin)
     {
         yield return Ease.Animate(.2f, (x) => {
-            pin.rectTransform.localScale = Vector3.one * Ease.Get(x * 1.2f, EaseFunction.Exponential, EaseMode.Out);
+            pin.rectTransform.localScale = Vector3.one * Ease.Get(x * 1.2f, EaseFunction.Back, EaseMode.Out);
             pin.rectTransform.localEulerAngles = Vector3.forward * (90 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
         });
     }
@@ -166,11 +166,11 @@ public class PlayerScreenResultDetails : MonoBehaviour
 
         Container.rectTransform.sizeDelta *= new Vector2Frag(y: 110 - 60 * ease1);
         Container.rectTransform.anchoredPosition *= new Vector2Frag(y: 25 * (1 - ease1));
-        TimingPinHolder.sizeDelta *= new Vector2Frag(y: -80 + 40 * ease1);
+        TimingPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, -80 + 40 * ease1);
         CatchPinHolder.anchoredPosition *= new Vector2Frag(y: 35 - 20 * ease1);
-        CatchPinHolder.sizeDelta *= new Vector2Frag(y: 20 - 10 * ease1);
+        CatchPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
         FlickPinHolder.anchoredPosition *= new Vector2Frag(y: 10 - 5 * ease1);
-        FlickPinHolder.sizeDelta *= new Vector2Frag(y: 20 - 10 * ease1);
+        FlickPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
 
         TimingLabelHolder.anchoredPosition *= new Vector2Frag(x: -1000 * ease1);
         CatchLabelHolder.anchoredPosition *= new Vector2Frag(x: -1000 * ease1);
