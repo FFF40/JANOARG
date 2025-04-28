@@ -26,6 +26,7 @@ public class SongSelectScreen : MonoBehaviour
     [Space]
     public RectTransform BackgroundHolder;
     public CanvasGroup BackgroundGroup;
+    public RectTransform SafeAreaHolder;
     [Space]
     public CanvasGroup TargetSongInfoHolder;
     public TMP_Text TargetSongInfoName;
@@ -500,7 +501,7 @@ public class SongSelectScreen : MonoBehaviour
         TargetSongCoverHolder.anchorMin = Vector2.Lerp(new(0, .5f), new(0, .5f), a);
         TargetSongCoverHolder.anchorMax = Vector2.Lerp(new(0, .5f), new(1, .5f), a);
         TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new(180 + .26795f * offset, offset), new(0, offset / 2), a);
-        TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4, 128), a);
+        TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4 - SafeAreaHolder.sizeDelta.x, 128), a);
         TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
         TargetSongCoverLayerHolder.anchoredPosition = new (-4 * a, 0);
         UpdateCover();
@@ -578,7 +579,7 @@ public class SongSelectScreen : MonoBehaviour
             TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp2));
             TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp2));
             TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp2));
-            TargetSongCoverHolder.sizeDelta = new(0, 128 * (1 - lerp2));
+            TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: 128 * (1 - lerp2));
             IsDirty = true;
             
             float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);

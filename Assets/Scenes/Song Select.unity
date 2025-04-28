@@ -5093,6 +5093,7 @@ MonoBehaviour:
   ItemCursor: {fileID: 1323845866}
   BackgroundHolder: {fileID: 1850335546}
   BackgroundGroup: {fileID: 1850335551}
+  SafeAreaHolder: {fileID: 162131310}
   TargetSongInfoHolder: {fileID: 832619951}
   TargetSongInfoName: {fileID: 1887098833}
   TargetSongInfoArtist: {fileID: 1709992015}
