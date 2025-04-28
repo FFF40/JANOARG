@@ -267,7 +267,7 @@ public class ProfileBar : MonoBehaviour
         // essenceChange += 10; SongEssence += 10; 
 
         // Animation setup
-        yield return new WaitForSeconds(.8f);
+        yield return new WaitForSeconds(.4f);
 
         ChangeARLabel.gameObject.SetActive(arOld != AbilityRating);
         ChangeARIcon.SetActive(arOld != AbilityRating);

@@ -7,7 +7,7 @@ Shader "JANOARG/Styles/Default - Hit"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Fade" }
         Blend SrcAlpha OneMinusSrcAlpha
         LOD 100
 
@@ -51,8 +51,7 @@ Shader "JANOARG/Styles/Default - Hit"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv) * _Color;
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                col.a *= min(max(i.fogCoord.x, 0) * 1.2, 1);
                 return col;
             }
             ENDCG

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using Unity.VisualScripting;
 
 public class OptionsPanel : MonoBehaviour
 {
@@ -13,8 +14,10 @@ public class OptionsPanel : MonoBehaviour
     public TMP_Text SubtitleLabel;
     [Space]
     public ScrollRect ContentScroller;
+    public LayoutGroup ContentLayout;
     public RectTransform ContentViewport;
     public CanvasGroup ContentGroup;
+    public Scrollbar ContentScrollBar;
     [Space]
     public List<OptionsPanelTabButton> TabButtons;
     [Space]
@@ -24,16 +27,45 @@ public class OptionsPanel : MonoBehaviour
     public GameObject AboutPane;
     [HideInInspector]
     public List<OptionItem> CurrentItems;
-
+    [Space]
+    public RenderTexture PreviewTexture;
+    public Camera PreviewCamera;
+    public RawImage PreviewTextureTarget;
+    [Space]
+    public Transform PreviewNormalCenter;
+    public Transform PreviewNormalLeft;
+    public Transform PreviewNormalRight;
+    public MeshFilter PreviewNormalFlick;
+    public Transform PreviewCatchCenter;
+    public Transform PreviewCatchLeft;
+    public Transform PreviewCatchRight;
+    public MeshFilter PreviewCatchFlick;
     public Panel CurrentPanel;
 
     [HideInInspector]
     public bool IsAnimating;
 
+    public Mesh FreeFlickIndicator { get; private set; }
+    public Mesh ArrowFlickIndicator { get; private set; }
+
     void Start()
     {
         TabButtons[CurrentTab].SetFill(1);
         MakeTab(CurrentTab);
+
+        PreviewTexture = new RenderTexture(Screen.width, Screen.height, 32, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_SNorm);
+        PreviewTextureTarget.texture = PreviewCamera.targetTexture = PreviewTexture;
+        PreviewCamera.fieldOfView = Camera.HorizontalToVerticalFieldOfView(110, PreviewCamera.aspect);
+        
+        InitFlickMeshes();
+        UpdatePlayerPreview();
+    }
+
+    public void OnDestroy()
+    {
+        Destroy(PreviewTexture);
+        Destroy(FreeFlickIndicator);
+        Destroy(ArrowFlickIndicator);
     }
 
     public void Close()
@@ -41,6 +73,7 @@ public class OptionsPanel : MonoBehaviour
         Common.main.Storage.Save();
         Common.main.Preferences.Save();
         ProfileBar.main.UpdateLabels();
+        if (CurrentTab == 1) StartCoroutine(PreviewAnim(false));
         CurrentPanel.Close();
     }
 
@@ -54,6 +87,9 @@ public class OptionsPanel : MonoBehaviour
         IsAnimating = true;
 
         Vector2 basePos = ContentViewport.anchoredPosition;
+
+        if (CurrentTab == 1) StartCoroutine(PreviewAnim(false));
+        else if (tab == 1) StartCoroutine(PreviewAnim(true));
 
         yield return Ease.Animate(.2f, x => {
             float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
@@ -82,6 +118,8 @@ public class OptionsPanel : MonoBehaviour
     public void SetScrollerWidth(float width)
     {
         rt(ContentScroller).sizeDelta = new (width, rt(ContentScroller).sizeDelta.y);
+        ContentLayout.padding.right = (int)(30 - width / 20);
+        rt(ContentScrollBar).anchoredPosition *= new Vector2Frag(y: width * Mathf.Tan(15 * Mathf.Deg2Rad) + 40);
     }
 
     public void MakeTab(int tab) 
@@ -169,7 +207,7 @@ public class OptionsPanel : MonoBehaviour
             case 1:
             {
                 SubtitleLabel.text = " > Gameplay";
-                SetScrollerWidth(400);
+                SetScrollerWidth(360);
 
                 Spawn<OptionCategoryTitle>("Syncronization");
 
@@ -220,11 +258,11 @@ public class OptionsPanel : MonoBehaviour
 
                 Spawn<MultiFloatOptionInput, float[]>("Hit Object Scale", 
                     () => Preferences.Get("PLYR:HitScale", new [] {1f}),
-                    x => Preferences.Set("PLYR:HitScale", x)
+                    x => { Preferences.Set("PLYR:HitScale", x); UpdatePlayerPreview(); }
                 );
                 Spawn<FloatOptionInput, float>("Flick Emblem Scale", 
                     () => Preferences.Get("PLYR:FlickScale", 1f),
-                    x => Preferences.Set("PLYR:FlickScale", x)
+                    x => { Preferences.Set("PLYR:FlickScale", x); UpdatePlayerPreview(); }
                 );
             }
             break;
@@ -270,14 +308,74 @@ public class OptionsPanel : MonoBehaviour
     public TType Spawn<TType>(string title) where TType : OptionItem 
     {
         TType item = Instantiate(GetOptionItemSample<TType>(), OptionItemHolder);
+        item.transform.localEulerAngles = Vector3.forward * 15;
         item.TitleLabel.text = title;
         CurrentItems.Add(item);
         return item;
+    }
+    
+    public void InitFlickMeshes() 
+    {
+        if (!FreeFlickIndicator) 
+        {
+            Mesh mesh = new();
+            List<Vector3> verts = new();
+            List<int> tris = new();
+
+            verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2), new(0, -.5f), new(1, 0), new(0, -2), new(0, .5f) });
+            tris.AddRange(new [] {0, 1, 2, 3, 4, 5});
+
+            mesh.SetVertices(verts);
+            mesh.SetUVs(0, verts);
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateNormals();
+            PreviewCatchFlick.sharedMesh = FreeFlickIndicator = mesh;
+        }
+        if (!ArrowFlickIndicator) 
+        {
+            Mesh mesh = new();
+            List<Vector3> verts = new();
+            List<int> tris = new();
+
+            verts.AddRange(new Vector3[] { new(-1, 0), new(0, 2.2f), new(1, 0), new(.71f, -.71f), new(0, -1), new(-.71f, -.71f) });
+            tris.AddRange(new [] {0, 1, 2, 2, 3, 0, 3, 4, 0, 4, 5, 0});
+            
+            mesh.SetVertices(verts);
+            mesh.SetUVs(0, verts);
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateNormals();
+            PreviewNormalFlick.sharedMesh = ArrowFlickIndicator = mesh;
+        }
+    }
+
+    public void UpdatePlayerPreview()
+    {
+        float width = 5;
+        var settings = new PlayerSettings();
+
+        {
+            float scale = settings.HitObjectScale[1];
+            PreviewCatchCenter.localScale = new (width, .2f * scale, .2f * scale);
+            PreviewCatchLeft.localScale = PreviewCatchRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
+            PreviewCatchRight.localPosition = Vector3.right * (width / 2);
+            PreviewCatchLeft.localPosition = -PreviewCatchRight.localPosition;
+        }
+        {
+            float scale = settings.HitObjectScale[0];
+            PreviewNormalCenter.localScale = new (width - .2f * scale, .4f * scale, .4f * scale);
+            PreviewNormalLeft.localScale = PreviewNormalRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
+            PreviewNormalRight.localPosition = Vector3.right * (width / 2 + .2f * scale);
+            PreviewNormalLeft.localPosition = -PreviewNormalRight.localPosition;
+        }
+
+        PreviewCatchFlick.transform.localScale = PreviewNormalFlick.transform.localScale
+            = Vector2.one * settings.FlickScale;
     }
 
     public TType Spawn<TType, TObject>(string title, Func<TObject> get, Action<TObject> set) where TType : OptionInput<TObject>
     {
         TType item = Instantiate(GetOptionItemSample<TType>(), OptionItemHolder);
+        item.transform.localEulerAngles = Vector3.forward * 15;
         item.TitleLabel.text = title;
         item.OnGet = get;
         item.OnSet = set;
@@ -301,6 +399,25 @@ public class OptionsPanel : MonoBehaviour
             _ => "",
         };
         if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
+    }
+
+    IEnumerator PreviewAnim(bool shown) 
+    {
+        if (shown) 
+        {
+            PreviewCamera.gameObject.SetActive(true);
+        }
+
+        yield return Ease.Animate(.5f, (x) => {
+            float ease1 = Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, shown ? EaseMode.Out : EaseMode.In);
+            PreviewCamera.transform.localPosition = new (0, (shown ? 12 : 0) - 12 * ease1, 0);
+            PreviewCamera.transform.localEulerAngles = new (0, (shown ? 180 : 0) - 180 * ease1, 0);
+        }); 
+
+        if (!shown) 
+        {
+            PreviewCamera.gameObject.SetActive(false);
+        }
     }
 
     static RectTransform rt(MonoBehaviour item) => (RectTransform)item.transform;

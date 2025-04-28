@@ -12,6 +12,7 @@ Shader "JANOARG/Styles/Default - Lane"
         Tags { "Queue"="Transparent" "RenderType"="Fade" "IgnoreProjectors"="True" }
         LOD 200
         Cull Off
+        ZWrite Off
 
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows alpha:fade
