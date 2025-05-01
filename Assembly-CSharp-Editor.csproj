@@ -64,11 +64,11 @@
     <Analyzer Include="/mnt/duducat/Unity/2022.3.46f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/JANOARG/Scripts/Editor/GizmoIconUtility.cs" />
     <Compile Include="Assets/JANOARG.Shared/Script/Data/Files/Editor/JAPSImporter.cs" />
+    <Compile Include="Assets/JANOARG/Scripts/Editor/SceneStarter.cs" />
     <Compile Include="Assets/JANOARG.Shared/Script/Data/Files/Editor/StoryImporter.cs" />
-    <Compile Include="Assets/JANOARG.Game/Scripts/Editor/GizmoIconUtility.cs" />
     <Compile Include="Assets/JANOARG.Shared/Script/Data/Files/Editor/JACImporter.cs" />
-    <Compile Include="Assets/JANOARG.Game/Scripts/Editor/SceneStarter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
