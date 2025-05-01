@@ -1,0 +1,3045 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b996f20fbb94ba04eb1a0dee52eb628e, type: 3}
+  m_Name: Overdrive 30
+  m_EditorClassIdentifier: 
+  Data:
+    Storyboard:
+      Timestamps:
+      - Time: 0
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 8
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 0
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.2
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 1.5
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 16
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 1.5
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 3.5
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: 24
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 3.5
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 4.5
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 32
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 4.5
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 6.5
+        Duration: 2.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 6.5
+        Duration: 2.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 8
+        Duration: 2
+        ID: CameraPivot_Y
+        From: NaN
+        Target: -8
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 9
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.2
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 9
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: -8
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 10
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: -16
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 10
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 11.5
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: -24
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 11.5
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 12.5
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: -32
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 12.5
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 14.5
+        Duration: 2
+        ID: CameraRotation_X
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 14.5
+        Duration: 2
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 16.5
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.2
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 16.5
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: 8
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 17.5
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 16
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 17.5
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 19.5
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: 24
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 19.5
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 20.5
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 20.5
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 32
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 22.5
+        Duration: 2.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 22.5
+        Duration: 2.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 24
+        Duration: 2
+        ID: CameraPivot_Y
+        From: NaN
+        Target: -16
+        Easing: Cubic
+        EaseMode: 2
+      - Time: 25
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: -8
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 25
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.2
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 26
+        Duration: 1.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: -16
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 26
+        Duration: 1.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0.5
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 27.5
+        Duration: 1
+        ID: CameraRotation_X
+        From: NaN
+        Target: -24
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 27.5
+        Duration: 1
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 28.5
+        Duration: 3.5
+        ID: CameraRotation_X
+        From: NaN
+        Target: 0
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 28.5
+        Duration: 3.5
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0
+        Easing: Quadratic
+        EaseMode: 1
+      - Time: 32
+        Duration: 2
+        ID: CameraRotation_Z
+        From: NaN
+        Target: 10
+        Easing: Cubic
+        EaseMode: 1
+      - Time: 32
+        Duration: 4
+        ID: CameraRotation_X
+        From: NaN
+        Target: 10
+        Easing: Quadratic
+        EaseMode: 1
+    DifficultyName: Overdrive
+    DifficultyLevel: 30
+    DifficultyIndex: 3
+    ChartConstant: 30
+    Groups: []
+    Lanes:
+    - Storyboard:
+        Timestamps:
+        - Time: -0
+          Duration: 6
+          ID: Offset_Y
+          From: -80
+          Target: -4
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 16
+          Duration: 1.5
+          ID: Offset_Y
+          From: -4
+          Target: 60
+          Easing: Exponential
+          EaseMode: 0
+        - Time: 17.5
+          Duration: 5
+          ID: Offset_Y
+          From: -80
+          Target: -12
+          Easing: Exponential
+          EaseMode: 1
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 28.5
+        Position: 0.05
+        Length: 0.90000004
+        HoldLength: 3.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 32
+        Position: 0.05
+        Length: 0.90000004
+        HoldLength: 0
+        Flickable: 1
+        FlickDirection: 150
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 0
+        StartPos: {x: -8, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 8, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 64
+        StartPos: {x: -8, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 8, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: -1000, z: 0}
+      OffsetRotation: {x: 0, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps:
+        - Time: -0
+          Duration: 2
+          ID: Offset_Y
+          From: 10
+          Target: -3
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 5.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 6.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 6.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: -3.54, y: 1000, z: 3}
+      OffsetRotation: {x: 13, y: 3.87, z: 6.47}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 1.5000001
+          Duration: 2
+          ID: Offset_Y
+          From: 10
+          Target: -2.5
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 5.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 6.7500005
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 6.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: -1.71, y: 1000, z: 4}
+      OffsetRotation: {x: 11.2, y: 2.6, z: 2.59}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 3.5
+          Duration: 2
+          ID: Offset_Y
+          From: 10
+          Target: -2
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 5.7499337
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.7499337
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.7499337
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.7499337
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.7499337
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 5.7499337
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 6.9999995
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 7
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1.54, y: 1000, z: 5}
+      OffsetRotation: {x: 23.85, y: -4.907, z: -1.728}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 3.5
+          Duration: 2
+          ID: Offset_Y
+          From: 10
+          Target: -1
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 6
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 7.25
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 7.25
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: -0.74, y: 1000, z: 6}
+      OffsetRotation: {x: 31.25, y: 5.989, z: -5.951}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 3.5
+          Duration: 2
+          ID: Offset_Y
+          From: 10
+          Target: 0
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 6.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 7.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 7.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 2.2, y: 1000, z: 7}
+      OffsetRotation: {x: 18.27, y: -9.96, z: 4.785}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 4.5000005
+          Duration: 2
+          ID: Offset_Y
+          From: 10
+          Target: 2
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 6.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 6.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 7.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 7.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 4.37, y: 1000, z: 8}
+      OffsetRotation: {x: 0, y: -4.17, z: 5.4}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 9
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -5
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 12.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 13.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 13.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 4.24, y: 1000, z: 3}
+      OffsetRotation: {x: 7.4, y: -8.67, z: 12.95}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 9
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -5.5
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 12.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 2
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 12.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 13.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 13.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1.95, y: 1000, z: 4}
+      OffsetRotation: {x: -6.27, y: -4.3, z: 5.92}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 10
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -6
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 13.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 14.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 14.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: -4.35, y: 1000, z: 5}
+      OffsetRotation: {x: -11.41, y: -22.3, z: 9.01}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 10
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -6.5
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 13.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -2
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 14.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 14.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: -1.3, y: 1000, z: 6}
+      OffsetRotation: {x: 23.18, y: -3.5, z: 11.47}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 11.5
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -7
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 13.750001
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.750001
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.750001
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.750001
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.750001
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 13.750001
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 15.000001
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 15.000001
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 0.57, y: 1000, z: 7}
+      OffsetRotation: {x: 2.32, y: -19.2, z: 24.03}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 11.5
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -8
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 14.000001
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.000001
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.000001
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.000001
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.000001
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.000001
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 15.250001
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 15.250001
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 5.05, y: 1000, z: 8}
+      OffsetRotation: {x: 1.8, y: -0.9, z: -3.6}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 12.5
+          Duration: 1.75
+          ID: Offset_Y
+          From: -18
+          Target: -9
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 14.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 2
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 15.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 15.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 2.7, y: 1000, z: 9}
+      OffsetRotation: {x: -3.31, y: 4.38, z: 8.64}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 12.5
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -9.5
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 14.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 15.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 15.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 3.56, y: 1000, z: 10}
+      OffsetRotation: {x: -7.4, y: -9.1, z: 3.23}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 12.5
+          Duration: 2
+          ID: Offset_Y
+          From: -18
+          Target: -10
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 14.75
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -4
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.75
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.75
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -2
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.75
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.75
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 14.75
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 16
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 16
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: -4.87, y: 1000, z: 11}
+      OffsetRotation: {x: 1.08, y: -5.46, z: -1.55}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 16.5
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 0.96
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 21.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 22.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 22.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -11, z: 3}
+      OffsetRotation: {x: 11.42, y: -5.8, z: -7.4}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 16.5
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 2.67
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 21.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 22.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 22.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -10.5, z: 4}
+      OffsetRotation: {x: 3.15, y: -7.4, z: 4.75}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 17.5
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: 0.29
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 21.749933
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.749933
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.749933
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.749933
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.749933
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 21.749933
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 23
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 23
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -10, z: 5}
+      OffsetRotation: {x: -27.7, y: 5.2, z: 2.6}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 19.5
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: -1.15
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 22
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 23.25
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 23.25
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -9, z: 6}
+      OffsetRotation: {x: 8.9, y: 3.71, z: 4.98}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 19.5
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: -2.66
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 22.25
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.25
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.25
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.25
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.25
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.25
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 23.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 23.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -8, z: 7}
+      OffsetRotation: {x: -15.4, y: 8.1, z: -7.72}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 20.5
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 1.11
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 22.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 22.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 23.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 23.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -6, z: 8}
+      OffsetRotation: {x: 0, y: -8.14, z: -1.39}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 27
+          Duration: 0
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Linear
+          EaseMode: 0
+        - Time: 27.25
+          Duration: 0
+          ID: Offset_Y
+          From: NaN
+          Target: -1000
+          Easing: Linear
+          EaseMode: 0
+        - Time: 27.5
+          Duration: 0
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Linear
+          EaseMode: 0
+        - Time: 27.75
+          Duration: 0
+          ID: Offset_Y
+          From: NaN
+          Target: -1000
+          Easing: Linear
+          EaseMode: 0
+        - Time: 28.5
+          Duration: 2
+          ID: Offset_Y
+          From: -96
+          Target: -20
+          Easing: Exponential
+          EaseMode: 1
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 32
+        Position: 0.05
+        Length: 0.90000004
+        HoldLength: 0
+        Flickable: 1
+        FlickDirection: 330
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 26
+        StartPos: {x: -8, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 8, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 68
+        StartPos: {x: -8, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 8, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: -1000, z: 0}
+      OffsetRotation: {x: 0, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps:
+        - Time: 25
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 0.96
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 28.249935
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.249935
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.249935
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.249935
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.249935
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.249935
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 29.499935
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 29.499935
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 3}
+      OffsetRotation: {x: 11.42, y: -5.8, z: -7.4}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 25
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 2.67
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 28.499935
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.499935
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.499935
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.499935
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.499935
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.499935
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 29.749935
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 29.749935
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 4}
+      OffsetRotation: {x: 3.15, y: -7.4, z: 4.75}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 25.5
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: 0.29
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 28.749868
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.749868
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.749868
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.749868
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.749868
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.749868
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 29.999935
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 29.999935
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 5}
+      OffsetRotation: {x: -27.7, y: 5.2, z: 2.6}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 25.5
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: -1.15
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 28.999935
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.999935
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.999935
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.999935
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.999935
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 28.999935
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 30.249935
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 30.249935
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 6}
+      OffsetRotation: {x: 8.9, y: 3.71, z: 4.98}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 26
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: -2.66
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 29.249935
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -12
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.249935
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.249935
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.249935
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.249935
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.249935
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 30.499935
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 30.499935
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 7}
+      OffsetRotation: {x: -15.4, y: 8.1, z: -7.72}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 26
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: -1.11
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 29.499935
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.499935
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.499935
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.499935
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.499935
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.499935
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 30.749935
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 30.749935
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 8}
+      OffsetRotation: {x: 0, y: -8.14, z: -1.39}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 27.5
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 0.96
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 29.75
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.75
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.75
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.75
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.75
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 29.75
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 31
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 31
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 9}
+      OffsetRotation: {x: 11.42, y: -5.8, z: -7.4}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 27.5
+          Duration: 2
+          ID: Offset_X
+          From: 20
+          Target: 2.67
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 30
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 3
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 31.25
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 31.25
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 10}
+      OffsetRotation: {x: 3.15, y: -7.4, z: 4.75}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 28.5
+          Duration: 1.75
+          ID: Offset_X
+          From: -20
+          Target: 0.29
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 30.249933
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.249933
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.249933
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: 1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.249933
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.249933
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.249933
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 31.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 31.5
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 11}
+      OffsetRotation: {x: -27.7, y: 5.2, z: 2.6}
+      Group: 
+      StyleIndex: -1
+    - Storyboard:
+        Timestamps:
+        - Time: 28.5
+          Duration: 2
+          ID: Offset_X
+          From: -20
+          Target: -1.15
+          Easing: Exponential
+          EaseMode: 1
+        - Time: 30.5
+          Duration: 1.25
+          ID: Offset_Y
+          From: NaN
+          Target: -20
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.5
+          Duration: 1.25
+          ID: Offset_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.5
+          Duration: 1.25
+          ID: Offset_X
+          From: NaN
+          Target: -1
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.5
+          Duration: 1.25
+          ID: OffsetRotation_X
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.5
+          Duration: 1.25
+          ID: OffsetRotation_Y
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+        - Time: 30.5
+          Duration: 1.25
+          ID: OffsetRotation_Z
+          From: NaN
+          Target: 0
+          Easing: Quadratic
+          EaseMode: 0
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 1
+        Offset: 31.75
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 31.75
+        StartPos: {x: -2, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 1000, y: -16, z: 12}
+      OffsetRotation: {x: 8.9, y: 3.71, z: 4.98}
+      Group: 
+      StyleIndex: -1
+    CameraPivot: {x: 0, y: 0, z: 0}
+    CameraRotation: {x: 0, y: 0, z: 0}
+    Pallete:
+      Storyboard:
+        Timestamps: []
+      BackgroundColor: {r: 0.04777, g: 0.053225584, b: 0.085, a: 1}
+      InterfaceColor: {r: 1, g: 1, b: 1, a: 1}
+      LaneStyles:
+      - Storyboard:
+          Timestamps: []
+        LaneMaterial: {fileID: 2100000, guid: 988651f4589605f43a016265927babd6, type: 2}
+        LaneColorTarget: _Color
+        LaneColor: {r: 1, g: 1, b: 1, a: 0.2}
+        JudgeMaterial: {fileID: 2100000, guid: 459c918eee51b5444951a8a96014793e, type: 2}
+        JudgeColorTarget: _Color
+        JudgeColor: {r: 0, g: 0, b: 0, a: 1}
+      HitStyles:
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 1, g: 1, b: 1, a: 1}
+        CatchColor: {r: 1, g: 0.9454185, b: 0, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 1, g: 1, b: 1, a: 0.5019608}

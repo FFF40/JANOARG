@@ -1,0 +1,38 @@
+JANOARG Playable Song Format
+github.com/FFF40/JANOARG
+
+[VERSION]
+2
+
+[METADATA]
+Name: Routeout
+Artist: Sound Souler
+Genre: Genreless
+Location: Prototype
+Preview Range: 30.09308 52.19453
+
+[RESOURCES]
+Clip: routeout.mp3
+
+[COVER]
+Artist: the void!?!??
+Background: 0.9529412 1 0.8745098 1
+Icon: icon.png
+Icon Center: 0 0
+Icon Size: 200
+
+[COLORS]
+Background: 0.9529412 1 0.8745098 1
+Interface: 0.007843138 0 0.282353 1
+
+[TIMING]
++ BPM 7.267 41.4 4 S
+
+[CHARTS]
++ Chart
+  Target: snale
+  Index: -1
+  Name: 🐌
+  Charter: duducat
+  Level: ??
+  Constant: 0

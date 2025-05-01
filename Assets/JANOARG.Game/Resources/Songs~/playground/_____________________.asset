@@ -1,0 +1,563 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b996f20fbb94ba04eb1a0dee52eb628e, type: 3}
+  m_Name: _____________________
+  m_EditorClassIdentifier: 
+  Data:
+    Storyboard:
+      Timestamps: []
+    DifficultyName: ?????????????????????
+    DifficultyLevel: ??
+    DifficultyIndex: -1
+    ChartConstant: 0
+    Groups:
+    - Storyboard:
+        Timestamps:
+        - Offset: 0
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 0
+          Duration: 64
+          ID: Rotation_Y
+          From: NaN
+          Target: 1200
+          Easing: 0
+          EaseMode: 0
+        - Offset: 4
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 8
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 12
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 16
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 20
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 24
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 28
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 32
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 36
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 40
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 44
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 48
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 52
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+        - Offset: 56
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 1
+          Easing: 1
+          EaseMode: 2
+        - Offset: 60
+          Duration: 4
+          ID: Position_Y
+          From: NaN
+          Target: 0
+          Easing: 1
+          EaseMode: 2
+      Name: Cup
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Group: 
+    - Storyboard:
+        Timestamps:
+        - Offset: 0
+          Duration: 64
+          ID: Rotation_X
+          From: NaN
+          Target: 2717
+          Easing: 0
+          EaseMode: 0
+        - Offset: 0
+          Duration: 64
+          ID: Rotation_Y
+          From: NaN
+          Target: 3141
+          Easing: 0
+          EaseMode: 0
+        - Offset: 0
+          Duration: 64
+          ID: Rotation_Z
+          From: NaN
+          Target: 1337
+          Easing: 0
+          EaseMode: 0
+      Name: Spinner
+      Position: {x: 0, y: 0, z: 0}
+      Rotation: {x: 0, y: 0, z: 0}
+      Group: 
+    Lanes:
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 0
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 64
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 0, y: 0, z: -20}
+      Rotation: {x: 0, y: 180, z: 0}
+      Group: Spinner
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 0
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 64
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 0, y: 0, z: 20}
+      Rotation: {x: 0, y: 0, z: 0}
+      Group: Spinner
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 0
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 64
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 20, y: 0, z: 0}
+      Rotation: {x: 0, y: 90, z: 0}
+      Group: Spinner
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 0
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 64
+        StartPos: {x: -6, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: 6, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: -20, y: 0, z: 0}
+      Rotation: {x: 0, y: -90, z: 0}
+      Group: Spinner
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 63.999996
+        StartPos: {x: 1, y: -1}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: -1}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 64.001
+        StartPos: {x: 1, y: 1}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 1}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 0, y: -2, z: 0}
+      Rotation: {x: 90, y: 0, z: 0}
+      Group: Cup
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 63.999996
+        StartPos: {x: 1, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 64.001
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 0, y: -2, z: -1}
+      Rotation: {x: -5, y: 0, z: 0}
+      Group: Cup
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 63.999996
+        StartPos: {x: 1, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 64.001
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: -1, y: -2, z: 0}
+      Rotation: {x: -5, y: -270, z: 0}
+      Group: Cup
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 63.999996
+        StartPos: {x: 1, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 64.001
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 1, y: -2, z: 0}
+      Rotation: {x: -5, y: -90, z: 0}
+      Group: Cup
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 63.999996
+        StartPos: {x: 1, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 64.001
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 1
+      Position: {x: 0, y: -2, z: 1}
+      Rotation: {x: -5, y: -180, z: 0}
+      Group: Cup
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 64
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 64.00003
+        StartPos: {x: 4, y: 0}
+        StartEaseX: 0
+        StartEaseXMode: 0
+        StartEaseY: 0
+        StartEaseYMode: 0
+        EndPos: {x: -4, y: 0}
+        EndEaseX: 0
+        EndEaseXMode: 0
+        EndEaseY: 0
+        EndEaseYMode: 0
+        Speed: 0
+      Position: {x: 0.95, y: 2, z: 1}
+      Rotation: {x: 0, y: 0, z: 75}
+      Group: Cup
+      StyleIndex: 0
+    Camera:
+      Storyboard:
+        Timestamps: []
+      CameraPivot: {x: -12, y: 17.5, z: -12}
+      PivotDistance: 10
+      CameraRotation: {x: 45, y: 45, z: 0}
+    CameraPivot: {x: 0, y: 0, z: 0}
+    CameraRotation: {x: 0, y: 0, z: 0}
+    Pallete:
+      Storyboard:
+        Timestamps: []
+      BackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+      InterfaceColor: {r: 0, g: 0, b: 0, a: 1}
+      LaneStyles:
+      - Storyboard:
+          Timestamps: []
+        LaneMaterial: {fileID: 2100000, guid: 988651f4589605f43a016265927babd6, type: 2}
+        LaneColorTarget: _Color
+        LaneColor: {r: 1, g: 1, b: 1, a: 0.6}
+        JudgeMaterial: {fileID: 2100000, guid: 459c918eee51b5444951a8a96014793e, type: 2}
+        JudgeColorTarget: _Color
+        JudgeColor: {r: 0, g: 0, b: 0, a: 1}
+      HitStyles:
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0, g: 0, b: 0, a: 1}
+        CatchColor: {r: 0, g: 0, b: 1, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0, g: 0, b: 0, a: 1}

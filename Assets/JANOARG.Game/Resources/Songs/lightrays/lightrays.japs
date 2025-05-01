@@ -1,0 +1,40 @@
+JANOARG Playable Song Format
+github.com/FFF40/JANOARG
+
+[VERSION]
+2
+
+[METADATA]
+Name: light-rays
+Artist: R3ality
+Genre: Kawaii
+Location: ???
+Preview Range: 79.81 99.61
+
+[RESOURCES]
+Clip: lightrays.mp3
+
+[COVER]
+Artist: R3ality
+Background: 0.373 0.1438195 0.1438195 1
+Icon: icon.png
+Icon Center: -2 0
+Icon Size: 400
++ Layer 1 0 0 0
+  Target: cover.png
+
+[COLORS]
+Background: 0.373 0.144 0.144 1
+Interface: 1 1 1 1
+
+[TIMING]
++ BPM 0.01 200 4 S
+
+[CHARTS]
++ Chart
+  Target: simple
+  Index: 1
+  Name: Normal
+  Charter: M3galodon
+  Level: 15
+  Constant: 15

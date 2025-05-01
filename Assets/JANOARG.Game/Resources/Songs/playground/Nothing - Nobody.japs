@@ -1,0 +1,35 @@
+JANOARG Playable Song Format
+github.com/ducdat0507/janoarg
+
+[METADATA]
+Name: MilK
+Artist: モリモリあつし
+Alt Artist: Morimori Atsushi
+Genre: Genreless
+Location: Prototype
+
+[RESOURCES]
+Clip: funny.ogg
+
+[COVER]
+Artist: the void!?!??
+Background: 0 0 0 1
+Icon: icon.png
+Icon Center: 0 0
+Icon Size: 24
+
+[COLORS]
+Background: 0 0 0 1
+Interface: 1 1 1 1
+
+[TIMING]
++ BPM 0 140 4 S
+
+[CHARTS]
++ Chart
+  Target: _____________________
+  Index: -1
+  Name: ?????????????????????
+  Charter: duducat
+  Level: ??
+  Constant: 0

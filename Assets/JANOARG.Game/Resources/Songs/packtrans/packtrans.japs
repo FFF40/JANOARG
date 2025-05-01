@@ -1,0 +1,45 @@
+JANOARG Playable Song Format
+github.com/FFF40/JANOARG
+
+[VERSION]
+2
+
+[METADATA]
+Name: Packet Transfer Final
+Artist: mrcool909090
+Genre: Electronic
+Location: Prototype
+Preview Range: 15 30
+
+[RESOURCES]
+Clip: packtrans.ogg
+
+[COVER]
+Artist: the void!?!??
+Background: 0 0 0 1
+Icon: icon.png
+Icon Center: 0 0
+Icon Size: 24
+
+[COLORS]
+Background: 0 0 0 1
+Interface: 1 1 1 1
+
+[TIMING]
++ BPM 0 165 4 S
+
+[CHARTS]
++ Chart
+  Target: complex
+  Index: 2
+  Name: Complex
+  Charter: duducat
+  Level: 26
+  Constant: 26
++ Chart
+  Target: test
+  Index: -1
+  Name: Test Difficulty
+  Charter: dudududucat
+  Level: ??
+  Constant: 0

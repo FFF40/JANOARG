@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bf945a69fe88df42b29fd6483cfde30, type: 3}
+  m_Name: Routeout - Sound Souler
+  m_EditorClassIdentifier: 
+  SongName: Routeout
+  AltSongName: 
+  SongArtist: Sound Souler
+  AltSongArtist: 
+  Location: Prototype
+  Genre: Genreless
+  Clip: {fileID: 8300000, guid: 668875c044e10e848ab30e8c209680f4, type: 3}
+  BackgroundColor: {r: 0.9529412, g: 1, b: 0.8745098, a: 1}
+  InterfaceColor: {r: 0.007843138, g: 0, b: 0.28235295, a: 1}
+  Timing:
+    Stops:
+    - Offset: 7.267
+      BPM: 41.4
+      Signature: 4
+  ChartsOld: []
+  Charts:
+  - Target: "\U0001F40C"
+    DifficultyName: "\U0001F40C"
+    DifficultyLevel: ??
+    DifficultyIndex: -1
+    ChartConstant: 0

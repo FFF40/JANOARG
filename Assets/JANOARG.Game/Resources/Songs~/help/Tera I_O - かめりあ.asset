@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bf945a69fe88df42b29fd6483cfde30, type: 3}
+  m_Name: "Tera I_O - \u304B\u3081\u308A\u3042"
+  m_EditorClassIdentifier: 
+  SongName: Tera I/O
+  AltSongName: 
+  SongArtist: "\u304B\u3081\u308A\u3042"
+  AltSongArtist: Camellia
+  Location: Prototype
+  Genre: 200step
+  Clip: {fileID: 8300000, guid: d560f8f17352f8a478b4ec139c9791a4, type: 3}
+  Timing:
+    Stops:
+    - Offset: 0.015
+      BPM: 200
+      Signature: 4
+  ChartsOld: []
+  Charts:
+  - Target: INFORMATION_OVERLOAD
+    DifficultyName: INFORMATION/OVERLOAD
+    DifficultyLevel: 47*
+    DifficultyIndex: -1
+    ChartConstant: 47

@@ -1,0 +1,267 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b996f20fbb94ba04eb1a0dee52eb628e, type: 3}
+  m_Name: Test Difficulty __
+  m_EditorClassIdentifier: 
+  Data:
+    Storyboard:
+      Timestamps: []
+    DifficultyName: Test Difficulty
+    DifficultyLevel: ??
+    DifficultyIndex: -1
+    ChartConstant: 0
+    Groups: []
+    Lanes:
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -0.000033219654
+        StartPos: {x: 1, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 0.0009667804
+        StartPos: {x: 1, y: 2}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 2}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: -2, z: 0}
+      OffsetRotation: {x: 90, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -0.000033219654
+        StartPos: {x: 1, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 0.0009667804
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: -2, z: 0}
+      OffsetRotation: {x: -5, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -0.000033219654
+        StartPos: {x: 1, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 0.0009667804
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: -1, y: -2, z: 1}
+      OffsetRotation: {x: -5, y: -270, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -0.000033219654
+        StartPos: {x: 1, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 0.0009667804
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 1, y: -2, z: 1}
+      OffsetRotation: {x: -5, y: -90, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects: []
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -0.000033219654
+        StartPos: {x: 1, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      - Storyboard:
+          Timestamps: []
+        Offset: 0.0009667804
+        StartPos: {x: 1.5, y: 6}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -1.5, y: 6}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: -2, z: 2}
+      OffsetRotation: {x: -5, y: -180, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps: []
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: -0.00003
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: 0
+        StartPos: {x: 4, y: 0}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: -4, y: 0}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 0
+      ExpandToInfinity: 1
+      Offset: {x: 0.95, y: 2, z: 1}
+      OffsetRotation: {x: 0, y: 0, z: 75}
+      Group: 
+      StyleIndex: 0
+    CameraPivot: {x: -5, y: 4, z: -4}
+    CameraRotation: {x: 25, y: 45, z: 0}
+    Pallete:
+      Storyboard:
+        Timestamps: []
+      BackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+      InterfaceColor: {r: 0, g: 0, b: 0, a: 1}
+      LaneStyles:
+      - Storyboard:
+          Timestamps: []
+        LaneMaterial: {fileID: 2100000, guid: 988651f4589605f43a016265927babd6, type: 2}
+        LaneColorTarget: _Color
+        LaneColor: {r: 1, g: 1, b: 1, a: 0.5019608}
+        JudgeMaterial: {fileID: 2100000, guid: 459c918eee51b5444951a8a96014793e, type: 2}
+        JudgeColorTarget: _Color
+        JudgeColor: {r: 0, g: 0, b: 0, a: 1}
+      HitStyles:
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0, g: 0, b: 0, a: 1}
+        CatchColor: {r: 1, g: 0.98591554, b: 0, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0, g: 0, b: 0, a: 1}

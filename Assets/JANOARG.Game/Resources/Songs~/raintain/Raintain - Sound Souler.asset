@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bf945a69fe88df42b29fd6483cfde30, type: 3}
+  m_Name: Raintain - Sound Souler
+  m_EditorClassIdentifier: 
+  SongName: Raintain
+  AltSongName: 
+  SongArtist: Sound Souler
+  AltSongArtist: 
+  Location: Prototype
+  Genre: Genreless
+  Clip: {fileID: 8300000, guid: a0ffce90e66dc8a4e9e74cfd8eca6604, type: 3}
+  BackgroundColor: {r: 0.98039216, g: 1, b: 0.84313726, a: 1}
+  InterfaceColor: {r: 0.14509805, g: 0.16862746, b: 0.14509805, a: 1}
+  Timing:
+    Stops:
+    - Offset: 0.025
+      BPM: 207
+      Signature: 4
+      Significant: 1
+    - Offset: 41.764
+      BPM: 169.84616
+      Signature: 4
+      Significant: 0
+    - Offset: 43.177
+      BPM: 207
+      Signature: 4
+      Significant: 1
+  ChartsOld: []
+  Charts:
+  - Target: Overdrive
+    DifficultyName: Overdrive
+    DifficultyLevel: 32
+    DifficultyIndex: 3
+    ChartConstant: 32

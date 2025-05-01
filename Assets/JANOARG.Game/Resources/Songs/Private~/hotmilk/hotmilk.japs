@@ -1,0 +1,41 @@
+JANOARG Playable Song Format
+github.com/FFF40/JANOARG
+
+[VERSION]
+2
+
+[METADATA]
+Name: hot milk
+Artist: Snail's House
+Genre: instant death
+Location: ✨quality✨rhythm✨game✨content✨
+Preview Range: 187.32 214.52
+
+[RESOURCES]
+Clip: hotmilk.mp3
+
+[COVER]
+Artist: 
+Background: 0.995 1 0.721 1
+Icon: icon.png
+Icon Center: -1 10
+Icon Size: 300
++ Layer 0.75 0 -200 2
+  Target: cover.png
+  Tiling
+
+[COLORS]
+Background: 0.995 1 0.721 1
+Interface: 0.049 0.058 0 1
+
+[TIMING]
++ BPM 0.12 75 4 S
+
+[CHARTS]
++ Chart
+  Target: snaile
+  Index: -1
+  Name: 🐌
+  Charter: duducat
+  Level: ??
+  Constant: 0

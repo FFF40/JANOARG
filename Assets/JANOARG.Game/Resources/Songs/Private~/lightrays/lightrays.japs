@@ -1,0 +1,30 @@
+JANOARG Playable Song Format
+github.com/FFF40/JANOARG
+
+[VERSION]
+1
+
+[METADATA]
+Name: light-rays
+Artist: Reality
+Genre: Kawaii
+Location: ???
+
+[RESOURCES]
+Clip: lightrays.wav
+
+[COLORS]
+Background: 0.373 0.1438195 0.1438195 1
+Interface: 1 1 1 1
+
+[TIMING]
++ BPM 0 200 4 S
+
+[CHARTS]
++ Chart
+  Target: simple
+  Index: 0
+  Name: Normal
+  Charter: M3galodon
+  Level: 15
+  Constant: 15

@@ -1,0 +1,537 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b996f20fbb94ba04eb1a0dee52eb628e, type: 3}
+  m_Name: Furry Fury 40_
+  m_EditorClassIdentifier: 
+  Data:
+    Storyboard:
+      Timestamps:
+      - Time: 0
+        Duration: 8
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 1.2
+        Easing: Cubic
+        EaseMode: 1
+      - Time: 0
+        Duration: 8
+        ID: CameraRotation_X
+        From: NaN
+        Target: 30
+        Easing: Cubic
+        EaseMode: 1
+      - Time: 8
+        Duration: 8
+        ID: CameraRotation_X
+        From: NaN
+        Target: 40
+        Easing: Cubic
+        EaseMode: 1
+      - Time: 8
+        Duration: 8
+        ID: CameraPivot_Z
+        From: NaN
+        Target: 0
+        Easing: Cubic
+        EaseMode: 1
+      - Time: 8
+        Duration: 8
+        ID: CameraPivot_Y
+        From: NaN
+        Target: 2
+        Easing: Cubic
+        EaseMode: 1
+    DifficultyName: Furry Fury
+    DifficultyLevel: 40*
+    DifficultyIndex: 3
+    ChartConstant: 40
+    Groups: []
+    Lanes:
+    - Storyboard:
+        Timestamps:
+        - Time: 0
+          Duration: 8
+          ID: Offset_X
+          From: NaN
+          Target: 6.75
+          Easing: Quartic
+          EaseMode: 1
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 7.74994
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -4
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 24
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: 0, z: 0}
+      OffsetRotation: {x: 0, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps:
+        - Time: 0
+          Duration: 8
+          ID: Offset_X
+          From: NaN
+          Target: -6.75
+          Easing: Quartic
+          EaseMode: 1
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 3
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 7.49993
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 7.99996
+        Position: 0
+        Length: 2.1
+        HoldLength: 0.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 8.99993
+        Position: 0
+        Length: 2.1
+        HoldLength: 0.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 10
+        Position: 0
+        Length: 2.1
+        HoldLength: 0.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 11.99995
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 15.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -4
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 24
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: 0, z: 0}
+      OffsetRotation: {x: 0, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps:
+        - Time: 0
+          Duration: 8
+          ID: Offset_X
+          From: NaN
+          Target: -2.25
+          Easing: Quartic
+          EaseMode: 1
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 6.49995
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 10.99997
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 12.24996
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 14.99996
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -4
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 24
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: 0, z: 0}
+      OffsetRotation: {x: 0, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    - Storyboard:
+        Timestamps:
+        - Time: 0
+          Duration: 8
+          ID: Offset_X
+          From: NaN
+          Target: 2.25
+          Easing: Quartic
+          EaseMode: 1
+      Objects:
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: -0.00003
+        Position: 0.55
+        Length: 0.90000004
+        HoldLength: 0
+        Flickable: 1
+        FlickDirection: 45
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: -0
+        Position: -0.45
+        Length: 0.90000004
+        HoldLength: 0
+        Flickable: 1
+        FlickDirection: 315
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 4
+        Position: 0
+        Length: 1
+        HoldLength: 1.25
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 7
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 8
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 11.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 12.49998
+        Position: 0
+        Length: 2.1
+        HoldLength: 0.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 13.499951
+        Position: 0
+        Length: 2.1
+        HoldLength: 0.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 14.499929
+        Position: 0
+        Length: 2.1
+        HoldLength: 0.5
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      - Storyboard:
+          Timestamps: []
+        Type: 0
+        Offset: 15.5
+        Position: 0
+        Length: 1
+        HoldLength: 0
+        Flickable: 0
+        FlickDirection: -1
+        StyleIndex: 0
+      LaneSteps:
+      - Storyboard:
+          Timestamps: []
+        Offset: -4
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      - Storyboard:
+          Timestamps: []
+        Offset: 24
+        StartPos: {x: -2, y: -3.5}
+        StartEaseX: Linear
+        StartEaseXMode: 0
+        StartEaseY: Linear
+        StartEaseYMode: 0
+        EndPos: {x: 2, y: -3.5}
+        EndEaseX: Linear
+        EndEaseXMode: 0
+        EndEaseY: Linear
+        EndEaseYMode: 0
+        Speed: 1
+      ExpandToInfinity: 1
+      Offset: {x: 0, y: 0, z: 0}
+      OffsetRotation: {x: 0, y: 0, z: 0}
+      Group: 
+      StyleIndex: 0
+    CameraPivot: {x: 0, y: 0, z: 0}
+    CameraRotation: {x: 0, y: 0, z: 0}
+    Pallete:
+      Storyboard:
+        Timestamps:
+        - Time: 0
+          Duration: 4
+          ID: BackgroundColor_R
+          From: 0.2
+          Target: 0
+          Easing: Linear
+          EaseMode: 0
+        - Time: 0
+          Duration: 4
+          ID: BackgroundColor_G
+          From: 0.2
+          Target: 0
+          Easing: Linear
+          EaseMode: 0
+        - Time: 0
+          Duration: 4
+          ID: BackgroundColor_B
+          From: 0.2
+          Target: 0
+          Easing: Linear
+          EaseMode: 0
+      BackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+      InterfaceColor: {r: 1, g: 1, b: 1, a: 1}
+      LaneStyles:
+      - Storyboard:
+          Timestamps: []
+        LaneMaterial: {fileID: 2100000, guid: 988651f4589605f43a016265927babd6, type: 2}
+        LaneColorTarget: _Color
+        LaneColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
+        JudgeMaterial: {fileID: 0}
+        JudgeColorTarget: _Color
+        JudgeColor: {r: 1, g: 1, b: 1, a: 1}
+      HitStyles:
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0.8915094, g: 0.9415225, b: 1, a: 1}
+        CatchColor: {r: 1, g: 0.997451, b: 0.35000002, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+        CatchColor: {r: 1, g: 0.99607843, b: 0.34901962, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+        CatchColor: {r: 1, g: 0.99607843, b: 0.34901962, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+        CatchColor: {r: 1, g: 0.99607843, b: 0.34901962, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+      - Storyboard:
+          Timestamps: []
+        MainMaterial: {fileID: 2100000, guid: b2c224326cfa4f848a615404f8d6969e, type: 2}
+        MainColorTarget: _Color
+        NormalColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}
+        CatchColor: {r: 1, g: 0.99607843, b: 0.34901962, a: 1}
+        HoldTailMaterial: {fileID: 2100000, guid: 70f98e086b90d284c842d3b99abe4dd9, type: 2}
+        HoldTailColorTarget: _Color
+        HoldTailColor: {r: 0.8901961, g: 0.9411765, b: 1, a: 1}

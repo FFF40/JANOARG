@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bf945a69fe88df42b29fd6483cfde30, type: 3}
+  m_Name: "\u874E\u864E\u5929\u4F53 -Lacertid- - Nick Furry vs \u60AA\u3044\u30B1\u30E2\u30CE-A"
+  m_EditorClassIdentifier: 
+  SongName: "\u874E\u864E\u5929\u4F53 -Lacertid-"
+  AltSongName: Celestial Lizard-Tiger -Lacertid-
+  SongArtist: "Nick Furry vs \u60AA\u3044\u30B1\u30E2\u30CE-A"
+  AltSongArtist: Nick Furry vs Warui Kemono-A
+  Location: Prototype
+  Genre: Genreless
+  Clip: {fileID: 8300000, guid: 9b3f23effcc0df64ebdb0eb05230487f, type: 3}
+  Timing:
+    Stops:
+    - Offset: 1.364
+      BPM: 220
+      Signature: 4
+  ChartsOld: []
+  Charts:
+  - Target: Furry Fury 40_
+    DifficultyName: Furry Fury
+    DifficultyLevel: 40*
+    DifficultyIndex: 3
+    ChartConstant: 40
+  - Target: Test Difficulty __
+    DifficultyName: Test Difficulty
+    DifficultyLevel: ??
+    DifficultyIndex: -1
+    ChartConstant: 0

@@ -1,0 +1,40 @@
+JANOARG Playable Song Format
+github.com/FFF40/JANOARG
+
+[VERSION]
+2
+
+[METADATA]
+Name: Raintain
+Artist: Sound Souler
+Genre: Genreless
+Location: Prototype
+Preview Range: 42.11742 62.3076
+
+[RESOURCES]
+Clip: raintain.mp3
+
+[COVER]
+Artist: the void!?!??
+Background: 0.9803922 1 0.8431373 1
+Icon: icon.png
+Icon Center: 0 0
+Icon Size: 200
+
+[COLORS]
+Background: 0.9803922 1 0.8431373 1
+Interface: 0.145098 0.1686275 0.145098 1
+
+[TIMING]
++ BPM 0.025 207 4 S
++ BPM 41.764 169.8462 4 _
++ BPM 43.177 207 4 S
+
+[CHARTS]
++ Chart
+  Target: overdrive
+  Index: 3
+  Name: Overdrive
+  Charter: duducat
+  Level: 32
+  Constant: 32

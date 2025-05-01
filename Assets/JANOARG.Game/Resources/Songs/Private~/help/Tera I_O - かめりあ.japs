@@ -1,0 +1,27 @@
+JANOARG Playable Song Format
+github.com/ducdat0507/janoarg
+
+[METADATA]
+Name: Tera I/O
+Artist: かめりあ
+Alt Artist: Camellia
+Genre: 200step
+Location: Prototype
+
+[RESOURCES]
+Clip: 07 Tera I_O.mp3
+
+[COLORS]
+Background: 0 0 0 1
+Interface: 1 1 1 1
+
+[TIMING]
++ BPM 0.015 200 4 S
+
+[CHARTS]
++ Chart
+  Target: INFORMATION_OVERLOAD
+  Index: -1
+  Name: INFORMATION/OVERLOAD
+  Level: 47*
+  Constant: 47

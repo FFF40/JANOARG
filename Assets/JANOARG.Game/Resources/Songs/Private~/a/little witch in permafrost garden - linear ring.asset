@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bf945a69fe88df42b29fd6483cfde30, type: 3}
+  m_Name: little witch in permafrost garden - linear ring
+  m_EditorClassIdentifier: 
+  SongName: little witch in permafrost garden
+  AltSongName: 
+  SongArtist: linear ring
+  AltSongArtist: 
+  Location: Prototype
+  Genre: Genreless
+  Clip: {fileID: 8300000, guid: a4426066c08f08442a09540682c83d6e, type: 3}
+  Timing:
+    Stops:
+    - Offset: 0.515
+      BPM: 170
+      Signature: 3
+    - Offset: 11.103
+      BPM: 182
+      Signature: 3
+    - Offset: 12.092
+      BPM: 195
+      Signature: 3
+    - Offset: 13.015
+      BPM: 210
+      Signature: 3
+    - Offset: 14.729
+      BPM: 225
+      Signature: 3
+    - Offset: 16.329
+      BPM: 242
+      Signature: 3
+    - Offset: 72.858
+      BPM: 222
+      Signature: 3
+    - Offset: 74.48
+      BPM: 208
+      Signature: 3
+    - Offset: 76.21
+      BPM: 188
+      Signature: 3
+    - Offset: 83.87
+      BPM: 200
+      Signature: 3
+    - Offset: 85.67
+      BPM: 218
+      Signature: 3
+    - Offset: 87.321
+      BPM: 242
+      Signature: 3
+    - Offset: 133.437
+      BPM: 250
+      Signature: 3
+    - Offset: 134.877
+      BPM: 260
+      Signature: 3
+    - Offset: 136.261
+      BPM: 280
+      Signature: 3
+    - Offset: 137.547
+      BPM: 300
+      Signature: 3
+    - Offset: 149.547
+      BPM: 316
+      Signature: 3
+    - Offset: 150.686
+      BPM: 330
+      Signature: 3
+    - Offset: 151.777
+      BPM: 350
+      Signature: 3
+  ChartsOld: []
+  Charts:
+  - Target: Hi-Fidelity 30
+    DifficultyName: Hi-Fidelity
+    DifficultyLevel: 30
+    DifficultyIndex: 3
+    ChartConstant: 30
