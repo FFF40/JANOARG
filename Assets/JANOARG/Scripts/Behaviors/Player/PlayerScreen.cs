@@ -39,7 +39,9 @@ public class PlayerScreen : MonoBehaviour
     public ScrollingCounter ScoreCounter;
     public List<Graphic> ScoreDigits;
     [Space]
+    public CanvasGroup JudgmentGroup;
     public TMP_Text JudgmentLabel;
+    public CanvasGroup ComboGroup;
     public TMP_Text ComboLabel;
     public RectTransform JudgeScreenHolder;
     [Space]
@@ -123,6 +125,7 @@ public class PlayerScreen : MonoBehaviour
         SongArtistLabel.text = TargetSong.SongArtist;
         DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
         DifficultyLabel.text = TargetChartMeta.DifficultyLevel;
+        
 
         string path = Path.Combine(Path.GetDirectoryName(TargetSongPath), TargetChartMeta.Target);
         Debug.Log(path);
@@ -178,6 +181,8 @@ public class PlayerScreen : MonoBehaviour
             }
 
         }
+
+        ComboGroup.alpha = JudgmentGroup.alpha = 0;
 
         float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
 
@@ -373,6 +378,8 @@ public class PlayerScreen : MonoBehaviour
         PlayerInputManager.main.UpdateTouches();
     }
 
+    Coroutine judgAnim;
+
     public void AddScore(float score, float? acc)
     {
         CurrentExScore += score;
@@ -390,9 +397,39 @@ public class PlayerScreen : MonoBehaviour
             Combo = 0;
             BadCount++;
         }
+        
+        ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
+        if (acc.HasValue)
+        {
+            JudgmentLabel.text = acc == 0 ? "FLAWLESS" : 
+                acc < 0 ? (score > 0 ? "EARLY" : "BAD") : 
+                (score > 0 ? "LATE" : "MISS");
+        }
+        else 
+        {
+            JudgmentLabel.text = score > 0 ? "FLAWLESS" : "MISS";
+        }
+
+        if (judgAnim != null) StopCoroutine(judgAnim);
+        judgAnim = StartCoroutine(JudgmentAnim());
+
         TotalCombo++;
-        ComboLabel.text = Combo.ToString("0000");
     }
+
+    IEnumerator JudgmentAnim() 
+    {
+        yield return Ease.Animate(.6f, (x) => {
+            float val = Mathf.Pow(1 - x, 5);
+            float val2 = 1 - Ease.Get(x, EaseFunction.Quintic, EaseMode.In);
+
+            ComboGroup.alpha = Combo == 0 ? 0 : val + 1;
+            ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
+            JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
+            JudgmentGroup.alpha = val2;
+        });
+    }
+
+
 
     public void RemoveHitPlayer(HitPlayer hit) 
     {
@@ -489,7 +526,7 @@ public class PlayerScreen : MonoBehaviour
         foreach (Graphic g in ScoreDigits) g.color = color;
         SongProgressBody.color = color * new Color (1, 1, 1, .5f);
     }
-
+    
     public void InitFlickMeshes() 
     {
         if (!FreeFlickIndicator) 

@@ -22,20 +22,20 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
     [HideInInspector]
     public List<HoldHandler> HoldQueue = new();
 
-    public void Awake() 
+    public void Awake()
     {
         EnhancedTouchSupport.Enable();
-        main = this; 
+        main = this;
     }
 
-    public void OnDestroy() 
+    public void OnDestroy()
     {
         EnhancedTouchSupport.Disable();
     }
 
     public void UpdateTouches()
     {
-        if (Autoplay) 
+        if (Autoplay)
         {
             for (int a = 0; a < HitQueue.Count; a++)
             {
@@ -47,12 +47,12 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 }
                 else if (hit.IsHit)
                 {
-                    while (hit.HoldTicks.Count > 0 && hit.HoldTicks[0] <= Player.CurrentTime) 
+                    while (hit.HoldTicks.Count > 0 && hit.HoldTicks[0] <= Player.CurrentTime)
                     {
                         Player.AddScore(1, null);
-                        Player.HitObjectHistory.Add(new (hit.HoldTicks[0], HitObjectHistoryType.Catch, 0));
+                        Player.HitObjectHistory.Add(new(hit.HoldTicks[0], HitObjectHistoryType.Catch, 0));
                         hit.HoldTicks.RemoveAt(0);
-                        
+
                         var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
                         effect.SetAccuracy(null);
                         effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
@@ -70,13 +70,13 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 {
                     Player.Hit(hit, 0);
                 }
-                else 
+                else
                 {
                     break;
                 }
             }
         }
-        else 
+        else
         {
             int fingerCount = Touch.activeFingers.Count;
             float dpi = Screen.dpi > 0 ? Screen.dpi : 200;
@@ -89,7 +89,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 Touch touch = finger.currentTouch;
                 if (Fingers.Find(x => x.Finger.index == finger.index) == null)
                 {
-                    Fingers.Add(new FingerHandler {
+                    Fingers.Add(new FingerHandler
+                    {
                         Finger = finger,
                         StartTime = (float)touch.startTime - Time.realtimeSinceStartup + Player.CurrentTime,
                         FlickCenter = touch.startScreenPosition,
@@ -97,7 +98,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 }
             }
 
-            for (int a = 0; a < Fingers.Count; a++) 
+            for (int a = 0; a < Fingers.Count; a++)
             {
                 var finger = Fingers[a];
                 Touch touch = finger.Finger.currentTouch;
@@ -140,34 +141,34 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 {
                     if (hit.IsHit)
                     {
-                        
+
                     }
-                    else 
+                    else
                     {
                         if (isDiscrete)
                         {
-                            if (hit.IsQueuedHit)
+                            if (hit.IsHit || hit.IsQueuedHit)
                             {
-                                
+
                             }
                             else if (hit.Current.Flickable)
                             {
                                 float distance = 0;
-                                bool IsInRange(Vector2 screenPos) => 
+                                bool IsInRange(Vector2 screenPos) =>
                                     hit.Current.Type == HitObject.HitType.Normal && float.IsFinite(hit.Current.FlickDirection)
                                         ? (distance = Mathf.Abs((Quaternion.Euler(0, 0, hit.Current.FlickDirection) * (screenPos - hit.HitCoord.Position)).x)) < hit.HitCoord.Radius
                                         : (distance = Vector2.Distance(screenPos, hit.HitCoord.Position)) < hit.HitCoord.Radius + dpi * 1f;
-                                
+
                                 if (hit.Current.Type == HitObject.HitType.Normal && !hit.IsTapped)
                                 {
                                     foreach (FingerHandler finger in Fingers)
                                     {
                                         float timeDiff = 0;
-                                        if 
+                                        if
                                         (
-                                            finger.TapEligible && 
-                                            IsInRange(finger.Finger.screenPosition) && 
-                                            (!finger.QueuedHit || 
+                                            finger.TapEligible &&
+                                            IsInRange(finger.Finger.screenPosition) &&
+                                            (!finger.QueuedHit ||
                                                 (timeDiff = hit.Time - finger.QueuedHit.Time) < -0.0001f ||
                                                 (timeDiff < 0.0001f && distance < finger.QueuedHitDistance)
                                             )
@@ -180,15 +181,15 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                         }
                                     }
                                 }
-                                else 
+                                else
                                 {
                                     foreach (FingerHandler finger in Fingers)
                                     {
 
-                                        if 
+                                        if
                                         (
-                                            finger.FlickEligible && 
-                                            ((hit.Current.Type == HitObject.HitType.Normal) ? finger.QueuedHit == hit : IsInRange(finger.Finger.screenPosition)) && 
+                                            finger.FlickEligible &&
+                                            ((hit.Current.Type == HitObject.HitType.Normal) ? finger.QueuedHit == hit : IsInRange(finger.Finger.screenPosition)) &&
                                             (!float.IsFinite(hit.Current.FlickDirection) || CheckFlickDirection(hit.Current.FlickDirection, finger.FlickDirection))
                                         )
                                         {
@@ -199,11 +200,11 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                     }
                                 }
                             }
-                            else 
+                            else
                             {
                                 foreach (FingerHandler finger in Fingers)
-                                { 
-                                    if 
+                                {
+                                    if
                                     (
                                         Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position) < hit.HitCoord.Radius
                                     )
@@ -219,11 +220,11 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             foreach (FingerHandler finger in Fingers)
                             {
                                 float distance = 0, timeDiff = 0;
-                                if 
+                                if
                                 (
-                                    finger.TapEligible && 
-                                    (distance = Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position)) < hit.HitCoord.Radius && 
-                                    (!finger.QueuedHit || 
+                                    finger.TapEligible &&
+                                    (distance = Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position)) < hit.HitCoord.Radius &&
+                                    (!finger.QueuedHit ||
                                         (timeDiff = hit.Time - finger.QueuedHit.Time) < -0.0001f ||
                                         (timeDiff < 0.0001f && distance < finger.QueuedHitDistance)
                                     )
@@ -248,7 +249,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
 
                         if (hit.IsHit)
                         {
-                            HoldQueue.Add(new HoldHandler {
+                            HoldQueue.Add(new HoldHandler
+                            {
                                 Hit = hit,
                             });
                             HitQueue.RemoveAt(a);
@@ -266,14 +268,14 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
             // Process hold notes 
             if (HoldQueue.Count > 0)
             {
-                float time = Player.CurrentTime;
+                float time = Player.CurrentTime + Player.Settings.JudgmentOffset;
                 float beat = PlayerScreen.TargetSong.Timing.ToBeat(time);
 
                 CameraController camera = (CameraController)PlayerScreen.TargetChart.Data.Camera.Get(beat);
                 Player.Pseudocamera.transform.position = camera.CameraPivot;
                 Player.Pseudocamera.transform.eulerAngles = camera.CameraRotation;
                 Player.Pseudocamera.transform.Translate(Vector3.back * camera.PivotDistance);
-                
+
                 for (int a = 0; a < HoldQueue.Count; a++)
                 {
                     var hold = HoldQueue[a];
@@ -285,14 +287,14 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     startPos = Quaternion.Euler(lane.Rotation) * step.StartPos + lane.Position;
                     endPos = Quaternion.Euler(lane.Rotation) * step.EndPos + lane.Position;
                     LaneGroupPlayer gp = hold.Hit.Lane.Group;
-                    while (gp) 
+                    while (gp)
                     {
                         LaneGroup laneGroup = (LaneGroup)gp.Original.Get(beat);
                         startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
                         endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
                         gp = gp.Parent;
                     }
-                    
+
                     HitObject hit = (HitObject)hold.Hit.Original.Get(beat);
                     Vector2 hitStart = Player.Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, hit.Position));
                     Vector2 hitEnd = Player.Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, hit.Position + hit.Length));
@@ -304,8 +306,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     {
                         bool isHoldingNow = false;
                         foreach (FingerHandler finger in Fingers)
-                        { 
-                            if 
+                        {
+                            if
                             (
                                 Vector2.Distance(finger.Finger.screenPosition, hold.Hit.HitCoord.Position) < hold.Hit.HitCoord.Radius
                             )
@@ -319,19 +321,19 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         {
                             hold.HoldValue = Mathf.Clamp01(hold.HoldValue + Time.deltaTime / Player.PassWindow * .1f);
                         }
-                        else 
+                        else
                         {
                             hold.HoldValue = hold.HoldValue - Time.deltaTime / Player.PassWindow;
                             if (hold.HoldValue <= 0) hold.IsHolding = false;
                         }
                     }
-                    else 
+                    else
                     {
-                        if (hold.HoldValue >= 1) 
+                        if (hold.HoldValue >= 1)
                         {
                             foreach (FingerHandler finger in Fingers)
-                            { 
-                                if 
+                            {
+                                if
                                 (
                                     Vector2.Distance(finger.Finger.screenPosition, hold.Hit.HitCoord.Position) < hold.Hit.HitCoord.Radius
                                 )
@@ -343,12 +345,12 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         }
                     }
 
-                    while (hold.Hit.HoldTicks.Count > 0 && hold.Hit.HoldTicks[0] <= Player.CurrentTime) 
+                    while (hold.Hit.HoldTicks.Count > 0 && hold.Hit.HoldTicks[0] <= Player.CurrentTime)
                     {
                         Player.AddScore(hold.IsHolding ? 1 : 0, null);
-                        Player.HitObjectHistory.Add(new (hold.Hit.HoldTicks[0], HitObjectHistoryType.Catch, hold.IsHolding ? 0 : float.PositiveInfinity));
+                        Player.HitObjectHistory.Add(new(hold.Hit.HoldTicks[0], HitObjectHistoryType.Catch, hold.IsHolding ? 0 : float.PositiveInfinity));
                         hold.Hit.HoldTicks.RemoveAt(0);
-                        if (hold.IsHolding) 
+                        if (hold.IsHolding)
                         {
                             var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
                             effect.SetAccuracy(null);
@@ -356,7 +358,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             var rt = (RectTransform)effect.transform;
                             rt.position = hold.Hit.HitCoord.Position;
                         }
-                        else 
+                        else
                         {
                             hold.HoldValue = 1;
                         }
@@ -370,25 +372,31 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     }
                 }
             }
-            
+
             // Process queued hit objects
-            for (int a = 0; a < Fingers.Count; a++) 
+            for (int a = 0; a < Fingers.Count; a++)
             {
                 var finger = Fingers[a];
-                if (finger.QueuedHit && finger.QueuedHit.Current.Type == HitObject.HitType.Normal && !finger.QueuedHit.Current.Flickable)
+                if (
+                    finger.QueuedHit &&
+                    !finger.QueuedHit.IsHit &&
+                    finger.QueuedHit.Current.Type == HitObject.HitType.Normal &&
+                    !finger.QueuedHit.Current.Flickable
+                )
                 {
                     Player.Hit(finger.QueuedHit, finger.StartTime + Player.Settings.JudgmentOffset - finger.QueuedHit.Time);
 
                     if (finger.QueuedHit.IsHit)
                     {
-                        HoldQueue.Add(new HoldHandler {
+                        HoldQueue.Add(new HoldHandler
+                        {
                             Hit = finger.QueuedHit,
                             IsHolding = true,
                             HoldValue = 1,
                         });
                         HitQueue.Remove(finger.QueuedHit);
                     }
-
+                    finger.QueuedHit.IsHit = true;
                     finger.QueuedHit = null;
                 }
                 finger.TapEligible = false;
@@ -403,7 +411,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
         }
     }
 
-    public void AddToQueue(HitPlayer hit) 
+    public void AddToQueue(HitPlayer hit)
     {
         int index = HitQueue.FindLastIndex(x => x.Time < hit.Time);
         HitQueue.Insert(index + 1, hit);
@@ -416,7 +424,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
     }
 }
 
-public class FingerHandler 
+public class FingerHandler
 {
     public Finger Finger;
     public float StartTime;
@@ -429,7 +437,7 @@ public class FingerHandler
     public float QueuedHitDistance;
 }
 
-public class HoldHandler 
+public class HoldHandler
 {
     public HitPlayer Hit;
     public bool IsHolding;

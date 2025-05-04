@@ -71,11 +71,7 @@ public class SongSelectReadyScreen : MonoBehaviour
             var meshInfo = SongNameText.textInfo.meshInfo[info2.materialReferenceIndex];
             int index = info2.vertexIndex;
             float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Circle, EaseMode.In), 3.5f);
-            float ease2 = Ease.Get(x * .8f + .2f, EaseFunction.Bounce, EaseMode.Out);
-            Vector3 offset = new (
-                1000 * (1 - ease),
-                30 * (1 - ease2)
-            );
+            Vector3 offset = new (1000 * (1 - ease), 0);
             meshInfo.vertices[index] += offset;
             meshInfo.vertices[index + 1] += offset;
             meshInfo.vertices[index + 2] += offset;

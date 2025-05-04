@@ -24,7 +24,8 @@ public class ScoreStore
 
     public ScoreStoreEntry Get(string SongID, string ChartID)
     {
-        if (Entries.TryGetValue(SongID + "/" + ChartID, out var value)) return value;
+        ScoreStoreEntry value;
+        if (Entries.TryGetValue(SongID + "/" + ChartID, out value)) return value;
         return null;
     }
 
@@ -37,6 +38,7 @@ public class ScoreStore
         }
         else 
         {
+            Debug.Log(oldEntry.Score + " " + entry.Score);
             oldEntry.Rating = Mathf.Max(oldEntry.Rating, entry.Rating);
             oldEntry.MaxCombo = Mathf.Max(oldEntry.MaxCombo, entry.MaxCombo);
         }
