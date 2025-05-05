@@ -53,7 +53,7 @@ public class OptionsPanel : MonoBehaviour
         TabButtons[CurrentTab].SetFill(1);
         MakeTab(CurrentTab);
 
-        PreviewTexture = new RenderTexture(Screen.width, Screen.height, 32, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_SNorm);
+        PreviewTexture = new RenderTexture(Screen.width, Screen.height, 32, UnityEngine.Experimental.Rendering.DefaultFormat.LDR);
         PreviewTextureTarget.texture = PreviewCamera.targetTexture = PreviewTexture;
         PreviewCamera.fieldOfView = Camera.HorizontalToVerticalFieldOfView(110, PreviewCamera.aspect);
         

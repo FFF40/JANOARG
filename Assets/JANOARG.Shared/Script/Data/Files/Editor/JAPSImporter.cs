@@ -3,7 +3,7 @@ using UnityEditor.AssetImporters;
 using System.IO;
 using UnityEditor;
 
-[ScriptedImporter(1, "japs", 1)]
+[ScriptedImporter(1, "japs", 1000)]
 public class JAPSImporter : ScriptedImporter
 {
     public override void OnImportAsset(AssetImportContext ctx)
