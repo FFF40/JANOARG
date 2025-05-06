@@ -14,12 +14,8 @@ public class StorageManager : MonoBehaviour
     void Awake()
     {
         main = this;
-    } 
-
-    void Start()
-    {
         Load();
-    }
+    } 
 
     public void Load()
     {

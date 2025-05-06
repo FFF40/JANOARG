@@ -34,11 +34,11 @@ public class ScoreStore
         ScoreStoreEntry oldEntry = Get(entry.SongID, entry.ChartID);
         if (oldEntry == null || oldEntry.Score < entry.Score) 
         {
-            Entries[entry.SongID + "/" + entry.ChartID] = entry;
+            string id = entry.SongID + "/" + entry.ChartID;
+            Entries[id] = entry;
         }
         else 
         {
-            Debug.Log(oldEntry.Score + " " + entry.Score);
             oldEntry.Rating = Mathf.Max(oldEntry.Rating, entry.Rating);
             oldEntry.MaxCombo = Mathf.Max(oldEntry.MaxCombo, entry.MaxCombo);
         }

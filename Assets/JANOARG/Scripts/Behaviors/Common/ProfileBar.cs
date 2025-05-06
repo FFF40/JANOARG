@@ -150,9 +150,7 @@ public class ProfileBar : MonoBehaviour
 
     public void UpdateRatingInfo()
     {
-
         // Get all records in save
-        StorageManager.main.Scores.Load();
         Dictionary<string, ScoreStoreEntry> Entries = StorageManager.main.Scores.Entries;
         List<float> ratingEntries = new List<float>();
         
