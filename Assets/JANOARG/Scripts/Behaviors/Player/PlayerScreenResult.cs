@@ -79,21 +79,38 @@ public class PlayerScreenResult : MonoBehaviour
     IEnumerator EndingAnim()
     {
         Fanfare.LoadAudioData();
-        PlayerScreen.main.PlayerHUD.SetActive(false);
-        
+
+        PlayerScreen.main.PauseLabel.gameObject.SetActive(false); // hide pause label but not the rest
+
         PlayerScreen ps = PlayerScreen.main;
 
-        if (ps.TotalCombo == ps.PerfectCount) {
+        if (ps.TotalCombo == ps.PerfectCount)
+        {
             ResultText.text = "ALL FLAWLESS!!!";
-        } else if (ps.BadCount == 0 && ps.GoodCount != 0) {
+        }
+        else if (ps.BadCount == 0 && ps.GoodCount != 0)
+        {
             ResultText.text = "FULL STREAK!";
-        } else if (ps.GoodCount == ps.TotalCombo) {
+        }
+        else if (ps.GoodCount == ps.TotalCombo)
+        {
             ResultText.text = "ALL MISALIGNED...!?";
-        } else if (ps.BadCount == ps.TotalCombo) {
+        }
+        else if (ps.BadCount == ps.TotalCombo)
+        {
             ResultText.text = "ALL BROKEN...?";
-        } else {
+        }
+        else
+        {
             ResultText.text = "TRACK CLEARED";
         }
+
+        yield return new WaitWhile(() => ps.JudgmentGroup.alpha != 0);
+        yield return Ease.Animate(1, x =>
+        {
+            ps.ComboLabel.rectTransform.anchoredPosition *=
+                new Vector3Frag(x: -28 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out));
+        });
 
         Flash.SetActive(true);
         ResultText.gameObject.SetActive(false);
@@ -102,25 +119,29 @@ public class PlayerScreenResult : MonoBehaviour
         ResultTextBig.alpha = 0;
 
         foreach (var ring in ScoreExplosionRings) ring.rectTransform.localPosition = Vector2.zero;
-        ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
+        ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
             PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
-        StartCoroutine(Ease.Animate(2, x => {
-            FlashBackground.color = new (1, 1, 1, .2f * (1 - x));
+        StartCoroutine(Ease.Animate(2, x =>
+        {
+            FlashBackground.color = new(1, 1, 1, .2f * (1 - x));
             ScoreExplosionRings[0].InsideRadius = 0.9f * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
-            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (200 * Ease.Get(x, EaseFunction.Circle, EaseMode.Out));
-            ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+            ScoreExplosionRings[0].rectTransform.sizeDelta =
+                Vector2.one * (200 * Ease.Get(x, EaseFunction.Circle, EaseMode.Out));
+            ScoreExplosionRings[0].rectTransform.localEulerAngles =
+                Vector3.forward * (55 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
         }));
 
-        yield return Ease.Animate(1, (x) => {
-
-            ResultBackground.rectTransform.sizeDelta = new (
+        yield return Ease.Animate(1, (x) =>
+        {
+            ResultBackground.rectTransform.sizeDelta = new(
                 ResultBackground.rectTransform.sizeDelta.y,
                 Ease.Get(x, EaseFunction.Circle, EaseMode.In) * 50
             );
         });
 
-        ResultText.gameObject.SetActive(true);
+
+    ResultText.gameObject.SetActive(true);
         ResultText.rectTransform.localScale = Vector3.one;
         ResultText.rectTransform.anchoredPosition = Vector2.zero;
         ResultTextBig.text = ResultText.text;
@@ -189,6 +210,7 @@ public class PlayerScreenResult : MonoBehaviour
                 ResultBackground.rectTransform.sizeDelta.x,
                 ease1 * -10 + 100
             );
+            
             ResultText.fontSize = 50 * (1 - ease1);
             ResultText.characterSpacing = 15 / Mathf.Pow(1 - ease1, 3);
             FanfareSource.volume = (x * .3f + .3f) * Settings.BGMusicVolume;
@@ -391,6 +413,9 @@ public class PlayerScreenResult : MonoBehaviour
     IEnumerator RetryAnim()
     {
         IsAnimating = true;
+        
+        // Return components to their original state
+        PlayerScreen.main.ComboLabel.rectTransform.localPosition *= new Vector3Frag(x: 15);
 
         ScoreHolder.gameObject.SetActive(false);
         RetryBackground.gameObject.SetActive(true);
