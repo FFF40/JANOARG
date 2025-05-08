@@ -105,12 +105,7 @@ public class PlayerScreenResult : MonoBehaviour
             ResultText.text = "TRACK CLEARED";
         }
 
-        yield return new WaitWhile(() => ps.JudgmentGroup.alpha != 0);
-        yield return Ease.Animate(1, x =>
-        {
-            ps.ComboLabel.rectTransform.anchoredPosition *=
-                new Vector3Frag(x: -28 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out));
-        });
+        StartCoroutine(CenteriseComboCounter()); // Prevent WaitWhile from delaying the overall animation
 
         Flash.SetActive(true);
         ResultText.gameObject.SetActive(false);
@@ -173,6 +168,16 @@ public class PlayerScreenResult : MonoBehaviour
 
         yield return new WaitWhile(() => PlayerScreen.main.CurrentTime < PlayerScreen.main.Music.clip.length);
         StartResultAnim();
+    }
+    
+    IEnumerator CenteriseComboCounter()
+    {
+        yield return new WaitWhile(() => PlayerScreen.main.JudgmentGroup.alpha != 0);
+        yield return Ease.Animate(1, x =>
+        {
+            PlayerScreen.main.ComboLabel.rectTransform.anchoredPosition *=
+                new Vector3Frag(x: -28 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out));
+        });
     }
 
     public void StartResultAnim() 
