@@ -421,6 +421,7 @@ public class PlayerScreenResult : MonoBehaviour
         
         // Return components to their original state
         PlayerScreen.main.ComboLabel.rectTransform.localPosition *= new Vector3Frag(x: 15);
+        PlayerScreen.main.PauseLabel.gameObject.SetActive(true);
 
         ScoreHolder.gameObject.SetActive(false);
         RetryBackground.gameObject.SetActive(true);
