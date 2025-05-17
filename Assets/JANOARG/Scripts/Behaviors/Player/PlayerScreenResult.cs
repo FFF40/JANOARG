@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 using System.IO;
+using Random = UnityEngine.Random;
 
 public class PlayerScreenResult : MonoBehaviour
 {
@@ -47,6 +49,7 @@ public class PlayerScreenResult : MonoBehaviour
     public TMP_Text GoodCountText;
     public TMP_Text BadCountText;
     public TMP_Text MaxComboText;
+    public TMP_Text AverageOffset;
     [Space]
     public CanvasGroup LeftActionsHolder;
     public RectTransform LeftActionsTransform;
@@ -319,12 +322,46 @@ public class PlayerScreenResult : MonoBehaviour
             ScoreText.rectTransform.anchoredPosition *= new Vector2Frag(x: 50 + 110 * ease3);
         });
 
+        string AverageOffsetGetter()
+        {
+            string avgOffsetGetterTxt = "";
+            float avgOffsetGetterVal = 0.00f;
+            float samples = 0;
+            List<HitObjectHistoryItem> historyTaps = new List<HitObjectHistoryItem>();
+            
+            var history = PlayerScreen.main.HitObjectHistory;
+            foreach (var hitnotes in history) // Only count taps into the average offset
+            {
+                if (hitnotes.Type == HitObjectHistoryType.Timing)
+                    historyTaps.Add(hitnotes);
+            }
+            
+            foreach (var hSamples in historyTaps)
+            {
+                if (!float.IsPositiveInfinity(hSamples.Offset) && !float.IsNegativeInfinity(hSamples.Offset)) // Missed notes are not counted (Infinity)
+                    samples += hSamples.Offset * 100;
+            } // Sum of all tap offsets
+            
+            avgOffsetGetterVal = samples / historyTaps.Count;
+
+            if (avgOffsetGetterVal >= 0)
+            {
+                avgOffsetGetterTxt = "+" + avgOffsetGetterVal.ToString("F2"); // Append positive sign if >=0
+            }
+            else
+            {
+                avgOffsetGetterTxt = avgOffsetGetterVal.ToString("F2"); // Negative value already has sign (duh)
+            }
+            return avgOffsetGetterTxt;
+        };
+
         DetailsHolder.gameObject.SetActive(true);
         PerfectCountText.text = PlayerScreen.main.PerfectCount.ToString("N0");
         GoodCountText.text = PlayerScreen.main.GoodCount.ToString("N0");
         BadCountText.text = PlayerScreen.main.BadCount.ToString("N0");
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString("N0") 
             + " <size=60%><b>/ " + PlayerScreen.main.TotalCombo.ToString("N0");
+        AverageOffset.text = AverageOffsetGetter();
 
         var record = GetBestScore();
         var recordScore = record?.Score ?? 0;
