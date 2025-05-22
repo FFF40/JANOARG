@@ -338,20 +338,30 @@ public class PlayerScreenResult : MonoBehaviour
             
             foreach (var hSamples in historyTaps)
             {
-                if (!float.IsPositiveInfinity(hSamples.Offset) && !float.IsNegativeInfinity(hSamples.Offset)) // Missed notes are not counted (Infinity)
-                    samples += hSamples.Offset * 100;
+                if (!float.IsPositiveInfinity(hSamples.Offset) 
+                    && !float.IsNegativeInfinity(hSamples.Offset)) // Missed notes are not counted (+/-Infinity)
+                    samples += hSamples.Offset * 1000;
             } // Sum of all tap offsets
+            
+            // Check for zero count
+            if (historyTaps.Count == 0)
+                return "+0.00ms";
             
             avgOffsetGetterVal = samples / historyTaps.Count;
 
-            if (avgOffsetGetterVal >= 0)
+            if (avgOffsetGetterVal > 0)
             {
-                avgOffsetGetterTxt = "+" + avgOffsetGetterVal.ToString("F2"); // Append positive sign if >=0
+                avgOffsetGetterTxt = "+" + avgOffsetGetterVal.ToString("F2") +"ms"; // Append positive sign if >=0
+            }
+            else if (avgOffsetGetterVal == 0)
+            {
+                avgOffsetGetterTxt = "+0.00ms";
             }
             else
             {
-                avgOffsetGetterTxt = avgOffsetGetterVal.ToString("F2"); // Negative value already has sign (duh)
+                avgOffsetGetterTxt = avgOffsetGetterVal.ToString("F2") +"ms"; // Negative value already has sign (duh)
             }
+            
             return avgOffsetGetterTxt;
         };
 
