@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 using System.IO;
+using Random = UnityEngine.Random;
 
 public class PlayerScreenResult : MonoBehaviour
 {
@@ -47,6 +49,7 @@ public class PlayerScreenResult : MonoBehaviour
     public TMP_Text GoodCountText;
     public TMP_Text BadCountText;
     public TMP_Text MaxComboText;
+    public TMP_Text AverageOffset;
     [Space]
     public CanvasGroup LeftActionsHolder;
     public RectTransform LeftActionsTransform;
@@ -79,21 +82,33 @@ public class PlayerScreenResult : MonoBehaviour
     IEnumerator EndingAnim()
     {
         Fanfare.LoadAudioData();
-        PlayerScreen.main.PlayerHUD.SetActive(false);
-        
+
+        PlayerScreen.main.PauseLabel.gameObject.SetActive(false); // hide pause label but not the rest
+
         PlayerScreen ps = PlayerScreen.main;
 
-        if (ps.TotalCombo == ps.PerfectCount) {
+        if (ps.TotalCombo == ps.PerfectCount)
+        {
             ResultText.text = "ALL FLAWLESS!!!";
-        } else if (ps.BadCount == 0 && ps.GoodCount != 0) {
+        }
+        else if (ps.BadCount == 0 && ps.GoodCount != 0)
+        {
             ResultText.text = "FULL STREAK!";
-        } else if (ps.GoodCount == ps.TotalCombo) {
+        }
+        else if (ps.GoodCount == ps.TotalCombo)
+        {
             ResultText.text = "ALL MISALIGNED...!?";
-        } else if (ps.BadCount == ps.TotalCombo) {
+        }
+        else if (ps.BadCount == ps.TotalCombo)
+        {
             ResultText.text = "ALL BROKEN...?";
-        } else {
+        }
+        else
+        {
             ResultText.text = "TRACK CLEARED";
         }
+
+        StartCoroutine(CenteriseComboCounter()); // Prevent WaitWhile from delaying the overall animation
 
         Flash.SetActive(true);
         ResultText.gameObject.SetActive(false);
@@ -102,25 +117,29 @@ public class PlayerScreenResult : MonoBehaviour
         ResultTextBig.alpha = 0;
 
         foreach (var ring in ScoreExplosionRings) ring.rectTransform.localPosition = Vector2.zero;
-        ScoreExplosionRings[0].color = ScoreExplosionRings[1].color = 
+        ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
             PlayerScreen.CurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
 
-        StartCoroutine(Ease.Animate(2, x => {
-            FlashBackground.color = new (1, 1, 1, .2f * (1 - x));
+        StartCoroutine(Ease.Animate(2, x =>
+        {
+            FlashBackground.color = new(1, 1, 1, .2f * (1 - x));
             ScoreExplosionRings[0].InsideRadius = 0.9f * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
-            ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (200 * Ease.Get(x, EaseFunction.Circle, EaseMode.Out));
-            ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+            ScoreExplosionRings[0].rectTransform.sizeDelta =
+                Vector2.one * (200 * Ease.Get(x, EaseFunction.Circle, EaseMode.Out));
+            ScoreExplosionRings[0].rectTransform.localEulerAngles =
+                Vector3.forward * (55 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
         }));
 
-        yield return Ease.Animate(1, (x) => {
-
-            ResultBackground.rectTransform.sizeDelta = new (
+        yield return Ease.Animate(1, (x) =>
+        {
+            ResultBackground.rectTransform.sizeDelta = new(
                 ResultBackground.rectTransform.sizeDelta.y,
                 Ease.Get(x, EaseFunction.Circle, EaseMode.In) * 50
             );
         });
 
-        ResultText.gameObject.SetActive(true);
+
+    ResultText.gameObject.SetActive(true);
         ResultText.rectTransform.localScale = Vector3.one;
         ResultText.rectTransform.anchoredPosition = Vector2.zero;
         ResultTextBig.text = ResultText.text;
@@ -152,6 +171,16 @@ public class PlayerScreenResult : MonoBehaviour
 
         yield return new WaitWhile(() => PlayerScreen.main.CurrentTime < PlayerScreen.main.Music.clip.length);
         StartResultAnim();
+    }
+    
+    IEnumerator CenteriseComboCounter()
+    {
+        yield return new WaitWhile(() => PlayerScreen.main.JudgmentGroup.alpha != 0);
+        yield return Ease.Animate(1, x =>
+        {
+            PlayerScreen.main.ComboLabel.rectTransform.anchoredPosition *=
+                new Vector3Frag(x: -28 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out));
+        });
     }
 
     public void StartResultAnim() 
@@ -189,6 +218,7 @@ public class PlayerScreenResult : MonoBehaviour
                 ResultBackground.rectTransform.sizeDelta.x,
                 ease1 * -10 + 100
             );
+            
             ResultText.fontSize = 50 * (1 - ease1);
             ResultText.characterSpacing = 15 / Mathf.Pow(1 - ease1, 3);
             FanfareSource.volume = (x * .3f + .3f) * Settings.BGMusicVolume;
@@ -292,12 +322,58 @@ public class PlayerScreenResult : MonoBehaviour
             ScoreText.rectTransform.anchoredPosition *= new Vector2Frag(x: 50 + 110 * ease3);
         });
 
+        string AverageOffsetGetter()
+        {
+            string avgOffsetGetterTxt = "";
+            float avgOffsetGetterVal = 0.00f;
+            float samples = 0;
+            List<HitObjectHistoryItem> historyTaps = new List<HitObjectHistoryItem>();
+            
+            var history = PlayerScreen.main.HitObjectHistory;
+            foreach (var hitnotes in history) // Only count taps into the average offset
+            {
+                if (hitnotes.Type == HitObjectHistoryType.Timing)
+                    historyTaps.Add(hitnotes);
+            }
+            
+            foreach (var hSamples in historyTaps)
+            {
+                if (!float.IsPositiveInfinity(hSamples.Offset) 
+                    && !float.IsNegativeInfinity(hSamples.Offset)) // Missed notes are not counted (+/-Infinity)
+                    samples += hSamples.Offset * 1000;
+            } // Sum of all tap offsets
+            
+            // Check for zero count
+            if (historyTaps.Count == 0)
+                return "+0.00ms";
+            
+            avgOffsetGetterVal = samples / historyTaps.Count;
+
+            if (avgOffsetGetterVal > 0)
+            {
+                avgOffsetGetterTxt = "+" + avgOffsetGetterVal.ToString("F2") +"ms"; // Append positive sign if >=0
+            }
+            else if (avgOffsetGetterVal == 0)
+            {
+                avgOffsetGetterTxt = "+0.00ms";
+            }
+            else
+            {
+                avgOffsetGetterTxt = avgOffsetGetterVal.ToString("F2") +"ms"; // Negative value already has sign (duh)
+            }
+            
+            OptionsPanel.RecommendedOffset.Add(avgOffsetGetterVal);
+            
+            return avgOffsetGetterTxt;
+        };
+
         DetailsHolder.gameObject.SetActive(true);
         PerfectCountText.text = PlayerScreen.main.PerfectCount.ToString("N0");
         GoodCountText.text = PlayerScreen.main.GoodCount.ToString("N0");
         BadCountText.text = PlayerScreen.main.BadCount.ToString("N0");
         MaxComboText.text = PlayerScreen.main.MaxCombo.ToString("N0") 
             + " <size=60%><b>/ " + PlayerScreen.main.TotalCombo.ToString("N0");
+        AverageOffset.text = AverageOffsetGetter();
 
         var record = GetBestScore();
         var recordScore = record?.Score ?? 0;
@@ -391,6 +467,10 @@ public class PlayerScreenResult : MonoBehaviour
     IEnumerator RetryAnim()
     {
         IsAnimating = true;
+        
+        // Return components to their original state
+        PlayerScreen.main.ComboLabel.rectTransform.localPosition *= new Vector3Frag(x: 15);
+        PlayerScreen.main.PauseLabel.gameObject.SetActive(true);
 
         ScoreHolder.gameObject.SetActive(false);
         RetryBackground.gameObject.SetActive(true);

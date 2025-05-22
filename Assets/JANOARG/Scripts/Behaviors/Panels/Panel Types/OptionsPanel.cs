@@ -44,6 +44,7 @@ public class OptionsPanel : MonoBehaviour
 
     [HideInInspector]
     public bool IsAnimating;
+    public static List<float?> RecommendedOffset = new List<float?>();
 
     public Mesh FreeFlickIndicator { get; private set; }
     public Mesh ArrowFlickIndicator { get; private set; }
@@ -210,6 +211,17 @@ public class OptionsPanel : MonoBehaviour
                 SetScrollerWidth(360);
 
                 Spawn<OptionCategoryTitle>("Syncronization");
+
+                float RecommendedOffsetCalc()
+                {
+                    if (RecommendedOffset.Count == 0) return 0; // Skip calculation when no data
+                    float? offsetResult = 0;
+                    foreach (var samples in RecommendedOffset)
+                    {
+                        offsetResult += samples;
+                    }
+                    return (float)(offsetResult / RecommendedOffset.Count);
+                }
 
                 FloatOptionInput sample = GetOptionItemSample<FloatOptionInput>();
                 sample.Min = -500;
