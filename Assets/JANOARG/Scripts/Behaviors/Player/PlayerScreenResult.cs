@@ -362,6 +362,8 @@ public class PlayerScreenResult : MonoBehaviour
                 avgOffsetGetterTxt = avgOffsetGetterVal.ToString("F2") +"ms"; // Negative value already has sign (duh)
             }
             
+            OptionsPanel.RecommendedOffset.Add(avgOffsetGetterVal);
+            
             return avgOffsetGetterTxt;
         };
 

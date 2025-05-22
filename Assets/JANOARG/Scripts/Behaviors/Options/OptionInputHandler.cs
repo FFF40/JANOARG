@@ -5,7 +5,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Linq;
-
 public class OptionInputHandler : MonoBehaviour
 {
     public static OptionInputHandler main;
@@ -102,7 +101,11 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
+            case RecommendedOffsetOptionInput:
+            
+
+            case JudgmentOffsetOptionInput: 
+            case VisualOffsetOptionInput: 
                 {
                     FloatOptionInput i = (FloatOptionInput)item;
 
