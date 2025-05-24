@@ -132,18 +132,14 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 }
 
                 float offset = judgTime - hit.Time;
-                bool isDiscrete = (hit.Current.Type == HitObject.HitType.Catch) || hit.Current.Flickable;
+                bool isDiscrete = (hit.Current.Type == HitObject.HitType.Catch) || hit.Current.Flickable; // If catch or flick (no discrete timing window)
                 float window = isDiscrete ? Player.PassWindow : Player.GoodWindow;
 
                 bool isHit = false;
 
                 if (offset >= -window)
                 {
-                    if (hit.IsHit)
-                    {
-
-                    }
-                    else
+                    if(!hit.IsHit) // If the HitObject hasn't been hit yet
                     {
                         if (isDiscrete)
                         {
@@ -252,6 +248,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             HoldQueue.Add(new HoldHandler
                             {
                                 Hit = hit,
+                                HoldValue = hit.Current.HoldLength
+                                
                             });
                             HitQueue.RemoveAt(a);
                             a--;
@@ -268,6 +266,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
             // Process hold notes 
             if (HoldQueue.Count > 0)
             {
+                Debug.Log("HoldQueue: " + HoldQueue.Count);
                 float time = Player.CurrentTime + Player.Settings.JudgmentOffset;
                 float beat = PlayerScreen.TargetSong.Timing.ToBeat(time);
 
@@ -278,6 +277,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
 
                 for (int a = 0; a < HoldQueue.Count; a++)
                 {
+                    Debug.Log("HoldQueue: " + a);
                     var hold = HoldQueue[a];
                     Vector3 startPos, endPos;
 
@@ -300,19 +300,25 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     Vector2 hitEnd = Player.Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, hit.Position + hit.Length));
                     hold.Hit.HitCoord.Position = (hitStart + hitEnd) / 2;
                     hold.Hit.HitCoord.Radius = Vector2.Distance(hitStart, hitEnd) / 2;
+                    
+                    //Debug.Log($"HOLD_DETAILS: HitCoord_Position: {hold.Hit.HitCoord.Position} HitCoord_Radius: {hold.Hit.HitCoord.Radius} HoldValue: {hold.HoldValue} Hit_StartEnd: {hitStart}|{hitEnd}");
 
+
+                    
                     // Determine if the player is currently holding the note
                     if (hold.IsHolding)
                     {
                         bool isHoldingNow = false;
                         foreach (FingerHandler finger in Fingers)
                         {
+                            // Keep checking
                             if
                             (
                                 Vector2.Distance(finger.Finger.screenPosition, hold.Hit.HitCoord.Position) < hold.Hit.HitCoord.Radius
                             )
                             {
                                 isHoldingNow = true;
+                                //Debug.Log($"HOLD_OnChange: isHoldingNow: {isHoldingNow} IsHolding: {hold.IsHolding}");
                                 break;
                             }
                         }
@@ -324,7 +330,11 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         else
                         {
                             hold.HoldValue = hold.HoldValue - Time.deltaTime / Player.PassWindow;
-                            if (hold.HoldValue <= 0) hold.IsHolding = false;
+                            if (hold.HoldValue <= 0)
+                            {
+                                hold.IsHolding = false;
+                                //Debug.Log($"HOLD_OnChange: isHoldingNow: {isHoldingNow} IsHolding: {hold.IsHolding}");
+                            }
                         }
                     }
                     else
@@ -339,6 +349,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                 )
                                 {
                                     hold.IsHolding = true;
+                                    //Debug.Log($"HOLD_OnChange: IsHolding: {hold.IsHolding}");
                                     break;
                                 }
                             }
@@ -347,7 +358,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
 
                     while (hold.Hit.HoldTicks.Count > 0 && hold.Hit.HoldTicks[0] <= Player.CurrentTime)
                     {
-                        Player.AddScore(hold.IsHolding ? 1 : 0, null);
+                        //Debug.Log($"HOLD: IsHolding: {hold.IsHolding} HoldTick: {hold.Hit.HoldTicks[0]} IsFingerOnHold: {Vector2.Distance(Fingers[0].Finger.screenPosition, hold.Hit.HitCoord.Position) < hold.Hit.HitCoord.Radius}");
+                        Player.AddScore(hold.IsHolding ? 1 : 0, null); 
                         Player.HitObjectHistory.Add(new(hold.Hit.HoldTicks[0], HitObjectHistoryType.Catch, hold.IsHolding ? 0 : float.PositiveInfinity));
                         hold.Hit.HoldTicks.RemoveAt(0);
                         if (hold.IsHolding)
