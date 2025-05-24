@@ -20,10 +20,10 @@ public class SongSelectItem : MonoBehaviour
     [NonSerialized] public int Index;
     [NonSerialized] public float Position;
     [NonSerialized] public float PositionOffset;
-    [NonSerialized] public string SongPath;
+    [NonSerialized] public PlaylistSong MapInfo;
     [NonSerialized] public PlayableSong Song;
 
-    public void SetItem(string path, PlayableSong song, int index, float pos) 
+    public void SetItem(PlaylistSong mapInfo, PlayableSong song, int index, float pos) 
     {
         SongNameLabel.text = song.SongName;
         SongArtistLabel.text = song.SongArtist;
@@ -32,7 +32,7 @@ public class SongSelectItem : MonoBehaviour
         Index = index;
         Position = pos;
         Song = song;
-        SongPath = path;
+        MapInfo = mapInfo;
 
         SetDifficulty(SongSelectScreen.main.GetNearestDifficulty(song.Charts));
         LoadCoverImage();
@@ -53,19 +53,10 @@ public class SongSelectItem : MonoBehaviour
         if (CoverLoadRoutine != null) StopCoroutine(CoverLoadRoutine);
         CoverLoadRoutine = StartCoroutine(LoadCoverImageRoutine());
     }
-    
-    private IEnumerator LoadCoverImageRoutine() 
+
+    private IEnumerator LoadCoverImageRoutine()
     {
-        string path = Path.Combine(Path.GetDirectoryName(SongPath), Song.Cover.IconTarget);
-        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
-        ResourceRequest req = Resources.LoadAsync<Texture2D>(path);
-        yield return new WaitUntil(() => req.isDone);
-        if (req.asset) 
-        {
-            Texture2D tex = (Texture2D)req.asset;
-            CoverImage.texture = tex;
-            CoverImage.color = Color.white;
-        }
+        yield return SongSelectCoverManager.main.RegisterUse(CoverImage, MapInfo.ID, Song);
     }
 
     public void SetVisibilty(float a)

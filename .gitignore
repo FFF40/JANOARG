@@ -3,10 +3,10 @@
 /Temp
 /UserSettings
 /Library
-/Assets/Resources/Songs/*
-/Assets/Resources/Songs~/
 /Recordings
 *.apk
 *.zip
+*.blob
+*.csproj
 /Chartmaker
 /Songs

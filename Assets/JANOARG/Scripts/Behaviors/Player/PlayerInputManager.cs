@@ -248,8 +248,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             HoldQueue.Add(new HoldHandler
                             {
                                 Hit = hit,
-                                IsHolding = true,
-                                HoldValue = 1
+                                IsHolding = hit.IsQueuedHit,
+                                HoldValue = hit.IsQueuedHit ? 0 : 1,
                             });
                             HitQueue.RemoveAt(a);
                             a--;

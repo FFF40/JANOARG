@@ -5,25 +5,27 @@ using UnityEngine;
 
 public static class Helper 
 {
+    public const float PassingScore = 800000;
+
     public static string GetRank(float score) => score switch
     {
         >= 1000000 => "1",
-        >=  995000 => "SSS+",
-        >=  990000 => "SSS",
-        >=  980000 => "SS+",
-        >=  970000 => "SS",
-        >=  960000 => "S+",
-        >=  950000 => "S",
-        >=  940000 => "AAA+",
-        >=  920000 => "AAA",
-        >=  900000 => "AA+",
-        >=  875000 => "AA",
-        >=  850000 => "A+",
-        >=  800000 => "A",
-        >=  700000 => "B",
-        >=  600000 => "C",
-        >=       1 => "D",
-                 _ => "?"
+        >= 995000 => "SSS+",
+        >= 990000 => "SSS",
+        >= 980000 => "SS+",
+        >= 970000 => "SS",
+        >= 960000 => "S+",
+        >= 950000 => "S",
+        >= 940000 => "AAA+",
+        >= 920000 => "AAA",
+        >= 900000 => "AA+",
+        >= 875000 => "AA",
+        >= 850000 => "A+",
+        >= 800000 => "A",
+        >= 700000 => "B",
+        >= 600000 => "C",
+        >= 1 => "D",
+        _ => "?"
     };
     public static float GetRating(float constant, float score) => score switch
     {

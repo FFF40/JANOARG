@@ -101,7 +101,7 @@ public class PlayerScreenResultDetails : MonoBehaviour
         {
             var item = history[HistoryIndex];
             RectTransform parent = null;
-            bool isMiss = item.Offset > PlayerScreen.main.GoodWindow;
+            bool isMiss = Mathf.Abs(item.Offset) > PlayerScreen.main.GoodWindow;
             
             switch (item.Type) 
             {

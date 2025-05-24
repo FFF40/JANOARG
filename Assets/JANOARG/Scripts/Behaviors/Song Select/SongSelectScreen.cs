@@ -16,14 +16,19 @@ public class SongSelectScreen : MonoBehaviour
 
     public Playlist Playlist;
     public List<PlayableSong> SongList { get; private set; } = new();
-    [Space]
+
+    [Header("List View")]
     public SongSelectItem ItemSample;
     public RectTransform ItemHolder;
     public CanvasGroup ItemGroup;
     public List<SongSelectItem> ItemList { get; private set; } = new();
     public Graphic ItemTrack;
     public Graphic ItemCursor;
-    [Space]
+
+    [Header("Map View")]
+    public MapManager MapManager;
+    
+    [Header("Song Selection")]
     public RectTransform BackgroundHolder;
     public CanvasGroup BackgroundGroup;
     public RectTransform SafeAreaHolder;
@@ -40,7 +45,8 @@ public class SongSelectScreen : MonoBehaviour
     public CoverLayerImage CoverLayerSample;
     public RectTransform TargetSongCoverLayerHolder;
     public List<CoverLayerImage> TargetSongCoverLayers;
-    [Space]
+
+    [Header("Difficulty Selection")]
     public CanvasGroup DifficultyHolder;
     public RectTransform DifficultyListHolder;
     public SongSelectDifficulty DifficultySample;
@@ -51,15 +57,29 @@ public class SongSelectScreen : MonoBehaviour
     public TMP_Text TargetDifficultyName;
     public TMP_Text TargetDifficultyScore;
     public GameObject TargetDifficultyNewIndicator;
-    [Space]
+
+    [Header("Actions")]
     public CanvasGroup LeftActionsHolder;
     public CanvasGroup RightActionsHolder;
-    [Space]
+
+    [Header("Launch")]
     public CanvasGroup LaunchTextHolder;
     public TMP_Text LaunchText;
     [Space]
     public SongSelectReadyScreen ReadyScreen;
+
+    [Header("Audio")]
+    public AudioSource PreviewSource;
+    public float PreviewVolume;
+    public float PreviewVolumeMulti;
+    public AudioClip CurrentPreviewClip;
+    public Vector2 CurrentPreviewRange;
     [Space]
+    public AudioSource SFXSource;
+    public AudioClip SFXTickClip;
+    public float SFXVolume;
+
+    [Header("Data")]
     public float ScrollOffset;
     public float ScrollVelocity;
     public float TargetScrollOffset;
@@ -72,17 +92,6 @@ public class SongSelectScreen : MonoBehaviour
     public float TargetSongOffset;
     public bool IsAnimating;
     public bool IsInit;
-    [Space]
-    public AudioSource PreviewSource;
-    public float PreviewVolume;
-    public float PreviewVolumeMulti;
-    public AudioClip CurrentPreviewClip;
-    public Vector2 CurrentPreviewRange;
-    [Space]
-    public AudioSource SFXSource;
-    public AudioClip SFXTickClip;
-    public float SFXVolume;
-
     public Coroutine TargetSongAnim;
 
     [NonSerialized] public Cover CurrentCover;
@@ -220,11 +229,13 @@ public class SongSelectScreen : MonoBehaviour
     {
         int index = 0;
         int pos = 0;
-        foreach (string path in Playlist.ItemPaths)
+        MapManager.LoadMap();
+        foreach (PlaylistSong songInfo in Playlist.Songs)
         {
+            string path = $"Songs/{songInfo.ID}/{songInfo.ID}";
             ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
             yield return new WaitUntil(() => req.isDone);
-            if (!req.asset) 
+            if (!req.asset)
             {
                 Debug.LogWarning("Couldn't load Playable Song at " + path);
                 continue;
@@ -233,12 +244,13 @@ public class SongSelectScreen : MonoBehaviour
             SongList.Add(song);
 
             SongSelectItem item = Instantiate(ItemSample, ItemHolder);
-            item.SetItem(path, song, index, pos);
+            item.SetItem(songInfo, song, index, pos);
             ItemList.Add(item);
             index++;
             pos += 48;
-            
         }
+
+        yield return new WaitUntil(() => MapManager.IsReady);
         IsInit = true;
         
         if (!LoadingBar.main.gameObject.activeSelf) Intro();
@@ -332,7 +344,8 @@ public class SongSelectScreen : MonoBehaviour
         CurrentPreviewClip = TargetSong.Song.Clip;
         CurrentPreviewRange = TargetSong.Song.PreviewRange;
 
-        string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
+        var songItem = Playlist.Songs[SongList.IndexOf(TargetSong.Song)];
+        string songPath = $"Songs/{songItem.ID}/{songItem.ID}";
         string songID = Path.GetFileNameWithoutExtension(songPath);
         foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
         DifficultyList.Clear();
@@ -366,10 +379,10 @@ public class SongSelectScreen : MonoBehaviour
             TargetSongCoverLayers.Clear();
             foreach (CoverLayer layer in CurrentCover.Layers)
             {
-                string path = Path.Combine(Path.GetDirectoryName(TargetSong.SongPath), layer.Target);
+                string path = Path.Combine($"Songs/{songItem.ID}", layer.Target);
                 if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
                 var req = Resources.LoadAsync<Texture2D>(path);
-                yield return new WaitUntil(() => req.isDone);
+                yield return req;
                 if (req.asset)
                 {
                     Texture2D tex = (Texture2D)req.asset;
@@ -588,7 +601,8 @@ public class SongSelectScreen : MonoBehaviour
             TargetSongCoverFlash.color = new (1, 1, 1, 1 - lerp3);
         });
 
-        PlayerScreen.TargetSongPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
+        var songItem = Playlist.Songs[SongList.IndexOf(TargetSong.Song)];
+        PlayerScreen.TargetSongPath = $"Songs/{songItem.ID}/{songItem.ID}";
         PlayerScreen.TargetSong = TargetSong.Song;
         PlayerScreen.TargetChartMeta = TargetDifficulty.Chart;
         Common.main.MainCamera.backgroundColor = TargetSong.Song.BackgroundColor;
@@ -599,6 +613,7 @@ public class SongSelectScreen : MonoBehaviour
         Common.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
             SongSelectReadyScreen.main.EndLaunch();
         }, false);
+        SceneManager.UnloadSceneAsync(MapManager.MapScene);
         SceneManager.UnloadSceneAsync("Song Select");
         Resources.UnloadUnusedAssets();
     }

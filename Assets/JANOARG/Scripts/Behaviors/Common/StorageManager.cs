@@ -10,6 +10,7 @@ public class StorageManager : MonoBehaviour
     public static StorageManager main;
 
     public ScoreStore Scores = new();
+    public FlagStore Flags = new();
 
     void Awake()
     {
@@ -20,11 +21,13 @@ public class StorageManager : MonoBehaviour
     public void Load()
     {
         Scores.Load();
+        Flags.Load();
     }
 
     public void Save() 
     {
         Scores.Save();
+        Flags.Save();
         Common.main.Storage.Save();
     }
 }
