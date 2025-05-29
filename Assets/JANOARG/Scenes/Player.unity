@@ -12073,7 +12073,7 @@ MonoBehaviour:
   FlickHitsound: {fileID: 8300000, guid: 28adaf7812f2cc554ae85e70929de788, type: 3}
   Speed: 121
   PerfectWindow: 0.05
-  GoodWindow: 0.2
+  GoodWindow: 0.15
   BadWindow: 0.2
   PassWindow: 0.1
   SyncThreshold: 0.03

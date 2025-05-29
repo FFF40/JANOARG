@@ -7,6 +7,7 @@ public class MapManager : MonoBehaviour
 {
     public static MapManager main;
     public static List<MapItem> Items = new();
+    public static List<MapItemUI> ItemUIs = new();
 
 
     public Scene MapScene;
@@ -70,16 +71,25 @@ public class MapManager : MonoBehaviour
     }
     public TItem MakeItemUI<TItem>() where TItem : MapItemUI
     {
-        return Instantiate(GetItemUISample<TItem>(), ItemUIHolder);
+        var item = Instantiate(GetItemUISample<TItem>(), ItemUIHolder);
+        ItemUIs.Add(item);
+        return item;
     }
     public TItem MakeItemUI<TItem, TParent>(TParent parent) where TParent : MapItem where TItem : MapItemUI<TParent>
     {
         var item = Instantiate(GetItemUISample<TItem, TParent>(), ItemUIHolder);
         item.SetParent(parent);
+        ItemUIs.Add(item);
         return item;
     }
 
-
+    public void UpdateAllPositions()
+    {
+        foreach (var item in ItemUIs)
+        {
+            item.UpdatePosition();
+        }
+    }
 
 
     IEnumerator UnloadMapRoutine()

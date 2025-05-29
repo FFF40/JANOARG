@@ -18,6 +18,9 @@ public class SongSelectScreen : MonoBehaviour
     public List<PlayableSong> SongList { get; private set; } = new();
 
     [Header("List View")]
+    public RectTransform BackgroundHolder;
+    public CanvasGroup BackgroundGroup;
+    [Space]
     public SongSelectItem ItemSample;
     public RectTransform ItemHolder;
     public CanvasGroup ItemGroup;
@@ -27,10 +30,10 @@ public class SongSelectScreen : MonoBehaviour
 
     [Header("Map View")]
     public MapManager MapManager;
+    [Space]
+    public CanvasGroup MapUIGroup;
     
     [Header("Song Selection")]
-    public RectTransform BackgroundHolder;
-    public CanvasGroup BackgroundGroup;
     public RectTransform SafeAreaHolder;
     [Space]
     public CanvasGroup TargetSongInfoHolder;
@@ -92,6 +95,7 @@ public class SongSelectScreen : MonoBehaviour
     public float TargetSongOffset;
     public bool IsAnimating;
     public bool IsInit;
+    public bool IsMapView = true;
     public Coroutine TargetSongAnim;
 
     [NonSerialized] public Cover CurrentCover;
@@ -125,70 +129,79 @@ public class SongSelectScreen : MonoBehaviour
         SFXVolume = Common.main.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
     }
 
-    public void Update() 
+    public void Update()
     {
         if (!IsReady) return;
 
-        if (IsPointerDown) 
+        if (IsMapView)
         {
-            ScrollVelocity = (lastScrollOffset - ScrollOffset) / Time.deltaTime;
-            lastScrollOffset = ScrollOffset;
+            TargetSongHiddenTarget = false;
         }
-        else 
+        else
         {
-            if (Mathf.Abs(ScrollVelocity) > 10)
+            if (IsPointerDown)
             {
-                ScrollOffset -= ScrollVelocity * Time.deltaTime;
-                ScrollVelocity *= Mathf.Pow(0.2f, Time.deltaTime);
-
-                float minBound = ItemList[0].Position - 20; 
-                float maxBound = ItemList[^1].Position + 20;
-                if (ScrollOffset < minBound) 
-                {
-                    ScrollOffset = minBound;
-                    ScrollVelocity = 0;
-                }
-                else if (ScrollOffset > maxBound) 
-                {
-                    ScrollOffset = maxBound;
-                    ScrollVelocity = 0;
-                }
-
-                UpdateTarget();
-                IsDirty = true;
+                ScrollVelocity = (lastScrollOffset - ScrollOffset) / Time.deltaTime;
+                lastScrollOffset = ScrollOffset;
             }
-            else 
+            else
             {
-                if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f) 
+                if (Mathf.Abs(ScrollVelocity) > 10)
                 {
-                    ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
+                    ScrollOffset -= ScrollVelocity * Time.deltaTime;
+                    ScrollVelocity *= Mathf.Pow(0.2f, Time.deltaTime);
+
+                    float minBound = ItemList[0].Position - 20;
+                    float maxBound = ItemList[^1].Position + 20;
+                    if (ScrollOffset < minBound)
+                    {
+                        ScrollOffset = minBound;
+                        ScrollVelocity = 0;
+                    }
+                    else if (ScrollOffset > maxBound)
+                    {
+                        ScrollOffset = maxBound;
+                        ScrollVelocity = 0;
+                    }
+
+                    UpdateTarget();
                     IsDirty = true;
                 }
-                TargetSongHiddenTarget = false;
+                else
+                {
+                    if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f)
+                    {
+                        ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
+                        IsDirty = true;
+                    }
+                    TargetSongHiddenTarget = false;
+                }
+            }
+
+            if (TargetSongHiddenTarget)
+            {
+                ItemCursor.color += new Color(0, 0, 0, (1 - ItemCursor.color.a) * Mathf.Pow(5e-3f, Time.deltaTime));
+            }
+            else
+            {
+                ItemCursor.color *= new Color(1, 1, 1, Mathf.Pow(.001f, Time.deltaTime));
+            }
+
+            if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden)
+            {
+                IsTargetSongHidden = TargetSongHiddenTarget;
+                if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+                if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(TargetSongHideAnim());
+                else TargetSongAnim = StartCoroutine(TargetSongShowAnim());
+            }
+            if (IsDirty)
+            {
+                UpdateItems();
+                IsDirty = false;
             }
         }
 
-        if (TargetSongHiddenTarget) 
-        {
-            ItemCursor.color += new Color(0, 0, 0, (1 - ItemCursor.color.a) * Mathf.Pow(5e-3f, Time.deltaTime));
-        }
-        else 
-        {
-            ItemCursor.color *= new Color(1, 1, 1, Mathf.Pow(.001f, Time.deltaTime));
-        }
-
-        if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden) 
-        {
-            IsTargetSongHidden = TargetSongHiddenTarget;
-            if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
-            if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(TargetSongHideAnim());
-            else TargetSongAnim = StartCoroutine(TargetSongShowAnim());
-        }
-        if (IsDirty) 
-        {
-            UpdateItems();
-            IsDirty = false;
-        }
+        // Handle song preview
 
         float previewVolumeSpeed = 1;
         if (ReadyScreen.IsAnimating) previewVolumeSpeed = -0.5f;
@@ -294,7 +307,21 @@ public class SongSelectScreen : MonoBehaviour
         }
     }
 
-    public void OnListPointerDown(BaseEventData data) 
+    public void ToggleMapView()
+    {
+        if (IsAnimating) return;
+        IsMapView = !IsMapView;
+        StartCoroutine(ToggleMapViewCoroutine());
+    }
+
+    IEnumerator ToggleMapViewCoroutine()
+    {
+        IsAnimating = true;
+        yield return null;
+        IsAnimating = false;
+    }
+
+    public void OnListPointerDown(BaseEventData data)
     {
         lastScrollOffset = ScrollOffset;
         ScrollVelocity = 0;
@@ -647,13 +674,31 @@ public class SongSelectScreen : MonoBehaviour
         ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x;
         UpdateItems(false);
 
-        yield return StartCoroutine(Ease.Animate(1, x => {
-            ItemGroup.alpha = x * 1e10f;
-            float xPos = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-            ItemTrack.color = new (1, 1, 1, Mathf.Clamp01(x * 3));
-            BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
-            ItemTrack.rectTransform.anchoredPosition = new (xPos - 180, ItemTrack.rectTransform.anchoredPosition.y);
-            BackgroundHolder.anchoredPosition = new (xPos, BackgroundHolder.anchoredPosition.y);
+        Transform cameraTransform = Common.main.MainCamera.transform;
+
+        cameraTransform.rotation = Quaternion.identity;
+        cameraTransform.position = Vector3.zero;
+        cameraTransform.position *= new Vector3Frag(z: -100);
+
+        yield return StartCoroutine(Ease.Animate(1, x =>
+        {
+            if (IsMapView)
+            {
+                float lerp1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                MapUIGroup.alpha = x * 1e10f;
+                MapUIGroup.transform.localScale = Vector3.one * lerp1;
+                MapManager.UpdateAllPositions();
+                cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
+            }
+            else
+            {
+                ItemGroup.alpha = x * 1e10f;
+                float xPos = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(x * 3));
+                BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
+                ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ItemTrack.rectTransform.anchoredPosition.y);
+                BackgroundHolder.anchoredPosition = new(xPos, BackgroundHolder.anchoredPosition.y);
+            }
 
             ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
             UpdateItems(false);

@@ -56,13 +56,13 @@ public class SongSelectCoverManager : MonoBehaviour
         {
             CoverInfos[songID].BackgroundColor = coverImage.color;
             coverImage.texture = CoverInfos[songID].Icon;
-            coverImage.color = coverImage.texture ? Color.white : CoverInfos[songID].BackgroundColor; ;
+            coverImage.color = coverImage.texture ? Color.white : CoverInfos[songID].BackgroundColor;
         }
     }
     public IEnumerator RegisterUse(RawImage coverImage, string songID)
     {
         yield return new WaitUntil(() => CoverInfos.ContainsKey(songID));
-        if (CoverInfos[songID].Coroutine != null) yield return CoverInfos[songID].Coroutine;
+        if (CoverInfos[songID].Coroutine != null) yield return new WaitUntil(() => CoverInfos[songID].Coroutine == null);
         if (CoverInfos.ContainsKey(songID))
         {
             coverImage.texture = CoverInfos[songID].Icon;
