@@ -51,6 +51,7 @@ public class PlayerScreen : MonoBehaviour
     public LaneGroupPlayer LaneGroupSample;
     public LanePlayer LaneSample;
     public HitPlayer HitSample;
+    public TextPlayer TextSample;
     public MeshRenderer HoldSample;
     public JudgeScreenEffect JudgeScreenSample;
     [Space]
@@ -99,6 +100,8 @@ public class PlayerScreen : MonoBehaviour
     public List<LaneGroupPlayer> LaneGroups = new ();
     [HideInInspector]
     public List<LanePlayer> Lanes = new ();
+    [HideInInspector]
+    public List<TextPlayer> Texts = new();
 
     double lastDSPTime;
 
@@ -138,6 +141,7 @@ public class PlayerScreen : MonoBehaviour
         TargetChart = thing.asset as ExternalChart;
 
         yield return InitChart();
+   
     }
 
     public IEnumerator InitChart()
@@ -162,6 +166,7 @@ public class PlayerScreen : MonoBehaviour
         {
             foreach (LaneStyle style in CurrentChart.Palette.LaneStyles) LaneStyles.Add(new(style));
             foreach (HitStyle style in CurrentChart.Palette.HitStyles) HitStyles.Add(new(style));
+            
 
             for (int a = 0; a < TargetChart.Data.Groups.Count; a++)
             {
@@ -180,11 +185,19 @@ public class PlayerScreen : MonoBehaviour
                 player.transform.SetParent(player.Parent.transform);
             }
 
+            // Instantiate every text ig
+
         }
 
         ComboGroup.alpha = JudgmentGroup.alpha = 0;
 
         float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
+
+        float HoldTicks = 0;
+        int Normal = 0;
+        int Catch = 0;
+        int OmniDir = 0;
+        int DirF = 0;
 
         for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
         {
@@ -205,6 +218,32 @@ public class PlayerScreen : MonoBehaviour
             Vector3 startPos = Vector3.zero, endPos = Vector3.zero;
             foreach (HitObject hit in player.Original.Objects)
             {
+                HoldTicks += Mathf.Ceil(hit.HoldLength / 0.5f);
+                if (hit.Type == HitObject.HitType.Normal)
+                {
+                    Normal++;
+                    if (hit.Flickable)
+                    {
+                        if (!float.IsNaN(hit.FlickDirection))
+                        {
+                            DirF++;
+                        } else OmniDir++;
+
+                    }
+                }
+                else
+                {
+                    Catch++;
+                    if (hit.Flickable)
+                    {
+                        if (!float.IsNaN(hit.FlickDirection))
+                        {
+                            DirF++;
+                        }
+                        else OmniDir++;
+                    }
+                }
+
                 TotalExScore += hit.Type == HitObject.HitType.Normal ? 3 : 1;
                 TotalExScore += Mathf.Ceil(hit.HoldLength / 0.5f);
                 if (hit.Flickable)
@@ -245,8 +284,25 @@ public class PlayerScreen : MonoBehaviour
 
             HitsRemaining += player.Original.Objects.Count;
 
+            
+
             yield return new WaitForEndOfFrame();
         }
+
+        for (int t = 0; t < TargetChart.Data.Texts.Count; t++)
+        {
+            TextPlayer text_chart = Instantiate(TextSample, Holder); // idk how this shit works :uogh:
+
+            text_chart.Original = TargetChart.Data.Texts[t];
+            text_chart.Current = CurrentChart.Texts[t];
+            
+            text_chart.Init();
+            Texts.Add(text_chart);
+        }
+
+        Debug.Log("Hold Ticks: " + HoldTicks + "| Normal: " + Normal + "| Catch: " + Catch + "| Omni: " + OmniDir + "| DirF: " + DirF + "| Total: " + (HoldTicks + Normal + Catch + OmniDir + DirF) );
+        Debug.Log("EX: " + HoldTicks + "| ex: " + Normal*3 + "| EX: " + Catch + "| EX: " + OmniDir + "|EX: " + DirF*2 + "| EX: " + (HoldTicks + Normal*3 + Catch + OmniDir + DirF*2));
+        Debug.Log(TotalExScore);
 
         Music.clip = TargetSong.Clip;
         Music.volume = Settings.BGMusicVolume;
@@ -354,6 +410,8 @@ public class PlayerScreen : MonoBehaviour
             // Update scene
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
+            foreach (TextPlayer text in Texts) text.UpdateSelf(visualTime, visualBeat);
+            //Add text loader
         }
     }
 

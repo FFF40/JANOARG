@@ -23,6 +23,7 @@ public class JACDecoder
         string mode = "";
 
         Lane currentLane = null;
+        Text currentText = null;
         object currentObject = null;
         Storyboard currentStoryboard = null;
 
@@ -64,6 +65,11 @@ public class JACDecoder
                     else if (mode == "OBJECTS")
                     {
                         currentObject = chart.Lanes;
+                        currentStoryboard = null;
+                    }
+                    else if (mode == "EXTRAS")
+                    {
+                        currentObject = chart.Texts;
                         currentStoryboard = null;
                     }
                     else 
@@ -214,6 +220,48 @@ public class JACDecoder
                             throw new System.Exception("Not enough tokens (minimum 9, got " + tokens.Length + ").");
                         }
                     }
+                    else if (tokens[1] == "Text")
+                    {
+                        if (tokens.Length >= 8)
+                        {
+                            Text text_r = new Text
+                            {
+                                Position = new Vector3(ParseFloat(tokens[2]), ParseFloat(tokens[3]), ParseFloat(tokens[4])),
+                                Rotation = new Vector3(ParseFloat(tokens[5]), ParseFloat(tokens[6]), ParseFloat(tokens[7])),
+                                //DisplayText = (tokens[8]),
+                            };
+                            currentObject = currentText = text_r;
+                            currentStoryboard = text_r.Storyboard;
+                            chart.Texts.Add(text_r);
+                        }
+                        else
+                        {
+                            throw new System.Exception("Not enough tokens (minimum 9, got " + tokens.Length + ").");
+                        }
+                    }
+                    else if (tokens[1] == "TextStep")
+                    {
+                        if (tokens.Length >= 12)
+                        {
+                            TextStep step = new TextStep
+                            {
+                                Offset = ParseTime(tokens[2]),
+                                StartPos = new Vector2(ParseFloat(tokens[3]), ParseFloat(tokens[4])),
+                                StartEaseX = ParseEasing(tokens[5]),
+                                StartEaseY = ParseEasing(tokens[6]),
+                                EndPos = new Vector2(ParseFloat(tokens[7]), ParseFloat(tokens[8])),
+                                EndEaseX = ParseEasing(tokens[9]),
+                                EndEaseY = ParseEasing(tokens[10])
+                            };
+                            currentObject = step;
+                            currentStoryboard = step.Storyboard;
+                            currentText.TextSteps.Add(step);
+                        }
+                        else
+                        {
+                            throw new System.Exception("Not enough tokens (minimum 12, got " + tokens.Length + ").");
+                        }
+                    }
                     else 
                     {
                         throw new System.Exception("The specified object " + tokens[1] + " is not a valid object.");
@@ -270,6 +318,11 @@ public class JACDecoder
                     {
                              if (key == "Name")   lane.Name = value;
                         else if (key == "Group")  lane.Group = value;
+                    }
+                    else if (currentObject is Text text)
+                    {
+                             if (key == "Name") text.Name = value;
+                        else if (key == "Display") text.DisplayText = value;
                     }
                 }
                 else if (currentObject?.ToString() == "version")

@@ -29,6 +29,8 @@ public class Chart : IDeepClonable<Chart>
 
     public Palette Palette = new();
 
+    public List<Text> Texts = new();
+
     public Chart() 
     {
         
@@ -49,6 +51,7 @@ public class Chart : IDeepClonable<Chart>
         };
         foreach (LaneGroup group in Groups) clone.Groups.Add(group.DeepClone());
         foreach (Lane lane in Lanes) clone.Lanes.Add(lane.DeepClone());
+        foreach (Text text in Texts) clone.Texts.Add(text.DeepClone());
         return clone;
     }
 }
@@ -433,6 +436,217 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
         return clone;
     }
 }
+
+// Text
+[System.Serializable]
+public class Text : Storyboardable, IDeepClonable<Text>
+{
+    public string Name;
+    public Vector3 Position;
+    public Vector3 Rotation;
+
+    public string DisplayText;
+    public List<TextStep> TextSteps = new();
+
+    public TextPosition GetLanePosition(float time, float laneTime, Metronome timing)
+    {
+        float offset = 0;
+        float timeT = timing.ToSeconds(time);
+        float laneTimeT = timing.ToSeconds(laneTime);
+        float curtime = laneTimeT;
+        List<TextStep> steps = new();
+        for (int a = 0; a < TextSteps.Count; a++)
+        {
+            TextStep step = (TextStep)TextSteps[a].Get(laneTime);
+            steps.Add(step);
+
+            float t = timing.ToSeconds(step.Offset);
+            offset += step.Speed * (Mathf.Max(t, laneTimeT) - curtime);
+            curtime = Mathf.Max(t, laneTimeT);
+
+            if (time == step.Offset) return new TextPosition
+            {
+                StartPos = step.StartPos,
+                EndPos = step.EndPos,
+                Offset = laneTime < time ? offset : float.NaN,
+            };
+            else if (time < step.Offset)
+            {
+                if (a == 0) return new TextPosition
+                {
+                    StartPos = step.StartPos,
+                    EndPos = step.EndPos,
+                    Offset = laneTime < time ? offset : float.NaN,
+                };
+
+                TextStep prev = steps[a - 1];
+                float p = (time - prev.Offset) / (step.Offset - prev.Offset);
+
+                if (step.IsLinear)
+                {
+                    return new TextPosition
+                    {
+                        StartPos = Vector2.LerpUnclamped(prev.StartPos, step.StartPos, p),
+                        EndPos = Vector2.LerpUnclamped(prev.EndPos, step.EndPos, p),
+                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
+                    };
+                }
+                else
+                {
+
+                    return new TextPosition
+                    {
+                        StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, step.StartEaseX.Get(p)),
+                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, step.StartEaseY.Get(p))),
+                        EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, step.EndEaseX.Get(p)),
+                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, step.EndEaseY.Get(p))),
+                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
+                    };
+                }
+            }
+
+        }
+        {
+            float t = timing.ToSeconds(steps[steps.Count - 1].Offset);
+            return new TextPosition
+            {
+                StartPos = steps[steps.Count - 1].StartPos,
+                EndPos = steps[steps.Count - 1].EndPos,
+                Offset = laneTime < time ? offset + (timeT - t) * TextSteps[TextSteps.Count - 1].Speed : float.NaN,
+            };
+        }
+    }
+
+    public new static TimestampType[] TimestampTypes = {
+        new() {
+            ID = "Position_X",
+            Name = "Position X",
+            Get = (x) => ((Text)x).Position.x,
+            Set = (x, a) => { ((Text)x).Position.x = a; },
+        },
+        new() {
+            ID = "Position_Y",
+            Name = "Position Y",
+            Get = (x) => ((Text)x).Position.y,
+            Set = (x, a) => { ((Text)x).Position.y = a; },
+        },
+        new() {
+            ID = "Position_Z",
+            Name = "Position Z",
+            Get = (x) => ((Text)x).Position.z,
+            Set = (x, a) => { ((Text)x).Position.z = a; },
+        },
+        new() {
+            ID = "Rotation_X",
+            Name = "Rotation X",
+            Get = (x) => ((Text)x).Rotation.x,
+            Set = (x, a) => { ((Text)x).Rotation.x = a; },
+        },
+        new() {
+            ID = "Rotation_Y",
+            Name = "Rotation Y",
+            Get = (x) => ((Text)x).Rotation.y,
+            Set = (x, a) => { ((Text)x).Rotation.y = a; },
+        },
+        new() {
+            ID = "Rotation_Z",
+            Name = "Rotation Z",
+            Get = (x) => ((Text)x).Rotation.z,
+            Set = (x, a) => { ((Text)x).Rotation.z = a; },
+        },
+    };
+
+    //get the text position on time
+
+
+    public Text DeepClone()
+    {
+        Text clone = new()
+        {
+            Name = Name,
+            Position = new Vector3(Position.x, Position.y, Position.z),
+            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
+}
+
+//Text Step
+
+[System.Serializable]
+public class TextStep : DirtyTrackedStoryboardable, IDeepClonable<TextStep>
+{
+    public BeatPosition Offset = new();
+    public Vector2 StartPos;
+    [SerializeReference]
+    public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference]
+    public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    public Vector2 EndPos;
+    [SerializeReference]
+    public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference]
+    public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    public float Speed = 1;
+
+    public bool IsLinear =>
+        StartEaseX is BasicEaseDirective sx && StartEaseY is BasicEaseDirective sy && EndEaseX is BasicEaseDirective ex && EndEaseY is BasicEaseDirective ey &&
+        sx.Function == EaseFunction.Linear && sy.Function == EaseFunction.Linear && ex.Function == EaseFunction.Linear && ey.Function == EaseFunction.Linear;
+
+    public new static TimestampType[] TimestampTypes =
+    {
+        new() {
+            ID = "StartPos_X",
+            Name = "Start Position X",
+            Get = (x) => ((TextStep)x).StartPos.x,
+            Set = (x, a) => { ((TextStep)x).StartPos.x = a; },
+        },
+        new() {
+            ID = "StartPos_Y",
+            Name = "Start Position Y",
+            Get = (x) => ((TextStep)x).StartPos.y,
+            Set = (x, a) => { ((TextStep)x).StartPos.y = a; },
+        },
+        new() {
+            ID = "EndPos_X",
+            Name = "End Position X",
+            Get = (x) => ((TextStep)x).EndPos.x,
+            Set = (x, a) => { ((TextStep)x).EndPos.x = a; },
+        },
+        new() {
+            ID = "EndPos_Y",
+            Name = "End Position Y",
+            Get = (x) => ((TextStep)x).EndPos.y,
+            Set = (x, a) => { ((TextStep)x).EndPos.y = a; },
+        },
+        new() {
+            ID = "Speed",
+            Name = "Speed",
+            Get = (x) => ((TextStep)x).Speed,
+            Set = (x, a) => { ((TextStep)x).Speed = a; },
+        },
+    };
+
+    public TextStep DeepClone()
+    {
+        TextStep clone = new()
+        {
+            Offset = Offset,
+            StartPos = new Vector2(StartPos.x, StartPos.y),
+            StartEaseX = StartEaseX,
+            StartEaseY = StartEaseY,
+            EndPos = new Vector2(EndPos.x, EndPos.y),
+            EndEaseX = EndEaseX,
+            EndEaseY = EndEaseY,
+            Speed = Speed,
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
+}
+
+public class TextPosition : LanePosition { }
 
 [System.Serializable]
 public class LanePosition

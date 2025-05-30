@@ -143,6 +143,7 @@ public class LaneStyleManager {
         }
 
         if (LaneMaterial) LaneMaterial.SetColor(style.LaneColorTarget, style.LaneColor);
+        //Debug.Log(style.LaneColor);
         if (JudgeMaterial) JudgeMaterial.SetColor(style.JudgeColorTarget, style.JudgeColor);
     }
 
