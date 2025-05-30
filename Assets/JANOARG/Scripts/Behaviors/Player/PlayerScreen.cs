@@ -160,7 +160,9 @@ public class PlayerScreen : MonoBehaviour
             for (int a = 0; a < HitStyles.Count; a++) HitStyles[a].Update(CurrentChart.Palette.HitStyles[a]);
             for (int a = 0; a < TargetChart.Data.Groups.Count; a++) LaneGroups[a].Current = CurrentChart.Groups[a];
             foreach (LanePlayer lane in Lanes) Destroy(lane.gameObject);
+            foreach (TextPlayer text in Texts) Destroy(text.gameObject);
             Lanes.Clear();
+            Texts.Clear();
         } 
         else 
         {
@@ -184,6 +186,16 @@ public class PlayerScreen : MonoBehaviour
                 player.Parent = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
                 player.transform.SetParent(player.Parent.transform);
             }
+            //for text ig (idk what im doing)
+            //for (int a = 0; a < TargetChart.Data.Texts.Count; a++)
+            //{
+            //    TextPlayer player = Instantiate(TextSample, Holder);
+            //    player.Original = TargetChart.Data.Texts[a];
+            //    player.Current = CurrentChart.Texts[a];
+            //    player.gameObject.name = player.Current.Name;
+            //    Texts.Add(player);
+            //    yield return new WaitForEndOfFrame();
+            //} 
 
             // Instantiate every text ig
 
@@ -291,13 +303,14 @@ public class PlayerScreen : MonoBehaviour
 
         for (int t = 0; t < TargetChart.Data.Texts.Count; t++)
         {
-            TextPlayer text_chart = Instantiate(TextSample, Holder); // idk how this shit works :uogh:
+            TextPlayer text_chart = Instantiate(TextSample, Holder); 
 
             text_chart.Original = TargetChart.Data.Texts[t];
             text_chart.Current = CurrentChart.Texts[t];
-            
+            Debug.Log("Adding" + text_chart);
             text_chart.Init();
             Texts.Add(text_chart);
+           
         }
 
         Debug.Log("Hold Ticks: " + HoldTicks + "| Normal: " + Normal + "| Catch: " + Catch + "| Omni: " + OmniDir + "| DirF: " + DirF + "| Total: " + (HoldTicks + Normal + Catch + OmniDir + DirF) );

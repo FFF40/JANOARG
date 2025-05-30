@@ -448,7 +448,7 @@ public class Text : Storyboardable, IDeepClonable<Text>
     public string DisplayText;
     public List<TextStep> TextSteps = new();
 
-    public TextPosition GetLanePosition(float time, float laneTime, Metronome timing)
+    public TextPosition GetTextPosition(float time, float laneTime, Metronome timing)
     {
         float offset = 0;
         float timeT = timing.ToSeconds(time);

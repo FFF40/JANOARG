@@ -241,6 +241,7 @@ public class JACDecoder
                     }
                     else if (tokens[1] == "TextStep")
                     {
+                        Debug.Log("Before braking");
                         if (tokens.Length >= 12)
                         {
                             TextStep step = new TextStep

@@ -45,18 +45,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6c7003b454a1fa4891e6c6a1c9c2cc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TextDisplay:
+  Original:
     Storyboard:
       Timestamps: []
     Name: 
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0}
     DisplayText: 
-    LaneSteps: []
+    TextSteps: []
+  Current:
+    Storyboard:
+      Timestamps: []
+    Name: 
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0}
+    DisplayText: 
+    TextSteps: []
   Text: 
   TextHolder: {fileID: 3615853142590212004}
-  Positions: []
-  Times: []
   CurrentPosition: 0
   references:
     version: 2
@@ -187,15 +193,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 8
+  m_fontSizeBase: 8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
