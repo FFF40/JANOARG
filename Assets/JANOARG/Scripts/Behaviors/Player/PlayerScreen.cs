@@ -313,6 +313,8 @@ public class PlayerScreen : MonoBehaviour
            
         }
 
+
+
         Debug.Log("Hold Ticks: " + HoldTicks + "| Normal: " + Normal + "| Catch: " + Catch + "| Omni: " + OmniDir + "| DirF: " + DirF + "| Total: " + (HoldTicks + Normal + Catch + OmniDir + DirF) );
         Debug.Log("EX: " + HoldTicks + "| ex: " + Normal*3 + "| EX: " + Catch + "| EX: " + OmniDir + "|EX: " + DirF*2 + "| EX: " + (HoldTicks + Normal*3 + Catch + OmniDir + DirF*2));
         Debug.Log(TotalExScore);
@@ -424,7 +426,9 @@ public class PlayerScreen : MonoBehaviour
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
             foreach (TextPlayer text in Texts) text.UpdateSelf(visualTime, visualBeat);
-            //Add text loader
+
+            // Update Text
+
         }
     }
 

@@ -12,15 +12,14 @@ public class TextPlayer : MonoBehaviour
     public string Text;
     public TextMeshPro TextHolder;
 
-    public float CurrentPosition;
-
+    //public float CurrentPosition;
 
     public void Init()
     {
-        var met = PlayerScreen.TargetSong.Timing;
         TextHolder.text = Original.DisplayText;
+        Text = Original.DisplayText;
+        //TextHolder.color = Original.TextColor;
     }
-
 
     public void UpdateSelf(float time, float beat)
     {
@@ -29,9 +28,15 @@ public class TextPlayer : MonoBehaviour
 
         transform.localPosition = Current.Position;
         transform.localEulerAngles = Current.Rotation;
+      
+        Text = Original.GetUpdateText(time,Original.DisplayText);
+        //Text = Original.GetUpdateColor(time, Original.Col);
+        TextHolder.text = Text;
         TextHolder.fontSize = Current.TextSize;
+        //Debug.Log(Current.TextColor);
+        //TextHolder.color = Current.TextColor;
 
-        
+
     }
 
 }
