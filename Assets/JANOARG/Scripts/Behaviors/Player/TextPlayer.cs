@@ -29,6 +29,9 @@ public class TextPlayer : MonoBehaviour
 
         transform.localPosition = Current.Position;
         transform.localEulerAngles = Current.Rotation;
+        TextHolder.fontSize = Current.TextSize;
+
+        
     }
 
 }

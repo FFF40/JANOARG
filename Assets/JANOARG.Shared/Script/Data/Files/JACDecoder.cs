@@ -241,26 +241,21 @@ public class JACDecoder
                     }
                     else if (tokens[1] == "TextStep")
                     {
-                        Debug.Log("Before braking");
-                        if (tokens.Length >= 12)
+                        Debug.Log(tokens.Length);
+                        if (tokens.Length >= 3)
                         {
                             TextStep step = new TextStep
                             {
                                 Offset = ParseTime(tokens[2]),
-                                StartPos = new Vector2(ParseFloat(tokens[3]), ParseFloat(tokens[4])),
-                                StartEaseX = ParseEasing(tokens[5]),
-                                StartEaseY = ParseEasing(tokens[6]),
-                                EndPos = new Vector2(ParseFloat(tokens[7]), ParseFloat(tokens[8])),
-                                EndEaseX = ParseEasing(tokens[9]),
-                                EndEaseY = ParseEasing(tokens[10])
+                                TextChange = string.Join(" ", tokens[3..]),
                             };
                             currentObject = step;
-                            currentStoryboard = step.Storyboard;
+
                             currentText.TextSteps.Add(step);
                         }
                         else
                         {
-                            throw new System.Exception("Not enough tokens (minimum 12, got " + tokens.Length + ").");
+                            throw new System.Exception("Not enough tokens (minimum 3, got " + tokens.Length + ").");
                         }
                     }
                     else 

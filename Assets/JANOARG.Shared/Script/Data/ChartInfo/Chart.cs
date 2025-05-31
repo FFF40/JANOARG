@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -446,75 +447,20 @@ public class Text : Storyboardable, IDeepClonable<Text>
     public Vector3 Rotation;
 
     public string DisplayText;
+    public float TextSize = 7f;
     public List<TextStep> TextSteps = new();
 
-    public TextPosition GetTextPosition(float time, float laneTime, Metronome timing)
+    public string GetUpdateText(float time, float laneTime, Metronome timing)
     {
-        float offset = 0;
-        float timeT = timing.ToSeconds(time);
-        float laneTimeT = timing.ToSeconds(laneTime);
-        float curtime = laneTimeT;
+        string rt = "";
         List<TextStep> steps = new();
-        for (int a = 0; a < TextSteps.Count; a++)
+        for (int i = 0; i < TextSteps.Count; i++)
         {
-            TextStep step = (TextStep)TextSteps[a].Get(laneTime);
+            TextStep step = TextSteps[i];
             steps.Add(step);
-
-            float t = timing.ToSeconds(step.Offset);
-            offset += step.Speed * (Mathf.Max(t, laneTimeT) - curtime);
-            curtime = Mathf.Max(t, laneTimeT);
-
-            if (time == step.Offset) return new TextPosition
-            {
-                StartPos = step.StartPos,
-                EndPos = step.EndPos,
-                Offset = laneTime < time ? offset : float.NaN,
-            };
-            else if (time < step.Offset)
-            {
-                if (a == 0) return new TextPosition
-                {
-                    StartPos = step.StartPos,
-                    EndPos = step.EndPos,
-                    Offset = laneTime < time ? offset : float.NaN,
-                };
-
-                TextStep prev = steps[a - 1];
-                float p = (time - prev.Offset) / (step.Offset - prev.Offset);
-
-                if (step.IsLinear)
-                {
-                    return new TextPosition
-                    {
-                        StartPos = Vector2.LerpUnclamped(prev.StartPos, step.StartPos, p),
-                        EndPos = Vector2.LerpUnclamped(prev.EndPos, step.EndPos, p),
-                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
-                    };
-                }
-                else
-                {
-
-                    return new TextPosition
-                    {
-                        StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, step.StartEaseX.Get(p)),
-                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, step.StartEaseY.Get(p))),
-                        EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, step.EndEaseX.Get(p)),
-                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, step.EndEaseY.Get(p))),
-                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
-                    };
-                }
-            }
-
         }
-        {
-            float t = timing.ToSeconds(steps[steps.Count - 1].Offset);
-            return new TextPosition
-            {
-                StartPos = steps[steps.Count - 1].StartPos,
-                EndPos = steps[steps.Count - 1].EndPos,
-                Offset = laneTime < time ? offset + (timeT - t) * TextSteps[TextSteps.Count - 1].Speed : float.NaN,
-            };
-        }
+
+        return rt;
     }
 
     public new static TimestampType[] TimestampTypes = {
@@ -554,10 +500,13 @@ public class Text : Storyboardable, IDeepClonable<Text>
             Get = (x) => ((Text)x).Rotation.z,
             Set = (x, a) => { ((Text)x).Rotation.z = a; },
         },
+        new() {
+            ID = "Text_Size",
+            Name = "Text Size",
+            Get = (x) => ((Text)x).TextSize,
+            Set = (x, a) => { ((Text)x).TextSize = a; },
+        },
     };
-
-    //get the text position on time
-
 
     public Text DeepClone()
     {
@@ -566,6 +515,7 @@ public class Text : Storyboardable, IDeepClonable<Text>
             Name = Name,
             Position = new Vector3(Position.x, Position.y, Position.z),
             Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            TextSize = TextSize,
             Storyboard = Storyboard.DeepClone(),
         };
         return clone;
@@ -575,78 +525,23 @@ public class Text : Storyboardable, IDeepClonable<Text>
 //Text Step
 
 [System.Serializable]
-public class TextStep : DirtyTrackedStoryboardable, IDeepClonable<TextStep>
+public class TextStep : IDeepClonable<TextStep>
 {
     public BeatPosition Offset = new();
-    public Vector2 StartPos;
-    [SerializeReference]
-    public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
-    [SerializeReference]
-    public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
-    public Vector2 EndPos;
-    [SerializeReference]
-    public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
-    [SerializeReference]
-    public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
-    public float Speed = 1;
-
-    public bool IsLinear =>
-        StartEaseX is BasicEaseDirective sx && StartEaseY is BasicEaseDirective sy && EndEaseX is BasicEaseDirective ex && EndEaseY is BasicEaseDirective ey &&
-        sx.Function == EaseFunction.Linear && sy.Function == EaseFunction.Linear && ex.Function == EaseFunction.Linear && ey.Function == EaseFunction.Linear;
-
-    public new static TimestampType[] TimestampTypes =
-    {
-        new() {
-            ID = "StartPos_X",
-            Name = "Start Position X",
-            Get = (x) => ((TextStep)x).StartPos.x,
-            Set = (x, a) => { ((TextStep)x).StartPos.x = a; },
-        },
-        new() {
-            ID = "StartPos_Y",
-            Name = "Start Position Y",
-            Get = (x) => ((TextStep)x).StartPos.y,
-            Set = (x, a) => { ((TextStep)x).StartPos.y = a; },
-        },
-        new() {
-            ID = "EndPos_X",
-            Name = "End Position X",
-            Get = (x) => ((TextStep)x).EndPos.x,
-            Set = (x, a) => { ((TextStep)x).EndPos.x = a; },
-        },
-        new() {
-            ID = "EndPos_Y",
-            Name = "End Position Y",
-            Get = (x) => ((TextStep)x).EndPos.y,
-            Set = (x, a) => { ((TextStep)x).EndPos.y = a; },
-        },
-        new() {
-            ID = "Speed",
-            Name = "Speed",
-            Get = (x) => ((TextStep)x).Speed,
-            Set = (x, a) => { ((TextStep)x).Speed = a; },
-        },
-    };
-
+    public string TextChange = "";
+    
     public TextStep DeepClone()
     {
         TextStep clone = new()
         {
-            Offset = Offset,
-            StartPos = new Vector2(StartPos.x, StartPos.y),
-            StartEaseX = StartEaseX,
-            StartEaseY = StartEaseY,
-            EndPos = new Vector2(EndPos.x, EndPos.y),
-            EndEaseX = EndEaseX,
-            EndEaseY = EndEaseY,
-            Speed = Speed,
-            Storyboard = Storyboard.DeepClone(),
+           Offset = Offset,
+           TextChange = TextChange,
+           //Storyboard = Storyboard.DeepClone(),
         };
         return clone;
     }
 }
 
-public class TextPosition : LanePosition { }
 
 [System.Serializable]
 public class LanePosition
