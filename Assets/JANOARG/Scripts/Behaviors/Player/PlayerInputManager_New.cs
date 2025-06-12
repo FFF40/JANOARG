@@ -570,7 +570,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     // Check if the hold note is eligible for scoring
                     if (holdNote_entry.HoldPassDrainValue == 0)
                     {
-                        HoldEligible = false; // Missed the opportunity to recover :()
+                        HoldEligible = false; // Missed the opportunity to recover :(
                     }
                     else if (holdNote_entry.HoldPassDrainValue > 0)
                     {
@@ -656,42 +656,42 @@ public class PlayerInputManagerNew : MonoBehaviour
         }
         else // Autoplay, From old input manager since it works as is (for now)
         {
-            for (int a = 0; a < HitQueue.Count; a++) // While there's still hitobjects in the queue
+            for (int i = 0; i < HitQueue.Count; i++)
             {
-                HitPlayer hit = HitQueue[a]; // Get the first hitobject in the queue list
-                if (!hit) // If the hitobject has been destroyed in runtime
+                HitPlayer currentHit = HitQueue[i];
+
+                if (!currentHit) // If the hitobject has already been destroyed in runtime
                 {
-                    HitQueue.RemoveAt(a);
-                    a--;
+                    HitQueue.RemoveAt(i);
+                    i--;
                 }
-                else if (hit.IsHit) // If autoplay already hit the hitobject
+                else if (currentHit.IsHit) // Autoplay's hold note processor
                 {
-                    while (hit.HoldTicks.Count > 0 &&
-                           hit.HoldTicks[0] <= Player.CurrentTime) // While there's hold ticks
+                    while (currentHit.HoldTicks.Count > 0 && currentHit.HoldTicks[0] <= Player.CurrentTime)
                     {
                         Player.AddScore(1, null);
-                        Player.HitObjectHistory.Add(new(hit.HoldTicks[0], HitObjectHistoryType.Catch, 0));
-                        hit.HoldTicks.RemoveAt(0);
+                        Player.HitObjectHistory.Add(new(currentHit.HoldTicks[0], HitObjectHistoryType.Catch, 0));
+                        currentHit.HoldTicks.RemoveAt(0);
 
                         var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
                         effect.SetAccuracy(null);
                         effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
-                        var rt = (RectTransform)effect.transform;
-                        rt.position = Common.main.MainCamera.WorldToScreenPoint(hit.transform.position);
+                        var rectTransform = (RectTransform)effect.transform;
+                        rectTransform.position = Common.main.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                     }
 
-                    if (hit.HoldTicks.Count <= 0) // No hold ticks left
+                    if (currentHit.HoldTicks.Count == 0)
                     {
-                        Player.RemoveHitPlayer(hit);
-                        HitQueue.RemoveAt(a);
-                        a--;
+                        Player.RemoveHitPlayer(currentHit);
+                        HitQueue.RemoveAt(i);
+                        i--;
                     }
                 }
-                else if (hit.Time <= Player.CurrentTime) // Hit it, autoplay
+                else if (currentHit.Time <= Player.CurrentTime) // Hit it
                 {
-                    Player.Hit(hit, 0);
+                    Player.Hit(currentHit, 0);
                 }
-                else // Stop autoplay when there's no more hitobjects (final hitobject is destroyed)
+                else // Autoplay's job is done (final hitobject is destroyed)
                 {
                     break;
                 }
