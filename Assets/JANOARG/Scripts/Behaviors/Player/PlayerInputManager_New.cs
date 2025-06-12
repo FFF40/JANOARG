@@ -561,11 +561,10 @@ public class PlayerInputManagerNew : MonoBehaviour
                     }
                     else
                     {
-                        // Switch to 0 once the second value starts to go negative
-                        holdNote_entry.HoldPassDrainValue = Math.Max(
-                            0,
-                            holdNote_entry.HoldPassDrainValue - Time.deltaTime / Player.PassWindow
-                        );
+                        if (holdNote_entry.HoldPassDrainValue > 0)
+                        {
+                            holdNote_entry.HoldPassDrainValue -= Time.deltaTime / Player.PassWindow * .1f;
+                        }
                     }
 
                     // Check if the hold note is eligible for scoring
