@@ -34,7 +34,7 @@ public class TextPlayer : MonoBehaviour
         TextHolder.text = Text;
         TextHolder.fontSize = Current.TextSize;
         //Debug.Log(Current.TextColor);
-        //TextHolder.color = Current.TextColor;
+        TextHolder.color = Current.TextColor;
 
 
     }

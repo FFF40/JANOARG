@@ -448,9 +448,9 @@ public class Text : Storyboardable, IDeepClonable<Text>
 
     public string DisplayText;
     public float TextSize = 7f;
+    public Color TextColor = Color.white;
     
     public List<TextStep> TextSteps = new();
-    public List<TextColorStep> TextColorSteps = new();
 
     public string GetUpdateText(float time,string oldText)
     {
@@ -472,25 +472,6 @@ public class Text : Storyboardable, IDeepClonable<Text>
         return rt;
     }
 
-    public Color GetUpdateColor(float time, Color oldColor)
-    {
-        Color rt = oldColor;
-        List<TextColorStep> steps = new();
-        for (int i = 0; i < TextSteps.Count; i++)
-        {
-            TextColorStep step = (TextColorStep)TextColorSteps[i].Get(time);
-            steps.Add(step);
-            if (steps[i].TextColor != oldColor) return steps[i].TextColor;
-            //if (time >= (step.Offset))
-            //{
-            //    rt = step.TextChange;
-            //    DisplayText = step.TextChange;
-            //    TextSteps.RemoveAt(i);
-            //    return rt;
-            //}
-        }
-        return rt;
-    }
 
     public new static TimestampType[] TimestampTypes = {
         new() {
@@ -535,6 +516,31 @@ public class Text : Storyboardable, IDeepClonable<Text>
             Get = (x) => ((Text)x).TextSize,
             Set = (x, a) => { ((Text)x).TextSize = a; },
         },
+        new() {
+            ID = "Text_Color_R",
+            Name = "Text Color R",
+            Get = (x) => ((Text)x).TextColor.r,
+            Set = (x, a) => { ((Text)x).TextColor.r = a; },
+        },
+        new() {
+            ID = "Text_Color_G",
+            Name = "Text Color G",
+            Get = (x) => ((Text)x).TextColor.g,
+            Set = (x, a) => { ((Text)x).TextColor.g= a; },
+        },
+        new() {
+            ID = "Text_Color_B",
+            Name = "Text Color B",
+            Get = (x) => ((Text)x).TextColor.r,
+            Set = (x, a) => { ((Text)x).TextColor.b = a; },
+        },
+        new() {
+            ID = "Text_Color_A",
+            Name = "Text Color A",
+            Get = (x) => ((Text)x).TextColor.r,
+            Set = (x, a) => { ((Text)x).TextColor.a = a; },
+        },
+        
         
     };
 
@@ -565,48 +571,6 @@ public class TextStep : IDeepClonable<TextStep>
            Offset = Offset,
            TextChange = TextChange,
            //Storyboard = Storyboard.DeepClone(),
-        };
-        return clone;
-    }
-}
-
-[System.Serializable]
-public class TextColorStep : Storyboardable ,IDeepClonable<TextColorStep>
-{
-    public Color TextColor = Color.white;
-
-    public new static TimestampType[] TimestampTypes = {
-        new() {
-            ID = "TextColor_R",
-            Name = "Text Color R",
-            Get = (x) => ((TextColorStep)x).TextColor.r,
-            Set = (x, a) => { ((TextColorStep)x).TextColor.r = a; },
-        },
-        new() {
-            ID = "TextColor_G",
-            Name = "Text Color G",
-            Get = (x) => ((TextColorStep)x).TextColor.g,
-            Set = (x, a) => { ((TextColorStep)x).TextColor.g = a; },
-        },
-        new() {
-            ID = "TextColor_B",
-            Name = "Text Color B",
-            Get = (x) => ((TextColorStep)x).TextColor.b,
-            Set = (x, a) => { ((TextColorStep)x).TextColor.b = a; },
-        },
-        new() {
-            ID = "TextColor_A",
-            Name = "Text Color A",
-            Get = (x) => ((TextColorStep)x).TextColor.a,
-            Set = (x, a) => { ((TextColorStep)x).TextColor.a = a; },
-        },
-    };
-
-    public TextColorStep DeepClone()
-    {
-        TextColorStep clone = new()
-        {
-            Storyboard = Storyboard.DeepClone(),
         };
         return clone;
     }
