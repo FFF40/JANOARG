@@ -307,7 +307,7 @@ public class PlayerScreen : MonoBehaviour
 
             text_chart.Original = TargetChart.Data.Texts[t];
             text_chart.Current = CurrentChart.Texts[t];
-            Debug.Log("Adding" + text_chart);
+            Debug.Log("Adding " + text_chart);
             text_chart.Init();
             Texts.Add(text_chart);
            

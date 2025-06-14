@@ -445,14 +445,15 @@ public class Text : Storyboardable, IDeepClonable<Text>
     public string Name;
     public Vector3 Position;
     public Vector3 Rotation;
-
     public string DisplayText;
+
     public float TextSize = 7f;
     public Color TextColor = Color.white;
+    public FontFamily TextFont = FontFamily.RobotoMono;
     
     public List<TextStep> TextSteps = new();
 
-    public string GetUpdateText(float time,string oldText)
+    public string GetUpdateText(float time,float beat,string oldText)
     {
         string rt = oldText;
         List<TextStep> steps = new();
@@ -460,13 +461,14 @@ public class Text : Storyboardable, IDeepClonable<Text>
         {
             TextStep step = TextSteps[i];
             steps.Add(step);
-            if (time >= (step.Offset))
+            //Change text if current beat is more than the step's offset
+            if (beat >= step.Offset)
             {
                 Debug.Log(step.TextChange + "Change Text");
                 rt = step.TextChange;
                 DisplayText = step.TextChange;
                 TextSteps.RemoveAt(i);
-                return rt ;
+                return rt;
             }
         }
         return rt;
@@ -552,6 +554,7 @@ public class Text : Storyboardable, IDeepClonable<Text>
             Position = new Vector3(Position.x, Position.y, Position.z),
             Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
             TextSize = TextSize,
+            TextFont = TextFont,
             Storyboard = Storyboard.DeepClone(),
         };
         return clone;
@@ -854,4 +857,13 @@ public enum CoordinateMode
     Local,
     Group,
     Global,
+}
+
+// This will refer to 'Arial', 'Calibri', Roboto Sans'
+public enum FontFamily
+{
+    RobotoMono,
+    Roboto,
+    Garvette,
+    Michroma,
 }
