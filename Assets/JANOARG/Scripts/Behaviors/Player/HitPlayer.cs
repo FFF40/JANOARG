@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class HitPlayer : MonoBehaviour
 {
@@ -26,7 +27,9 @@ public class HitPlayer : MonoBehaviour
     public LanePlayer Lane;
     public HitScreenCoord HitCoord;
 
-    public bool IsQueuedHit;
+    public bool InDiscreteHitQueue;
+
+    public bool PendingHoldQueue;
     public bool IsHit;
     public bool IsTapped;
 
