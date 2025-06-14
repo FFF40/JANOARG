@@ -449,7 +449,7 @@ public class Text : Storyboardable, IDeepClonable<Text>
 
     public float TextSize = 7f;
     public Color TextColor = Color.white;
-    public FontFamily TextFont = FontFamily.RobotoMono;
+    public FontFamily TextFont;
     
     public List<TextStep> TextSteps = new();
 

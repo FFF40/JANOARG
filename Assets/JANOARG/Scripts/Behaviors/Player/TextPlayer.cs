@@ -17,12 +17,9 @@ public class TextPlayer : MonoBehaviour
     public void Init()
     {
         TextHolder.text = Original.DisplayText;
-        Debug.LogWarning(Original.TextFont);
         TextHolder.font = InitFontFamily(Original.TextFont);
 
         Text = Original.DisplayText;
-
-        //TextHolder.color = Original.TextColor;
     }
 
     TMP_FontAsset InitFontFamily(FontFamily font)
@@ -40,7 +37,6 @@ public class TextPlayer : MonoBehaviour
         if (rt == null)
         Debug.LogWarning($"Font asset for {font} not found in Resources.");
         
-
         return rt;
     }
 
@@ -53,13 +49,9 @@ public class TextPlayer : MonoBehaviour
         transform.localEulerAngles = Current.Rotation;
 
         Text = Original.GetUpdateText(time, beat, Original.DisplayText);
-        //Text = Original.GetUpdateColor(time, Original.Col);
         TextHolder.text = Text;
         TextHolder.fontSize = Current.TextSize;
-        //Debug.Log(Current.TextColor);
         TextHolder.color = Current.TextColor;
-
-
     }
 
 }

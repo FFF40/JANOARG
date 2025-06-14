@@ -235,7 +235,7 @@ public class JACDecoder
                             {
                                 Position = new Vector3(ParseFloat(tokens[2]), ParseFloat(tokens[3]), ParseFloat(tokens[4])),
                                 Rotation = new Vector3(ParseFloat(tokens[5]), ParseFloat(tokens[6]), ParseFloat(tokens[7])),
-                                TextFont = ParseFont(tokens[8]),
+                                TextFont = ParseEnum<FontFamily>(tokens[8]),
                             };
                             currentObject = currentText = text_r;
                             currentStoryboard = text_r.Storyboard;
@@ -415,20 +415,4 @@ public class JACDecoder
         return new Color(ParseFloat(tokens[0]), ParseFloat(tokens[1]), ParseFloat(tokens[2]), ParseFloat(tokens[3]));
     }
 
-    static FontFamily ParseFont(string str)
-    {
-        switch (str.ToLowerInvariant())
-        {
-            case "garvette":
-                return FontFamily.Garvette;
-            case "robotomono":
-                return FontFamily.RobotoMono;
-            case "roboto":
-                return FontFamily.Roboto;
-            case "michroma":
-                return FontFamily.Michroma;
-            default:
-                return FontFamily.RobotoMono; // Fallback
-        }
-    }
 }
