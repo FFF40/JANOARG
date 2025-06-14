@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -29,6 +30,8 @@ public class Chart : IDeepClonable<Chart>
 
     public Palette Palette = new();
 
+    public List<Text> Texts = new();
+
     public Chart() 
     {
         
@@ -49,6 +52,7 @@ public class Chart : IDeepClonable<Chart>
         };
         foreach (LaneGroup group in Groups) clone.Groups.Add(group.DeepClone());
         foreach (Lane lane in Lanes) clone.Lanes.Add(lane.DeepClone());
+        foreach (Text text in Texts) clone.Texts.Add(text.DeepClone());
         return clone;
     }
 }
@@ -434,6 +438,147 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     }
 }
 
+// Text
+[System.Serializable]
+public class Text : Storyboardable, IDeepClonable<Text>
+{
+    public string Name;
+    public Vector3 Position;
+    public Vector3 Rotation;
+    public string DisplayText;
+
+    public float TextSize = 7f;
+    public Color TextColor = Color.white;
+    public FontFamily TextFont;
+    
+    public List<TextStep> TextSteps = new();
+
+    public string GetUpdateText(float time,float beat,string oldText)
+    {
+        string rt = oldText;
+        List<TextStep> steps = new();
+        for (int i = 0; i < TextSteps.Count; i++)
+        {
+            TextStep step = TextSteps[i];
+            steps.Add(step);
+            //Change text if current beat is more than the step's offset
+            if (beat >= step.Offset)
+            {
+                Debug.Log(step.TextChange + "Change Text");
+                rt = step.TextChange;
+                DisplayText = step.TextChange;
+                TextSteps.RemoveAt(i);
+                return rt;
+            }
+        }
+        return rt;
+    }
+
+
+    public new static TimestampType[] TimestampTypes = {
+        new() {
+            ID = "Position_X",
+            Name = "Position X",
+            Get = (x) => ((Text)x).Position.x,
+            Set = (x, a) => { ((Text)x).Position.x = a; },
+        },
+        new() {
+            ID = "Position_Y",
+            Name = "Position Y",
+            Get = (x) => ((Text)x).Position.y,
+            Set = (x, a) => { ((Text)x).Position.y = a; },
+        },
+        new() {
+            ID = "Position_Z",
+            Name = "Position Z",
+            Get = (x) => ((Text)x).Position.z,
+            Set = (x, a) => { ((Text)x).Position.z = a; },
+        },
+        new() {
+            ID = "Rotation_X",
+            Name = "Rotation X",
+            Get = (x) => ((Text)x).Rotation.x,
+            Set = (x, a) => { ((Text)x).Rotation.x = a; },
+        },
+        new() {
+            ID = "Rotation_Y",
+            Name = "Rotation Y",
+            Get = (x) => ((Text)x).Rotation.y,
+            Set = (x, a) => { ((Text)x).Rotation.y = a; },
+        },
+        new() {
+            ID = "Rotation_Z",
+            Name = "Rotation Z",
+            Get = (x) => ((Text)x).Rotation.z,
+            Set = (x, a) => { ((Text)x).Rotation.z = a; },
+        },
+        new() {
+            ID = "Text_Size",
+            Name = "Text Size",
+            Get = (x) => ((Text)x).TextSize,
+            Set = (x, a) => { ((Text)x).TextSize = a; },
+        },
+        new() {
+            ID = "Text_Color_R",
+            Name = "Text Color R",
+            Get = (x) => ((Text)x).TextColor.r,
+            Set = (x, a) => { ((Text)x).TextColor.r = a; },
+        },
+        new() {
+            ID = "Text_Color_G",
+            Name = "Text Color G",
+            Get = (x) => ((Text)x).TextColor.g,
+            Set = (x, a) => { ((Text)x).TextColor.g= a; },
+        },
+        new() {
+            ID = "Text_Color_B",
+            Name = "Text Color B",
+            Get = (x) => ((Text)x).TextColor.r,
+            Set = (x, a) => { ((Text)x).TextColor.b = a; },
+        },
+        new() {
+            ID = "Text_Color_A",
+            Name = "Text Color A",
+            Get = (x) => ((Text)x).TextColor.r,
+            Set = (x, a) => { ((Text)x).TextColor.a = a; },
+        },
+        
+        
+    };
+
+    public Text DeepClone()
+    {
+        Text clone = new()
+        {
+            Name = Name,
+            Position = new Vector3(Position.x, Position.y, Position.z),
+            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            TextSize = TextSize,
+            TextFont = TextFont,
+            Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
+}
+
+[System.Serializable]
+public class TextStep : IDeepClonable<TextStep>
+{
+    public BeatPosition Offset = new();
+    public string TextChange = "";
+    
+    public TextStep DeepClone()
+    {
+        TextStep clone = new()
+        {
+           Offset = Offset,
+           TextChange = TextChange,
+           //Storyboard = Storyboard.DeepClone(),
+        };
+        return clone;
+    }
+}
+
 [System.Serializable]
 public class LanePosition
 {
@@ -712,4 +857,13 @@ public enum CoordinateMode
     Local,
     Group,
     Global,
+}
+
+// This will refer to 'Arial', 'Calibri', Roboto Sans'
+public enum FontFamily
+{
+    RobotoMono,
+    Roboto,
+    Garvette,
+    Michroma,
 }

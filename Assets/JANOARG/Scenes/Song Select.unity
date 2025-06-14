@@ -5085,7 +5085,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c35667dc285e4aa40a039b2a37a9ec08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Playlist: {fileID: 11400000, guid: 8496bc59e6795a44785a16fe995ec357, type: 2}
+  Playlist: {fileID: 11400000, guid: 3d88ca9e8b4956e43b960309e1f6a2a0, type: 2}
   ItemSample: {fileID: 1567076798739812424, guid: 70ce51dbf68132e49a34eb0db328beb2, type: 3}
   ItemHolder: {fileID: 879351028}
   ItemGroup: {fileID: 879351032}
