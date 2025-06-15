@@ -243,7 +243,7 @@ public class JACDecoder
                         }
                         else
                         {
-                            throw new System.Exception("Not enough tokens (minimum 9, got " + tokens.Length + ").");
+                            throw new System.Exception("Not enough tokens (minimum 8, got " + tokens.Length + ").");
                         }
                     }
                     else if (tokens[1] == "TextStep")

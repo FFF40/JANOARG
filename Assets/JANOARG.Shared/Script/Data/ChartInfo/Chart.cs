@@ -447,33 +447,30 @@ public class Text : Storyboardable, IDeepClonable<Text>
     public Vector3 Rotation;
     public string DisplayText;
 
+    // Default Values
     public float TextSize = 7f;
     public Color TextColor = Color.white;
-    public FontFamily TextFont;
+    public FontFamily TextFont; //Default value: RobotoMono
     
     public List<TextStep> TextSteps = new();
 
     public string GetUpdateText(float time,float beat,string oldText)
     {
         string rt = oldText;
-        List<TextStep> steps = new();
-        for (int i = 0; i < TextSteps.Count; i++)
+        List<TextStep> steps = TextSteps;
+        for (int i = 0; i < steps.Count; i++)
         {
-            TextStep step = TextSteps[i];
-            steps.Add(step);
-            //Change text if current beat is more than the step's offset
+            TextStep step = steps[i];
+            //Change text if current beat is more than or equal to the step's offset
             if (beat >= step.Offset)
             {
-                Debug.Log(step.TextChange + "Change Text");
                 rt = step.TextChange;
-                DisplayText = step.TextChange;
-                TextSteps.RemoveAt(i);
-                return rt;
+                // steps.RemoveAt(i); //Problem
+                // return rt;
             }
         }
         return rt;
     }
-
 
     public new static TimestampType[] TimestampTypes = {
         new() {
@@ -565,6 +562,8 @@ public class Text : Storyboardable, IDeepClonable<Text>
 public class TextStep : IDeepClonable<TextStep>
 {
     public BeatPosition Offset = new();
+
+    // The new text will replace DisplayText 
     public string TextChange = "";
     
     public TextStep DeepClone()
@@ -573,7 +572,6 @@ public class TextStep : IDeepClonable<TextStep>
         {
            Offset = Offset,
            TextChange = TextChange,
-           //Storyboard = Storyboard.DeepClone(),
         };
         return clone;
     }

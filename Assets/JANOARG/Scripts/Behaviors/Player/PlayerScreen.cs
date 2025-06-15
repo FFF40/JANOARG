@@ -186,19 +186,8 @@ public class PlayerScreen : MonoBehaviour
                 player.Parent = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
                 player.transform.SetParent(player.Parent.transform);
             }
-            //for text ig (idk what im doing)
-            //for (int a = 0; a < TargetChart.Data.Texts.Count; a++)
-            //{
-            //    TextPlayer player = Instantiate(TextSample, Holder);
-            //    player.Original = TargetChart.Data.Texts[a];
-            //    player.Current = CurrentChart.Texts[a];
-            //    player.gameObject.name = player.Current.Name;
-            //    Texts.Add(player);
-            //    yield return new WaitForEndOfFrame();
-            //} 
-
-            // Instantiate every text ig
-
+            //Should worked fr
+            
         }
 
         ComboGroup.alpha = JudgmentGroup.alpha = 0;
@@ -296,23 +285,19 @@ public class PlayerScreen : MonoBehaviour
 
             HitsRemaining += player.Original.Objects.Count;
 
-            
-
             yield return new WaitForEndOfFrame();
         }
 
         for (int t = 0; t < TargetChart.Data.Texts.Count; t++)
         {
-            TextPlayer text_chart = Instantiate(TextSample, Holder); 
+            TextPlayer text_chart = Instantiate(TextSample, Holder);
 
             text_chart.Original = TargetChart.Data.Texts[t];
             text_chart.Current = CurrentChart.Texts[t];
-            Debug.Log("Adding " + text_chart);
             text_chart.Init();
             Texts.Add(text_chart);
-           
-        }
 
+        }
 
 
         Debug.Log("Hold Ticks: " + HoldTicks + "| Normal: " + Normal + "| Catch: " + Catch + "| Omni: " + OmniDir + "| DirF: " + DirF + "| Total: " + (HoldTicks + Normal + Catch + OmniDir + DirF) );
@@ -426,8 +411,6 @@ public class PlayerScreen : MonoBehaviour
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
             foreach (TextPlayer text in Texts) text.UpdateSelf(visualTime, visualBeat);
-
-            // Update Text
 
         }
     }
