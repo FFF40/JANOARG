@@ -53,6 +53,12 @@ public class JACEncoder
             str += EncodeLane(lane);
         }
 
+        str += "\n\n[EXTRAS]";
+        foreach (Text text in chart.Texts)
+        {
+            str += EncodeText(text);
+        }
+
         return str;
     }
 
@@ -176,6 +182,24 @@ public class JACEncoder
         foreach (HitObject hit in lane.Objects) {
             str += EncodeHitObject(hit, depth2);
         }
+
+        return str;
+    }
+
+    public static string EncodeText(Text text, int depth = 0)
+    {
+        string indent = new string(' ', depth);
+        string indent2 = new string(' ', depth + IndentSize);
+
+        string str = "\n" + indent + "+ Text"
+            + " " + EncodeVector(text.Position)
+            + " " + EncodeVector(text.Rotation);
+        if (!string.IsNullOrEmpty(text.Name)) str += "\n" + indent2 + "Name: " + text.Name;
+
+        if (!string.IsNullOrEmpty(text.DisplayText))
+            str += "\n" + indent2 + "Display Text: " + text.DisplayText;
+
+        str += EncodeStoryboard(text, depth + IndentSize);
 
         return str;
     }
