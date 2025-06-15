@@ -20,6 +20,9 @@ public class TextPlayer : MonoBehaviour
         TextHolder.color    = Original.TextColor;
         TextHolder.font     = InitFontFamily(Original.TextFont);
 
+        transform.localPosition = Original.Position;
+        transform.localEulerAngles = Original.Rotation;
+
         Text = Original.DisplayText;
         Current.TextSteps = Original.TextSteps;
     }
