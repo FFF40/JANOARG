@@ -525,7 +525,8 @@ public class PlayerInputManagerNew : MonoBehaviour
                     }
                 }
 
-                if (offsetedHit < -Math.Max(Player.PassWindow, Player.GoodWindow)) // Too damn early
+                // Skip checks if none of the hitobjects are even near window range
+                if (offsetedHit < -Math.Max(Player.PassWindow, Player.GoodWindow))
                 {
                     /*
                     Debug.Log($"Hitobject at {hitIteration.Time} is hit too early. Missed it.");
@@ -626,18 +627,19 @@ public class PlayerInputManagerNew : MonoBehaviour
                     // Invalidate holding state
                     if
                     (
-                        TouchClasses.FindAll
+                        holdNote_entry.IsPlayerHolding &&
+                        holdNote_entry.AssignedTouch != null &&
                         (
-                            handler =>
-                                handler.Touch.finger.index == holdNote_entry.AssignedTouch.Touch.finger.index
-                        ).Any
-                        (
-                            handler =>
-                                handler.Touch.phase is TouchPhase.Ended or TouchPhase.Canceled
+                            // Check if the assigned touch no longer exists in TouchClasses or is out of range radius
+                            TouchClasses.Find(touch => touch.Touch.finger.index == holdNote_entry.AssignedTouch.Touch.finger.index) == null ||
+                            Vector2.Distance(
+                                holdNote_entry.AssignedTouch.Touch.screenPosition,
+                                holdNote_entry.HitObjectValues.HitCoord.Position
+                                ) > holdNote_entry.HitObjectValues.HitCoord.Radius
                         )
                     )
                     {
-                        Debug.Log($"Touch {holdNote_entry.AssignedTouch.Touch.finger.index} ended or canceled. Invalidating hold state.");
+                        Debug.Log($"Touch at {holdNote_entry.HitObjectValues.Time} ended or canceled. Invalidating hold state.");
                         holdNote_entry.IsPlayerHolding = false; // Player is not holding the note anymore
                         holdNote_entry.AssignedTouch = null; // Clear the assigned touch
                     }
@@ -655,6 +657,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     {
                         // Prevent negative values
                         if (holdNote_entry.HoldPassDrainValue > 0) holdNote_entry.HoldPassDrainValue -= Time.deltaTime / Player.PassWindow * .1f; 
+                        else holdNote_entry.HoldPassDrainValue = 0; // Preventing measure, as a single iteration sometimes could drag it far enough to hit the negative land
                             
                     }
 
