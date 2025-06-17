@@ -41,10 +41,15 @@ public class HoldNoteClass
         get => _HoldPassDrainValue;
         set
         {
-            if (value is > 1 or < 0)
+            if (value > 1)
             {
-                throw new ArgumentOutOfRangeException(value.ToString(CultureInfo.InvariantCulture),
-                    "HoldPassDrainValue must be between 0 and 1.");
+                Debug.LogWarning($"HoldPassDrainValue was above 1 ({value}), clamping to 1");
+                value = 1;
+            }
+            else if (value < 0)
+            {
+                Debug.LogWarning($"HoldPassDrainValue was below 0 ({value}), clamping to 0");
+                value = 0;
             }
             _HoldPassDrainValue = value;
         }
