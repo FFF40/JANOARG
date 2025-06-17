@@ -134,6 +134,14 @@ public class TouchClass
     /// Indicates whether the touch is currently being held.
     /// </summary>
     public bool IsHolding;
+    
+    /// <summary>
+    /// If the touch is within the PassWindow range of a Discrete Hitobject.
+    /// </summary>
+    /// <remarks>
+    /// This is to prevent additional inputs from being passed to a non-discrete hitobject, which results in unexpected early judgement.
+    /// </remarks>
+    public bool DiscreteHitobjectIsInRange;
 
     /// <summary>
     /// The initial position of the flick gesture.
@@ -437,6 +445,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                         Debug.Log($"Touch {touch.Touch.finger.index} flicked on hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                                         touch.Flicked = false; // Reset flick state (otherwise you can suddenly flick more than one note at once)
                                         hitIteration.InDiscreteHitQueue = true;
+                                        touch.DiscreteHitobjectIsInRange = true;
                                         alreadyHit = true;
                                     }
                                 }
@@ -452,6 +461,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 {
                                     Debug.Log($"Touch {touch.Touch.finger.index} is in range on hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                                     hitIteration.InDiscreteHitQueue = true;
+                                    touch.DiscreteHitobjectIsInRange = true;
                                     alreadyHit = true;
                                 }
                             }
@@ -466,6 +476,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                             if (
                                 touch.Tapped &&
+                                !touch.DiscreteHitobjectIsInRange &&
                                 (
                                     distance = Vector2.Distance(
                                         touch.Touch.screenPosition,
@@ -487,6 +498,24 @@ public class PlayerInputManagerNew : MonoBehaviour
                         }
                     }
                     
+                    // For additional inputs
+                    foreach (TouchClass touch in TouchClasses)
+                    {
+                        float distance;
+                        if (
+                            hitIteration.Current.Type == HitObject.HitType.Catch || hitIteration.Current.Flickable && 
+                            (
+                                distance = Vector2.Distance(
+                                    touch.Touch.screenPosition,
+                                    hitIteration.HitCoord.Position
+                                )
+                            ) < hitIteration.HitCoord.Radius
+                        )
+                        {
+                            touch.DiscreteHitobjectIsInRange = true;
+                        }
+                    }
+
                     // Wait for discrete hitobject to reach judgement line before clearing (for satisfaction)
                     if (hitIteration.InDiscreteHitQueue && offsetedHit > 0)
                     {
