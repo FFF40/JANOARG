@@ -415,6 +415,9 @@ public class PlayerInputManagerNew : MonoBehaviour
                             {
                                 if (!touch.Tapped)
                                     return false;
+                                
+                                if (touch.QueuedHit == null)
+                                    return true;
                                     
                                 float timeDifference = hitObject.Time - touch.QueuedHit.Time;
                                 return timeDifference < -1e-3f || (timeDifference < 1e-3f && distance < touch.QueuedHitDistance);
@@ -457,6 +460,21 @@ public class PlayerInputManagerNew : MonoBehaviour
                                     }
                                     alreadyHit = true;
                                     break;
+                                }
+                            }
+                        }
+                        else // Normal catch note
+                        {
+                            foreach (TouchClass touch in TouchClasses)
+                            {
+                                if (Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position) <
+                                    hitIteration.HitCoord.Radius
+                                   )
+                                {
+                                    Debug.Log($"Touch {touch.Touch.finger.index} is in range on hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
+                                    hitIteration.InDiscreteHitQueue = true;
+                                    touch.DiscreteHitobjectIsInRange = true;
+                                    alreadyHit = true;
                                 }
                             }
                         }
