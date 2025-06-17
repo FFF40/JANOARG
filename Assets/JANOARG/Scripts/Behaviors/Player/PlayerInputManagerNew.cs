@@ -734,7 +734,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                             effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
                             var rt = (RectTransform)effect.transform;
 
-                            rt.position = holdNote_entry.HitObjectValues.HitCoord.Position;
+                            rt.position = Common.main.MainCamera.WorldToScreenPoint(holdNote_entry.HitObjectValues.transform.position);
                         }
                         else
                         {
