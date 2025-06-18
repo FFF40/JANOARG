@@ -204,8 +204,9 @@ public class PlayerInputManagerNew : MonoBehaviour
     public bool ValidateFlickPass(float expected, float actual)
     {
         float angularDifference = ((expected - actual) % 360 + 360) % 360;
-        Debug.Log($"ValidatingFlickPass: Expected {expected}°, got {actual}°, Difference {angularDifference}°");
-        return angularDifference < (0 + 25) || angularDifference > (360 - 25); // ±25 degrees
+        bool comparison = angularDifference < (0 + 25) || angularDifference > (360 - 25);
+        Debug.Log($"ValidatingFlickPass: Expected {expected}°, got {actual}°, Difference 25 < ({angularDifference})° < 335 ({comparison})");
+        return comparison; // ±25 degrees
     }
 
     private void ValidateTouchClass(TouchClass handler) // Implement this somehow
@@ -329,7 +330,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                     )
                 )
                 {
-                    iteratingTouch.Tapped = false; // Tap only lasts for a single frame
                     iteratingTouch.IsHolding = true; // Consider it holding in the next frame
                 }
             }
@@ -389,6 +389,10 @@ public class PlayerInputManagerNew : MonoBehaviour
                                         if (!TapFlickValid)
                                             continue; // Skip if invalidated
                                         
+                                        hitIteration.InDiscreteHitQueue = true;
+                                        touch.QueuedHit = hitIteration;
+                                        touch.QueuedHitDistance = distance;
+                                        touch.Flicked = false; // Reset flick state
                                         hitIteration.IsTapped = true;
                                         break;
                                     case HitObject.HitType.Catch:
@@ -397,12 +401,13 @@ public class PlayerInputManagerNew : MonoBehaviour
                                             continue; // Skip if invalidated
                                         
                                         hitIteration.InDiscreteHitQueue = true;
+                                        touch.QueuedHit = hitIteration;
+                                        touch.QueuedHitDistance = distance;
+                                        touch.Flicked = false; // Reset flick state
                                         touch.DiscreteHitobjectIsInRange = true;
                                         break;
                                 }
-                                touch.QueuedHit = hitIteration;
-                                touch.QueuedHitDistance = distance;
-                                touch.Flicked = false; // Reset flick state
+
                             }
 
                             bool FlickRangeCheck(Vector2 position, HitPlayer hit)
@@ -440,32 +445,30 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                             bool TapFlickVerifier(HitPlayer hitObject, TouchClass touch)
                             {
-                                float touchToHitdistance, timeDifference;
+                                float timeDifference;
                                 
                                 // Shared logic from normal tap note
                                 if (
                                     touch.Tapped &&
                                     !touch.DiscreteHitobjectIsInRange &&
-                                    (
-                                        touchToHitdistance = Vector2.Distance(
-                                            touch.Touch.startScreenPosition,
-                                            hitObject.HitCoord.Position
-                                        )
-                                    ) < hitIteration.HitCoord.Radius + flickThreshold &&
+                                    FlickRangeCheck(touch.Touch.startScreenPosition, hitObject) && // Special hitbox for directional tap flick
                                     (
                                         !touch.QueuedHit ||
                                         (timeDifference = hitIteration.Time - touch.QueuedHit.Time) < -1e-3f ||
-                                        (timeDifference < 1e-3f && touchToHitdistance < touch.QueuedHitDistance)
+                                        (timeDifference < 1e-3f && distance < touch.QueuedHitDistance)
                                     )
                                 )
-                                    return FlickVerifier(hitObject, touch);
+                                {
+                                    Debug.Log($"Touched {touch.Touch.finger.index} is a tap flick. Passing to main flick verifier with flick direction {touch.FlickDirection}.");
+                                   return FlickVerifier(hitObject, touch, hitObject.Current.FlickDirection);
+                                }
                                 else
                                     return false;
 
                             }
                             
                             // Applies to both tap and catch flick (main processor for distance and angle calculations)
-                            bool FlickVerifier(HitPlayer hitObject, TouchClass touch)
+                            bool FlickVerifier(HitPlayer hitObject, TouchClass touch, float? angle = null)
                             {
                                 float touchToHitdistance;
                                 
@@ -481,9 +484,10 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 )
                                     return false;
                                 
+                                Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                                 if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
                                 {
-                                    return ValidateFlickPass(hitObject.Current.FlickDirection, touch.FlickDirection); }
+                                    return ValidateFlickPass(hitObject.Current.FlickDirection, angle ?? touch.FlickDirection); }
                                 else // Omnidirectional flick (doesn't give a fuck which direction you flick)
                                 {
                                     return FlickRangeCheck(touch.Touch.startScreenPosition, hitObject);
@@ -492,104 +496,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 return false;
                             }
                         }
-                            
-                            /*
-                            bool IsFlickValid(HitPlayer hitObject, TouchClass touch, Vector2 screenPosition, float screenDpi, out float distance)
-                            {
-                                distance = 0;
-                                
-                                if (!hitObject.Current.Flickable || hitObject.IsHit || hitObject.InDiscreteHitQueue)
-                                    return false;
-    
-                                // Check if position is in range    
-                                if (!IsPositionInRange(hitObject, screenPosition, screenDpi, out distance))
-                                    return false;
-                                    
-                                // For normal tap flicks, validate tap state
-                                if (hitObject.Current.Type == HitObject.HitType.Normal && !hitObject.IsTapped)
-                                {
-                                    return ValidateTapFlick(hitObject, touch, distance);
-                                }
-                                
-                                // For catch flicks, validate flick state
-                                return ValidateCatchFlick(hitObject, touch, screenPosition);
-                            }
-    
-                            bool IsPositionInRange(HitPlayer hitObject, Vector2 screenPosition, float screenDpi, out float distance)
-                            {
-                                if (hitObject.Current.Type == HitObject.HitType.Normal)
-                                {
-                                    // Calculate the distance in the x-axis after applying the flick direction rotation
-                                    distance = Math.Abs(
-                                        (Quaternion.Euler(0, 0, hitObject.Current.FlickDirection) *
-                                        (screenPosition - hitObject.HitCoord.Position)).x
-                                    );
-                                    return distance < hitObject.HitCoord.Radius;
-                                }
-                                
-                                // Calculate the Euclidean distance for catch type
-                                distance = Vector2.Distance(screenPosition, hitObject.HitCoord.Position);
-                                return distance < (hitObject.HitCoord.Radius + screenDpi * 1f);
-                            }
-    
-                            bool ValidateTapFlick(HitPlayer hitObject, TouchClass touch, float distance)
-                            {
-                                
-                                if (
-                                    touch.Tapped &&
-                                    IsPositionInRange(hitObject, touch.Touch.screenPosition, Screen.dpi, out _) &&
-                                    distance < hitObject.HitCoord.Radius
-                                )
-                                    return true;
-                                else
-                                    return false;
-                            }
-    
-                            bool ValidateCatchFlick(HitPlayer hitObject, TouchClass touch, Vector2 screenPosition)
-                            {
-                                if (!touch.Flicked)
-                                    return false;
-                                    
-                                bool positionValid = hitObject.Current.Type == HitObject.HitType.Normal 
-                                    ? touch.QueuedHit == hitObject 
-                                    : IsPositionInRange(hitObject, screenPosition, Screen.dpi, out _);
-                                    
-                                if (!positionValid)
-                                    return false;
-                                    
-                                return !float.IsFinite(hitObject.Current.FlickDirection) || 
-                                       ValidateFlickPass(hitObject.Current.FlickDirection, touch.FlickDirection);
-                            }
-                            
-                            foreach (TouchClass touch in TouchClasses)
-                            {
-                                float distance = Vector2.Distance(
-                                    touch.Touch.startScreenPosition,
-                                    hitIteration.HitCoord.Position
-                                );
-                                
-                                if (IsFlickValid(hitIteration, touch, touch.Touch.screenPosition, screenDpi, out distance))
-                                {
-                                    if (hitIteration.Current.Type == HitObject.HitType.Normal)
-                                    {
-                                        // Handle tap flick hit
-                                        touch.QueuedHit = hitIteration;
-                                        touch.QueuedHitDistance = distance;
-                                        hitIteration.IsTapped = true;
-                                    }
-                                    else
-                                    {
-                                        // Handle catch flick hit
-                                        touch.Flicked = false;
-                                        hitIteration.InDiscreteHitQueue = true;
-                                        touch.DiscreteHitobjectIsInRange = true;
-                                    }
-                                    alreadyHit = true;
-                                    break;
-                                }
-                            }
-                        }
-                        */
                         else // Normal catch note
                         {
                             foreach (TouchClass touch in TouchClasses)
@@ -623,6 +529,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                         hitIteration.HitCoord.Position
                                     )
                                 ) < hitIteration.HitCoord.Radius &&
+                                
                                 (
                                     !touch.QueuedHit ||
                                     (timeDifference = hitIteration.Time - touch.QueuedHit.Time) < -1e-3f ||
@@ -930,6 +837,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     touch.QueuedHit = null; // Clear the queued hit
                 }
+                touch.Tapped = false; // Tap only lasts for a single frame
             }
 
         }
