@@ -329,6 +329,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     )
                 )
                 {
+                    iteratingTouch.Tapped = false; // Tap only lasts for a single frame
                     iteratingTouch.IsHolding = true; // Consider it holding in the next frame
                 }
             }
@@ -912,7 +913,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                         touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time
                     );
                     Debug.Log($"Hit queued hitobject at {touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time} for touch {touch.Touch.finger.index}.");
-                    touch.Tapped = false; // Tap only lasts for a single frame
                     touch.QueuedHit.IsHit = true; // Mark as hit
 
                     if (touch.QueuedHit.PendingHoldQueue)
