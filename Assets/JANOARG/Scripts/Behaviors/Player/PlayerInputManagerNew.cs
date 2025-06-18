@@ -585,7 +585,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     else if (!alreadyHit && offsetedHit > window) // Didn't hit the hitobject within the timing window
                     {
                         Player.Hit(hitIteration, float.PositiveInfinity, false);
-                        Debug.Log($"Hitobject at {hitIteration.Time} ({hitIteration.Current.Type}) missed.");
+                        Debug.Log($"Hitobject at {hitIteration.Time} ({hitIteration.Current.Type}) missed. Radius: {hitIteration.HitCoord.Radius}");
 
                         if (hitIteration.PendingHoldQueue) //Pass to HoldQueue on miss
                         {
