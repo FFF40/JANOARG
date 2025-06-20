@@ -104,6 +104,7 @@ public class PlayerScreen : MonoBehaviour
 
     [NonSerialized]
     public PlayerSettings Settings = new();
+    private protected readonly float MinimumRadius = 180f;
 
     public void Awake() 
     {
@@ -242,11 +243,15 @@ public class PlayerScreen : MonoBehaviour
                 HitObject h = (HitObject)hit.Get(hit.Offset); //Get current HitObject?
                 Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position));
                 Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position + hit.Length));
+
+                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f;
                 
                 //Add hit coords
                 player.HitCoords.Add(new HitScreenCoord {
                     Position = (hitStart + hitEnd) / 2,
-                    Radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f,
+                    Radius = radius > MinimumRadius
+                        ? radius
+                        : MinimumRadius
                 });
             }
 
