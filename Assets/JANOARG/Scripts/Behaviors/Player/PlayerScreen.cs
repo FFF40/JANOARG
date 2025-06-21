@@ -446,12 +446,12 @@ public class PlayerScreen : MonoBehaviour
 
     public void RemoveHitPlayer(HitPlayer hit) 
     {
-        if (hit.HoldMesh)
+        if (hit.HoldMesh != null)
         {
             Destroy(hit.HoldMesh.mesh);
             Destroy(hit.HoldMesh.gameObject);
         }
-        if (hit.gameObject)
+        if (hit.gameObject != null)
             Destroy(hit.gameObject);
         
         hit.Lane.HitObjects.Remove(hit);
