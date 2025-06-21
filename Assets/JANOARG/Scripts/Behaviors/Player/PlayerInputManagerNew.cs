@@ -718,10 +718,20 @@ public class PlayerInputManagerNew : MonoBehaviour
                     if (holdNote_entry.HitObjectValues.HoldTicks.Count <= 0) // No hold ticks left
                     {
                         Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} has no hold ticks left. Removing from queue.");
-                        Player.RemoveHitPlayer(holdNote_entry.HitObjectValues); // Terminate the hold note
-
-                        HoldQueue.RemoveAt(a);
-                        a--; // Pointer rollback
+                        try
+                        {
+                            Player.RemoveHitPlayer(holdNote_entry.HitObjectValues); // Terminate the hold note
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogException(e);
+                            Debug.LogWarning($"Hold note at {holdNote_entry.HitObjectValues.Time} already terminated. Skipping.");
+                        }
+                        finally
+                        {
+                            HoldQueue.RemoveAt(a);
+                            a--; // Pointer rollback
+                        }
                     }
 
                 }
