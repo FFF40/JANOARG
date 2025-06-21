@@ -489,7 +489,11 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                             if (
                                 touch.Tapped &&
-                                !touch.DiscreteHitobjectIsInRange &&
+                                !(
+                                    touch.DiscreteHitobjectIsInRange &&
+                                    offsetedHit > -Player.GoodWindow // Ignore hits that are too early and near the discrete hitobject
+                                    
+                                )&&
                                 (
                                     distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
                                 ) < hitIteration.HitCoord.Radius &&
