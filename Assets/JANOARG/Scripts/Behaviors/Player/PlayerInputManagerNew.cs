@@ -133,6 +133,14 @@ public class TouchClass
     }
 
     /// <summary>
+    /// The nearest discrete hitobject to the touch.
+    /// </summary>
+    /// <remarks>
+    /// This is to compare the attributes to the normal hitobject.
+    /// </remarks>
+    public HitPlayer NearestDiscreteHitobject;
+
+    /// <summary>
     /// Backing field for the <see cref="FlickDirection"/> property.
     /// </summary>
     private float _flickDirection;
@@ -414,7 +422,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 // Shared logic from normal tap note
                                 if (
                                     touch.Tapped &&
-                                    !touch.DiscreteHitobjectIsInRange &&
                                     ( // Tap flick hitbox check
                                         
                                         ( // Directional tap flick
@@ -494,15 +501,15 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                             if (
                                 touch.Tapped &&
-                                !(
-                                    touch.DiscreteHitobjectIsInRange &&
-                                    offsetedHit >= -Player.GoodWindow // Ignore hits that are too early and near the discrete hitobject
-                                    
-                                )&&
                                 (
                                     distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
                                 ) < hitIteration.HitCoord.Radius &&
-                                
+                                !(
+                                    touch.DiscreteHitobjectIsInRange &&
+                                    offsetedHit >= -Player.GoodWindow &&
+                                    Vector2.Distance(touch.Touch.screenPosition, touch.NearestDiscreteHitobject.HitCoord.Position) < distance
+                                    
+                                )&&
                                 (
                                     !touch.QueuedHit ||
                                     (timeDifference = hitIteration.Time - touch.QueuedHit.Time) < -1e-3f ||
@@ -523,10 +530,14 @@ public class PlayerInputManagerNew : MonoBehaviour
                     {
                         float distance;
                         if (
-                            hitIteration.Current.Type == HitObject.HitType.Catch || hitIteration.Current.Flickable && 
-                            Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)< hitIteration.HitCoord.Radius
+                            hitIteration.Current.Type == HitObject.HitType.Catch || hitIteration.Current.Flickable &&
+                            Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position) <
+                            hitIteration.HitCoord.Radius
                         )
+                        {
                             touch.DiscreteHitobjectIsInRange = true;
+                            touch.NearestDiscreteHitobject = hitIteration;
+                        }
                     }
 
                     // Wait for discrete hitobject to reach judgement line before clearing (for satisfaction)
