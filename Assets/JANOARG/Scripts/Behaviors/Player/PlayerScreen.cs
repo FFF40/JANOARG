@@ -241,8 +241,8 @@ public class PlayerScreen : MonoBehaviour
                 }
 
                 HitObject h = (HitObject)hit.Get(hit.Offset); //Get current HitObject?
-                Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position));
-                Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position + hit.Length));
+                Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position));
+                Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position + hit.Length));
 
                 float radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f;
                 
@@ -451,7 +451,9 @@ public class PlayerScreen : MonoBehaviour
             Destroy(hit.HoldMesh.mesh);
             Destroy(hit.HoldMesh.gameObject);
         }
-        Destroy(hit.gameObject);
+        if (hit.gameObject)
+            Destroy(hit.gameObject);
+        
         hit.Lane.HitObjects.Remove(hit);
 
         HitsRemaining--;
@@ -469,7 +471,8 @@ public class PlayerScreen : MonoBehaviour
         if (hit.Current.Flickable)
         {
             score += 1;
-            if (!float.IsNaN(hit.Current.FlickDirection)) score += 1;
+            if (!float.IsNaN(hit.Current.FlickDirection)) // Directional
+                score += 1;
         }
         
         float offsetAbs = Mathf.Abs(offset);
@@ -510,10 +513,14 @@ public class PlayerScreen : MonoBehaviour
                 if (Mathf.Abs((float)acc) >= 1) hsVol = Settings.HitsoundVolume[2];
                 else if (Mathf.Abs((float)acc) > 0) hsVol = Settings.HitsoundVolume[1];
             }
-
-            if (hit.Current.Type == HitObject.HitType.Normal) Hitsounds.PlayOneShot(NormalHitsound, hsVol);
-            else Hitsounds.PlayOneShot(CatchHitsound, hsVol);
-            if (hit.Current.Flickable) Hitsounds.PlayOneShot(FlickHitsound, hsVol);
+            
+            if (hit.Current.Type is HitObject.HitType.Normal) 
+                Hitsounds.PlayOneShot(NormalHitsound, hsVol);
+            else 
+                Hitsounds.PlayOneShot(CatchHitsound, hsVol);
+            
+            if (hit.Current.Flickable) 
+                Hitsounds.PlayOneShot(FlickHitsound, hsVol);
         }
 
         if (hit.Time == hit.EndTime)
