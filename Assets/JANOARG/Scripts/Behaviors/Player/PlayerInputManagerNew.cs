@@ -451,7 +451,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                     (
                                         hitObject.Current.Type != HitObject.HitType.Normal && // Skip hitbox check if it is a tap flick (it's already checked)
                                         (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position) 
-                                        ) < hitIteration.HitCoord.Radius + screenDpi
+                                        ) > hitIteration.HitCoord.Radius + screenDpi
                                     )
                                     
                                 )
@@ -461,8 +461,9 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
                                 {
                                     return ValidateFlickPass(hitObject.Current.FlickDirection, angle ?? touch.FlickDirection); }
-                                else // Omnidirectional flick (doesn't give a fuck which direction you flick)
+                                
                                 {
+                                    // Omnidirectional flick (doesn't give a fuck which direction you flick)
                                     return true;
                                 }
 
@@ -495,7 +496,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 touch.Tapped &&
                                 !(
                                     touch.DiscreteHitobjectIsInRange &&
-                                    offsetedHit > -Player.GoodWindow // Ignore hits that are too early and near the discrete hitobject
+                                    offsetedHit >= -Player.GoodWindow // Ignore hits that are too early and near the discrete hitobject
                                     
                                 )&&
                                 (
@@ -535,7 +536,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         Player.Hit(hitIteration, 0);
                         Debug.Log($"An entry in InDiscreteHitQueue at {hitIteration.Time} satisfied.");
 
-                        if (hitIteration.PendingHoldQueue) // Pass it to HoldQueue ASAP or the head doesn't even get handled (probably runtime bullshit)
+                        if (hitIteration.PendingHoldQueue) // Pass it to HoldQueue ASAP, or the head doesn't even get handled (probably runtime bullshit)
                         {
                             HoldQueue.Add(new HoldNoteClass
                             {
@@ -655,7 +656,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         ) <= holdNote_entry.HitObjectValues.HitCoord.Radius // Be careful, it's <= not <
                     );
 
-                    bool HoldEligible = false; // If the hold note currently eligible for scoring
+                    bool HoldEligible; // If the hold note currently eligible for scoring
 
                     // Update Drain value
                     holdNote_entry.HoldPassDrainValue = Mathf.Clamp01(
