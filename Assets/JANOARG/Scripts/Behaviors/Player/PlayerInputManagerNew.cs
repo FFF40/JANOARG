@@ -391,7 +391,11 @@ public class PlayerInputManagerNew : MonoBehaviour
                                     isValid = FlickVerifier(hitIteration, touch);
                                 }
 
-                                if (!isValid) continue;
+                                if (!isValid)
+                                {
+                                    touch.Flicked = false;
+                                    continue;
+                                }
 
                                 hitIteration.InDiscreteHitQueue = true;
                                 touch.QueuedHit = hitIteration;
