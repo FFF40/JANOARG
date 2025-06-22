@@ -213,7 +213,7 @@ public class PlayerInputManagerNew : MonoBehaviour
     {
         float angularDifference = ((expected - actual) % 360 + 360) % 360;
         bool comparison = angularDifference < (0 + 25) || angularDifference > (360 - 25);
-        Debug.Log($"ValidatingFlickPass: Expected {expected}°, got {actual}°, Difference 25 < ({angularDifference})° < 335 ({comparison})");
+        //Debug.Log($"ValidatingFlickPass: Expected {expected}°, got {actual}°, Difference 25 < ({angularDifference})° < 335 ({comparison})");
         return comparison; // ±25 degrees
     }
 
@@ -243,7 +243,7 @@ public class PlayerInputManagerNew : MonoBehaviour
     public void AddToQueue(HitPlayer hit)
     {
         int index = HitQueue.FindLastIndex(x => x.Time < hit.Time);
-        Debug.Log($"Adding hit at time {hit.Time} to queue. Inserting at index {index + 1}.");
+        //Debug.Log($"Adding hit at time {hit.Time} to queue. Inserting at index {index + 1}.");
         HitQueue.Insert(index + 1, hit);
     }
 
@@ -253,7 +253,6 @@ public class PlayerInputManagerNew : MonoBehaviour
     {
         if (!Autoplay) // Player input
         {
-            Debug.Log($"Report log at {Player.CurrentTime}");
             initLogger("Autoplay: OFF");
 
             int inputCount = Touch.activeTouches.Count;
@@ -270,17 +269,17 @@ public class PlayerInputManagerNew : MonoBehaviour
             for (int a = 0; a < inputCount; a++) // Process Touch entries and pass to TouchClasses as TouchClass entries
             {
                 Touch inputEntry = Touch.activeTouches[a]; // Iterate on all touch inputs in single frame
-                Debug.Log($"Processing touch input: {inputEntry.finger.index} in {a}, phase: {inputEntry.phase}");
+                //Debug.Log($"Processing touch input: {inputEntry.finger.index} in {a}, phase: {inputEntry.phase}");
 
                 if (!inputEntry.isInProgress && (inputEntry.phase is TouchPhase.Ended or TouchPhase.Canceled)) // Remove TouchClass entry containing destroyed touch input
                 {
                     TouchClasses.RemoveAll(input => input.Touch.finger.index == inputEntry.finger.index); // Remove all matching entries in one operation
-                    Debug.Log($"Removed TouchClass entry for finger index {inputEntry.finger.index}.");
+                    //Debug.Log($"Removed TouchClass entry for finger index {inputEntry.finger.index}.");
                 }
 
                 if (!TouchClasses.Any(handler => handler.Touch.finger.index == inputEntry.finger.index)) // Duplicate input check
                 {
-                    Debug.Log($"Adding new TouchClass entry for finger index {inputEntry.finger.index}.");
+                    //Debug.Log($"Adding new TouchClass entry for finger index {inputEntry.finger.index}.");
                     TouchClasses.Add(new TouchClass
                     {
                         Touch = inputEntry,
@@ -293,14 +292,14 @@ public class PlayerInputManagerNew : MonoBehaviour
             for (int a = 0; a < TouchClasses.Count; a++) // TouchClass processor
             {
                 var iteratingTouch = TouchClasses[a];
-                Debug.Log($"Processing TouchClass entry for finger index {iteratingTouch.Touch.finger.index} in {a}.");
+                //Debug.Log($"Processing TouchClass entry for finger index {iteratingTouch.Touch.finger.index} in {a}.");
 
                 Touch touch = iteratingTouch.Touch;
 
                 // Leave no redundant TouchClass entries
                 if (!touch.isInProgress && iteratingTouch.QueuedHit == null)
                 {
-                    Debug.Log($"TouchClass entry for finger index {touch.finger.index} is no longer in progress. Removing.");
+                    //Debug.Log($"TouchClass entry for finger index {touch.finger.index} is no longer in progress. Removing.");
                     TouchClasses.RemoveAt(a);
                     a--;
                     continue;
@@ -314,7 +313,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         > flickThreshold
                     )
                     {
-                        Debug.Log($"Flick (past threshold) detected for finger index {touch.finger.index} at position {touch.screenPosition}.");
+                        //Debug.Log($"Flick (past threshold) detected for finger index {touch.finger.index} at position {touch.screenPosition}.");
                         iteratingTouch.Flicked = true;
                         iteratingTouch.FlickTime = Player.CurrentTime;
                         iteratingTouch.FlickDirection =
@@ -326,7 +325,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     if (Player.CurrentTime - iteratingTouch.FlickTime > Player.PassWindow) // Reset flick state after pass window
                     {
-                        Debug.Log($"Flick state reset for finger index {touch.finger.index}.");
+                        //Debug.Log($"Flick state reset for finger index {touch.finger.index}.");
                         iteratingTouch.Flicked = false;
                     }
                 }
@@ -352,7 +351,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                 if (!hitIteration) // If the hitobject has already been destroyed in runtime
                 {
-                    Debug.Log($"Removing detroyed HitPlayer {a} from queue.");
+                    //Debug.Log($"Removing detroyed HitPlayer {a} from queue.");
                     HitQueue.RemoveAt(a);
                     a--;
                     continue; // Go check the next hitobject
@@ -373,7 +372,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                 if (hitIteration.Current.HoldLength > 0 && ! hitIteration.PendingHoldQueue)  // Pass to HoldNoteClass if there's hold length
                 {
                     hitIteration.PendingHoldQueue = true; // Mark as pending hold queue
-                    Debug.Log($"Hitobject at {hitIteration.Time} is a hold note. Adding to hold queue soon.");
+                    //Debug.Log($"Hitobject at {hitIteration.Time} is a hold note. Adding to hold queue soon.");
                 }
 
                 if (offsetedHit >= -window && !hitIteration.IsHit)
@@ -441,7 +440,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                     )
                                 )
                                 {
-                                    Debug.Log($"Touched {touch.Touch.finger.index} is a tap flick. Passing to main flick verifier with flick direction {touch.FlickDirection}.");
+                                    //Debug.Log($"Touched {touch.Touch.finger.index} is a tap flick. Passing to main flick verifier with flick direction {touch.FlickDirection}.");
                                    return FlickVerifier(hitObject, touch, hitObject.Current.FlickDirection);
                                 }
                                 else
@@ -464,7 +463,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 )
                                     return false;
                                 
-                                Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
+                                //Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                                 if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
                                 {
                                     return ValidateFlickPass(hitObject.Current.FlickDirection, angle ?? touch.FlickDirection); }
@@ -489,7 +488,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                                     alreadyHit = true;
                                 }
                             }
-                            
                         }
                     }
                     else // Normal tap note
@@ -517,7 +515,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 )
                             )
                             {
-                                Debug.Log($"Touch {touch.Touch.finger.index} tapped on hitobject at {hitIteration.Time}. Adding to queue.");
+                                //Debug.Log($"Touch {touch.Touch.finger.index} tapped on hitobject at {hitIteration.Time}. Adding to queue.");
                                 touch.QueuedHit = hitIteration;
                                 touch.QueuedHitDistance = distance;
                                 alreadyHit = true;
@@ -545,7 +543,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                     {
                         hitIteration.InDiscreteHitQueue = false;
                         Player.Hit(hitIteration, 0);
-                        Debug.Log($"An entry in InDiscreteHitQueue at {hitIteration.Time} satisfied.");
 
                         if (hitIteration.PendingHoldQueue) // Pass it to HoldQueue ASAP, or the head doesn't even get handled (probably runtime bullshit)
                         {
@@ -555,14 +552,12 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 HoldPassDrainValue = 1
                             });
                             HitQueue.Remove(hitIteration);
-
-                            Debug.Log($"Hold hitobject head handled, passing to hold queue.");
                         }
                     }
                     else if (!alreadyHit && offsetedHit > window) // Didn't hit the hitobject within the timing window
                     {
                         Player.Hit(hitIteration, float.PositiveInfinity, false);
-                        Debug.Log($"Hitobject at {hitIteration.Time} ({hitIteration.Current.Type}) missed. Radius: {hitIteration.HitCoord.Radius}, Hold? {(hitIteration.PendingHoldQueue ? "Yes": "No")}");
+                        //Debug.Log($"Hitobject at {hitIteration.Time} ({hitIteration.Current.Type}) missed. Radius: {hitIteration.HitCoord.Radius}, Hold? {(hitIteration.PendingHoldQueue ? "Yes": "No")}");
 
                         if (hitIteration.PendingHoldQueue) //Pass to HoldQueue on miss
                         {
@@ -573,7 +568,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                             });
                             HitQueue.Remove(hitIteration);
 
-                            Debug.Log($"Hold hitobject head handled, passing to hold queue.");
+                            //Debug.Log($"Hold hitobject head handled, passing to hold queue.");
                         }
                     }
                 }
@@ -605,7 +600,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                 {
                     HoldNoteClass holdNote_entry = HoldQueue[a];
 
-                    Debug.Log($"Processing hold note entry {a} at time {holdNote_entry.HitObjectValues.Time}.");
+                    //Debug.Log($"Processing hold note entry {a} at time {holdNote_entry.HitObjectValues.Time}.");
 
                     Vector3 startHoldPosition, endHoldPosition;
 
@@ -616,7 +611,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     endHoldPosition = Quaternion.Euler(lane_HoldNote.Rotation) * step.EndPos + lane_HoldNote.Position;
                     LaneGroupPlayer currentHold_GroupPlayer = holdNote_entry.HitObjectValues.Lane.Group;
 
-                    Debug.Log($"Got; Lane: {lane_HoldNote.Name}, Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
+                    //Debug.Log($"Got; Lane: {lane_HoldNote.Name}, Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
 
                     // Apply transforms in group
                     while (currentHold_GroupPlayer) // Current LaneGroupPlayer still exists
@@ -627,11 +622,11 @@ public class PlayerInputManagerNew : MonoBehaviour
                         currentHold_GroupPlayer = currentHold_GroupPlayer.Parent; // Go to the parent LaneGroupPlayer
                     }
 
-                    Debug.Log($"Transformed; Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
+                    //Debug.Log($"Transformed; Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
 
                     HitObject hitObject = (HitObject)holdNote_entry.HitObjectValues.Original.Get(beat); // Get the hitobject data for the current beat
 
-                    Debug.Log($"Hold note hitobject data: Type: {hitObject.Type}, Hold Length: {hitObject.HoldLength}, Position: {hitObject.Position}");
+                    //Debug.Log($"Hold note hitobject data: Type: {hitObject.Type}, Hold Length: {hitObject.HoldLength}, Position: {hitObject.Position}");
 
                     // Calculate hitbox positions
                     // I dunno what lerp is but just go with it I guess
@@ -651,12 +646,12 @@ public class PlayerInputManagerNew : MonoBehaviour
                         )
                     );
 
-                    Debug.Log($"Hold note hitbox start: {holdNote_hitbox_start}, end: {holdNote_hitbox_end}");
+                    //Debug.Log($"Hold note hitbox start: {holdNote_hitbox_start}, end: {holdNote_hitbox_end}");
 
                     holdNote_entry.HitObjectValues.HitCoord.Position = (holdNote_hitbox_start + holdNote_hitbox_end) / 2;
                     holdNote_entry.HitObjectValues.HitCoord.Radius = Vector2.Distance(holdNote_hitbox_start, holdNote_hitbox_end) / 2;
 
-                    Debug.Log($"Hold note hitbox position: {holdNote_entry.HitObjectValues.HitCoord.Position}, radius: {holdNote_entry.HitObjectValues.HitCoord.Radius}");
+                    //Debug.Log($"Hold note hitbox position: {holdNote_entry.HitObjectValues.HitCoord.Position}, radius: {holdNote_entry.HitObjectValues.HitCoord.Radius}");
 
                     // HItbox checker
                     
@@ -685,12 +680,12 @@ public class PlayerInputManagerNew : MonoBehaviour
                     if (holdNote_entry.HoldPassDrainValue != 0)
                     {
                         HoldEligible = true;
-                        Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} is held with HoldPassDrainValue: {holdNote_entry.HoldPassDrainValue}.");
+                        //Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} is held with HoldPassDrainValue: {holdNote_entry.HoldPassDrainValue}.");
                     } 
                     else 
                     {
                         HoldEligible = false;
-                        Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} is not eligible for scoring now.");
+                        //Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} is not eligible for scoring now.");
                     }
 
 
@@ -704,8 +699,8 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 : 0,
                             null
                         );
-                        Debug.Log($"Hold tick at {holdNote_entry.HitObjectValues.HoldTicks[0]} processed. " +
-                                  $"HoldEligible: {HoldEligible}, Score: {(HoldEligible ? 1 : 0)}");
+                        //Debug.Log($"Hold tick at {holdNote_entry.HitObjectValues.HoldTicks[0]} processed. " +
+                        //          $"HoldEligible: {HoldEligible}, Score: {(HoldEligible ? 1 : 0)}");
 
                         Player.HitObjectHistory.Add(new HitObjectHistoryItem(
                                 holdNote_entry.HitObjectValues.HoldTicks[0],
@@ -714,7 +709,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                             )
                         );
 
-                        Debug.Log($"Hold tick at {holdNote_entry.HitObjectValues.HoldTicks[0]} removed from hold ticks list.");
+                        //Debug.Log($"Hold tick at {holdNote_entry.HitObjectValues.HoldTicks[0]} removed from hold ticks list.");
 
 
                         holdNote_entry.HitObjectValues.HoldTicks.RemoveAt(0); // Remove the first hold tick (and pretty much shift the next tick in)
@@ -737,7 +732,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     if (holdNote_entry.HitObjectValues.HoldTicks.Count <= 0) // No hold ticks left
                     {
-                        Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} has no hold ticks left. Removing from queue.");
+                        //Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} has no hold ticks left. Removing from queue.");
                         try
                         {
                             Player.RemoveHitPlayer(holdNote_entry.HitObjectValues); // Terminate the hold note
@@ -761,7 +756,7 @@ public class PlayerInputManagerNew : MonoBehaviour
             {
                 TouchClass touch = TouchClasses[a];
 
-                Debug.Log($"Processing queued hit for touch {touch.Touch.finger.index} at time {touch.StartTime}.");
+                //Debug.Log($"Processing queued hit for touch {touch.Touch.finger.index} at time {touch.StartTime}.");
 
                 if (
                     touch.QueuedHit && // if the input in question interacted with a hitobject
@@ -775,7 +770,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         touch.QueuedHit,
                         touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time
                     );
-                    Debug.Log($"Hit queued hitobject at {touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time} for touch {touch.Touch.finger.index}.");
+                    //Debug.Log($"Hit queued hitobject at {touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time} for touch {touch.Touch.finger.index}.");
                     touch.QueuedHit.IsHit = true; // Mark as hit
 
                     if (touch.QueuedHit.PendingHoldQueue)
@@ -788,7 +783,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                             AssignedTouch = touch
                         });
 
-                        Debug.Log($"Hold hitobject head handled, passing to hold queue.");
+                        //Debug.Log($"Hold hitobject head handled, passing to hold queue.");
                     }
 
                     touch.QueuedHit = null; // Clear the queued hit
