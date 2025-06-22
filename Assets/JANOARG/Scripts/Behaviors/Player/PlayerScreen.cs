@@ -186,8 +186,6 @@ public class PlayerScreen : MonoBehaviour
                 player.Parent = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
                 player.transform.SetParent(player.Parent.transform);
             }
-            //Should worked fr
-            
         }
 
         ComboGroup.alpha = JudgmentGroup.alpha = 0;
@@ -298,11 +296,6 @@ public class PlayerScreen : MonoBehaviour
             Texts.Add(text_chart);
 
         }
-
-
-        Debug.Log("Hold Ticks: " + HoldTicks + "| Normal: " + Normal + "| Catch: " + Catch + "| Omni: " + OmniDir + "| DirF: " + DirF + "| Total: " + (HoldTicks + Normal + Catch + OmniDir + DirF) );
-        Debug.Log("EX: " + HoldTicks + "| ex: " + Normal*3 + "| EX: " + Catch + "| EX: " + OmniDir + "|EX: " + DirF*2 + "| EX: " + (HoldTicks + Normal*3 + Catch + OmniDir + DirF*2));
-        Debug.Log(TotalExScore);
 
         Music.clip = TargetSong.Clip;
         Music.volume = Settings.BGMusicVolume;

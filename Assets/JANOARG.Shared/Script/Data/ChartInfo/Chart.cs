@@ -522,12 +522,9 @@ public class Text : WorldObject{
         for (int i = 0; i < steps.Count; i++)
         {
             TextStep step = steps[i];
-            //Change text if current beat is more than or equal to the step's offset
             if (beat >= step.Offset)
             {
                 rt = step.TextChange;
-                // steps.RemoveAt(i); //Problem
-                // return rt;
             }
         }
         return rt;

@@ -14,7 +14,6 @@ public class TextPlayer : MonoBehaviour
 
     public void Init()
     {
-        //Current is affecting the original somehow
         TextHolder.text     = Original.DisplayText;
         TextHolder.fontSize = Original.TextSize;
         TextHolder.color    = Original.TextColor;
@@ -31,7 +30,6 @@ public class TextPlayer : MonoBehaviour
     {
         if (Current != null) Current.Advance(beat);
         else Current = (Text)Original.Get(beat);
-
         
         transform.localPosition = Current.Position;
         transform.localEulerAngles = Current.Rotation;
