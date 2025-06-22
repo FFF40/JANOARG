@@ -574,6 +574,16 @@ public class PlayerInputManagerNew : MonoBehaviour
                     else if (!alreadyHit && offsetedHit > window) // Didn't hit the hitobject within the timing window
                     {
                         Player.Hit(hitIteration, float.PositiveInfinity, false);
+                        
+                        // Clear any touch that was assigned to this missed hit
+                        foreach (var touch in TouchClasses)
+                        {
+                            if (touch.QueuedHit == hitIteration)
+                            {
+                                touch.QueuedHit = null;
+                                touch.DiscreteHitobjectIsInRange = false;
+                            }
+                        }
                         //Debug.Log($"Hitobject at {hitIteration.Time} ({hitIteration.Current.Type}) missed. Radius: {hitIteration.HitCoord.Radius}, Hold? {(hitIteration.PendingHoldQueue ? "Yes": "No")}");
 
                         if (hitIteration.PendingHoldQueue) //Pass to HoldQueue on miss
