@@ -546,9 +546,9 @@ public class PlayerInputManagerNew : MonoBehaviour
                     }
 
                     // Wait for discrete hitobject to reach judgement line before clearing (for satisfaction)
-                    if (hitIteration.InDiscreteHitQueue && offsetedHit > 0)
+                    if (hitIteration.InDiscreteHitQueue)
                     {
-                        Player.Hit(hitIteration, 0);
+                        Player.Hit(hitIteration, offsetedHit > 0 ? offsetedHit : 0);
                         hitIteration.InDiscreteHitQueue = false;
     
                         // Clear any touch that was assigned to this hit
