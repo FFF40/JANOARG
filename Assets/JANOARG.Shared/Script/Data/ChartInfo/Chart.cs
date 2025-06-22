@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
@@ -52,7 +53,7 @@ public class Chart : IDeepClonable<Chart>
         };
         foreach (LaneGroup group in Groups) clone.Groups.Add(group.DeepClone());
         foreach (Lane lane in Lanes) clone.Lanes.Add(lane.DeepClone());
-        foreach (Text text in Texts) clone.Texts.Add(text.DeepClone());
+        foreach (Text text in Texts) clone.Texts.Add((Text)text.DeepClone());
         return clone;
     }
 }
@@ -438,39 +439,13 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     }
 }
 
-// Text
-[System.Serializable]
-public class Text : Storyboardable, IDeepClonable<Text>
+
+// Refers to the non-lane objects like Text, Images, 3d shapes
+public class WorldObject : Storyboardable, IDeepClonable<WorldObject>
 {
     public string Name;
     public Vector3 Position;
     public Vector3 Rotation;
-    public string DisplayText;
-
-    // Default Values
-    public float TextSize = 7f;
-    public Color TextColor = Color.white;
-    public FontFamily TextFont; //Default value: RobotoMono
-    
-    public List<TextStep> TextSteps = new();
-
-    public string GetUpdateText(float time,float beat,string oldText)
-    {
-        string rt = oldText;
-        List<TextStep> steps = TextSteps;
-        for (int i = 0; i < steps.Count; i++)
-        {
-            TextStep step = steps[i];
-            //Change text if current beat is more than or equal to the step's offset
-            if (beat >= step.Offset)
-            {
-                rt = step.TextChange;
-                // steps.RemoveAt(i); //Problem
-                // return rt;
-            }
-        }
-        return rt;
-    }
 
     public new static TimestampType[] TimestampTypes = {
         new() {
@@ -509,6 +484,57 @@ public class Text : Storyboardable, IDeepClonable<Text>
             Get = (x) => ((Text)x).Rotation.z,
             Set = (x, a) => { ((Text)x).Rotation.z = a; },
         },
+
+
+    };
+    
+    public virtual WorldObject DeepClone()
+    {
+        return new WorldObject
+        {
+            Name = Name,
+            Position = new Vector3(Position.x, Position.y, Position.z),
+            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            Storyboard = Storyboard.DeepClone(),
+        };
+    }
+}
+
+
+
+// Text
+[System.Serializable]
+public class Text : WorldObject{
+    
+    public string DisplayText;
+
+    // Default Values
+    public float TextSize = 7f;
+    public Color TextColor = Color.white;
+    public FontFamily TextFont; //Default value: RobotoMono
+    
+    public List<TextStep> TextSteps = new();
+
+    public string GetUpdateText(float time,float beat,string oldText)
+    {
+        string rt = oldText;
+        List<TextStep> steps = TextSteps;
+        for (int i = 0; i < steps.Count; i++)
+        {
+            TextStep step = steps[i];
+            //Change text if current beat is more than or equal to the step's offset
+            if (beat >= step.Offset)
+            {
+                rt = step.TextChange;
+                // steps.RemoveAt(i); //Problem
+                // return rt;
+            }
+        }
+        return rt;
+    }
+
+    //Append Text Storyboard to the base WorldObject Storyboard
+    public new static TimestampType[] TimestampTypes = WorldObject.TimestampTypes.Concat(new TimestampType[] {
         new() {
             ID = "Text_Size",
             Name = "Text Size",
@@ -539,23 +565,27 @@ public class Text : Storyboardable, IDeepClonable<Text>
             Get = (x) => ((Text)x).TextColor.r,
             Set = (x, a) => { ((Text)x).TextColor.a = a; },
         },
-        
-        
-    };
+    }).ToArray();
 
-    public Text DeepClone()
+    public override WorldObject DeepClone()
     {
-        Text clone = new()
+        Text clone = new Text
         {
             Name = Name,
             Position = new Vector3(Position.x, Position.y, Position.z),
             Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            Storyboard = Storyboard.DeepClone(),
+
+            // Text-specific properties
             TextSize = TextSize,
             TextFont = TextFont,
-            Storyboard = Storyboard.DeepClone(),
+            TextColor = new Color(TextColor.r, TextColor.g, TextColor.b, TextColor.a),
+            DisplayText = DisplayText,
+            TextSteps = new List<TextStep>(TextSteps),
         };
         return clone;
     }
+
 }
 
 [System.Serializable]
