@@ -480,10 +480,17 @@ public class PlayerInputManagerNew : MonoBehaviour
                         {
                             foreach (TouchClass touch in TouchClasses)
                             {
-                                if (Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position) < hitIteration.HitCoord.Radius)
+                                float distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position);
+                                float timeDifference;
+    
+                                if (distance < hitIteration.HitCoord.Radius &&
+                                    (!touch.QueuedHit || 
+                                     (timeDifference = hitIteration.Time - touch.QueuedHit.Time) < -1e-3f ||
+                                     (timeDifference < 1e-3f && distance < touch.QueuedHitDistance)))
                                 {
-                                    Debug.Log($"Touch {touch.Touch.finger.index} is in range on hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                                     hitIteration.InDiscreteHitQueue = true;
+                                    touch.QueuedHit = hitIteration;
+                                    touch.QueuedHitDistance = distance;
                                     touch.DiscreteHitobjectIsInRange = true;
                                     alreadyHit = true;
                                 }
@@ -541,10 +548,20 @@ public class PlayerInputManagerNew : MonoBehaviour
                     // Wait for discrete hitobject to reach judgement line before clearing (for satisfaction)
                     if (hitIteration.InDiscreteHitQueue && offsetedHit > 0)
                     {
-                        hitIteration.InDiscreteHitQueue = false;
                         Player.Hit(hitIteration, 0);
+                        hitIteration.InDiscreteHitQueue = false;
+    
+                        // Clear any touch that was assigned to this hit
+                        foreach (var touch in TouchClasses)
+                        {
+                            if (touch.QueuedHit == hitIteration)
+                            {
+                                touch.QueuedHit = null;
+                                touch.DiscreteHitobjectIsInRange = false;
+                            }
+                        }
 
-                        if (hitIteration.PendingHoldQueue) // Pass it to HoldQueue ASAP, or the head doesn't even get handled (probably runtime bullshit)
+                        if (hitIteration.PendingHoldQueue)
                         {
                             HoldQueue.Add(new HoldNoteClass
                             {
