@@ -571,7 +571,8 @@ public class PlayerInputManagerNew : MonoBehaviour
                             HitQueue.Remove(hitIteration);
                         }
                     }
-                    else if (!alreadyHit && offsetedHit > window) // Didn't hit the hitobject within the timing window
+                    
+                    if (!alreadyHit && offsetedHit > window) // Didn't hit the hitobject within the timing window
                     {
                         Player.Hit(hitIteration, float.PositiveInfinity, false);
                         
