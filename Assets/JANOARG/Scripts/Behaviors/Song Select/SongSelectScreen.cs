@@ -63,7 +63,13 @@ public class SongSelectScreen : MonoBehaviour
 
     [Header("Actions")]
     public CanvasGroup LeftActionsHolder;
+    public Button BackButton;
+    [Space]
     public CanvasGroup RightActionsHolder;
+    public Button MapViewButton;
+    public Button ListViewButton;
+    public Button SortButton;
+    public Button LaunchButton;
 
     [Header("Launch")]
     public CanvasGroup LaunchTextHolder;
@@ -96,6 +102,7 @@ public class SongSelectScreen : MonoBehaviour
     public bool IsAnimating;
     public bool IsInit;
     public bool IsMapView = true;
+    public MapItem TargetMapItem;
     public Coroutine TargetSongAnim;
 
     [NonSerialized] public Cover CurrentCover;
@@ -164,7 +171,7 @@ public class SongSelectScreen : MonoBehaviour
                         ScrollVelocity = 0;
                     }
 
-                    UpdateTarget();
+                    UpdateListTarget();
                     IsDirty = true;
                 }
                 else
@@ -191,12 +198,12 @@ public class SongSelectScreen : MonoBehaviour
             {
                 IsTargetSongHidden = TargetSongHiddenTarget;
                 if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
-                if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(TargetSongHideAnim());
-                else TargetSongAnim = StartCoroutine(TargetSongShowAnim());
+                if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(ListTargetSongHideAnim());
+                else TargetSongAnim = StartCoroutine(ListTargetSongShowAnim());
             }
             if (IsDirty)
             {
-                UpdateItems();
+                UpdateListItems();
                 IsDirty = false;
             }
         }
@@ -269,7 +276,7 @@ public class SongSelectScreen : MonoBehaviour
         if (!LoadingBar.main.gameObject.activeSelf) Intro();
     }
 
-    public void UpdateItems(bool cap = true)
+    public void UpdateListItems(bool cap = true)
     {
         float scrollOfs = ScrollOffset;
         if (cap) scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
@@ -287,7 +294,7 @@ public class SongSelectScreen : MonoBehaviour
         }
     }
 
-    public void UpdateTarget() 
+    public void UpdateListTarget() 
     {
         float lastTarget = TargetScrollOffset;
         float tsDist = float.PositiveInfinity;
@@ -307,6 +314,16 @@ public class SongSelectScreen : MonoBehaviour
         }
     }
 
+    public void UpdateButtons()
+    {
+        BackButton.gameObject.SetActive(IsMapView && TargetMapItem is SongMapItem);
+        ListViewButton.gameObject.SetActive(IsMapView && !TargetMapItem);
+
+        MapViewButton.gameObject.SetActive(!IsMapView);
+        SortButton.gameObject.SetActive(!IsMapView);
+        LaunchButton.gameObject.SetActive(!IsMapView || TargetMapItem is SongMapItem);
+    }
+
     public void ToggleMapView()
     {
         if (IsAnimating) return;
@@ -317,6 +334,7 @@ public class SongSelectScreen : MonoBehaviour
     IEnumerator ToggleMapViewCoroutine()
     {
         IsAnimating = true;
+        // TODO Add logic here
         yield return null;
         IsAnimating = false;
     }
@@ -331,7 +349,7 @@ public class SongSelectScreen : MonoBehaviour
     public void OnListDrag(BaseEventData data) 
     {
         ScrollOffset += ((PointerEventData)data).delta.y / transform.lossyScale.x;
-        UpdateTarget();
+        UpdateListTarget();
         IsDirty = true;
     }
 
@@ -342,7 +360,7 @@ public class SongSelectScreen : MonoBehaviour
         IsPointerDown = false;
     }
 
-    public IEnumerator TargetSongShowAnim()
+    public IEnumerator ListTargetSongShowAnim()
     {
         TargetSongOffset = TargetScrollOffset;
         SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
@@ -445,7 +463,7 @@ public class SongSelectScreen : MonoBehaviour
         if (TargetSongOffset != TargetScrollOffset) 
         {
             IsTargetSongHidden = true;
-            StartCoroutine(TargetSongHideAnim());
+            StartCoroutine(ListTargetSongHideAnim());
         }
 
         TargetSongAnim = null;
@@ -468,7 +486,7 @@ public class SongSelectScreen : MonoBehaviour
         return target;
     }
 
-    public IEnumerator TargetSongHideAnim()
+    public IEnumerator ListTargetSongHideAnim()
     {
         float lerpCoverStart = coverLerp;
         yield return Ease.Animate(.3f, a => {
@@ -654,13 +672,26 @@ public class SongSelectScreen : MonoBehaviour
 
     public void LerpUI(float a)
     {
-        LeftActionsHolder.alpha = RightActionsHolder.alpha = DifficultyHolder.alpha = a * a;
-        LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = DifficultyHolder.blocksRaycasts = a == 1;
-        rt(LeftActionsHolder).anchoredPosition = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
-        rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
-        rt(DifficultyHolder).anchoredPosition = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+        LerpActions(a);
+        LerpDifficulty(a);
         if (!QuickMenu.main || !QuickMenu.main.gameObject.activeSelf) ProfileBar.main.SetVisibilty(a);
     }
+
+    public void LerpActions(float a)
+    {
+        LeftActionsHolder.alpha = RightActionsHolder.alpha = a * a;
+        LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = a == 1;
+        rt(LeftActionsHolder).anchoredPosition = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
+        rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
+    }
+
+    public void LerpDifficulty(float a)
+    {
+        DifficultyHolder.alpha = a * a;
+        DifficultyHolder.blocksRaycasts = a == 1;
+        rt(DifficultyHolder).anchoredPosition = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+    }
+
 
     public void Intro()
     {
@@ -672,7 +703,8 @@ public class SongSelectScreen : MonoBehaviour
         IsAnimating = true;
 
         ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x;
-        UpdateItems(false);
+        UpdateListItems(false);
+        UpdateButtons();
 
         Transform cameraTransform = Common.main.MainCamera.transform;
 
@@ -701,11 +733,26 @@ public class SongSelectScreen : MonoBehaviour
             }
 
             ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
-            UpdateItems(false);
-            IsReady = x > 0.6f;
+            UpdateListItems(false);
+            if (!IsReady && x > 0.6f)
+            {
+                IsReady = true;
+                if (IsMapView) StartCoroutine(IntroShowMapUIAnim());
+                
+            }
         }));
 
         IsAnimating = false;
+    }
+
+    IEnumerator IntroShowMapUIAnim()
+    {
+        yield return Ease.Animate(.2f, (x) =>
+        {
+            float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+            LerpActions(ease1);
+            ProfileBar.main.SetVisibilty(ease1);
+        });
     }
 
     RectTransform rt (Component obj) => obj.transform as RectTransform;
