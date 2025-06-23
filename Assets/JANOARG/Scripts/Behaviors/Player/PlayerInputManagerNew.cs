@@ -611,10 +611,10 @@ public class PlayerInputManagerNew : MonoBehaviour
 
             if (HoldQueue.Count > 0) // Hold note processor
             {
-
+                
                 //// Camera handling are done here to calculate hold note hitboxes on the fly
                 //// As it has dynamic attributes as it progresses, unlike normal hitobjects.
-                
+
                 float beat = PlayerScreen.TargetSong.Timing.ToBeat(judgementOffseted_Time); // Get current BPM
 
                 // Camera handling
@@ -630,6 +630,15 @@ public class PlayerInputManagerNew : MonoBehaviour
                     HoldNoteClass holdNote_entry = HoldQueue[a];
 
                     //Debug.Log($"Processing hold note entry {a} at time {holdNote_entry.HitObjectValues.Time}.");
+
+                    // If the hold note doesn't exist (it's already completed)
+                    if (!holdNote_entry.HitObjectValues)
+                    {
+                        HoldQueue.RemoveAt(a);
+                        a--; // Pointer rollback
+                        continue;
+                    }
+
 
                     Vector3 startHoldPosition, endHoldPosition;
 
@@ -761,21 +770,9 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     if (holdNote_entry.HitObjectValues.HoldTicks.Count <= 0) // No hold ticks left
                     {
-                        //Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} has no hold ticks left. Removing from queue.");
-                        try
-                        {
-                            Player.RemoveHitPlayer(holdNote_entry.HitObjectValues); // Terminate the hold note
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogException(e);
-                            Debug.LogWarning($"Hold note at {holdNote_entry.HitObjectValues.Time} already terminated. Skipping.");
-                        }
-                        finally
-                        {
-                            HoldQueue.RemoveAt(a);
-                            a--; // Pointer rollback
-                        }
+                        Player.RemoveHitPlayer(holdNote_entry.HitObjectValues);
+                        HoldQueue.RemoveAt(a);
+                        a--; // Pointer rollback
                     }
 
                 }
