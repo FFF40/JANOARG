@@ -707,7 +707,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         holdNote_entry.HoldPassDrainValue + Time.deltaTime / Player.PassWindow * (
                             holdNote_entry.IsPlayerHolding // Increment and decrement based on holding state
                                 ? .1f 
-                                : -.1f
+                                : -1f
                             )
                         );
                     
