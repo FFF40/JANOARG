@@ -17,12 +17,17 @@ public class HoldNoteClass
     /// <summary>
     /// The values associated with the hit player object.
     /// </summary>
-    public HitPlayer HitObjectValues;
+    public HitPlayer HitObject;
 
     /// <summary>
     /// Indicates if the player is currently holding the note.
     /// </summary>
     public bool IsPlayerHolding;
+
+    /// <summary>
+    /// Indicates whether the note would give score on hold ticks (would hit or would miss).
+    /// </summary>
+    public bool IsScoring;
 
     /// <summary>
     /// The touch that is currently assigned to this hold note.
@@ -566,7 +571,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         {
                             HoldQueue.Add(new HoldNoteClass
                             {
-                                HitObjectValues = hitIteration,
+                                HitObject = hitIteration,
                                 HoldPassDrainValue = 1
                             });
                             HitQueue.Remove(hitIteration);
@@ -592,7 +597,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                         {
                             HoldQueue.Add(new HoldNoteClass
                             {
-                                HitObjectValues = hitIteration
+                                HitObject = hitIteration
 
                             });
                             HitQueue.Remove(hitIteration);
@@ -632,7 +637,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     //Debug.Log($"Processing hold note entry {a} at time {holdNote_entry.HitObjectValues.Time}.");
 
                     // If the hold note doesn't exist (it's already completed)
-                    if (!holdNote_entry.HitObjectValues)
+                    if (!holdNote_entry.HitObject)
                     {
                         HoldQueue.RemoveAt(a);
                         a--; // Pointer rollback
@@ -643,11 +648,11 @@ public class PlayerInputManagerNew : MonoBehaviour
                     Vector3 startHoldPosition, endHoldPosition;
 
                     // Note position
-                    Lane lane_HoldNote = (Lane)holdNote_entry.HitObjectValues.Lane.Original.Get(beat); // Which lane is the hold note on?
+                    Lane lane_HoldNote = (Lane)holdNote_entry.HitObject.Lane.Original.Get(beat); // Which lane is the hold note on?
                     LanePosition step = lane_HoldNote.GetLanePosition(beat, beat, PlayerScreen.TargetSong.Timing); // Get the lane position for the current beat
                     startHoldPosition = Quaternion.Euler(lane_HoldNote.Rotation) * step.StartPos + lane_HoldNote.Position;
                     endHoldPosition = Quaternion.Euler(lane_HoldNote.Rotation) * step.EndPos + lane_HoldNote.Position;
-                    LaneGroupPlayer currentHold_GroupPlayer = holdNote_entry.HitObjectValues.Lane.Group;
+                    LaneGroupPlayer currentHold_GroupPlayer = holdNote_entry.HitObject.Lane.Group;
 
                     //Debug.Log($"Got; Lane: {lane_HoldNote.Name}, Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
 
@@ -662,7 +667,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     //Debug.Log($"Transformed; Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
 
-                    HitObject hitObject = (HitObject)holdNote_entry.HitObjectValues.Original.Get(beat); // Get the hitobject data for the current beat
+                    HitObject hitObject = (HitObject)holdNote_entry.HitObject.Original.Get(beat); // Get the hitobject data for the current beat
 
                     //Debug.Log($"Hold note hitobject data: Type: {hitObject.Type}, Hold Length: {hitObject.HoldLength}, Position: {hitObject.Position}");
 
@@ -686,8 +691,8 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     //Debug.Log($"Hold note hitbox start: {holdNote_hitbox_start}, end: {holdNote_hitbox_end}");
 
-                    holdNote_entry.HitObjectValues.HitCoord.Position = (holdNote_hitbox_start + holdNote_hitbox_end) / 2;
-                    holdNote_entry.HitObjectValues.HitCoord.Radius = Vector2.Distance(holdNote_hitbox_start, holdNote_hitbox_end) / 2;
+                    holdNote_entry.HitObject.HitCoord.Position = (holdNote_hitbox_start + holdNote_hitbox_end) / 2;
+                    holdNote_entry.HitObject.HitCoord.Radius = Vector2.Distance(holdNote_hitbox_start, holdNote_hitbox_end) / 2;
 
                     //Debug.Log($"Hold note hitbox position: {holdNote_entry.HitObjectValues.HitCoord.Position}, radius: {holdNote_entry.HitObjectValues.HitCoord.Radius}");
 
@@ -696,43 +701,38 @@ public class PlayerInputManagerNew : MonoBehaviour
                     // Assigned a new touch
                     holdNote_entry.AssignedTouch = TouchClasses.Find(touch => Vector2.Distance(
                             touch.Touch.screenPosition,
-                            holdNote_entry.HitObjectValues.HitCoord.Position
-                        ) <= holdNote_entry.HitObjectValues.HitCoord.Radius // Be careful, it's <= not <
+                            holdNote_entry.HitObject.HitCoord.Position
+                        ) <= holdNote_entry.HitObject.HitCoord.Radius // Be careful, it's <= not <
                     );
 
-                    bool HoldEligible; // If the hold note currently eligible for scoring
+                    // Taking advantage of inline checks, since List<T>.Find() can give null
+                    holdNote_entry.IsPlayerHolding = (holdNote_entry.AssignedTouch != null);
+
 
                     // Update Drain value
                     holdNote_entry.HoldPassDrainValue = Mathf.Clamp01(
                         holdNote_entry.HoldPassDrainValue + Time.deltaTime / Player.PassWindow * (
-                            holdNote_entry.IsPlayerHolding // Increment and decrement based on holding state
-                                ? .1f 
-                                : -1f
-                            )
+                            holdNote_entry.IsPlayerHolding ? 1f : -1f)
                         );
                     
-                    // Taking advantage of inline checks, since List<T>.Find() can give null
-                    holdNote_entry.IsPlayerHolding = (holdNote_entry.AssignedTouch != null);
                     
                     // Check if the hold note is eligible for scoring
-                    if (holdNote_entry.HoldPassDrainValue != 0)
+                    if (!holdNote_entry.IsScoring && holdNote_entry.HoldPassDrainValue >= 1)
                     {
-                        HoldEligible = true;
-                        //Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} is held with HoldPassDrainValue: {holdNote_entry.HoldPassDrainValue}.");
+                        holdNote_entry.IsScoring = true;
                     } 
-                    else 
+                    if (holdNote_entry.IsScoring && holdNote_entry.HoldPassDrainValue <= 0)
                     {
-                        HoldEligible = false;
-                        //Debug.Log($"Hold note at {holdNote_entry.HitObjectValues.Time} is not eligible for scoring now.");
+                        holdNote_entry.IsScoring = false;
                     }
 
 
                     // Hold ticks processing
-                    while (holdNote_entry.HitObjectValues.HoldTicks.Count > 0 &&
-                           holdNote_entry.HitObjectValues.HoldTicks[0] <= Player.CurrentTime)
+                    while (holdNote_entry.HitObject.HoldTicks.Count > 0 &&
+                           holdNote_entry.HitObject.HoldTicks[0] <= Player.CurrentTime)
                     {
                         Player.AddScore(
-                            HoldEligible 
+                            holdNote_entry.IsScoring 
                                 ? 1 
                                 : 0,
                             null
@@ -741,26 +741,26 @@ public class PlayerInputManagerNew : MonoBehaviour
                         //          $"HoldEligible: {HoldEligible}, Score: {(HoldEligible ? 1 : 0)}");
 
                         Player.HitObjectHistory.Add(new HitObjectHistoryItem(
-                                holdNote_entry.HitObjectValues.HoldTicks[0],
+                                holdNote_entry.HitObject.HoldTicks[0],
                                 HitObjectHistoryType.Catch,
-                                HoldEligible ? 0 : float.PositiveInfinity // Catch note-like hitobject history
+                                holdNote_entry.IsScoring  ? 0 : float.PositiveInfinity // Catch note-like hitobject history
                             )
                         );
 
                         //Debug.Log($"Hold tick at {holdNote_entry.HitObjectValues.HoldTicks[0]} removed from hold ticks list.");
 
-
-                        holdNote_entry.HitObjectValues.HoldTicks.RemoveAt(0); // Remove the first hold tick (and pretty much shift the next tick in)
+                        // Remove the first hold tick (and pretty much shift the next tick in)
+                        holdNote_entry.HitObject.HoldTicks.RemoveAt(0); 
 
                         // Handle hold tick just like how HitPlayer does
-                        if (HoldEligible)
+                        if (holdNote_entry.IsScoring)
                         {
                             var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
                             effect.SetAccuracy(null);
                             effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
                             var rt = (RectTransform)effect.transform;
 
-                            rt.position = Common.main.MainCamera.WorldToScreenPoint(holdNote_entry.HitObjectValues.transform.position);
+                            rt.position = Common.main.MainCamera.WorldToScreenPoint(holdNote_entry.HitObject.transform.position);
                         }
                         else
                         {
@@ -768,9 +768,9 @@ public class PlayerInputManagerNew : MonoBehaviour
                         }
                     }
 
-                    if (holdNote_entry.HitObjectValues.HoldTicks.Count <= 0) // No hold ticks left
+                    if (holdNote_entry.HitObject.HoldTicks.Count <= 0) // No hold ticks left
                     {
-                        Player.RemoveHitPlayer(holdNote_entry.HitObjectValues);
+                        Player.RemoveHitPlayer(holdNote_entry.HitObject);
                         HoldQueue.RemoveAt(a);
                         a--; // Pointer rollback
                     }
@@ -803,7 +803,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     {
                          HoldQueue.Add(new HoldNoteClass
                          {
-                            HitObjectValues = touch.QueuedHit,
+                            HitObject = touch.QueuedHit,
                             IsPlayerHolding = touch.IsHolding,
                             HoldPassDrainValue = 1, // Little leniency won't hurt
                             AssignedTouch = touch
