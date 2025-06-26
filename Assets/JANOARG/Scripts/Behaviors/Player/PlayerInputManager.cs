@@ -143,7 +143,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     {
                         if (isDiscrete)
                         {
-                            if (hit.IsHit || hit.IsQueuedHit)
+                            if (hit.IsHit || hit.InDiscreteHitQueue)
                             {
 
                             }
@@ -189,7 +189,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                             (!float.IsFinite(hit.Current.FlickDirection) || CheckFlickDirection(hit.Current.FlickDirection, finger.FlickDirection))
                                         )
                                         {
-                                            hit.IsQueuedHit = true;
+                                            hit.InDiscreteHitQueue = true;
                                             finger.FlickEligible = false;
                                             isHit = true;
                                         }
@@ -205,7 +205,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                                         Vector2.Distance(finger.Finger.screenPosition, hit.HitCoord.Position) < hit.HitCoord.Radius
                                     )
                                     {
-                                        hit.IsQueuedHit = true;
+                                        hit.InDiscreteHitQueue = true;
                                         isHit = true;
                                     }
                                 }
@@ -233,9 +233,9 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             }
                         }
 
-                        if (hit.IsQueuedHit && offset > 0)
+                        if (hit.InDiscreteHitQueue && offset > 0)
                         {
-                            hit.IsQueuedHit = false;
+                            hit.InDiscreteHitQueue = false;
                             Player.Hit(hit, 0);
                         }
                         else if (!isHit && offset > window)
@@ -398,7 +398,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                 {
                     Player.Hit(finger.QueuedHit, finger.StartTime + Player.Settings.JudgmentOffset - finger.QueuedHit.Time);
 
-                    if (finger.QueuedHit.IsHit)
+                    if (finger.QueuedHit.IsHit) // Abusing the IsHit flag for hold note
                     {
                         HoldQueue.Add(new HoldHandler
                         {

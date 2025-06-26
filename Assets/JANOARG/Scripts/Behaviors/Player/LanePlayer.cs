@@ -244,7 +244,8 @@ public class LanePlayer : MonoBehaviour
                 
                 player.Lane = this;
                 HitObjects.Add(player);
-                PlayerInputManager.main.AddToQueue(player);
+                //PlayerInputManager.main.AddToQueue(player);
+                PlayerInputManagerNew.Instance.AddToQueue(player);
                 player.Init();
 
                 Current.Objects.RemoveAt(0);

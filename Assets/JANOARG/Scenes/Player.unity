@@ -11824,6 +11824,7 @@ GameObject:
   - component: {fileID: 1551788787}
   - component: {fileID: 1551788791}
   - component: {fileID: 1551788792}
+  - component: {fileID: 1551788793}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -11999,6 +12000,21 @@ MonoBehaviour:
   LaneGroups: []
   Lanes: []
 --- !u!114 &1551788792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551788786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e81ad65eb802493680d9d48de6221e5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player: {fileID: 1551788791}
+  Autoplay: 0
+  HitQueue: []
+--- !u!114 &1551788793
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

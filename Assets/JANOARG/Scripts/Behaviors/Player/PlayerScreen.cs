@@ -104,6 +104,7 @@ public class PlayerScreen : MonoBehaviour
 
     [NonSerialized]
     public PlayerSettings Settings = new();
+    private protected readonly float MinimumRadius = 180f;
 
     public void Awake() 
     {
@@ -202,9 +203,10 @@ public class PlayerScreen : MonoBehaviour
             Lanes.Add(player);
 
             float time = float.NaN;
-            Vector3 startPos = Vector3.zero, endPos = Vector3.zero;
+            Vector3 startPos = Vector3.zero, endPos = Vector3.zero; //Declare 2 points of lane show in screen
             foreach (HitObject hit in player.Original.Objects)
             {
+                // Add ExScore by note type
                 TotalExScore += hit.Type == HitObject.HitType.Normal ? 3 : 1;
                 TotalExScore += Mathf.Ceil(hit.HoldLength / 0.5f);
                 if (hit.Flickable)
@@ -215,16 +217,20 @@ public class PlayerScreen : MonoBehaviour
 
                 if (time != hit.Offset) 
                 {
+                    // Set camera distance and rotation to hit time of the note?
                     CameraController camera = (CameraController)TargetChart.Data.Camera.Get(hit.Offset);
                     Pseudocamera.transform.position = camera.CameraPivot;
                     Pseudocamera.transform.eulerAngles = camera.CameraRotation;
                     Pseudocamera.transform.Translate(Vector3.back * camera.PivotDistance);
 
+                    // Set 2 points of lane?
                     Lane lane = (Lane)player.Original.Get(hit.Offset);
                     LanePosition step = lane.GetLanePosition(hit.Offset, hit.Offset, TargetSong.Timing);
                     startPos = Quaternion.Euler(lane.Rotation) * step.StartPos + lane.Position;
                     endPos = Quaternion.Euler(lane.Rotation) * step.EndPos + lane.Position;
                     LaneGroupPlayer gp = group;
+
+                    // Loop to get localPosition of 2 points of lane?
                     while (gp) 
                     {
                         LaneGroup laneGroup = (LaneGroup)gp.Original.Get(hit.Offset);
@@ -234,12 +240,18 @@ public class PlayerScreen : MonoBehaviour
                     }
                 }
 
-                HitObject h = (HitObject)hit.Get(hit.Offset);
-                Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position));
-                Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position + hit.Length));
+                HitObject h = (HitObject)hit.Get(hit.Offset); //Get current HitObject?
+                Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position));
+                Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position + hit.Length));
+
+                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f;
+                
+                //Add hit coords
                 player.HitCoords.Add(new HitScreenCoord {
                     Position = (hitStart + hitEnd) / 2,
-                    Radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f,
+                    Radius = radius > MinimumRadius
+                        ? radius
+                        : MinimumRadius
                 });
             }
 
@@ -375,7 +387,8 @@ public class PlayerScreen : MonoBehaviour
                 }
             }
         }
-        PlayerInputManager.main.UpdateTouches();
+        //PlayerInputManager.main.UpdateTouches();
+        PlayerInputManagerNew.Instance.UpdateInput();
     }
 
     Coroutine judgAnim;
@@ -433,12 +446,14 @@ public class PlayerScreen : MonoBehaviour
 
     public void RemoveHitPlayer(HitPlayer hit) 
     {
-        if (hit.HoldMesh)
+        if (hit.HoldMesh != null)
         {
             Destroy(hit.HoldMesh.mesh);
             Destroy(hit.HoldMesh.gameObject);
         }
-        Destroy(hit.gameObject);
+        if (hit.gameObject != null)
+            Destroy(hit.gameObject);
+        
         hit.Lane.HitObjects.Remove(hit);
 
         HitsRemaining--;
@@ -456,7 +471,8 @@ public class PlayerScreen : MonoBehaviour
         if (hit.Current.Flickable)
         {
             score += 1;
-            if (!float.IsNaN(hit.Current.FlickDirection)) score += 1;
+            if (!float.IsNaN(hit.Current.FlickDirection)) // Directional
+                score += 1;
         }
         
         float offsetAbs = Mathf.Abs(offset);
@@ -497,10 +513,14 @@ public class PlayerScreen : MonoBehaviour
                 if (Mathf.Abs((float)acc) >= 1) hsVol = Settings.HitsoundVolume[2];
                 else if (Mathf.Abs((float)acc) > 0) hsVol = Settings.HitsoundVolume[1];
             }
-
-            if (hit.Current.Type == HitObject.HitType.Normal) Hitsounds.PlayOneShot(NormalHitsound, hsVol);
-            else Hitsounds.PlayOneShot(CatchHitsound, hsVol);
-            if (hit.Current.Flickable) Hitsounds.PlayOneShot(FlickHitsound, hsVol);
+            
+            if (hit.Current.Type is HitObject.HitType.Normal) 
+                Hitsounds.PlayOneShot(NormalHitsound, hsVol);
+            else 
+                Hitsounds.PlayOneShot(CatchHitsound, hsVol);
+            
+            if (hit.Current.Flickable) 
+                Hitsounds.PlayOneShot(FlickHitsound, hsVol);
         }
 
         if (hit.Time == hit.EndTime)
