@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6dcb89d4-30d7-4725-b9f3-9863a28751a8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/JANOARG/Scenes/DevBuild_Preset.preset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Chart.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Chart.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Easing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Easing.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Storyboardable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Storyboardable.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/NotoSansKR-Regular SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/NotoSansKR-Regular SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/RobotoMono-Light SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/RobotoMono-Light SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/RobotoMono-Regular SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/RobotoMono-Regular SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/RobotoMono-SemiBold SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Fonts/RobotoMono-SemiBold SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Prefabs/Player/Hit Object.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Prefabs/Player/Hit Object.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Prefabs/Player/Lane Group.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Prefabs/Player/Lane Group.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Resources/Prefabs/Player/Lane.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Resources/Prefabs/Player/Lane.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scenes/Player.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scenes/Player.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scenes/Song Select.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scenes/Song Select.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Common/Common.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Common/Common.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Common/CommonScene.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Common/CommonScene.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/LaneGroupPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/LaneGroupPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/LanePlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/LanePlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerInputManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerInputManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerScreen.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerScreen.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Song Select/SongSelectReadyScreen.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Song Select/SongSelectReadyScreen.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Debug/FPSCounter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JANOARG/Scripts/Debug/FPSCounter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/03342b5b1db64c6799b542dd9f53c2a67c00/9d/0747af3a/SendMouseEvents.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/1c/d84c8e3c/WaitForEndOfFrame.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/25/bbbb9e45/MonoBehaviour.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/97/de06103b/RenderPipelineManager.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/9c/29f3ea75/Component.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/9f/59bdb043/SetupCoroutine.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/cc/1cde185a/ScriptableRuntimeReflectionSystemWrapper.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/cf/18d4f927/Mathf.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/d9/e3807aa5/UnitySynchronizationContext.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/da/6781f0ab/Transform.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/329558add73142f9a7be3bc167386576176400/dd/add02e33/Object.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/44d8a396c41544f3b2530502400acc73d400/05/6c1d2407/NavMesh.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/47367468c1d546ddb04537764e21ca5f3c00/8d/ef49849b/NativeInputSystem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/77/4230ea42/Object.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/89/8932e18a/List`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/75629efd6bf446d386386dfd50efceae2d600/92/255ea230/GUIUtility.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/75629efd6bf446d386386dfd50efceae2d600/ac/423192dc/Event.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/859d4990817f4bf8a235001abf05a64f7000/f5/ffa6dece/Canvas.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c617e27be39947ffbd2ef3d60d352cc9957c00/0c/4527e1c3/HostView.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c617e27be39947ffbd2ef3d60d352cc9957c00/4f/36d94efc/PhysicsDebugDraw.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ded5b51949274abead19b04d3f7647b917a000/19/793660fa/RenderChain.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f98723dd4586469db5213ec59da723ca468a00/29/ab653eaf/ThrowHelper.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f98723dd4586469db5213ec59da723ca468a00/e8/75762a51/List`1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/3ea01e77be99618395f448b16bd7cc2bd4248bd9e5d8474964b2d97f39c5d74/System.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Chart.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/ExternalChart.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG.Shared/Script/Data/ChartInfo/Playlist.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Common/Common.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Common/DebugLog.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Intro/IntroScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/HitPlayer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/LanePlayer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerScreenPause.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Player/PlayerScreenResult.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Song Select/SongSelectDifficulty.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Song Select/SongSelectReadyScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/JANOARG/Scripts/Behaviors/Song Select/SongSelectScreen.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.7.0/InputSystem/Devices/Touchscreen.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.7.0/InputSystem/Plugins/EnhancedTouch/Finger.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.7.0/InputSystem/Plugins/EnhancedTouch/Touch.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.7.0/InputSystem/Plugins/PlayerInput/PlayerInputManager.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.textmeshpro@3.0.6/Scripts/Runtime/TMP_Text.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/UIBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2wgQQgqFIAm1Bbwcfwyq3OUUwFY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Attach to Unity Editor.Attach to Unity Editor.executor&quot;: &quot;Debug&quot;,
+    &quot;Attach to Unity Player.Unity (Unknown Project).executor&quot;: &quot;Debug&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.61990213&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Major-Refactor&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.AIAssistantPromptsLibrary&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="$USER_HOME$/Unity/Hub/Editor/2022.3.46f1/Editor/Unity" />
+      <option name="PROGRAM_PARAMETERS" value="-projectPath &quot;$PROJECT_DIR$&quot; -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="PTY_MODE" value="Auto" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="$USER_HOME$/Unity/Hub/Editor/2022.3.46f1/Editor/Unity" />
+      <option name="PROGRAM_PARAMETERS" value="-projectPath &quot;$PROJECT_DIR$&quot; -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="PTY_MODE" value="Auto" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="$USER_HOME$/Unity/Hub/Editor/2022.3.46f1/Editor/Unity" />
+      <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath &quot;$PROJECT_DIR$&quot; -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="PTY_MODE" value="Auto" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="$USER_HOME$/Unity/Hub/Editor/2022.3.46f1/Editor/Unity" />
+      <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath &quot;$PROJECT_DIR$&quot; -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="PTY_MODE" value="Auto" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="runtimes">
+        <list />
+      </option>
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="useMixedMode" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="runtimes">
+        <list />
+      </option>
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="useMixedMode" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="runtimes">
+        <list />
+      </option>
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="useMixedMode" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="runtimes">
+        <list />
+      </option>
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="useMixedMode" value="false" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6dcb89d4-30d7-4725-b9f3-9863a28751a8" name="Changes" comment="" />
+      <created>1746460726570</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1746460726570</updated>
+      <workItem from="1746460735381" duration="2349000" />
+      <workItem from="1746465629550" duration="8791000" />
+      <workItem from="1746622971375" duration="3603000" />
+      <workItem from="1746631804518" duration="12834000" />
+      <workItem from="1746696864962" duration="16632000" />
+      <workItem from="1746770248234" duration="614000" />
+      <workItem from="1746771337095" duration="6044000" />
+      <workItem from="1746798980955" duration="4263000" />
+      <workItem from="1747320666930" duration="512000" />
+      <workItem from="1747468227743" duration="1773000" />
+      <workItem from="1747470765251" duration="1705000" />
+      <workItem from="1747474451777" duration="431000" />
+      <workItem from="1747479360273" duration="7877000" />
+      <workItem from="1747497034921" duration="8716000" />
+      <workItem from="1747532724142" duration="1942000" />
+      <workItem from="1747534892255" duration="26000" />
+      <workItem from="1747543524298" duration="101000" />
+      <workItem from="1747543641944" duration="2611000" />
+      <workItem from="1747549343759" duration="7292000" />
+      <workItem from="1747908075576" duration="20233000" />
+      <workItem from="1747991040693" duration="450000" />
+      <workItem from="1747991514854" duration="329000" />
+      <workItem from="1747991864695" duration="128000" />
+      <workItem from="1747992036912" duration="120000" />
+      <workItem from="1747993028283" duration="2431000" />
+      <workItem from="1748009368338" duration="8359000" />
+      <workItem from="1748055758560" duration="2297000" />
+      <workItem from="1748058172048" duration="11385000" />
+      <workItem from="1748146562129" duration="10656000" />
+      <workItem from="1748332028640" duration="119000" />
+      <workItem from="1748332243747" duration="3814000" />
+      <workItem from="1748336569129" duration="22970000" />
+      <workItem from="1748421296501" duration="5556000" />
+      <workItem from="1749976131106" duration="180000" />
+      <workItem from="1749977459026" duration="747000" />
+      <workItem from="1749978250006" duration="9294000" />
+      <workItem from="1749995695114" duration="3165000" />
+      <workItem from="1750004244520" duration="654000" />
+      <workItem from="1750076482849" duration="366000" />
+      <workItem from="1750080019411" duration="10726000" />
+      <workItem from="1750170720594" duration="2482000" />
+      <workItem from="1750173524259" duration="18112000" />
+      <workItem from="1750248522613" duration="13607000" />
+      <workItem from="1750416598651" duration="1780000" />
+      <workItem from="1750423140358" duration="1234000" />
+      <workItem from="1750430252278" duration="1953000" />
+      <workItem from="1750433122122" duration="3320000" />
+      <workItem from="1750470264832" duration="9039000" />
+      <workItem from="1750513141693" duration="1324000" />
+      <workItem from="1750516851801" duration="548000" />
+      <workItem from="1750525376249" duration="3086000" />
+      <workItem from="1750528682485" duration="3878000" />
+      <workItem from="1750532934044" duration="981000" />
+      <workItem from="1750557785540" duration="3617000" />
+      <workItem from="1750565864421" duration="7700000" />
+      <workItem from="1750575870342" duration="134000" />
+      <workItem from="1750584861776" duration="1562000" />
+      <workItem from="1750588057576" duration="13855000" />
+      <workItem from="1750950302890" duration="3735000" />
+      <workItem from="1751002065854" duration="57000" />
+      <workItem from="1751002155118" duration="63000" />
+      <workItem from="1751002251669" duration="6449000" />
+      <workItem from="1751029439588" duration="1645000" />
+      <workItem from="1751041958947" duration="701000" />
+      <workItem from="1751124861240" duration="741000" />
+      <workItem from="1751172996144" duration="1743000" />
+      <workItem from="1751180004700" duration="2010000" />
+      <workItem from="1751460459738" duration="2839000" />
+      <workItem from="1751465750659" duration="1391000" />
+      <workItem from="1751532923163" duration="25206000" />
+      <workItem from="1751888201858" duration="616000" />
+      <workItem from="1751889452621" duration="11136000" />
+      <workItem from="1752076383920" duration="6566000" />
+      <workItem from="1752158738059" duration="15414000" />
+      <workItem from="1752343087853" duration="1908000" />
+      <workItem from="1752380002073" duration="33678000" />
+      <workItem from="1752506185128" duration="6865000" />
+      <workItem from="1752756228061" duration="16470000" />
+      <workItem from="1752830168528" duration="4187000" />
+      <workItem from="1752835696294" duration="10103000" />
+      <workItem from="1752853048339" duration="451000" />
+      <workItem from="1752938178612" duration="5449000" />
+      <workItem from="1753188380390" duration="2737000" />
+      <workItem from="1753700497155" duration="3201000" />
+      <workItem from="1753704600461" duration="7653000" />
+      <workItem from="1753786790155" duration="16404000" />
+      <workItem from="1753938616457" duration="16684000" />
+      <workItem from="1754124837443" duration="14160000" />
+      <workItem from="1754317524433" duration="17619000" />
+      <workItem from="1754476000000" duration="19052000" />
+      <workItem from="1754821542407" duration="36394000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityProjectDiscoverer">
+    <option name="hasUnityReference" value="true" />
+    <option name="unityProject" value="true" />
+    <option name="unityProjectFolder" value="true" />
+  </component>
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="3" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.NullReferenceException" breakIfHandledByUserCode="true" breakIfUnhandled="false" isInternal="false" displayValue="NullReferenceException" namespaceName="System">
+            <option name="internal" value="false" />
+          </properties>
+          <option name="timeStamp" value="4" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="Type#SetBackgroundMusicStoryInstruction" memberName="musicName" />
+        <PinnedItemInfo parentTag="Type#LaneGroupPlayer" memberName="Original" />
+      </pinned-members>
+    </pin-to-top-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
