@@ -11825,6 +11825,7 @@ GameObject:
   - component: {fileID: 1551788791}
   - component: {fileID: 1551788792}
   - component: {fileID: 1551788793}
+  - component: {fileID: 1551788794}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -11984,6 +11985,8 @@ MonoBehaviour:
   BadWindow: 0.2
   PassWindow: 0.1
   SyncThreshold: 0.03
+  MinimumRadius: 80
+  ScreenUnit: {x: 700, y: 400}
   IsReady: 0
   IsPlaying: 0
   HasPlayedBefore: 0
@@ -12029,6 +12032,18 @@ MonoBehaviour:
   Player: {fileID: 1551788791}
   Autoplay: 0
   HitQueue: []
+--- !u!114 &1551788794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1551788786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef1ae68e7730bf41ea6964f1f076fbbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1557704231
 GameObject:
   m_ObjectHideFlags: 0

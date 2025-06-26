@@ -89,7 +89,6 @@ public class LanePlayer : MonoBehaviour
             if (Times[0] < time)
             {
                 Destroy(mesh);
-                Destroy(gameObject);
             }
             return;
         }

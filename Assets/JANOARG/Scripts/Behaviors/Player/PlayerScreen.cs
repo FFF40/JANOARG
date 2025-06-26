@@ -70,6 +70,9 @@ public class PlayerScreen : MonoBehaviour
     [Space]
     public float SyncThreshold = 0.05f;
     [Space]
+    public float MinimumRadius = 180f;
+    public Vector2 ScreenUnit;
+    [Space]
     [Header("Data")]
     public bool IsReady;
     public bool IsPlaying;
@@ -104,9 +107,15 @@ public class PlayerScreen : MonoBehaviour
 
     [NonSerialized]
     public PlayerSettings Settings = new();
-    private protected readonly float MinimumRadius = 180f;
 
-    public void Awake() 
+
+
+    [NonSerialized]
+    public float CalculatedExtraRadius;
+    [NonSerialized]
+    public float CalculatedMinimumRadius;
+
+    public void Awake()
     {
         main = this;
         CommonScene.Load();
@@ -186,6 +195,10 @@ public class PlayerScreen : MonoBehaviour
         ComboGroup.alpha = JudgmentGroup.alpha = 0;
 
         float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
+        float su = Mathf.Min(Screen.width / ScreenUnit.x, Screen.height / ScreenUnit.y);
+
+        CalculatedExtraRadius = dpi * 0.2f;
+        CalculatedMinimumRadius = MinimumRadius * su;
 
         for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
         {
@@ -193,7 +206,7 @@ public class PlayerScreen : MonoBehaviour
             player.Original = TargetChart.Data.Lanes[a];
             player.Current = CurrentChart.Lanes[a];
             LaneGroupPlayer group = null;
-            if (!string.IsNullOrEmpty(player.Current.Group)) 
+            if (!string.IsNullOrEmpty(player.Current.Group))
             {
                 group = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
                 player.transform.SetParent(group.transform);
@@ -215,7 +228,7 @@ public class PlayerScreen : MonoBehaviour
                     if (!float.IsNaN(hit.FlickDirection)) TotalExScore += 1;
                 }
 
-                if (time != hit.Offset) 
+                if (time != hit.Offset)
                 {
                     // Set camera distance and rotation to hit time of the note?
                     CameraController camera = (CameraController)TargetChart.Data.Camera.Get(hit.Offset);
@@ -231,7 +244,7 @@ public class PlayerScreen : MonoBehaviour
                     LaneGroupPlayer gp = group;
 
                     // Loop to get localPosition of 2 points of lane?
-                    while (gp) 
+                    while (gp)
                     {
                         LaneGroup laneGroup = (LaneGroup)gp.Original.Get(hit.Offset);
                         startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
@@ -244,14 +257,13 @@ public class PlayerScreen : MonoBehaviour
                 Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position));
                 Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position + hit.Length));
 
-                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f;
-                
+                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + CalculatedExtraRadius;
+
                 //Add hit coords
-                player.HitCoords.Add(new HitScreenCoord {
+                player.HitCoords.Add(new HitScreenCoord
+                {
                     Position = (hitStart + hitEnd) / 2,
-                    Radius = radius > MinimumRadius
-                        ? radius
-                        : MinimumRadius
+                    Radius = Mathf.Max(radius, CalculatedMinimumRadius)
                 });
             }
 
