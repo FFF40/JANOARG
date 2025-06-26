@@ -193,6 +193,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
     [HideInInspector] public List<TouchClass> TouchClasses = new();
     [HideInInspector] public List<HitPlayer> HitQueue = new();
+    [HideInInspector] public List<HitPlayer> DiscreteHitQueue = new(); // Special queue for catch/flickable notes
     [HideInInspector] public List<HoldNoteClass> HoldQueue = new();
 
     public void Awake() // Unity's version of constructor
@@ -538,7 +539,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                     // For additional inputs
                     foreach (TouchClass touch in TouchClasses)
                     {
-                        float distance;
                         if (
                             hitIteration.Current.Type == HitObject.HitType.Catch || hitIteration.Current.Flickable &&
                             Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position) <
@@ -550,32 +550,14 @@ public class PlayerInputManagerNew : MonoBehaviour
                         }
                     }
 
-                    // Wait for discrete hitobject to reach judgement line before clearing (for satisfaction)
-                    if (hitIteration.InDiscreteHitQueue || (alreadyHit && hitIteration.Current.Type == HitObject.HitType.Catch) && offsetedHit >= 0)
+                    // Pass to DiscreteHitQueue
+                    if (hitIteration.InDiscreteHitQueue)
                     {
-                        Player.Hit(hitIteration, offsetedHit);
-                        
+                        DiscreteHitQueue.Add(hitIteration);
                         hitIteration.InDiscreteHitQueue = false;
-    
-                        // Clear any touch that was assigned to this hit
-                        foreach (var touch in TouchClasses)
-                        {
-                            if (touch.QueuedHit == hitIteration)
-                            {
-                                touch.QueuedHit = null;
-                                touch.DiscreteHitobjectIsInRange = false;
-                            }
-                        }
-
-                        if (hitIteration.PendingHoldQueue)
-                        {
-                            HoldQueue.Add(new HoldNoteClass
-                            {
-                                HitObject = hitIteration,
-                                HoldPassDrainValue = 1
-                            });
-                            HitQueue.Remove(hitIteration);
-                        }
+                        
+                        // Remove from the main queue
+                        HitQueue.Remove(hitIteration);
                     }
                     
                     if (!alreadyHit && offsetedHit > window) // Didn't hit the hitobject within the timing window
@@ -775,6 +757,41 @@ public class PlayerInputManagerNew : MonoBehaviour
                         a--; // Pointer rollback
                     }
 
+                }
+            }
+
+            for (int i = 0; i < DiscreteHitQueue.Count; i++)
+            {
+                HitPlayer hitObject = DiscreteHitQueue[i];
+
+                float time = judgementOffseted_Time - hitObject.Time;
+
+                if (judgementOffseted_Time >= hitObject.Time)
+                {
+                    Player.Hit(hitObject, time);
+
+                    hitObject.InDiscreteHitQueue = false;
+
+                    // Clear any touch that was assigned to this hit
+                    foreach (var touch in TouchClasses)
+                    {
+                        if (touch.QueuedHit == hitObject)
+                        {
+                            touch.QueuedHit = null;
+                            touch.DiscreteHitobjectIsInRange = false;
+                        }
+                    }
+
+                    if (hitObject.PendingHoldQueue)
+                    {
+                        HoldQueue.Add(new HoldNoteClass
+                        {
+                            HitObject = hitObject,
+                            HoldPassDrainValue = 1
+                        });
+                    }
+                    
+                    DiscreteHitQueue.Remove(hitObject);
                 }
             }
 
