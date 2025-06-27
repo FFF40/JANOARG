@@ -535,9 +535,11 @@ public class PlayerInputManagerNew : MonoBehaviour
                                     distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
                                 ) < hitIteration.HitCoord.Radius &&
                                 !(
+                                !( // Prevents false trigger nearby discrete hitobjects
                                     touch.DiscreteHitobjectIsInRange &&
                                     offsetedHit >= -Player.GoodWindow &&
-                                    Vector2.Distance(touch.Touch.screenPosition, touch.NearestDiscreteHitobject.HitCoord.Position) < distance
+                                    Vector2.Distance(touch.Touch.screenPosition, touch.NearestDiscreteHitobject.HitCoord.Position) < distance &&
+                                    touch.NearestDiscreteHitobject.Time < hitIteration.Time
 
                                 ) &&
                                 (
@@ -560,7 +562,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     {
                         if (
                             hitIteration.Current.Type == HitObject.HitType.Catch || hitIteration.Current.Flickable &&
-                            Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position) <
+                            Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position) <=
                             hitIteration.HitCoord.Radius
                         )
                         {
@@ -751,13 +753,9 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                     // Check if the hold note is eligible for scoring
                     if (!holdNote_entry.IsScoring && holdNote_entry.HoldPassDrainValue >= 1)
-                    {
                         holdNote_entry.IsScoring = true;
-                    }
-                    if (holdNote_entry.IsScoring && holdNote_entry.HoldPassDrainValue <= 0)
-                    {
+                    else
                         holdNote_entry.IsScoring = false;
-                    }
 
 
                     // Hold ticks processing
