@@ -818,7 +818,8 @@ public class PlayerInputManagerNew : MonoBehaviour
 
                 float time = judgementOffseted_Time - hitObject.Time;
 
-                if (judgementOffseted_Time >= hitObject.Time)
+                if ((judgementOffseted_Time >= hitObject.Time && hitObject.Current.Type == HitObject.HitType.Catch) 
+                    || hitObject.Current.Flickable) // Immediate feedback on flicks
                 {
                     Player.Hit(hitObject, time);
 
