@@ -534,7 +534,6 @@ public class PlayerInputManagerNew : MonoBehaviour
                                 (
                                     distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
                                 ) < hitIteration.HitCoord.Radius &&
-                                !(
                                 !( // Prevents false trigger nearby discrete hitobjects
                                     touch.DiscreteHitobjectIsInRange &&
                                     offsetedHit >= -Player.GoodWindow &&
@@ -715,12 +714,14 @@ public class PlayerInputManagerNew : MonoBehaviour
                     {
                         Position = (holdNote_hitbox_start + holdNote_hitbox_end) / 2,
                         Radius = Mathf.Max(
-                            Vector2.Distance(holdNote_hitbox_start, holdNote_hitbox_end) / 2 + Player.CalculatedExtraRadius,
-                            Player.CalculatedMinimumRadius
+                            Vector2.Distance(holdNote_hitbox_start, holdNote_hitbox_end) / 2 + Player.ScaledExtraRadius,
+                            Player.ScaledMinimumRadius
                         )
                     };
 
                     // TODO remove when debug complete
+                    
+                    // Draw the hitobject radius
                     if (PlayerHitboxVisualizer.main)
                     {
                         PlayerHitboxVisualizer.main.DrawHitScreenCoordDebug(

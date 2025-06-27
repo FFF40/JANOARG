@@ -111,9 +111,9 @@ public class PlayerScreen : MonoBehaviour
 
 
     [NonSerialized]
-    public float CalculatedExtraRadius;
+    public float ScaledExtraRadius;
     [NonSerialized]
-    public float CalculatedMinimumRadius;
+    public float ScaledMinimumRadius;
 
     public void Awake()
     {
@@ -197,8 +197,8 @@ public class PlayerScreen : MonoBehaviour
         float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
         float su = Mathf.Min(Screen.width / ScreenUnit.x, Screen.height / ScreenUnit.y);
 
-        CalculatedExtraRadius = dpi * 0.2f;
-        CalculatedMinimumRadius = MinimumRadius * su;
+        ScaledExtraRadius = dpi * 0.2f;
+        ScaledMinimumRadius = MinimumRadius * su;
 
         for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
         {
@@ -257,13 +257,13 @@ public class PlayerScreen : MonoBehaviour
                 Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position));
                 Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position + hit.Length));
 
-                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + CalculatedExtraRadius;
+                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
 
                 //Add hit coords
                 player.HitCoords.Add(new HitScreenCoord
                 {
                     Position = (hitStart + hitEnd) / 2,
-                    Radius = Mathf.Max(radius, CalculatedMinimumRadius)
+                    Radius = Mathf.Max(radius, ScaledMinimumRadius)
                 });
             }
 
