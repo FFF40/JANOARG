@@ -110,6 +110,7 @@
     <Compile Include="Assets/JANOARG/Scripts/Behaviors/Player/LanePlayer.cs" />
     <Compile Include="Assets/JANOARG/Scripts/Behaviors/Song Select/SongSelectReadyScreen.cs" />
     <Compile Include="Assets/JANOARG/Scripts/Utils/Helper.cs" />
+    <Compile Include="Assets/JANOARG/Scripts/Behaviors/Player/PlayerHitboxVisualizer.cs" />
     <Compile Include="Assets/JANOARG/Scripts/Behaviors/Options/OptionInput.cs" />
     <Compile Include="Assets/JANOARG/Scripts/Behaviors/Player/LaneGroupPlayer.cs" />
     <Compile Include="Assets/JANOARG.Shared/Script/Data/ChartInfo/ExternalChart.cs" />
