@@ -299,7 +299,7 @@ public class PlayerInputManagerNew : MonoBehaviour
             for (int a = 0; a < TouchClasses.Count; a++) // TouchClass processor
             {
                 var iteratingTouch = TouchClasses[a];
-                Debug.Log($"Processing TouchClass entry for finger index {iteratingTouch.Touch.finger.index} in {a}.");
+                if (TouchClasses.Count != 0) Debug.Log($"Processing TouchClass entry for finger index {iteratingTouch.Touch.finger.index} in {a}.");
 
                 Touch touch = iteratingTouch.Touch;
 
