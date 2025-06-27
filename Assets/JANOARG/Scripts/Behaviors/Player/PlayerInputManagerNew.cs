@@ -276,7 +276,7 @@ public class PlayerInputManagerNew : MonoBehaviour
             for (int a = 0; a < inputCount; a++) // Process Touch entries and pass to TouchClasses as TouchClass entries
             {
                 Touch inputEntry = Touch.activeTouches[a]; // Iterate on all touch inputs in single frame
-                Debug.Log($"Processing touch input: {inputEntry.finger.index} in {a}, phase: {inputEntry.phase}");
+                if (inputCount != 0) Debug.Log($"Processing touch input: {inputEntry.finger.index} in {a}, phase: {inputEntry.phase}");
 
                 if (!inputEntry.isInProgress && (inputEntry.phase is TouchPhase.Ended or TouchPhase.Canceled)) // Remove TouchClass entry containing destroyed touch input
                 {
@@ -757,7 +757,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                     // Check if the hold note is eligible for scoring
                     if (!holdNote_entry.IsScoring && holdNote_entry.HoldPassDrainValue >= 1)
                         holdNote_entry.IsScoring = true;
-                    else
+                    else if (holdNote_entry.IsScoring && holdNote_entry.HoldPassDrainValue <= 0)
                         holdNote_entry.IsScoring = false;
 
 
