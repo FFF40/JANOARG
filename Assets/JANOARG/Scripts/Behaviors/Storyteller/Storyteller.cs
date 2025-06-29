@@ -80,7 +80,7 @@ public class Storyteller : MonoBehaviour
         }
         else 
         {
-            PlayNextChunk();
+            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk();
         }
     }
 
