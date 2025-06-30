@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +15,14 @@ public class ActorInfo
     public string Name;
     public string Alias;
     public string TextPrefix;
+    public List<ActorSprite> ActorSprites; //alias, Sprite
+}
+
+[Serializable]
+public class ActorSprite
+{
+    public string Alias;
+    public Sprite Sprite;
 }
 
 [Serializable]

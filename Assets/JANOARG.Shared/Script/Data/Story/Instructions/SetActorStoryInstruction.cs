@@ -10,7 +10,7 @@ public class SetActorStoryInstruction : StoryInstruction
 
     public override void OnTextBuild(Storyteller teller)
     {
-        if (Actors.Count == 0) 
+        if (Actors.Count == 0)
         {
             var narrator = teller.Constants.Actors.Find(x => string.IsNullOrEmpty(x.Alias));
             teller.SetNameLabelText("");
@@ -21,6 +21,10 @@ public class SetActorStoryInstruction : StoryInstruction
             var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
             teller.SetNameLabelText(actor.Name);
             teller.DialogueLabel.text += actor.TextPrefix;
+
+            //Check if sprite is present 
+            //+ Add bounce on actor sprite
+            //- Skip bounce
         }
     }
 }

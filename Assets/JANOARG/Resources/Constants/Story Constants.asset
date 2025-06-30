@@ -16,12 +16,17 @@ MonoBehaviour:
   - Name: '[Narrator]'
     Alias: 
     TextPrefix: <alpha=#cc><i>
+    ActorSprites: []
   - Name: '[Name Pending]'
     Alias: A
     TextPrefix: <color=#bdf>
+    ActorSprites: []
   - Name: ???
     Alias: Unknown
     TextPrefix: <alpha=#cc>
+    ActorSprites:
+    - Alias: test
+      Sprite: {fileID: 21300000, guid: c1f51be90e1d1541faa26e6023c0cb87, type: 3}
   Backgrounds:
   - Name: Blank
     Alias: blank

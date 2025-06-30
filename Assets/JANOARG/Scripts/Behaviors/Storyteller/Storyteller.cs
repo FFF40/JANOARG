@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +22,11 @@ public class Storyteller : MonoBehaviour
     public Graphic NextChunkIndicator;
     [Space]
     public Image BackgroundImage;
+    [Space]
+    public CanvasGroup ActorHolder;
+    public GameObject ActorSpriteItem;
+    public List<GameObject> Actors;
+    public float ActorSpriteBounceValue;
     [Space]
     public float CharacterDuration = 0.01f;
     public float SpeedFactor = 1;
@@ -82,7 +88,9 @@ public class Storyteller : MonoBehaviour
         }
         else
         {
-            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk();
+            //Prevents IndexOutOfBounds
+            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk(); 
+
         }
     }
 
@@ -110,6 +118,7 @@ public class Storyteller : MonoBehaviour
         DialogueLabel.color = Color.white;
         DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
 
+        //Background Change
         foreach (var ins in chunk.Instructions)
         {
             var crt = ins.OnBackgroundChange(this);
@@ -117,6 +126,7 @@ public class Storyteller : MonoBehaviour
         }
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
+        //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
         CurrentCharacterIndex = 0;
@@ -127,6 +137,7 @@ public class Storyteller : MonoBehaviour
         IsMeshDirty = true;
         ResetDialogueMesh();
 
+        //Print Story
         foreach (var ins in chunk.Instructions)
         {
             var crt = ins.OnTextReveal(this);
@@ -171,6 +182,7 @@ public class Storyteller : MonoBehaviour
         StartCoroutine(r());
     }
 
+    //Current Next Chunk Index Position
     float currentNCIPos = 0;
     Coroutine currentNCIRoutine = null;
     public void SetNextChunkIndicatorState(float target)
@@ -191,6 +203,7 @@ public class Storyteller : MonoBehaviour
         });
     }
 
+    //Current Next F???
     Coroutine currentNFRoutine = null;
     public void SetNameLabelText(string name)
     {

@@ -28,17 +28,17 @@ public class ChangeBackgroundInstruction : StoryInstruction
             teller.BackgroundImage.color = new Color(1f, 1f, 1f, lerp);   
         });
 
-
-        if (teller.Constants.Backgrounds.Count == 0) {
+        if (teller.Constants.Backgrounds.Count == 0)
+        {
             teller.BackgroundImage.sprite = teller.Constants.Backgrounds[0].File;   //black screen         
         }
-        var bg = teller.Constants.Backgrounds.Find(x => x.Alias == TargetBackground);
-        Debug.LogWarning(bg.File);
-        teller.BackgroundImage.sprite = bg.File; 
+        else
+        {
+            var bg = teller.Constants.Backgrounds.Find(x => x.Alias == TargetBackground);
+            teller.BackgroundImage.sprite = bg.File; 
+        }
         
-
         //Fade In
-        
         yield return Ease.Animate(FadeDuration, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
