@@ -19,3 +19,13 @@ MonoBehaviour:
   - Name: '[Name Pending]'
     Alias: A
     TextPrefix: <color=#bdf>
+  - Name: ???
+    Alias: Unknown
+    TextPrefix: <alpha=#cc>
+  Backgrounds:
+  - Name: Blank
+    Alias: blank
+    File: {fileID: 21300000, guid: acb7477b5cead3c66b09073b3d8da173, type: 3}
+  - Name: Test
+    Alias: test
+    File: {fileID: 21300000, guid: 780a168898e96cc70a200534f353cdd5, type: 3}

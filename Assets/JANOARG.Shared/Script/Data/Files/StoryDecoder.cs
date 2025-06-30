@@ -98,16 +98,16 @@ public class StoryDecoder
                 {
                     sb = new();
                     index++;
-                    while (index < line.Length && char.IsLetterOrDigit(line[index])) 
+                    while (index < line.Length && char.IsLetterOrDigit(line[index]))
                     {
                         sb.Append(line[index]);
                         index++;
                     }
                     string keyword = sb.ToString();
-                    if (!StoryTags.ContainsKey(keyword)) 
+                    if (!StoryTags.ContainsKey(keyword))
                     {
                         Debug.LogWarning($"Unknown story tag \"{keyword}\"");
-                        while (index < line.Length && line[index] != ']') index++; 
+                        while (index < line.Length && line[index] != ']') index++;
                         index++;
                         continue;
                     }
@@ -117,24 +117,24 @@ public class StoryDecoder
                     List<string> stringParams = new();
 
                     // Parse parameters
-                    foreach (var param in parameters) 
+                    foreach (var param in parameters)
                     {
-                        while (index < line.Length && char.IsWhiteSpace(line[index])) index++; 
-                        sb = new ();
-                        if (line[index] is '"' or '\'') 
+                        while (index < line.Length && char.IsWhiteSpace(line[index])) index++;
+                        sb = new();
+                        if (line[index] is '"' or '\'')
                         {
                             char bound = line[index];
                             index++;
-                            while (index < line.Length && line[index] != bound) 
+                            while (index < line.Length && line[index] != bound)
                             {
                                 if (line[index] == '\\') index++;
                                 sb.Append(line[index]);
                                 index++;
                             }
                         }
-                        else 
+                        else
                         {
-                            while (index < line.Length && !char.IsWhiteSpace(line[index]) && line[index] != ']') 
+                            while (index < line.Length && !char.IsWhiteSpace(line[index]) && line[index] != ']')
                             {
                                 sb.Append(line[index]);
                                 index++;
@@ -146,22 +146,32 @@ public class StoryDecoder
                     }
 
                     Debug.Log(string.Join(", ", stringParams));
-                    currentChunk.Instructions.Add(
-                        (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
-                    );
+                    try
+                    {
+                        currentChunk.Instructions.Add(
+                            (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"StoryInstruction in line {line} have error: {stringParams[0]}");
+                        Debug.Log(ex);
+                    }
+                    
+                    
                 }
                 // Parse text
-                else 
+                else
                 {
                     sb = new();
-                    while (index < line.Length && line[index] != '[') 
+                    while (index < line.Length && line[index] != '[')
                     {
-                        if (line[index] == '\\') 
+                        if (line[index] == '\\')
                         {
                             index++;
                             sb.Append(line[index]);
                         }
-                        else 
+                        else
                         {
                             sb.Append(line[index]);
                         }
@@ -169,7 +179,8 @@ public class StoryDecoder
                     }
 
                     currentChunk.Instructions.Add(
-                        new TextPrintStoryInstruction() {
+                        new TextPrintStoryInstruction()
+                        {
                             Text = sb.ToString()
                         }
                     );

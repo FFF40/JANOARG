@@ -20,6 +20,8 @@ public class Storyteller : MonoBehaviour
     public CanvasGroup NameLabelGroup;
     public Graphic NextChunkIndicator;
     [Space]
+    public Image BackgroundImage;
+    [Space]
     public float CharacterDuration = 0.01f;
     public float SpeedFactor = 1;
 
@@ -44,11 +46,11 @@ public class Storyteller : MonoBehaviour
 
     public void Update()
     {
-        if (IsPlaying) 
+        if (IsPlaying)
         {
             TimeBuffer += Time.deltaTime * SpeedFactor;
         }
-        if (IsMeshDirty) 
+        if (IsMeshDirty)
         {
             DialogueLabel.ForceMeshUpdate();
             ResetDialogueMesh();
@@ -58,7 +60,7 @@ public class Storyteller : MonoBehaviour
 
     public void LateUpdate()
     {
-        if (IsMeshDirty) 
+        if (IsMeshDirty)
         {
             UpdateDialogueMesh();
         }
@@ -72,32 +74,33 @@ public class Storyteller : MonoBehaviour
         StartCoroutine(PlayChunk());
     }
 
-    public void OnScreenClick() 
+    public void OnScreenClick()
     {
-        if (IsPlaying) 
+        if (IsPlaying)
         {
             SpeedFactor *= 5;
         }
-        else 
+        else
         {
             if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk();
         }
     }
 
-    public void PlayNextChunk() 
+    public void PlayNextChunk()
     {
         CurrentChunkIndex++;
         StartCoroutine(PlayChunk());
     }
 
-    public IEnumerator PlayChunk() 
+    public IEnumerator PlayChunk()
     {
         IsPlaying = true;
         StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
 
         SetNextChunkIndicatorState(0);
         Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
-        yield return Ease.Animate(0.2f, (x) => {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
             float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
             float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.In);
@@ -106,6 +109,13 @@ public class Storyteller : MonoBehaviour
         DialogueLabel.text = "";
         DialogueLabel.color = Color.white;
         DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
+
+        foreach (var ins in chunk.Instructions)
+        {
+            var crt = ins.OnBackgroundChange(this);
+            if (crt != null) yield return crt;
+        }
+        yield return new WaitWhile(() => ActiveCoroutines > 0);
 
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
@@ -127,8 +137,8 @@ public class Storyteller : MonoBehaviour
         IsPlaying = false;
         SetNextChunkIndicatorState(1);
     }
-    
-    public void ResetDialogueMesh() 
+
+    public void ResetDialogueMesh()
     {
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
@@ -139,7 +149,7 @@ public class Storyteller : MonoBehaviour
             DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
     }
-    public void UpdateDialogueMesh() 
+    public void UpdateDialogueMesh()
     {
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
@@ -152,7 +162,7 @@ public class Storyteller : MonoBehaviour
 
     public void RegisterCoroutine(IEnumerator routine)
     {
-        IEnumerator r() 
+        IEnumerator r()
         {
             ActiveCoroutines++;
             yield return routine;
@@ -171,7 +181,8 @@ public class Storyteller : MonoBehaviour
     IEnumerator NextChunkIndicatorAnim(float target)
     {
         float from = currentNCIPos;
-        yield return Ease.Animate(0.2f, (x) => {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
             x = Mathf.Lerp(from, target, x);
             currentNCIPos = x;
             float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
@@ -193,22 +204,25 @@ public class Storyteller : MonoBehaviour
         float fromXPos = NameLabelHolder.anchorMin.x;
         float toXPos = 0;
 
-        if (toAlpha > 0) 
+        if (toAlpha > 0)
         {
             NameLabel.text = name;
-            NameLabelHolder.sizeDelta = new (NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
+            NameLabelHolder.sizeDelta = new(NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
         }
-        if (fromAlpha == 0) 
+        if (fromAlpha == 0)
         {
             fromXPos = toXPos;
         }
 
-        yield return Ease.Animate(0.2f, (x) => {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
             float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
             float xPos = Mathf.Lerp(fromXPos, toXPos, ease);
             NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new(xPos, 0.5f);
-            NameLabelHolder.anchoredPosition = new (0, (1 - NameLabelGroup.alpha) * -5);
+            NameLabelHolder.anchoredPosition = new(0, (1 - NameLabelGroup.alpha) * -5);
         });
     }
+
+    
 }
