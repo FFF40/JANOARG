@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChangeActorSpriteStoryInstruction : StoryInstruction 
+public class MoveActorSpriteStoryInstruction : StoryInstruction 
 {
     public List<string> Actors = new();
 

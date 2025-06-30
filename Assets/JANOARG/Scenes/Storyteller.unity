@@ -735,8 +735,9 @@ MonoBehaviour:
   NameLabelGroup: {fileID: 1470953555}
   NextChunkIndicator: {fileID: 1685622515}
   BackgroundImage: {fileID: 1418348633}
-  ActorHolder: {fileID: 1220507275}
-  ActorSpriteItem: {fileID: 7059868176381729264, guid: 9d8279edc8e67be728e0567c8795e0c6, type: 3}
+  ActorHolder: {fileID: 1220507274}
+  ActorSpriteItem: {fileID: 190559558757694629, guid: 9d8279edc8e67be728e0567c8795e0c6, type: 3}
+  Actors: []
   ActorSpriteBounceValue: 2
   CharacterDuration: 0.015
   SpeedFactor: 1

@@ -21,22 +21,23 @@ public class StoryDecoder
 
     static Dictionary<string, StoryTagInfo> StoryTags;
 
-    #if UNITY_EDITOR
-	[DidReloadScripts]
-    #endif
-    public static void InitiateStoryTags() 
+#if UNITY_EDITOR
+    [DidReloadScripts]
+#endif
+    public static void InitiateStoryTags()
     {
-        StoryTags = new ();
+        StoryTags = new();
         var asm = Assembly.GetAssembly(typeof(StoryInstruction));
         foreach (var cls in asm.GetTypes())
         {
             if (!typeof(StoryInstruction).IsAssignableFrom(cls)) continue;
             foreach (var cons in cls.GetConstructors())
             {
-                foreach (var attr in cons.GetCustomAttributes()) 
+                foreach (var attr in cons.GetCustomAttributes())
                 {
                     if (attr is not StoryTagAttribute tagAttr) continue;
-                    StoryTags[tagAttr.Keyword] = new () {
+                    StoryTags[tagAttr.Keyword] = new()
+                    {
                         Keyword = tagAttr.Keyword,
                         DefaultParameters = tagAttr.DefaultParameters,
                         Constructor = cons,
@@ -58,16 +59,16 @@ public class StoryDecoder
         foreach (var line in lines)
         {
             int index = 0;
-            if (string.IsNullOrEmpty(line)) 
+            if (string.IsNullOrEmpty(line))
             {
-                if (currentChunk.Instructions.Count > 0) 
+                if (currentChunk.Instructions.Count > 0)
                 {
                     currentChunk = new();
                     script.Chunks.Add(currentChunk);
                 }
                 continue;
             }
-            if (line.StartsWith("#")) 
+            if (line.StartsWith("#"))
             {
                 continue;
             }
@@ -77,7 +78,7 @@ public class StoryDecoder
                 Match match;
                 var authorIns = new SetActorStoryInstruction();
                 currentChunk.Instructions.Add(authorIns);
-                if ((match = actorParseRegex.Match(line)).Success) 
+                if ((match = actorParseRegex.Match(line)).Success)
                 {
                     index = match.Groups["content"].Index;
                     authorIns.Actors.AddRange(match.Groups["actor"].Value.Split(','));
@@ -157,8 +158,8 @@ public class StoryDecoder
                         Debug.LogWarning($"StoryInstruction in line {line} have error: {stringParams[0]}");
                         Debug.Log(ex);
                     }
-                    
-                    
+
+
                 }
                 // Parse text
                 else
@@ -186,7 +187,7 @@ public class StoryDecoder
                     );
                 }
             }
-        } 
+        }
 
         if (currentChunk.Instructions.Count == 0) script.Chunks.Remove(currentChunk);
 
@@ -194,6 +195,8 @@ public class StoryDecoder
     }
 
     static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
+    //Make RegEx for actorActions
+    
 }
 
 [AttributeUsage(AttributeTargets.Constructor)]

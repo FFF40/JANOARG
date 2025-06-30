@@ -13,15 +13,15 @@ public class ActorSpriteHandler : MonoBehaviour
     public string CurrentActorSprite;
 
     
-    public void SetActor()
+    public void SetActor(string name)
     {
-
+        CurrentActor = name;
     }
-    public void SetActorSprite()
+    public void SetActorSprite(string name = "normal")
     {
-
+        CurrentActorSprite = name;
     }
-    public void SetActorPosition()
+    public void SetActorPosition(Vector2 posDelta)
     {
 
     }

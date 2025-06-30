@@ -23,9 +23,9 @@ public class Storyteller : MonoBehaviour
     [Space]
     public Image BackgroundImage;
     [Space]
-    public CanvasGroup ActorHolder;
-    public GameObject ActorSpriteItem;
-    public List<GameObject> Actors;
+    public RectTransform ActorHolder;
+    public ActorSpriteHandler ActorSpriteItem;
+    public List<ActorSpriteHandler > Actors;
     public float ActorSpriteBounceValue;
     [Space]
     public float CharacterDuration = 0.01f;
