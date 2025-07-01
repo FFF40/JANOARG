@@ -72,7 +72,7 @@ public class StoryDecoder
             {
                 continue;
             }
-
+            
             if (currentChunk.Instructions.Count == 0)
             {
                 Match match;
@@ -195,7 +195,6 @@ public class StoryDecoder
     }
 
     static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
-    //Make RegEx for actorActions
     
 }
 

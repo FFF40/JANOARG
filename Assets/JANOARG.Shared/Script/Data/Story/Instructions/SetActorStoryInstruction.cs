@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class SetActorStoryInstruction : StoryInstruction 
+public class SetActorStoryInstruction : ActorActionStoryInstruction 
 {
-    public List<string> Actors = new();
 
     public override void OnTextBuild(Storyteller teller)
     {
@@ -22,9 +21,19 @@ public class SetActorStoryInstruction : StoryInstruction
             teller.SetNameLabelText(actor.Name);
             teller.DialogueLabel.text += actor.TextPrefix;
 
-            //Check if sprite is present 
-            //+ Add bounce on actor sprite
-            //- Skip bounce
+            //Check if sprite is present
+            var actorSprite = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
+            if (actorSprite != null)
+            {
+                //+ Add bounce on actor sprite
+                
+            }
+            else
+            {
+                //- Skip bounce
+            }
+            
+            
         }
     }
 }

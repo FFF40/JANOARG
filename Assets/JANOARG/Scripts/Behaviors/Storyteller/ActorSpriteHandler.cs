@@ -21,9 +21,13 @@ public class ActorSpriteHandler : MonoBehaviour
     {
         CurrentActorSprite = name;
     }
-    public void SetActorPosition(Vector2 posDelta)
+    public IEnumerator SetActorPosition(float FadeDuration)
     {
-
+        yield return Ease.Animate(FadeDuration, (a) =>
+        {
+            float lerp = Ease.Get(1-a, EaseFunction.Cubic, EaseMode.Out);
+            // ImageHolder.   
+        });
     }
     
 

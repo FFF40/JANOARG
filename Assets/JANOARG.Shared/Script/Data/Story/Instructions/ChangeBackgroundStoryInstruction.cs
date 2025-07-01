@@ -11,7 +11,6 @@ public class ChangeBackgroundInstruction : StoryInstruction
 {
     public float FadeDuration = 1f;
     public string TargetBackground = "Blank";
-    // public 
 
     [StoryTag("bgswitch")]
      public ChangeBackgroundInstruction(string alias)

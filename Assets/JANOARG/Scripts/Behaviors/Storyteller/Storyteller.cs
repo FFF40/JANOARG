@@ -25,7 +25,7 @@ public class Storyteller : MonoBehaviour
     [Space]
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
-    public List<ActorSpriteHandler > Actors;
+    public List<ActorSpriteHandler> Actors;
     public float ActorSpriteBounceValue;
     [Space]
     public float CharacterDuration = 0.01f;
@@ -129,6 +129,15 @@ public class Storyteller : MonoBehaviour
         //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
+        //Actor Actions
+        foreach (var ins in chunk.Instructions) ins.OnActorStaticAction(this);
+        
+        // foreach (var ins in chunk.Instructions)
+        // {
+        //      var crt = ins.OnActorStaticAction(this);
+        //      if (crt != null) yield return crt;
+        // }
+
         CurrentCharacterIndex = 0;
         TimeBuffer = 0;
         SpeedFactor = 1;
@@ -137,7 +146,7 @@ public class Storyteller : MonoBehaviour
         IsMeshDirty = true;
         ResetDialogueMesh();
 
-        //Print Story
+        //Print Story 
         foreach (var ins in chunk.Instructions)
         {
             var crt = ins.OnTextReveal(this);
