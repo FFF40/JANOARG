@@ -11,6 +11,6 @@ public class ActorActionStoryInstruction : StoryInstruction
     public ActorSprite sprite = new();
     public string TargetSprite;
 
-
+    
    
 }

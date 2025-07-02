@@ -72,7 +72,9 @@ public class StoryDecoder
             {
                 continue;
             }
-            
+
+            //some vars that store the actors
+            List<string> currentChunkActors = new List<string>();
             if (currentChunk.Instructions.Count == 0)
             {
                 Match match;
@@ -82,6 +84,7 @@ public class StoryDecoder
                 {
                     index = match.Groups["content"].Index;
                     authorIns.Actors.AddRange(match.Groups["actor"].Value.Split(','));
+                    currentChunkActors.AddRange(match.Groups["actor"].Value.Split(','));
                 }
             }
 
@@ -149,13 +152,24 @@ public class StoryDecoder
                     Debug.Log(string.Join(", ", stringParams));
                     try
                     {
+                        try
+                        {
+                            currentChunk.Instructions.Add(
+                                (ActorActionStoryInstruction)tagInfo.Constructor.Invoke(new object[] { stringParams[0], currentChunkActors })
+                            );
+                        }
+                        catch 
+                        {
+                            //continue
+                        }
+                        
                         currentChunk.Instructions.Add(
                             (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
                         );
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogWarning($"StoryInstruction in line {line} have error: {stringParams[0]}");
+                        Debug.LogWarning($"StoryInstruction in line {line} have error: {stringParams[0]},{currentChunkActors[0]}");
                         Debug.Log(ex);
                     }
 

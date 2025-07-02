@@ -8,6 +8,7 @@ using UnityEngine;
 public class ActorSpriteHandler : MonoBehaviour
 {
     public GameObject ImageHolder;
+    public Image Sprite;
     [Space]
     public string CurrentActor;
     public string CurrentActorSprite;
@@ -19,6 +20,8 @@ public class ActorSpriteHandler : MonoBehaviour
     }
     public void SetActorSprite(string name = "normal")
     {
+        Image Current = ImageHolder.GetComponent<Image>();
+    
         CurrentActorSprite = name;
     }
     public IEnumerator SetActorPosition(float FadeDuration)

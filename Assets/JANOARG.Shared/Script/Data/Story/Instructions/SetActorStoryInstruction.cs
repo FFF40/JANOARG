@@ -18,6 +18,10 @@ public class SetActorStoryInstruction : ActorActionStoryInstruction
         else if (Actors.Count == 1)
         {
             var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
+
+            //Pass list of actors' alias to storyteller cuz im losing my sanity
+            teller.CurrentActors.Add(actor);
+
             teller.SetNameLabelText(actor.Name);
             teller.DialogueLabel.text += actor.TextPrefix;
 
@@ -26,14 +30,14 @@ public class SetActorStoryInstruction : ActorActionStoryInstruction
             if (actorSprite != null)
             {
                 //+ Add bounce on actor sprite
-                
+
             }
             else
             {
                 //- Skip bounce
             }
-            
-            
+
+
         }
     }
 }

@@ -25,7 +25,9 @@ MonoBehaviour:
     Alias: Unknown
     TextPrefix: <alpha=#cc>
     ActorSprites:
-    - Alias: test
+    - Alias: surtr
+      Sprite: {fileID: 21300000, guid: 7f003071f8d8cc2ccb218918c27e522b, type: 3}
+    - Alias: normal
       Sprite: {fileID: 21300000, guid: c1f51be90e1d1541faa26e6023c0cb87, type: 3}
   Backgrounds:
   - Name: Blank

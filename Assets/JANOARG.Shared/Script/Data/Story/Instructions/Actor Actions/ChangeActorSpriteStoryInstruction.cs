@@ -9,10 +9,10 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
 {
 
     [StoryTag("switch")]
-    public ChangeActorSpriteStoryInstruction(string param)
+    public ChangeActorSpriteStoryInstruction(string param, List<string> actors)
     {
-        Debug.LogWarning(param);
         TargetSprite = param;
+        Actors = actors;
     }
 
     private bool CheckIfSpriteExists(string targetSprite, Storyteller teller)
@@ -37,6 +37,8 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
         else if (Actors.Count == 1)
         {
             Debug.LogWarning(teller.Constants.Actors[0]);
+
+
             var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
             Debug.LogWarning(actor.Alias);
 
@@ -46,7 +48,7 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
             if (TargetActorSpriteHandler == null)
             {
                 ActorSpriteHandler target = UnityEngine.Object.Instantiate(teller.ActorSpriteItem, teller.ActorHolder);
-                target.SetActor(actor.Alias);
+                target.SetActor(actor.Alias); //Set alias
 
                 if (CheckIfSpriteExists(TargetSprite, teller))
                     target.SetActorSprite(TargetSprite);

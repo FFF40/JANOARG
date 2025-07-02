@@ -26,6 +26,7 @@ public class Storyteller : MonoBehaviour
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
     public List<ActorSpriteHandler> Actors;
+    public List<ActorInfo> CurrentActors = new List<ActorInfo>();
     public float ActorSpriteBounceValue;
     [Space]
     public float CharacterDuration = 0.01f;
