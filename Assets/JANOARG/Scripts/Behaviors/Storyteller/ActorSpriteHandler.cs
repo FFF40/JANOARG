@@ -1,28 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
+using UnityEngine.UI;
 
 [Serializable]
 public class ActorSpriteHandler : MonoBehaviour
 {
     public GameObject ImageHolder;
-    public Image Sprite;
     [Space]
     public string CurrentActor;
-    public string CurrentActorSprite;
+    public string CurrentActorSpriteAlias;
 
-    
-    public void SetActor(string name)
+
+    public void SetActor(string name, string spriteAlias)
     {
         CurrentActor = name;
+        CurrentActorSpriteAlias = spriteAlias;
     }
-    public void SetActorSprite(string name = "normal")
+    public void SetActorSprite(Sprite sprite)
     {
-        Image Current = ImageHolder.GetComponent<Image>();
-    
-        CurrentActorSprite = name;
+        Image Current = ImageHolder.GetComponentInChildren<Image>();
+        Current.sprite = sprite;
+        Current.SetNativeSize();
     }
     public IEnumerator SetActorPosition(float FadeDuration)
     {

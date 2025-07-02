@@ -8,8 +8,8 @@ using UnityEngine;
 public class ActorActionStoryInstruction : StoryInstruction 
 {
     public List<string> Actors = new();
-    public ActorSprite sprite = new();
-    public string TargetSprite;
+    public Sprite TargetActorSprite ;
+    public string TargetSpriteName;
 
     
    
