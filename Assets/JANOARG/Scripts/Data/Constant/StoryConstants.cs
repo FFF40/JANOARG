@@ -7,6 +7,8 @@ public class StoryConstants : ScriptableObject
 {
     public List<ActorInfo> Actors;
     public List<BackgroundInfo> Backgrounds;
+
+    public ActorSprite PlaceholderActorSprite;
 }
 
 [Serializable]

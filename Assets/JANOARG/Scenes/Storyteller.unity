@@ -339,6 +339,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1220507274}
   - component: {fileID: 1220507275}
+  - component: {fileID: 1220507276}
   m_Layer: 0
   m_Name: Actors
   m_TagString: Untagged
@@ -377,6 +378,29 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!223 &1220507276
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220507273}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1266978310
 GameObject:
   m_ObjectHideFlags: 0
@@ -738,6 +762,7 @@ MonoBehaviour:
   ActorHolder: {fileID: 1220507274}
   ActorSpriteItem: {fileID: 190559558757694629, guid: 9d8279edc8e67be728e0567c8795e0c6, type: 3}
   Actors: []
+  CurrentActors: []
   ActorSpriteBounceValue: 2
   CharacterDuration: 0.015
   SpeedFactor: 1

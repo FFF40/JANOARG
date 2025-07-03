@@ -148,22 +148,14 @@ public class StoryDecoder
                         stringParams.Add(sb.ToString());
                         index++;
                     }
-
-                    Debug.Log(string.Join(", ", stringParams));
+                    
+                    Debug.Log($"Line: {line} \n{keyword} : {string.Join(", ", stringParams)}");
+                    
                     try
                     {
-                        try
-                        {
-                            currentChunk.Instructions.Add(
-                                (ActorActionStoryInstruction)tagInfo.Constructor.Invoke(new object[] { stringParams[0], currentChunkActors })
-                            );
-                        }
-                        catch 
-                        {
-                             currentChunk.Instructions.Add(
-                                (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
-                            );
-                        }
+                        currentChunk.Instructions.Add(
+                            (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
+                        );
                     }
                     catch (Exception ex)
                     {
