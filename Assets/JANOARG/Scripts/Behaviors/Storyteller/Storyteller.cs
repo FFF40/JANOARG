@@ -130,15 +130,6 @@ public class Storyteller : MonoBehaviour
         //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
-        //Actor Actions
-        foreach (var ins in chunk.Instructions) ins.OnActorStaticAction(this);
-        
-        // foreach (var ins in chunk.Instructions)
-        // {
-        //      var crt = ins.OnActorStaticAction(this);
-        //      if (crt != null) yield return crt;
-        // }
-
         CurrentCharacterIndex = 0;
         TimeBuffer = 0;
         SpeedFactor = 1;
@@ -147,12 +138,18 @@ public class Storyteller : MonoBehaviour
         IsMeshDirty = true;
         ResetDialogueMesh();
 
-        //Print Story 
+        //Print Story and Actor Actions
         foreach (var ins in chunk.Instructions)
         {
+            var acrt = ins.OnActorAction(this);
+            
+
             var crt = ins.OnTextReveal(this);
+            if (acrt != null) yield return acrt;
             if (crt != null) yield return crt;
         }
+
+        
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
         IsPlaying = false;

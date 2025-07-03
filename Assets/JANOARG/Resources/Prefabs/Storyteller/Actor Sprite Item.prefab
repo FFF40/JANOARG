@@ -202,6 +202,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af49dc1104a225dffbb4928cab3f53aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HandlerCanvas: {fileID: 5149035552539000115}
   ImageHolder: {fileID: 3054983140185206315}
   CurrentActor: 
-  CurrentActorSprite: 
+  CurrentActorSpriteAlias: 
+  BounceHeigth: 250

@@ -160,20 +160,16 @@ public class StoryDecoder
                         }
                         catch 
                         {
-                            //continue
+                             currentChunk.Instructions.Add(
+                                (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
+                            );
                         }
-                        
-                        currentChunk.Instructions.Add(
-                            (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
-                        );
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogWarning($"StoryInstruction in line {line} have error: {stringParams[0]},{currentChunkActors[0]}");
-                        Debug.Log(ex);
+                        Debug.LogWarning($"StoryInstruction in line {line} have Error: {keyword},{stringParams[0]},{currentChunkActors[0]}");
+                        Debug.LogError(ex);
                     }
-
-
                 }
                 // Parse text
                 else

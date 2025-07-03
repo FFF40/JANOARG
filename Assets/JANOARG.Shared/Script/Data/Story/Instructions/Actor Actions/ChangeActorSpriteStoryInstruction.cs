@@ -16,7 +16,7 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
         Actors = actors;
     }
 
-    public override void OnActorStaticAction(Storyteller teller)
+    public override IEnumerator OnActorAction(Storyteller teller)
     {
         Debug.LogWarning("ONactor");
         Debug.LogWarning($"Count: {Actors.Count}");
@@ -28,22 +28,24 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
         {
             var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
             ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
-            
+
             if (TargetActorSpriteHandler == null)
             {
-                TargetActorSprite = GetSprite(TargetSpriteName,teller);
+                TargetActorSprite = GetSprite(TargetSpriteName, teller);
                 ActorSpriteHandler target = UnityEngine.Object.Instantiate(teller.ActorSpriteItem, teller.ActorHolder);
                 target.SetActor(actor.Alias, TargetSpriteName); //Set alias
 
-                ChangeSprite(target, TargetSpriteName, teller , TargetActorSprite);
+                ChangeSprite(target, TargetSpriteName, teller, TargetActorSprite);
                 teller.Actors.Add(target);
             }
             else
             {
-                TargetActorSprite = GetSprite(TargetSpriteName,teller);
+                TargetActorSprite = GetSprite(TargetSpriteName, teller);
                 ChangeSprite(TargetActorSpriteHandler, TargetSpriteName, teller, TargetActorSprite);
             }
         }
+
+        yield return null;
     }
 
     private bool CheckIfSpriteExists(string targetSprite, Storyteller teller)
