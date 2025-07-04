@@ -5,8 +5,15 @@
 /Library
 /Assets/Resources/Songs/*
 /Assets/Resources/Songs~/
+
+/Assets/JANOARG/Resources/Songs/*
+/Assets/JANOARG/Resources/Songs~/
+
 /Recordings
 *.apk
 *.zip
 /Chartmaker
 /Songs
+
+/Assets/JANOARG/Resources/Stories/Side Stories/*
+/Assets/JANOARG/Resources/Constants/Story Constants.asset

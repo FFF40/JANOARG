@@ -21,22 +21,23 @@ public class StoryDecoder
 
     static Dictionary<string, StoryTagInfo> StoryTags;
 
-    #if UNITY_EDITOR
-	[DidReloadScripts]
-    #endif
-    public static void InitiateStoryTags() 
+#if UNITY_EDITOR
+    [DidReloadScripts]
+#endif
+    public static void InitiateStoryTags()
     {
-        StoryTags = new ();
+        StoryTags = new();
         var asm = Assembly.GetAssembly(typeof(StoryInstruction));
         foreach (var cls in asm.GetTypes())
         {
             if (!typeof(StoryInstruction).IsAssignableFrom(cls)) continue;
             foreach (var cons in cls.GetConstructors())
             {
-                foreach (var attr in cons.GetCustomAttributes()) 
+                foreach (var attr in cons.GetCustomAttributes())
                 {
                     if (attr is not StoryTagAttribute tagAttr) continue;
-                    StoryTags[tagAttr.Keyword] = new () {
+                    StoryTags[tagAttr.Keyword] = new()
+                    {
                         Keyword = tagAttr.Keyword,
                         DefaultParameters = tagAttr.DefaultParameters,
                         Constructor = cons,
@@ -58,29 +59,32 @@ public class StoryDecoder
         foreach (var line in lines)
         {
             int index = 0;
-            if (string.IsNullOrEmpty(line)) 
+            if (string.IsNullOrEmpty(line))
             {
-                if (currentChunk.Instructions.Count > 0) 
+                if (currentChunk.Instructions.Count > 0)
                 {
                     currentChunk = new();
                     script.Chunks.Add(currentChunk);
                 }
                 continue;
             }
-            if (line.StartsWith("#")) 
+            if (line.StartsWith("#"))
             {
                 continue;
             }
 
+            //some vars that store the actors
+            List<string> currentChunkActors = new List<string>();
             if (currentChunk.Instructions.Count == 0)
             {
                 Match match;
                 var authorIns = new SetActorStoryInstruction();
                 currentChunk.Instructions.Add(authorIns);
-                if ((match = actorParseRegex.Match(line)).Success) 
+                if ((match = actorParseRegex.Match(line)).Success)
                 {
                     index = match.Groups["content"].Index;
                     authorIns.Actors.AddRange(match.Groups["actor"].Value.Split(','));
+                    currentChunkActors.AddRange(match.Groups["actor"].Value.Split(','));
                 }
             }
 
@@ -98,16 +102,16 @@ public class StoryDecoder
                 {
                     sb = new();
                     index++;
-                    while (index < line.Length && char.IsLetterOrDigit(line[index])) 
+                    while (index < line.Length && char.IsLetterOrDigit(line[index]))
                     {
                         sb.Append(line[index]);
                         index++;
                     }
                     string keyword = sb.ToString();
-                    if (!StoryTags.ContainsKey(keyword)) 
+                    if (!StoryTags.ContainsKey(keyword))
                     {
                         Debug.LogWarning($"Unknown story tag \"{keyword}\"");
-                        while (index < line.Length && line[index] != ']') index++; 
+                        while (index < line.Length && line[index] != ']') index++;
                         index++;
                         continue;
                     }
@@ -117,24 +121,24 @@ public class StoryDecoder
                     List<string> stringParams = new();
 
                     // Parse parameters
-                    foreach (var param in parameters) 
+                    foreach (var param in parameters)
                     {
-                        while (index < line.Length && char.IsWhiteSpace(line[index])) index++; 
-                        sb = new ();
-                        if (line[index] is '"' or '\'') 
+                        while (index < line.Length && char.IsWhiteSpace(line[index])) index++;
+                        sb = new();
+                        if (line[index] is '"' or '\'')
                         {
                             char bound = line[index];
                             index++;
-                            while (index < line.Length && line[index] != bound) 
+                            while (index < line.Length && line[index] != bound)
                             {
                                 if (line[index] == '\\') index++;
                                 sb.Append(line[index]);
                                 index++;
                             }
                         }
-                        else 
+                        else
                         {
-                            while (index < line.Length && !char.IsWhiteSpace(line[index]) && line[index] != ']') 
+                            while (index < line.Length && !char.IsWhiteSpace(line[index]) && line[index] != ']')
                             {
                                 sb.Append(line[index]);
                                 index++;
@@ -144,24 +148,33 @@ public class StoryDecoder
                         stringParams.Add(sb.ToString());
                         index++;
                     }
-
-                    Debug.Log(string.Join(", ", stringParams));
-                    currentChunk.Instructions.Add(
-                        (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
-                    );
+                    
+                    Debug.Log($"Line: {line} \n{keyword} : {string.Join(", ", stringParams)}");
+                    
+                    try
+                    {
+                        currentChunk.Instructions.Add(
+                            (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"StoryInstruction in line {line} have Error: {keyword},{stringParams[0]},{currentChunkActors[0]}");
+                        Debug.LogError(ex);
+                    }
                 }
                 // Parse text
-                else 
+                else
                 {
                     sb = new();
-                    while (index < line.Length && line[index] != '[') 
+                    while (index < line.Length && line[index] != '[')
                     {
-                        if (line[index] == '\\') 
+                        if (line[index] == '\\')
                         {
                             index++;
                             sb.Append(line[index]);
                         }
-                        else 
+                        else
                         {
                             sb.Append(line[index]);
                         }
@@ -169,13 +182,14 @@ public class StoryDecoder
                     }
 
                     currentChunk.Instructions.Add(
-                        new TextPrintStoryInstruction() {
+                        new TextPrintStoryInstruction()
+                        {
                             Text = sb.ToString()
                         }
                     );
                 }
             }
-        } 
+        }
 
         if (currentChunk.Instructions.Count == 0) script.Chunks.Remove(currentChunk);
 
@@ -183,6 +197,7 @@ public class StoryDecoder
     }
 
     static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
+    
 }
 
 [AttributeUsage(AttributeTargets.Constructor)]
