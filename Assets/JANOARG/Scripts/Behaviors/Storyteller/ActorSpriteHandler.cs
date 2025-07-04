@@ -20,10 +20,13 @@ public class ActorSpriteHandler : MonoBehaviour
         CurrentActor = name;
         CurrentActorSpriteAlias = spriteAlias;
     }
-    public void SetActorSprite(Sprite sprite)
+    public void SetActorSprite(Sprite sprite, bool isInvisible)
     {
         Image Current = ImageHolder.GetComponentInChildren<Image>();
+        if (isInvisible) Current.color = new Color(0f, 0f, 0f, 0f);
         Current.sprite = sprite;
+
+        //I need to find a way to make the image scale based on safe area stuff
         Current.SetNativeSize();
 
         StartCoroutine(BounceSprite());
@@ -54,7 +57,24 @@ public class ActorSpriteHandler : MonoBehaviour
             // ImageHolder.   
         });
     }
-    
+
+    public void SetSpriteVisible()
+    {
+        Image Current = ImageHolder.GetComponentInChildren<Image>();
+        Current.color = new Color(1f, 1f, 1f, 1f);
+    }
+
+    public IEnumerator SetSpriteVisible(float FadeDuration)
+    {
+        Image Current = ImageHolder.GetComponentInChildren<Image>();
+
+        yield return Ease.Animate(FadeDuration, (a) =>
+        {
+            float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+            Current.color = new Color(1f, 1f, 1f, 1f*lerp);
+        });
+        
+    }
 
     
 }

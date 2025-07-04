@@ -15,7 +15,7 @@ public abstract class StoryInstruction
     //To reduce manual labor
     public void Log(string message, Storyteller teller,[CallerMemberName] string caller = "")
     {
-        Debug.LogWarning($"Chunk {teller.CurrentChunkIndex}\nClass :{GetType().Name} \nFunction:{message} in {caller}");
+        Debug.LogWarning($"Chunk {teller.CurrentChunkIndex}, Class:{GetType().Name}, Function:{message} in {caller}()");
     }
 
 }

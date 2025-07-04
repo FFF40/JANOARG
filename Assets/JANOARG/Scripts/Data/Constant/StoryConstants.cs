@@ -17,7 +17,8 @@ public class ActorInfo
     public string Name;
     public string Alias;
     public string TextPrefix;
-    public List<ActorSprite> ActorSprites; //alias, Sprite
+    public List<ActorSprite> ActorSprites;
+    
 }
 
 [Serializable]
@@ -30,7 +31,7 @@ public class ActorSprite
 [Serializable]
 public class BackgroundInfo
 {
-    public string Name;
-    public string Alias;
-    public Sprite File;
+    public string Name;     
+    public string Alias;    
+    public Sprite File;    
 }
