@@ -76,5 +76,14 @@ public class ActorSpriteHandler : MonoBehaviour
         
     }
 
-    
+    public IEnumerator MoveSprite(Vector2 startPos,Vector2 endPos, float FadeDuration)
+    {
+        RectTransform rectTransform = HandlerCanvas.GetComponent<RectTransform>();
+        
+        yield return Ease.Animate(FadeDuration, (a) =>
+        {
+            float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+            // Current.color = new Color(1f, 1f, 1f, 1f*lerp);
+        });
+    }
 }

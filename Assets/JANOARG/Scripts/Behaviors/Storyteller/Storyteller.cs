@@ -10,6 +10,7 @@ public class Storyteller : MonoBehaviour
     public static Storyteller main;
 
     public StoryConstants Constants;
+    public StoryAudioConstants AudioConstants;
     [Space]
     public StoryScript CurrentScript;
     public int CurrentChunkIndex;
@@ -22,6 +23,9 @@ public class Storyteller : MonoBehaviour
     public Graphic NextChunkIndicator;
     [Space]
     public Image BackgroundImage;
+    [Space]
+    public AudioSource BackgroundMusicPlayer;
+    public AudioSource SoundEffectsPlayer;
     [Space]
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
@@ -127,6 +131,9 @@ public class Storyteller : MonoBehaviour
         }
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
+        //Change BG Music
+        foreach (var ins in chunk.Instructions) ins.OnMusicChange(this);
+        
         //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 

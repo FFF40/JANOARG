@@ -5,44 +5,31 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
+using UnityEngine.Rendering;
 
 [Serializable]
 public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
 {
-    string Mode;
     string From;
     Vector2 FromPos;
     string Destination;
     Vector2 DestinationPos;
+    float Duration;
 
     [StoryTag("move")]
-    public MoveActorSpriteStoryInstruction(string actor, string mode, string source, string destination)
+    public MoveActorSpriteStoryInstruction(string actor, string source, string destination, string duration)
     {
         Actors.Add(actor);
 
-        if (mode == "rel" || mode == "relative")                Mode = "rel";
-        else if (mode == "abs" || mode == "absolute")           Mode = "abs";
-        else { throw new ArgumentException($"Mode({mode}) is invalid"); }
+        (From, FromPos) = ParseParameters(source);
+        (Destination, DestinationPos) = ParseParameters(destination);
 
-        if      (source == "r" || source == "right")            From = "r";
-        else if (source == "l" || source == "left")             From = "l";
-        else if (source == "c" || source == "center")           From = "c";
-        else if (source == "*" )                                From = "self";
-        else if (source == "ol" || source == "outleft")         From = "ol"; //Out of Bounds position on left of the visible screen
-        else if (source == "or" || source == "outright")        From = "or"; //Out of Bounds position on right of the visible screen
-        else if (TryParsePosition(source))                      {From = "pos";   FromPos = ParsePosition(source);}
-        else { throw new ArgumentException($"source({source}) is invalid"); }
-
-        if      (destination == "r" || destination == "right")              Destination = "r";
-        else if (destination == "l" || destination == "left")               Destination = "l";
-        else if (destination == "c" || destination == "center")             Destination = "c";
-        else if (source == "*" )                                From = "self";
-        else if (destination == "ol" || destination == "outleft") Destination = "ol"; //Out of Bounds position on left of the visible screen
-        else if (destination == "or" || destination == "outright") Destination = "or"; //Out of Bounds position on right of the visible screen
-        else if (TryParsePosition(destination)) { Destination = "pos"; DestinationPos = ParsePosition(destination); }
-        else { throw new ArgumentException($"destination({destination}) is invalid"); }
+        var match = Regex.Match(duration, @"^(?<number>\d+(?:\.\d+)?)(?<unit>s|x|)$");
+        if (!match.Success) throw new ArgumentException("Duration value is invalid");
+        Duration = Convert.ToSingle(match.Groups["number"].Value);
     }
 
+    #region Parse Position
     bool TryParsePosition(string pos)
     {
         var match = Regex.Match(pos, @"<\s*(-?\d+)\s*,\s*(-?\d+)\s*>");
@@ -57,6 +44,28 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         return new Vector2(x, y);
     }
 
+    (string,Vector2) ParseParameters(string input)
+    {
+        Vector2 rtPos = Vector2.zero;
+
+        if (TryParsePosition(input))
+        {
+            rtPos = ParsePosition(input);
+            return ("pos", rtPos);
+        }
+
+        return input switch
+        {
+            "r" or "right"                      => ("r", rtPos),
+            "l" or "left"                       => ("l", rtPos),
+            "c" or "center" or "middle"         => ("c", rtPos),
+            "*" or "self"                       => ("self", rtPos),
+            "ol" or "outleft"                   => ("ol", rtPos),  //Out of Bounds position on left of the visible screen
+            "or" or "outright"                  => ("or", rtPos),    //Out of Bounds position on right of the visible screen
+            _ => throw new ArgumentException($"Input '{input}' is invalid. Expected a direction or position like <x,y>."),
+        };
+    }
+    #endregion
     public override void OnTextBuild(Storyteller teller)
     {
         if (Actors.Count == 0)
@@ -65,12 +74,15 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         }
         else if (Actors.Count == 1)
         {
-            //Init
+            //Init Sprite Handler
             InitSpriteHandler(teller);
             var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
             ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
 
-            //Parse
+            if (From == "pos") {
+                
+            }
+
 
 
 
