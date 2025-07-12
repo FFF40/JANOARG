@@ -310,6 +310,8 @@ public class PlayerScreen : MonoBehaviour
         lastDSPTime = AudioSettings.dspTime;
     }
 
+    public bool ResultExec = false;
+    
     public void Update()
     {
         if (IsPlaying)
@@ -378,6 +380,12 @@ public class PlayerScreen : MonoBehaviour
             // Update scene
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
+            
+            if (HitsRemaining <= 0 && PlayerInputManagerNew.Instance.HoldQueue.Count == 0 && !ResultExec) 
+            {
+                PlayerScreenResult.main.StartEndingAnim();
+                ResultExec = true;
+            }
         }
     }
 
@@ -469,10 +477,6 @@ public class PlayerScreen : MonoBehaviour
         hit.Lane.HitObjects.Remove(hit);
 
         HitsRemaining--;
-        if (HitsRemaining <= 0) 
-        {
-            PlayerScreenResult.main.StartEndingAnim();
-        }
     }
 
     public void Hit(HitPlayer hit, float offset, bool spawnEffect = true)
