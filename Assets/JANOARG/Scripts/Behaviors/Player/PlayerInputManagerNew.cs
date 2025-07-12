@@ -391,8 +391,7 @@ public class PlayerInputManagerNew : MonoBehaviour
 
 
                 // Draw debug hitboxes 
-                // TODO remove when debug complete
-                if (hitobjectTimingDelta >= -window && PlayerHitboxVisualizer.main)
+                /*if (hitobjectTimingDelta >= -window && PlayerHitboxVisualizer.main)
                 {
                     PlayerHitboxVisualizer.main.DrawHitScreenCoordDebug(
                         hitIteration.HitCoord,
@@ -402,7 +401,7 @@ public class PlayerInputManagerNew : MonoBehaviour
                             Mathf.Pow(1 - Mathf.Abs(hitobjectTimingDelta / Player.GoodWindow), 2)
                         )
                     );
-                }
+                }*/
 
 
                 bool alreadyHit = false;
@@ -787,17 +786,15 @@ public class PlayerInputManagerNew : MonoBehaviour
                             Player.ScaledMinimumRadius
                         )
                     };
-
-                    // TODO remove when debug complete
                     
                     // Draw the hitobject radius
-                    if (PlayerHitboxVisualizer.main)
+                    /*if (PlayerHitboxVisualizer.main)
                     {
                         PlayerHitboxVisualizer.main.DrawHitScreenCoordDebug(
                             holdNoteEntry.HitObject.HitCoord,
                             Color.green
                         );
-                    }
+                    }*/
 
                     Debug.Log($"Hold note hitbox position: {holdNoteEntry.HitObject.HitCoord.Position}, radius: {holdNoteEntry.HitObject.HitCoord.Radius}");
 
