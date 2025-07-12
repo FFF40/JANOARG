@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class HitPlayer : MonoBehaviour
 {
@@ -30,7 +28,7 @@ public class HitPlayer : MonoBehaviour
     public bool InDiscreteHitQueue;
 
     public bool PendingHoldQueue;
-    public bool IsHit;
+    public bool IsProcessed;
     public bool IsTapped;
 
     public void Init()
@@ -65,7 +63,7 @@ public class HitPlayer : MonoBehaviour
         if (Current != null) Current.Advance(beat);
         else Current = (HitObject)Original.Get(beat);
 
-        if (Current.IsDirty || forceDirty || IsHit) 
+        if (Current.IsDirty || forceDirty || IsProcessed) 
         {
             UpdateMesh();
             Current.IsDirty = false;
