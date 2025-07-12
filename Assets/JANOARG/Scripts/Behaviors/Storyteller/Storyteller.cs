@@ -26,6 +26,7 @@ public class Storyteller : MonoBehaviour
     [Space]
     public AudioSource BackgroundMusicPlayer;
     public AudioSource SoundEffectsPlayer;
+    [NonSerialized] public float MaxVolume;
     [Space]
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
@@ -44,7 +45,7 @@ public class Storyteller : MonoBehaviour
     [NonSerialized] public bool IsMeshDirty;
     [NonSerialized] public float TimeBuffer = 0;
     [NonSerialized] public int ActiveCoroutines = 0;
-
+    [NonSerialized] public PlayerSettings Settings = new();
     public void Awake()
     {
         main = this;
@@ -53,6 +54,8 @@ public class Storyteller : MonoBehaviour
     public void Start()
     {
         DialogueLabel.text = "";
+        MaxVolume = Settings.BGMusicVolume;
+        Debug.Log(Settings.BGMusicVolume);
     }
 
     public void Update()
@@ -132,8 +135,15 @@ public class Storyteller : MonoBehaviour
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
         //Change BG Music
+        foreach (var ins in chunk.Instructions)
+        {
+            var crt = ins.OnMusicPlay(this);
+            if (crt != null) yield return crt;
+        }
+        yield return new WaitWhile(() => ActiveCoroutines > 0);
+
         foreach (var ins in chunk.Instructions) ins.OnMusicChange(this);
-        
+
         //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
@@ -149,11 +159,11 @@ public class Storyteller : MonoBehaviour
         foreach (var ins in chunk.Instructions)
         {
             var acrt = ins.OnActorAction(this);
-            
-
             var crt = ins.OnTextReveal(this);
+            var srt = ins.OnSFXPlay(this);
             if (acrt != null) yield return acrt;
             if (crt != null) yield return crt;
+            if (srt != null) yield return srt;
         }
 
         

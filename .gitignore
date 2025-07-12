@@ -17,3 +17,5 @@
 
 /Assets/JANOARG/Resources/Stories/Side Stories/*
 /Assets/JANOARG/Resources/Constants/Story Constants.asset
+
+*.meta
