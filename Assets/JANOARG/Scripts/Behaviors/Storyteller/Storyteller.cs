@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class Storyteller : MonoBehaviour
     public static Storyteller main;
 
     public StoryConstants Constants;
+    public StoryAudioConstants AudioConstants;
     [Space]
     public StoryScript CurrentScript;
     public int CurrentChunkIndex;
@@ -19,6 +21,18 @@ public class Storyteller : MonoBehaviour
     public RectTransform NameLabelHolder;
     public CanvasGroup NameLabelGroup;
     public Graphic NextChunkIndicator;
+    [Space]
+    public Image BackgroundImage;
+    [Space]
+    public AudioSource BackgroundMusicPlayer;
+    public AudioSource SoundEffectsPlayer;
+    [NonSerialized] public float MaxVolume;
+    [Space]
+    public RectTransform ActorHolder;
+    public ActorSpriteHandler ActorSpriteItem;
+    public List<ActorSpriteHandler> Actors;
+    public List<ActorInfo> CurrentActors = new List<ActorInfo>();
+    public float ActorSpriteBounceValue;
     [Space]
     public float CharacterDuration = 0.01f;
     public float SpeedFactor = 1;
@@ -31,7 +45,7 @@ public class Storyteller : MonoBehaviour
     [NonSerialized] public bool IsMeshDirty;
     [NonSerialized] public float TimeBuffer = 0;
     [NonSerialized] public int ActiveCoroutines = 0;
-
+    [NonSerialized] public PlayerSettings Settings = new();
     public void Awake()
     {
         main = this;
@@ -40,15 +54,17 @@ public class Storyteller : MonoBehaviour
     public void Start()
     {
         DialogueLabel.text = "";
+        MaxVolume = Settings.BGMusicVolume;
+        Debug.Log(Settings.BGMusicVolume);
     }
 
     public void Update()
     {
-        if (IsPlaying) 
+        if (IsPlaying)
         {
             TimeBuffer += Time.deltaTime * SpeedFactor;
         }
-        if (IsMeshDirty) 
+        if (IsMeshDirty)
         {
             DialogueLabel.ForceMeshUpdate();
             ResetDialogueMesh();
@@ -58,7 +74,7 @@ public class Storyteller : MonoBehaviour
 
     public void LateUpdate()
     {
-        if (IsMeshDirty) 
+        if (IsMeshDirty)
         {
             UpdateDialogueMesh();
         }
@@ -72,32 +88,35 @@ public class Storyteller : MonoBehaviour
         StartCoroutine(PlayChunk());
     }
 
-    public void OnScreenClick() 
+    public void OnScreenClick()
     {
-        if (IsPlaying) 
+        if (IsPlaying)
         {
             SpeedFactor *= 5;
         }
-        else 
+        else
         {
-            PlayNextChunk();
+            //Prevents IndexOutOfBounds
+            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk(); 
+
         }
     }
 
-    public void PlayNextChunk() 
+    public void PlayNextChunk()
     {
         CurrentChunkIndex++;
         StartCoroutine(PlayChunk());
     }
 
-    public IEnumerator PlayChunk() 
+    public IEnumerator PlayChunk()
     {
         IsPlaying = true;
         StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
 
         SetNextChunkIndicatorState(0);
         Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
-        yield return Ease.Animate(0.2f, (x) => {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
             float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
             float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.In);
@@ -107,6 +126,25 @@ public class Storyteller : MonoBehaviour
         DialogueLabel.color = Color.white;
         DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
 
+        //Background Change
+        foreach (var ins in chunk.Instructions)
+        {
+            var crt = ins.OnBackgroundChange(this);
+            if (crt != null) yield return crt;
+        }
+        yield return new WaitWhile(() => ActiveCoroutines > 0);
+
+        //Change BG Music
+        foreach (var ins in chunk.Instructions)
+        {
+            var crt = ins.OnMusicPlay(this);
+            if (crt != null) yield return crt;
+        }
+        yield return new WaitWhile(() => ActiveCoroutines > 0);
+
+        foreach (var ins in chunk.Instructions) ins.OnMusicChange(this);
+
+        //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
         CurrentCharacterIndex = 0;
@@ -117,18 +155,25 @@ public class Storyteller : MonoBehaviour
         IsMeshDirty = true;
         ResetDialogueMesh();
 
+        //Print Story and Actor Actions
         foreach (var ins in chunk.Instructions)
         {
+            var acrt = ins.OnActorAction(this);
             var crt = ins.OnTextReveal(this);
+            var srt = ins.OnSFXPlay(this);
+            if (acrt != null) yield return acrt;
             if (crt != null) yield return crt;
+            if (srt != null) yield return srt;
         }
+
+        
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
         IsPlaying = false;
         SetNextChunkIndicatorState(1);
     }
-    
-    public void ResetDialogueMesh() 
+
+    public void ResetDialogueMesh()
     {
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
@@ -139,7 +184,7 @@ public class Storyteller : MonoBehaviour
             DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
     }
-    public void UpdateDialogueMesh() 
+    public void UpdateDialogueMesh()
     {
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
@@ -152,7 +197,7 @@ public class Storyteller : MonoBehaviour
 
     public void RegisterCoroutine(IEnumerator routine)
     {
-        IEnumerator r() 
+        IEnumerator r()
         {
             ActiveCoroutines++;
             yield return routine;
@@ -161,6 +206,7 @@ public class Storyteller : MonoBehaviour
         StartCoroutine(r());
     }
 
+    //Current Next Chunk Index Position
     float currentNCIPos = 0;
     Coroutine currentNCIRoutine = null;
     public void SetNextChunkIndicatorState(float target)
@@ -171,7 +217,8 @@ public class Storyteller : MonoBehaviour
     IEnumerator NextChunkIndicatorAnim(float target)
     {
         float from = currentNCIPos;
-        yield return Ease.Animate(0.2f, (x) => {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
             x = Mathf.Lerp(from, target, x);
             currentNCIPos = x;
             float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
@@ -180,6 +227,7 @@ public class Storyteller : MonoBehaviour
         });
     }
 
+    //Current Next F???
     Coroutine currentNFRoutine = null;
     public void SetNameLabelText(string name)
     {
@@ -193,22 +241,25 @@ public class Storyteller : MonoBehaviour
         float fromXPos = NameLabelHolder.anchorMin.x;
         float toXPos = 0;
 
-        if (toAlpha > 0) 
+        if (toAlpha > 0)
         {
             NameLabel.text = name;
-            NameLabelHolder.sizeDelta = new (NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
+            NameLabelHolder.sizeDelta = new(NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
         }
-        if (fromAlpha == 0) 
+        if (fromAlpha == 0)
         {
             fromXPos = toXPos;
         }
 
-        yield return Ease.Animate(0.2f, (x) => {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
             float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
             float xPos = Mathf.Lerp(fromXPos, toXPos, ease);
             NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new(xPos, 0.5f);
-            NameLabelHolder.anchoredPosition = new (0, (1 - NameLabelGroup.alpha) * -5);
+            NameLabelHolder.anchoredPosition = new(0, (1 - NameLabelGroup.alpha) * -5);
         });
     }
+
+    
 }
