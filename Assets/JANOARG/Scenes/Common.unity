@@ -6745,7 +6745,6 @@ MonoBehaviour:
   ParticleCoinFlash: {fileID: 2127883454}
   ParticleOrbFlash: {fileID: 1688295542}
   ParticleEssenceFlash: {fileID: 630120065}
-  LastBonusUpdate: 0
 --- !u!222 &1344250017
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7521,6 +7520,7 @@ GameObject:
   - component: {fileID: 1562277643}
   - component: {fileID: 1562277644}
   - component: {fileID: 1562277645}
+  - component: {fileID: 1562277646}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -7656,6 +7656,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AudioMixer: {fileID: 24100000, guid: 606287d1c8c9886669e259bcd1fd7af4, type: 2}
+--- !u!114 &1562277646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562277638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42acb047d9597b3deae6b6c5ca73147f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AddDebugLogMessages: 1
+  AddDebugWarningMessages: 1
 --- !u!1 &1571469826
 GameObject:
   m_ObjectHideFlags: 0
