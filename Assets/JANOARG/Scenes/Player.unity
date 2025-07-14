@@ -4407,7 +4407,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -10.000488, y: -9.999985}
+  m_AnchoredPosition: {x: -10.000488, y: -10}
   m_SizeDelta: {x: -110, y: -80}
   m_Pivot: {x: 1, y: 1}
 --- !u!1 &606307377
@@ -11933,6 +11933,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6a77452eee572143885d7f2de9a957c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RunChart: {fileID: 5022602860645237092, guid: be9b1b2f2d1ed80c7977c6e1a675dd15, type: 3}
+  Chart: {fileID: 5022602860645237092, guid: 62d5153c84ca91ee88cfdd7b488ca242, type: 3}
   Music: {fileID: 1395341278}
   Hitsounds: {fileID: 1395341278}
   Pseudocamera: {fileID: 939693537}
