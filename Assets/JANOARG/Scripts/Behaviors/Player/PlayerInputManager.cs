@@ -248,11 +248,8 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                             HoldQueue.Add(new HoldHandler
                             {
                                 Hit = hit,
-                                HoldValue = // HoldValue is treated as bool
-                                        hit.Current.HoldLength > 0
-                                        ? 1
-                                        : 0 
-                                
+                                IsHolding = true,
+                                HoldValue = 1
                             });
                             HitQueue.RemoveAt(a);
                             a--;
@@ -269,7 +266,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
             // Process hold notes 
             if (HoldQueue.Count > 0)
             {
-                Debug.Log("HoldQueue: " + HoldQueue.Count);
+                // Debug.Log("HoldQueue: " + HoldQueue.Count);
                 float time = Player.CurrentTime + Player.Settings.JudgmentOffset;
                 float beat = PlayerScreen.TargetSong.Timing.ToBeat(time);
 
@@ -280,7 +277,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
 
                 for (int a = 0; a < HoldQueue.Count; a++)
                 {
-                    Debug.Log("HoldQueue: " + a);
+                    // Debug.Log("HoldQueue: " + a);
                     var hold = HoldQueue[a];
                     Vector3 startPos, endPos;
 
