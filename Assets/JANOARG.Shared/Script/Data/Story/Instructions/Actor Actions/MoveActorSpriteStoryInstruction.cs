@@ -23,10 +23,7 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
 
         (From, FromPos) = ParseParameters(source);
         (Destination, DestinationPos) = ParseParameters(destination);
-
-        var match = Regex.Match(duration, @"^(?<number>\d+(?:\.\d+)?)(?<unit>s|x|)$");
-        if (!match.Success) throw new ArgumentException("Duration value is invalid");
-        Duration = Convert.ToSingle(match.Groups["number"].Value);
+        Duration = ParseDuration(duration);
     }
 
     #region Parse Position

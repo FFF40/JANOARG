@@ -16,6 +16,8 @@ public class Storyteller : MonoBehaviour
     public int CurrentChunkIndex;
     public int CurrentCharacterIndex;
     [Space]
+    public CanvasGroup InterfaceGroup;
+    [Space]
     public TMP_Text DialogueLabel;
     public TMP_Text NameLabel;
     public RectTransform NameLabelHolder;
@@ -134,6 +136,7 @@ public class Storyteller : MonoBehaviour
         }
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
+        
         //Change BG Music
         foreach (var ins in chunk.Instructions)
         {
@@ -161,9 +164,13 @@ public class Storyteller : MonoBehaviour
             var acrt = ins.OnActorAction(this);
             var crt = ins.OnTextReveal(this);
             var srt = ins.OnSFXPlay(this);
+
+            var urt = ins.OnInterfaceChange(this);
+
             if (acrt != null) yield return acrt;
             if (crt != null) yield return crt;
             if (srt != null) yield return srt;
+            if (urt != null) yield return urt;
         }
 
         

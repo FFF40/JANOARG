@@ -246,6 +246,7 @@ GameObject:
   - component: {fileID: 1020738990}
   - component: {fileID: 1020738989}
   - component: {fileID: 1020738988}
+  - component: {fileID: 1020738991}
   m_Layer: 5
   m_Name: Interface
   m_TagString: Untagged
@@ -329,6 +330,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1020738986}
   m_CullTransparentMesh: 1
+--- !u!225 &1020738991
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020738986}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1220507273
 GameObject:
   m_ObjectHideFlags: 0
@@ -756,6 +769,7 @@ MonoBehaviour:
   CurrentScript: {fileID: 0}
   CurrentChunkIndex: 0
   CurrentCharacterIndex: 0
+  InterfaceGroup: {fileID: 1020738991}
   DialogueLabel: {fileID: 1865017652}
   NameLabel: {fileID: 1266978314}
   NameLabelHolder: {fileID: 1470953560}
