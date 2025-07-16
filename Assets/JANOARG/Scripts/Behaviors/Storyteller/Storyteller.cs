@@ -99,7 +99,7 @@ public class Storyteller : MonoBehaviour
         else
         {
             //Prevents IndexOutOfBounds
-            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk(); 
+            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk();
 
         }
     }

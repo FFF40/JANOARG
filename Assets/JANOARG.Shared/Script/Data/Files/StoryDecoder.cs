@@ -18,6 +18,7 @@ public class StoryDecoder
 {
     public const int FormatVersion = 1;
     public const int IndentSize = 2;
+    static Dictionary<string, StoryInstruction> InstructionList = new Dictionary<string, StoryInstruction>();
 
     static Dictionary<string, StoryTagInfo> StoryTags;
 
@@ -68,12 +69,68 @@ public class StoryDecoder
                 }
                 continue;
             }
+
+            // Skip comments
             if (line.StartsWith("#"))
             {
                 continue;
             }
 
-            //some vars that store the actors
+            // Add substitute control tags
+            if (line.StartsWith("[["))
+            {
+                Match match = instructionParseRegex.Match(line);
+                if (match.Success)
+                {
+                    string id = match.Groups[1].Value;
+                    string instructionText = match.Groups[2].Value;
+
+
+                    string[] parts = instructionText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 0)
+                    {
+                        Debug.LogWarning($"No keyword in instruction: {line}");
+                    }
+
+                    string keyword = parts[0];
+                    string[] args = parts.Skip(1).ToArray();
+
+                    if (!StoryTags.ContainsKey(keyword))
+                    {
+                        Debug.LogWarning($"Unknown story tag keyword \"{keyword}\" in line: {line}");
+                    }
+
+                    var tagInfo = StoryTags[keyword];
+                    var parameters = tagInfo.Constructor.GetParameters();
+                    List<string> stringParams = new();
+
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        stringParams.Add(i < args.Length ? args[i] : "");
+                    }
+
+                    Debug.Log($"Instruction ID: {id}, Keyword: {keyword}, Params: {string.Join(", ", stringParams)}");
+
+                    try
+                    {
+                        var instruction = (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray());
+                        InstructionList[id] = instruction;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"Error constructing instruction [[{id}]] {keyword}: {ex.Message}");
+                    }
+                    
+                }
+                else
+                {
+                    Debug.LogWarning($"Line format not recognized: {line}");
+                }
+                continue;
+            }
+
+            // Add actors
             List<string> currentChunkActors = new List<string>();
             if (currentChunk.Instructions.Count == 0)
             {
@@ -88,6 +145,7 @@ public class StoryDecoder
                 }
             }
 
+           
             // Skip white space
             while (index < line.Length && char.IsWhiteSpace(line[index]))
             {
@@ -97,8 +155,38 @@ public class StoryDecoder
             while (index < line.Length)
             {
                 StringBuilder sb;
+
+                //Parse reference tags
+                if (line[index] == '[' && line[index + 1] == '[')
+                {
+                    Match match = instructionRefRegex.Match(line, index);
+                    if (match.Success)
+                    {
+                        string id = match.Groups[1].Value;
+
+                        try
+                        {
+                            if (InstructionList.TryGetValue(id, out var instruction))
+                            {
+                                currentChunk.Instructions.Add(instruction);
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"Instruction ID not found: [[{id}]]");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogWarning($"Error adding instruction [[{id}]] from line: {line}");
+                            Debug.LogError(ex);
+                        }
+
+                        index = match.Index + match.Length; // Move index past match
+                        
+                    }
+                }
                 // Parse control tags
-                if (line[index] == '[')
+                else if (line[index] == '[')
                 {
                     sb = new();
                     index++;
@@ -148,9 +236,9 @@ public class StoryDecoder
                         stringParams.Add(sb.ToString());
                         index++;
                     }
-                    
+
                     Debug.Log($"Line: {line} \n{keyword} : {string.Join(", ", stringParams)}");
-                    
+
                     try
                     {
                         currentChunk.Instructions.Add(
@@ -196,8 +284,10 @@ public class StoryDecoder
         return script;
     }
 
-    static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
-    
+    static readonly Regex actorParseRegex           = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
+    static readonly Regex instructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
+    static readonly Regex instructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
+
 }
 
 [AttributeUsage(AttributeTargets.Constructor)]
