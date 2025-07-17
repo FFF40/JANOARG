@@ -21,19 +21,21 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
         {
             // Just do nothing
         }
-        else if (Actors.Count == 1)
+        else
         {
             Debug.Log(Actors);
 
-            //Init
-            InitSpriteHandler(teller);
-            var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
-            ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
+            for (int i = 0; i < Actors.Count; i++)
+            {
+                //Init
+                var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[i]);
+                InitSpriteHandler(actor.Alias,teller);
+                ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
 
-            //Change
-            TargetActorSprite = GetSprite(TargetSpriteName, teller);
-            ChangeSprite(TargetActorSpriteHandler, teller, TargetActorSprite,false);
-
+                //Change
+                TargetActorSprite = GetSprite(actor.Alias,TargetSpriteName, teller);
+                ChangeSprite(TargetActorSpriteHandler, teller, TargetActorSprite,false);
+            }
         }
 
         yield return null;

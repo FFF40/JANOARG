@@ -12,15 +12,15 @@ public class ActorActionStoryInstruction : StoryInstruction
     public string TargetSpriteName;
 
     #region Init Sprite 
-    public void InitSpriteHandler(Storyteller teller, bool isInvisible = false)
+    public void InitSpriteHandler(string TargetActor, Storyteller teller, bool isInvisible = false)
     {
-        var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
+        var actor = teller.Constants.Actors.Find(x => x.Alias == TargetActor);
         ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
 
         if (TargetActorSpriteHandler == null)
         {
             ActorSpriteHandler target = UnityEngine.Object.Instantiate(teller.ActorSpriteItem, teller.ActorHolder);
-            TargetActorSprite = GetSprite("normal", teller); //default sprite
+            TargetActorSprite = GetSprite(actor.Alias,"normal", teller); //default sprite
             target.SetActor(actor.Alias, TargetSpriteName); //Set alias
 
             ChangeSprite(target, teller, TargetActorSprite,isInvisible);
@@ -28,22 +28,22 @@ public class ActorActionStoryInstruction : StoryInstruction
         }
     }
 
-    public Sprite GetSprite(string targetSprite, Storyteller teller)
+    public Sprite GetSprite(string TargetActor,string TargetSprite, Storyteller teller)
     {
-        var actor = GetActor(teller);
+        var actor = GetActor(TargetActor,teller);
 
         #region Debug
         if (teller.Constants.PlaceholderActorSprite.Sprite == null) Log("Placeholder Sprite is not set", teller);
         if (teller.Constants.Actors.Find(x => x.Alias == Actors[0]) == null) Log("targetActor is not present", teller);
-        if (actor.ActorSprites.Find(x => x.Alias == targetSprite) == null) Log("targetSprite is not present. Set sprite to placeholder sprite", teller);
+        if (actor.ActorSprites.Find(x => x.Alias == TargetSprite) == null) Log("targetSprite is not present. Set sprite to placeholder sprite", teller);
         if (Actors == null || Actors.Count == 0) Log("Actors is null or empty", teller);
         #endregion
 
-        if (actor.ActorSprites.Find(x => x.Alias == targetSprite) == null) return teller.Constants.PlaceholderActorSprite.Sprite;
-        return actor.ActorSprites.Find(x => x.Alias == targetSprite).Sprite;
+        if (actor.ActorSprites.Find(x => x.Alias == TargetSprite) == null) return teller.Constants.PlaceholderActorSprite.Sprite;
+        return actor.ActorSprites.Find(x => x.Alias == TargetSprite).Sprite;
     }
 
-    public ActorInfo GetActor(Storyteller teller)
+    public ActorInfo GetActor(string TargetActor,Storyteller teller)
     {
         #region Debug
         if (teller.Constants == null) Log("Constant is not set", teller);
@@ -54,7 +54,7 @@ public class ActorActionStoryInstruction : StoryInstruction
         if (teller.Constants == null || teller.Constants.Actors == null || Actors == null || Actors.Count == 0)
             return null;
 
-        return teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
+        return teller.Constants.Actors.Find(x => x.Alias == TargetActor);
     }
 
     public void ChangeSprite(ActorSpriteHandler TargetActorSpriteHandler, Storyteller teller, Sprite actorSprite, bool isInvisible)

@@ -72,8 +72,8 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         else if (Actors.Count == 1)
         {
             //Init Sprite Handler
-            InitSpriteHandler(teller);
             var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
+            InitSpriteHandler(actor.Alias,teller);
             ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
 
             if (From == "pos") {

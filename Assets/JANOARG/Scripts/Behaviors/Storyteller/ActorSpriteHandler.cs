@@ -24,7 +24,15 @@ public class ActorSpriteHandler : MonoBehaviour
     {
         Image Current = ImageHolder.GetComponentInChildren<Image>();
         if (isInvisible) Current.color = new Color(0f, 0f, 0f, 0f);
-        Current.sprite = sprite;
+
+        // // Get sprite size
+        // Vector2 spriteSize = new Vector2(sprite.bounds.size.x, sprite.bounds.size.y);
+        // Debug.Log(spriteSize);
+
+        // // Then scale the sprite based on the screen res
+        // // 
+
+        // Current.sprite = sprite;
 
         //I need to find a way to make the image scale based on safe area stuff
         Current.SetNativeSize();

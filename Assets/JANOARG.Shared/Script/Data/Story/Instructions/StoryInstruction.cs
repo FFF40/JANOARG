@@ -10,6 +10,8 @@ public abstract class StoryInstruction
     #region Static
     public virtual void OnTextBuild(Storyteller teller) { }
     public virtual void OnMusicChange(Storyteller teller) { }
+    public virtual void AddChoices(Storyteller teller) { }
+    public virtual void CheckStoryFlags(Storyteller teller) { }
     #endregion
 
     #region Dynamic

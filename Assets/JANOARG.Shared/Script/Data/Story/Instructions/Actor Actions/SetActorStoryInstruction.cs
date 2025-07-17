@@ -15,28 +15,17 @@ public class SetActorStoryInstruction : ActorActionStoryInstruction
             teller.SetNameLabelText("");
             teller.DialogueLabel.text += narrator.TextPrefix;
         }
-        else if (Actors.Count == 1)
+        else
         {
-            var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
-
-            //Pass list of actors' alias to storyteller cuz im losing my sanity
-            teller.CurrentActors.Add(actor);
-
-            teller.SetNameLabelText(actor.Name);
-            teller.DialogueLabel.text += actor.TextPrefix;
-
-            //Check if sprite is present
-            var actorSprite = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
-            if (actorSprite != null)
+            for (int i = 0; i < Actors.Count; i++)
             {
-                //+ Add bounce on actor sprite
+                var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[i]);
+                teller.CurrentActors.Add(actor);
 
+                //TODO: Make the actor name stack if there are 2 or more actors
+                teller.SetNameLabelText(actor.Name);
+                teller.DialogueLabel.text += actor.TextPrefix;
             }
-            else
-            {
-                //- Skip bounce
-            }
-
 
         }
     }

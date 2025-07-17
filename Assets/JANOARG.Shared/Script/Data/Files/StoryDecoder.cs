@@ -130,6 +130,17 @@ public class StoryDecoder
                 continue;
             }
 
+            // Add Decisions
+            if (line.StartsWith("!")) {
+                continue;
+            }
+
+            //Add Decision Checks
+            if (line.StartsWith("!"))
+            {
+                continue;
+            }
+
             // Add actors
             List<string> currentChunkActors = new List<string>();
             if (currentChunk.Instructions.Count == 0)

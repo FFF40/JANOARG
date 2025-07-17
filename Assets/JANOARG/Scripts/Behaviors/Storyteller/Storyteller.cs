@@ -7,35 +7,48 @@ using UnityEngine.UI;
 
 public class Storyteller : MonoBehaviour
 {
+    
     public static Storyteller main;
-
+    //Constants
     public StoryConstants Constants;
     public StoryAudioConstants AudioConstants;
     [Space]
+    // Story Script
     public StoryScript CurrentScript;
     public int CurrentChunkIndex;
     public int CurrentCharacterIndex;
     [Space]
+    // Interface
     public CanvasGroup InterfaceGroup;
-    [Space]
     public TMP_Text DialogueLabel;
     public TMP_Text NameLabel;
     public RectTransform NameLabelHolder;
     public CanvasGroup NameLabelGroup;
     public Graphic NextChunkIndicator;
-    [Space]
-    public Image BackgroundImage;
-    [Space]
-    public AudioSource BackgroundMusicPlayer;
-    public AudioSource SoundEffectsPlayer;
+    // Top Bar
+    public TMP_Text PlaceText;
+    public TMP_Text TimeText;
     [NonSerialized] public float MaxVolume;
     [Space]
+    // Background
+    public Image BackgroundImage;
+    [Space]
+    // Audio
+    public AudioSource BackgroundMusicPlayer;
+    public AudioSource SoundEffectsPlayer;
+    public TMP_Text MusicCreditText;
+    [Space]
+    //Actor Sprites
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
     public List<ActorSpriteHandler> Actors;
     public List<ActorInfo> CurrentActors = new List<ActorInfo>();
     public float ActorSpriteBounceValue;
     [Space]
+    // Decision
+    public Dictonary<string, string> ChoiceDictionary;
+    [Space]
+    //Text Related Effects
     public float CharacterDuration = 0.01f;
     public float SpeedFactor = 1;
 
@@ -136,14 +149,16 @@ public class Storyteller : MonoBehaviour
         }
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
-        
         //Change BG Music
-        foreach (var ins in chunk.Instructions)
+        foreach (var instruction in chunk.Instructions)
         {
-            var crt = ins.OnMusicPlay(this);
-            if (crt != null) yield return crt;
+            var coroutine = instruction.OnMusicPlay(this);
+            if (coroutine != null)
+            {
+                yield return coroutine;
+                // MusicCreditText.text = $"Playing {BackgroundMusicPlayer.name} - {AudioConstants.BackgroundMusic.Find(bgm => bgm.Name == BackgroundMusicPlayer.name).Artist}"; // "Song Title - Artist"
+            }
         }
-        yield return new WaitWhile(() => ActiveCoroutines > 0);
 
         foreach (var ins in chunk.Instructions) ins.OnMusicChange(this);
 
@@ -159,18 +174,18 @@ public class Storyteller : MonoBehaviour
         ResetDialogueMesh();
 
         //Print Story and Actor Actions
-        foreach (var ins in chunk.Instructions)
+        foreach (var instruction in chunk.Instructions)
         {
-            var acrt = ins.OnActorAction(this);
-            var crt = ins.OnTextReveal(this);
-            var srt = ins.OnSFXPlay(this);
+            var actorCoroutine = instruction.OnActorAction(this);
+            var coroutine = instruction.OnTextReveal(this);
+            var sfxCoroutine = instruction.OnSFXPlay(this);
 
-            var urt = ins.OnInterfaceChange(this);
+            var uiCoroutine = instruction.OnInterfaceChange(this);
 
-            if (acrt != null) yield return acrt;
-            if (crt != null) yield return crt;
-            if (srt != null) yield return srt;
-            if (urt != null) yield return urt;
+            if (actorCoroutine != null) yield return actorCoroutine;
+            if (coroutine != null) yield return coroutine;
+            if (sfxCoroutine != null) yield return sfxCoroutine;
+            if (uiCoroutine != null) yield return uiCoroutine;
         }
 
         

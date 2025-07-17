@@ -24,7 +24,6 @@ public class HideInterfaceStoryInstruction : StoryInstruction
         Debug.Log(isShow);
         if (isShow == true)
         {
-            Debug.Log("opacity to 0");
             //Fade Out
             yield return Ease.Animate(FadeDuration, (a) =>
             {
@@ -34,7 +33,6 @@ public class HideInterfaceStoryInstruction : StoryInstruction
         }
         else
         {
-            Debug.Log("opacity to 1");
             //Fade Out
             yield return Ease.Animate(FadeDuration, (a) =>
             {

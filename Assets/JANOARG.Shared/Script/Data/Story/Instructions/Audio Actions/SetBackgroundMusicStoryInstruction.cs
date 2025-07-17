@@ -15,13 +15,14 @@ public class SetBackgroundMusicStoryInstruction : StoryInstruction
         musicName = name;
     }
 
+    //TODO: Add player's volume preference 
     public override void OnMusicChange(Storyteller teller)
     {
         var musicToBePlayed = teller.AudioConstants.BackgroundMusic.Find(x => x.Name == musicName);
         var player = teller.BackgroundMusicPlayer;
         if (musicToBePlayed != null)
         {
-            player.volume = 1f;//teller.MaxVolume;
+            player.volume = 1f;
             player.clip = musicToBePlayed.BackgroundMusic;
             player.loop = true;
             player.Play();
@@ -34,6 +35,7 @@ public class SetBackgroundMusicStoryInstruction : StoryInstruction
     }
 }
 
+//TODO: Make it fade 
 [Serializable]
 public class FadeBackgroundMusicStoryInstruction : StoryInstruction 
 {

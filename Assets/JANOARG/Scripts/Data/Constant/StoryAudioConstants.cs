@@ -13,6 +13,7 @@ public class StoryAudioConstants : ScriptableObject
 public class StoryBackgroundMusicInfo
 {
     public string Name;
+    public string Artist = "";
     public AudioClip BackgroundMusic;
 }
 
