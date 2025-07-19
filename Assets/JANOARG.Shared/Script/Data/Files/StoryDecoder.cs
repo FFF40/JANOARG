@@ -18,9 +18,15 @@ public class StoryDecoder
 {
     public const int FormatVersion = 1;
     public const int IndentSize = 2;
+    static Dictionary<string, StoryTagInfo> StoryTags;
+
     static Dictionary<string, StoryInstruction> InstructionList = new Dictionary<string, StoryInstruction>();
 
-    static Dictionary<string, StoryTagInfo> StoryTags;
+    static bool isCurrentLineDecisionMaker = false;
+    static bool isCurrentLineFlagChecker = false;
+
+    static List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
+    static List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
 
 #if UNITY_EDITOR
     [DidReloadScripts]
@@ -121,7 +127,7 @@ public class StoryDecoder
                     {
                         Debug.LogError($"Error constructing instruction [[{id}]] {keyword}: {ex.Message}");
                     }
-                    
+
                 }
                 else
                 {
@@ -131,13 +137,57 @@ public class StoryDecoder
             }
 
             // Add Decisions
-            if (line.StartsWith("!")) {
+            if (line.StartsWith("?"))
+            {
+                Match match = DecisionParseRegex.Match(line);
+                if (match.Success)
+                {
+                    string key = match.Groups[1].Value;
+                    string value = match.Groups[2].Value;
+                    string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
+
+                    var decision = new DecisionItem(key, value, label);
+                    CurrentDecisionItems.Add(decision);
+
+                }
+                else
+                {
+                    Debug.LogWarning($"Line format not recognized: {line}");
+                }
                 continue;
             }
 
             //Add Decision Checks
             if (line.StartsWith("!"))
             {
+                Match match = DecisionParseRegex.Match(line);
+                if (match.Success)
+                {
+                    string key = match.Groups[1].Value;
+                    string value = match.Groups[2].Value;
+                    string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
+
+                    comparisonMatch = ComparisonParseRegex.Match(value);
+                    if (comparisonMatch.Success)
+                    {
+                        string comparison = comparisonMatch.Groups[1].Value;
+                        DecisionComparisionType comparisonType = ParseComparison(comparison);
+                        value = comparisonMatch.Groups[2].Value;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Invalid comparison format in line: {line}");
+                        continue;
+                    }
+
+                    var checks = new DecisionItem(key, value, label, comparison);
+                    CurrentFlagChecks.Add(checks);
+
+                }
+                else
+                {
+                    Debug.LogWarning($"Line format not recognized: {line}");
+                }
                 continue;
             }
 
@@ -156,17 +206,22 @@ public class StoryDecoder
                 }
             }
 
-           
+
             // Skip white space
             while (index < line.Length && char.IsWhiteSpace(line[index]))
             {
                 index++;
             }
 
+            //TODO: Call either DecisionItemStoryInstruction or DecisionCheckStoryInstruction based on the current line
+            //TODO: Add logic to handle DecisionItemStoryInstruction and DecisionCheckStoryInstruction
+            //TODO:     Add the list of DecisionItems to the perspective StoryInstruction
+            //TODO:                        
+
+
             while (index < line.Length)
             {
                 StringBuilder sb;
-
                 //Parse reference tags
                 if (line[index] == '[' && line[index + 1] == '[')
                 {
@@ -193,7 +248,7 @@ public class StoryDecoder
                         }
 
                         index = match.Index + match.Length; // Move index past match
-                        
+
                     }
                 }
                 // Parse control tags
@@ -295,10 +350,26 @@ public class StoryDecoder
         return script;
     }
 
-    static readonly Regex actorParseRegex           = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
+    static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
     static readonly Regex instructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
     static readonly Regex instructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
+    static readonly Regex DecisionParseRegex = new(@"\{([A-Z]+:[^|{}]+)\s*\|\s*([^|{}]+)(?:\s*\|\s*([^{}]+))?\}");
 
+    static readonly Regex ComparisonParseRegex = new(@"^(!=|>=|<=|=|<|>)\s*(-?[0-9]*\.?[0-9]+)$");
+
+    static DecisionComparisionType ParseComparison(string comparison)
+    {
+        return comparison switch
+        {
+            "!=" => DecisionComparisionType.NotEqual,
+            ">=" => DecisionComparisionType.GreaterThanOrEqual,
+            "<=" => DecisionComparisionType.LessThanOrEqual,
+            "=" => DecisionComparisionType.Equal,
+            "<" => DecisionComparisionType.LessThan,
+            ">" => DecisionComparisionType.GreaterThan,
+            _ => throw new ArgumentException($"Unknown comparison type: {comparison}")
+        };
+    }
 }
 
 [AttributeUsage(AttributeTargets.Constructor)]

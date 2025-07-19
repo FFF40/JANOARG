@@ -46,7 +46,8 @@ public class Storyteller : MonoBehaviour
     public float ActorSpriteBounceValue;
     [Space]
     // Decision
-    public Dictonary<string, string> ChoiceDictionary;
+    public List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
+    public List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
     [Space]
     //Text Related Effects
     public float CharacterDuration = 0.01f;
