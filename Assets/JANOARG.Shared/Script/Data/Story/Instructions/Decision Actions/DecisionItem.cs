@@ -10,35 +10,19 @@ public class DecisionItem
     public string StoryFlag;
     public string Value;
     public string Dialog;
-    public DecisionComparisionType ComparisionType = DecisionComparisionType.Equal;
 
-
-    
     public DecisionItem(string flag, string value, string text)
     {
         StoryFlag = flag;
         Value = value;
         Dialog = text;
     }
-
-    public DecisionItem(string flag, string value, string text, DecisionComparisionType comparisionType)
-    {
-        StoryFlag = flag;
-        Value = value;
-        Dialog = text;
-        ComparisionType = comparisionType;
-    }
-
-
-
 }
 
-public enum DecisionComparisionType
+
+public class FlagCheck : DecisionItem
 {
-    Equal,
-    NotEqual,
-    GreaterThan,
-    LessThan,
-    GreaterThanOrEqual,
-    LessThanOrEqual
+    public FlagCheck(string flag, string value, string text) : base(flag, value, text)
+    { } 
 }
+

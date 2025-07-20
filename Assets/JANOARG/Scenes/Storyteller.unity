@@ -262,7 +262,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1204349971}
   m_Father: {fileID: 1020738987}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -404,6 +405,76 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!1001 &1151357217
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 821665853}
+    m_Modifications:
+    - target: {fileID: 4870421134117804489, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_Name
+      value: Decision Item
+      objectReference: {fileID: 0}
+    - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+--- !u!4 &1204349971 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
+  m_PrefabInstance: {fileID: 1151357217}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1220507273
 GameObject:
   m_ObjectHideFlags: 0
@@ -838,14 +909,20 @@ MonoBehaviour:
   NameLabelHolder: {fileID: 1470953560}
   NameLabelGroup: {fileID: 1470953555}
   NextChunkIndicator: {fileID: 1685622515}
+  PlaceText: {fileID: 0}
+  TimeText: {fileID: 0}
   BackgroundImage: {fileID: 1418348633}
   BackgroundMusicPlayer: {fileID: 1427275886}
   SoundEffectsPlayer: {fileID: 1773869744}
+  MusicCreditText: {fileID: 0}
   ActorHolder: {fileID: 1220507274}
   ActorSpriteItem: {fileID: 190559558757694629, guid: 9d8279edc8e67be728e0567c8795e0c6, type: 3}
   Actors: []
   CurrentActors: []
   ActorSpriteBounceValue: 2
+  CurrentDecisionItems: []
+  CurrentFlagChecks: []
+  AreConditionsMet: 0
   CharacterDuration: 0.015
   SpeedFactor: 1
   CurrentVertexIndexes: 

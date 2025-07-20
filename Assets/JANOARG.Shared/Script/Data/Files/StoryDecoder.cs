@@ -157,40 +157,26 @@ public class StoryDecoder
                 continue;
             }
 
-            //Add Decision Checks
-            if (line.StartsWith("!"))
-            {
-                Match match = DecisionParseRegex.Match(line);
-                if (match.Success)
-                {
-                    string key = match.Groups[1].Value;
-                    string value = match.Groups[2].Value;
-                    string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
+#region 
+            // //Add Decision Checks
+            // if (line.StartsWith("!"))
+            // {
+            //     Match match = DecisionParseRegex.Match(line);
+            //     if (match.Success)
+            //     {
+            //         string key = match.Groups[1].Value;
+            //         string value = match.Groups[2].Value;
+            //         string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
 
-                    comparisonMatch = ComparisonParseRegex.Match(value);
-                    if (comparisonMatch.Success)
-                    {
-                        string comparison = comparisonMatch.Groups[1].Value;
-                        DecisionComparisionType comparisonType = ParseComparison(comparison);
-                        value = comparisonMatch.Groups[2].Value;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Invalid comparison format in line: {line}");
-                        continue;
-                    }
 
-                    var checks = new DecisionItem(key, value, label, comparison);
-                    CurrentFlagChecks.Add(checks);
-
-                }
-                else
-                {
-                    Debug.LogWarning($"Line format not recognized: {line}");
-                }
-                continue;
-            }
-
+            //     }
+            //     else
+            //     {
+            //         Debug.LogWarning($"Line format not recognized: {line}");
+            //     }
+            //     continue;
+            // }
+#endregion
             // Add actors
             List<string> currentChunkActors = new List<string>();
             if (currentChunk.Instructions.Count == 0)
@@ -357,19 +343,7 @@ public class StoryDecoder
 
     static readonly Regex ComparisonParseRegex = new(@"^(!=|>=|<=|=|<|>)\s*(-?[0-9]*\.?[0-9]+)$");
 
-    static DecisionComparisionType ParseComparison(string comparison)
-    {
-        return comparison switch
-        {
-            "!=" => DecisionComparisionType.NotEqual,
-            ">=" => DecisionComparisionType.GreaterThanOrEqual,
-            "<=" => DecisionComparisionType.LessThanOrEqual,
-            "=" => DecisionComparisionType.Equal,
-            "<" => DecisionComparisionType.LessThan,
-            ">" => DecisionComparisionType.GreaterThan,
-            _ => throw new ArgumentException($"Unknown comparison type: {comparison}")
-        };
-    }
+
 }
 
 [AttributeUsage(AttributeTargets.Constructor)]

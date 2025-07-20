@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class Storyteller : MonoBehaviour
 {
-    
+
     public static Storyteller main;
     //Constants
     public StoryConstants Constants;
@@ -48,6 +48,9 @@ public class Storyteller : MonoBehaviour
     // Decision
     public List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
     public List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
+    public bool AreConditionsMet = false;
+    public GameObject DecisionHolder;
+    public GameObject DecisionItemPrefab;
     [Space]
     //Text Related Effects
     public float CharacterDuration = 0.01f;
@@ -188,9 +191,9 @@ public class Storyteller : MonoBehaviour
             if (sfxCoroutine != null) yield return sfxCoroutine;
             if (uiCoroutine != null) yield return uiCoroutine;
         }
-
-        
         yield return new WaitWhile(() => ActiveCoroutines > 0);
+
+        // Show Decision Items
 
         IsPlaying = false;
         SetNextChunkIndicatorState(1);
@@ -284,5 +287,24 @@ public class Storyteller : MonoBehaviour
         });
     }
 
-    
+    #region Decision Methods
+
+    public void SetDecisionItems(List<DecisionItem> items)
+    {
+        for (int i = 0; i < items.Count; i++)
+        {
+            // DecisionHolder.Ins
+            
+        }
+    } 
+
+    //Show Decision into Storyteller UI
+
+    //Add Story Flag to Save File
+
+    //Read Story Flag from Save File
+
+    //Check if Decision is Met
+
+    #endregion
 }
