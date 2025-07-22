@@ -315,7 +315,7 @@ public class PlayerScreenResult : MonoBehaviour
             float ease3 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
             BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = ease3;
-            ProfileBar.main.SetVisibilty(ease3);
+            ProfileBar.main.SetVisibility(ease3);
             BestScoreTransform.anchoredPosition = new (-1010 + 10 * ease3, BestScoreTransform.anchoredPosition.y);
             SongInfoTransform.anchoredPosition = new (SongInfoTransform.anchoredPosition.x, 40 - 10 * ease3);
             DetailsTransform.anchoredPosition = new (DetailsTransform.anchoredPosition.x, 10 * ease3 - 50);
@@ -399,7 +399,7 @@ public class PlayerScreenResult : MonoBehaviour
 
         yield return Ease.Animate(1, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
-            ProfileBar.main.SetVisibilty(1 - lerp);
+            ProfileBar.main.SetVisibility(1 - lerp);
             BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
 
@@ -454,7 +454,7 @@ public class PlayerScreenResult : MonoBehaviour
 
         yield return Ease.Animate(1, a => {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
-            ProfileBar.main.SetVisibilty(1 - lerp);
+            ProfileBar.main.SetVisibility(1 - lerp);
             SongInfoHolder.alpha = DetailsHolder.alpha
                 = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
 

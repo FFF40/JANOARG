@@ -25,5 +25,7 @@ public abstract class MapItem : MonoBehaviour
     {
         return MapManager.main.MakeItemUI<TItem, TParent>((TParent)this);
     }
+
+    
     
 }

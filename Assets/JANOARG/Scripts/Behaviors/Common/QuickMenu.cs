@@ -47,7 +47,7 @@ public class QuickMenu : MonoBehaviour
         AudioManager.main.SetSceneLayerLowPassCutoff(1000, 0.5f);
 
         yield return Ease.Animate(.2f, a => {
-            ProfileBar.main.SetVisibilty(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+            ProfileBar.main.SetVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             Background.alpha = a;
         });
 
@@ -81,7 +81,7 @@ public class QuickMenu : MonoBehaviour
         LeftPanel.gameObject.SetActive(false);
 
         yield return Ease.Animate(.2f, a => {
-            ProfileBar.main.SetVisibilty(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+            ProfileBar.main.SetVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             Background.alpha = 1 - a;
         });
 
@@ -104,7 +104,7 @@ public class QuickMenu : MonoBehaviour
         AudioManager.main.SetSceneLayerLowPassCutoff(22050, 0.5f);
 
         yield return Ease.Animate(.2f, a => {
-            ProfileBar.main.SetVisibilty(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+            ProfileBar.main.SetVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             Background.alpha = 1 - a;
         });
 

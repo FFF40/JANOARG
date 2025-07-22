@@ -194,7 +194,7 @@ public class ProfileBar : MonoBehaviour
     {
         UpdateRatingInfo();
         UpdateLabels();
-        SetVisibilty(0);
+        SetVisibility(0);
         SetRewardLerp(0);
 
         ChangeHeader.gameObject.SetActive(false);
@@ -521,7 +521,7 @@ public class ProfileBar : MonoBehaviour
         return particle;
     }
 
-    public void SetVisibilty(float a)
+    public void SetVisibility(float a)
     {
         LeftPane.alpha = RightPane.alpha = a * a;
         LeftPane.blocksRaycasts = RightPane.blocksRaycasts = a == 1;

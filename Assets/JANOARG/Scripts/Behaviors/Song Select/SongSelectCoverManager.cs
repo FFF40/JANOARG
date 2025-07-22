@@ -75,7 +75,7 @@ public class SongSelectCoverManager : MonoBehaviour
         if (CoverInfos.ContainsKey(songID))
         {
             CoverInfos[songID].Uses--;
-            if (CoverInfos[songID].Uses < 0)
+            if (CoverInfos[songID].Uses <= 0)
             {
                 Destroy(CoverInfos[songID].Icon);
                 CoverInfos.Remove(songID);

@@ -59,7 +59,7 @@ public class SongSelectItem : MonoBehaviour
         yield return SongSelectCoverManager.main.RegisterUse(CoverImage, MapInfo.ID, Song);
     }
 
-    public void SetVisibilty(float a)
+    public void SetVisibility(float a)
     {
         MainGroup.blocksRaycasts = a == 1;
         MainGroup.alpha = a;

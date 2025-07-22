@@ -5,11 +5,13 @@ using UnityEngine;
 
 public class SongMapItem : MapItem
 {
-    [NonSerialized]
-    public PlaylistSong Target;
 
     [Space]
     public string TargetID;
+
+    [NonSerialized]
+    public PlaylistSong Target;
+    [NonSerialized]
     public SongMapItemUI ItemUI;
 
     public void Start()
@@ -27,14 +29,17 @@ public class SongMapItem : MapItem
         if (ItemUI == null)
         {
             ItemUI = MakeItemUI<SongMapItemUI, SongMapItem>();
+            MapManager.SongMapItemUIsByID.Add(TargetID, ItemUI);
         }
 
         bool revealed = GameConditional.TestAll(Target.RevealConditions);
         bool unlocked = revealed && GameConditional.TestAll(Target.UnlockConditions);
     }
 
-    public void Onestroy()
+    public void OnDestroy()
     {
+        MapManager.ItemUIs.Remove(ItemUI);
+        MapManager.SongMapItemUIsByID.Remove(TargetID);
         Destroy(ItemUI);        
     }
 }

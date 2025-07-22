@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,6 +10,8 @@ public class MapManager : MonoBehaviour
     public static MapManager main;
     public static List<MapItem> Items = new();
     public static List<MapItemUI> ItemUIs = new();
+
+    public static Dictionary<string, SongMapItemUI> SongMapItemUIsByID = new();
 
 
     public Scene MapScene;
@@ -22,8 +26,6 @@ public class MapManager : MonoBehaviour
     {
         main = this;
     }
-
-
 
     public void LoadMap()
     {
@@ -51,7 +53,18 @@ public class MapManager : MonoBehaviour
     {
         StartCoroutine(UnloadMapRoutine());
     }
-    
+
+    public List<(SongMapItemUI, SongSelectItem)> GetMapToListItems(List<SongSelectItem> listItems)
+    {
+        var listDict = listItems.ToDictionary(x => x.MapInfo.ID, x => x);
+        var keys = listDict.Keys.Intersect(SongMapItemUIsByID.Keys);
+        List<(SongMapItemUI, SongSelectItem)> result = new();
+        foreach (string key in keys)
+        {
+            result.Add((SongMapItemUIsByID[key], listDict[key]));
+        }
+        return result;
+    }
 
     public TItem GetItemUISample<TItem>() where TItem : MapItemUI
     {
@@ -90,7 +103,6 @@ public class MapManager : MonoBehaviour
             item.UpdatePosition();
         }
     }
-
 
     IEnumerator UnloadMapRoutine()
     {
