@@ -11,7 +11,7 @@ public class DecisionItemHandler : MonoBehaviour
     public string Value;
 
     public TMP_Text DecisionText;
-    public Storage Storage = new Storage("save");
+    // public Storage Storage = new Storage("save");
 
     public void Setup(DecisionItem item)
     {
@@ -42,8 +42,8 @@ public class DecisionItemHandler : MonoBehaviour
         //         break;
         // }
 
-        Storage.Set(StoryFlag, Value);
-        Storage.Save();
+        // Storage.Set(StoryFlag, Value);
+        // Storage.Save();
 
     }
 }
