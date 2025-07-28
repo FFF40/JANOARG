@@ -381,7 +381,7 @@ public class PlayerScreen : MonoBehaviour
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
             foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
             
-            if (HitsRemaining <= 0 && PlayerInputManagerNew.Instance.HoldQueue.Count == 0 && !ResultExec) 
+            if (HitsRemaining <= 0 && PlayerInputManager.Instance.HoldQueue.Count == 0 && !ResultExec) 
             {
                 PlayerScreenResult.main.StartEndingAnim();
                 ResultExec = true;
@@ -408,7 +408,7 @@ public class PlayerScreen : MonoBehaviour
             }
         }
         //PlayerInputManager.main.UpdateTouches();
-        PlayerInputManagerNew.Instance.UpdateInput();
+        PlayerInputManager.Instance.UpdateInput();
     }
 
     Coroutine judgAnim;
@@ -545,7 +545,7 @@ public class PlayerScreen : MonoBehaviour
         }
         else 
         {
-            hit.IsHit = true;
+            hit.IsProcessed = true;
         }
     }
     public void SetBackgroundColor(Color color) 

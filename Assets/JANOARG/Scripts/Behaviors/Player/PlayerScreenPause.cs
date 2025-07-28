@@ -42,7 +42,7 @@ public class PlayerScreenPause : MonoBehaviour
             PlayerScreen.main.IsPlaying = false;
             PlayerScreen.main.Music.Pause();
             //PlayerInputManager.main.Fingers.Clear();
-            PlayerInputManagerNew.Instance.TouchClasses.Clear();
+            PlayerInputManager.Instance.TouchClasses.Clear();
             Show();
         }
         else 
