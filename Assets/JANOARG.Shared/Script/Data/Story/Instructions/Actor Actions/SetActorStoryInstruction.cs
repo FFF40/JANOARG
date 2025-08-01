@@ -9,12 +9,14 @@ public class SetActorStoryInstruction : ActorActionStoryInstruction
 
     public override void OnTextBuild(Storyteller teller)
     {
+        // Narrator
         if (Actors.Count == 0)
         {
             var narrator = teller.Constants.Actors.Find(x => string.IsNullOrEmpty(x.Alias));
             teller.SetNameLabelText("");
             teller.DialogueLabel.text += narrator.TextPrefix;
         }
+        // Actors
         else
         {
             for (int i = 0; i < Actors.Count; i++)

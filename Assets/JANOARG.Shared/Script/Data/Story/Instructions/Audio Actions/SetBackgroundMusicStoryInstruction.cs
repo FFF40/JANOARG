@@ -35,7 +35,7 @@ public class SetBackgroundMusicStoryInstruction : StoryInstruction
     }
 }
 
-//TODO: Make it fade 
+//TODO: Make it fade also this StoryInstruction is not yet implemented
 [Serializable]
 public class FadeBackgroundMusicStoryInstruction : StoryInstruction 
 {

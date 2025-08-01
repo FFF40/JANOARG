@@ -9,22 +9,21 @@ using UnityEngine.UIElements;
 [Serializable]
 public class HideInterfaceStoryInstruction : StoryInstruction
 {
-    public bool isShow;
+    public bool isHideInterface;
     public float FadeDuration = 1f;
 
     [StoryTag("hideInterface")]
     public HideInterfaceStoryInstruction(string isHide, string duration)
     {
-        isShow = ParseBoolean(isHide);
+        isHideInterface = ParseBoolean(isHide);
         FadeDuration = ParseDuration(duration);
     }
 
     public override IEnumerator OnInterfaceChange(Storyteller teller)
     {
-        Debug.Log(isShow);
-        if (isShow == true)
+        if (isHideInterface == true)
         {
-            //Fade Out
+            // Hides in the interface for the duration 
             yield return Ease.Animate(FadeDuration, (a) =>
             {
                 float lerp = Ease.Get(1 - a, EaseFunction.Cubic, EaseMode.Out);
@@ -33,7 +32,7 @@ public class HideInterfaceStoryInstruction : StoryInstruction
         }
         else
         {
-            //Fade Out
+            // Shows in the interface for the duration
             yield return Ease.Animate(FadeDuration, (a) =>
             {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);

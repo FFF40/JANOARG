@@ -10,6 +10,9 @@ public class TextPrintStoryInstruction : StoryInstruction
 
     private int StopPoint;
 
+    /// <summary>
+    /// It appends the text to the dialogue label and updates the stop point.
+    /// </summary>
     public override void OnTextBuild(Storyteller teller)
     {
         teller.DialogueLabel.text += Text;
@@ -17,11 +20,21 @@ public class TextPrintStoryInstruction : StoryInstruction
         StopPoint = teller.DialogueLabel.textInfo.characterCount;
     }
 
+    /// <summary>
+    /// It reveals the text character by character with a delay based on punctuation.
+    /// This method is called when the text is being revealed.
+    /// It checks the current character index and updates the vertex indexes for the text mesh.
+    
+    /// </summary>
     public override IEnumerator OnTextReveal(Storyteller teller)
     {
         bool isWait = false;
-        while (teller.CurrentCharacterIndex < StopPoint) 
+        
+        
+        // Wait until the current character index is less than the stop point
+        while (teller.CurrentCharacterIndex < StopPoint)
         {
+            // Current Character Info
             int index = teller.CurrentCharacterIndex;
             var charInfo = teller.DialogueLabel.textInfo.characterInfo[index];
 
@@ -43,6 +56,7 @@ public class TextPrintStoryInstruction : StoryInstruction
                     isWait = false;
                     break;
             }
+
             while (teller.TimeBuffer < waitTime) yield return null;
             teller.TimeBuffer -= waitTime;
 

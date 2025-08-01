@@ -80,7 +80,7 @@ public class Storyteller : MonoBehaviour
     {
         DialogueLabel.text = "";
         MaxVolume = Settings.BGMusicVolume;
-        Debug.Log(Settings.BGMusicVolume);
+        // Debug.Log(Settings.BGMusicVolume);
     }
 
     public void Update()
@@ -121,12 +121,15 @@ public class Storyteller : MonoBehaviour
         }
         else
         {
-            //Prevents IndexOutOfBounds
+            // Prevents IndexOutOfBounds
             if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk();
+
+            // TODO: Close this scene after the .story is finished
 
         }
     }
 
+    // Plays the next line
     public void PlayNextChunk()
     {
         CurrentChunkIndex++;
@@ -139,6 +142,8 @@ public class Storyteller : MonoBehaviour
         StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
 
         SetNextChunkIndicatorState(0);
+
+        //Initialize the Dialogue Label
         Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
         yield return Ease.Animate(0.2f, (x) =>
         {
@@ -170,11 +175,13 @@ public class Storyteller : MonoBehaviour
             }
         }
 
+        // Change BG Music
         foreach (var ins in chunk.Instructions) ins.OnMusicChange(this);
 
         //Setup Actor Name/Properties
         foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
 
+        // Dialogue Setup 
         CurrentCharacterIndex = 0;
         TimeBuffer = 0;
         SpeedFactor = 1;
@@ -210,9 +217,11 @@ public class Storyteller : MonoBehaviour
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
         {
+            // Opacity of the mesh to zero
             for (int j = CurrentVertexIndexes[i]; j < textInfo.meshInfo[i].colors32.Length; j++)
                 textInfo.meshInfo[i].colors32[j].a = 0;
             textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
+
             DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
     }
@@ -221,8 +230,10 @@ public class Storyteller : MonoBehaviour
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
         {
+            // Updates the mesh vertices and colors
             textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
             textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
+
             DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
     }
@@ -251,8 +262,11 @@ public class Storyteller : MonoBehaviour
         float from = currentNCIPos;
         yield return Ease.Animate(0.2f, (x) =>
         {
+
             x = Mathf.Lerp(from, target, x);
             currentNCIPos = x;
+
+            // Animate the Next Chunk Indicator's opacity and Y position
             float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
             NextChunkIndicator.color = new Color(1, 1, 1, x);
             NextChunkIndicator.rectTransform.anchoredPosition = 5 * (1 - ease) * Vector2.down;
@@ -263,7 +277,10 @@ public class Storyteller : MonoBehaviour
     Coroutine currentNFRoutine = null;
     public void SetNameLabelText(string name)
     {
+        // Stop the existing name fade routine if it's running
         if (currentNFRoutine != null) StopCoroutine(currentNFRoutine);
+
+        // Start coroutine
         currentNFRoutine = StartCoroutine(NameLabelAnim(name));
     }
     IEnumerator NameLabelAnim(string name)
@@ -276,6 +293,7 @@ public class Storyteller : MonoBehaviour
         if (toAlpha > 0)
         {
             NameLabel.text = name;
+            // Match width to label's preferred width
             NameLabelHolder.sizeDelta = new(NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
         }
         if (fromAlpha == 0)
@@ -283,12 +301,22 @@ public class Storyteller : MonoBehaviour
             fromXPos = toXPos;
         }
 
+        // Fade in/out the Name Label 
         yield return Ease.Animate(0.2f, (x) =>
         {
+            //Animate the alpha
             float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
+
             float xPos = Mathf.Lerp(fromXPos, toXPos, ease);
-            NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new(xPos, 0.5f);
+
+            // Set anchor and pivot to the new X position (centered vertically)
+            Vector2 anchorAndPivot = new(xPos, 0.5f);
+            NameLabelHolder.anchorMin = anchorAndPivot;
+            NameLabelHolder.anchorMax = anchorAndPivot;
+            NameLabelHolder.pivot = anchorAndPivot;
+
+            //Animate the position
             NameLabelHolder.anchoredPosition = new(0, (1 - NameLabelGroup.alpha) * -5);
         });
     }
