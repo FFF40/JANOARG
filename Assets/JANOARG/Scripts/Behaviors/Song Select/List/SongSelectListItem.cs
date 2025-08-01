@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using System;
 using System.IO;
 
-public class SongSelectItem : MonoBehaviour
+public class SongSelectListItem : MonoBehaviour
 {
     public TMP_Text SongNameLabel;
     public TMP_Text SongArtistLabel;

@@ -14,24 +14,17 @@ public class SongSelectScreen : MonoBehaviour
     public static SongSelectScreen main;
 
     public Playlist Playlist;
-    public List<PlayableSong> SongList { get; private set; } = new();
+    public Dictionary<string, PlayableSong> SongList { get; private set; } = new();
 
     [Header("List View")]
-    public RectTransform BackgroundHolder;
-    public CanvasGroup BackgroundGroup;
-    [Space]
-    public SongSelectItem ItemSample;
-    public RectTransform ItemHolder;
-    public CanvasGroup ItemGroup;
-    public List<SongSelectItem> ItemList { get; private set; } = new();
-    public Graphic ItemTrack;
-    public Graphic ItemCursor;
+    public SongSelectListView ListView;
 
     [Header("Map View")]
     public MapManager MapManager;
     public RectTransform MapLerpItemHolder;
     [Space]
     public CanvasGroup MapUIGroup;
+    public Image MapCover;
     
     [Header("Song Selection")]
     public RectTransform SafeAreaHolder;
@@ -88,17 +81,9 @@ public class SongSelectScreen : MonoBehaviour
     public AudioClip SFXTickClip;
     public float SFXVolume;
 
+
     [Header("Data")]
-    public float ScrollOffset;
-    public float ScrollVelocity;
-    public float TargetScrollOffset;
-    float lastScrollOffset;
     public bool IsReady;
-    public bool IsDirty;
-    public bool IsPointerDown;
-    public bool IsTargetSongHidden;
-    public bool TargetSongHiddenTarget;
-    public float TargetSongOffset;
     public bool IsAnimating;
     public bool IsInit;
     public bool IsMapView = true;
@@ -135,88 +120,21 @@ public class SongSelectScreen : MonoBehaviour
         PreviewVolumeMulti = Common.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
         SFXVolume = Common.main.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
     }
-
+            
     public void Update()
     {
         if (!IsReady) return;
 
-        if (IsMapView)
-        {
-            TargetSongHiddenTarget = false;
-        }
-        else
-        {
-            if (IsPointerDown)
-            {
-                ScrollVelocity = (lastScrollOffset - ScrollOffset) / Time.deltaTime;
-                lastScrollOffset = ScrollOffset;
-            }
-            else
-            {
-                if (Mathf.Abs(ScrollVelocity) > 10)
-                {
-                    ScrollOffset -= ScrollVelocity * Time.deltaTime;
-                    ScrollVelocity *= Mathf.Pow(0.2f, Time.deltaTime);
-
-                    float minBound = ItemList[0].Position - 20;
-                    float maxBound = ItemList[^1].Position + 20;
-                    if (ScrollOffset < minBound)
-                    {
-                        ScrollOffset = minBound;
-                        ScrollVelocity = 0;
-                    }
-                    else if (ScrollOffset > maxBound)
-                    {
-                        ScrollOffset = maxBound;
-                        ScrollVelocity = 0;
-                    }
-
-                    UpdateListTarget();
-                    IsDirty = true;
-                }
-                else
-                {
-                    if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f)
-                    {
-                        ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
-                        IsDirty = true;
-                    }
-                    TargetSongHiddenTarget = false;
-                }
-            }
-
-            if (TargetSongHiddenTarget)
-            {
-                ItemCursor.color += new Color(0, 0, 0, (1 - ItemCursor.color.a) * Mathf.Pow(5e-3f, Time.deltaTime));
-            }
-            else
-            {
-                ItemCursor.color *= new Color(1, 1, 1, Mathf.Pow(.001f, Time.deltaTime));
-            }
-
-            if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden)
-            {
-                IsTargetSongHidden = TargetSongHiddenTarget;
-                if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
-                if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(ListTargetSongHideAnim());
-                else TargetSongAnim = StartCoroutine(ListTargetSongShowAnim());
-            }
-            if (IsDirty)
-            {
-                UpdateListItems();
-                IsDirty = false;
-            }
-        }
+        if (ListView) ListView.HandleUpdate();
 
         // Handle song preview
-
         float previewVolumeSpeed = 1;
         if (ReadyScreen.IsAnimating) previewVolumeSpeed = -0.5f;
         else if (CurrentPreviewClip != PreviewSource.clip) previewVolumeSpeed = -2;
         else if (!CurrentPreviewClip) previewVolumeSpeed = -2;
         else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded) previewVolumeSpeed = -1;
         else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume) previewVolumeSpeed = -1;
-        else if (IsTargetSongHidden) previewVolumeSpeed = -0.4f;
+        else if (ListView != null && ListView.IsTargetSongHidden) previewVolumeSpeed = -0.4f;
         PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
         PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
         if (PreviewVolume <= 0) 
@@ -226,6 +144,7 @@ public class SongSelectScreen : MonoBehaviour
                 if (!PreviewSource.clip) 
                 {
                     PreviewSource.clip = CurrentPreviewClip;
+                    PreviewSource.clip.LoadAudioData();
                     PreviewSource.Play();
                     PreviewSource.time = CurrentPreviewRange.x;
                 }
@@ -242,11 +161,13 @@ public class SongSelectScreen : MonoBehaviour
                 PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
             }
         }
-        
     }
 
     public IEnumerator InitPlaylist()
     {
+        // Before load
+        MapCover.color = Common.main.MainCamera.backgroundColor * new ColorFrag(a: 1);
+
         int index = 0;
         int pos = 0;
         MapManager.LoadMap();
@@ -261,11 +182,11 @@ public class SongSelectScreen : MonoBehaviour
                 continue;
             }
             PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
-            SongList.Add(song);
+            SongList.Add(songInfo.ID, song);
 
-            SongSelectItem item = Instantiate(ItemSample, ItemHolder);
+            SongSelectListItem item = Instantiate(ListView.ItemSample, ListView.ItemHolder);
             item.SetItem(songInfo, song, index, pos);
-            ItemList.Add(item);
+            ListView.ItemList.Add(item);
             index++;
             pos += 48;
         }
@@ -278,40 +199,12 @@ public class SongSelectScreen : MonoBehaviour
 
     public void UpdateListItems(bool cap = true)
     {
-        float scrollOfs = ScrollOffset;
-        if (cap) scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
-
-        foreach (SongSelectItem item in ItemList)
-        {
-            RectTransform rt = (RectTransform)item.transform;
-            rt.anchoredPosition = new Vector2(-.26795f, -1) * (item.Position + item.PositionOffset - scrollOfs);
-        }
-        ItemCursor.rectTransform.anchoredPosition = new(ItemCursor.rectTransform.anchoredPosition.x, scrollOfs - TargetScrollOffset);
-        if (!IsAnimating && TargetSongAnim == null)
-        {
-            float offset = scrollOfs - TargetSongOffset;
-            TargetSongCoverHolder.anchoredPosition = new(0, offset / 2);
-        }
+        ListView.UpdateListItems(this, cap);
     }
 
     public void UpdateListTarget() 
     {
-        float lastTarget = TargetScrollOffset;
-        float tsDist = float.PositiveInfinity;
-        foreach (SongSelectItem item in ItemList)
-        {
-            if (Mathf.Abs(item.Position - ScrollOffset) < tsDist) 
-            {
-                TargetScrollOffset = item.Position;
-                tsDist = Mathf.Abs(item.Position - ScrollOffset);
-            }
-            else break;
-        }
-        if (lastTarget != TargetScrollOffset) 
-        {
-            TargetSongHiddenTarget = true;
-            SFXSource.PlayOneShot(SFXTickClip, SFXVolume);
-        }
+        ListView.UpdateListTarget();
     }
 
     public void UpdateButtons()
@@ -334,16 +227,16 @@ public class SongSelectScreen : MonoBehaviour
     IEnumerator ToggleViewAnim()
     {
         IsAnimating = true;
-        ItemGroup.blocksRaycasts = !IsMapView;
+        ListView.ItemGroup.blocksRaycasts = !IsMapView;
         if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
 
         // Animate map icons to list icons
-        var mapListItems = MapManager.main.GetMapToListItems(ItemList);
+        var mapListItems = MapManager.main.GetMapToListItems(ListView.ItemList);
         float lerpFrom = IsMapView ? 1 : 0;
         float lerpTo = 1 - lerpFrom;
         IEnumerator MapCoroutine()
         {
-            foreach ((SongMapItemUI mapItem, SongSelectItem listItem) in mapListItems)
+            foreach ((SongMapItemUI mapItem, SongSelectListItem listItem) in mapListItems)
             {
                 listItem.CoverBorder.gameObject.SetActive(false);
                 mapItem.transform.SetParent(MapLerpItemHolder);
@@ -351,13 +244,13 @@ public class SongSelectScreen : MonoBehaviour
             yield return Ease.Animate(0.5f, (x) =>
             {
                 float ease1 = Mathf.Lerp(lerpFrom, lerpTo, Ease.Get(x, EaseFunction.Quartic, EaseMode.Out));
-                foreach ((SongMapItemUI mapItem, SongSelectItem listItem) in mapListItems)
+                foreach ((SongMapItemUI mapItem, SongSelectListItem listItem) in mapListItems)
                 {
                     mapItem.UpdatePosition();
                     mapItem.transform.position = Vector3.Lerp(mapItem.transform.position, listItem.CoverImage.transform.position, ease1);
                 }
             });
-            foreach ((SongMapItemUI mapItem, SongSelectItem listItem) in mapListItems)
+            foreach ((SongMapItemUI mapItem, SongSelectListItem listItem) in mapListItems)
             {
                 listItem.CoverBorder.gameObject.SetActive(true);
                 mapItem.transform.SetParent(MapManager.ItemUIHolder);
@@ -366,34 +259,23 @@ public class SongSelectScreen : MonoBehaviour
         Coroutine mapCoroutine = StartCoroutine(MapCoroutine());
         
         // Animate bottom buttons
-        IEnumerator NavCoroutine()
-        {
-            yield return Ease.Animate(0.2f, (x) =>
-            {
-                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                LerpActions(1 - ease1);
-            });
-            UpdateButtons();
-            yield return Ease.Animate(0.2f, (x) =>
-            {
-                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                LerpActions(ease1);
-            });
-        }
-        Coroutine navCoroutine = StartCoroutine(NavCoroutine());
+        Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
         
         // Animate the cover
         IEnumerator CoverCoroutine()
         {
-            SongSelectItem targetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+            SongSelectListItem targetSong = ListView.ItemList.Find(item => ListView.TargetScrollOffset == item.Position);
             if (!MapManager.SongMapItemUIsByID.TryGetValue(targetSong.MapInfo.ID, out SongMapItemUI target)) yield break;
             target.CoverImage.gameObject.SetActive(false);
-            yield return Ease.Animate(0.5f, (x) =>
+            TargetSongCoverHolder.gameObject.SetActive(true);
+            yield return Ease.Animate(lerpFrom == 0 ? 0.6f : 0.5f, (x) =>
             {
-                float ease1 = Mathf.Lerp(lerpFrom, lerpTo, Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
-                TargetSongCoverHolder.gameObject.SetActive(ease1 > 0);
+                float ease1 = lerpFrom == 0
+                    ? Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.InOut)
+                    : 1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
                 LerpCover(ease1, target.CoverImage.transform as RectTransform);
             });
+            TargetSongCoverHolder.gameObject.SetActive(lerpTo > 0);
             target.CoverImage.gameObject.SetActive(true);
         }
         Coroutine coverCoroutine = null;
@@ -410,7 +292,7 @@ public class SongSelectScreen : MonoBehaviour
             {
                 float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 MapUIGroup.alpha = ease1;
-                LerpListView(1 - ease1);
+                ListView.LerpListView(1 - ease1);
                 LerpInfo(1 - ease1);
                 LerpDifficulty(1 - ease1);
             });
@@ -420,64 +302,43 @@ public class SongSelectScreen : MonoBehaviour
             // In list view 
 
             // Update list item positions
-            TargetSongOffset = TargetScrollOffset;
-            SongSelectItem targetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+            ListView.TargetSongOffset = ListView.TargetScrollOffset;
+            SongSelectListItem targetSong = ListView.ItemList.Find(item => ListView.TargetScrollOffset == item.Position);
             if (targetSong)
             {
                 SetTargetSong(targetSong.MapInfo.ID, targetSong.Song);
                 var songItem = targetSong.MapInfo;
-                yield return SetCover(songItem, targetSong);
+                yield return SetCover(songItem, targetSong.Song);
                 coverCoroutine = StartCoroutine(CoverCoroutine());
             }
 
             // Update list item positions
-            TargetSongHiddenTarget = IsTargetSongHidden = false;
+            ListView.TargetSongHiddenTarget = ListView.IsTargetSongHidden = false;
             coverLerp = 1;
-            foreach (SongSelectItem item in ItemList)
+            foreach (SongSelectListItem item in ListView.ItemList)
             {
-                item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
+                item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
             }
-            UpdateListItems();
+            ListView.UpdateListItems(this);
 
             // Animate
             yield return Ease.Animate(0.6f, (x) =>
             {
-                float ease1 = Ease.Get(x * 2, EaseFunction.Cubic, EaseMode.Out);
+                float ease1 = Ease.Get(x * 3, EaseFunction.Cubic, EaseMode.Out);
                 MapUIGroup.alpha = 1 - ease1;
-                LerpListView(ease1);
+                ListView.LerpListView(ease1);
 
-                float ease2 = Ease.Get(x * 2 - 1, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(ease2);
+                float ease2 = Ease.Get(x * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
                 LerpDifficulty(ease2);
+                LerpInfo(ease2);
             });
         }
 
         yield return mapCoroutine;
         yield return navCoroutine;
-        yield return coverCoroutine;
+        TargetSongAnim = coverCoroutine;
 
         IsAnimating = false;
-    }
-
-    public void OnListPointerDown(BaseEventData data)
-    {
-        lastScrollOffset = ScrollOffset;
-        ScrollVelocity = 0;
-        IsPointerDown = true;
-    }
-
-    public void OnListDrag(BaseEventData data) 
-    {
-        ScrollOffset += ((PointerEventData)data).delta.y / transform.lossyScale.x;
-        UpdateListTarget();
-        IsDirty = true;
-    }
-
-    public void OnListPointerUp(BaseEventData data) 
-    {
-        if (ItemList.Count < 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
-        else ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
-        IsPointerDown = false;
     }
 
     public void SetTargetSong(string songID, PlayableSong targetSong)
@@ -527,13 +388,13 @@ public class SongSelectScreen : MonoBehaviour
 
     public IEnumerator ListTargetSongShowAnim()
     {
-        TargetSongOffset = TargetScrollOffset;
-        SongSelectItem targetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+        ListView.TargetSongOffset = ListView.TargetScrollOffset;
+        SongSelectListItem targetSong = ListView.ItemList.Find(item => ListView.TargetScrollOffset == item.Position);
         if (targetSong)
         {
             SetTargetSong(targetSong.MapInfo.ID, targetSong.Song);
             var songItem = targetSong.MapInfo;
-            yield return SetCover(songItem, targetSong);
+            yield return SetCover(songItem, targetSong.Song);
         }
 
         yield return Ease.Animate(.9f, a =>
@@ -549,30 +410,30 @@ public class SongSelectScreen : MonoBehaviour
             LerpUI(lerp3);
 
             float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
-            foreach (SongSelectItem item in ItemList)
+            foreach (SongSelectListItem item in ListView.ItemList)
             {
-                item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1)
+                item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1)
                      * (lerp2 * .5f + lerp4 * .5f);
             }
-            IsDirty = true;
+            ListView.IsDirty = true;
         });
 
-        if (TargetSongOffset != TargetScrollOffset)
+        if (ListView.TargetSongOffset != ListView.TargetScrollOffset)
         {
-            IsTargetSongHidden = true;
+            ListView.IsTargetSongHidden = true;
             StartCoroutine(ListTargetSongHideAnim());
         }
 
         TargetSongAnim = null;
     }
 
-    public IEnumerator SetCover(PlaylistSong songItem, SongSelectItem targetSong)
+    public IEnumerator SetCover(PlaylistSong songItem, PlayableSong targetSong)
     {
-        TargetSongCoverBackground.color = targetSong.Song.Cover.BackgroundColor;
+        TargetSongCoverBackground.color = targetSong.Cover.BackgroundColor;
         TargetSongCoverHolder.gameObject.SetActive(false);
-        if (CurrentCover != targetSong.Song.Cover) 
+        if (CurrentCover != targetSong.Cover) 
         {
-            CurrentCover = targetSong.Song.Cover;
+            CurrentCover = targetSong.Cover;
             foreach (var layer in TargetSongCoverLayers) 
             {
                 Resources.UnloadAsset(layer.Image.texture);
@@ -625,17 +486,84 @@ public class SongSelectScreen : MonoBehaviour
 
             float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
             LerpCoverList((1 - lerp2) * lerpCoverStart);
-            foreach (SongSelectItem item in ItemList)
+            foreach (SongSelectListItem item in ListView.ItemList)
             {
-                item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
+                item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
             }
-            IsDirty = true;
+            ListView.IsDirty = true;
         });
         TargetSongCoverHolder.gameObject.SetActive(false);
 
         TargetSongAnim = null;
     }
-    
+
+    public IEnumerator MapTargetSongShowAnim(SongMapItem target)
+    {
+        TargetMapItem = target;
+        PlayableSong song = SongList[target.TargetID];
+        SetTargetSong(target.TargetID, song);
+        LerpCover(0, target.ItemUI.CoverImage.rectTransform);
+        yield return SetCover(target.Target, song);
+        target.ItemUI.CoverImage.gameObject.SetActive(false);
+
+        Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
+
+        MapUIGroup.blocksRaycasts = MapUIGroup.interactable = false;
+
+        yield return Ease.Animate(.9f, a =>
+        {
+            float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
+            LerpInfo(lerp);
+            LerpDifficulty(lerp);
+
+            float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
+                * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+            LerpCover(lerp2, target.ItemUI.CoverImage.rectTransform);
+
+            float lerp3 = Ease.Get(a * 3, EaseFunction.Cubic, EaseMode.InOut);
+            Common.main.MainCamera.transform.position *= new Vector3Frag(z: -lerp3 - 10);
+            MapUIGroup.alpha = 1 - lerp3;
+            MapUIGroup.transform.localScale = Vector3.one * (1 - lerp3 * 0.1f);
+        });
+
+        yield return navCoroutine;
+
+        TargetSongAnim = null;
+    }
+
+    public IEnumerator MapTargetSongHideAnim()
+    {
+        SongMapItem target = (SongMapItem)TargetMapItem;
+        var coverTarget = target.ItemUI.CoverImage.rectTransform;
+        TargetMapItem = null;
+
+        Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
+
+        yield return Ease.Animate(.6f, a =>
+        {
+            float lerp = Ease.Get(a * 2, EaseFunction.Cubic, EaseMode.Out);
+            LerpInfo(1 - lerp);
+            LerpDifficulty(1 - lerp);
+
+            float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
+            LerpCover(1 - lerp2, coverTarget);
+
+            float lerp3 = Ease.Get(a * 2, EaseFunction.Cubic, EaseMode.InOut);
+            Common.main.MainCamera.transform.position *= new Vector3Frag(z: lerp3 - 11);
+            MapUIGroup.alpha = lerp3;
+            MapUIGroup.transform.localScale = Vector3.one * (1 - (1 - lerp3) * 0.1f);
+        });
+
+        yield return navCoroutine;
+
+        TargetSongCoverHolder.gameObject.SetActive(false);
+        target.ItemUI.CoverImage.gameObject.SetActive(true);
+        MapUIGroup.blocksRaycasts = MapUIGroup.interactable = true;
+
+        TargetSongAnim = null;
+    }
+
+
     public void ChangeDiff(SongSelectDifficulty target)
     {
         if (IsAnimating || TargetDifficulty == target) return;
@@ -649,7 +577,7 @@ public class SongSelectScreen : MonoBehaviour
         SongSelectDifficulty oldTarget = TargetDifficulty;
         TargetDifficulty = target;
 
-        foreach (var item in ItemList) 
+        foreach (var item in ListView.ItemList)
         {
             item.SetDifficulty(GetNearestDifficulty(item.Song.Charts));
         }
@@ -671,6 +599,21 @@ public class SongSelectScreen : MonoBehaviour
 
     }
 
+    IEnumerator NavUpdateAnim()
+    {
+        yield return Ease.Animate(0.2f, (x) =>
+        {
+            float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+            LerpActions(1 - ease1);
+        });
+        UpdateButtons();
+        yield return Ease.Animate(0.2f, (x) =>
+        {
+            float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+            LerpActions(ease1);
+        });
+    }
+
     public void SetScoreInfo(SongSelectDifficulty target)
     {
         TargetDifficultyName.text = target.Chart.DifficultyName;
@@ -683,8 +626,8 @@ public class SongSelectScreen : MonoBehaviour
     public void LerpCoverList(float a) 
     {
         coverLerp = a;
-        float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
-        float offset = scrollOfs - TargetSongOffset;
+        float scrollOfs = Mathf.Clamp(ListView.ScrollOffset, ListView.ItemList[0].Position - 20, ListView.ItemList[^1].Position + 20);
+        float offset = scrollOfs - ListView.TargetSongOffset;
         TargetSongCoverHolder.anchorMin = Vector2.Lerp(new(0, .5f), new(0, .5f), a);
         TargetSongCoverHolder.anchorMax = Vector2.Lerp(new(0, .5f), new(1, .5f), a);
         TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new(180 + .26795f * offset, offset), new(0, offset / 2), a);
@@ -747,12 +690,20 @@ public class SongSelectScreen : MonoBehaviour
         if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
         StartCoroutine(LaunchAnim());
     }
+    public void Return()
+    {
+        if (TargetMapItem is SongMapItem)
+        {
+            if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+            TargetSongAnim = StartCoroutine(MapTargetSongHideAnim());
+        }
+    }
 
     public IEnumerator LaunchAnim()
     {
         IsAnimating = true;
 
-        string[] launchTextList = new []{
+        string[] launchTextList = new[]{
             "LET'S GO",
             "LET'S DO THIS",
             "HERE WE GO",
@@ -761,35 +712,35 @@ public class SongSelectScreen : MonoBehaviour
             "NEXT DESTINATION",
         };
         LaunchText.text = launchTextList[Random.Range(0, launchTextList.Length)];
-        
+
         LerpInfo(0);
 
-        SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
+        SongSelectListItem TargetSong = ListView.ItemList.Find(item => ListView.TargetScrollOffset == item.Position);
         TargetSongCoverLayerHolder.gameObject.SetActive(false);
         TargetSongCoverBackground.color = TargetSong.Song.BackgroundColor;
 
-        yield return Ease.Animate(0.8f, a => {
+        yield return Ease.Animate(0.8f, a =>
+        {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
             LerpUI(1 - lerp);
-            foreach (SongSelectItem item in ItemList) item.SetVisibility(1 - lerp);
+            foreach (SongSelectListItem item in ListView.ItemList) item.SetVisibility(1 - lerp);
 
             float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
-            float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
-            float offset = scrollOfs - TargetSongOffset;
+            float scrollOfs = Mathf.Clamp(ListView.ScrollOffset, ListView.ItemList[0].Position - 20, ListView.ItemList[^1].Position + 20);
+            float offset = scrollOfs - ListView.TargetSongOffset;
             TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp2));
             TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp2));
             TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp2));
             TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: 128 * (1 - lerp2));
-            IsDirty = true;
-            
+            ListView.IsDirty = true;
+
             float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
             rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp3, rt(LaunchTextHolder).sizeDelta.y);
             LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
-            TargetSongCoverFlash.color = new (1, 1, 1, 1 - lerp3);
+            TargetSongCoverFlash.color = new(1, 1, 1, 1 - lerp3);
         });
 
-        var songItem = Playlist.Songs[SongList.IndexOf(TargetSong.Song)];
-        PlayerScreen.TargetSongPath = $"Songs/{songItem.ID}/{songItem.ID}";
+        PlayerScreen.TargetSongPath = $"Songs/{TargetSong.MapInfo.ID}/{TargetSong.MapInfo.ID}";
         PlayerScreen.TargetSong = TargetSong.Song;
         PlayerScreen.TargetChartMeta = TargetDifficulty.Chart;
         Common.main.MainCamera.backgroundColor = TargetSong.Song.BackgroundColor;
@@ -797,22 +748,13 @@ public class SongSelectScreen : MonoBehaviour
 
         yield return new WaitForSeconds(2);
 
-        Common.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
+        Common.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () =>
+        {
             SongSelectReadyScreen.main.EndLaunch();
         }, false);
         SceneManager.UnloadSceneAsync(MapManager.MapScene);
         SceneManager.UnloadSceneAsync("Song Select");
         Resources.UnloadUnusedAssets();
-    }
-
-    public void LerpListView(float a)
-    {
-        float xPos = 120 + 60 * a;
-        ItemTrack.color = new(1, 1, 1, a);
-        ItemGroup.alpha = BackgroundGroup.alpha = a;
-        ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ItemTrack.rectTransform.anchoredPosition.y);
-        BackgroundHolder.anchoredPosition = new(xPos, BackgroundHolder.anchoredPosition.y);
-        ItemHolder.anchoredPosition = new(xPos, BackgroundHolder.anchoredPosition.y);
     }
 
     public void LerpInfo(float a)
@@ -854,7 +796,7 @@ public class SongSelectScreen : MonoBehaviour
     {
         IsAnimating = true;
 
-        ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x;
+        ListView.ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x;
         UpdateListItems(false);
         UpdateButtons();
 
@@ -866,31 +808,34 @@ public class SongSelectScreen : MonoBehaviour
 
         yield return StartCoroutine(Ease.Animate(1, x =>
         {
+            float lerp1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+            cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
+            MapCover.color *= new ColorFrag(a: 1 - lerp1);
+
             if (IsMapView)
             {
-                float lerp1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
                 MapUIGroup.alpha = x * 1e10f;
                 MapUIGroup.transform.localScale = Vector3.one * lerp1;
                 MapManager.UpdateAllPositions();
-                cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
             }
             else
             {
-                ItemGroup.alpha = x * 1e10f;
-                float xPos = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-                ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(x * 3));
-                BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
-                ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ItemTrack.rectTransform.anchoredPosition.y);
-                BackgroundHolder.anchoredPosition = new(xPos, BackgroundHolder.anchoredPosition.y);
+                ListView.ItemGroup.alpha = x * 1e10f;
+                float xPos = 120 + 60 * lerp1;
+                ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(x * 3));
+                ListView.BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
+                ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+                ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
             }
 
-            ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
+
+            ListView.ScrollOffset = Screen.height / 2 / Common.main.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
             UpdateListItems(false);
             if (!IsReady && x > 0.6f)
             {
                 IsReady = true;
                 if (IsMapView) StartCoroutine(IntroShowMapUIAnim());
-                
+                else ListView.ItemGroup.interactable = ListView.ItemGroup.blocksRaycasts = ListView.IsTargetSongHidden = true;
             }
         }));
 

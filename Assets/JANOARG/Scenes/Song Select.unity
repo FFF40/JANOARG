@@ -2989,7 +2989,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 439665943}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1562277643}
+        m_TargetAssemblyTypeName: SongSelectScreen, Assembly-CSharp
+        m_MethodName: Return
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &439665943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3706,6 +3718,7 @@ MonoBehaviour:
   ItemUISamples:
   - {fileID: 3686334420043380740, guid: b9dc680138eecc9049b3c3a0cb7bf768, type: 3}
   ItemUIHolder: {fileID: 1221148511}
+  DragScale: 17.5
 --- !u!4 &532315936
 Transform:
   m_ObjectHideFlags: 0
@@ -4936,6 +4949,7 @@ GameObject:
   - component: {fileID: 879351030}
   - component: {fileID: 879351031}
   - component: {fileID: 879351032}
+  - component: {fileID: 879351033}
   m_Layer: 5
   m_Name: List
   m_TagString: Untagged
@@ -4990,8 +5004,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1562277643}
-          m_TargetAssemblyTypeName: SongSelectScreen, Assembly-CSharp
+        - m_Target: {fileID: 879351033}
+          m_TargetAssemblyTypeName: SongSelectListView, Assembly-CSharp
           m_MethodName: OnListPointerDown
           m_Mode: 0
           m_Arguments:
@@ -5006,8 +5020,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1562277643}
-          m_TargetAssemblyTypeName: SongSelectScreen, Assembly-CSharp
+        - m_Target: {fileID: 879351033}
+          m_TargetAssemblyTypeName: SongSelectListView, Assembly-CSharp
           m_MethodName: OnListPointerUp
           m_Mode: 0
           m_Arguments:
@@ -5022,8 +5036,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1562277643}
-          m_TargetAssemblyTypeName: SongSelectScreen, Assembly-CSharp
+        - m_Target: {fileID: 879351033}
+          m_TargetAssemblyTypeName: SongSelectListView, Assembly-CSharp
           m_MethodName: OnListDrag
           m_Mode: 0
           m_Arguments:
@@ -5043,9 +5057,36 @@ CanvasGroup:
   m_GameObject: {fileID: 879351027}
   m_Enabled: 1
   m_Alpha: 0
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!114 &879351033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879351027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85f37ed7f506d30cd80ef66ed24cbe95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BackgroundHolder: {fileID: 1850335546}
+  BackgroundGroup: {fileID: 1850335551}
+  ItemSample: {fileID: 1567076798739812424, guid: 70ce51dbf68132e49a34eb0db328beb2, type: 3}
+  ItemHolder: {fileID: 879351028}
+  ItemGroup: {fileID: 879351032}
+  ItemTrack: {fileID: 1149158469}
+  ItemCursor: {fileID: 1323845866}
+  ScrollOffset: 0
+  ScrollVelocity: 0
+  TargetScrollOffset: 0
+  IsDirty: 0
+  IsPointerDown: 0
+  IsTargetSongHidden: 0
+  TargetSongHiddenTarget: 0
+  TargetSongOffset: 0
 --- !u!1 &881946326
 GameObject:
   m_ObjectHideFlags: 0
@@ -5675,6 +5716,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1109661622}
   m_CullTransparentMesh: 1
+--- !u!1 &1114411599
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1114411600}
+  - component: {fileID: 1114411602}
+  - component: {fileID: 1114411601}
+  m_Layer: 5
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1114411600
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114411599}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1562277642}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1114411601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114411599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1114411602
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114411599}
+  m_CullTransparentMesh: 1
 --- !u!1 &1141668506
 GameObject:
   m_ObjectHideFlags: 0
@@ -5940,6 +6056,7 @@ GameObject:
   - component: {fileID: 1221148513}
   - component: {fileID: 1221148512}
   - component: {fileID: 1221148514}
+  - component: {fileID: 1221148515}
   m_Layer: 5
   m_Name: Map View
   m_TagString: Untagged
@@ -6016,6 +6133,67 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &1221148515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221148510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 5
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 532315935}
+          m_TargetAssemblyTypeName: MapManager, Assembly-CSharp
+          m_MethodName: OnMapDrag
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 532315935}
+          m_TargetAssemblyTypeName: MapManager, Assembly-CSharp
+          m_MethodName: OnMapPointerUp
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 12
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 532315935}
+          m_TargetAssemblyTypeName: MapManager, Assembly-CSharp
+          m_MethodName: OnMapPointerDown
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1223477971
 GameObject:
   m_ObjectHideFlags: 0
@@ -7104,6 +7282,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1114411600}
   - {fileID: 1221148511}
   - {fileID: 162131310}
   - {fileID: 231156583}
@@ -7127,16 +7306,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Playlist: {fileID: 11400000, guid: 8496bc59e6795a44785a16fe995ec357, type: 2}
-  BackgroundHolder: {fileID: 1850335546}
-  BackgroundGroup: {fileID: 1850335551}
-  ItemSample: {fileID: 1567076798739812424, guid: 70ce51dbf68132e49a34eb0db328beb2, type: 3}
-  ItemHolder: {fileID: 879351028}
-  ItemGroup: {fileID: 879351032}
-  ItemTrack: {fileID: 1149158469}
-  ItemCursor: {fileID: 1323845866}
+  ListView: {fileID: 879351033}
   MapManager: {fileID: 532315935}
   MapLerpItemHolder: {fileID: 1597500258}
   MapUIGroup: {fileID: 1221148514}
+  MapCover: {fileID: 1114411601}
   SafeAreaHolder: {fileID: 162131310}
   TargetSongInfoHolder: {fileID: 832619951}
   TargetSongInfoName: {fileID: 1887098833}
@@ -7175,18 +7349,10 @@ MonoBehaviour:
   SFXSource: {fileID: 2026222169}
   SFXTickClip: {fileID: 8300000, guid: 7913ced82b4f22b7f813f72287e1197f, type: 3}
   SFXVolume: 0
-  ScrollOffset: 0
-  ScrollVelocity: 0
-  TargetScrollOffset: 0
   IsReady: 0
-  IsDirty: 0
-  IsPointerDown: 0
-  IsTargetSongHidden: 1
-  TargetSongHiddenTarget: 1
-  TargetSongOffset: 0
   IsAnimating: 0
   IsInit: 0
-  IsMapView: 1
+  IsMapView: 0
   TargetMapItem: {fileID: 0}
 --- !u!1 &1576925517
 GameObject:
@@ -7335,7 +7501,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1597500259

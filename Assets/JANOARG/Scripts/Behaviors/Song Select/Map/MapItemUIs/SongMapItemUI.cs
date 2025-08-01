@@ -31,4 +31,9 @@ public class SongMapItemUI : MapItemUI<SongMapItem>
         Vector3 toPos = cover.position;
         (transform as RectTransform).position = Vector3.Lerp(fromPos, toPos, t);
     }
+
+    public void OnClick()
+    {
+        MapManager.main.SelectSong(Parent);
+    }
 }

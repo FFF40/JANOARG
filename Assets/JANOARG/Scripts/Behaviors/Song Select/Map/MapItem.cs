@@ -3,6 +3,8 @@ using UnityEngine;
 
 public abstract class MapItem : MonoBehaviour
 {
+    public float SafeCameraDistance = 100;
+
     protected void OnEnable()
     {
         MapManager.Items.Add(this);
