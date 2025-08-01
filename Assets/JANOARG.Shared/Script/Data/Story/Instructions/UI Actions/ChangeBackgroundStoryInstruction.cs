@@ -20,17 +20,18 @@ public class ChangeBackgroundInstruction : StoryInstruction
 
     public override IEnumerator OnBackgroundChange(Storyteller teller)
     {
-        //Fade Out
+        // Background opacity will be set to 0 before changing the background
         yield return Ease.Animate(FadeDuration, (a) =>
         {
             float lerp = Ease.Get(1-a, EaseFunction.Cubic, EaseMode.Out);
             teller.BackgroundImage.color = new Color(1f, 1f, 1f, lerp);   
         });
 
-        //Change Background
+        // Change Background
         if (teller.Constants.Backgrounds.Count == 0)
         {
-            teller.BackgroundImage.sprite = teller.Constants.Backgrounds[0].File;   //black screen         
+            // Black screen if there are no backgrounds set in the constants
+            teller.BackgroundImage.sprite = teller.Constants.Backgrounds[0].File;            
         }
         else
         {
@@ -38,7 +39,7 @@ public class ChangeBackgroundInstruction : StoryInstruction
             teller.BackgroundImage.sprite = bg.File;
         }
         
-        //Fade In
+        // Background opacity will be set to 1(fully visible) before changing the background
         yield return Ease.Animate(FadeDuration, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
