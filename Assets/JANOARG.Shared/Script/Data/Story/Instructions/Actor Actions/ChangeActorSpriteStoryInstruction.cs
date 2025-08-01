@@ -23,11 +23,11 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
         }
         else
         {
-            Debug.Log(Actors);
+            Debug.Log(Actors[0]);
 
             for (int i = 0; i < Actors.Count; i++)
             {
-                //Init
+                //Init 
                 var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[i]);
                 InitSpriteHandler(actor.Alias,teller);
                 ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);

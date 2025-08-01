@@ -28,17 +28,22 @@ public class Storyteller : MonoBehaviour
     // Top Bar
     public TMP_Text PlaceText;
     public TMP_Text TimeText;
-    [NonSerialized] public float MaxVolume;
+    public TMP_Text MusicCreditText;
+    
     [Space]
     // Background
     public Image BackgroundImage;
     [Space]
+    public CanvasGroup FullScreenNarrationGroup;
+    public TMP_Text FullScreenNarrationText;
+
+    [Space]
     // Audio
     public AudioSource BackgroundMusicPlayer;
     public AudioSource SoundEffectsPlayer;
-    public TMP_Text MusicCreditText;
+    [NonSerialized] public float MaxVolume;
     [Space]
-    //Actor Sprites
+    //Actors
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
     public List<ActorSpriteHandler> Actors;
@@ -64,6 +69,7 @@ public class Storyteller : MonoBehaviour
     [NonSerialized] public bool IsMeshDirty;
     [NonSerialized] public float TimeBuffer = 0;
     [NonSerialized] public int ActiveCoroutines = 0;
+
     [NonSerialized] public PlayerSettings Settings = new();
     public void Awake()
     {

@@ -27,6 +27,7 @@ public class ChangeBackgroundInstruction : StoryInstruction
             teller.BackgroundImage.color = new Color(1f, 1f, 1f, lerp);   
         });
 
+        //Change Background
         if (teller.Constants.Backgrounds.Count == 0)
         {
             teller.BackgroundImage.sprite = teller.Constants.Backgrounds[0].File;   //black screen         
@@ -34,7 +35,7 @@ public class ChangeBackgroundInstruction : StoryInstruction
         else
         {
             var bg = teller.Constants.Backgrounds.Find(x => x.Alias == TargetBackground);
-            teller.BackgroundImage.sprite = bg.File; 
+            teller.BackgroundImage.sprite = bg.File;
         }
         
         //Fade In

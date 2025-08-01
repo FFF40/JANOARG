@@ -296,7 +296,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 31.77
       objectReference: {fileID: 0}
     - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -336,7 +336,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 47.77
       objectReference: {fileID: 0}
     - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -492,7 +492,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &821665853
 RectTransform:
   m_ObjectHideFlags: 0
@@ -513,7 +513,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 523.63635, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 450, y: 197.83}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &821665854
 MonoBehaviour:
@@ -577,7 +577,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 49.03
       objectReference: {fileID: 0}
     - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -617,7 +617,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 65.03
       objectReference: {fileID: 0}
     - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -869,7 +869,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 49.03
       objectReference: {fileID: 0}
     - target: {fileID: 5723033679239276534, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -909,7 +909,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 65.03
       objectReference: {fileID: 0}
     - target: {fileID: 7886641996344578649, guid: 0b93b4b5736574b16b4ebff324bc5aa6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1234,13 +1234,14 @@ GameObject:
   - component: {fileID: 1321206344}
   - component: {fileID: 1321206346}
   - component: {fileID: 1321206345}
+  - component: {fileID: 1321206347}
   m_Layer: 0
   m_Name: Foreground Effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1321206344
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1299,6 +1300,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1321206343}
   m_CullTransparentMesh: 1
+--- !u!225 &1321206347
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1321206343}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1345503483
 GameObject:
   m_ObjectHideFlags: 0
@@ -1517,12 +1530,14 @@ MonoBehaviour:
   NameLabelHolder: {fileID: 1470953560}
   NameLabelGroup: {fileID: 1470953555}
   NextChunkIndicator: {fileID: 1685622515}
-  PlaceText: {fileID: 0}
-  TimeText: {fileID: 0}
+  PlaceText: {fileID: 1673875450}
+  TimeText: {fileID: 1395594042}
+  MusicCreditText: {fileID: 0}
   BackgroundImage: {fileID: 1418348633}
+  FullScreenNarrationGroup: {fileID: 1321206347}
+  FullScreenNarrationText: {fileID: 2053507243}
   BackgroundMusicPlayer: {fileID: 1427275886}
   SoundEffectsPlayer: {fileID: 1773869744}
-  MusicCreditText: {fileID: 0}
   ActorHolder: {fileID: 1220507274}
   ActorSpriteItem: {fileID: 190559558757694629, guid: 9d8279edc8e67be728e0567c8795e0c6, type: 3}
   Actors: []

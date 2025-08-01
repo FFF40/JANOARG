@@ -32,7 +32,8 @@ public class ActorSpriteHandler : MonoBehaviour
         // // Then scale the sprite based on the screen res
         // // 
 
-        // Current.sprite = sprite;
+        //Change the sprite
+        Current.sprite = sprite;
 
         //I need to find a way to make the image scale based on safe area stuff
         Current.SetNativeSize();
