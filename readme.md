@@ -5,7 +5,11 @@
     <br/><br/>
 </div>
 
+<details><summary>Previews <i>(epilepsy warning!)</i></summary>
+    
 ![Looks, name, and chart not final](Previews/preview.gif)
+
+</details>
 
 ## How to Make Charts
 * Download the Standalone Chartmaker [(in releases)](https://github.com/ducdat0507/JANOARG/releases)
