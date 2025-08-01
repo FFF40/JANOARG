@@ -17,5 +17,4 @@
 * Unity Editor 2022.3
 
 ## Contact
-We have a [Discord server](https://discord.gg/vXJTPFQBHm) for discussions/official songlist submission
-(guys i just need one song so i can make a proper preview video)
+[FFF40 Studios Discord server](https://discord.gg/vXJTPFQBHm)
