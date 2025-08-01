@@ -12,10 +12,8 @@ public class DelayStoryInstruction : StoryInstruction
     [StoryTag("wait")]
     public DelayStoryInstruction (string duration) 
     {
-        var match = Regex.Match(duration, @"^(?<number>\d+(?:\.\d+)?)(?<unit>s|x|)$");
-        if (!match.Success) throw new ArgumentException("Duration value is invalid");
-        Duration = Convert.ToSingle(match.Groups["number"].Value);
-        ScaleWithCharacterDuration = match.Groups["unit"].Value != "s";
+        Duration = ParseDuration(duration);
+        ScaleWithCharacterDuration = isDurationScaleable(duration);
     }
 
     public override IEnumerator OnTextReveal(Storyteller teller)
