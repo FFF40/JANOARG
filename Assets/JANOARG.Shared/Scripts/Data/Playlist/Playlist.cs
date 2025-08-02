@@ -7,7 +7,11 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "New Playlist", menuName = "JANOARG/Playlist", order = 100)]
 public class Playlist : ScriptableObject
 {
+    [Header("Metadata")]
     public string MapName;
+    public Color BackgroundColor = Color.black;
+
+    [Header("Items")]
     [FormerlySerializedAs("Items")]
     public PlaylistSong[] Songs;
     public PlaylistReference[] Playlists;

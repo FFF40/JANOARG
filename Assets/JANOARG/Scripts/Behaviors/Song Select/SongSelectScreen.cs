@@ -87,9 +87,11 @@ public class SongSelectScreen : MonoBehaviour
     public bool IsAnimating;
     public bool IsInit;
     public bool IsMapView = true;
-    public MapItem TargetMapItem;
     public Coroutine TargetSongAnim;
 
+    [NonSerialized] public MapItem TargetMapItem;
+    [NonSerialized] public PlayableSong TargetSong;
+    [NonSerialized] public string TargetSongID;
     [NonSerialized] public Cover CurrentCover;
 
     public void Awake()
@@ -167,6 +169,7 @@ public class SongSelectScreen : MonoBehaviour
     {
         // Before load
         MapCover.color = Common.main.MainCamera.backgroundColor * new ColorFrag(a: 1);
+        Common.main.MainCamera.backgroundColor = RenderSettings.fogColor = Playlist.BackgroundColor;
 
         int index = 0;
         int pos = 0;
@@ -343,6 +346,8 @@ public class SongSelectScreen : MonoBehaviour
 
     public void SetTargetSong(string songID, PlayableSong targetSong)
     {
+        TargetSongID = songID;
+        TargetSong = targetSong;
         TargetSongInfoName.text = targetSong.SongName;
         TargetSongInfoArtist.text = targetSong.SongArtist;
 
@@ -536,6 +541,7 @@ public class SongSelectScreen : MonoBehaviour
         SongMapItem target = (SongMapItem)TargetMapItem;
         var coverTarget = target.ItemUI.CoverImage.rectTransform;
         TargetMapItem = null;
+        CurrentPreviewClip = null;
 
         Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
 
@@ -647,7 +653,7 @@ public class SongSelectScreen : MonoBehaviour
         TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4 - SafeAreaHolder.sizeDelta.x, 128), a);
         TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
         TargetSongCoverLayerHolder.anchoredPosition = new (-4 * a, 0);
-        UpdateCover();
+        if (CurrentCover != null) UpdateCover();
     }
 
     public void UpdateCover()
@@ -715,35 +721,42 @@ public class SongSelectScreen : MonoBehaviour
 
         LerpInfo(0);
 
-        SongSelectListItem TargetSong = ListView.ItemList.Find(item => ListView.TargetScrollOffset == item.Position);
         TargetSongCoverLayerHolder.gameObject.SetActive(false);
-        TargetSongCoverBackground.color = TargetSong.Song.BackgroundColor;
+        TargetSongCoverBackground.color = TargetSong.BackgroundColor;
+
+        float currentCameraZ = 0;
 
         yield return Ease.Animate(0.8f, a =>
         {
             float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
             LerpUI(1 - lerp);
-            foreach (SongSelectListItem item in ListView.ItemList) item.SetVisibility(1 - lerp);
+            if (!IsMapView) ListView.LerpListView(1 - lerp);
 
-            float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
+            float lerp2 = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+            float targetCameraZ = lerp2 * 5;
+            Common.main.MainCamera.transform.Translate(Vector3.back * (targetCameraZ - currentCameraZ));
+            currentCameraZ = targetCameraZ;
+
+            float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
             float scrollOfs = Mathf.Clamp(ListView.ScrollOffset, ListView.ItemList[0].Position - 20, ListView.ItemList[^1].Position + 20);
             float offset = scrollOfs - ListView.TargetSongOffset;
-            TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp2));
-            TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp2));
-            TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp2));
-            TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: 128 * (1 - lerp2));
+            TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp3));
+            TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp3));
+            TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp3));
+            TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: (128 - Mathf.Pow(40 * lerp2, 0.5f)) * (1 - lerp3));
+            Common.main.MainCamera.fieldOfView = 60 + 60 * lerp3;
             ListView.IsDirty = true;
 
-            float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
-            rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp3, rt(LaunchTextHolder).sizeDelta.y);
-            LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
-            TargetSongCoverFlash.color = new(1, 1, 1, 1 - lerp3);
+            float lerp4 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
+            rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp4, rt(LaunchTextHolder).sizeDelta.y);
+            LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp3 * 2;
+            TargetSongCoverFlash.color = new(1, 1, 1, 1 - lerp4);
         });
 
-        PlayerScreen.TargetSongPath = $"Songs/{TargetSong.MapInfo.ID}/{TargetSong.MapInfo.ID}";
-        PlayerScreen.TargetSong = TargetSong.Song;
+        PlayerScreen.TargetSongPath = $"Songs/{TargetSongID}/{TargetSongID}";
+        PlayerScreen.TargetSong = TargetSong;
         PlayerScreen.TargetChartMeta = TargetDifficulty.Chart;
-        Common.main.MainCamera.backgroundColor = TargetSong.Song.BackgroundColor;
+        Common.main.MainCamera.backgroundColor = TargetSong.BackgroundColor;
         ReadyScreen.BeginLaunch();
 
         yield return new WaitForSeconds(2);
@@ -810,6 +823,7 @@ public class SongSelectScreen : MonoBehaviour
         {
             float lerp1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
             cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
+            Common.main.MainCamera.fieldOfView = 120 - 60 * lerp1;
             MapCover.color *= new ColorFrag(a: 1 - lerp1);
 
             if (IsMapView)

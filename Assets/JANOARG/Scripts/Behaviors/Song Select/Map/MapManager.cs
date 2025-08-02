@@ -53,7 +53,7 @@ public class MapManager : MonoBehaviour
     
     public void Update()
     {
-        if (SongSelectScreen.main.IsMapView)
+        if (IsReady && SongSelectScreen.main.IsMapView)
         {
             if (IsPointerDown)
             {
@@ -70,15 +70,18 @@ public class MapManager : MonoBehaviour
                     cameraPos += ScrollVelocity * Time.deltaTime;
                     ScrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
                 }
-                
+
                 // Snap camera to the nearest map item
-                Vector2 closestItemPosition = ((RectTransform)closestItem.transform).anchoredPosition;
-                float closestItemDistance = closestItemPosition.magnitude;
-                if (closestItemDistance >= closestItem.Parent.SafeCameraDistance)
+                if (closestItem)
                 {
-                    ScrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
-                    Vector2 moveOffset = closestItemPosition.normalized * (closestItemDistance - closestItem.Parent.SafeCameraDistance + 0.01f);
-                    cameraPos += moveOffset * ((1 - Mathf.Pow(1e-3f, Time.deltaTime)) / DragScale);
+                    Vector2 closestItemPosition = ((RectTransform)closestItem.transform).anchoredPosition;
+                    float closestItemDistance = closestItemPosition.magnitude;
+                    if (closestItemDistance >= closestItem.Parent.SafeCameraDistance)
+                    {
+                        ScrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
+                        Vector2 moveOffset = closestItemPosition.normalized * (closestItemDistance - closestItem.Parent.SafeCameraDistance + 0.01f);
+                        cameraPos += moveOffset * ((1 - Mathf.Pow(1e-3f, Time.deltaTime)) / DragScale);
+                    }
                 }
             }
         }

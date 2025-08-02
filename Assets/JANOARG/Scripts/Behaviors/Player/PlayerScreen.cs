@@ -125,7 +125,6 @@ public class PlayerScreen : MonoBehaviour
         SongArtistLabel.text = TargetSong.SongArtist;
         DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
         DifficultyLabel.text = TargetChartMeta.DifficultyLevel;
-        
 
         string path = Path.Combine(Path.GetDirectoryName(TargetSongPath), TargetChartMeta.Target);
         Debug.Log(path);
@@ -186,13 +185,15 @@ public class PlayerScreen : MonoBehaviour
 
         float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
 
+        Common.main.MainCamera.fieldOfView = Pseudocamera.fieldOfView;
+
         for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
         {
             LanePlayer player = Instantiate(LaneSample, Holder);
             player.Original = TargetChart.Data.Lanes[a];
             player.Current = CurrentChart.Lanes[a];
             LaneGroupPlayer group = null;
-            if (!string.IsNullOrEmpty(player.Current.Group)) 
+            if (!string.IsNullOrEmpty(player.Current.Group))
             {
                 group = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
                 player.transform.SetParent(group.transform);
@@ -213,7 +214,7 @@ public class PlayerScreen : MonoBehaviour
                     if (!float.IsNaN(hit.FlickDirection)) TotalExScore += 1;
                 }
 
-                if (time != hit.Offset) 
+                if (time != hit.Offset)
                 {
                     CameraController camera = (CameraController)TargetChart.Data.Camera.Get(hit.Offset);
                     Pseudocamera.transform.position = camera.CameraPivot;
@@ -225,7 +226,7 @@ public class PlayerScreen : MonoBehaviour
                     startPos = Quaternion.Euler(lane.Rotation) * step.StartPos + lane.Position;
                     endPos = Quaternion.Euler(lane.Rotation) * step.EndPos + lane.Position;
                     LaneGroupPlayer gp = group;
-                    while (gp) 
+                    while (gp)
                     {
                         LaneGroup laneGroup = (LaneGroup)gp.Original.Get(hit.Offset);
                         startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
@@ -237,7 +238,8 @@ public class PlayerScreen : MonoBehaviour
                 HitObject h = (HitObject)hit.Get(hit.Offset);
                 Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position));
                 Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.Lerp(startPos, endPos, h.Position + hit.Length));
-                player.HitCoords.Add(new HitScreenCoord {
+                player.HitCoords.Add(new HitScreenCoord
+                {
                     Position = (hitStart + hitEnd) / 2,
                     Radius = Vector2.Distance(hitStart, hitEnd) / 2 + dpi * .2f,
                 });
