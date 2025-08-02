@@ -61,7 +61,7 @@ public class HitPlayer : MonoBehaviour
     public void UpdateSelf(float time, float beat, bool forceDirty = false)
     {
         if (Current != null) Current.Advance(beat);
-        else Current = (HitObject)Original.Get(beat);
+        else Current = (HitObject)Original.GetStoryboardableObject(beat);
 
         if (Current.IsDirty || forceDirty || IsProcessed) 
         {

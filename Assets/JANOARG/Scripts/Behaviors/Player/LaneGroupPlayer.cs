@@ -8,13 +8,15 @@ public class LaneGroupPlayer : MonoBehaviour
     public LaneGroup Current;
 
     public LaneGroupPlayer Parent;
-
+    
     public void UpdateSelf(float time, float beat)
     {
-        if (Current != null) Current.Advance(beat);
-        else Current = (LaneGroup)Original.Get(beat);
-
-        transform.localPosition = Current.Position;
+        if (Current != null) 
+            Current.Advance(beat);
+        else 
+            Current = (LaneGroup)Original.Get(beat);
+        
+        transform.localPosition    = Current.Position;
         transform.localEulerAngles = Current.Rotation;
     }
 }

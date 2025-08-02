@@ -6,6 +6,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.IO;
 using System;
+using System.Linq;
+using UnityEngine.Serialization;
 
 public class PlayerScreen : MonoBehaviour
 {
@@ -76,7 +78,7 @@ public class PlayerScreen : MonoBehaviour
     [Header("Data")]
     public bool IsReady;
     public bool IsPlaying;
-    public bool HasPlayedBefore;
+    [FormerlySerializedAs("HasPlayedBefore")] public bool AlreadyInitialised;
     public float CurrentTime = -5;
     [Space]
     public float TotalExScore = 0;
@@ -109,6 +111,8 @@ public class PlayerScreen : MonoBehaviour
     public PlayerSettings Settings = new();
 
 
+    List<Lane> _laneQueues;
+    List<LaneGroup> _laneGroupQueues;
 
     [NonSerialized]
     public float ScaledExtraRadius;
@@ -131,10 +135,11 @@ public class PlayerScreen : MonoBehaviour
 
     public IEnumerator LoadChart()
     {
-        SongNameLabel.text = TargetSong.SongName;
-        SongArtistLabel.text = TargetSong.SongArtist;
+        SongNameLabel.text       = TargetSong.SongName;
+        SongArtistLabel.text     = TargetSong.SongArtist;
+        
         DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
-        DifficultyLabel.text = TargetChartMeta.DifficultyLevel;
+        DifficultyLabel.text     = TargetChartMeta.DifficultyLevel;
         
 
         string path = Path.Combine(Path.GetDirectoryName(TargetSongPath), TargetChartMeta.Target);
@@ -154,122 +159,201 @@ public class PlayerScreen : MonoBehaviour
     {
         CurrentChart = TargetChart.Data.DeepClone();
         HitObjectHistory = new();
-
-        if (HasPlayedBefore) 
+        
+        // Player retry reinitialisation
+        if (AlreadyInitialised) 
         {
-            TotalExScore = CurrentExScore = 0;
-            PerfectCount = GoodCount = BadCount = Combo = MaxCombo = TotalCombo = HitsRemaining = 0;
+            TotalExScore = 
+                CurrentExScore = 0;
+            
+            PerfectCount = 
+                GoodCount = 
+                    BadCount = 
+                        Combo = 
+                            MaxCombo = 
+                                TotalCombo = 
+                                    HitsRemaining = 0;
+            
             ScoreCounter.SetNumber(0);
             SongProgress.value = 0;
 
-            for (int a = 0; a < LaneStyles.Count; a++) LaneStyles[a].Update(CurrentChart.Palette.LaneStyles[a]);
-            for (int a = 0; a < HitStyles.Count; a++) HitStyles[a].Update(CurrentChart.Palette.HitStyles[a]);
-            for (int a = 0; a < TargetChart.Data.Groups.Count; a++) LaneGroups[a].Current = CurrentChart.Groups[a];
-            foreach (LanePlayer lane in Lanes) Destroy(lane.gameObject);
+            for (int a = 0; a < LaneStyles.Count; a++) 
+                LaneStyles[a].Update(CurrentChart.Palette.LaneStyles[a]);
+            
+            for (int a = 0; a < HitStyles.Count; a++) 
+                HitStyles[a].Update(CurrentChart.Palette.HitStyles[a]);
+            
+            for (int a = 0; a < TargetChart.Data.Groups.Count; a++) 
+                LaneGroups[a].Current = CurrentChart.Groups[a];
+            
+            foreach (LanePlayer lane in Lanes) 
+                Destroy(lane.gameObject);
+            
             Lanes.Clear();
         } 
         else 
         {
-            foreach (LaneStyle style in CurrentChart.Palette.LaneStyles) LaneStyles.Add(new(style));
-            foreach (HitStyle style in CurrentChart.Palette.HitStyles) HitStyles.Add(new(style));
+            foreach (LaneStyle style in CurrentChart.Palette.LaneStyles) 
+                LaneStyles.Add(new(style));
+            
+            foreach (HitStyle style in CurrentChart.Palette.HitStyles) 
+                HitStyles.Add(new(style));
 
-            for (int a = 0; a < TargetChart.Data.Groups.Count; a++)
+            int loadedLaneGroups = 0;
+            bool[] isLoaded = new bool[TargetChart.Data.Groups.Count];
+
+            while (loadedLaneGroups < TargetChart.Data.Groups.Count)
             {
-                LaneGroupPlayer player = Instantiate(LaneGroupSample, Holder);
-                player.Original = TargetChart.Data.Groups[a];
-                player.Current = CurrentChart.Groups[a];
-                player.gameObject.name = player.Current.Name;
-                LaneGroups.Add(player);
-                yield return new WaitForEndOfFrame();
-            }
-            for (int a = 0; a < LaneGroups.Count; a++)
-            {
-                LaneGroupPlayer player = LaneGroups[a];
-                if (string.IsNullOrEmpty(player.Current.Group)) continue;
-                player.Parent = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
-                player.transform.SetParent(player.Parent.transform);
-            }
+                bool progressMade = false;
 
-        }
-
-        ComboGroup.alpha = JudgmentGroup.alpha = 0;
-
-        float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
-        float su = Mathf.Min(Screen.width / ScreenUnit.x, Screen.height / ScreenUnit.y);
-
-        ScaledExtraRadius = dpi * 0.2f;
-        ScaledMinimumRadius = MinimumRadius * su;
-
-        for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
-        {
-            LanePlayer player = Instantiate(LaneSample, Holder);
-            player.Original = TargetChart.Data.Lanes[a];
-            player.Current = CurrentChart.Lanes[a];
-            LaneGroupPlayer group = null;
-            if (!string.IsNullOrEmpty(player.Current.Group))
-            {
-                group = LaneGroups.Find(x => x.Current.Name == player.Current.Group);
-                player.transform.SetParent(group.transform);
-                player.Group = group;
-            }
-            player.Init();
-            Lanes.Add(player);
-
-            float time = float.NaN;
-            Vector3 startPos = Vector3.zero, endPos = Vector3.zero; //Declare 2 points of lane show in screen
-            foreach (HitObject hit in player.Original.Objects)
-            {
-                // Add ExScore by note type
-                TotalExScore += hit.Type == HitObject.HitType.Normal ? 3 : 1;
-                TotalExScore += Mathf.Ceil(hit.HoldLength / 0.5f);
-                if (hit.Flickable)
+                for (int i = 0; i < TargetChart.Data.Groups.Count; i++)
                 {
-                    TotalExScore += 1;
-                    if (!float.IsNaN(hit.FlickDirection)) TotalExScore += 1;
-                }
+                    if (isLoaded[i])
+                        continue;
 
-                if (time != hit.Offset)
-                {
-                    // Set camera distance and rotation to hit time of the note?
-                    CameraController camera = (CameraController)TargetChart.Data.Camera.Get(hit.Offset);
-                    Pseudocamera.transform.position = camera.CameraPivot;
-                    Pseudocamera.transform.eulerAngles = camera.CameraRotation;
-                    Pseudocamera.transform.Translate(Vector3.back * camera.PivotDistance);
+                    LaneGroup laneGroup = TargetChart.Data.Groups[i];
+                    
+                    bool hasNoParent = string.IsNullOrEmpty(laneGroup.Group);
+                    bool parentFound = LaneGroups.Exists(x => x.Current.Name == laneGroup.Group); // Stays false until the parent is instantiated
 
-                    // Set 2 points of lane?
-                    Lane lane = (Lane)player.Original.Get(hit.Offset);
-                    LanePosition step = lane.GetLanePosition(hit.Offset, hit.Offset, TargetSong.Timing);
-                    startPos = Quaternion.Euler(lane.Rotation) * step.StartPos + lane.Position;
-                    endPos = Quaternion.Euler(lane.Rotation) * step.EndPos + lane.Position;
-                    LaneGroupPlayer gp = group;
-
-                    // Loop to get localPosition of 2 points of lane?
-                    while (gp)
+                    if (hasNoParent || parentFound)
                     {
-                        LaneGroup laneGroup = (LaneGroup)gp.Original.Get(hit.Offset);
-                        startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
-                        endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
-                        gp = gp.Parent;
+                        Transform parentTransform = hasNoParent
+                            ? Holder
+                            : LaneGroups.Find(x => x.Current.Name == laneGroup.Group).transform;
+
+                        LaneGroupPlayer instancedLaneGroup = Instantiate(LaneGroupSample, parentTransform);
+
+                        instancedLaneGroup.Original = TargetChart.Data.Groups[i];
+                        instancedLaneGroup.Current = CurrentChart.Groups[i];
+                        instancedLaneGroup.gameObject.name = instancedLaneGroup.Current.Name;
+
+                        LaneGroups.Add(instancedLaneGroup);
+                        isLoaded[i] = true;
+                        loadedLaneGroups++;
+                        progressMade = true;
+
+                        // Intentional throttling maybe idk
+                        //yield return new WaitForEndOfFrame();
                     }
                 }
 
-                HitObject h = (HitObject)hit.Get(hit.Offset); //Get current HitObject?
-                Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position));
-                Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, h.Position + hit.Length));
-
-                float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
-
-                //Add hit coords
-                player.HitCoords.Add(new HitScreenCoord
+                if (!progressMade)
                 {
-                    Position = (hitStart + hitEnd) / 2,
-                    Radius = Mathf.Max(radius, ScaledMinimumRadius)
-                });
+                    Debug.LogError("Failed to resolve lane group dependencies. Possible circular or missing references.");
+                    break;
+                }
             }
 
-            HitsRemaining += player.Original.Objects.Count;
 
-            yield return new WaitForEndOfFrame();
+        }
+
+        ComboGroup.alpha = 
+            JudgmentGroup.alpha = 0;
+
+        float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
+        float screenUnit = Mathf.Min(Screen.width / ScreenUnit.x, Screen.height / ScreenUnit.y);
+
+        ScaledExtraRadius = dpi * 0.2f;
+        ScaledMinimumRadius = MinimumRadius * screenUnit;
+
+        int loadedLanes = 0;
+        bool[] instantiatedLane = new bool[TargetChart.Data.Lanes.Count];
+
+        while (loadedLanes < TargetChart.Data.Lanes.Count)
+        {
+            for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
+            {
+                if (instantiatedLane[a])
+                {
+                    Debug.Log($"[LaneInit] Skipping lane {a}, already instantiated.");
+                    continue;
+                }
+
+                var laneData = TargetChart.Data.Lanes[a];
+                bool noParent = string.IsNullOrEmpty(laneData.Group);
+                LaneGroupPlayer laneInGroup = noParent ? null : LaneGroups.Find(x => x.Current.Name == laneData.Group);
+
+                Debug.Log($"[LaneInit] Processing lane {a}: group = '{laneData.Group}'");
+                
+                // Only continue if no parent is needed, or parent exists
+                if (!noParent && laneInGroup == null)
+                {
+                    Debug.LogWarning($"Lane [{a}] references non-existent(yet) '{laneData.Group}' in LaneGroups. Delaying.");
+                    continue;
+                }
+
+                LanePlayer instancedLane = Instantiate(
+                    LaneSample,
+                    noParent ? Holder : laneInGroup.transform
+                );
+
+                instancedLane.Group = laneInGroup;
+                instancedLane.Original = TargetChart.Data.Lanes[a];
+                instancedLane.Current = CurrentChart.Lanes[a];
+                
+                instancedLane.Init();
+                Lanes.Add(instancedLane);
+                
+                float time = float.NaN;
+                Vector3 startPos = Vector3.zero, 
+                        endPos = Vector3.zero; //Declare 2 points of lane show in screen
+                foreach (HitObject laneHitobject in instancedLane.Original.Objects)
+                {
+                    // Add ExScore by note type
+                    TotalExScore += laneHitobject.Type == HitObject.HitType.Normal ? 3 : 1;
+                    TotalExScore += Mathf.Ceil(laneHitobject.HoldLength / 0.5f);
+                    if (laneHitobject.Flickable)
+                    {
+                        TotalExScore += 1;
+                        if (!float.IsNaN(laneHitobject.FlickDirection)) TotalExScore += 1;
+                    }
+    
+                    if (!Mathf.Approximately(time, laneHitobject.Offset))
+                    {
+                        // Set camera distance and rotation to hit time of the note?
+                        CameraController hitObjectCamera = (CameraController)TargetChart.Data.Camera.GetStoryboardableObject(laneHitobject.Offset);
+                        Pseudocamera.transform.localPosition = hitObjectCamera.CameraPivot;
+                        Pseudocamera.transform.localEulerAngles = hitObjectCamera.CameraRotation;
+                        Pseudocamera.transform.Translate(Vector3.back * hitObjectCamera.PivotDistance);
+    
+                        // Set 2 points of lane?
+                        Lane lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
+                        LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, TargetSong.Timing);
+                        startPos = Quaternion.Euler(lane.Rotation) * positionStep.StartPosition + lane.Position;
+                        endPos = Quaternion.Euler(lane.Rotation) * positionStep.EndPosition + lane.Position;
+                        LaneGroupPlayer group = laneInGroup;
+    
+                        // Loop to get localPosition of 2 points of lane?
+                        while (group)
+                        {
+                            LaneGroup laneGroup = (LaneGroup)group.Original.GetStoryboardableObject(laneHitobject.Offset);
+                            startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
+                            endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
+                            group = group.Parent;
+                        }
+                    }
+    
+                    HitObject hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); //Get current HitObject?
+                    Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
+                    Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
+    
+                    float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
+    
+                    //Add hit coords
+                    instancedLane.HitCoords.Add(new HitScreenCoord
+                    {
+                        Position = (hitStart + hitEnd) / 2,
+                        Radius = Mathf.Max(radius, ScaledMinimumRadius)
+                    });
+                }
+    
+                HitsRemaining += instancedLane.Original.Objects.Count;
+    
+                loadedLanes++;
+                instantiatedLane[a] = true;
+                //yield return new WaitForEndOfFrame();
+            }
         }
 
         Music.clip = TargetSong.Clip;
@@ -277,8 +361,9 @@ public class PlayerScreen : MonoBehaviour
         CurrentTime = -5;
         PlayerScreenPause.main.PauseTime = -10;
         IsReady = true;
-        HasPlayedBefore = true;
+        AlreadyInitialised = true;
         lastDSPTime = AudioSettings.dspTime;
+        yield return new WaitForEndOfFrame();
     }
 
     public void BeginReadyAnim() 
@@ -352,8 +437,13 @@ public class PlayerScreen : MonoBehaviour
             // Update song progress slider
             SongProgress.value = CurrentTime / Music.clip.length;
 
-            float visualTime = CurrentTime + Settings.VisualOffset;
+            
+            // Prevents from going to negative values, which might break things
+            float ChartUpdateTime(float time) => time < 0 ? 0 : time ;
+            
+            float visualTime = ChartUpdateTime(CurrentTime + Settings.VisualOffset) ;
             float visualBeat = TargetSong.Timing.ToBeat(visualTime);
+            
             
             // Update palette
             CurrentChart.Palette.Advance(visualBeat);
@@ -379,9 +469,9 @@ public class PlayerScreen : MonoBehaviour
 
             // Update scene
             foreach (LaneGroupPlayer group in LaneGroups) group.UpdateSelf(visualTime, visualBeat);
-            foreach (LanePlayer lane in Lanes) lane.UpdateSelf(visualTime, visualBeat);
+            foreach (LanePlayer lane in Lanes)            lane.UpdateSelf(visualTime, visualBeat);
             
-            if (HitsRemaining <= 0 && PlayerInputManager.Instance.HoldQueue.Count == 0 && !ResultExec) 
+            if ((HitsRemaining <= 0 && PlayerInputManager.Instance.HoldQueue.Count == 0 || CurrentTime/Music.clip.length >= 1) && !ResultExec) 
             {
                 PlayerScreenResult.main.StartEndingAnim();
                 ResultExec = true;

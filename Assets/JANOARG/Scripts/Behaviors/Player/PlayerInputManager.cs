@@ -695,7 +695,7 @@ public class PlayerInputManager : MonoBehaviour
                 float beat = PlayerScreen.TargetSong.Timing.ToBeat(judgementOffsetTime); // Get current BPM
 
                 // Camera handling
-                CameraController currentCamera = (CameraController)PlayerScreen.TargetChart.Data.Camera.Get(beat); // Get camera data for the current beat
+                CameraController currentCamera = (CameraController)PlayerScreen.TargetChart.Data.Camera.GetStoryboardableObject(beat); // Get camera data for the current beat
                 // Update transforms
                 Player.Pseudocamera.transform.position = currentCamera.CameraPivot;
                 Player.Pseudocamera.transform.eulerAngles = currentCamera.CameraRotation;
@@ -716,10 +716,10 @@ public class PlayerInputManager : MonoBehaviour
                     }
 
                     // Note position
-                    Lane laneHoldNote = (Lane)holdNoteEntry.HitObject.Lane.Original.Get(beat); // Which lane is the hold note on?
+                    Lane laneHoldNote = (Lane)holdNoteEntry.HitObject.Lane.Original.GetStoryboardableObject(beat); // Which lane is the hold note on?
                     LanePosition step = laneHoldNote.GetLanePosition(beat, beat, PlayerScreen.TargetSong.Timing); // Get the lane position for the current beat
-                    Vector3 startHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.StartPos + laneHoldNote.Position;
-                    Vector3 endHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.EndPos + laneHoldNote.Position;
+                    Vector3 startHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.StartPosition + laneHoldNote.Position;
+                    Vector3 endHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.EndPosition + laneHoldNote.Position;
                     LaneGroupPlayer currentHoldGroupPlayer = holdNoteEntry.HitObject.Lane.Group;
 
                     Debug.Log($"Got; Lane: {laneHoldNote.Name}, Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
@@ -727,7 +727,7 @@ public class PlayerInputManager : MonoBehaviour
                     // Apply transforms in the group
                     while (currentHoldGroupPlayer) // Current LaneGroupPlayer still exists
                     {
-                        LaneGroup currentLaneGroup = (LaneGroup)currentHoldGroupPlayer.Original.Get(beat); // Get the current lane group
+                        LaneGroup currentLaneGroup = (LaneGroup)currentHoldGroupPlayer.Original.GetStoryboardableObject(beat); // Get the current lane group
                         startHoldPosition = Quaternion.Euler(currentLaneGroup.Rotation) * startHoldPosition + currentLaneGroup.Position; // Apply transform manually
                         endHoldPosition = Quaternion.Euler(currentLaneGroup.Rotation) * endHoldPosition + currentLaneGroup.Position;
                         currentHoldGroupPlayer = currentHoldGroupPlayer.Parent; // Go to the parent LaneGroupPlayer
@@ -735,7 +735,7 @@ public class PlayerInputManager : MonoBehaviour
 
                     Debug.Log($"Transformed; Start Position: {startHoldPosition}, End Position: {endHoldPosition}");
 
-                    HitObject hitObject = (HitObject)holdNoteEntry.HitObject.Original.Get(beat); // Get the hitobject data for the current beat
+                    HitObject hitObject = (HitObject)holdNoteEntry.HitObject.Original.GetStoryboardableObject(beat); // Get the hitobject data for the current beat
 
                     Debug.Log($"Hold note hitobject data: Type: {hitObject.Type}, Hold Length: {hitObject.HoldLength}, Position: {hitObject.Position}");
 
@@ -869,7 +869,7 @@ public class PlayerInputManager : MonoBehaviour
                 if ((judgementOffsetTime >= hitObject.Time && hitObject.Current.Type == HitObject.HitType.Catch) 
                     || hitObject.Current.Flickable) // Immediate feedback on flicks
                 {
-                    if (hitObject.IsProcessed) // Just in case 
+                    if (!hitObject.IsProcessed || hitObject.Current.Flickable) // Just in case 
                         Player.Hit(hitObject, time);
 
                     hitObject.InDiscreteHitQueue = false;

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -16,8 +15,8 @@ public class LanePlayer : MonoBehaviour
     public LaneGroupPlayer Group;
     [Space]
     public MeshRenderer JudgeLine;
-    public MeshRenderer JudgePointLeft;
-    public MeshRenderer JudgePointRight;
+    [FormerlySerializedAs("JudgeLeft")] public MeshRenderer JudgePointLeft;
+    [FormerlySerializedAs("JudgeRight")] public MeshRenderer JudgePointRight;
 
     public List<float> PositionPoints = new();
     public List<float> TimeStamps = new();
@@ -30,17 +29,20 @@ public class LanePlayer : MonoBehaviour
 
     public void Init() 
     {
-        var met = PlayerScreen.TargetSong.Timing;
+        var metronome = PlayerScreen.TargetSong.Timing;
         foreach (LaneStep step in Current.LaneSteps)
         {
-            TimeStamps.Add(met.ToSeconds(step.Offset));
+            TimeStamps.Add(metronome.ToSeconds(step.Offset));
         }
         if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.main.LaneStyles.Count)
         {
             LaneStyleManager style = PlayerScreen.main.LaneStyles[Current.StyleIndex];
-            MeshRenderer.sharedMaterial = style.LaneMaterial;
-            JudgeLine.sharedMaterial = JudgePointLeft.sharedMaterial = JudgePointRight.sharedMaterial
-                = style.JudgeMaterial;
+            MeshRenderer.sharedMaterial = style.LaneMaterial; 
+            
+            JudgeLine.sharedMaterial = 
+                JudgePointLeft.sharedMaterial = 
+                    JudgePointRight.sharedMaterial = 
+                        style.JudgeMaterial;
         }
         else 
         {
@@ -53,28 +55,43 @@ public class LanePlayer : MonoBehaviour
 
     public void UpdateSelf(float time, float beat)
     {
-        if (Current != null) Current.Advance(beat);
-        else Current = (Lane)Original.Get(beat);
+        if (Current != null) 
+            Current.Advance(beat);
+        else 
+            Current = (Lane)Original.GetStoryboardableObject(beat);
 
         UpdateMesh(time, beat);
-        transform.localPosition = Current.Position;
+        
+        transform.localPosition    = Current.Position;
         transform.localEulerAngles = Current.Rotation;
-        Holder.localPosition = Vector3.back * CurrentPosition;
-        if (CurrentPosition - PositionPoints[0] > -200) UpdateHitObjects(time, beat);
+        Holder.localPosition       = Vector3.back * CurrentPosition;
+        
+        if (CurrentPosition - PositionPoints[0] > -200)
+        {
+            transform.gameObject.SetActive(true);
+            UpdateHitObjects(time, beat);
+        }
+        else
+            transform.gameObject.SetActive(false);
     }
 
-    public void UpdateMesh(float time, float beat, float maxDistance = 200)
+
+    private void UpdateMesh(float time, float beat, float maxDistance = 200)
     {
+        // New mesh if MeshFilter doesn't have one
         Mesh mesh = MeshFilter.mesh ?? new Mesh();
         List<Vector3> vertices = new();
         List<int> triangles = new();
         
         void AddLine(Vector3 start, Vector3 end) 
         {
-            vertices.AddRange(new [] {start, end});
-            if (vertices.Count > 2) triangles.AddRange(new [] {
-                vertices.Count - 4, vertices.Count - 2, vertices.Count - 3,
-                vertices.Count - 2, vertices.Count - 1, vertices.Count - 3
+            vertices.AddRange(new Vector3[] {start, end});
+            
+            int vertexCount = vertices.Count;
+            if (vertexCount > 2) 
+                triangles.AddRange(new int[] {
+                vertexCount - 4, vertexCount - 2, vertexCount - 3,
+                vertexCount - 2, vertexCount - 1, vertexCount - 3
             });
         }
 
@@ -88,14 +105,14 @@ public class LanePlayer : MonoBehaviour
         if (Current.LaneSteps.Count < 1) 
         {
             if (TimeStamps[0] < time)
-            {
                 Destroy(mesh);
-            }
             return;
         }
         
         Current.LaneSteps[0].Advance(beat);
-        if (Current.LaneSteps.Count > 1) Current.LaneSteps[1].Advance(beat);
+        
+        if (Current.LaneSteps.Count > 1) 
+            Current.LaneSteps[1].Advance(beat);
 
         CurrentPosition = (TimeStamps.Count <= 1 || TimeStamps[0] > time) 
             ? time * Current.LaneSteps[0].Speed * PlayerScreen.main.Speed 
@@ -119,7 +136,7 @@ public class LanePlayer : MonoBehaviour
         {
 
             float position = Mathf.Lerp(PositionPoints[0], PositionPoints[1], progress);
-            var currentLaneStep = Current.LaneSteps[1];
+            LaneStep currentLaneStep = Current.LaneSteps[1];
             Vector3 start, end;
 
             if (currentLaneStep.IsLinear)
@@ -142,15 +159,24 @@ public class LanePlayer : MonoBehaviour
             }
 
             AddLine(start, end);
-            JudgeLine.enabled = JudgePointLeft.enabled = JudgePointRight.enabled = TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
+            
+            JudgeLine.enabled = 
+                JudgePointLeft.enabled = 
+                    JudgePointRight.enabled = 
+                        TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
+            
             if (JudgeLine.enabled && JudgeLine.gameObject.activeSelf) 
             {
-                JudgeLine.transform.localPosition = (start + end) / 2;
-                JudgeLine.transform.localScale = new(Vector2.Distance(start, end), .05f, .05f);
-                JudgeLine.transform.localEulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.right, end - start);
-                JudgePointLeft.transform.localPosition = start;
+                JudgeLine.transform.localPosition    = (start + end) / 2;
+                JudgeLine.transform.localScale       = new Vector3(Vector2.Distance(start, end), .05f, .05f);
+                JudgeLine.transform.localRotation    = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.right, end - start));
+                
+                JudgePointLeft.transform.localPosition  = start;
                 JudgePointRight.transform.localPosition = end;
             }
+            
+            if (!JudgeLine.enabled)
+                transform.gameObject.SetActive(false);
         }
 
 
@@ -178,7 +204,12 @@ public class LanePlayer : MonoBehaviour
                 }
             }
             float calculatedPosition = PositionPoints[currentTimestamp - 1] + (TimeStamps[currentTimestamp] - TimeStamps[currentTimestamp - 1]) * currentLaneStep.Speed * PlayerScreen.main.Speed;
-            if (PositionPoints.Count <= currentTimestamp) PositionPoints.Add(calculatedPosition); else PositionPoints[currentTimestamp] = calculatedPosition;
+            
+            if (PositionPoints.Count <= currentTimestamp) 
+                PositionPoints.Add(calculatedPosition); 
+            else 
+                PositionPoints[currentTimestamp] = calculatedPosition;
+            
             if (currentLaneStep.IsLinear)
             {
                 AddLine(
@@ -196,6 +227,7 @@ public class LanePlayer : MonoBehaviour
                             Mathf.LerpUnclamped(previousStep.StartPos.x, currentLaneStep.StartPos.x, currentLaneStep.StartEaseX.Get(x)), 
                             Mathf.LerpUnclamped(previousStep.StartPos.y, currentLaneStep.StartPos.y, currentLaneStep.StartEaseY.Get(x)),
                         Mathf.Lerp(PositionPoints[currentTimestamp - 1], calculatedPosition, x)), 
+
                         new Vector3(
                             Mathf.LerpUnclamped(previousStep.EndPos.x, currentLaneStep.EndPos.x, currentLaneStep.EndEaseX.Get(x)), 
                             Mathf.LerpUnclamped(previousStep.EndPos.y, currentLaneStep.EndPos.y, currentLaneStep.EndEaseY.Get(x)),
@@ -204,7 +236,9 @@ public class LanePlayer : MonoBehaviour
                 }
             }
             progress = 0;
-            if (currentTimestamp >= PositionPoints.Count && calculatedPosition - CurrentPosition > 200) break;
+            
+            if (currentTimestamp >= PositionPoints.Count && calculatedPosition - CurrentPosition > 200) 
+                break;
         }
 
         mesh.Clear();
@@ -216,7 +250,7 @@ public class LanePlayer : MonoBehaviour
     private float _hitObjectTime = float.NaN;
     private int _hitObjectOffset = 0;
 
-    public void UpdateHitObjects(float time, float beat, float maxDistance = 200) 
+    private void UpdateHitObjects(float time, float beat, float maxDistance = 200) 
     {
         while (Current.Objects.Count > 0) 
         {
