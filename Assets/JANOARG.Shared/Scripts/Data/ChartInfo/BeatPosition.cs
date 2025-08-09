@@ -2,7 +2,6 @@
 using System;
 using System.Globalization;
 using System.Numerics;
-using Unity.VisualScripting;
 
 [Serializable]
 public struct BeatPosition : IComparable<BeatPosition>

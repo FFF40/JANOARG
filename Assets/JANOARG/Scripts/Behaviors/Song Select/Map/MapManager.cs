@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -122,11 +121,11 @@ public class MapManager : MonoBehaviour
         StartCoroutine(UnloadMapRoutine());
     }
 
-    public List<(SongMapItemUI, SongSelectListItem)> GetMapToListItems(List<SongSelectListItem> listItems)
+    public List<(SongMapItemUI, SongSelectListSongUI)> GetMapToListItems(List<SongSelectListSongUI> listItems)
     {
-        var listDict = listItems.ToDictionary(x => x.MapInfo.ID, x => x);
+        var listDict = listItems.Where(x => x.Target != null).ToDictionary(x => x.Target.SongID, x => x);
         var keys = listDict.Keys.Intersect(SongMapItemUIsByID.Keys);
-        List<(SongMapItemUI, SongSelectListItem)> result = new();
+        List<(SongMapItemUI, SongSelectListSongUI)> result = new();
         foreach (string key in keys)
         {
             result.Add((SongMapItemUIsByID[key], listDict[key]));
@@ -203,6 +202,7 @@ public class MapManager : MonoBehaviour
 
     public void OnMapDrag(BaseEventData data)
     {
+        if (!IsPointerDown) return;
         PointerEventData pointerData = (PointerEventData)data;
         Vector2 delta = (lastTouchPos - pointerData.position) / Screen.height * DragScale;
         cameraPos += delta;
@@ -218,6 +218,7 @@ public class MapManager : MonoBehaviour
 
     public void SelectSong(SongMapItem item)
     {
+        IsPointerDown = false;
         if (SongSelectScreen.main.TargetSongAnim != null) StopCoroutine(SongSelectScreen.main.TargetSongAnim);
         SongSelectScreen.main.TargetSongAnim = StartCoroutine(SongSelectScreen.main.MapTargetSongShowAnim(item));
     }
