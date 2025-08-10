@@ -27,6 +27,8 @@ public class LanePlayer : MonoBehaviour
 
     public bool LaneStepDirty = false;
 
+    private List<Vector3> verts = new();
+    private List<int> tris = new();
     public void Init() 
     {
         var met = PlayerScreen.TargetSong.Timing;
@@ -65,16 +67,24 @@ public class LanePlayer : MonoBehaviour
     public void UpdateMesh(float time, float beat, float maxDistance = 200)
     {
         Mesh mesh = MeshFilter.mesh ?? new Mesh();
-        List<Vector3> verts = new();
-        List<int> tris = new();
+        verts.Clear();
+        tris.Clear();
         
         void AddLine(Vector3 start, Vector3 end) 
         {
-            verts.AddRange(new [] {start, end});
-            if (verts.Count > 2) tris.AddRange(new [] {
-                verts.Count - 4, verts.Count - 2, verts.Count - 3,
-                verts.Count - 2, verts.Count - 1, verts.Count - 3
-            });
+            // No AddRange here because the alloc overhead adds up
+            verts.Add(start);
+            verts.Add(end);
+
+            if (verts.Count > 2)
+            {
+                tris.Add(verts.Count - 4);
+                tris.Add(verts.Count - 2);
+                tris.Add(verts.Count - 3);
+                tris.Add(verts.Count - 2);
+                tris.Add(verts.Count - 1);
+                tris.Add(verts.Count - 3);
+            }
         }
 
         while (Times.Count > 2 && Times[1] < time) 
@@ -196,11 +206,11 @@ public class LanePlayer : MonoBehaviour
                 {
                     AddLine(
                         new Vector3(
-                            Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(x)),
                             Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, cur.StartEaseY.Get(x)),
-                        Mathf.Lerp(Positions[a - 1], pos, x)), 
+                        Mathf.Lerp(Positions[a - 1], pos, x)),
                         new Vector3(
-                            Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(x)),
                             Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, cur.EndEaseY.Get(x)),
                         Mathf.Lerp(Positions[a - 1], pos, x))
                     );
@@ -323,16 +333,24 @@ public class LanePlayer : MonoBehaviour
             hit.HoldMesh.mesh = new Mesh();
         }
         Mesh mesh = hit.HoldMesh.mesh;
-        List<Vector3> verts = new();
-        List<int> tris = new();
-        
-        void AddLine(Vector3 start, Vector3 end) 
+        verts.Clear();
+        tris.Clear();
+
+        void AddLine(Vector3 start, Vector3 end)
         {
-            verts.AddRange(new [] {start, end});
-            if (verts.Count > 2) tris.AddRange(new [] {
-                verts.Count - 4, verts.Count - 2, verts.Count - 3,
-                verts.Count - 2, verts.Count - 1, verts.Count - 3
-            });
+            // No AddRange here because the alloc overhead adds up
+            verts.Add(start);
+            verts.Add(end);
+
+            if (verts.Count > 2)
+            {
+                tris.Add(verts.Count - 4);
+                tris.Add(verts.Count - 2);
+                tris.Add(verts.Count - 3);
+                tris.Add(verts.Count - 2);
+                tris.Add(verts.Count - 1);
+                tris.Add(verts.Count - 3);
+            }
         }
 
         float time = Mathf.Max(PlayerScreen.main.CurrentTime + PlayerScreen.main.Settings.VisualOffset, hit.Time);
