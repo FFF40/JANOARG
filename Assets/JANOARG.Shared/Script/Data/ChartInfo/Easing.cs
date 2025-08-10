@@ -189,11 +189,12 @@ public interface IEaseDirective
 }
 
 [Serializable]
-public struct BasicEaseDirective : IEaseDirective
+public class BasicEaseDirective : IEaseDirective
 {
     public EaseFunction Function;
     public EaseMode Mode;
-
+    
+    [NonSerialized()] private Func<float, float> _func;
     public BasicEaseDirective(EaseFunction function, EaseMode mode)
     {
         Function = function;
@@ -202,7 +203,22 @@ public struct BasicEaseDirective : IEaseDirective
 
     public float Get(float x) 
     {
-        return Ease.Get(x, Function, Mode);
+        if (_func is null)
+        {
+            Ease _ease = Ease.Eases[Function];
+            switch (Mode)
+            {
+                case EaseMode.Out:
+                    _func = _ease.Out; break;
+                case EaseMode.In:
+                    _func = _ease.In; break;
+                case EaseMode.InOut:
+                    _func = _ease.InOut; break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+        return _func(x);
     }
 
     public override string ToString() 
