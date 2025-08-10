@@ -240,7 +240,30 @@ public class PlayerScreen : MonoBehaviour
 
                 if (!progressMade)
                 {
-                    Debug.LogError("Failed to resolve lane group dependencies. Possible circular or missing references.");
+                    int err = 0;
+                    List<string> errDetails = new();
+                    for (var i = 0; i < isLoaded.Length; i++)
+                        if (!isLoaded[i])
+                        {
+                            err++;
+                            errDetails.Add($"{LaneGroups[i].Current.Name} depends on {LaneGroups[i].Current.Group}");
+                        }
+
+                    string PrintDepDetails()
+                    {
+                        string final = String.Empty;
+                        for (int a = 0; a < errDetails.Count; a++)
+                        {
+                            if (a == errDetails.Count - 1)
+                                final += String.Concat(errDetails[a]);
+                            else
+                                final += String.Concat(errDetails[a], "\n");
+                        }
+                        return final;
+                    }
+                    
+                    Debug.LogError($"Failed to resolve {err} lane group dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
+                    
                     break;
                 }
             }
@@ -262,6 +285,8 @@ public class PlayerScreen : MonoBehaviour
 
         while (loadedLanes < TargetChart.Data.Lanes.Count)
         {
+            bool progressMade = false;
+            
             for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
             {
                 if (instantiatedLane[a])
@@ -274,7 +299,7 @@ public class PlayerScreen : MonoBehaviour
                 bool noParent = string.IsNullOrEmpty(laneData.Group);
                 LaneGroupPlayer laneInGroup = noParent ? null : LaneGroups.Find(x => x.Current.Name == laneData.Group);
 
-                Debug.Log($"[LaneInit] Processing lane {a}: group = '{laneData.Group}'");
+                //Debug.Log($"[LaneInit] Processing lane {a}: group = '{laneData.Group}'");
                 
                 // Only continue if no parent is needed, or parent exists
                 if (!noParent && laneInGroup == null)
@@ -352,7 +377,36 @@ public class PlayerScreen : MonoBehaviour
     
                 loadedLanes++;
                 instantiatedLane[a] = true;
+                progressMade = true;
                 //yield return new WaitForEndOfFrame();
+            }
+            
+            if (!progressMade)
+            {
+                int err = 0;
+                List<string> errDetails = new();
+                for (var i = 0; i < instantiatedLane.Length; i++)
+                    if (!instantiatedLane[i])
+                    {
+                        err++;
+                        errDetails.Add($"Lane {(String.IsNullOrEmpty(Lanes[i].Current.Name) ? i : Lanes[i].Current.Name)} depends on {Lanes[i].Current.Group}");
+                    }
+
+                string PrintDepDetails()
+                {
+                    string final = String.Empty;
+                    for (int a = 0; a < errDetails.Count; a++)
+                    {
+                        if (a == errDetails.Count - 1)
+                            final += String.Concat(errDetails[a]);
+                        else
+                            final += String.Concat(errDetails[a], "\n");
+                    }
+                    return final;
+                }
+                
+                Debug.LogError($"Failed to resolve {err} lane dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
+                break;
             }
         }
 
