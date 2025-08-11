@@ -64,14 +64,11 @@ public abstract class Storyboardable
 {
     public Storyboard Storyboard = new Storyboard();
 
-    public static TimestampType[] TimestampTypes = {};
+    public abstract TimestampType[] TimestampTypes { get; }
 
-    protected TimestampType[] tts;
-    
     public Storyboardable Get(float time) {
-        if (tts == null) tts = (TimestampType[])this.GetType().GetField("TimestampTypes").GetValue(null);
         Storyboardable obj = (Storyboardable)this.MemberwiseClone();
-        foreach(TimestampType tst in tts) try {
+        foreach(TimestampType tst in TimestampTypes) try {
             List<Timestamp> sb = Storyboard.FromType(tst.ID);
             float value = tst.Get(this);
             foreach (Timestamp ts in sb) 
@@ -96,16 +93,15 @@ public abstract class Storyboardable
     protected float currentTime;
     public virtual void Advance (float time) 
     {
-        if (tts == null) tts = (TimestampType[])this.GetType().GetField("TimestampTypes").GetValue(null);
         if (currentValues == null) 
         {
             currentValues = new Dictionary<string, float>();
-            foreach (TimestampType tst in tts) 
+            foreach (TimestampType tst in TimestampTypes) 
             {
                 currentValues.Add(tst.ID, tst.Get(this));
             }
         }
-        foreach(TimestampType tst in tts) try {
+        foreach(TimestampType tst in TimestampTypes) try {
             float value = currentValues[tst.ID];
             while (true) 
             {
@@ -136,16 +132,15 @@ public abstract class DirtyTrackedStoryboardable : Storyboardable {
 
     public override void Advance (float time) 
     {
-        if (tts == null) tts = (TimestampType[])this.GetType().GetField("TimestampTypes").GetValue(null);
         if (currentValues == null) 
         {
             currentValues = new Dictionary<string, float>();
-            foreach (TimestampType tst in tts) 
+            foreach (TimestampType tst in TimestampTypes) 
             {
                 currentValues.Add(tst.ID, tst.Get(this));
             }
         }
-        foreach(TimestampType tst in tts) try {
+        foreach(TimestampType tst in TimestampTypes) try {
             float value = currentValues[tst.ID];
             while (true) 
             {

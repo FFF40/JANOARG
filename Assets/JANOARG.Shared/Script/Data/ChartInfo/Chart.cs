@@ -59,7 +59,7 @@ public class CameraController : Storyboardable, IDeepClonable<CameraController> 
     public float PivotDistance = 10;
     public Vector3 CameraRotation;
     
-    public new static TimestampType[] TimestampTypes = 
+    private static TimestampType[] _timestampTypes = 
     {
         new() {
             ID = "CameraPivot_X",
@@ -104,7 +104,8 @@ public class CameraController : Storyboardable, IDeepClonable<CameraController> 
             Set = (x, a) => { ((CameraController)x).CameraRotation.z = a; },
         },
     };
-    
+    public override TimestampType[] TimestampTypes => _timestampTypes;
+
     public CameraController DeepClone()
     {
         CameraController clone = new()
@@ -127,7 +128,7 @@ public class Palette : Storyboardable, IDeepClonable<Palette>  {
     public List<LaneStyle> LaneStyles = new();
     public List<HitStyle> HitStyles = new();
 
-    public new static TimestampType[] TimestampTypes = 
+    private static TimestampType[] _timestampTypes = 
     {
         new() {
             ID = "BackgroundColor_R",
@@ -172,6 +173,7 @@ public class Palette : Storyboardable, IDeepClonable<Palette>  {
             Set = (x, a) => { ((Palette)x).InterfaceColor.a = a; },
         },
     };
+    public override TimestampType[] TimestampTypes => _timestampTypes;
 
     public Palette DeepClone()
     {
@@ -200,7 +202,7 @@ public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle>
     public string JudgeColorTarget = "_Color";
     public Color JudgeColor = Color.black;
 
-    public new static TimestampType[] TimestampTypes = 
+    private static TimestampType[] _timestampTypes = 
     {
         new() {
             ID = "LaneColor_R",
@@ -251,6 +253,7 @@ public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle>
             Set = (x, a) => { ((LaneStyle)x).JudgeColor.a = a; },
         },
     };
+    public override TimestampType[] TimestampTypes => _timestampTypes;
 
     public LaneStyle DeepClone()
     {
@@ -282,7 +285,7 @@ public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
     public string HoldTailColorTarget = "_Color";
     public Color HoldTailColor = Color.black;
 
-    public new static TimestampType[] TimestampTypes = {
+    private static TimestampType[] _timestampTypes = {
         new() {
             ID = "NormalColor_R",
             Name = "Normal Color R",
@@ -356,6 +359,7 @@ public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
             Set = (x, a) => { ((HitStyle)x).HoldTailColor.a = a; },
         },
     };
+    public override TimestampType[] TimestampTypes => _timestampTypes;
 
     public HitStyle DeepClone()
     {
@@ -382,7 +386,7 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     public Vector3 Rotation;
     public string Group;
 
-    public new static TimestampType[] TimestampTypes = {
+    private static TimestampType[] _timestampTypes = {
         new() {
             ID = "Position_X",
             Name = "Position X",
@@ -420,6 +424,7 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
             Set = (x, a) => { ((LaneGroup)x).Rotation.z = a; },
         },
     };
+    public override TimestampType[] TimestampTypes => _timestampTypes;
 
     public LaneGroup DeepClone()
     {
@@ -526,7 +531,7 @@ public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
         }
     }
 
-    public new static TimestampType[] TimestampTypes = 
+    private static TimestampType[] _timestampTypes = 
     {
         new() {
             ID = "Offset_X",
@@ -565,6 +570,7 @@ public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
             Set = (x, a) => { ((Lane)x).Rotation.z = a; },
         },
     };
+    public override TimestampType[] TimestampTypes => _timestampTypes;
 
     public Lane DeepClone()
     {
@@ -602,7 +608,7 @@ public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep>
         StartEaseX is BasicEaseDirective sx && StartEaseY is BasicEaseDirective sy && EndEaseX is BasicEaseDirective ex && EndEaseY is BasicEaseDirective ey &&
         sx.Function == EaseFunction.Linear && sy.Function == EaseFunction.Linear && ex.Function == EaseFunction.Linear && ey.Function == EaseFunction.Linear;
 
-    public new static TimestampType[] TimestampTypes = 
+    private static TimestampType[] _timestampTypes = 
     {
         new() {
             ID = "StartPos_X",
@@ -635,7 +641,8 @@ public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep>
             Set = (x, a) => { ((LaneStep)x).Speed = a; },
         },
     };
-    
+    public override TimestampType[] TimestampTypes => _timestampTypes;
+
     public LaneStep DeepClone()
     {
         LaneStep clone = new()
@@ -673,7 +680,7 @@ public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
         Catch,
     }
 
-    public new static TimestampType[] TimestampTypes = 
+    private static TimestampType[] _timestampTypes = 
     {
         new() {
             ID = "Position",
@@ -688,7 +695,8 @@ public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
             Set = (x, a) => { ((HitObject)x).Length = a; },
         },
     };
-    
+    public override TimestampType[] TimestampTypes => _timestampTypes;
+
     public HitObject DeepClone()
     {
         HitObject clone = new()
