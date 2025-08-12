@@ -22,9 +22,15 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
     [HideInInspector]
     public List<HoldHandler> HoldQueue = new();
 
+    // Update Touche Variables
+    private float dpi;
+    private float flickThres;
+
     public void Awake()
     {
         EnhancedTouchSupport.Enable();
+        dpi = Screen.dpi > 0 ? Screen.dpi : 200;
+        flickThres = dpi * 0.2f;
         main = this;
     }
 
@@ -53,9 +59,10 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         Player.HitObjectHistory.Add(new(hit.HoldTicks[0], HitObjectHistoryType.Catch, 0));
                         hit.HoldTicks.RemoveAt(0);
 
-                        var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
-                        effect.SetAccuracy(null);
-                        effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                        // var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
+                        // effect.SetAccuracy(null);
+                        // effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                        var effect = JudgeScreenManager.main.BorrowEffect(null, PlayerScreen.CurrentChart.Palette.InterfaceColor, Player.JudgeScreenHolder);
                         var rt = (RectTransform)effect.transform;
                         rt.position = Common.main.MainCamera.WorldToScreenPoint(hit.transform.position);
                     }
@@ -79,8 +86,6 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
         else
         {
             int fingerCount = Touch.activeFingers.Count;
-            float dpi = Screen.dpi > 0 ? Screen.dpi : 200;
-            float flickThres = dpi * 0.2f;
 
             for (int a = 0; a < fingerCount; a++)
             {
@@ -290,6 +295,7 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                     while (gp)
                     {
                         LaneGroup laneGroup = (LaneGroup)gp.Original.Get(beat);
+                        Quaternion rotation = Quaternion.Euler(laneGroup.Rotation);
                         startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
                         endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
                         gp = gp.Parent;
@@ -364,9 +370,10 @@ public class PlayerInputManager : UnityEngine.MonoBehaviour
                         hold.Hit.HoldTicks.RemoveAt(0);
                         if (hold.IsHolding)
                         {
-                            var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
-                            effect.SetAccuracy(null);
-                            effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                            // var effect = Instantiate(Player.JudgeScreenSample, Player.JudgeScreenHolder);
+                            // effect.SetAccuracy(null);
+                            // effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                            var effect = JudgeScreenManager.main.BorrowEffect(null, PlayerScreen.CurrentChart.Palette.InterfaceColor, Player.JudgeScreenHolder);
                             var rt = (RectTransform)effect.transform;
                             rt.position = hold.Hit.HitCoord.Position;
                         }

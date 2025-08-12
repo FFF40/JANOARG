@@ -27,8 +27,21 @@ public class LanePlayer : MonoBehaviour
 
     public bool LaneStepDirty = false;
 
-    public void Init() 
+    // Cached mesh for performance
+    private Mesh currentMesh;
+    private List<Vector3> currentVerts;
+    private List<int> currentTris;
+    
+    public void Init()
     {
+        // Mesh initialization
+        currentMesh = MeshFilter.mesh ?? new Mesh();
+        currentMesh.MarkDynamic();
+        MeshFilter.mesh = currentMesh;
+        currentTris = new List<int>(16);
+        currentVerts = new List<Vector3>(16);
+
+        // Lane initialization
         var met = PlayerScreen.TargetSong.Timing;
         foreach (LaneStep step in Current.LaneSteps)
         {
@@ -41,7 +54,7 @@ public class LanePlayer : MonoBehaviour
             JudgeLine.sharedMaterial = JudgeLeft.sharedMaterial = JudgeRight.sharedMaterial
                 = style.JudgeMaterial;
         }
-        else 
+        else
         {
             MeshRenderer.enabled = false;
             JudgeLine.gameObject.SetActive(false);
@@ -64,42 +77,48 @@ public class LanePlayer : MonoBehaviour
 
     public void UpdateMesh(float time, float beat, float maxDistance = 200)
     {
-        Mesh mesh = MeshFilter.mesh ?? new Mesh();
-        List<Vector3> verts = new();
-        List<int> tris = new();
-        
-        void AddLine(Vector3 start, Vector3 end) 
+        currentVerts.Clear();
+        currentTris.Clear();
+
+        void AddLine(Vector3 start, Vector3 end)
         {
-            verts.AddRange(new [] {start, end});
-            if (verts.Count > 2) tris.AddRange(new [] {
-                verts.Count - 4, verts.Count - 2, verts.Count - 3,
-                verts.Count - 2, verts.Count - 1, verts.Count - 3
-            });
+            int baseIndex = currentVerts.Count;
+            currentVerts.Add(start);
+            currentVerts.Add(end);
+            if (baseIndex > 0)
+            {
+                currentTris.Add(baseIndex - 2);
+                currentTris.Add(baseIndex);
+                currentTris.Add(baseIndex - 1);
+                currentTris.Add(baseIndex);
+                currentTris.Add(baseIndex + 1);
+                currentTris.Add(baseIndex - 1);
+            }
         }
 
-        while (Times.Count > 2 && Times[1] < time) 
+        while (Times.Count > 2 && Times[1] < time)
         {
             Times.RemoveAt(0);
             Positions.RemoveAt(0);
             Current.LaneSteps.RemoveAt(0);
         }
 
-        if (Current.LaneSteps.Count < 1) 
-        {
-            if (Times[0] < time)
-            {
-                Destroy(mesh);
-                Destroy(gameObject);
-            }
-            return;
-        }
-        
+        // if (Current.LaneSteps.Count < 1)
+        // {
+        //     if (Times[0] < time)
+        //     {
+        //         Destroy(mesh);
+        //         Destroy(gameObject);
+        //     }
+        //     return;
+        // }
+
         Current.LaneSteps[0].Advance(beat);
         if (Current.LaneSteps.Count > 1) Current.LaneSteps[1].Advance(beat);
 
-        CurrentPosition = (Times.Count <= 1 || Times[0] > time) ? time * Current.LaneSteps[0].Speed * PlayerScreen.main.Speed : 
+        CurrentPosition = (Times.Count <= 1 || Times[0] > time) ? time * Current.LaneSteps[0].Speed * PlayerScreen.main.Speed :
             (time - Times[0]) * Current.LaneSteps[1].Speed * PlayerScreen.main.Speed + Positions[0];
-        
+
         float progress = Times.Count <= 1 ? 0 : Mathf.InverseLerp(Times[0], Times[1], time);
 
         if (Positions.Count <= 1)
@@ -114,7 +133,7 @@ public class LanePlayer : MonoBehaviour
         {
             Positions.Add((Times[1] - Times[0]) * Current.LaneSteps[1].Speed * PlayerScreen.main.Speed + Positions[0]);
         }
-        else 
+        else
         {
             Positions[1] = Positions[0] + (Times[1] - Times[0]) * Current.LaneSteps[1].Speed * PlayerScreen.main.Speed;
         }
@@ -130,15 +149,15 @@ public class LanePlayer : MonoBehaviour
                 start = Vector3.Lerp(Current.LaneSteps[0].StartPos, Current.LaneSteps[1].StartPos, progress) + Vector3.forward * position;
                 end = Vector3.Lerp(Current.LaneSteps[0].EndPos, Current.LaneSteps[1].EndPos, progress) + Vector3.forward * position;
             }
-            else 
+            else
             {
                 start = new Vector3(
-                    Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, cur.StartEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, cur.StartEaseX.Get(progress)),
                     Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, cur.StartEaseY.Get(progress)),
                     position
                 );
                 end = new Vector3(
-                    Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, cur.EndEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, cur.EndEaseX.Get(progress)),
                     Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, cur.EndEaseY.Get(progress)),
                     position
                 );
@@ -146,7 +165,7 @@ public class LanePlayer : MonoBehaviour
 
             AddLine(start, end);
             JudgeLine.enabled = JudgeLeft.enabled = JudgeRight.enabled = Times.Count >= 2 && time >= Times[0] && time < Times[1];
-            if (JudgeLine.enabled && JudgeLine.gameObject.activeSelf) 
+            if (JudgeLine.enabled && JudgeLine.gameObject.activeSelf)
             {
                 JudgeLine.transform.localPosition = (start + end) / 2;
                 JudgeLine.transform.localScale = new(Vector2.Distance(start, end), .05f, .05f);
@@ -157,24 +176,24 @@ public class LanePlayer : MonoBehaviour
         }
 
 
-        if (Current.LaneSteps[0].IsDirty) 
+        if (Current.LaneSteps[0].IsDirty)
         {
             LaneStepDirty = true;
             Current.LaneSteps[0].IsDirty = false;
         }
-        if (Current.LaneSteps[1].IsDirty) 
+        if (Current.LaneSteps[1].IsDirty)
         {
             LaneStepDirty = true;
             Current.LaneSteps[1].IsDirty = false;
         }
 
-        for (int a = 1; a < Times.Count; a++) 
+        for (int a = 1; a < Times.Count; a++)
         {
             var cur = Current.LaneSteps[a];
-            if (a > 1) 
+            if (a > 1)
             {
                 cur.Advance(beat);
-                if (cur.IsDirty) 
+                if (cur.IsDirty)
                 {
                     LaneStepDirty = true;
                     cur.IsDirty = false;
@@ -185,22 +204,22 @@ public class LanePlayer : MonoBehaviour
             if (cur.IsLinear)
             {
                 AddLine(
-                    (Vector3)cur.StartPos + Vector3.forward * pos, 
+                    (Vector3)cur.StartPos + Vector3.forward * pos,
                     (Vector3)cur.EndPos + Vector3.forward * pos
                 );
             }
-            else 
+            else
             {
                 var pre = Current.LaneSteps[a - 1];
                 for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16; x <= 1; x = Mathf.Floor(x * 16 + 1.01f) / 16)
                 {
                     AddLine(
                         new Vector3(
-                            Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(x)),
                             Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, cur.StartEaseY.Get(x)),
-                        Mathf.Lerp(Positions[a - 1], pos, x)), 
+                        Mathf.Lerp(Positions[a - 1], pos, x)),
                         new Vector3(
-                            Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(x)),
                             Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, cur.EndEaseY.Get(x)),
                         Mathf.Lerp(Positions[a - 1], pos, x))
                     );
@@ -210,10 +229,10 @@ public class LanePlayer : MonoBehaviour
             if (a >= Positions.Count && pos - CurrentPosition > 200) break;
         }
 
-        mesh.Clear();
-        mesh.SetVertices(verts);
-        mesh.SetTriangles(tris, 0);
-        MeshFilter.mesh = mesh;
+        currentMesh.Clear();
+        currentMesh.SetVertices(currentVerts);
+        currentMesh.SetTriangles(currentTris, 0, false);
+        currentMesh.RecalculateBounds();
     }
 
     float hoTime = float.NaN;
@@ -270,7 +289,15 @@ public class LanePlayer : MonoBehaviour
 
     public float GetZPosition(float time) 
     {
-        int index = Times.FindIndex(x => x >= time);
+        int index = -1;
+        for (int i = 0; i < Times.Count; i++)
+        {
+            if (Times[i] >= time)
+            {
+                index = i;
+                break;
+            }
+        }
         if (index < 0) return Positions[^1] + (time - Times[Positions.Count - 1]) * Current.LaneSteps[Positions.Count - 1].Speed * PlayerScreen.main.Speed; 
         index = Mathf.Min(index, Positions.Count - 1);
         return Positions[index] + (time - Times[index]) * Current.LaneSteps[index].Speed * PlayerScreen.main.Speed; 
@@ -278,7 +305,15 @@ public class LanePlayer : MonoBehaviour
 
     public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end) 
     {
-        int index = Times.FindIndex(x => x >= time);
+        int index = -1;
+        for (int i = 0; i < Times.Count; i++)
+        {
+            if (Times[i] >= time)
+            {
+                index = i;
+                break;
+            }
+        }
         if (index < 0)
         {
             start = Current.LaneSteps[^1].StartPos;
@@ -289,23 +324,23 @@ public class LanePlayer : MonoBehaviour
             start = Current.LaneSteps[0].StartPos;
             end = Current.LaneSteps[0].EndPos;
         }
-        else 
+        else
         {
             var cur = Current.LaneSteps[index];
             var pre = Current.LaneSteps[index - 1];
             float progress = Mathf.InverseLerp(Times[index - 1], Times[index], time);
-            if (cur.IsLinear) 
+            if (cur.IsLinear)
             {
                 start = Vector2.Lerp(pre.StartPos, cur.StartPos, progress);
                 end = Vector2.Lerp(pre.EndPos, cur.EndPos, progress);
             }
-            else 
+            else
             {
                 start = new Vector2(
-                    Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(progress)),
                     Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, cur.StartEaseY.Get(progress)));
                 end = new Vector2(
-                    Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(progress)),
                     Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, cur.EndEaseY.Get(progress)));
             }
         }

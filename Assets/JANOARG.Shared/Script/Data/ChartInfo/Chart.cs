@@ -58,8 +58,9 @@ public class CameraController : Storyboardable, IDeepClonable<CameraController> 
     public Vector3 CameraPivot;
     public float PivotDistance = 10;
     public Vector3 CameraRotation;
-    
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID = "CameraPivot_X",
@@ -126,8 +127,9 @@ public class Palette : Storyboardable, IDeepClonable<Palette>  {
 
     public List<LaneStyle> LaneStyles = new();
     public List<HitStyle> HitStyles = new();
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = 
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID = "BackgroundColor_R",
@@ -199,8 +201,9 @@ public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle>
     public string JudgeMaterial = "Default";
     public string JudgeColorTarget = "_Color";
     public Color JudgeColor = Color.black;
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = 
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID = "LaneColor_R",
@@ -281,8 +284,9 @@ public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
     public string HoldTailMaterial = "Default";
     public string HoldTailColorTarget = "_Color";
     public Color HoldTailColor = Color.black;
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = {
+    public static TimestampType[] ThisTimestampTypes = {
         new() {
             ID = "NormalColor_R",
             Name = "Normal Color R",
@@ -381,8 +385,9 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     public Vector3 Position;
     public Vector3 Rotation;
     public string Group;
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = {
+    public static TimestampType[] ThisTimestampTypes = {
         new() {
             ID = "Position_X",
             Name = "Position X",
@@ -526,7 +531,9 @@ public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
         }
     }
 
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID = "Offset_X",
@@ -602,7 +609,8 @@ public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep>
         StartEaseX is BasicEaseDirective sx && StartEaseY is BasicEaseDirective sy && EndEaseX is BasicEaseDirective ex && EndEaseY is BasicEaseDirective ey &&
         sx.Function == EaseFunction.Linear && sy.Function == EaseFunction.Linear && ex.Function == EaseFunction.Linear && ey.Function == EaseFunction.Linear;
 
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID = "StartPos_X",
@@ -673,7 +681,8 @@ public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
         Catch,
     }
 
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID = "Position",

@@ -485,9 +485,7 @@ public class PlayerScreen : MonoBehaviour
 
         if (spawnEffect)
         {
-            var effect = Instantiate(JudgeScreenSample, JudgeScreenHolder);
-            effect.SetAccuracy(acc);
-            effect.SetColor(CurrentChart.Palette.InterfaceColor);
+            var effect = JudgeScreenManager.main.BorrowEffect(acc, PlayerScreen.CurrentChart.Palette.InterfaceColor, JudgeScreenHolder);
             var rt = (RectTransform)effect.transform;
             rt.position = hit.HitCoord.Position;
 
