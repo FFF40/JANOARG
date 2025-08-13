@@ -26,6 +26,9 @@ public class LanePlayer : MonoBehaviour
     public List<HitScreenCoord> HitCoords = new();
 
     public bool LaneStepDirty = false;
+    
+    private List<Vector3> _verts = new();
+    private List<int> _tris = new();
 
     public void Init() 
     {
@@ -80,19 +83,25 @@ public class LanePlayer : MonoBehaviour
     {
         // New mesh if MeshFilter doesn't have one
         Mesh mesh = MeshFilter.mesh ?? new Mesh();
-        List<Vector3> vertices = new();
-        List<int> triangles = new();
+        
+        _verts.Clear();
+        _tris.Clear();
         
         void AddLine(Vector3 start, Vector3 end) 
         {
-            vertices.AddRange(new Vector3[] {start, end});
-            
-            int vertexCount = vertices.Count;
-            if (vertexCount > 2) 
-                triangles.AddRange(new int[] {
-                vertexCount - 4, vertexCount - 2, vertexCount - 3,
-                vertexCount - 2, vertexCount - 1, vertexCount - 3
-            });
+            // No AddRange here because the alloc overhead adds up
+            _verts.Add(start);
+            _verts.Add(end);
+
+            if (_verts.Count > 2)
+            {
+                _tris.Add(_verts.Count - 4);
+                _tris.Add(_verts.Count - 2);
+                _tris.Add(_verts.Count - 3);
+                _tris.Add(_verts.Count - 2);
+                _tris.Add(_verts.Count - 1);
+                _tris.Add(_verts.Count - 3);
+            }
         }
 
         while (TimeStamps.Count > 2 && TimeStamps[1] < time) 
@@ -147,12 +156,12 @@ public class LanePlayer : MonoBehaviour
             else 
             {
                 start = new Vector3(
-                    Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, currentLaneStep.StartEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, currentLaneStep.StartEaseX.Get(progress)),
                     Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, currentLaneStep.StartEaseY.Get(progress)),
                     position
                 );
                 end = new Vector3(
-                    Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, currentLaneStep.EndEaseX.Get(progress)), 
+                    Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, currentLaneStep.EndEaseX.Get(progress)),
                     Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, currentLaneStep.EndEaseY.Get(progress)),
                     position
                 );
@@ -224,12 +233,12 @@ public class LanePlayer : MonoBehaviour
                 {
                     AddLine(
                         new Vector3(
-                            Mathf.LerpUnclamped(previousStep.StartPos.x, currentLaneStep.StartPos.x, currentLaneStep.StartEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(previousStep.StartPos.x, currentLaneStep.StartPos.x, currentLaneStep.StartEaseX.Get(x)),
                             Mathf.LerpUnclamped(previousStep.StartPos.y, currentLaneStep.StartPos.y, currentLaneStep.StartEaseY.Get(x)),
                         Mathf.Lerp(PositionPoints[currentTimestamp - 1], calculatedPosition, x)), 
 
                         new Vector3(
-                            Mathf.LerpUnclamped(previousStep.EndPos.x, currentLaneStep.EndPos.x, currentLaneStep.EndEaseX.Get(x)), 
+                            Mathf.LerpUnclamped(previousStep.EndPos.x, currentLaneStep.EndPos.x, currentLaneStep.EndEaseX.Get(x)),
                             Mathf.LerpUnclamped(previousStep.EndPos.y, currentLaneStep.EndPos.y, currentLaneStep.EndEaseY.Get(x)),
                         Mathf.Lerp(PositionPoints[currentTimestamp - 1], calculatedPosition, x))
                     );
@@ -242,8 +251,8 @@ public class LanePlayer : MonoBehaviour
         }
 
         mesh.Clear();
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
+        mesh.SetVertices(_verts);
+        mesh.SetTriangles(_tris, 0);
         MeshFilter.mesh = mesh;
     }
 
@@ -355,16 +364,24 @@ public class LanePlayer : MonoBehaviour
             hit.HoldMesh.mesh = new Mesh();
         }
         Mesh mesh = hit.HoldMesh.mesh;
-        List<Vector3> verts = new();
-        List<int> tris = new();
+        _verts.Clear();
+        _tris.Clear();
         
         void AddLine(Vector3 start, Vector3 end) 
         {
-            verts.AddRange(new [] {start, end});
-            if (verts.Count > 2) tris.AddRange(new [] {
-                verts.Count - 4, verts.Count - 2, verts.Count - 3,
-                verts.Count - 2, verts.Count - 1, verts.Count - 3
-            });
+            // No AddRange here because the alloc overhead adds up
+            _verts.Add(start);
+            _verts.Add(end);
+
+            if (_verts.Count > 2)
+            {
+                _tris.Add(_verts.Count - 4);
+                _tris.Add(_verts.Count - 2);
+                _tris.Add(_verts.Count - 3);
+                _tris.Add(_verts.Count - 2);
+                _tris.Add(_verts.Count - 1);
+                _tris.Add(_verts.Count - 3);
+            }
         }
 
         float time = Mathf.Max(PlayerScreen.main.CurrentTime + PlayerScreen.main.Settings.VisualOffset, hit.Time);
@@ -451,8 +468,8 @@ public class LanePlayer : MonoBehaviour
         }
 
         mesh.Clear();
-        mesh.SetVertices(verts);
-        mesh.SetTriangles(tris, 0);
+        mesh.SetVertices(_verts);
+        mesh.SetTriangles(_tris, 0);
         hit.HoldMesh.mesh = mesh;
     }
 

@@ -242,6 +242,35 @@ public class PlayerInputManager : MonoBehaviour
 
     public void UpdateInput() // Main input thread
     {
+        void EnqueueHoldNote(TouchClass? touch = null, HitPlayer? hitObject = null, bool missed = false)
+        {
+            if (touch != null && touch.QueuedHit.PendingHoldQueue)
+            {
+                HoldQueue.Add(new HoldNoteClass
+                {
+                    HitObject = touch.QueuedHit,
+                    IsPlayerHolding = touch.IsHolding,
+                    HoldPassDrainValue = 1, // Little leniency won't hurt
+                    AssignedTouch = touch
+                });
+
+                Debug.Log($"Hold hitobject head handled, passing to hold queue.");
+                return;
+            }
+            
+            if (hitObject != null && hitObject.PendingHoldQueue)
+            {
+                HoldQueue.Add(new HoldNoteClass
+                {
+                    HitObject = hitObject,
+                    HoldPassDrainValue = missed ? 0 : 1,
+                });
+                
+                Debug.Log($"Hold hitobject head handled, passing to hold queue.");
+                return;
+            }
+        }
+
         double currentTimeMs = Player.CurrentTime * 1000.0;
 
         #region Unity statistics
@@ -415,214 +444,7 @@ public class PlayerInputManager : MonoBehaviour
                 if (hitobjectTimingDelta >= -window && !hitIteration.IsProcessed)
                 {
                     
-                    if (hitIteration.Current.Flickable) // Flick notes (catch/tap)
-                    {
-                        float distance = 0;
-
-                        foreach (TouchClass touch in TouchClasses)
-                        {
-                            if (touch.QueuedHit != null && !touch.Flicked) continue;
-
-                            bool isValid = false;
-
-                            switch (hitIteration.Current.Type)
-                            {
-                                case HitObject.HitType.Normal:
-                                    isValid = TapFlickVerifier(hitIteration, touch);
-                                    break;
-                                
-                                case HitObject.HitType.Catch:
-                                    isValid = FlickVerifier(hitIteration, touch);
-                                    break;
-                            }
-
-                            if (!isValid)
-                                continue;
-
-                            hitIteration.InDiscreteHitQueue = true;
-                            
-                            // Reset flick state
-                            touch.Flicked = false;
-                            touch.FlickCenter = touch.Touch.screenPosition;
-                            hitIteration.IsProcessed = true;
-
-
-                            if (hitIteration.Current.Type == HitObject.HitType.Normal)
-                            {
-                                hitIteration.IsTapped = true;
-                                touch.QueuedHitDistance = distance;
-                            }
-
-                            if (hitIteration.Current.Type == HitObject.HitType.Catch)
-                            {
-                                touch.DiscreteHitobjectIsInRange = true;
-                                touch.DiscreteHitobjectDistance = distance;
-                            }
-                        }
-
-                        #region FLICK NOTE LOCAL FUNCTION
-                        bool TapFlickVerifier(HitPlayer hitObject, TouchClass touch)
-                        {
-                            float timeDifference;
-
-                            // Shared logic from the normal tap note's
-                            if (
-                                touch.Tapped &&
-                                ( // Tap flick hitbox check
-
-                                    ( // Directional tap flick
-                                        float.IsFinite(hitObject.Current.FlickDirection) &&
-                                        (distance = Mathf.Abs((Quaternion.Euler(0, 0, hitObject.Current.FlickDirection) * (touch.Touch.startScreenPosition - hitObject.HitCoord.Position)).x)
-                                        ) < hitIteration.HitCoord.Radius + flickThreshold
-                                    ) ||
-
-                                    // Omnidirectional tap flick
-                                    (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)
-                                    ) < hitIteration.HitCoord.Radius
-                                ) &&
-                                (
-                                    !touch.QueuedHit ||
-                                    (timeDifference = hitIteration.Time - touch.QueuedHit.Time) < -1e-3f ||
-                                    (timeDifference < 1e-3f && distance < touch.QueuedHitDistance)
-                                )
-                            )
-                            {
-                                Debug.Log($"Touched {touch.Touch.finger.index} is a tap flick. Passing to main flick verifier with flick direction {touch.FlickDirection}.");
-                                return FlickVerifier(hitObject, touch, hitObject.Current.FlickDirection);
-                            }
-                            else
-                                return false;
-
-                        }
-
-                        // Applies to both tap and catch flick (main processor for distance and angle calculations)
-                        bool FlickVerifier(HitPlayer hitObject, TouchClass touch, float? angle = null)
-                        {
-
-                            
-                            if (!touch.Flicked ||
-                                hitObject.Current.Type == HitObject.HitType.Catch && // Only do range check if it's a catch-flick
-                                // None of the positions touched it :(
-                               (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)) > hitIteration.HitCoord.Radius &&
-                               Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position) 
-                               > hitIteration.HitCoord.Radius)
-                                
-                                return false;
-                            
-                            if (hitObject.Current.Type == HitObject.HitType.Normal){}
-
-                            //Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
-                            if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
-                            {
-                                float calculatedAngle = angle ?? touch.FlickDirection;
-
-                                return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
-                            }
-                            else
-                                // Omnidirectional flick (doesn't give a fuck which direction you flick)
-                                return true;
-                        }
-                        #endregion
-                        
-                    }
-                    else
-                        switch (hitIteration.Current.Type)
-                        {
-                            case HitObject.HitType.Normal:
-                                foreach (TouchClass touch in TouchClasses)
-                                {
-                                    float distance;
-
-                                    bool discreteTapProtectionPassed = false;
-
-                                    if (
-                                        touch.Tapped &&
-                                        (
-                                            distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
-                                        ) < hitIteration.HitCoord.Radius &&
-                                        (
-                                            discreteTapProtectionPassed = !( // Safeguard to prevent false 'early' taps while the player intends to catch notes
-                                                
-                                                // Status check
-                                                touch.DiscreteHitobjectIsInRange &&
-                                                touch.NearestDiscreteHitobject != null &&
-                                                touch.NearestDiscreteHitobject.Current.Type == HitObject.HitType.Catch &&
-                                                
-                                                // Only suppress if the catch note is EARLIER and likely to be triggered by this input
-                                                touch.NearestDiscreteHitobject.Time < hitIteration.Time &&
-                                                hitIteration.Time >= -Player.GoodWindow &&
-                                                
-                                                // Spatial distance comparison
-                                                Vector2.Distance(touch.Touch.screenPosition, touch.NearestDiscreteHitobject.HitCoord.Position) < distance &&
-                                                (hitIteration.Time - touch.NearestDiscreteHitobject.Time) <= Player.GoodWindow * 2
-                                            )
-                                            ||
-                                            ( // Exception clause
-                                                    
-                                                touch.DiscreteHitobjectIsInRange &&
-                                                touch.NearestDiscreteHitobject != null &&
-                                                ( // Ways that won't break the player's expectation
-                                                    Math.Abs(hitobjectTimingDelta) <= Player.PerfectWindow ||
-                                                    Mathf.Approximately(hitIteration.Time, touch.NearestDiscreteHitobject.Time) ||
-                                                    Mathf.Approximately(Vector3.Distance(hitIteration.HitCoord.Position, touch.NearestDiscreteHitobject.HitCoord.Position), hitIteration.HitCoord.Radius/2)
-                                                )
-                                            )
-                                        )&&
-                                        (
-                                            !touch.QueuedHit ||
-                                            hitIteration.Time < touch.QueuedHit.Time ||
-                                            (
-                                                Mathf.Approximately(hitIteration.Time, touch.QueuedHit.Time) &&
-                                                distance < touch.QueuedHitDistance
-                                            )
-                                        )
-                                    )
-                                    {
-                                        Debug.Log($"Touch {touch.Touch.finger.index} tapped on hitobject at {hitIteration.Time}. Adding to queue.");
-                                        touch.QueuedHit = hitIteration;
-                                        touch.QueuedHitDistance = distance;
-                                        alreadyHit = true;
-                                    }
-                                    else if (!discreteTapProtectionPassed && touch.NearestDiscreteHitobject != null)
-                                    {
-                                        Debug.Log($"Tap suppressed for hitobject at {hitIteration.Time}. \n" +
-                                                  $"At touch.NearestDiscreteHitobject.Time: {touch.NearestDiscreteHitobject.Time} < hitIteration.Time: {hitIteration.Time}. \n" +
-                                                  $"At touch.NearestDiscreteHitobject.Type: {touch.NearestDiscreteHitobject.Current.Type} \n" +
-                                                  $"At touch.NearestDiscreteHitobject.HitCoord.Position: {touch.NearestDiscreteHitobject.HitCoord.Position} < hitIteration.HitCoord.Position: {hitIteration.HitCoord.Position}.\n" +
-                                                  $"At Hit Delta {hitobjectTimingDelta} >= -{Player.GoodWindow}. \n" +
-                                                  $"At comparison of Discrete-Tap delta {hitIteration.Time - touch.NearestDiscreteHitobject.Time} < {Player.GoodWindow * 2}");
-                                    }
-                                }
-                                break;
-                            
-                            case HitObject.HitType.Catch:
-                                foreach (TouchClass touch in TouchClasses)
-                                {
-                                    float distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position);
-
-                                    if (distance < hitIteration.HitCoord.Radius)
-                                    {
-                                        bool shouldAssign = !hitIteration.InDiscreteHitQueue;  // Slow down on the assigning, due to the nature of catch notes being able to be spammed at lightspeed
-                                        // || hitIteration.Time < touch.QueuedHit.Time 
-                                        // || (
-                                        // Mathf.Approximately(hitIteration.Time, touch.QueuedHit.Time) &&
-                                        // distance < touch.DiscreteHitobjectDistance
-                                        // );
-
-                                        if (shouldAssign)
-                                        {
-                                            Debug.Log($"[Catch Note Assign] Touch {touch.Touch.finger.index} queued catch note at {hitIteration.Time} (dist: {distance})");
-
-                                            hitIteration.InDiscreteHitQueue = true;
-                                            touch.DiscreteHitobjectDistance = distance;
-                                            touch.DiscreteHitobjectIsInRange = true;
-                                            alreadyHit = true;
-                                        }
-                                    }
-
-                                }
-                                break;
-                        }
+                    HitobjectProcessor(hitIteration, flickThreshold, hitobjectTimingDelta, ref alreadyHit);
 
                     // For additional inputs
                     foreach (TouchClass touch in TouchClasses)
@@ -665,17 +487,7 @@ public class PlayerInputManager : MonoBehaviour
                         }
                         Debug.Log($"Hitobject at {hitIteration.Time} ({hitIteration.Current.Type}) missed. Radius: {hitIteration.HitCoord.Radius}, Hold? {(hitIteration.PendingHoldQueue ? "Yes": "No")}");
 
-                        if (hitIteration.PendingHoldQueue) //Pass to HoldQueue regardless
-                        {
-                            HoldQueue.Add(new HoldNoteClass
-                            {
-                                HitObject = hitIteration
-
-                            });
-                            HitQueue.Remove(hitIteration);
-
-                            Debug.Log($"Hold hitobject head handled, passing to hold queue.");
-                        }
+                        EnqueueHoldNote( null , hitIteration, true);
                     }
                 }
 
@@ -689,7 +501,7 @@ public class PlayerInputManager : MonoBehaviour
             if (HoldQueue.Count != 0) // Hold note processor
             {
 
-                //// Camera handling is done here to calculate hold note hitboxes on the fly
+                //// Camera handling and other extra stuff is done here to calculate hold note hitboxes and positions on the fly
                 //// As it has dynamic attributes as it progresses, unlike normal hitobjects.
 
                 float beat = PlayerScreen.TargetSong.Timing.ToBeat(judgementOffsetTime); // Get current BPM
@@ -886,14 +698,7 @@ public class PlayerInputManager : MonoBehaviour
                         }
                     }
 
-                    if (hitObject.PendingHoldQueue)
-                    {
-                        HoldQueue.Add(new HoldNoteClass
-                        {
-                            HitObject = hitObject,
-                            HoldPassDrainValue = 1
-                        });
-                    }
+                    EnqueueHoldNote(hitObject: hitObject);
                     
                     DiscreteHitQueue.Remove(hitObject);
                 }
@@ -918,18 +723,7 @@ public class PlayerInputManager : MonoBehaviour
                     Debug.Log($"Hit queued hitobject at {touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time} for touch {touch.Touch.finger.index}.");
                     touch.QueuedHit.IsProcessed = true; // Mark as hit
 
-                    if (touch.QueuedHit.PendingHoldQueue)
-                    {
-                        HoldQueue.Add(new HoldNoteClass
-                        {
-                            HitObject = touch.QueuedHit,
-                            IsPlayerHolding = touch.IsHolding,
-                            HoldPassDrainValue = 1, // Little leniency won't hurt
-                            AssignedTouch = touch
-                        });
-
-                        Debug.Log($"Hold hitobject head handled, passing to hold queue.");
-                    }
+                    EnqueueHoldNote(touch: touch);
 
                     touch.QueuedHit = null; // Clear the queued hit
                 }
@@ -997,5 +791,218 @@ public class PlayerInputManager : MonoBehaviour
             Delta = _deltaTime.ToString("F3") + "ms";
         }
     }
-    
+
+    private void HitobjectProcessor(HitPlayer hitIteration, float flickThreshold, float hitobjectTimingDelta, ref bool alreadyHit)
+    {
+        if (hitIteration.Current.Flickable) // Flick notes (catch/tap)
+        {
+            float distance = 0;
+
+            foreach (TouchClass touch in TouchClasses)
+            {
+                if (touch.QueuedHit != null && !touch.Flicked) continue;
+
+                bool isValid = false;
+
+                switch (hitIteration.Current.Type)
+                {
+                    case HitObject.HitType.Normal:
+                        isValid = TapFlickVerifier(hitIteration, touch);
+                        break;
+                                
+                    case HitObject.HitType.Catch:
+                        isValid = FlickVerifier(hitIteration, touch);
+                        break;
+                }
+
+                if (!isValid)
+                    continue;
+
+                hitIteration.InDiscreteHitQueue = true;
+                            
+                // Reset flick state
+                touch.Flicked = false;
+                touch.FlickCenter = touch.Touch.screenPosition;
+                hitIteration.IsProcessed = true;
+
+
+                if (hitIteration.Current.Type == HitObject.HitType.Normal)
+                {
+                    hitIteration.IsTapped = true;
+                    touch.QueuedHitDistance = distance;
+                }
+
+                if (hitIteration.Current.Type == HitObject.HitType.Catch)
+                {
+                    touch.DiscreteHitobjectIsInRange = true;
+                    touch.DiscreteHitobjectDistance = distance;
+                }
+            }
+
+            #region FLICK NOTE LOCAL FUNCTION
+            bool TapFlickVerifier(HitPlayer hitObject, TouchClass touch)
+            {
+                float timeDifference;
+
+                // Shared logic from the normal tap note's
+                if (
+                    touch.Tapped &&
+                    ( // Tap flick hitbox check
+
+                        ( // Directional tap flick
+                            float.IsFinite(hitObject.Current.FlickDirection) &&
+                            (distance = Mathf.Abs((Quaternion.Euler(0, 0, hitObject.Current.FlickDirection) * (touch.Touch.startScreenPosition - hitObject.HitCoord.Position)).x)
+                            ) < hitIteration.HitCoord.Radius + flickThreshold
+                        ) ||
+
+                        // Omnidirectional tap flick
+                        (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)
+                        ) < hitIteration.HitCoord.Radius
+                    ) &&
+                    (
+                        !touch.QueuedHit ||
+                        (timeDifference = hitIteration.Time - touch.QueuedHit.Time) < -1e-3f ||
+                        (timeDifference < 1e-3f && distance < touch.QueuedHitDistance)
+                    )
+                )
+                {
+                    Debug.Log($"Touched {touch.Touch.finger.index} is a tap flick. Passing to main flick verifier with flick direction {touch.FlickDirection}.");
+                    return FlickVerifier(hitObject, touch, hitObject.Current.FlickDirection);
+                }
+                else
+                    return false;
+
+            }
+
+            // Applies to both tap and catch flick (main processor for distance and angle calculations)
+            bool FlickVerifier(HitPlayer hitObject, TouchClass touch, float? angle = null)
+            {
+
+                            
+                if (!touch.Flicked ||
+                    hitObject.Current.Type == HitObject.HitType.Catch && // Only do range check if it's a catch-flick
+                    // None of the positions touched it :(
+                    (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)) > hitIteration.HitCoord.Radius &&
+                    Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position) 
+                    > hitIteration.HitCoord.Radius)
+                                
+                    return false;
+                            
+                if (hitObject.Current.Type == HitObject.HitType.Normal){}
+
+                //Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
+                if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
+                {
+                    float calculatedAngle = angle ?? touch.FlickDirection;
+
+                    return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
+                }
+                else
+                    // Omnidirectional flick (doesn't give a fuck which direction you flick)
+                    return true;
+            }
+            #endregion
+
+            return;
+
+        }
+
+        switch (hitIteration.Current.Type)
+        {
+            case HitObject.HitType.Normal:
+                foreach (TouchClass touch in TouchClasses)
+                {
+                    float distance;
+
+                    bool discreteTapProtectionPassed = false;
+
+                    if (
+                        touch.Tapped &&
+                        (
+                            distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
+                        ) < hitIteration.HitCoord.Radius &&
+                        (
+                            discreteTapProtectionPassed = !( // Safeguard to prevent false 'early' taps while the player intends to catch notes
+                                                
+                                  // Status check
+                                  touch.DiscreteHitobjectIsInRange &&
+                                  touch.NearestDiscreteHitobject != null &&
+                                  touch.NearestDiscreteHitobject.Current.Type == HitObject.HitType.Catch &&
+                
+                                  // Only suppress if the catch note is EARLIER and likely to be triggered by this input
+                                  touch.NearestDiscreteHitobject.Time < hitIteration.Time &&
+                                  hitIteration.Time >= -Player.GoodWindow &&
+                
+                                  // Spatial distance comparison
+                                  Vector2.Distance(touch.Touch.screenPosition, touch.NearestDiscreteHitobject.HitCoord.Position) < distance &&
+                                  (hitIteration.Time - touch.NearestDiscreteHitobject.Time) <= Player.GoodWindow * 2
+                              )
+                          ||
+                          ( // Exception clause
+                    
+                              touch.DiscreteHitobjectIsInRange &&
+                              touch.NearestDiscreteHitobject != null &&
+                              ( // Ways that won't break the player's expectation
+                                  Math.Abs(hitobjectTimingDelta) <= Player.PerfectWindow ||
+                                  Mathf.Approximately(hitIteration.Time, touch.NearestDiscreteHitobject.Time) ||
+                                  Mathf.Approximately(Vector3.Distance(hitIteration.HitCoord.Position, touch.NearestDiscreteHitobject.HitCoord.Position), hitIteration.HitCoord.Radius/2)
+                              )
+                          )
+                        )&&
+                        (
+                            !touch.QueuedHit ||
+                            hitIteration.Time < touch.QueuedHit.Time ||
+                            (
+                                Mathf.Approximately(hitIteration.Time, touch.QueuedHit.Time) &&
+                                distance < touch.QueuedHitDistance
+                            )
+                        )
+                    )
+                    {
+                        Debug.Log($"Touch {touch.Touch.finger.index} tapped on hitobject at {hitIteration.Time}. Adding to queue.");
+                        touch.QueuedHit = hitIteration;
+                        touch.QueuedHitDistance = distance;
+                        alreadyHit = true;
+                    }
+                    else if (!discreteTapProtectionPassed && touch.NearestDiscreteHitobject != null)
+                    {
+                        Debug.Log($"Tap suppressed for hitobject at {hitIteration.Time}. \n" +
+                                  $"At touch.NearestDiscreteHitobject.Time: {touch.NearestDiscreteHitobject.Time} < hitIteration.Time: {hitIteration.Time}. \n" +
+                                  $"At touch.NearestDiscreteHitobject.Type: {touch.NearestDiscreteHitobject.Current.Type} \n" +
+                                  $"At touch.NearestDiscreteHitobject.HitCoord.Position: {touch.NearestDiscreteHitobject.HitCoord.Position} < hitIteration.HitCoord.Position: {hitIteration.HitCoord.Position}.\n" +
+                                  $"At Hit Delta {hitobjectTimingDelta} >= -{Player.GoodWindow}. \n" +
+                                  $"At comparison of Discrete-Tap delta {hitIteration.Time - touch.NearestDiscreteHitobject.Time} < {Player.GoodWindow * 2}");
+                    }
+                }
+                return;
+                            
+            case HitObject.HitType.Catch:
+                foreach (TouchClass touch in TouchClasses)
+                {
+                    float distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position);
+
+                    if (distance < hitIteration.HitCoord.Radius)
+                    {
+                        bool shouldAssign = !hitIteration.InDiscreteHitQueue;  // Slow down on the assigning, due to the nature of catch notes being able to be spammed at lightspeed
+                        // || hitIteration.Time < touch.QueuedHit.Time 
+                        // || (
+                        // Mathf.Approximately(hitIteration.Time, touch.QueuedHit.Time) &&
+                        // distance < touch.DiscreteHitobjectDistance
+                        // );
+
+                        if (shouldAssign)
+                        {
+                            Debug.Log($"[Catch Note Assign] Touch {touch.Touch.finger.index} queued catch note at {hitIteration.Time} (dist: {distance})");
+
+                            hitIteration.InDiscreteHitQueue = true;
+                            touch.DiscreteHitobjectDistance = distance;
+                            touch.DiscreteHitobjectIsInRange = true;
+                            alreadyHit = true;
+                        }
+                    }
+
+                }
+                return;
+        }
+    }
 }

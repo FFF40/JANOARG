@@ -133,15 +133,31 @@ public class PlayerScreen : MonoBehaviour
         StartCoroutine(LoadChart());
     }
 
-    public IEnumerator LoadChart()
+    private int _totalObjects;
+    private int _loadedObjects;
+
+    private void Update_LoadingBarHolder(int increments, string currentProgress)
+    {
+        _loadedObjects += increments;
+        
+        SongSelectReadyScreen.main.OverallProgress.text = $"{_loadedObjects}/{_totalObjects}";
+        SongSelectReadyScreen.main.CurrentProgress.text = currentProgress;
+        
+        SongSelectReadyScreen.main.LoadProgress.value = (float)_loadedObjects / _totalObjects;
+    }
+
+    private IEnumerator LoadChart()
     {
         SongNameLabel.text       = TargetSong.SongName;
         SongArtistLabel.text     = TargetSong.SongArtist;
         
         DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
         DifficultyLabel.text     = TargetChartMeta.DifficultyLevel;
-        
 
+        SongSelectReadyScreen.main.LoadingBarHolder.gameObject.SetActive(true);
+        SongSelectReadyScreen.main.OverallProgress.text = "0/0";
+        SongSelectReadyScreen.main.CurrentProgress.text = "Loading audio file...";
+        
         string path = Path.Combine(Path.GetDirectoryName(TargetSongPath), TargetChartMeta.Target);
         Debug.Log(path);
         ResourceRequest thing = Resources.LoadAsync<ExternalChart>(path);
@@ -150,6 +166,8 @@ public class PlayerScreen : MonoBehaviour
 
         yield return new WaitUntil(() => thing.isDone && TargetSong.Clip.loadState != AudioDataLoadState.Loading);
 
+        SongSelectReadyScreen.main.CurrentProgress.text += "Done.";
+
         TargetChart = thing.asset as ExternalChart;
 
         yield return InitChart();
@@ -157,6 +175,7 @@ public class PlayerScreen : MonoBehaviour
 
     public IEnumerator InitChart()
     {
+        
         CurrentChart = TargetChart.Data.DeepClone();
         HitObjectHistory = new();
         
@@ -193,11 +212,19 @@ public class PlayerScreen : MonoBehaviour
         } 
         else 
         {
-            foreach (LaneStyle style in CurrentChart.Palette.LaneStyles) 
+            _totalObjects += CurrentChart.Palette.LaneStyles.Count + CurrentChart.Palette.HitStyles.Count + CurrentChart.Groups.Count + CurrentChart.Lanes.Count;
+
+            foreach (LaneStyle style in CurrentChart.Palette.LaneStyles)
+            {
                 LaneStyles.Add(new(style));
-            
-            foreach (HitStyle style in CurrentChart.Palette.HitStyles) 
+                Update_LoadingBarHolder(1, $"Loading lanestyle {style.Name}...({LaneStyles.Count} of {CurrentChart.Palette.LaneStyles.Count})");;
+            }
+
+            foreach (HitStyle style in CurrentChart.Palette.HitStyles)
+            {
                 HitStyles.Add(new(style));
+                Update_LoadingBarHolder(1, $"Loading hitstyle {style.Name}...({HitStyles.Count} of {CurrentChart.Palette.HitStyles.Count})");;
+            }
 
             int loadedLaneGroups = 0;
             bool[] isLoaded = new bool[TargetChart.Data.Groups.Count];
@@ -232,10 +259,12 @@ public class PlayerScreen : MonoBehaviour
                         isLoaded[i] = true;
                         loadedLaneGroups++;
                         progressMade = true;
-
-                        // Intentional throttling maybe idk
-                        //yield return new WaitForEndOfFrame();
+                        
+                        Update_LoadingBarHolder(1, $"Loading lanegroup {laneGroup.Name}...({loadedLaneGroups} of {TargetChart.Data.Groups.Count}");
                     }
+                    
+                    // Intentional throttling maybe idk
+                    yield return new WaitForEndOfFrame();
                 }
 
                 if (!progressMade)
@@ -263,6 +292,8 @@ public class PlayerScreen : MonoBehaviour
                     }
                     
                     Debug.LogError($"Failed to resolve {err} lane group dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
+                    
+                    Update_LoadingBarHolder(Math.Abs(TargetChart.Data.Groups.Count - loadedLaneGroups), $"Failed to load {err} lanegroups!");
                     
                     break;
                 }
@@ -378,7 +409,10 @@ public class PlayerScreen : MonoBehaviour
                 loadedLanes++;
                 instantiatedLane[a] = true;
                 progressMade = true;
-                //yield return new WaitForEndOfFrame();
+                
+                Update_LoadingBarHolder(1, $"Loading lane {a}...({loadedLanes} of {TargetChart.Data.Lanes.Count})");;
+                
+                yield return new WaitForEndOfFrame();
             }
             
             if (!progressMade)
@@ -406,6 +440,9 @@ public class PlayerScreen : MonoBehaviour
                 }
                 
                 Debug.LogError($"Failed to resolve {err} lane dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
+                
+                Update_LoadingBarHolder(Math.Abs(TargetChart.Data.Lanes.Count - loadedLanes), $"Failed to load {err} lanes!");
+                
                 break;
             }
         }
@@ -706,9 +743,10 @@ public class PlayerScreen : MonoBehaviour
         foreach (Graphic g in ScoreDigits) g.color = color;
         SongProgressBody.color = color * new Color (1, 1, 1, .5f);
     }
-    
-    public void InitFlickMeshes() 
+
+    private void InitFlickMeshes()
     {
+        return;
         if (!FreeFlickIndicator) 
         {
             Mesh mesh = new();
