@@ -38,17 +38,22 @@ public class Chart : IDeepClonable<Chart>
     {
         Chart clone = new()
         {
-            DifficultyName = DifficultyName,
+            DifficultyName  = DifficultyName,
             DifficultyLevel = DifficultyLevel,
             DifficultyIndex = DifficultyIndex,
-            ChartConstant = ChartConstant,
-            Camera = Camera.DeepClone(),
-            Palette = Palette.DeepClone(),
-            CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
-            CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z),
+            ChartConstant   = ChartConstant,
+            Camera          = Camera.DeepClone(),
+            Palette         = Palette.DeepClone(),
+            CameraPivot     = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
+            CameraRotation  = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z),
         };
-        foreach (LaneGroup group in Groups) clone.Groups.Add(group.DeepClone());
-        foreach (Lane lane in Lanes) clone.Lanes.Add(lane.DeepClone());
+        
+        foreach (LaneGroup group in Groups) 
+            clone.Groups.Add(group.DeepClone());
+        
+        foreach (Lane lane in Lanes) 
+            clone.Lanes.Add(lane.DeepClone());
+        
         return clone;
     }
 }
@@ -61,56 +66,69 @@ public class CameraController : Storyboardable, IDeepClonable<CameraController> 
     
     public new static TimestampType[] TimestampTypes = 
     {
-        new() {
-            ID = "CameraPivot_X",
+        #region Camera Pivot
+        new() 
+        {
+            ID   = "CameraPivot_X",
             Name = "Camera Pivot X",
-            Get = (x) => ((CameraController)x).CameraPivot.x,
-            Set = (x, a) => { ((CameraController)x).CameraPivot.x = a; },
+            Get  = (x) => ((CameraController)x).CameraPivot.x,
+            Set  = (x, a) => { ((CameraController)x).CameraPivot.x = a; },
         },
-        new() {
-            ID = "CameraPivot_Y",
+        new() 
+        {
+            ID   = "CameraPivot_Y",
             Name = "Camera Pivot Y",
-            Get = (x) => ((CameraController)x).CameraPivot.y,
-            Set = (x, a) => { ((CameraController)x).CameraPivot.y = a; },
+            Get  = (x) => ((CameraController)x).CameraPivot.y,
+            Set  = (x, a) => { ((CameraController)x).CameraPivot.y = a; },
         },
-        new() {
-            ID = "CameraPivot_Z",
+        new() 
+        {
+            ID   = "CameraPivot_Z",
             Name = "Camera Pivot Z",
-            Get = (x) => ((CameraController)x).CameraPivot.z,
-            Set = (x, a) => { ((CameraController)x).CameraPivot.z = a; },
+            Get  = (x) => ((CameraController)x).CameraPivot.z,
+            Set  = (x, a) => { ((CameraController)x).CameraPivot.z = a; },
         },
-        new() {
-            ID = "PivotDistance",
+        #endregion
+        
+        new()
+        {
+            ID   = "PivotDistance",
             Name = "Pivot Distance",
-            Get = (x) => ((CameraController)x).PivotDistance,
-            Set = (x, a) => { ((CameraController)x).PivotDistance = a; },
+            Get  = (x) => ((CameraController)x).PivotDistance,
+            Set  = (x, a) => { ((CameraController)x).PivotDistance = a; },
         },
-        new() {
-            ID = "CameraRotation_X",
+        
+        #region Camera Rotation
+        new() 
+        {
+            ID   = "CameraRotation_X",
             Name = "Camera Rotation X",
-            Get = (x) => ((CameraController)x).CameraRotation.x,
-            Set = (x, a) => { ((CameraController)x).CameraRotation.x = a; },
+            Get  = (x) => ((CameraController)x).CameraRotation.x,
+            Set  = (x, a) => { ((CameraController)x).CameraRotation.x = a; },
         },
-        new() {
-            ID = "CameraRotation_Y",
+        new() 
+        {
+            ID   = "CameraRotation_Y",
             Name = "Camera Rotation Y",
-            Get = (x) => ((CameraController)x).CameraRotation.y,
-            Set = (x, a) => { ((CameraController)x).CameraRotation.y = a; },
+            Get  = (x) => ((CameraController)x).CameraRotation.y,
+            Set  = (x, a) => { ((CameraController)x).CameraRotation.y = a; },
         },
-        new() {
-            ID = "CameraRotation_Z",
+        new() 
+        {
+            ID   = "CameraRotation_Z",
             Name = "Camera Rotation Z",
-            Get = (x) => ((CameraController)x).CameraRotation.z,
-            Set = (x, a) => { ((CameraController)x).CameraRotation.z = a; },
+            Get  = (x) => ((CameraController)x).CameraRotation.z,
+            Set  = (x, a) => { ((CameraController)x).CameraRotation.z = a; },
         },
+        #endregion
     };
     
     public CameraController DeepClone()
     {
         CameraController clone = new()
         {
-            Storyboard = Storyboard.DeepClone(),
-            CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
+            Storyboard     = Storyboard.DeepClone(),
+            CameraPivot    = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
             CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z),
         };
         return clone;
@@ -129,48 +147,60 @@ public class Palette : Storyboardable, IDeepClonable<Palette>  {
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new() {
-            ID = "BackgroundColor_R",
+        #region Background Color (RGB)
+        new() 
+        {
+            ID   = "BackgroundColor_R",
             Name = "Background Color R",
-            Get = (x) => ((Palette)x).BackgroundColor.r,
-            Set = (x, a) => { ((Palette)x).BackgroundColor.r = a; },
+            Get  = (x) => ((Palette)x).BackgroundColor.r,
+            Set  = (x, a) => { ((Palette)x).BackgroundColor.r = a; },
         },
-        new() {
-            ID = "BackgroundColor_G",
+        new() 
+        {
+            ID   = "BackgroundColor_G",
             Name = "Background Color G",
-            Get = (x) => ((Palette)x).BackgroundColor.g,
-            Set = (x, a) => { ((Palette)x).BackgroundColor.g = a; },
+            Get  = (x) => ((Palette)x).BackgroundColor.g,
+            Set  = (x, a) => { ((Palette)x).BackgroundColor.g = a; },
         },
-        new() {
-            ID = "BackgroundColor_B",
+        new()
+        {
+            ID   = "BackgroundColor_B",
             Name = "Background Color B",
-            Get = (x) => ((Palette)x).BackgroundColor.b,
-            Set = (x, a) => { ((Palette)x).BackgroundColor.b = a; },
+            Get  = (x) => ((Palette)x).BackgroundColor.b,
+            Set  = (x, a) => { ((Palette)x).BackgroundColor.b = a; },
         },
-        new() {
-            ID = "InterfaceColor_R",
+        #endregion
+        
+        #region Interface Color (RGBA)
+        new()
+        {
+            ID   = "InterfaceColor_R",
             Name = "Interface Color R",
-            Get = (x) => ((Palette)x).InterfaceColor.r,
-            Set = (x, a) => { ((Palette)x).InterfaceColor.r = a; },
+            Get  = (x) => ((Palette)x).InterfaceColor.r,
+            Set  = (x, a) => { ((Palette)x).InterfaceColor.r = a; },
         },
-        new() {
-            ID = "InterfaceColor_G",
+        new() 
+        {
+            ID   = "InterfaceColor_G",
             Name = "Interface Color G",
-            Get = (x) => ((Palette)x).InterfaceColor.g,
-            Set = (x, a) => { ((Palette)x).InterfaceColor.g = a; },
+            Get  = (x) => ((Palette)x).InterfaceColor.g,
+            Set  = (x, a) => { ((Palette)x).InterfaceColor.g = a; },
         },
-        new() {
-            ID = "InterfaceColor_B",
+        new() 
+        {
+            ID   = "InterfaceColor_B",
             Name = "Interface Color B",
-            Get = (x) => ((Palette)x).InterfaceColor.b,
-            Set = (x, a) => { ((Palette)x).InterfaceColor.b = a; },
+            Get  = (x) => ((Palette)x).InterfaceColor.b,
+            Set  = (x, a) => { ((Palette)x).InterfaceColor.b = a; },
         },
-        new() {
-            ID = "InterfaceColor_A",
+        new() 
+        {
+            ID   = "InterfaceColor_A",
             Name = "Interface Color A",
-            Get = (x) => ((Palette)x).InterfaceColor.a,
-            Set = (x, a) => { ((Palette)x).InterfaceColor.a = a; },
+            Get  = (x) => ((Palette)x).InterfaceColor.a,
+            Set  = (x, a) => { ((Palette)x).InterfaceColor.a = a; },
         },
+        #endregion
     };
 
     public Palette DeepClone()
@@ -202,67 +232,80 @@ public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle>
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new() {
-            ID = "LaneColor_R",
+        #region Lane Color
+        new() 
+        {
+            ID   = "LaneColor_R",
             Name = "Lane Color R",
-            Get = (x) => ((LaneStyle)x).LaneColor.r,
-            Set = (x, a) => { ((LaneStyle)x).LaneColor.r = a; },
+            Get  = (x) => ((LaneStyle)x).LaneColor.r,
+            Set  = (x, a) => { ((LaneStyle)x).LaneColor.r = a; },
         },
-        new() {
-            ID = "LaneColor_G",
+        new() 
+        {
+            ID   = "LaneColor_G",
             Name = "Lane Color G",
-            Get = (x) => ((LaneStyle)x).LaneColor.g,
-            Set = (x, a) => { ((LaneStyle)x).LaneColor.g = a; },
+            Get  = (x) => ((LaneStyle)x).LaneColor.g,
+            Set  = (x, a) => { ((LaneStyle)x).LaneColor.g = a; },
         },
-        new() {
-            ID = "LaneColor_B",
+        new() 
+        {
+            ID   = "LaneColor_B",
             Name = "Lane Color B",
-            Get = (x) => ((LaneStyle)x).LaneColor.b,
-            Set = (x, a) => { ((LaneStyle)x).LaneColor.b = a; },
+            Get  = (x) => ((LaneStyle)x).LaneColor.b,
+            Set  = (x, a) => { ((LaneStyle)x).LaneColor.b = a; },
         },
-        new() {
-            ID = "LaneColor_A",
+        new()
+        {
+            ID   = "LaneColor_A",
             Name = "Lane Color A",
-            Get = (x) => ((LaneStyle)x).LaneColor.a,
-            Set = (x, a) => { ((LaneStyle)x).LaneColor.a = a; },
+            Get  = (x) => ((LaneStyle)x).LaneColor.a,
+            Set  = (x, a) => { ((LaneStyle)x).LaneColor.a = a; },
         },
-        new() {
-            ID = "JudgeColor_R",
+        #endregion
+        
+        #region Judgeline Color
+        new() 
+        {
+            ID   = "JudgeColor_R",
             Name = "Judge Color R",
-            Get = (x) => ((LaneStyle)x).JudgeColor.r,
-            Set = (x, a) => { ((LaneStyle)x).JudgeColor.r = a; },
+            Get  = (x) => ((LaneStyle)x).JudgeColor.r,
+            Set  = (x, a) => { ((LaneStyle)x).JudgeColor.r = a; },
         },
-        new() {
-            ID = "JudgeColor_G",
+        new() 
+        {
+            ID   = "JudgeColor_G",
             Name = "Judge Color G",
-            Get = (x) => ((LaneStyle)x).JudgeColor.g,
-            Set = (x, a) => { ((LaneStyle)x).JudgeColor.g = a; },
+            Get  = (x) => ((LaneStyle)x).JudgeColor.g,
+            Set  = (x, a) => { ((LaneStyle)x).JudgeColor.g = a; },
         },
-        new() {
-            ID = "JudgeColor_B",
+        new()
+        {
+            ID   = "JudgeColor_B",
             Name = "Judge Color B",
-            Get = (x) => ((LaneStyle)x).JudgeColor.b,
-            Set = (x, a) => { ((LaneStyle)x).JudgeColor.b = a; },
+            Get  = (x) => ((LaneStyle)x).JudgeColor.b,
+            Set  = (x, a) => { ((LaneStyle)x).JudgeColor.b = a; },
         },
-        new() {
-            ID = "JudgeColor_A",
+        new()
+        {
+            ID   = "JudgeColor_A",
             Name = "Judge Color A",
-            Get = (x) => ((LaneStyle)x).JudgeColor.a,
-            Set = (x, a) => { ((LaneStyle)x).JudgeColor.a = a; },
+            Get  = (x) => ((LaneStyle)x).JudgeColor.a,
+            Set  = (x, a) => { ((LaneStyle)x).JudgeColor.a = a; },
         },
+        #endregion
     };
 
     public LaneStyle DeepClone()
     {
         LaneStyle clone = new()
         {
-            LaneMaterial = LaneMaterial,
-            LaneColorTarget = LaneColorTarget,
-            LaneColor = new Color(LaneColor.r, LaneColor.g, LaneColor.b, LaneColor.a),
-            JudgeMaterial = JudgeMaterial,
+            LaneMaterial     = LaneMaterial,
+            LaneColorTarget  = LaneColorTarget,
+            LaneColor        = new Color(LaneColor.r, LaneColor.g, LaneColor.b, LaneColor.a),
+            JudgeMaterial    = JudgeMaterial,
             JudgeColorTarget = JudgeColorTarget,
-            JudgeColor = new Color(JudgeColor.r, JudgeColor.g, JudgeColor.b, JudgeColor.a),
-            Storyboard = Storyboard.DeepClone(),
+            JudgeColor       = new Color(JudgeColor.r, JudgeColor.g, JudgeColor.b, JudgeColor.a),
+            Storyboard       = Storyboard.DeepClone(),
         };
         return clone;
     }
@@ -283,92 +326,112 @@ public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
     public Color HoldTailColor = Color.black;
 
     public new static TimestampType[] TimestampTypes = {
-        new() {
-            ID = "NormalColor_R",
+        #region Tap Note Color
+        new() 
+        {
+            ID   = "NormalColor_R",
             Name = "Normal Color R",
-            Get = (x) => ((HitStyle)x).NormalColor.r,
-            Set = (x, a) => { ((HitStyle)x).NormalColor.r = a; },
+            Get  = (x) => ((HitStyle)x).NormalColor.r,
+            Set  = (x, a) => { ((HitStyle)x).NormalColor.r = a; },
         },
-        new() {
-            ID = "NormalColor_G",
+        new()
+        {
+            ID   = "NormalColor_G",
             Name = "Normal Color G",
-            Get = (x) => ((HitStyle)x).NormalColor.g,
-            Set = (x, a) => { ((HitStyle)x).NormalColor.g = a; },
+            Get  = (x) => ((HitStyle)x).NormalColor.g,
+            Set  = (x, a) => { ((HitStyle)x).NormalColor.g = a; },
         },
         new() {
-            ID = "NormalColor_B",
+            
+            ID   = "NormalColor_B",
             Name = "Normal Color B",
-            Get = (x) => ((HitStyle)x).NormalColor.b,
-            Set = (x, a) => { ((HitStyle)x).NormalColor.b = a; },
+            Get  = (x) => ((HitStyle)x).NormalColor.b,
+            Set  = (x, a) => { ((HitStyle)x).NormalColor.b = a; },
         },
-        new() {
-            ID = "NormalColor_A",
+        new() 
+        {
+            ID   = "NormalColor_A",
             Name = "Normal Color A",
-            Get = (x) => ((HitStyle)x).NormalColor.a,
-            Set = (x, a) => { ((HitStyle)x).NormalColor.a = a; },
+            Get  = (x) => ((HitStyle)x).NormalColor.a,
+            Set  = (x, a) => { ((HitStyle)x).NormalColor.a = a; },
         },
-        new() {
-            ID = "CatchColor_R",
+        #endregion
+        
+        #region Catch Note Color
+        new()
+        {
+            ID   = "CatchColor_R",
             Name = "Catch Color R",
-            Get = (x) => ((HitStyle)x).CatchColor.r,
-            Set = (x, a) => { ((HitStyle)x).CatchColor.r = a; },
+            Get  = (x) => ((HitStyle)x).CatchColor.r,
+            Set  = (x, a) => { ((HitStyle)x).CatchColor.r = a; },
         },
-        new() {
-            ID = "CatchColor_G",
+        new() 
+        {
+            ID   = "CatchColor_G",
             Name = "Catch Color G",
-            Get = (x) => ((HitStyle)x).CatchColor.g,
-            Set = (x, a) => { ((HitStyle)x).CatchColor.g = a; },
+            Get  = (x) => ((HitStyle)x).CatchColor.g,
+            Set  = (x, a) => { ((HitStyle)x).CatchColor.g = a; },
         },
-        new() {
-            ID = "CatchColor_B",
+        new() 
+        {
+            ID   = "CatchColor_B",
             Name = "Catch Color B",
-            Get = (x) => ((HitStyle)x).CatchColor.b,
-            Set = (x, a) => { ((HitStyle)x).CatchColor.b = a; },
+            Get  = (x) => ((HitStyle)x).CatchColor.b,
+            Set  = (x, a) => { ((HitStyle)x).CatchColor.b = a; },
         },
-        new() {
-            ID = "CatchColor_A",
+        new() 
+        {
+            ID   = "CatchColor_A",
             Name = "Catch Color A",
-            Get = (x) => ((HitStyle)x).CatchColor.a,
-            Set = (x, a) => { ((HitStyle)x).CatchColor.a = a; },
+            Get  = (x) => ((HitStyle)x).CatchColor.a,
+            Set  = (x, a) => { ((HitStyle)x).CatchColor.a = a; },
         },
-        new() {
-            ID = "HoldTailColor_R",
+        #endregion
+        
+        #region Hold Note Color (Tail)
+        new() 
+        {
+            ID   = "HoldTailColor_R",
             Name = "Hold Tail Color R",
-            Get = (x) => ((HitStyle)x).HoldTailColor.r,
-            Set = (x, a) => { ((HitStyle)x).HoldTailColor.r = a; },
+            Get  = (x) => ((HitStyle)x).HoldTailColor.r,
+            Set  = (x, a) => { ((HitStyle)x).HoldTailColor.r = a; },
         },
-        new() {
-            ID = "HoldTailColor_G",
+        new() 
+        {
+            ID   = "HoldTailColor_G",
             Name = "Hold Tail Color G",
-            Get = (x) => ((HitStyle)x).HoldTailColor.g,
-            Set = (x, a) => { ((HitStyle)x).HoldTailColor.g = a; },
+            Get  = (x) => ((HitStyle)x).HoldTailColor.g,
+            Set  = (x, a) => { ((HitStyle)x).HoldTailColor.g = a; },
         },
-        new() {
-            ID = "HoldTailColor_B",
+        new() 
+        {
+            ID   = "HoldTailColor_B",
             Name = "Hold Tail Color B",
-            Get = (x) => ((HitStyle)x).HoldTailColor.b,
-            Set = (x, a) => { ((HitStyle)x).HoldTailColor.b = a; },
+            Get  = (x) => ((HitStyle)x).HoldTailColor.b,
+            Set  = (x, a) => { ((HitStyle)x).HoldTailColor.b = a; },
         },
-        new() {
-            ID = "HoldTailColor_A",
+        new() 
+        {
+            ID   = "HoldTailColor_A",
             Name = "Hold Tail Color A",
-            Get = (x) => ((HitStyle)x).HoldTailColor.a,
-            Set = (x, a) => { ((HitStyle)x).HoldTailColor.a = a; },
+            Get  = (x) => ((HitStyle)x).HoldTailColor.a,
+            Set  = (x, a) => { ((HitStyle)x).HoldTailColor.a = a; },
         },
+        #endregion
     };
 
     public HitStyle DeepClone()
     {
         HitStyle clone = new()
         {
-            MainMaterial = MainMaterial,
-            MainColorTarget = MainColorTarget,
-            NormalColor = new Color(NormalColor.r, NormalColor.g, NormalColor.b, NormalColor.a),
-            CatchColor = new Color(CatchColor.r, CatchColor.g, CatchColor.b, CatchColor.a),
-            HoldTailMaterial = HoldTailMaterial,
+            MainMaterial        = MainMaterial,
+            MainColorTarget     = MainColorTarget,
+            NormalColor         = new Color(NormalColor.r, NormalColor.g, NormalColor.b, NormalColor.a),
+            CatchColor          = new Color(CatchColor.r, CatchColor.g, CatchColor.b, CatchColor.a),
+            HoldTailMaterial    = HoldTailMaterial,
             HoldTailColorTarget = HoldTailColorTarget,
-            HoldTailColor = new Color(HoldTailColor.r, HoldTailColor.g, HoldTailColor.b, HoldTailColor.a),
-            Storyboard = Storyboard.DeepClone(),
+            HoldTailColor       = new Color(HoldTailColor.r, HoldTailColor.g, HoldTailColor.b, HoldTailColor.a),
+            Storyboard          = Storyboard.DeepClone(),
         };
         return clone;
     }
@@ -383,6 +446,7 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     public string Group;
 
     public new static TimestampType[] TimestampTypes = {
+        #region Position
         new() {
             ID = "Position_X",
             Name = "Position X",
@@ -401,6 +465,9 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
             Get = (x) => ((LaneGroup)x).Position.z,
             Set = (x, a) => { ((LaneGroup)x).Position.z = a; },
         },
+        #endregion
+        
+        #region Rotation
         new() {
             ID = "Rotation_X",
             Name = "Rotation X",
@@ -419,16 +486,18 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
             Get = (x) => ((LaneGroup)x).Rotation.z,
             Set = (x, a) => { ((LaneGroup)x).Rotation.z = a; },
         },
+        #endregion
     };
 
     public LaneGroup DeepClone()
     {
         LaneGroup clone = new()
         {
-            Name = Name,
-            Position = new Vector3(Position.x, Position.y, Position.z),
-            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            Name       = Name,
+            Position   = new Vector3(Position.x, Position.y, Position.z),
+            Rotation   = new Vector3(Rotation.x, Rotation.y, Rotation.z),
             Storyboard = Storyboard.DeepClone(),
+            Group      = Group
         };
         return clone;
     }
@@ -437,8 +506,8 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
 [System.Serializable]
 public class LanePosition
 {
-    public Vector2 StartPos;
-    public Vector2 EndPos;
+    [FormerlySerializedAs("StartPos")] public Vector2 StartPosition;
+    [FormerlySerializedAs("EndPos")]   public Vector2 EndPosition;
     public float Offset;
 }
 
@@ -466,118 +535,131 @@ public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
         List<LaneStep> steps = new();
         for (int a = 0; a < LaneSteps.Count; a++) 
         {
-            LaneStep step = (LaneStep)LaneSteps[a].Get(laneTime);
+            LaneStep step = (LaneStep)LaneSteps[a].GetStoryboardableObject(laneTime);
             steps.Add(step);
 
             float t = timing.ToSeconds(step.Offset);
             offset += step.Speed * (Mathf.Max(t, laneTimeT) - curtime);
             curtime = Mathf.Max(t, laneTimeT);
 
-            if (time == step.Offset) return new LanePosition 
+            if (Mathf.Approximately(time, step.Offset)) return new LanePosition 
             {
-                StartPos = step.StartPos,
-                EndPos = step.EndPos,
-                Offset = laneTime < time ? offset : float.NaN,
+                StartPosition = step.StartPos,
+                EndPosition   = step.EndPos,
+                Offset   = laneTime < time ? offset : float.NaN,
             };
             else if (time < step.Offset) 
             {
                 if (a == 0) return new LanePosition 
                 {
-                    StartPos = step.StartPos,
-                    EndPos = step.EndPos,
-                    Offset = laneTime < time ? offset : float.NaN,
+                    StartPosition = step.StartPos,
+                    EndPosition   = step.EndPos,
+                    Offset   = laneTime < time ? offset : float.NaN,
                 };
 
-                LaneStep prev = steps[a - 1];
-                float p = (time - prev.Offset) / (step.Offset - prev.Offset);
+                LaneStep previousStep = steps[a - 1];
+                float percentageDifference = (time - previousStep.Offset) / (step.Offset - previousStep.Offset);
 
                 if (step.IsLinear)
-                {
                     return new LanePosition 
                     {
-                        StartPos = Vector2.LerpUnclamped(prev.StartPos, step.StartPos, p),
-                        EndPos = Vector2.LerpUnclamped(prev.EndPos, step.EndPos, p),
-                        Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
+                        StartPosition = Vector2.LerpUnclamped(previousStep.StartPos, step.StartPos, percentageDifference),
+                        EndPosition   = Vector2.LerpUnclamped(previousStep.EndPos, step.EndPos, percentageDifference),
+                        Offset   = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
                     };
-                }
                 else 
-                {
-                    
                     return new LanePosition 
                     {
-                        StartPos = new Vector2(Mathf.LerpUnclamped(prev.StartPos.x, step.StartPos.x, step.StartEaseX.Get(p)),
-                            Mathf.LerpUnclamped(prev.StartPos.y, step.StartPos.y, step.StartEaseY.Get(p))),
-                        EndPos = new Vector2(Mathf.LerpUnclamped(prev.EndPos.x, step.EndPos.x, step.EndEaseX.Get(p)),
-                            Mathf.LerpUnclamped(prev.EndPos.y, step.EndPos.y, step.EndEaseY.Get(p))),
+                        StartPosition = new Vector2(Mathf.LerpUnclamped(previousStep.StartPos.x, step.StartPos.x, step.StartEaseX.Get(percentageDifference)),
+                            Mathf.LerpUnclamped(previousStep.StartPos.y, step.StartPos.y, step.StartEaseY.Get(percentageDifference))),
+                        EndPosition = new Vector2(Mathf.LerpUnclamped(previousStep.EndPos.x, step.EndPos.x, step.EndEaseX.Get(percentageDifference)),
+                            Mathf.LerpUnclamped(previousStep.EndPos.y, step.EndPos.y, step.EndEaseY.Get(percentageDifference))),
                         Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN,
                     };
-                }
             }
             
         }
         {
-            float t = timing.ToSeconds(steps[steps.Count - 1].Offset);
+            // Array[^x] == Array[Array.Count - x]
+            float t = timing.ToSeconds(steps[^1].Offset);
             return new LanePosition 
             {
-                StartPos = steps[steps.Count - 1].StartPos,
-                EndPos = steps[steps.Count - 1].EndPos,
-                Offset = laneTime < time ? offset + (timeT - t) * LaneSteps[LaneSteps.Count - 1].Speed : float.NaN,
+                StartPosition = steps[^1].StartPos,
+                EndPosition = steps[^1].EndPos,
+                Offset = laneTime < time ? offset + (timeT - t) * LaneSteps[^1].Speed : float.NaN,
             };
         }
     }
-
+    
+    // More as offset
     public new static TimestampType[] TimestampTypes = 
     {
-        new() {
-            ID = "Offset_X",
+        #region Position
+        new()
+        {
+            ID   = "Offset_X",
             Name = "Position X",
-            Get = (x) => ((Lane)x).Position.x,
-            Set = (x, a) => { ((Lane)x).Position.x = a; },
+            Get  = (x) => ((Lane)x).Position.x,
+            Set  = (x, a) => { ((Lane)x).Position.x = a; },
         },
-        new() {
-            ID = "Offset_Y",
+        new() 
+        {
+            ID   = "Offset_Y",
             Name = "Position Y",
-            Get = (x) => ((Lane)x).Position.y,
-            Set = (x, a) => { ((Lane)x).Position.y = a; },
+            Get  = (x) => ((Lane)x).Position.y,
+            Set  = (x, a) => { ((Lane)x).Position.y = a; },
         },
-        new() {
-            ID = "Offset_Z",
+        new() 
+        {
+            ID   = "Offset_Z",
             Name = "Position Z",
-            Get = (x) => ((Lane)x).Position.z,
-            Set = (x, a) => { ((Lane)x).Position.z = a; },
+            Get  = (x) => ((Lane)x).Position.z,
+            Set  = (x, a) => { ((Lane)x).Position.z = a; },
         },
-        new() {
-            ID = "OffsetRotation_X",
+        #endregion
+        
+        #region Rotation
+        new()
+        {
+            ID   = "OffsetRotation_X",
             Name = "Rotation X",
-            Get = (x) => ((Lane)x).Rotation.x,
-            Set = (x, a) => { ((Lane)x).Rotation.x = a; },
+            Get  = (x) => ((Lane)x).Rotation.x,
+            Set  = (x, a) => { ((Lane)x).Rotation.x = a; },
         },
-        new() {
-            ID = "OffsetRotation_Y",
+        new() 
+        {
+            ID   = "OffsetRotation_Y",
             Name = "Rotation Y",
-            Get = (x) => ((Lane)x).Rotation.y,
-            Set = (x, a) => { ((Lane)x).Rotation.y = a; },
+            Get  = (x) => ((Lane)x).Rotation.y,
+            Set  = (x, a) => { ((Lane)x).Rotation.y = a; },
         },
-        new() {
-            ID = "OffsetRotation_Z",
+        new() 
+        {
+            ID   = "OffsetRotation_Z",
             Name = "Rotation Z",
-            Get = (x) => ((Lane)x).Rotation.z,
-            Set = (x, a) => { ((Lane)x).Rotation.z = a; },
+            Get  = (x) => ((Lane)x).Rotation.z,
+            Set  = (x, a) => { ((Lane)x).Rotation.z = a; },
         },
+        #endregion
     };
 
     public Lane DeepClone()
     {
         Lane clone = new()
         {
-            Position = new Vector3(Position.x, Position.y, Position.z),
-            Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
-            Group = Group,
+            Position   = new Vector3(Position.x, Position.y, Position.z),
+            Rotation   = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+            Group      = Group,
             StyleIndex = StyleIndex,
             Storyboard = Storyboard.DeepClone(),
         };
-        foreach (HitObject obj in Objects) clone.Objects.Add(obj.DeepClone());
-        foreach (LaneStep step in LaneSteps) clone.LaneSteps.Add(step.DeepClone());
+        
+        foreach (HitObject obj in Objects)   
+            clone.Objects.Add(obj.DeepClone());
+        
+        foreach (LaneStep step in LaneSteps) 
+            clone.LaneSteps.Add(step.DeepClone());
+        
         return clone;
     }
 }
@@ -586,53 +668,72 @@ public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
 public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep> 
 {
     public BeatPosition Offset = new();
+    
     public Vector2 StartPos;
-    [SerializeReference]
-    public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
-    [SerializeReference]
-    public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference] public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference] public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    
     public Vector2 EndPos;
-    [SerializeReference]
-    public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
-    [SerializeReference]
-    public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference] public IEaseDirective EndEaseX   = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    [SerializeReference] public IEaseDirective EndEaseY   = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+    
     public float Speed = 1;
 
     public bool IsLinear => 
-        StartEaseX is BasicEaseDirective sx && StartEaseY is BasicEaseDirective sy && EndEaseX is BasicEaseDirective ex && EndEaseY is BasicEaseDirective ey &&
-        sx.Function == EaseFunction.Linear && sy.Function == EaseFunction.Linear && ex.Function == EaseFunction.Linear && ey.Function == EaseFunction.Linear;
+        StartEaseX is BasicEaseDirective startEaseX && 
+        StartEaseY is BasicEaseDirective startEaseY && 
+        
+        EndEaseX   is BasicEaseDirective endEaseX && 
+        EndEaseY   is BasicEaseDirective endEaseY &&
+        
+        startEaseX.Function == EaseFunction.Linear && 
+        startEaseY.Function == EaseFunction.Linear && 
+        
+        endEaseX.Function   == EaseFunction.Linear && 
+        endEaseY.Function   == EaseFunction.Linear;
 
     public new static TimestampType[] TimestampTypes = 
     {
-        new() {
-            ID = "StartPos_X",
+        #region Start Position
+        new() 
+        {
+            ID   = "StartPos_X",
             Name = "Start Position X",
-            Get = (x) => ((LaneStep)x).StartPos.x,
-            Set = (x, a) => { ((LaneStep)x).StartPos.x = a; },
+            Get  = (x) => ((LaneStep)x).StartPos.x,
+            Set  = (x, a) => { ((LaneStep)x).StartPos.x = a; },
         },
-        new() {
-            ID = "StartPos_Y",
+        new() 
+        {
+            ID   = "StartPos_Y",
             Name = "Start Position Y",
-            Get = (x) => ((LaneStep)x).StartPos.y,
-            Set = (x, a) => { ((LaneStep)x).StartPos.y = a; },
+            Get  = (x) => ((LaneStep)x).StartPos.y,
+            Set  = (x, a) => { ((LaneStep)x).StartPos.y = a; },
         },
-        new() {
-            ID = "EndPos_X",
+        #endregion
+        
+        #region End Position
+        new()
+        {
+            ID   = "EndPos_X",
             Name = "End Position X",
-            Get = (x) => ((LaneStep)x).EndPos.x,
-            Set = (x, a) => { ((LaneStep)x).EndPos.x = a; },
+            Get  = (x) => ((LaneStep)x).EndPos.x,
+            Set  = (x, a) => { ((LaneStep)x).EndPos.x = a; },
         },
-        new() {
-            ID = "EndPos_Y",
+        new()
+        {
+            ID   = "EndPos_Y",
             Name = "End Position Y",
-            Get = (x) => ((LaneStep)x).EndPos.y,
-            Set = (x, a) => { ((LaneStep)x).EndPos.y = a; },
+            Get  = (x) => ((LaneStep)x).EndPos.y,
+            Set  = (x, a) => { ((LaneStep)x).EndPos.y = a; },
         },
-        new() {
-            ID = "Speed",
+        #endregion
+        
+        new() 
+        {
+            ID   = "Speed",
             Name = "Speed",
-            Get = (x) => ((LaneStep)x).Speed,
-            Set = (x, a) => { ((LaneStep)x).Speed = a; },
+            Get  = (x) => ((LaneStep)x).Speed,
+            Set  = (x, a) => { ((LaneStep)x).Speed = a; },
         },
     };
     
@@ -640,14 +741,14 @@ public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep>
     {
         LaneStep clone = new()
         {
-            Offset = Offset,
-            StartPos = new Vector2(StartPos.x, StartPos.y),
+            Offset     = Offset,
+            StartPos   = new Vector2(StartPos.x, StartPos.y),
             StartEaseX = StartEaseX,
             StartEaseY = StartEaseY,
-            EndPos = new Vector2(EndPos.x, EndPos.y),
-            EndEaseX = EndEaseX,
-            EndEaseY = EndEaseY,
-            Speed = Speed,
+            EndPos     = new Vector2(EndPos.x, EndPos.y),
+            EndEaseX   = EndEaseX,
+            EndEaseY   = EndEaseY,
+            Speed      = Speed,
             Storyboard = Storyboard.DeepClone(),
         };
         return clone;
@@ -676,16 +777,16 @@ public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
     public new static TimestampType[] TimestampTypes = 
     {
         new() {
-            ID = "Position",
+            ID   = "Position",
             Name = "Position",
-            Get = (x) => ((HitObject)x).Position,
-            Set = (x, a) => { ((HitObject)x).Position = a; },
+            Get  = (x) => ((HitObject)x).Position,
+            Set  = (x, a) => { ((HitObject)x).Position = a; },
         },
         new() {
-            ID = "Length",
+            ID   = "Length",
             Name = "Length",
-            Get = (x) => ((HitObject)x).Length,
-            Set = (x, a) => { ((HitObject)x).Length = a; },
+            Get  = (x) => ((HitObject)x).Length,
+            Set  = (x, a) => { ((HitObject)x).Length = a; },
         },
     };
     
@@ -693,15 +794,15 @@ public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
     {
         HitObject clone = new()
         {
-            Type = Type,
-            Offset = Offset,
-            Position = Position,
-            Length = Length,
-            HoldLength = HoldLength,
-            Flickable = Flickable,
+            Type           = Type,
+            Offset         = Offset,
+            Position       = Position,
+            Length         = Length,
+            HoldLength     = HoldLength,
+            Flickable      = Flickable,
             FlickDirection = FlickDirection,
-            StyleIndex = StyleIndex,
-            Storyboard = Storyboard.DeepClone(),
+            StyleIndex     = StyleIndex,
+            Storyboard     = Storyboard.DeepClone(),
         };
         return clone;
     }

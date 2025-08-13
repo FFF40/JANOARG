@@ -161,6 +161,7 @@ public class PlayerScreenResult : MonoBehaviour
 
     IEnumerator ResultAnim()
     {
+        PlayerScreen.main.ResultExec = false;
         PlayerScreen.main.IsPlaying = false;
         FanfareSource.clip = Fanfare;
         FanfareSource.volume = 0;
