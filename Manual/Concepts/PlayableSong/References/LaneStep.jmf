@@ -1,0 +1,17 @@
+# Playable Song - Lane Step
+
+A <b>Lane Step</b> defines the Lane's properties such as its position at a point of time. Together
+they define the shape of the Lane.
+
+## Properties
+
+- <b>Offset</b> <i>(Float)</i>: The time position of the lane step, in song beats.
+
+- <b>Start/End Position</b> <i>(Storyboardable, Vector2)</i>: The space position of the lane step,
+defined by two points in space.
+
+- <b>Start/End Position Easing</b> <i>(Easing)</i>: Four easing for each axis of each position of
+the lane step.
+
+- <b>Scroll Speed</b> <i>(Storyboardable, Float)</i>: The scroll speed multiplier applied to the
+global scroll speed set by the player. This defines the Z position of the lane step.

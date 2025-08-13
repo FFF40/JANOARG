@@ -1,0 +1,25 @@
+# Playable Song - BPM Stop
+
+The <b>BPM Stop</b> contains BPM data at a specific point in the song. Together, they create
+timing instructions for the Metronome to calculate the timing of the song. Most songs do not
+have changes in tempo or signature while playing, so only one BPM Stop at the beginning beat of
+the song is needed, but for some of the songs that do feature these, more than one BPM Stop will
+need to be placed to be able to accurately sync the beats of the Metronome - therefore the position
+of the objects in the chart - to the beats of the song.
+
+## Properties
+
+- <b>Offset</b> <i>(Float)</i>: The time position (in seconds) before this Timestamp values takes
+place.
+
+- <b>BPM</b> <i>(Float)</i>: The tempo of the song at this place in time, in beats per second.
+
+- <b>Signature</b> <i>(Integer)</i>: The time signature of the song at this place in time. Note
+that only the top part of the signature (the number of beats in a bar) is needed, so instead of
+"3/4", type "3".
+
+- <b>Significant</b> <i>(Boolean)</i>: Determines whether the BPM Stop is "significant" enough to
+be included in places such as the song card's BPM summary. A BPM Stop is deemed as "insignificant"
+when it is placed when the song BPM or time signature isn't actually changed (i.e. you may need to
+put a small BPM change to realign the main beat of the metronome to the main beat of the song when
+there's a bar of the song with irregular beat quantization.)

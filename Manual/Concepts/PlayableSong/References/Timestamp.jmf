@@ -1,0 +1,19 @@
+# Playable Song - Timestamp
+
+A <b>Timestamp</b> denotes an even in which a property moves from a value to another at a position
+in time.
+
+## Properties
+
+- <b>Offset</b> <i>(Float)</i>: The time position when the animation start, in game beats.
+
+- <b>Type</b> <i>(Enum)</i>: The property to animate.
+
+- <b>Duration</b> <i>(Float)</i>: The time it takes to animate the property, in game beats.
+
+- <b>From</b> <i>(Optional, Float)</i>: The property value that the animation will start from. If
+unset, the previous value of the property will be used.
+
+- <b>To</b> <i>(Float)</i>: The property value that the animation will end to.
+
+- <b>Easing</b> <i>(Easing)</i>: The easing of the animation.

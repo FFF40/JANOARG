@@ -1,0 +1,9 @@
+# Tools
+
+Each tool in JANOARG is a customly made window made inside the Unity editor and is accessible using
+the JANOARG menu item on the top bar of the editor. Additionally, some features are also included
+in the menu, such as editor settings and this guide.
+
+## List of Tools
+
+$SUBITEMS
