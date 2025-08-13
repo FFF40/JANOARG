@@ -1,7 +1,0 @@
-# Playable Song - Metronome
-
-The <b>Metronome</b> contains timing informations about the song.
-
-## Sub-objects
-
-- <b>BPM Stops</b> <i>(List of BPM Stops)</i>: A list of BPM Stops.
