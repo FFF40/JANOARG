@@ -11976,8 +11976,8 @@ MonoBehaviour:
   HitSample: {fileID: 6330576044930397103, guid: f7c5f9796af0db641befed862691db8f, type: 3}
   HoldSample: {fileID: 3155999716207336932, guid: defee50d3359a704fbd6e85864f1a183, type: 3}
   JudgeScreenSample: {fileID: 423507467669762518, guid: 8a7d01df89b0588429a2a71d4f1c8272, type: 3}
-  FreeFlickIndicator: {fileID: 4300000, guid: 2b5d222a35f48f2cea34cd5c56196596, type: 2}
-  ArrowFlickIndicator: {fileID: 4300000, guid: 88e20e24274d0be85b07f3657e245e8b, type: 2}
+  FreeFlickIndicator: {fileID: 4300000, guid: d530a160b5945f776bb87b464583df98, type: 2}
+  ArrowFlickIndicator: {fileID: 4300000, guid: c077fd1c69d447b00a54cc34113f1f97, type: 2}
   NormalHitsound: {fileID: 8300000, guid: f90a4d2bd33f55e48bda9625f2ee1601, type: 3}
   CatchHitsound: {fileID: 8300000, guid: d68bd3e4706d98743a96de5b314d4921, type: 3}
   FlickHitsound: {fileID: 8300000, guid: 28adaf7812f2cc554ae85e70929de788, type: 3}
@@ -11991,7 +11991,7 @@ MonoBehaviour:
   ScreenUnit: {x: 700, y: 400}
   IsReady: 0
   IsPlaying: 0
-  HasPlayedBefore: 0
+  AlreadyInitialised: 0
   CurrentTime: -5
   TotalExScore: 0
   CurrentExScore: 0
@@ -12004,6 +12004,7 @@ MonoBehaviour:
   HitsRemaining: 0
   LaneGroups: []
   Lanes: []
+  ResultExec: 0
 --- !u!114 &1551788792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12018,7 +12019,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Player: {fileID: 1551788791}
   Autoplay: 1
+  UpdatePerSecond: NaN
+  Delta: 21.332ms
+  TouchClassesCount: 0
+  HoldQueueCount: 0
+  HitQueueCount: 0
+  DiscreteHitQueueCount: 0
   HitQueue: []
+  DiscreteHitQueue: []
 --- !u!114 &1551788793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12031,9 +12039,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a6a4bfa751512848bc43d2424a79ca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Player: {fileID: 1551788791}
-  Autoplay: 0
-  HitQueue: []
 --- !u!114 &1551788794
 MonoBehaviour:
   m_ObjectHideFlags: 0
