@@ -14,15 +14,15 @@ public class StorageManager : MonoBehaviour
     void Awake()
     {
         main = this;
-        Load();
+        LoadScores();
     } 
 
-    public void Load()
+    public void LoadScores()
     {
         Scores.Load();
     }
 
-    public void Save() 
+    public void SaveScores() 
     {
         Scores.Save();
         Common.main.Storage.Save();

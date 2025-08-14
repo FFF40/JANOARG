@@ -349,7 +349,7 @@ public class PlayerScreenResult : MonoBehaviour
         }
         SaveScoreEntry(score);
         ProfileBar.main.CompleteSong((long)baseOrbs, (long)baseCoins);
-        StorageManager.main.Save();
+        StorageManager.main.SaveScores();
     }
 
     IEnumerator RankExplosionAnim()

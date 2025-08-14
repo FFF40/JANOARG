@@ -22,17 +22,10 @@ public class ActorSpriteHandler : MonoBehaviour
     }
     public void SetActorSprite(Sprite sprite, bool isInvisible)
     {
+        // Get the Image compoent then change the sprite
         Image Current = ImageHolder.GetComponentInChildren<Image>();
+
         if (isInvisible) Current.color = new Color(0f, 0f, 0f, 0f);
-
-        // // Get sprite size
-        // Vector2 spriteSize = new Vector2(sprite.bounds.size.x, sprite.bounds.size.y);
-        // Debug.Log(spriteSize);
-
-        // // Then scale the sprite based on the screen res
-        // // 
-
-        //Change the sprite
         Current.sprite = sprite;
 
         //I need to find a way to make the image scale based on safe area stuff
@@ -45,6 +38,8 @@ public class ActorSpriteHandler : MonoBehaviour
     {
         RectTransform rectTransform = HandlerCanvas.GetComponent<RectTransform>();
         Vector2 originalPos = rectTransform.anchoredPosition;
+
+        // Bounce effect (up and down)
         yield return Ease.Animate(0.25f, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
@@ -58,6 +53,8 @@ public class ActorSpriteHandler : MonoBehaviour
         });
         rectTransform.anchoredPosition = originalPos;
     }
+
+    #region  WIP
     public IEnumerator SetActorPosition(float FadeDuration)
     {
         yield return Ease.Animate(FadeDuration, (a) =>
@@ -80,19 +77,21 @@ public class ActorSpriteHandler : MonoBehaviour
         yield return Ease.Animate(FadeDuration, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-            Current.color = new Color(1f, 1f, 1f, 1f*lerp);
+            Current.color = new Color(1f, 1f, 1f, 1f * lerp);
         });
-        
+
     }
 
-    public IEnumerator MoveSprite(Vector2 startPos,Vector2 endPos, float FadeDuration)
+    public IEnumerator MoveSprite(Vector2 startPos, Vector2 endPos, float FadeDuration)
     {
         RectTransform rectTransform = HandlerCanvas.GetComponent<RectTransform>();
-        
+
         yield return Ease.Animate(FadeDuration, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
             // Current.color = new Color(1f, 1f, 1f, 1f*lerp);
         });
     }
+    #endregion
+
 }

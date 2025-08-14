@@ -7,57 +7,47 @@ using UnityEngine.UI;
 
 public class Storyteller : MonoBehaviour
 {
-
     public static Storyteller main;
-    //Constants
+
     public StoryConstants Constants;
     public StoryAudioConstants AudioConstants;
-    [Space]
-    // Story Script
+
     public StoryScript CurrentScript;
     public int CurrentChunkIndex;
     public int CurrentCharacterIndex;
-    [Space]
-    // Interface
+
     public CanvasGroup InterfaceGroup;
     public TMP_Text DialogueLabel;
     public TMP_Text NameLabel;
     public RectTransform NameLabelHolder;
     public CanvasGroup NameLabelGroup;
     public Graphic NextChunkIndicator;
-    // Top Bar
+
     public TMP_Text PlaceText;
     public TMP_Text TimeText;
     public TMP_Text MusicCreditText;
-    
-    [Space]
-    // Background
+
     public Image BackgroundImage;
-    [Space]
+
     public CanvasGroup FullScreenNarrationGroup;
     public TMP_Text FullScreenNarrationText;
 
-    [Space]
-    // Audio
     public AudioSource BackgroundMusicPlayer;
     public AudioSource SoundEffectsPlayer;
     [NonSerialized] public float MaxVolume;
-    [Space]
-    //Actors
+
     public RectTransform ActorHolder;
     public ActorSpriteHandler ActorSpriteItem;
     public List<ActorSpriteHandler> Actors;
     public List<ActorInfo> CurrentActors = new List<ActorInfo>();
     public float ActorSpriteBounceValue;
-    [Space]
-    // Decision
+
     public List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
     public List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
     public bool AreConditionsMet = false;
     public GameObject DecisionHolder;
     public GameObject DecisionItemPrefab;
-    [Space]
-    //Text Related Effects
+
     public float CharacterDuration = 0.01f;
     public float SpeedFactor = 1;
 
@@ -71,6 +61,7 @@ public class Storyteller : MonoBehaviour
     [NonSerialized] public int ActiveCoroutines = 0;
 
     [NonSerialized] public PlayerSettings Settings = new();
+
     public void Awake()
     {
         main = this;
@@ -79,20 +70,21 @@ public class Storyteller : MonoBehaviour
     public void Start()
     {
         DialogueLabel.text = "";
+        FullScreenNarrationText.text = "";
         MaxVolume = Settings.BGMusicVolume;
-        // Debug.Log(Settings.BGMusicVolume);
     }
 
     public void Update()
     {
         if (IsPlaying)
-        {
             TimeBuffer += Time.deltaTime * SpeedFactor;
-        }
+
         if (IsMeshDirty)
         {
             DialogueLabel.ForceMeshUpdate();
             ResetDialogueMesh();
+            FullScreenNarrationText.ForceMeshUpdate();
+            ResetNarrationTextMesh();
             IsMeshDirty = false;
         }
     }
@@ -101,6 +93,7 @@ public class Storyteller : MonoBehaviour
     {
         if (IsMeshDirty)
         {
+            UpdateNarrationTextMesh();
             UpdateDialogueMesh();
         }
     }
@@ -109,7 +102,6 @@ public class Storyteller : MonoBehaviour
     {
         CurrentScript = script;
         CurrentChunkIndex = 0;
-
         StartCoroutine(PlayChunk());
     }
 
@@ -121,15 +113,11 @@ public class Storyteller : MonoBehaviour
         }
         else
         {
-            // Prevents IndexOutOfBounds
-            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count) PlayNextChunk();
-
-            // TODO: Close this scene after the .story is finished
-
+            if (CurrentChunkIndex + 1 < CurrentScript.Chunks.Count)
+                PlayNextChunk();
         }
     }
 
-    // Plays the next line
     public void PlayNextChunk()
     {
         CurrentChunkIndex++;
@@ -143,7 +131,7 @@ public class Storyteller : MonoBehaviour
 
         SetNextChunkIndicatorState(0);
 
-        //Initialize the Dialogue Label
+        // Dialogue fade out
         Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
         yield return Ease.Animate(0.2f, (x) =>
         {
@@ -156,7 +144,20 @@ public class Storyteller : MonoBehaviour
         DialogueLabel.color = Color.white;
         DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
 
-        //Background Change
+        // Narration fade out
+        Vector2 narrationPos = FullScreenNarrationText.rectTransform.anchoredPosition;
+        yield return Ease.Animate(0.2f, (x) =>
+        {
+            float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
+            FullScreenNarrationText.color = new Color(1, 1, 1, 1 - ease);
+            float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.In);
+            FullScreenNarrationText.rectTransform.anchoredPosition = narrationPos + ease2 * 5 * Vector2.down;
+        });
+        FullScreenNarrationText.text = "";
+        FullScreenNarrationText.color = Color.white;
+        FullScreenNarrationText.rectTransform.anchoredPosition = narrationPos;
+
+        // Background Change
         foreach (var ins in chunk.Instructions)
         {
             var crt = ins.OnBackgroundChange(this);
@@ -164,24 +165,32 @@ public class Storyteller : MonoBehaviour
         }
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
-        //Change BG Music
+        // Change BG Music
         foreach (var instruction in chunk.Instructions)
         {
             var coroutine = instruction.OnMusicPlay(this);
             if (coroutine != null)
-            {
                 yield return coroutine;
-                // MusicCreditText.text = $"Playing {BackgroundMusicPlayer.name} - {AudioConstants.BackgroundMusic.Find(bgm => bgm.Name == BackgroundMusicPlayer.name).Artist}"; // "Song Title - Artist"
-            }
         }
 
-        // Change BG Music
-        foreach (var ins in chunk.Instructions) ins.OnMusicChange(this);
+        foreach (var ins in chunk.Instructions)
+            ins.OnMusicChange(this);
+        
+        // Text Area Switch
+        foreach (var instruction in chunk.Instructions)
+        {
+            var coroutine = instruction.OnTextAreaSwitch(this);
+            if (coroutine != null)
+                yield return coroutine;
+        }
 
-        //Setup Actor Name/Properties
-        foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
+        // Setup Actor Name/Properties
+        foreach (var ins in chunk.Instructions)
+            ins.OnTextBuild(this);
 
-        // Dialogue Setup 
+        
+
+
         CurrentCharacterIndex = 0;
         TimeBuffer = 0;
         SpeedFactor = 1;
@@ -189,24 +198,26 @@ public class Storyteller : MonoBehaviour
         currentRevealEffect = new FloatInTypeEffect();
         IsMeshDirty = true;
         ResetDialogueMesh();
+        ResetNarrationTextMesh();
 
-        //Print Story and Actor Actions
         foreach (var instruction in chunk.Instructions)
         {
-            var actorCoroutine = instruction.OnActorAction(this);
-            var coroutine = instruction.OnTextReveal(this);
-            var sfxCoroutine = instruction.OnSFXPlay(this);
-
             var uiCoroutine = instruction.OnInterfaceChange(this);
-
-            if (actorCoroutine != null) yield return actorCoroutine;
-            if (coroutine != null) yield return coroutine;
-            if (sfxCoroutine != null) yield return sfxCoroutine;
             if (uiCoroutine != null) yield return uiCoroutine;
         }
         yield return new WaitWhile(() => ActiveCoroutines > 0);
 
-        // Show Decision Items
+        foreach (var instruction in chunk.Instructions)
+        {
+            var actorCoroutine = instruction.OnActorAction(this);
+            var textCoroutine = instruction.OnTextReveal(this);
+            var sfxCoroutine = instruction.OnSFXPlay(this);
+
+            if (actorCoroutine != null) yield return actorCoroutine;
+            if (textCoroutine != null) yield return textCoroutine;
+            if (sfxCoroutine != null) yield return sfxCoroutine;
+        }
+        yield return new WaitWhile(() => ActiveCoroutines > 0);
 
         IsPlaying = false;
         SetNextChunkIndicatorState(1);
@@ -217,24 +228,63 @@ public class Storyteller : MonoBehaviour
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
         {
-            // Opacity of the mesh to zero
             for (int j = CurrentVertexIndexes[i]; j < textInfo.meshInfo[i].colors32.Length; j++)
                 textInfo.meshInfo[i].colors32[j].a = 0;
             textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
-
             DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
     }
+
     public void UpdateDialogueMesh()
     {
         var textInfo = DialogueLabel.textInfo;
         for (int i = 0; i < textInfo.meshInfo.Length; i++)
         {
-            // Updates the mesh vertices and colors
             textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
             textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
-
             DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+        }
+    }
+
+   
+    public void ResetNarrationTextMesh()
+{
+    // Make sure TMP has current geometry
+    FullScreenNarrationText.ForceMeshUpdate();
+
+    var textInfo  = FullScreenNarrationText.textInfo;
+    int meshCount = textInfo.meshInfo.Length;
+
+    // Ensure the per-mesh reveal indexes array is sized for this text object
+    if (CurrentVertexIndexes == null || CurrentVertexIndexes.Length != meshCount)
+        CurrentVertexIndexes = new int[meshCount];
+
+    for (int meshIndex = 0; meshIndex < meshCount; meshIndex++)
+    {
+        var colors = textInfo.meshInfo[meshIndex].colors32;
+
+        // Start from the tracked reveal index, but keep it in-bounds
+        int start = CurrentVertexIndexes[meshIndex];
+        if (start < 0) start = 0;
+        if (start > colors.Length) start = colors.Length;
+
+        for (int v = start; v < colors.Length; v++)
+            colors[v].a = 0;
+
+        textInfo.meshInfo[meshIndex].mesh.colors32 = colors;
+        FullScreenNarrationText.UpdateGeometry(textInfo.meshInfo[meshIndex].mesh, meshIndex);
+    }
+}
+
+
+    public void UpdateNarrationTextMesh()
+    {
+        var textInfo = FullScreenNarrationText.textInfo;
+        for (int i = 0; i < textInfo.meshInfo.Length; i++)
+        {
+            textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
+            textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
+            FullScreenNarrationText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
     }
 
@@ -249,7 +299,6 @@ public class Storyteller : MonoBehaviour
         StartCoroutine(r());
     }
 
-    //Current Next Chunk Index Position
     float currentNCIPos = 0;
     Coroutine currentNCIRoutine = null;
     public void SetNextChunkIndicatorState(float target)
@@ -262,25 +311,18 @@ public class Storyteller : MonoBehaviour
         float from = currentNCIPos;
         yield return Ease.Animate(0.2f, (x) =>
         {
-
             x = Mathf.Lerp(from, target, x);
             currentNCIPos = x;
-
-            // Animate the Next Chunk Indicator's opacity and Y position
             float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
             NextChunkIndicator.color = new Color(1, 1, 1, x);
             NextChunkIndicator.rectTransform.anchoredPosition = 5 * (1 - ease) * Vector2.down;
         });
     }
 
-    //Current Next F???
     Coroutine currentNFRoutine = null;
     public void SetNameLabelText(string name)
     {
-        // Stop the existing name fade routine if it's running
         if (currentNFRoutine != null) StopCoroutine(currentNFRoutine);
-
-        // Start coroutine
         currentNFRoutine = StartCoroutine(NameLabelAnim(name));
     }
     IEnumerator NameLabelAnim(string name)
@@ -293,52 +335,29 @@ public class Storyteller : MonoBehaviour
         if (toAlpha > 0)
         {
             NameLabel.text = name;
-            // Match width to label's preferred width
             NameLabelHolder.sizeDelta = new(NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
         }
         if (fromAlpha == 0)
-        {
             fromXPos = toXPos;
-        }
 
-        // Fade in/out the Name Label 
         yield return Ease.Animate(0.2f, (x) =>
         {
-            //Animate the alpha
             float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
             NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
-
             float xPos = Mathf.Lerp(fromXPos, toXPos, ease);
-
-            // Set anchor and pivot to the new X position (centered vertically)
             Vector2 anchorAndPivot = new(xPos, 0.5f);
             NameLabelHolder.anchorMin = anchorAndPivot;
             NameLabelHolder.anchorMax = anchorAndPivot;
             NameLabelHolder.pivot = anchorAndPivot;
-
-            //Animate the position
             NameLabelHolder.anchoredPosition = new(0, (1 - NameLabelGroup.alpha) * -5);
         });
     }
-
-    #region Decision Methods
 
     public void SetDecisionItems(List<DecisionItem> items)
     {
         for (int i = 0; i < items.Count; i++)
         {
-            // DecisionHolder.Ins
-            
+            // Implement as needed
         }
-    } 
-
-    //Show Decision into Storyteller UI
-
-    //Add Story Flag to Save File
-
-    //Read Story Flag from Save File
-
-    //Check if Decision is Met
-
-    #endregion
+    }
 }

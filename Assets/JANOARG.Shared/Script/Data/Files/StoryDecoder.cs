@@ -157,7 +157,7 @@ public class StoryDecoder
                 continue;
             }
 
-#region 
+            #region 
             // //Add Decision Checks
             // if (line.StartsWith("!"))
             // {
@@ -176,7 +176,25 @@ public class StoryDecoder
             //     }
             //     continue;
             // }
-#endregion
+            #endregion
+
+            // Add Full Screen Narration
+            if (line.StartsWith("Narrate:"))
+            {
+                string text = line.Substring("Narrate:".Length).Trim();
+                Debug.Log($"Full Screen Narration: {text}");
+                if (!string.IsNullOrEmpty(text))
+                {
+                    currentChunk.Instructions.Add(
+                        new FullScreenNarrateStoryInstruction()
+                        {
+                            Text = text
+                        }
+                    );
+                }
+                continue;
+            }
+
             // Add actors
             List<string> currentChunkActors = new List<string>();
             if (currentChunk.Instructions.Count == 0)
@@ -336,7 +354,7 @@ public class StoryDecoder
         return script;
     }
 
-    static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
+    static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+\??,)*[0-9a-zA-Z]+\??)\s*>\s+(?<content>.*)");
     static readonly Regex instructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
     static readonly Regex instructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
     static readonly Regex DecisionParseRegex = new(@"\{([A-Z]+:[^|{}]+)\s*\|\s*([^|{}]+)(?:\s*\|\s*([^{}]+))?\}");

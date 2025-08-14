@@ -7,9 +7,11 @@ using System.Text.RegularExpressions;
 [Serializable]
 public abstract class StoryInstruction
 {
+    
+
     #region Static
     /// <summary>
-    /// This method is called when the text is built.
+    /// This method is called when add the text to the objects
     /// </summary>
     public virtual void OnTextBuild(Storyteller teller) { }
 
@@ -65,6 +67,12 @@ public abstract class StoryInstruction
     /// It can be used to update the UI elements in the story.
     /// </summary>
     public virtual IEnumerator OnInterfaceChange(Storyteller teller) { yield return null; }
+
+    /// <summary>
+    /// This method is called when the text area is switched.
+    /// It will be used to switch the text from the Dialogue Box to the Full Screen Narration.
+    /// </summary>
+    public virtual IEnumerator OnTextAreaSwitch(Storyteller teller) { yield return null; }
 
     #endregion
 

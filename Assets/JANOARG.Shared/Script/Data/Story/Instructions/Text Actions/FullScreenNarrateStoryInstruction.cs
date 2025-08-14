@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-
 //STILL IN PROGRESS <-------------------------------------------------------------
 [Serializable]
 public class FullScreenNarrateStoryInstruction : StoryInstruction 
@@ -14,29 +13,64 @@ public class FullScreenNarrateStoryInstruction : StoryInstruction
 
     public override void OnTextBuild(Storyteller teller)
     {
-        teller.DialogueLabel.text += Text;
-        teller.DialogueLabel.ForceMeshUpdate();
-        StopPoint = teller.DialogueLabel.textInfo.characterCount;
+        teller.FullScreenNarrationText.text = Text;
+        teller.FullScreenNarrationText.ForceMeshUpdate();
+        StopPoint = teller.FullScreenNarrationText.textInfo.characterCount;
+    }
+
+    public override IEnumerator OnTextAreaSwitch(Storyteller teller)
+    {
+        // Full Screen Narration is not active, activate it
+        if (teller.FullScreenNarrationGroup.alpha == 0f)
+        {
+            yield return Ease.Animate(1f, (a) =>
+            {
+                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                teller.FullScreenNarrationGroup.alpha = lerp;
+                teller.InterfaceGroup.alpha = 1-lerp;
+            });
+        }
     }
 
     public override IEnumerator OnTextReveal(Storyteller teller)
     {
         bool isWait = false;
-        while (teller.CurrentCharacterIndex < StopPoint) 
+        while (teller.CurrentCharacterIndex < StopPoint)
         {
             int index = teller.CurrentCharacterIndex;
-            var charInfo = teller.DialogueLabel.textInfo.characterInfo[index];
+            var charInfo = teller.FullScreenNarrationText.textInfo.characterInfo[index];
+
+            var textInfo = teller.FullScreenNarrationText.textInfo;
+
+            if (teller.CurrentVertexIndexes == null || teller.CurrentVertexIndexes.Length != textInfo.meshInfo.Length)
+                teller.CurrentVertexIndexes = new int[textInfo.meshInfo.Length];
+
+
+            if (!charInfo.isVisible)
+            {
+                teller.CurrentCharacterIndex++;
+                continue;
+            }
 
             float waitTime = teller.CharacterDuration;
             switch (charInfo.character)
             {
-                case ',': case ';': case '.': case '?': case '!':
-                case ')': case ']': case '}':
+                case ',':
+                case ';':
+                case '.':
+                case '?':
+                case '!':
+                case ')':
+                case ']':
+                case '}':
                     isWait = true;
                     break;
-                case '’': case '”': case '\'': case '"':
+                case '’':
+                case '”':
+                case '\'':
+                case '"':
                     break;
-                default: 
+                default:
                     if (isWait)
                     {
                         waitTime *= 3;
@@ -53,7 +87,7 @@ public class FullScreenNarrateStoryInstruction : StoryInstruction
                 teller.CurrentVertexIndexes[charInfo.materialReferenceIndex] = charInfo.vertexIndex + 4;
                 teller.RegisterCoroutine(teller.currentRevealEffect.OnCharacterReveal(
                     teller,
-                    teller.DialogueLabel,
+                    teller.FullScreenNarrationText,
                     index,
                     teller.TimeBuffer
                 ));
