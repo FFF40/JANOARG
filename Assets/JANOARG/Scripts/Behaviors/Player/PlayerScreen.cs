@@ -7,6 +7,8 @@ using UnityEngine.EventSystems;
 using System.IO;
 using System;
 using System.Linq;
+using UnityEditor;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 public class PlayerScreen : MonoBehaviour
@@ -19,6 +21,10 @@ public class PlayerScreen : MonoBehaviour
     public static ExternalChart TargetChart;
 
     public static Chart CurrentChart;
+    
+    [Header("Headless Initialisation")]
+    public ExternalPlayableSong RunChart;
+    public ExternalChart Chart;
 
     [Space]
     public AudioSource Music;
@@ -39,7 +45,7 @@ public class PlayerScreen : MonoBehaviour
     public Graphic SongProgressGlow;
     [Space]
     public ScrollingCounter ScoreCounter;
-    public List<Graphic> ScoreDigits;
+    public Graphic[] ScoreDigits;
     [Space]
     public CanvasGroup JudgmentGroup;
     public TMP_Text JudgmentLabel;
@@ -130,47 +136,69 @@ public class PlayerScreen : MonoBehaviour
         InitFlickMeshes();
         SetInterfaceColor(Color.clear);
         SongProgress.value = 0;
+        
         StartCoroutine(LoadChart());
     }
 
     private int _totalObjects;
     private int _loadedObjects;
+    internal static bool HeadlessInitialised = false;
 
     private void Update_LoadingBarHolder(int increments, string currentProgress)
     {
+        if (HeadlessInitialised) return;
+        
         _loadedObjects += increments;
         
         SongSelectReadyScreen.main.OverallProgress.text = $"{_loadedObjects}/{_totalObjects}";
         SongSelectReadyScreen.main.CurrentProgress.text = currentProgress;
         
-        SongSelectReadyScreen.main.LoadProgress.value = (float)_loadedObjects / _totalObjects;
+        SongSelectReadyScreen.main.Bar.value = (float)_loadedObjects / _totalObjects;
     }
 
     private IEnumerator LoadChart()
     {
-        SongNameLabel.text       = TargetSong.SongName;
-        SongArtistLabel.text     = TargetSong.SongArtist;
-        
-        DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
-        DifficultyLabel.text     = TargetChartMeta.DifficultyLevel;
+        // If TargetSong is empty, use Headless initialisation
+        if (TargetSong == null)
+        {
+            HeadlessPlayerStarter.Chart = Chart;
+            HeadlessPlayerStarter.RunChart = RunChart;
 
-        SongSelectReadyScreen.main.LoadingBarHolder.gameObject.SetActive(true);
-        SongSelectReadyScreen.main.OverallProgress.text = "0/0";
-        SongSelectReadyScreen.main.CurrentProgress.text = "Loading audio file...";
-        
-        string path = Path.Combine(Path.GetDirectoryName(TargetSongPath), TargetChartMeta.Target);
-        Debug.Log(path);
-        ResourceRequest thing = Resources.LoadAsync<ExternalChart>(path);
-        
-        TargetSong.Clip.LoadAudioData();
+            Common.Load("HeadlessPlayerStarter", null, null);
+            
+            SceneManager.UnloadSceneAsync("Player");
+            Resources.UnloadUnusedAssets();
+        }
+        else
+        {
+            SongNameLabel.text = TargetSong.SongName;
+            SongArtistLabel.text = TargetSong.SongArtist;
 
-        yield return new WaitUntil(() => thing.isDone && TargetSong.Clip.loadState != AudioDataLoadState.Loading);
+            DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
+            DifficultyLabel.text = TargetChartMeta.DifficultyLevel;
 
-        SongSelectReadyScreen.main.CurrentProgress.text += "Done.";
+            if (!HeadlessInitialised)
+            {
+                SongSelectReadyScreen.main.LoadingBarHolder.gameObject.SetActive(true);
+                SongSelectReadyScreen.main.OverallProgress.text = "0/0";
+                SongSelectReadyScreen.main.CurrentProgress.text = "Loading audio file...";
+            }
 
-        TargetChart = thing.asset as ExternalChart;
+            string path = Path.Combine(Path.GetDirectoryName(TargetSongPath), TargetChartMeta.Target);
+            Debug.Log(path);
+            ResourceRequest thing = Resources.LoadAsync<ExternalChart>(path);
 
-        yield return InitChart();
+            TargetSong.Clip.LoadAudioData();
+
+            yield return new WaitUntil(() => thing.isDone && TargetSong.Clip.loadState != AudioDataLoadState.Loading);
+
+            if (!HeadlessInitialised)
+                SongSelectReadyScreen.main.CurrentProgress.text += "Done.";
+
+            TargetChart = thing.asset as ExternalChart;
+
+            yield return InitChart();
+        }
     }
 
     public IEnumerator InitChart()
