@@ -131,45 +131,46 @@ public abstract class Storyboardable
         }
         
         foreach(TimestampType timestampType in TimestampTypesP)
+        {
+            if (!CurrentValues.ContainsKey(timestampType))
             {
-                if (!CurrentValues.ContainsKey(tst))
-                {
-                    Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
-                    continue;
-                }
-                float value = CurrentValues[timestampType.ID];
-                
-                while (true) 
-                {
-                    Timestamp timestamp = null;
-                    var storyboardTimestamps = Storyboard.Timestamps;
-                    foreach (int i = 0; i < storyboardTimestamps; i++){
-                        if (storyboardTimestamps[i].ID == timestampType.ID)
-                        {
-                            timestamp = storyboardTimestamps[i];
-                        }
-                    }
-                    
-                    if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset))
-                        break;
-
-                    if (time < timestamp.Offset + timestamp.Duration)
-                    {
-                        if (!float.IsNaN(timestamp.From))
-                            CurrentValues[timestampType.ID] = value = timestamp.From;
-                        
-                        value = Mathf.LerpUnclamped(value, timestamp.Target, timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration));
-                        
-                        break;
-                    }
-                    else
-                    {
-                        CurrentValues[timestampType.ID] = value = timestamp.Target;
-                        Storyboard.Timestamps.Remove(timestamp);
-                    }
-                }
-                timestampType.Set(this, value);
+                Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
+                continue;
             }
+            float value = CurrentValues[timestampType.ID];
+            
+            while (true) 
+            {
+                Timestamp timestamp = null;
+                var storyboardTimestamps = Storyboard.Timestamps;
+                for (int i = 0; i < storyboardTimestamps.Count; i++)
+                {
+                    if (storyboardTimestamps[i].ID == timestampType.ID)
+                    {
+                        timestamp = storyboardTimestamps[i];
+                    }
+                }
+                
+                if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset))
+                    break;
+
+                if (time < timestamp.Offset + timestamp.Duration)
+                {
+                    if (!float.IsNaN(timestamp.From))
+                        CurrentValues[timestampType.ID] = value = timestamp.From;
+                    
+                    value = Mathf.LerpUnclamped(value, timestamp.Target, timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration));
+                    
+                    break;
+                }
+                else
+                {
+                    CurrentValues[timestampType.ID] = value = timestamp.Target;
+                    Storyboard.Timestamps.Remove(timestamp);
+                }
+            }
+            timestampType.Set(this, value);
+        }
         
         CurrentTime = time;
     }

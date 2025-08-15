@@ -331,6 +331,7 @@ public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
 
 
     public static TimestampType[] ThisTimestampTypes = {
+        #region Tap Note Color
         new()
         {
             ID   = "NormalColor_R",
