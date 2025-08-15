@@ -14,7 +14,7 @@ public class LaneGroupPlayer : MonoBehaviour
         if (Current != null) 
             Current.Advance(beat);
         else 
-            Current = (LaneGroup)Original.Get(beat);
+            Current = (LaneGroup)Original.GetStoryboardableObject(beat);
         
         transform.localPosition    = Current.Position;
         transform.localEulerAngles = Current.Rotation;
