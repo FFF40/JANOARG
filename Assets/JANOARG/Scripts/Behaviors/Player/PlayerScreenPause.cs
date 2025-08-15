@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 using System.IO;
 
@@ -41,7 +40,8 @@ public class PlayerScreenPause : MonoBehaviour
         {
             PlayerScreen.main.IsPlaying = false;
             PlayerScreen.main.Music.Pause();
-            PlayerInputManager.main.Fingers.Clear();
+            //PlayerInputManager.main.Fingers.Clear();
+            PlayerInputManager.Instance.TouchClasses.Clear();
             Show();
         }
         else 

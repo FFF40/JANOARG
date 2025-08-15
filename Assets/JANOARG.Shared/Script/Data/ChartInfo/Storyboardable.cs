@@ -63,111 +63,140 @@ public class Storyboard
 
 public abstract class Storyboardable
 {
-    public Storyboard Storyboard = new Storyboard();
+    public Storyboard Storyboard = new();
 
     public abstract TimestampType[] TimestampTypes { get; }
 
-    protected TimestampType[] tts;
+    protected TimestampType[] TimestampTypesP;
     
-    public Storyboardable Get(float time) {
-        if (tts == null) tts = TimestampTypes;
-        Storyboardable obj = this;
-        foreach(TimestampType tst in tts){
-            List<Timestamp> sb = Storyboard.FromType(tst.ID);
-            if (sb.Count == 0)
+    public Storyboardable GetStoryboardableObject(float time) {
+        
+        if (TimestampTypesP == null) 
+            TimestampTypesP = TimestampTypes;
+        
+        Storyboardable obj = (Storyboardable)MemberwiseClone();
+        
+        foreach(TimestampType timestampType in TimestampTypesP) 
+        {
+            List<Timestamp> storyboard = Storyboard.FromType(timestampType.ID);
+
+            if (storyboard.Count == 0)
             {
                 // Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in storyboard.");
                 continue;
             }
-            float value = tst.Get(this);
-            foreach (Timestamp ts in sb) 
+
+            float value = timestampType.Get(this);
+
+            foreach (Timestamp timestamp in storyboard) 
             {
-                if (time >= ts.Offset + ts.Duration) value = ts.Target;
-                else if (time > ts.Offset) 
+                if (time >= timestamp.Offset + timestamp.Duration) 
+                    value = timestamp.Target;
+                else if (time > timestamp.Offset) 
                 {
-                    if (!float.IsNaN(ts.From)) value = (float)ts.From;
-                    value = Mathf.LerpUnclamped(value, ts.Target, ts.Easing.Get((time - ts.Offset) / ts.Duration));
+                    if (!float.IsNaN(timestamp.From)) 
+                        value = timestamp.From;
+
+                    value = Mathf.LerpUnclamped(
+                        value, 
+                        timestamp.Target, 
+                        timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration)
+                        );
+
                     break;
                 }
-                else break;
+                else 
+                    break;
             }
-            tst.Set(obj, value);
+            timestampType.Set(obj, value);
         }
         return obj;
     }
 
-    protected Dictionary<TimestampType, float> currentValues;
-    protected float currentTime;
+    protected Dictionary<string, float> CurrentValues;
+    
+    protected float CurrentTime;
+    
     public virtual void Advance (float time) 
     {
-        if (tts == null) tts = TimestampTypes;
-        if (currentValues == null) 
+        if (TimestampTypesP == null) 
+            TimestampTypesP = TimestampTypes;
+        
+        if (CurrentValues == null) 
         {
-            currentValues = new Dictionary<TimestampType, float>();
-            foreach (TimestampType tst in tts) 
-            {
-                currentValues.Add(tst, tst.Get(this));
-            }
+            CurrentValues = new Dictionary<string, float>();
+            
+            foreach (TimestampType timestampType in TimestampTypesP) 
+                CurrentValues.Add(timestampType.ID, timestampType.Get(this));
         }
-        foreach(TimestampType tst in tts){
-            if (!currentValues.ContainsKey(tst))
+        
+        foreach(TimestampType timestampType in TimestampTypesP)
             {
-                Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
-                continue;
-            }
-            float value = currentValues[tst];
-            while (true) 
-            {
-                Timestamp ts = null;
-                var timestamps = Storyboard.Timestamps;
-                for (int i = 0; i < timestamps.Count; i++)
+                if (!CurrentValues.ContainsKey(tst))
                 {
-                    if (timestamps[i].ID == tst.ID)
+                    Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
+                    continue;
+                }
+                float value = CurrentValues[timestampType.ID];
+                
+                while (true) 
+                {
+                    Timestamp timestamp = null;
+                    var storyboardTimestamps = Storyboard.Timestamps;
+                    foreach (int i = 0; i < storyboardTimestamps; i++){
+                        if (storyboardTimestamps[i].ID == timestampType.ID)
+                        {
+                            timestamp = storyboardTimestamps[i];
+                        }
+                    }
+                    
+                    if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset))
+                        break;
+
+                    if (time < timestamp.Offset + timestamp.Duration)
                     {
-                        ts = timestamps[i];
+                        if (!float.IsNaN(timestamp.From))
+                            CurrentValues[timestampType.ID] = value = timestamp.From;
+                        
+                        value = Mathf.LerpUnclamped(value, timestamp.Target, timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration));
+                        
                         break;
                     }
+                    else
+                    {
+                        CurrentValues[timestampType.ID] = value = timestamp.Target;
+                        Storyboard.Timestamps.Remove(timestamp);
+                    }
                 }
-                if (ts == null || (time < ts.Offset && currentTime < ts.Offset)) break;
-                else if (time < ts.Offset + ts.Duration)
-                {
-                    if (!float.IsNaN(ts.From)) currentValues[tst] = value = ts.From;
-                    value = Mathf.LerpUnclamped(value, ts.Target, ts.Easing.Get((time - ts.Offset) / ts.Duration));
-                    break;
-                }
-                else
-                {
-                    currentValues[tst] = value = ts.Target;
-                    Storyboard.Timestamps.Remove(ts);
-                }
+                timestampType.Set(this, value);
             }
-            tst.Set(this, value);
-        }
-        currentTime = time;
+        
+        CurrentTime = time;
     }
 }
 
-public abstract class DirtyTrackedStoryboardable : Storyboardable {
+public abstract class DirtyTrackedStoryboardable : Storyboardable 
+{
     public bool IsDirty;
 
     public override void Advance (float time) 
     {
-        if (tts == null) tts = TimestampTypes;
-        if (currentValues == null) 
+        if (TimestampTypesP == null) TimestampTypesP = TimestampTypes;
+        if (CurrentValues == null) 
         {
-            currentValues = new Dictionary<TimestampType, float>();
-            foreach (TimestampType tst in tts) 
+            CurrentValues = new Dictionary<string, float>();
+            foreach (TimestampType tst in TimestampTypesP) 
             {
-                currentValues.Add(tst, tst.Get(this));
+                CurrentValues.Add(tst.ID, tst.Get(this));
             }
         }
-        foreach(TimestampType tst in tts){
-            if (!currentValues.ContainsKey(tst))
+        foreach(TimestampType tst in TimestampTypesP){
+            if (!CurrentValues.ContainsKey(tst))
             {
                 Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
                 continue;
             }
-            float value = currentValues[tst];
+            float value = CurrentValues[tst.ID];
             while (true) 
             {
                 Timestamp ts = null;
@@ -180,23 +209,23 @@ public abstract class DirtyTrackedStoryboardable : Storyboardable {
                         break;
                     }
                 }
-                if (ts == null || (time < ts.Offset && currentTime < ts.Offset)) break;
+                if (ts == null || (time < ts.Offset && CurrentTime < ts.Offset)) break;
                 else if (time < ts.Offset + ts.Duration)
                 {
-                    if (!float.IsNaN(ts.From)) currentValues[tst] = value = ts.From;
+                    if (!float.IsNaN(ts.From)) CurrentValues[tst.ID] = value = ts.From;
                     value = Mathf.LerpUnclamped(value, ts.Target, ts.Easing.Get((time - ts.Offset) / ts.Duration));
                     IsDirty = true;
                     break;
                 }
                 else
                 {
-                    currentValues[tst] = value = ts.Target;
+                    CurrentValues[tst.ID] = value = ts.Target;
                     Storyboard.Timestamps.Remove(ts);
                     IsDirty = true;
                 }
             }
             tst.Set(this, value);
         }
-        currentTime = time;
+        CurrentTime = time;
     }
 }

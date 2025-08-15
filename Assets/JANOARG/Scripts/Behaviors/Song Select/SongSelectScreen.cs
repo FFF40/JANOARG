@@ -8,7 +8,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using System;
 using Random = UnityEngine.Random;
-using Unity.VisualScripting;
 
 public class SongSelectScreen : MonoBehaviour
 {
@@ -614,10 +613,13 @@ public class SongSelectScreen : MonoBehaviour
     {
         LeftActionsHolder.alpha = RightActionsHolder.alpha = DifficultyHolder.alpha = a * a;
         LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = DifficultyHolder.blocksRaycasts = a == 1;
-        rt(LeftActionsHolder).anchoredPosition = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
+        
+        rt(LeftActionsHolder).anchoredPosition  = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
         rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
-        rt(DifficultyHolder).anchoredPosition = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
-        if (!QuickMenu.main || !QuickMenu.main.gameObject.activeSelf) ProfileBar.main.SetVisibilty(a);
+        rt(DifficultyHolder).anchoredPosition   = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+        
+        if (!QuickMenu.main || !QuickMenu.main.gameObject.activeSelf) 
+            ProfileBar.main.SetVisibilty(a);
     }
 
     public void Intro()

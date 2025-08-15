@@ -6,7 +6,7 @@ using TMPro;
 
 public class PlayerScreenResultDetails : MonoBehaviour
 {
-    public static PlayerScreenResultDetails main;
+    public static PlayerScreenResultDetails Main;
 
     public Graphic Container;
     [Space]
@@ -41,65 +41,78 @@ public class PlayerScreenResultDetails : MonoBehaviour
     public RectTransform EarlyLine;
     public RectTransform LateLine;
 
-    int HistoryIndex;
-    List<GameObject> Pins = new();
+    int _historyIndex;
+    readonly List<GameObject> _pins = new();
 
-    int TimingBadCount,
-        TimingEarlyCount,
-        TimingCenterCount,
-        TimingLateCount,
-        TimingMissCount,
-        TimingTotalCount,
-        CatchHitCount,
-        CatchTotalCount,
-        FlickHitCount,
-        FlickTotalCount;
+    private int _badCount,
+        _earlyCount,
+        _centerCount,
+        _lateCount,
+        _missCount,
+        _totalCount,
+        _catchHitCount,
+        _catchTotalCount,
+        _flickHitCount,
+        _flickTotalCount;
 
     void Awake() 
     {
-        main = this;
+        Main = this;
     }
 
     void Start()
     {
         LerpDetailed(-1);
         float ratio = PlayerScreen.main.PerfectWindow / PlayerScreen.main.GoodWindow;
+        
         EarlyLine.anchorMin *= new Vector2Frag(y: .5f + ratio / 2);
         EarlyLine.anchorMax *= new Vector2Frag(y: .5f + ratio / 2);
-        LateLine.anchorMin *= new Vector2Frag(y: .5f - ratio / 2);
-        LateLine.anchorMax *= new Vector2Frag(y: .5f - ratio / 2);
+        LateLine.anchorMin  *= new Vector2Frag(y: .5f - ratio / 2);
+        LateLine.anchorMax  *= new Vector2Frag(y: .5f - ratio / 2);
     }
 
     public void Reset()
     {
         LerpDetailed(-1);
-        foreach (var pin in Pins) Destroy(pin);
-        Pins.Clear();
-        TimingBadCount = TimingEarlyCount = TimingCenterCount = TimingLateCount = TimingMissCount
-            = TimingTotalCount = CatchHitCount = CatchTotalCount = FlickHitCount = FlickTotalCount
-            = HistoryIndex = 0;
+        foreach (var pin in _pins) Destroy(pin);
+        _pins.Clear();
+        
+        _badCount = 
+            _earlyCount = 
+                _centerCount = 
+                    _lateCount = 
+                        _missCount = 
+                            _totalCount = 
+                                _catchHitCount = 
+                                    _catchTotalCount = 
+                                        _flickHitCount = 
+                                            _flickTotalCount = 
+                                                _historyIndex = 0;
     }
 
     public void UpdateLabels()
     {
-        TimingBadCountLabel.text = TimingBadCount.ToString("N0");
-        TimingEarlyCountLabel.text = TimingEarlyCount.ToString("N0");
-        TimingCenterCountLabel.text = TimingCenterCount.ToString("N0");
-        TimingLateCountLabel.text = TimingLateCount.ToString("N0");
-        TimingMissCountLabel.text = TimingMissCount.ToString("N0");
-        TimingTotalCountLabel.text = "/ " + TimingTotalCount.ToString("N0");
-        CatchHitCountLabel.text = CatchHitCount.ToString("N0");
-        CatchTotalCountLabel.text = "/ " + CatchTotalCount.ToString("N0");
-        FlickHitCountLabel.text = FlickHitCount.ToString("N0");
-        FlickTotalCountLabel.text = "/ " + FlickTotalCount.ToString("N0");
+        // Current score count
+        TimingBadCountLabel.text    = _badCount.ToString("N0");
+        TimingEarlyCountLabel.text  = _earlyCount.ToString("N0");
+        TimingCenterCountLabel.text = _centerCount.ToString("N0");
+        TimingLateCountLabel.text   = _lateCount.ToString("N0");
+        TimingMissCountLabel.text   = _missCount.ToString("N0");
+        
+        // Per chart's total notes
+        TimingTotalCountLabel.text  = "/ " + _totalCount.ToString("N0");
+        CatchHitCountLabel.text     = _catchHitCount.ToString("N0");
+        CatchTotalCountLabel.text   = "/ " + _catchTotalCount.ToString("N0");
+        FlickHitCountLabel.text     = _flickHitCount.ToString("N0");
+        FlickTotalCountLabel.text   = "/ " + _flickTotalCount.ToString("N0");
     }
 
     public void SpawnPins(float progress) 
     {
         var history = PlayerScreen.main.HitObjectHistory;
-        for (; HistoryIndex < history.Count * progress; HistoryIndex++)
+        for (; _historyIndex < history.Count * progress; _historyIndex++)
         {
-            var item = history[HistoryIndex];
+            var item = history[_historyIndex];
             RectTransform parent = null;
             bool isMiss = item.Offset > PlayerScreen.main.GoodWindow;
             
@@ -107,39 +120,57 @@ public class PlayerScreenResultDetails : MonoBehaviour
             {
                 case HitObjectHistoryType.Timing: {
                     parent = TimingPinHolder; 
-                    if (item.Offset < -PlayerScreen.main.GoodWindow) TimingBadCount++;
-                    else if (item.Offset < -PlayerScreen.main.PerfectWindow) TimingEarlyCount++;
-                    else if (item.Offset > PlayerScreen.main.GoodWindow) TimingMissCount++;
-                    else if (item.Offset > PlayerScreen.main.PerfectWindow) TimingLateCount++;
-                    else TimingCenterCount++;
-                    TimingTotalCount++;
+                    
+                    if      (item.Offset < -PlayerScreen.main.GoodWindow)    _badCount++;
+                    else if (item.Offset < -PlayerScreen.main.PerfectWindow) _earlyCount++;
+                    else if (item.Offset > PlayerScreen.main.GoodWindow)     _missCount++;
+                    else if (item.Offset > PlayerScreen.main.PerfectWindow)  _lateCount++;
+                    else                                                     _centerCount++;
+                    
+                    _totalCount++;
                     break;
                 }
                 case HitObjectHistoryType.Catch: {
                     parent = CatchPinHolder; 
-                    if (!isMiss) CatchHitCount++;
-                    CatchTotalCount++;
+                    
+                    if (!isMiss)
+                        _catchHitCount++;
+                    
+                    _catchTotalCount++;
                     break;
                 }
                 case HitObjectHistoryType.Flick: {
                     parent = FlickPinHolder; 
-                    if (!isMiss) FlickHitCount++;
-                    FlickTotalCount++;
+                    
+                    if (!isMiss) 
+                        _flickHitCount++;
+                    
+                    _flickTotalCount++;
                     break;
                 }
             };
 
-            var pin = Instantiate(isMiss ? MissPinSample : NormalPinSample, parent);
-            pin.rectTransform.anchorMin = pin.rectTransform.anchorMax = new (
-                item.Time / PlayerScreen.TargetSong.Clip.length,
-                item.Type == HitObjectHistoryType.Timing ? Mathf.Clamp01(.5f - item.Offset / PlayerScreen.main.GoodWindow / 2) : 0.5f
-            );
+            var pin = Instantiate(
+                isMiss ? MissPinSample : NormalPinSample, 
+                parent);
+            
+            pin.rectTransform.anchorMin = 
+                pin.rectTransform.anchorMax = 
+                    new (
+                        item.Time / PlayerScreen.TargetSong.Clip.length,
+                        item.Type == HitObjectHistoryType.Timing 
+                            ? Mathf.Clamp01(.5f - item.Offset / PlayerScreen.main.GoodWindow / 2)
+                            : 0.5f
+                    );
+            
             if (!isMiss) 
             {
-                if (parent == CatchPinHolder) pin.color *= new ColorFrag(a: .25f);
-                else if (parent == FlickPinHolder) pin.color *= new ColorFrag(a: .5f);
+                if (parent == CatchPinHolder) 
+                    pin.color *= new ColorFrag(a: .25f);
+                else if (parent == FlickPinHolder)
+                    pin.color *= new ColorFrag(a: .5f);
             }
-            Pins.Add(pin.gameObject);
+            _pins.Add(pin.gameObject);
             StartCoroutine(AnimatePin(pin));
         }
     }
@@ -147,7 +178,7 @@ public class PlayerScreenResultDetails : MonoBehaviour
     IEnumerator AnimatePin(Graphic pin)
     {
         yield return Ease.Animate(.2f, (x) => {
-            pin.rectTransform.localScale = Vector3.one * Ease.Get(x * 1.2f, EaseFunction.Back, EaseMode.Out);
+            pin.rectTransform.localScale       = Vector3.one * Ease.Get(x * 1.2f, EaseFunction.Back, EaseMode.Out);
             pin.rectTransform.localEulerAngles = Vector3.forward * (90 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
         });
     }
@@ -157,30 +188,34 @@ public class PlayerScreenResultDetails : MonoBehaviour
         float abs = Mathf.Abs(value);
 
         float ease1 = Ease.Get(abs, EaseFunction.Exponential, EaseMode.In);
+        
         Container.color *= new ColorFrag(a: Ease.Get(1 - ease1, EaseFunction.Cubic, EaseMode.InOut) * .8f);
+        
         foreach (var line in Lines) 
         {
             line.anchorMin *= new Vector2Frag(x: -2 * ease1);
             line.anchorMax *= new Vector2Frag(x: 1 + 2 * ease1);
         }
 
-        Container.rectTransform.sizeDelta *= new Vector2Frag(y: 110 - 60 * ease1);
+        Container.rectTransform.sizeDelta        *= new Vector2Frag(y: 110 - 60 * ease1);
         Container.rectTransform.anchoredPosition *= new Vector2Frag(y: 25 * (1 - ease1));
-        TimingPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, -80 + 40 * ease1);
-        CatchPinHolder.anchoredPosition *= new Vector2Frag(y: 35 - 20 * ease1);
-        CatchPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
-        FlickPinHolder.anchoredPosition *= new Vector2Frag(y: 10 - 5 * ease1);
-        FlickPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
+        TimingPinHolder.sizeDelta                 = new Vector2(100 * ease1 - 120, -80 + 40 * ease1);
+        CatchPinHolder.anchoredPosition          *= new Vector2Frag(y: 35 - 20 * ease1);
+        CatchPinHolder.sizeDelta                  = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
+        FlickPinHolder.anchoredPosition          *= new Vector2Frag(y: 10 - 5 * ease1);
+        FlickPinHolder.sizeDelta                  = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
 
-        TimingLabelHolder.anchoredPosition *= new Vector2Frag(x: -1000 * ease1);
-        CatchLabelHolder.anchoredPosition *= new Vector2Frag(x: -1000 * ease1);
-        FlickLabelHolder.anchoredPosition *= new Vector2Frag(x: -1000 * ease1);
+        Vector2Frag anchoredPositionFrag = new Vector2Frag(x: -1000 * ease1);
+        TimingLabelHolder.anchoredPosition *= anchoredPositionFrag;
+        CatchLabelHolder.anchoredPosition  *= anchoredPositionFrag;
+        FlickLabelHolder.anchoredPosition  *= anchoredPositionFrag;
 
-        float getLerp(float x) => Mathf.Clamp01(2 - Mathf.Abs(value + (value + 1) / 2 - x) * 2);
-        TimingEarlyTitle.alpha = Ease.Get(getLerp(0),   EaseFunction.Cubic, EaseMode.Out) / 2;
-        TimingLateTitle.alpha  = Ease.Get(getLerp(.2f), EaseFunction.Cubic, EaseMode.Out) / 2;
-        TimingTitle.alpha      = Ease.Get(getLerp(.4f), EaseFunction.Cubic, EaseMode.Out);
-        CatchTitle.alpha       = Ease.Get(getLerp(.6f), EaseFunction.Cubic, EaseMode.Out);
-        FlickTitle.alpha       = Ease.Get(getLerp(.8f), EaseFunction.Cubic, EaseMode.Out);
+        float GetLerp(float x) => Mathf.Clamp01(2 - Mathf.Abs(value + (value + 1) / 2 - x) * 2);
+        
+        TimingEarlyTitle.alpha = Ease.Get(GetLerp(0),   EaseFunction.Cubic, EaseMode.Out) / 2;
+        TimingLateTitle.alpha  = Ease.Get(GetLerp(.2f), EaseFunction.Cubic, EaseMode.Out) / 2;
+        TimingTitle.alpha      = Ease.Get(GetLerp(.4f), EaseFunction.Cubic, EaseMode.Out);
+        CatchTitle.alpha       = Ease.Get(GetLerp(.6f), EaseFunction.Cubic, EaseMode.Out);
+        FlickTitle.alpha       = Ease.Get(GetLerp(.8f), EaseFunction.Cubic, EaseMode.Out);
     }
 }

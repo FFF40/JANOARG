@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,8 +25,10 @@ public class HitPlayer : MonoBehaviour
     public LanePlayer Lane;
     public HitScreenCoord HitCoord;
 
-    public bool IsQueuedHit;
-    public bool IsHit;
+    public bool InDiscreteHitQueue;
+
+    public bool PendingHoldQueue;
+    public bool IsProcessed;
     public bool IsTapped;
 
     public void Init()
@@ -60,9 +61,9 @@ public class HitPlayer : MonoBehaviour
     public void UpdateSelf(float time, float beat, bool forceDirty = false)
     {
         if (Current != null) Current.Advance(beat);
-        else Current = (HitObject)Original.Get(beat);
+        else Current = (HitObject)Original.GetStoryboardableObject(beat);
 
-        if (Current.IsDirty || forceDirty || IsHit) 
+        if (Current.IsDirty || forceDirty || IsProcessed) 
         {
             UpdateMesh();
             Current.IsDirty = false;

@@ -37,14 +37,14 @@ public class ChartManager
     public void Update(float time, float pos)
     {
         PalleteManager.Update(CurrentChart.Palette, pos);
-        Camera = (CameraController)CurrentChart.Camera.Get(pos);
+        Camera = (CameraController)CurrentChart.Camera.GetStoryboardableObject(pos);
         HitObjectsRemaining = new [] { 0, 0 };
         FlicksRemaining = 0;
         ActiveLaneCount = ActiveHitCount = ActiveLaneVerts = ActiveLaneTris = 0;
 
         for (int a = 0; a < CurrentChart.Groups.Count; a++)
         {
-            LaneGroup group = (LaneGroup)CurrentChart.Groups[a].Get(pos);
+            LaneGroup group = (LaneGroup)CurrentChart.Groups[a].GetStoryboardableObject(pos);
             if (Groups.ContainsKey(group.Name)) Groups[group.Name].Update(group, pos, this);
             else Groups.Add(group.Name, new LaneGroupManager(group, pos, this));
             Groups[group.Name].isTouched = true;
@@ -58,7 +58,7 @@ public class ChartManager
 
         for (int a = 0; a < CurrentChart.Lanes.Count; a++)
         {
-            Lane lane = (Lane)CurrentChart.Lanes[a].Get(pos);
+            Lane lane = (Lane)CurrentChart.Lanes[a].GetStoryboardableObject(pos);
             if (Lanes.Count <= a) Lanes.Add(new LaneManager(lane, time, pos, this));
             else Lanes[a].Update(lane, time, pos, this);
         }
@@ -88,11 +88,11 @@ public class PalleteManager
 
     public void Update(Palette pallete, float pos)
     {
-        CurrentPallete = pallete = (Palette)pallete.Get(pos);
+        CurrentPallete = pallete = (Palette)pallete.GetStoryboardableObject(pos);
 
         for (int a = 0; a < pallete.LaneStyles.Count; a++)
         {
-            LaneStyle style = (LaneStyle)pallete.LaneStyles[a].Get(pos);
+            LaneStyle style = (LaneStyle)pallete.LaneStyles[a].GetStoryboardableObject(pos);
             if (LaneStyles.Count <= a) LaneStyles.Add(new LaneStyleManager(style));
             else LaneStyles[a].Update(style);
         }
@@ -104,7 +104,7 @@ public class PalleteManager
 
         for (int a = 0; a < pallete.HitStyles.Count; a++)
         {
-            HitStyle style = (HitStyle)pallete.HitStyles[a].Get(pos);
+            HitStyle style = (HitStyle)pallete.HitStyles[a].GetStoryboardableObject(pos);
             if (HitStyles.Count <= a) HitStyles.Add(new HitStyleManager(style));
             else HitStyles[a].Update(style);
         }
@@ -280,7 +280,7 @@ public class LaneManager
         for (int a = 0; a < CurrentLane.LaneSteps.Count; a++)
         {
             if (Steps.Count <= a) Steps.Add(new LaneStepManager());
-            LaneStep step = (LaneStep)CurrentLane.LaneSteps[a].Get(pos);
+            LaneStep step = (LaneStep)CurrentLane.LaneSteps[a].GetStoryboardableObject(pos);
             
             if (step.Offset != Steps[a].CurrentStep?.Offset) 
             {
@@ -417,7 +417,7 @@ public class LaneManager
 
         for (int a = 0; a < CurrentLane.Objects.Count; a++)
         {
-            HitObject hit = (HitObject)CurrentLane.Objects[a].Get(pos);
+            HitObject hit = (HitObject)CurrentLane.Objects[a].GetStoryboardableObject(pos);
             if (Objects.Count <= a) Objects.Add(new HitObjectManager(hit, time, this, main));
             else Objects[a].Update(hit, time, this, main);
         }
@@ -526,8 +526,8 @@ public class LaneManager
         {
             return new LanePosition()
             {
-                StartPos = CurrentLane.LaneSteps[0].StartPos,
-                EndPos = CurrentLane.LaneSteps[0].EndPos,
+                StartPosition = CurrentLane.LaneSteps[0].StartPos,
+                EndPosition = CurrentLane.LaneSteps[0].EndPos,
                 Offset = Steps[0].Distance - Steps[0].CurrentStep.Speed * speed * (Steps[0].Offset - sec),
             };
         }
@@ -535,8 +535,8 @@ public class LaneManager
         {
             return new LanePosition()
             {
-                StartPos = CurrentLane.LaneSteps[Steps.Count - 1].StartPos,
-                EndPos = CurrentLane.LaneSteps[Steps.Count - 1].EndPos,
+                StartPosition = CurrentLane.LaneSteps[Steps.Count - 1].StartPos,
+                EndPosition = CurrentLane.LaneSteps[Steps.Count - 1].EndPos,
                 Offset = Steps[Steps.Count - 1].Distance + Steps[Steps.Count - 1].CurrentStep.Speed * speed * (sec - Steps[Steps.Count - 1].Offset),
             };
         }
@@ -555,8 +555,8 @@ public class LaneManager
             {
                 return new LanePosition 
                 {
-                    StartPos = Vector2.LerpUnclamped(prevS.StartPos, currS.StartPos, p),
-                    EndPos = Vector2.LerpUnclamped(prevS.EndPos, currS.EndPos, p),
+                    StartPosition = Vector2.LerpUnclamped(prevS.StartPos, currS.StartPos, p),
+                    EndPosition = Vector2.LerpUnclamped(prevS.EndPos, currS.EndPos, p),
                     Offset = prev.Distance + currS.Speed * speed * (sec - prev.Offset),
                 };
             }
@@ -565,9 +565,9 @@ public class LaneManager
                 
                 return new LanePosition 
                 {
-                    StartPos = new Vector2(Mathf.LerpUnclamped(prevS.StartPos.x, currS.StartPos.x, currS.StartEaseX.Get(p)),
+                    StartPosition = new Vector2(Mathf.LerpUnclamped(prevS.StartPos.x, currS.StartPos.x, currS.StartEaseX.Get(p)),
                         Mathf.LerpUnclamped(prevS.StartPos.y, currS.StartPos.y, currS.StartEaseY.Get(p))),
-                    EndPos = new Vector2(Mathf.LerpUnclamped(prevS.EndPos.x, currS.EndPos.x, currS.EndEaseX.Get(p)),
+                    EndPosition = new Vector2(Mathf.LerpUnclamped(prevS.EndPos.x, currS.EndPos.x, currS.EndEaseX.Get(p)),
                         Mathf.LerpUnclamped(prevS.EndPos.y, currS.EndPos.y, currS.EndEaseY.Get(p))),
                     Offset = prev.Distance + currS.Speed * speed * (sec - prev.Offset),
                 };
@@ -795,8 +795,8 @@ public class HitObjectManager
             LanePosition pos = lane.GetLanePosition(Mathf.Max(TimeStart, time), main.CurrentSpeed);
 
             Vector3 fwd = Vector3.forward * pos.Offset;
-            StartPos = Vector3.LerpUnclamped(pos.StartPos, pos.EndPos, data.Position) + fwd;
-            EndPos = Vector3.LerpUnclamped(pos.StartPos, pos.EndPos, data.Position + data.Length) + fwd;
+            StartPos = Vector3.LerpUnclamped(pos.StartPosition, pos.EndPosition, data.Position) + fwd;
+            EndPos = Vector3.LerpUnclamped(pos.StartPosition, pos.EndPosition, data.Position + data.Length) + fwd;
 
             Position = (StartPos + EndPos) / 2;
             Rotation = Quaternion.LookRotation(EndPos - StartPos) * Quaternion.Euler(0, 90, 0);
