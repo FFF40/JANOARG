@@ -746,7 +746,7 @@ public class PlayerScreen : MonoBehaviour
 
     private void InitFlickMeshes()
     {
-        return;
+        return; //Asset already assigned
         if (!FreeFlickIndicator) 
         {
             Mesh mesh = new();
@@ -787,6 +787,9 @@ public class PlayerScreen : MonoBehaviour
             mesh.RecalculateNormals();
             ArrowFlickIndicator = mesh;
         }
+        
+        AssetDatabase.CreateAsset(FreeFlickIndicator, "Assets/JANOARG/Resources/Meshes/FreeFlickIndicator.asset");
+        AssetDatabase.CreateAsset(ArrowFlickIndicator, "Assets/JANOARG/Resources/Meshes/ArrowFlickIndicator.asset");
     }
 }
 
