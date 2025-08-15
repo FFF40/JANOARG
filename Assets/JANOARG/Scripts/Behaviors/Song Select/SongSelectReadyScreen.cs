@@ -28,6 +28,12 @@ public class SongSelectReadyScreen : MonoBehaviour
     public TMP_Text CoverArtistNameText;
     public TMP_Text CharterNameLabel;
     public TMP_Text CharterNameText;
+    
+    [Header("Loading Bar")]
+    public Transform LoadingBarHolder;
+    public Slider Bar;
+    public TMP_Text OverallProgress;
+    public TMP_Text CurrentProgress;
 
     public void Awake()
     {
@@ -47,6 +53,10 @@ public class SongSelectReadyScreen : MonoBehaviour
     public IEnumerator BeginLaunchAnim() 
     {
         IsAnimating = true;
+
+        OverallProgress.text = "0/0";
+        CurrentProgress.text = "Please wait.";
+        Bar.value = 0;
 
         DifficultyLevelText.text = Helper.FormatDifficulty(PlayerScreen.TargetChartMeta.DifficultyLevel);
         DifficultyNameText.text = PlayerScreen.TargetChartMeta.DifficultyName.ToUpper();
