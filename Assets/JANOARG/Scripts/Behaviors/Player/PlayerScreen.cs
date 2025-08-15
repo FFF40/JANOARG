@@ -200,9 +200,12 @@ public class PlayerScreen : MonoBehaviour
             yield return InitChart();
         }
     }
+    
+    bool[] _loadState = new bool[2]; // [IsFinished, WithErrors]
 
     public IEnumerator InitChart()
     {
+        
         
         CurrentChart = TargetChart.Data.DeepClone();
         HitObjectHistory = new();
@@ -254,84 +257,14 @@ public class PlayerScreen : MonoBehaviour
                 Update_LoadingBarHolder(1, $"Loading hitstyle {style.Name}...({HitStyles.Count} of {CurrentChart.Palette.HitStyles.Count})");;
             }
 
-            int loadedLaneGroups = 0;
-            bool[] isLoaded = new bool[TargetChart.Data.Groups.Count];
-
-            while (loadedLaneGroups < TargetChart.Data.Groups.Count)
-            {
-                bool progressMade = false;
-
-                for (int i = 0; i < TargetChart.Data.Groups.Count; i++)
-                {
-                    if (isLoaded[i])
-                        continue;
-
-                    LaneGroup laneGroup = TargetChart.Data.Groups[i];
-                    
-                    bool hasNoParent = string.IsNullOrEmpty(laneGroup.Group);
-                    bool parentFound = LaneGroups.Exists(x => x.Current.Name == laneGroup.Group); // Stays false until the parent is instantiated
-
-                    if (hasNoParent || parentFound)
-                    {
-                        Transform parentTransform = hasNoParent
-                            ? Holder
-                            : LaneGroups.Find(x => x.Current.Name == laneGroup.Group).transform;
-
-                        LaneGroupPlayer instancedLaneGroup = Instantiate(LaneGroupSample, parentTransform);
-
-                        instancedLaneGroup.Original = TargetChart.Data.Groups[i];
-                        instancedLaneGroup.Current = CurrentChart.Groups[i];
-                        instancedLaneGroup.gameObject.name = instancedLaneGroup.Current.Name;
-
-                        LaneGroups.Add(instancedLaneGroup);
-                        isLoaded[i] = true;
-                        loadedLaneGroups++;
-                        progressMade = true;
-                        
-                        Update_LoadingBarHolder(1, $"Loading lanegroup {laneGroup.Name}...({loadedLaneGroups} of {TargetChart.Data.Groups.Count}");
-                    }
-                    
-                    // Intentional throttling maybe idk
-                    yield return new WaitForEndOfFrame();
-                }
-
-                if (!progressMade)
-                {
-                    int err = 0;
-                    List<string> errDetails = new();
-                    for (var i = 0; i < isLoaded.Length; i++)
-                        if (!isLoaded[i])
-                        {
-                            err++;
-                            errDetails.Add($"{LaneGroups[i].Current.Name} depends on {LaneGroups[i].Current.Group}");
-                        }
-
-                    string PrintDepDetails()
-                    {
-                        string final = String.Empty;
-                        for (int a = 0; a < errDetails.Count; a++)
-                        {
-                            if (a == errDetails.Count - 1)
-                                final += String.Concat(errDetails[a]);
-                            else
-                                final += String.Concat(errDetails[a], "\n");
-                        }
-                        return final;
-                    }
-                    
-                    Debug.LogError($"Failed to resolve {err} lane group dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
-                    
-                    Update_LoadingBarHolder(Math.Abs(TargetChart.Data.Groups.Count - loadedLaneGroups), $"Failed to load {err} lanegroups!");
-                    
-                    break;
-                }
-            }
-
-
+            StartCoroutine(LaneGroupLoader());
+            yield return new WaitUntil(() => _loadState[0]);
         }
 
         ComboGroup.alpha = 
             JudgmentGroup.alpha = 0;
+
+        _loadState = new bool[2]; // reset
 
         float dpi = (Screen.dpi == 0 ? 100 : Screen.dpi);
         float screenUnit = Mathf.Min(Screen.width / ScreenUnit.x, Screen.height / ScreenUnit.y);
@@ -339,6 +272,23 @@ public class PlayerScreen : MonoBehaviour
         ScaledExtraRadius = dpi * 0.2f;
         ScaledMinimumRadius = MinimumRadius * screenUnit;
 
+        StartCoroutine(LaneLoader());
+        yield return new WaitUntil(() => _loadState[0]);
+        
+        Update_LoadingBarHolder(0, $"Finished {(_loadState[1] ? "with errors.":"!")}");
+
+        Music.clip = TargetSong.Clip;
+        Music.volume = Settings.BGMusicVolume;
+        CurrentTime = -5;
+        PlayerScreenPause.main.PauseTime = -10;
+        IsReady = true;
+        AlreadyInitialised = true;
+        lastDSPTime = AudioSettings.dspTime;
+        yield return new WaitForEndOfFrame();
+    }
+
+    private IEnumerator LaneLoader()
+    {
         int loadedLanes = 0;
         bool[] instantiatedLane = new bool[TargetChart.Data.Lanes.Count];
 
@@ -381,7 +331,7 @@ public class PlayerScreen : MonoBehaviour
                 
                 float time = float.NaN;
                 Vector3 startPos = Vector3.zero, 
-                        endPos = Vector3.zero; //Declare 2 points of lane show in screen
+                    endPos = Vector3.zero; //Declare 2 points of lane show in screen
                 foreach (HitObject laneHitobject in instancedLane.Original.Objects)
                 {
                     // Add ExScore by note type
@@ -440,11 +390,15 @@ public class PlayerScreen : MonoBehaviour
                 
                 Update_LoadingBarHolder(1, $"Loading lane {a}...({loadedLanes} of {TargetChart.Data.Lanes.Count})");;
                 
-                yield return new WaitForEndOfFrame();
+                //yield return new WaitForEndOfFrame();
             }
             
             if (!progressMade)
             {
+                // Try loading the lanegroup again once
+                yield return LaneGroupLoader();
+                yield return this;
+                
                 int err = 0;
                 List<string> errDetails = new();
                 for (var i = 0; i < instantiatedLane.Length; i++)
@@ -470,18 +424,94 @@ public class PlayerScreen : MonoBehaviour
                 Debug.LogError($"Failed to resolve {err} lane dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
                 
                 Update_LoadingBarHolder(Math.Abs(TargetChart.Data.Lanes.Count - loadedLanes), $"Failed to load {err} lanes!");
+                _loadState[1] = true;
+                yield return new WaitForSeconds(0.5f);
                 
                 break;
             }
         }
 
-        Music.clip = TargetSong.Clip;
-        Music.volume = Settings.BGMusicVolume;
-        CurrentTime = -5;
-        PlayerScreenPause.main.PauseTime = -10;
-        IsReady = true;
-        AlreadyInitialised = true;
-        lastDSPTime = AudioSettings.dspTime;
+        _loadState[0] = true;
+        yield return new WaitForEndOfFrame();
+    }
+
+    private IEnumerator LaneGroupLoader()
+    {
+        int loadedLaneGroups = 0;
+        bool[] isLoaded = new bool[TargetChart.Data.Groups.Count];
+
+        while (loadedLaneGroups < TargetChart.Data.Groups.Count)
+        {
+            bool progressMade = false;
+
+            for (int i = 0; i < TargetChart.Data.Groups.Count; i++)
+            {
+                if (isLoaded[i])
+                    continue;
+
+                LaneGroup laneGroup = TargetChart.Data.Groups[i];
+                    
+                bool hasNoParent = string.IsNullOrEmpty(laneGroup.Group);
+                bool parentFound = LaneGroups.Exists(x => x.Current.Name == laneGroup.Group); // Stays false until the parent is instantiated
+
+                if (hasNoParent || parentFound)
+                {
+                    Transform parentTransform = hasNoParent
+                        ? Holder
+                        : LaneGroups.Find(x => x.Current.Name == laneGroup.Group).transform;
+
+                    LaneGroupPlayer instancedLaneGroup = Instantiate(LaneGroupSample, parentTransform);
+
+                    instancedLaneGroup.Original = TargetChart.Data.Groups[i];
+                    instancedLaneGroup.Current = CurrentChart.Groups[i];
+                    instancedLaneGroup.gameObject.name = instancedLaneGroup.Current.Name;
+
+                    LaneGroups.Add(instancedLaneGroup);
+                    isLoaded[i] = true;
+                    loadedLaneGroups++;
+                    progressMade = true;
+                        
+                    Update_LoadingBarHolder(1, $"Loading lanegroup {laneGroup.Name}...({loadedLaneGroups} of {TargetChart.Data.Groups.Count})");
+                }
+                    
+                // Intentional throttling maybe idk
+                //yield return new WaitForEndOfFrame();
+            }
+
+            if (!progressMade)
+            {
+                int err = 0;
+                List<string> errDetails = new();
+                for (var i = 0; i < isLoaded.Length; i++)
+                    if (!isLoaded[i])
+                    {
+                        err++;
+                        errDetails.Add($"{LaneGroups[i].Current.Name} depends on {LaneGroups[i].Current.Group}");
+                    }
+
+                string PrintDepDetails()
+                {
+                    string final = String.Empty;
+                    for (int a = 0; a < errDetails.Count; a++)
+                    {
+                        if (a == errDetails.Count - 1)
+                            final += String.Concat(errDetails[a]);
+                        else
+                            final += String.Concat(errDetails[a], "\n");
+                    }
+                    return final;
+                }
+                    
+                Debug.LogError($"Failed to resolve {err} lane group dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
+                    
+                Update_LoadingBarHolder(Math.Abs(TargetChart.Data.Groups.Count - loadedLaneGroups), $"Failed to load {err} lanegroups!");
+                    
+                _loadState[1] = true;
+                break;
+            }
+        }
+        
+        _loadState[0] = true;
         yield return new WaitForEndOfFrame();
     }
 
