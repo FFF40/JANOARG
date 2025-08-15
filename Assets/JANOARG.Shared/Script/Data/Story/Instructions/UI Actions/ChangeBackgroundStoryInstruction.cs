@@ -36,7 +36,17 @@ public class ChangeBackgroundInstruction : StoryInstruction
         else
         {
             var bg = teller.Constants.Backgrounds.Find(x => x.Alias == TargetBackground);
-            teller.BackgroundImage.sprite = bg.File;
+            
+            // If the background with the specified alias is not found, use the first background as default
+            if (bg == null)
+            {
+                Debug.LogWarning($"Background with alias '{TargetBackground}' not found. Using default background.");
+                bg = teller.Constants.Backgrounds[0]; // Fallback to the first background
+            }
+            else
+            {
+                teller.BackgroundImage.sprite = bg.File;
+            }
         }
         
         // Background opacity will be set to 1(fully visible) before changing the background

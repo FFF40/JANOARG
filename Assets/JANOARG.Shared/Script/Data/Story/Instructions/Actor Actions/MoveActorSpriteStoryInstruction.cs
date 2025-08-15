@@ -7,83 +7,95 @@ using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using UnityEngine.Rendering;
 
-// STILL IN PROGRESS <-------------------------------------------------------------
 [Serializable]
 public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
 {
-    string From;
-    Vector2 FromPos;
-    string Destination;
-    Vector2 DestinationPos;
-    float Duration;
+    public string From;
+    public string Destination;
+    public float Duration;
+
+    private Vector2 SpriteSize;
 
     [StoryTag("move")]
     public MoveActorSpriteStoryInstruction(string actor, string source, string destination, string duration)
     {
         Actors.Add(actor);
 
-        (From, FromPos) = ParseParameters(source);
-        (Destination, DestinationPos) = ParseParameters(destination);
+        Debug.Log($"MoveActorSpriteStoryInstruction: Moving actor {actor} from {source} to {destination} over {duration}s");
+        From = ParseParameters(source);
+        Destination = ParseParameters(destination);
         Duration = ParseDuration(duration);
+
+        Debug.Log($"MoveActorSpriteStoryInstruction: Parsed From: {From}, Destination: {Destination}, Duration: {Duration}");
     }
 
-    #region Parse Position
-    bool TryParsePosition(string pos)
+    #region Parse Parameters
+    string ParseParameters(string input)
     {
-        var match = Regex.Match(pos, @"<\s*(-?\d+)\s*,\s*(-?\d+)\s*>");
-        if (match.Success) return true;
-        return false;
-    }
-
-    Vector2 ParsePosition(string pos) {
-        var match = Regex.Match(pos, @"<\s*(-?\d+)\s*,\s*(-?\d+)\s*>");
-        int x = int.Parse(match.Groups[1].Value);
-        int y = int.Parse(match.Groups[2].Value);
-        return new Vector2(x, y);
-    }
-
-    (string,Vector2) ParseParameters(string input)
-    {
-        Vector2 rtPos = Vector2.zero;
-
-        if (TryParsePosition(input))
-        {
-            rtPos = ParsePosition(input);
-            return ("pos", rtPos);
-        }
-
         return input switch
         {
-            "r" or "right"                      => ("r", rtPos),
-            "l" or "left"                       => ("l", rtPos),
-            "c" or "center" or "middle"         => ("c", rtPos),
-            "*" or "self"                       => ("self", rtPos),
-            "ol" or "outleft"                   => ("ol", rtPos),  //Out of Bounds position on left of the visible screen
-            "or" or "outright"                  => ("or", rtPos),    //Out of Bounds position on right of the visible screen
-            _ => throw new ArgumentException($"Input '{input}' is invalid. Expected a direction or position like <x,y>."),
+            "r" or "right" => "r",
+            "l" or "left" => "l",
+            "c" or "center" or "middle" => "c",
+            "*" or "self" => "self",
+            "ol" or "outleft" => "ol",
+            "or" or "outright" => "or",
+            _ => throw new ArgumentException($"Input '{input}' is invalid. Expected a keyword like left, right, center, etc."),
         };
     }
     #endregion
+
     public override void OnTextBuild(Storyteller teller)
     {
-        if (Actors.Count == 0)
+        Debug.Log($"MoveActorSpriteStoryInstruction: Moving actor {Actors[0]} from {From} to {Destination} over {Duration}s");
+        if (Actors.Count == 0) return;
+
+        var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
+        InitSpriteHandler(actor.Alias, teller);
+        ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
+        SpriteSize = TargetActorSpriteHandler.SpriteSize;
+
+        RectTransform rt = TargetActorSpriteHandler.ImageHolder.GetComponentInChildren<Image>().rectTransform;
+
+        Vector2 fromScreenPos = ResolvePosition(From, rt);
+        Vector2 toScreenPos = ResolvePosition(Destination, rt);
+
+        teller.StartCoroutine(MoveSprite(rt, fromScreenPos, toScreenPos, Duration));
+    }
+
+    
+    // TODO: Fix the left/right position keywords to be relative to the screen size
+    private Vector2 ResolvePosition(string keyword, RectTransform rt)
+    {
+        float screenW = Screen.width;
+        float screenH = Screen.height;
+
+        Debug.Log($"Resolving position for keyword '{keyword}' with screen size ({screenW}, {screenH})");
+
+        rt.sizeDelta = SpriteSize;
+
+        return keyword switch
         {
-            // Just do nothing
-        }
-        else if (Actors.Count == 1)
+            "l" or "left" => new Vector2(SpriteSize.x / 2, screenH / 2),
+            "r" or "right" => new Vector2(screenW - SpriteSize.x / 2, screenH / 2),
+            "c" or "center" or "middle" => new Vector2(screenW / 2, screenH / 2),
+            "ol" or "outleft" => new Vector2(-SpriteSize.x, screenH / 2),
+            "or" or "outright" => new Vector2(screenW + SpriteSize.x, screenH / 2),
+            "self" => rt.anchoredPosition,
+            _ => throw new ArgumentException($"Unknown position keyword: {keyword}")
+        };
+    }
+
+    private IEnumerator MoveSprite(RectTransform rt, Vector2 from, Vector2 to, float duration)
+    {
+        rt.anchoredPosition = from;
+
+        yield return Ease.Animate(duration, (a) =>
         {
-            //Init Sprite Handler
-            var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
-            InitSpriteHandler(actor.Alias,teller);
-            ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
+            float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+            rt.anchoredPosition = Vector2.Lerp(from, to, lerp);
+        });
 
-            if (From == "pos") {
-                
-            }
-
-
-
-
-        }
+        rt.anchoredPosition = to;
     }
 }

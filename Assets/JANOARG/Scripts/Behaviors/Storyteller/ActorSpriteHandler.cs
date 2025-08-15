@@ -12,8 +12,8 @@ public class ActorSpriteHandler : MonoBehaviour
     [Space]
     public string CurrentActor;
     public string CurrentActorSpriteAlias;
-    public float BounceHeigth = 5f;
-
+    public float BounceHeight = 5f;
+    public Vector2 SpriteSize;
 
     public void SetActor(string name, string spriteAlias)
     {
@@ -28,8 +28,15 @@ public class ActorSpriteHandler : MonoBehaviour
         if (isInvisible) Current.color = new Color(0f, 0f, 0f, 0f);
         Current.sprite = sprite;
 
-        //I need to find a way to make the image scale based on safe area stuff
-        Current.SetNativeSize();
+        Vector2 referenceResolution = new Vector2(880, 600);
+        float aspectRatio = (float)sprite.texture.width / sprite.texture.height;
+
+        float targetHeight = Screen.height * 0.8f; // 80% of screen height
+        float targetWidth = targetHeight * aspectRatio;
+
+        SpriteSize = new Vector2(targetWidth, targetHeight);
+        
+        Current.rectTransform.sizeDelta = SpriteSize;
 
         StartCoroutine(BounceSprite());
     }
@@ -52,6 +59,11 @@ public class ActorSpriteHandler : MonoBehaviour
             rectTransform.anchoredPosition = originalPos + new Vector2(0f, 10 * (1 - lerp));
         });
         rectTransform.anchoredPosition = originalPos;
+    }
+
+    public Vector2 GetSpriteSize()
+    {
+        return SpriteSize;
     }
 
     #region  WIP
