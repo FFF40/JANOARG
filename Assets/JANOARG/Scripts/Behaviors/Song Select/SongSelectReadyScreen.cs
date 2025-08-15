@@ -58,6 +58,9 @@ public class SongSelectReadyScreen : MonoBehaviour
         CurrentProgress.text = "Please wait.";
         Bar.value = 0;
 
+        OverallProgress.color =
+            CurrentProgress.color = (Color.white - Common.main.MainCamera.backgroundColor) * new ColorFrag(a: 1);
+
         DifficultyLevelText.text = Helper.FormatDifficulty(PlayerScreen.TargetChartMeta.DifficultyLevel);
         DifficultyNameText.text = PlayerScreen.TargetChartMeta.DifficultyName.ToUpper();
         SongInfoHolder.anchoredPosition += new Vector2(1000, 0);
