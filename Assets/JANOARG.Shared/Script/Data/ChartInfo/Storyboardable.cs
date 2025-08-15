@@ -132,9 +132,9 @@ public abstract class Storyboardable
         
         foreach(TimestampType timestampType in TimestampTypesP)
         {
-            if (!CurrentValues.ContainsKey(timestampType))
+            if (!CurrentValues.ContainsKey(timestampType.ID))
             {
-                Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
+                Debug.LogError(this.GetType() + " " + timestampType.ID + "\n" + "TimestampType not found in currentValues.");
                 continue;
             }
             float value = CurrentValues[timestampType.ID];
@@ -192,7 +192,7 @@ public abstract class DirtyTrackedStoryboardable : Storyboardable
             }
         }
         foreach(TimestampType tst in TimestampTypesP){
-            if (!CurrentValues.ContainsKey(tst))
+            if (!CurrentValues.ContainsKey(tst.ID))
             {
                 Debug.LogError(this.GetType() + " " + tst.ID + "\n" + "TimestampType not found in currentValues.");
                 continue;

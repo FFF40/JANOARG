@@ -341,15 +341,6 @@ public class LanePlayer : MonoBehaviour
     public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end) 
     {
         int index = -1;
-        for (int i = 0; i < Times.Count; i++)
-        {
-            if (Times[i] >= time)
-            {
-                index = i;
-                break;
-            }
-        }
-        int index = -1;
         for (int i = 0; i < TimeStamps.Count; i++)
         {
             if (TimeStamps[i] >= time)
