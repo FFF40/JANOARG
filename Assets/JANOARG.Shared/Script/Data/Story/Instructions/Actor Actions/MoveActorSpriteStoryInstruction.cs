@@ -53,7 +53,7 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
         InitSpriteHandler(actor.Alias, teller);
         ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
-        SpriteSize = TargetActorSpriteHandler.SpriteSize;
+        SpriteSize = TargetActorSpriteHandler.GetSpriteSize();
 
         RectTransform rt = TargetActorSpriteHandler.ImageHolder.GetComponentInChildren<Image>().rectTransform;
 
@@ -63,12 +63,11 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         teller.StartCoroutine(MoveSprite(rt, fromScreenPos, toScreenPos, Duration));
     }
 
-    
-    // TODO: Fix the left/right position keywords to be relative to the screen size
     private Vector2 ResolvePosition(string keyword, RectTransform rt)
     {
-        float screenW = Screen.width;
-        float screenH = Screen.height;
+        RectTransform parentRT = rt.parent as RectTransform;
+        float screenW = parentRT.rect.width;
+        float screenH = parentRT.rect.height;
 
         Debug.Log($"Resolving position for keyword '{keyword}' with screen size ({screenW}, {screenH})");
 
@@ -76,11 +75,18 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
 
         return keyword switch
         {
-            "l" or "left" => new Vector2(SpriteSize.x / 2, screenH / 2),
-            "r" or "right" => new Vector2(screenW - SpriteSize.x / 2, screenH / 2),
-            "c" or "center" or "middle" => new Vector2(screenW / 2, screenH / 2),
-            "ol" or "outleft" => new Vector2(-SpriteSize.x, screenH / 2),
-            "or" or "outright" => new Vector2(screenW + SpriteSize.x, screenH / 2),
+            // Left edge: half sprite width from left border
+            "l" or "left" => new Vector2(-screenW / 2 + SpriteSize.x / 2, 0),
+            // Right edge: half sprite width from right border
+            "r" or "right" => new Vector2(screenW / 2 - SpriteSize.x / 2, 0),
+
+            "c" or "center" or "middle" => Vector2.zero,
+
+            // Out of bounds left
+            "ol" or "outleft" => new Vector2(-screenW / 2 - SpriteSize.x, 0),
+            // Out of bounds right
+            "or" or "outright" => new Vector2(screenW / 2 + SpriteSize.x, 0),
+
             "self" => rt.anchoredPosition,
             _ => throw new ArgumentException($"Unknown position keyword: {keyword}")
         };
