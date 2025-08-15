@@ -10,6 +10,9 @@
         <img src="Previews/preview.gif" alt="Looks, name, and chart not final!">
 </div>
 
+----
+[![releases](https://img.shields.io/badge/Release-v0.2-blue)](https://github.com/FFF40/JANOARG/releases)
+        
 ## Contributing
 
 ### Requirement:
