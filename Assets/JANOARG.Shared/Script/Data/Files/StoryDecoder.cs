@@ -353,9 +353,11 @@ public class StoryDecoder
 
         return script;
     }
-
+    
     static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+\??,)*[0-9a-zA-Z]+\??)\s*>\s+(?<content>.*)");
     static readonly Regex instructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
+
+    // Regex for [[id]]
     static readonly Regex instructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
     static readonly Regex DecisionParseRegex = new(@"\{([A-Z]+:[^|{}]+)\s*\|\s*([^|{}]+)(?:\s*\|\s*([^{}]+))?\}");
 
