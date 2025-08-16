@@ -63,8 +63,9 @@ public class CameraController : Storyboardable, IDeepClonable<CameraController> 
     public Vector3 CameraPivot;
     public float PivotDistance = 10;
     public Vector3 CameraRotation;
-    
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+
+    public static TimestampType[] ThisTimestampTypes =
     {
         #region Camera Pivot
         new() 
@@ -144,8 +145,9 @@ public class Palette : Storyboardable, IDeepClonable<Palette>  {
 
     public List<LaneStyle> LaneStyles = new();
     public List<HitStyle> HitStyles = new();
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = 
+    public static TimestampType[] ThisTimestampTypes =
     {
         #region Background Color (RGB)
         new() 
@@ -229,8 +231,9 @@ public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle>
     public string JudgeMaterial = "Default";
     public string JudgeColorTarget = "_Color";
     public Color JudgeColor = Color.black;
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = 
+    public static TimestampType[] ThisTimestampTypes =
     {
         #region Lane Color
         new() 
@@ -324,10 +327,12 @@ public class HitStyle : Storyboardable, IDeepClonable<HitStyle> {
     public string HoldTailMaterial = "Default";
     public string HoldTailColorTarget = "_Color";
     public Color HoldTailColor = Color.black;
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = {
+
+    public static TimestampType[] ThisTimestampTypes = {
         #region Tap Note Color
-        new() 
+        new()
         {
             ID   = "NormalColor_R",
             Name = "Normal Color R",
@@ -444,8 +449,9 @@ public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     public Vector3 Position;
     public Vector3 Rotation;
     public string Group;
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
 
-    public new static TimestampType[] TimestampTypes = {
+    public static TimestampType[] ThisTimestampTypes = {
         #region Position
         new() {
             ID = "Position_X",
@@ -590,9 +596,10 @@ public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
             };
         }
     }
-    
-    // More as offset
-    public new static TimestampType[] TimestampTypes = 
+
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+
+    public static TimestampType[] ThisTimestampTypes =
     {
         #region Position
         new()
@@ -692,7 +699,8 @@ public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep>
         endEaseX.Function   == EaseFunction.Linear && 
         endEaseY.Function   == EaseFunction.Linear;
 
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+    public static TimestampType[] ThisTimestampTypes =
     {
         #region Start Position
         new() 
@@ -774,7 +782,8 @@ public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
         Catch,
     }
 
-    public new static TimestampType[] TimestampTypes = 
+    public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+    public static TimestampType[] ThisTimestampTypes =
     {
         new() {
             ID   = "Position",

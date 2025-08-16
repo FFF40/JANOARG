@@ -25,7 +25,7 @@ public class Common : MonoBehaviour
         Storage = new Storage("save");
         int count = Storage.Get("STAT:Count", 0) + 1;
         Storage.Set("STAT:Count", count);
-        Debug.Log(count);
+        Debug.Log($"Enter game {count} times");
         Storage.Save();
 
         Preferences = new Storage("prefs");
