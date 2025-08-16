@@ -27,7 +27,7 @@ A rhythm game where everything can move.
 ## Additional contributing (No programming skills required)
 As of now, we had plenty of song entry, but we are lacking of charters. We would like your help to fill the gaps! You can get started by installing [the chartmaker](https://github.com/FFF40/JANOARG-Chartmaker/releases) which is available for all (desktop) platforms, and joining the Discord server (link's down below).
 
-You can also submit your song and chart (that you made, obviously) to be used in the game, with this form https://forms.gle/HJsLRGxSC8rExwFFA
+You can also submit your song and chart (that you made, obviously) to be used in the game, with [Google Form](https://forms.gle/HJsLRGxSC8rExwFFA).
 
 ## Contact
 [FFF40 Studios Discord server](https://discord.gg/vXJTPFQBHm)
