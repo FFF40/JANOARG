@@ -119,6 +119,10 @@ public class SongSelectListView : MonoBehaviour
         float pos = 0;
         int sortDirection = FilterPanel.SortReversed ? -1 : 1;
 
+        bool CanAddSong(string songID)
+        {
+            return MapManager.SongMapItemsByID[songID].IsRevealed;
+        }
         void AddSong(string songID)
         {
             ItemList.Add(new SongSelectListSong
@@ -150,6 +154,7 @@ public class SongSelectListView : MonoBehaviour
                     string lastHeader = "";
                     foreach (PlaylistSong song in songs)
                     {
+                        if (!CanAddSong(song.ID)) continue;
                         PlayableSong playableSong = screen.PlayableSongByID[song.ID];
                         if (lastHeader != playableSong.Location)
                         {
@@ -172,6 +177,7 @@ public class SongSelectListView : MonoBehaviour
                     string lastHeader = "";
                     foreach (var song in songs)
                     {
+                        if (!CanAddSong(song.Key)) continue;
                         string firstChar = char.ToUpper(song.Value[0]).ToString();
                         if (lastHeader != firstChar)
                         {
@@ -195,6 +201,7 @@ public class SongSelectListView : MonoBehaviour
                     string lastHeader = "";
                     foreach (var song in songs)
                     {
+                        if (!CanAddSong(song.Key)) continue;
                         if (lastHeader != song.Value)
                         {
                             lastHeader = song.Value;
@@ -222,6 +229,7 @@ public class SongSelectListView : MonoBehaviour
                     int lastDiff = -10000;
                     foreach (var song in songs)
                     {
+                        if (!CanAddSong(song.Key)) continue;
                         if (lastDiff != song.Value)
                         {
                             lastDiff = song.Value;
@@ -248,6 +256,7 @@ public class SongSelectListView : MonoBehaviour
                     string lastHeader = "";
                     foreach (var song in songs)
                     {
+                        if (!CanAddSong(song.Key)) continue;
                         string rank = song.Value != null ? "<b><i>" + Helper.GetRank(song.Value ?? 0) : "Unplayed";
                         if (lastHeader != rank)
                         {
@@ -270,7 +279,7 @@ public class SongSelectListView : MonoBehaviour
 
     public void UpdateListItems(SongSelectScreen screen, bool cap = true)
     {
-        if (cap) ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+        if (cap && ItemList.Count > 0) ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
         float windowSize = ItemHolder.rect.height / 2 + SongItemSize * 2;
         HashSet<string> songItemsToUnload = new(SongItemsByID.Keys);
         int headerIndex = 0;

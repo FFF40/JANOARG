@@ -278,6 +278,7 @@ public class SongSelectScreen : MonoBehaviour
         IEnumerator CoverCoroutine()
         {
             SongSelectListSongUI targetSong = ListView.SongItems.Find(item => ListView.TargetScrollOffset == item.Target?.Position);
+            if (targetSong == null) yield break;
             if (!MapManager.SongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)) yield break;
             target.CoverImage.gameObject.SetActive(false);
             TargetSongCoverHolder.gameObject.SetActive(true);
@@ -316,10 +317,11 @@ public class SongSelectScreen : MonoBehaviour
 
             // Update list item positions
             SongSelectListSong targetSong = (SongSelectListSong)ListView.ItemList.Find(item => item is SongSelectListSong);
-            ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
-            ListView.TargetSongID = targetSong.SongID;
             if (targetSong != null)
             {
+                ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
+                ListView.TargetSongID = targetSong.SongID;
+
                 PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
                 SetTargetSong(targetSong.SongID, playableSong);
                 yield return SetCover(targetSong.SongID, playableSong);
@@ -875,7 +877,6 @@ public class SongSelectScreen : MonoBehaviour
         UpdateButtons();
 
         Transform cameraTransform = Common.main.MainCamera.transform;
-
         cameraTransform.rotation = Quaternion.identity;
         cameraTransform.position = Vector3.zero;
         cameraTransform.position *= new Vector3Frag(z: -100);

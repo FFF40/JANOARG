@@ -4,11 +4,11 @@ using System.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SongMapItemUI : MapItemUI<SongMapItem>
+public class PlaylistMapItemUI : MapItemUI<PlaylistMapItem>
 {
     public RawImage CoverImage;
 
-    public override void SetParent(SongMapItem parent)
+    public override void SetParent(PlaylistMapItem parent)
     {
         base.SetParent(parent);
         UpdateStatus();
@@ -44,15 +44,8 @@ public class SongMapItemUI : MapItemUI<SongMapItem>
         yield return SongSelectCoverManager.main.RegisterUse(CoverImage, Parent.TargetID);
     }
 
-    public void LerpToListItem(RectTransform cover, float t)
-    {
-        Vector3 fromPos = Common.main.MainCamera.WorldToScreenPoint(Parent.transform.position);
-        Vector3 toPos = cover.position;
-        (transform as RectTransform).position = Vector3.Lerp(fromPos, toPos, t);
-    }
-
     public void OnClick()
     {
-        MapManager.main.SelectSong(Parent);
+        // TODO show playlist info when clicked
     }
 }

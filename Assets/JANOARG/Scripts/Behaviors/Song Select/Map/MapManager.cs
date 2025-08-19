@@ -12,6 +12,7 @@ public class MapManager : MonoBehaviour
     public static List<MapItem> Items = new();
     public static List<MapItemUI> ItemUIs = new();
 
+    public static Dictionary<string, SongMapItem> SongMapItemsByID = new();
     public static Dictionary<string, SongMapItemUI> SongMapItemUIsByID = new();
 
 
@@ -128,6 +129,7 @@ public class MapManager : MonoBehaviour
         List<(SongMapItemUI, SongSelectListSongUI)> result = new();
         foreach (string key in keys)
         {
+            if (!SongMapItemUIsByID[key].gameObject.activeSelf) continue;
             result.Add((SongMapItemUIsByID[key], listDict[key]));
         }
         return result;
@@ -168,6 +170,7 @@ public class MapManager : MonoBehaviour
         float closestItemDistance = float.PositiveInfinity;
         foreach (var item in ItemUIs)
         {
+            if (!item.gameObject.activeSelf) continue;
             item.UpdatePosition();
             float distance = ((RectTransform)item.transform).anchoredPosition.sqrMagnitude
                 / (item.Parent.SafeCameraDistance * item.Parent.SafeCameraDistance);
@@ -176,6 +179,15 @@ public class MapManager : MonoBehaviour
                 closestItemDistance = distance;
                 closestItem = item;
             }
+        }
+        isPositionDirty = false;
+    }
+
+    public void UpdateAllStatuses()
+    {
+        foreach (var item in SongMapItemsByID)
+        {
+            item.Value.UpdateStatus();
         }
         isPositionDirty = false;
     }
