@@ -398,7 +398,7 @@ public class SongSelectListView : MonoBehaviour
 
     public void OnListPointerUp(BaseEventData data)
     {
-        if (ItemList.Count < 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
+        if (ItemList.Count <= 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
         else ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
         IsPointerDown = false;
     }
