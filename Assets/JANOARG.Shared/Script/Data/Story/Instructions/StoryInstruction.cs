@@ -1,11 +1,13 @@
-
 using System;
 using System.Collections;
-using JANOARG.Scripts.Behaviors.Storyteller;
+using JANOARG.Client.Scripts.Behaviors.Storyteller;
 
-[Serializable]
-public abstract class StoryInstruction 
+namespace JANOARG.Shared.Script.Data.Story.Instructions
 {
-    public virtual void OnTextBuild(Storyteller teller) {}
-    public virtual IEnumerator OnTextReveal(Storyteller teller) { yield return null; }
+    [Serializable]
+    public abstract class StoryInstruction 
+    {
+        public virtual void OnTextBuild(Storyteller teller) {}
+        public virtual IEnumerator OnTextReveal(Storyteller teller) { yield return null; }
+    }
 }

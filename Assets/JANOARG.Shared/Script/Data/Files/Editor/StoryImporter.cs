@@ -1,16 +1,18 @@
-using UnityEngine;
-using UnityEditor.AssetImporters;
 using System.IO;
-using UnityEditor;
+using JANOARG.Shared.Script.Data.Story;
+using UnityEditor.AssetImporters;
 
-[ScriptedImporter(1, "story")]
-public class StoryImporter : ScriptedImporter
+namespace JANOARG.Shared.Script.Data.Files.Editor
 {
-    public override void OnImportAsset(AssetImportContext ctx)
+    [ScriptedImporter(1, "story")]
+    public class StoryImporter : ScriptedImporter
     {
-        StoryScript script = StoryDecoder.Decode(File.ReadAllText(ctx.assetPath));
+        public override void OnImportAsset(AssetImportContext ctx)
+        {
+            StoryScript script = StoryDecoder.Decode(File.ReadAllText(ctx.assetPath));
 
-        ctx.AddObjectToAsset("main obj", script);
-        ctx.SetMainObject(script);
+            ctx.AddObjectToAsset("main obj", script);
+            ctx.SetMainObject(script);
+        }
     }
 }
