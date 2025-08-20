@@ -9241,7 +9241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c35667dc285e4aa40a039b2a37a9ec08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Playlist: {fileID: 11400000, guid: 8496bc59e6795a44785a16fe995ec357, type: 2}
+  Playlist: {fileID: 11400000, guid: 16788cf8b6448b6f698f7c5b7da1a991, type: 2}
   ListView: {fileID: 879351033}
   MapManager: {fileID: 532315935}
   MapLerpItemHolder: {fileID: 1597500258}
