@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor.AssetImporters;
 using System.IO;
+using JANOARG.Shared.Script.Data.ChartInfo;
 
 [ScriptedImporter(2, "jac", 1001)]
 public class JACImporter : ScriptedImporter

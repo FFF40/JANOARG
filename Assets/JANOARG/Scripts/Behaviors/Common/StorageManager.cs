@@ -1,29 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Scripts.Data.Storage;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Xml.Serialization;
 
-public class StorageManager : MonoBehaviour
+namespace JANOARG.Scripts.Behaviors.Common
 {
-    public static StorageManager main;
-
-    public ScoreStore Scores = new();
-
-    void Awake()
+    public class StorageManager : MonoBehaviour
     {
-        main = this;
-        Load();
-    } 
+        public static StorageManager main;
 
-    public void Load()
-    {
-        Scores.Load();
-    }
+        public ScoreStore Scores = new();
 
-    public void Save() 
-    {
-        Scores.Save();
-        Common.main.Storage.Save();
+        void Awake()
+        {
+            main = this;
+            Load();
+        } 
+
+        public void Load()
+        {
+            Scores.Load();
+        }
+
+        public void Save() 
+        {
+            Scores.Save();
+            global::JANOARG.Scripts.Behaviors.Common.CommonSys.main.Storage.Save();
+        }
     }
 }

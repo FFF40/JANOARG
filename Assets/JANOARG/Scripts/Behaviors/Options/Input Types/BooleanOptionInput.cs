@@ -1,30 +1,29 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
+using JANOARG.Scripts.UI;
 
-public class BooleanOptionInput : OptionInput<bool>
+namespace JANOARG.Scripts.Behaviors.Options.Input_Types
 {
-    public AnimatedToggle Toggle;
-
-    public new void Start() 
+    public class BooleanOptionInput : OptionInput<bool>
     {
-        UpdateValue();
-    }
+        public AnimatedToggle Toggle;
 
-    public new void UpdateValue() 
-    {
-        base.UpdateValue();
-        Toggle.Value = CurrentValue;
-    }
-
-    public void OnToggle()
-    {
-        if (Toggle.Value != CurrentValue)
+        public new void Start() 
         {
-            CurrentValue = Toggle.Value;
-            Set(CurrentValue);
+            UpdateValue();
+        }
+
+        public new void UpdateValue() 
+        {
+            base.UpdateValue();
+            Toggle.Value = CurrentValue;
+        }
+
+        public void OnToggle()
+        {
+            if (Toggle.Value != CurrentValue)
+            {
+                CurrentValue = Toggle.Value;
+                Set(CurrentValue);
+            }
         }
     }
 }

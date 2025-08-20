@@ -1,9 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-
-public class VisualOffsetOptionInput : FloatOptionInput
+namespace JANOARG.Scripts.Behaviors.Options.Input_Types
 {
+    public class VisualOffsetOptionInput : FloatOptionInput
+    {
+    }
 }

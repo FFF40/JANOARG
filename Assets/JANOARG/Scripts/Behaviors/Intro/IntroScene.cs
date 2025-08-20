@@ -1,14 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Scripts.Behaviors.Common;
 using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 
-public class IntroScene : MonoBehaviour
+namespace JANOARG.Scripts.Behaviors.Intro
 {
-
-    public void Awake()
+    public class IntroScene : MonoBehaviour
     {
-        CommonScene.Load();
+
+        public void Awake()
+        {
+            CommonScene.Load();
+        }
     }
 }

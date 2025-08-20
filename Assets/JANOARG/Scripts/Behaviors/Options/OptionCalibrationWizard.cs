@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+using JANOARG.Scripts.Behaviors.Common;
+using JANOARG.Scripts.Behaviors.Options.Input_Types;
+using JANOARG.Shared.Script.Data.ChartInfo;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -184,7 +187,7 @@ public class OptionCalibrationWizard : MonoBehaviour
 
         float trialTime = (float)touch.startTime - Time.realtimeSinceStartup + CurrentTime;
         if (CurrentOptionInput is JudgmentOffsetOptionInput) trialTime += SyncOffset;
-        else trialTime -= Common.main.Preferences.Get("PLYR:JudgmentOffset", 0f) / 1000;
+        else trialTime -= CommonSys.main.Preferences.Get("PLYR:JudgmentOffset", 0f) / 1000;
         float trialDuration = 60 / CalibrationLoopBPM * 4;
         int trialIndex = Mathf.FloorToInt(trialTime / trialDuration);
         Debug.Log(trialIndex + " " +  trialTime + " " + trialDuration);

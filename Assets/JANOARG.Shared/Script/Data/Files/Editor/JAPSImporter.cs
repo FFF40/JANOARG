@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor.AssetImporters;
 using System.IO;
+using JANOARG.Shared.Script.Data.ChartInfo;
 using UnityEditor;
 
 [ScriptedImporter(1, "japs", 1000)]

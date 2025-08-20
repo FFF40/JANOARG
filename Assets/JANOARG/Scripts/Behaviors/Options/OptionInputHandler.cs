@@ -1,74 +1,79 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 using System.Linq;
+using JANOARG.Scripts.Behaviors.Options.Input_Types;
+using JANOARG.Scripts.UI;
+using JANOARG.Shared.Script.Data.ChartInfo;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class OptionInputHandler : MonoBehaviour
+namespace JANOARG.Scripts.Behaviors.Options
 {
-    public static OptionInputHandler main;
-    [Space]
-    public Graphic Background;
-    public Graphic InputBackground;
-    [Space]
-    public GameObject MainHolder;
-    public TMP_Text TitleText;
-    public CanvasGroup RightHolder;
-    public RectTransform RightTransform;
-    [Space]
-    public TMP_Text BeforeText;
-    public TMP_Text AfterText;
-    [Space]
-    public CanvasGroup AdvancedInputGroup;
-    public RectTransform AdvancedInputTransform;
-    public AnimatedToggle AdvancedInputToggle;
-    [Space]
-    public CanvasGroup ListGroup;
-    public RectTransform ListTransform;
-    public OptionInputListHandler ListHandler;
-
-    [Space]
-    public OptionInputField InputSample;
-    public RectTransform InputHolder;
-    public List<OptionInputField> CurrentInputs;
-    public LayoutGroup InputLayout;
-    public CanvasGroup InputGroup;
-    [Space]
-    public OptionCalibrationWizard CalibrationWizard;
-    [Space]
-    public TMP_Text TextAnimSample;
-    public RectTransform TextAnimHolder;
-    public List<TMP_Text> TextAnimLabels;
-
-    [HideInInspector]
-    public bool IsAnimating;
-    [HideInInspector]
-    public bool IsAdvanced;
-    [HideInInspector]
-    public OptionItem CurrentItem;
-
-    bool recursionBuster = false;
-
-    public void Awake() 
+    public class OptionInputHandler : MonoBehaviour
     {
-        main = this;
-    }
+        public static OptionInputHandler main;
+        [Space]
+        public Graphic Background;
+        public Graphic InputBackground;
+        [Space]
+        public GameObject MainHolder;
+        public TMP_Text TitleText;
+        public CanvasGroup RightHolder;
+        public RectTransform RightTransform;
+        [Space]
+        public TMP_Text BeforeText;
+        public TMP_Text AfterText;
+        [Space]
+        public CanvasGroup AdvancedInputGroup;
+        public RectTransform AdvancedInputTransform;
+        public AnimatedToggle AdvancedInputToggle;
+        [Space]
+        public CanvasGroup ListGroup;
+        public RectTransform ListTransform;
+        public OptionInputListHandler ListHandler;
 
-    public void Start() 
-    {
-        Background.gameObject.SetActive(false);
-        MainHolder.SetActive(false);
-    }
+        [Space]
+        public OptionInputField InputSample;
+        public RectTransform InputHolder;
+        public List<OptionInputField> CurrentInputs;
+        public LayoutGroup InputLayout;
+        public CanvasGroup InputGroup;
+        [Space]
+        public OptionCalibrationWizard CalibrationWizard;
+        [Space]
+        public TMP_Text TextAnimSample;
+        public RectTransform TextAnimHolder;
+        public List<TMP_Text> TextAnimLabels;
 
-    public void Edit(OptionItem item)
-    {
-        if (IsAnimating) return;
+        [HideInInspector]
+        public bool IsAnimating;
+        [HideInInspector]
+        public bool IsAdvanced;
+        [HideInInspector]
+        public OptionItem CurrentItem;
 
-        switch (item)
+        bool recursionBuster = false;
+
+        public void Awake() 
         {
-            case StringOptionInput:
+            main = this;
+        }
+
+        public void Start() 
+        {
+            Background.gameObject.SetActive(false);
+            MainHolder.SetActive(false);
+        }
+
+        public void Edit(OptionItem item)
+        {
+            if (IsAnimating) return;
+
+            switch (item)
+            {
+                case StringOptionInput:
                 {
                     StringOptionInput i = (StringOptionInput)item;
 
@@ -102,7 +107,7 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
+                case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
                 {
                     FloatOptionInput i = (FloatOptionInput)item;
 
@@ -149,7 +154,7 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            case FloatOptionInput: 
+                case FloatOptionInput: 
                 {
                     FloatOptionInput i = (FloatOptionInput)item;
 
@@ -212,7 +217,7 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            case MultiFloatOptionInput:
+                case MultiFloatOptionInput:
                 {
                     MultiFloatOptionInput i = (MultiFloatOptionInput)item;
                     var fieldInfos = MultiValueFieldData.Info[i.ValueType];
@@ -296,7 +301,7 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
                 
-            case ListOptionInput:
+                case ListOptionInput:
                 {
                     Debug.Log("ListOptionInput");
                     ListOptionInput i = (ListOptionInput)item;
@@ -316,36 +321,36 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            default:
-                return;
+                default:
+                    return;
+            }
+
+            if (CurrentInputs.Count > 0) 
+            {
+                SelectInputField(CurrentInputs[0].InputField);
+            }
+
+            CurrentItem = item;
+            StartCoroutine(EditIntro(item));
         }
 
-        if (CurrentInputs.Count > 0) 
+        public void SelectInputField(TMP_InputField field)
         {
-            SelectInputField(CurrentInputs[0].InputField);
+            StartCoroutine(SelectInputFieldAnim(field));
         }
 
-        CurrentItem = item;
-        StartCoroutine(EditIntro(item));
-    }
-
-    public void SelectInputField(TMP_InputField field)
-    {
-        StartCoroutine(SelectInputFieldAnim(field));
-    }
-
-    public IEnumerator SelectInputFieldAnim(TMP_InputField field)
-    {
-        field.Select();
-        yield return null;
-        field.ActivateInputField();
-    }
-
-    public void GetItemLerpFunctions(OptionItem item, out Action<float> inputLerp, out Action endLerp) 
-    {
-        switch (item) 
+        public IEnumerator SelectInputFieldAnim(TMP_InputField field)
         {
-            case StringOptionInput: 
+            field.Select();
+            yield return null;
+            field.ActivateInputField();
+        }
+
+        public void GetItemLerpFunctions(OptionItem item, out Action<float> inputLerp, out Action endLerp) 
+        {
+            switch (item) 
+            {
+                case StringOptionInput: 
                 {
                     StringOptionInput input = (StringOptionInput)item;
                     inputLerp = x => {
@@ -355,7 +360,7 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
-            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput:
+                case JudgmentOffsetOptionInput: case VisualOffsetOptionInput:
                 {
                     FloatOptionInput input = (FloatOptionInput)item;
                     inputLerp = x => {
@@ -366,7 +371,7 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
-            case FloatOptionInput: 
+                case FloatOptionInput: 
                 {
                     FloatOptionInput input = (FloatOptionInput)item;
                     inputLerp = x => {
@@ -377,7 +382,7 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
-            case MultiFloatOptionInput: 
+                case MultiFloatOptionInput: 
                 {
                     MultiFloatOptionInput input = (MultiFloatOptionInput)item;
                     inputLerp = x => {
@@ -391,7 +396,7 @@ public class OptionInputHandler : MonoBehaviour
                     };
                     break;
                 }
-            case ListOptionInput: 
+                case ListOptionInput: 
                 {
                     ListOptionInput input = (ListOptionInput)item;
                     inputLerp = x => {
@@ -402,20 +407,20 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            default:
+                default:
                 {
                     inputLerp = _ => {};
                     endLerp = () => {};
                     break;
                 }
+            }
         }
-    }
 
-    public void GetItemFinishFunctions(OptionItem item, out Action onFinish) 
-    {
-        switch (item) 
+        public void GetItemFinishFunctions(OptionItem item, out Action onFinish) 
         {
-            case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
+            switch (item) 
+            {
+                case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
                 {
                     onFinish = () => {
                         CalibrationWizard.HideWizard();
@@ -423,7 +428,7 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            case ListOptionInput: 
+                case ListOptionInput: 
                 {
                     onFinish = () => {
                         ListHandler.Finish();
@@ -432,137 +437,137 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            default:
+                default:
                 {
                     onFinish = () => {};
                     break;
                 }
+            }
         }
-    }
 
-    public IEnumerator EditIntro(OptionItem item)
-    {
-        IsAnimating = true;
-        GetItemLerpFunctions(item, out Action<float> inputLerp, out Action endLerp);
+        public IEnumerator EditIntro(OptionItem item)
+        {
+            IsAnimating = true;
+            GetItemLerpFunctions(item, out Action<float> inputLerp, out Action endLerp);
         
-        Background.gameObject.SetActive(true);
-        MainHolder.SetActive(true);
+            Background.gameObject.SetActive(true);
+            MainHolder.SetActive(true);
 
-        TitleText.text = item.TitleLabel.text;
-        Vector2 titlePos = TitleText.rectTransform.anchoredPosition;
-        TitleText.alpha = RightHolder.alpha = 0;
-        Vector2 rightPos = RightTransform.anchoredPosition;
-        Vector2 listPos = ListTransform.anchoredPosition;
+            TitleText.text = item.TitleLabel.text;
+            Vector2 titlePos = TitleText.rectTransform.anchoredPosition;
+            TitleText.alpha = RightHolder.alpha = 0;
+            Vector2 rightPos = RightTransform.anchoredPosition;
+            Vector2 listPos = ListTransform.anchoredPosition;
 
-        yield return Ease.Animate(.45f, x => {
+            yield return Ease.Animate(.45f, x => {
 
-            float ease = Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out);
-            Background.color = new Color(0, 0, 0, .5f * ease);
-            InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, ease * 40);
+                float ease = Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out);
+                Background.color = new Color(0, 0, 0, .5f * ease);
+                InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, ease * 40);
 
-            float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            float offset = 30 * (1 - ease2);
-            TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
-            RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
-            ListTransform.anchoredPosition = listPos + Vector2.right * offset;
+                float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                float offset = 30 * (1 - ease2);
+                TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
+                RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
+                ListTransform.anchoredPosition = listPos + Vector2.right * offset;
 
-            float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
-            TitleText.alpha = RightHolder.alpha = ListGroup.alpha = ease3;
-            AdvancedInputTransform.anchoredPosition = new (
-                (IsAdvanced ? -690 : -190) - 10 * ease3, 
-                AdvancedInputTransform.anchoredPosition.y
-            );
-            AdvancedInputGroup.alpha = ease3;
+                float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
+                TitleText.alpha = RightHolder.alpha = ListGroup.alpha = ease3;
+                AdvancedInputTransform.anchoredPosition = new (
+                    (IsAdvanced ? -690 : -190) - 10 * ease3, 
+                    AdvancedInputTransform.anchoredPosition.y
+                );
+                AdvancedInputGroup.alpha = ease3;
 
-            inputLerp(ease); 
-        });
+                inputLerp(ease); 
+            });
 
-        endLerp();
+            endLerp();
     
-        IsAnimating = false;
-    }
-
-    public void EndEdit() 
-    {
-        if (IsAnimating) return;
-        StartCoroutine(EditOutro());
-    }
-
-    public IEnumerator EditOutro()
-    {
-        IsAnimating = true;
-        GetItemLerpFunctions(CurrentItem, out Action<float> inputLerp, out Action endLerp);
-        GetItemFinishFunctions(CurrentItem, out Action onFinish);
-        onFinish();
-
-        Vector2 titlePos = TitleText.rectTransform.anchoredPosition;
-        Vector2 rightPos = RightTransform.anchoredPosition;
-        Vector2 listPos = ListTransform.anchoredPosition;
-
-        yield return Ease.Animate(.3f, x => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, (1 - ease) * 40);
-            Background.color = new Color(0, 0, 0, .5f * (1 - ease));
-
-            float offset = 10 * ease;
-            TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
-            RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
-            ListTransform.anchoredPosition = listPos + Vector2.right * offset;
-            TitleText.alpha = RightHolder.alpha = ListGroup.alpha = 1 - ease;
-
-            AdvancedInputTransform.anchoredPosition = new (
-                (IsAdvanced ? -700 : -200) + 10 * ease, 
-                AdvancedInputTransform.anchoredPosition.y
-            );
-            AdvancedInputGroup.alpha = 1 - ease;
-
-            inputLerp(1 - ease);
-        });
-
-        foreach (var field in CurrentInputs) Destroy(field.gameObject);
-        CurrentInputs.Clear();
-        foreach (var textAnim in TextAnimLabels) Destroy(textAnim.gameObject);
-        TextAnimLabels.Clear();
-        
-        Background.gameObject.SetActive(false);
-        MainHolder.SetActive(false);
-        ListHandler.gameObject.SetActive(false);
-        TitleText.rectTransform.anchoredPosition = titlePos;
-        RightTransform.anchoredPosition = rightPos;
-        ListTransform.anchoredPosition = listPos;
-
-        IsAnimating = false;
-    }
-
-    public static void LerpText(TMP_Text textAnim, TMP_Text from, TMP_Text to, float lerp)
-    {
-        from.alpha = lerp == 0 ? 1 : 0;
-        to.alpha = lerp == 1 ? 1 : 0;
-        textAnim.gameObject.SetActive(lerp != 0 && lerp != 1);
-
-        Vector3[] corners = new Vector3[4];
-        from.rectTransform.GetWorldCorners(corners);
-        Vector3 cornerFrom = corners[0];
-        to.rectTransform.GetWorldCorners(corners);
-        Vector3 cornerTo = corners[0];
-        textAnim.rectTransform.position = Vector3.Lerp(cornerFrom, cornerTo, lerp);
-    }
-
-    public void UpdateAdvancedInput() 
-    {
-        if (IsAnimating || recursionBuster) 
-        {
-            recursionBuster = true;
-            AdvancedInputToggle.Value = !AdvancedInputToggle.Value;
-            recursionBuster = false;
-            return;
+            IsAnimating = false;
         }
 
-        MultiValueType type;
-
-        switch (CurrentItem) 
+        public void EndEdit() 
         {
-            case MultiFloatOptionInput: 
+            if (IsAnimating) return;
+            StartCoroutine(EditOutro());
+        }
+
+        public IEnumerator EditOutro()
+        {
+            IsAnimating = true;
+            GetItemLerpFunctions(CurrentItem, out Action<float> inputLerp, out Action endLerp);
+            GetItemFinishFunctions(CurrentItem, out Action onFinish);
+            onFinish();
+
+            Vector2 titlePos = TitleText.rectTransform.anchoredPosition;
+            Vector2 rightPos = RightTransform.anchoredPosition;
+            Vector2 listPos = ListTransform.anchoredPosition;
+
+            yield return Ease.Animate(.3f, x => {
+                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, (1 - ease) * 40);
+                Background.color = new Color(0, 0, 0, .5f * (1 - ease));
+
+                float offset = 10 * ease;
+                TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
+                RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
+                ListTransform.anchoredPosition = listPos + Vector2.right * offset;
+                TitleText.alpha = RightHolder.alpha = ListGroup.alpha = 1 - ease;
+
+                AdvancedInputTransform.anchoredPosition = new (
+                    (IsAdvanced ? -700 : -200) + 10 * ease, 
+                    AdvancedInputTransform.anchoredPosition.y
+                );
+                AdvancedInputGroup.alpha = 1 - ease;
+
+                inputLerp(1 - ease);
+            });
+
+            foreach (var field in CurrentInputs) Destroy(field.gameObject);
+            CurrentInputs.Clear();
+            foreach (var textAnim in TextAnimLabels) Destroy(textAnim.gameObject);
+            TextAnimLabels.Clear();
+        
+            Background.gameObject.SetActive(false);
+            MainHolder.SetActive(false);
+            ListHandler.gameObject.SetActive(false);
+            TitleText.rectTransform.anchoredPosition = titlePos;
+            RightTransform.anchoredPosition = rightPos;
+            ListTransform.anchoredPosition = listPos;
+
+            IsAnimating = false;
+        }
+
+        public static void LerpText(TMP_Text textAnim, TMP_Text from, TMP_Text to, float lerp)
+        {
+            from.alpha = lerp == 0 ? 1 : 0;
+            to.alpha = lerp == 1 ? 1 : 0;
+            textAnim.gameObject.SetActive(lerp != 0 && lerp != 1);
+
+            Vector3[] corners = new Vector3[4];
+            from.rectTransform.GetWorldCorners(corners);
+            Vector3 cornerFrom = corners[0];
+            to.rectTransform.GetWorldCorners(corners);
+            Vector3 cornerTo = corners[0];
+            textAnim.rectTransform.position = Vector3.Lerp(cornerFrom, cornerTo, lerp);
+        }
+
+        public void UpdateAdvancedInput() 
+        {
+            if (IsAnimating || recursionBuster) 
+            {
+                recursionBuster = true;
+                AdvancedInputToggle.Value = !AdvancedInputToggle.Value;
+                recursionBuster = false;
+                return;
+            }
+
+            MultiValueType type;
+
+            switch (CurrentItem) 
+            {
+                case MultiFloatOptionInput: 
                 {
                     MultiFloatOptionInput input = (MultiFloatOptionInput)CurrentItem;
                     type = input.ValueType;
@@ -573,66 +578,67 @@ public class OptionInputHandler : MonoBehaviour
                     break;
                 }
 
-            default: return;
+                default: return;
+            }
+
+            StartCoroutine(AdvancedInputAnim(type, AdvancedInputToggle.Value));
         }
 
-        StartCoroutine(AdvancedInputAnim(type, AdvancedInputToggle.Value));
-    }
+        public void SetAdvancedInput(MultiValueType type, bool active) 
+        {
+            IsAdvanced = active;
+            var list = MultiValueFieldData.Info[type];
 
-    public void SetAdvancedInput(MultiValueType type, bool active) 
-    {
-        IsAdvanced = active;
-        var list = MultiValueFieldData.Info[type];
-
-        Color firstColor = active ? list[0].Color : Color.white;
-        TextAnimLabels[0].color = TextAnimLabels[1].color = firstColor;
-        CurrentInputs[0].SetColor(firstColor);
+            Color firstColor = active ? list[0].Color : Color.white;
+            TextAnimLabels[0].color = TextAnimLabels[1].color = firstColor;
+            CurrentInputs[0].SetColor(firstColor);
         
-        for (int a = 0; a < CurrentInputs.Count; a++)
-        {
-            CurrentInputs[a].Title.text = active ? list[a].Name : "";
+            for (int a = 0; a < CurrentInputs.Count; a++)
+            {
+                CurrentInputs[a].Title.text = active ? list[a].Name : "";
+            }
+            for (int a = 1; a < CurrentInputs.Count; a++)
+            {
+                CurrentInputs[a].gameObject.SetActive(active);
+                TextAnimLabels[a * 2].text = active ? CurrentInputs[a].InputField.text : "";
+                TextAnimLabels[a * 2 + 1].text = active ? CurrentInputs[a].UnitLabel.text : "";
+            }
         }
-        for (int a = 1; a < CurrentInputs.Count; a++)
-        {
-            CurrentInputs[a].gameObject.SetActive(active);
-            TextAnimLabels[a * 2].text = active ? CurrentInputs[a].InputField.text : "";
-            TextAnimLabels[a * 2 + 1].text = active ? CurrentInputs[a].UnitLabel.text : "";
-        }
-    }
 
-    public IEnumerator AdvancedInputAnim(MultiValueType type, bool active)
-    {
-        IsAnimating = true;
-
-        if (active)
+        public IEnumerator AdvancedInputAnim(MultiValueType type, bool active)
         {
-            StartCoroutine(Ease.Animate(.4f, x => {
+            IsAnimating = true;
+
+            if (active)
+            {
+                StartCoroutine(Ease.Animate(.4f, x => {
+                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                    AdvancedInputTransform.anchoredPosition = new (-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
+                }));
+            }
+            else 
+            {
+                StartCoroutine(Ease.Animate(.5f, x => {
+                    float ease2 = Ease.Get(Mathf.Clamp01(x * 1.2f - .2f), EaseFunction.Cubic, EaseMode.Out);
+                    AdvancedInputTransform.anchoredPosition = new (-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
+                }));
+            }
+
+            yield return Ease.Animate(.2f, x => {
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                AdvancedInputTransform.anchoredPosition = new (-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
-            }));
+                InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * ease);
+                InputGroup.alpha = (1 - ease) * (1 - ease);
+            });
+
+            SetAdvancedInput(type, active);
+
+            yield return Ease.Animate(.4f, x => {
+                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * (1 - ease));
+                InputGroup.alpha = ease * ease;
+            });
+
+            IsAnimating = false;
         }
-        else 
-        {
-            StartCoroutine(Ease.Animate(.5f, x => {
-                float ease2 = Ease.Get(Mathf.Clamp01(x * 1.2f - .2f), EaseFunction.Cubic, EaseMode.Out);
-                AdvancedInputTransform.anchoredPosition = new (-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
-            }));
-        }
-
-        yield return Ease.Animate(.2f, x => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * ease);
-            InputGroup.alpha = (1 - ease) * (1 - ease);
-        });
-
-        SetAdvancedInput(type, active);
-
-        yield return Ease.Animate(.4f, x => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * (1 - ease));
-            InputGroup.alpha = ease * ease;
-        });
-
-        IsAnimating = false;
     }
 }

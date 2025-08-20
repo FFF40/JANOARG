@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Globalization;
 using UnityEditor;
 using System.IO;
+using JANOARG.Shared.Script.Data.ChartInfo;
 
 public class JACDecoder
 {

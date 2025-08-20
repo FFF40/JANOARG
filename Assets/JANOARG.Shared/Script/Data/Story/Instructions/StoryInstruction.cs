@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections;
+using JANOARG.Scripts.Behaviors.Storyteller;
 
 [Serializable]
 public abstract class StoryInstruction 

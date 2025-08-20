@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JANOARG.Scripts.Behaviors.Common;
+using JANOARG.Scripts.Behaviors.Player;
+using JANOARG.Shared.Script.Data.ChartInfo;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -654,7 +657,7 @@ public class PlayerInputManager : MonoBehaviour
                             effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
                             var rt = (RectTransform)effect.transform;
 
-                            rt.position = Common.main.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
+                            rt.position = CommonSys.main.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
                         }
                         else
                         {
@@ -755,7 +758,7 @@ public class PlayerInputManager : MonoBehaviour
                         effect.SetAccuracy(null);
                         effect.SetColor(PlayerScreen.CurrentChart.Palette.InterfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
-                        rectTransform.position = Common.main.MainCamera.WorldToScreenPoint(currentHit.transform.position);
+                        rectTransform.position = CommonSys.main.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                     }
 
                     if (currentHit.HoldTicks.Count == 0)

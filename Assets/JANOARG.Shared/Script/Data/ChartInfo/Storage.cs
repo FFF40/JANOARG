@@ -1,154 +1,157 @@
-using System.Xml;
-using System.Xml.Serialization;
-using System.IO;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
-using UnityEngine.Events;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
+using JANOARG.Scripts.Data.Storage;
+using UnityEngine;
+using UnityEngine.Events;
 
-public class Storage 
+namespace JANOARG.Shared.Script.Data.ChartInfo
 {
-    public Dictionary<string, object> values = new Dictionary<string, object>();
-    public string SaveName;
-
-    public Storage(string path)
+    public class Storage 
     {
-        SaveName = Application.persistentDataPath + "/" + path;
-        Load();
-    }
+        public Dictionary<string, object> values = new Dictionary<string, object>();
+        public string SaveName;
 
-    public T Get<T>(string key, T fallback)
-    {
-        if (values.ContainsKey(key)) 
+        public Storage(string path)
         {
-            return (T)values[key];
+            SaveName = Application.persistentDataPath + "/" + path;
+            Load();
         }
-        else return fallback;
-    }
-    public T[] Get<T>(string key, T[] fallback)
-    {
-        if (values.ContainsKey(key)) 
+
+        public T Get<T>(string key, T fallback)
         {
-            if (values[key] is object[]) return ((object[])values[key]).OfType<T>().ToArray();
-            return (T[])values[key];
-        }
-        else return fallback;
-    }
-
-    public void Set(string key, object value)
-    {
-        values[key] = value;
-    }
-
-    public UnityEvent OnSave = new UnityEvent();
-
-    public UnityEvent OnLoad = new UnityEvent();
-
-    [XmlInclude(typeof(ScoreStoreEntry))]
-    public class SerializeProxy
-    {
-        [XmlAttribute]
-        public string Key;
-        public object Value;
-        public static implicit operator SerializeProxy(KeyValuePair<string, object> item)
-        {
-            SerializeProxy proxy = new SerializeProxy
+            if (values.ContainsKey(key)) 
             {
-                Key = item.Key,
-                Value = item.Value,
-            };
-            if (proxy.Value is Array) proxy.Value = new CollectionProxy(proxy.Value as Array);
-            return proxy;
+                return (T)values[key];
+            }
+            else return fallback;
+        }
+        public T[] Get<T>(string key, T[] fallback)
+        {
+            if (values.ContainsKey(key)) 
+            {
+                if (values[key] is object[]) return ((object[])values[key]).OfType<T>().ToArray();
+                return (T[])values[key];
+            }
+            else return fallback;
         }
 
-        public static implicit operator KeyValuePair<string, object>(SerializeProxy item)
+        public void Set(string key, object value)
         {
-            object value = item.Value;
-            if (value is CollectionProxy) value = ((CollectionProxy)value).Value;
-            KeyValuePair<string, object> pair = new KeyValuePair<string, object>(item.Key, value);
-            return pair;
+            values[key] = value;
         }
 
-        public void AddPair(Dictionary<string, object> dict)
+        public UnityEvent OnSave = new UnityEvent();
+
+        public UnityEvent OnLoad = new UnityEvent();
+
+        [XmlInclude(typeof(ScoreStoreEntry))]
+        public class SerializeProxy
         {
-            KeyValuePair<string, object> pair = this;
-            dict.TryAdd(pair.Key, pair.Value);
+            [XmlAttribute]
+            public string Key;
+            public object Value;
+            public static implicit operator SerializeProxy(KeyValuePair<string, object> item)
+            {
+                SerializeProxy proxy = new SerializeProxy
+                {
+                    Key = item.Key,
+                    Value = item.Value,
+                };
+                if (proxy.Value is Array) proxy.Value = new CollectionProxy(proxy.Value as Array);
+                return proxy;
+            }
+
+            public static implicit operator KeyValuePair<string, object>(SerializeProxy item)
+            {
+                object value = item.Value;
+                if (value is CollectionProxy) value = ((CollectionProxy)value).Value;
+                KeyValuePair<string, object> pair = new KeyValuePair<string, object>(item.Key, value);
+                return pair;
+            }
+
+            public void AddPair(Dictionary<string, object> dict)
+            {
+                KeyValuePair<string, object> pair = this;
+                dict.TryAdd(pair.Key, pair.Value);
+            }
         }
-    }
 
-    public class CollectionProxy
-    {
-        [XmlElement("Item")]
-        public object[] Value;
-
-        public CollectionProxy()
+        public class CollectionProxy
         {
+            [XmlElement("Item")]
+            public object[] Value;
+
+            public CollectionProxy()
+            {
+            }
+
+            public CollectionProxy(Array array)
+            {
+                Value = new object[array.Length];
+                for (int a = 0; a < array.Length; a++) Value[a] = array.GetValue(a);
+            }
         }
 
-        public CollectionProxy(Array array)
+        [XmlRoot("ItemList")]
+        [XmlInclude(typeof(CollectionProxy))]
+        public class SerializeProxyList
         {
-            Value = new object[array.Length];
-            for (int a = 0; a < array.Length; a++) Value[a] = array.GetValue(a);
+            [XmlElement("Item")]
+            public List<SerializeProxy> Items = new List<SerializeProxy>();
         }
-    }
 
-    [XmlRoot("ItemList")]
-    [XmlInclude(typeof(CollectionProxy))]
-    public class SerializeProxyList
-    {
-        [XmlElement("Item")]
-        public List<SerializeProxy> Items = new List<SerializeProxy>();
-    }
-
-    public void Save()
-    {
-        SerializeProxyList list = new SerializeProxyList();
-        foreach (KeyValuePair<string, object> pair in values) if (pair.Value != null) list.Items.Add(pair);
-
-        XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
-        FileStream fs;
-
-        fs = new FileStream(SaveName + ".jas", FileMode.Create);
-        serializer.Serialize(fs, list);
-        fs.Close();
-        fs = new FileStream(SaveName + ".backup.jas", FileMode.Create);
-        serializer.Serialize(fs, list);
-        fs.Close();
-
-        OnSave.Invoke();
-    }
-
-    public void Load()
-    {
-        SerializeProxyList list = new SerializeProxyList();
-
-        XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
-        FileStream fs = null;
-        try 
+        public void Save()
         {
-            fs = new FileStream(SaveName + ".jas", FileMode.OpenOrCreate);
-            list = (SerializeProxyList)serializer.Deserialize(fs);
+            SerializeProxyList list = new SerializeProxyList();
+            foreach (KeyValuePair<string, object> pair in values) if (pair.Value != null) list.Items.Add(pair);
+
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
+            FileStream fs;
+
+            fs = new FileStream(SaveName + ".jas", FileMode.Create);
+            serializer.Serialize(fs, list);
             fs.Close();
+            fs = new FileStream(SaveName + ".backup.jas", FileMode.Create);
+            serializer.Serialize(fs, list);
+            fs.Close();
+
+            OnSave.Invoke();
         }
-        catch (Exception e)
+
+        public void Load()
         {
+            SerializeProxyList list = new SerializeProxyList();
+
+            XmlSerializer serializer = new XmlSerializer(typeof(SerializeProxyList));
+            FileStream fs = null;
             try 
             {
-                fs?.Close();
-                fs = new FileStream(SaveName + ".backup.jas", FileMode.OpenOrCreate);
+                fs = new FileStream(SaveName + ".jas", FileMode.OpenOrCreate);
                 list = (SerializeProxyList)serializer.Deserialize(fs);
                 fs.Close();
             }
-            catch (Exception ee)
+            catch (Exception e)
             {
-                fs?.Close();
-                Debug.Log(e + "\n" + ee);
+                try 
+                {
+                    fs?.Close();
+                    fs = new FileStream(SaveName + ".backup.jas", FileMode.OpenOrCreate);
+                    list = (SerializeProxyList)serializer.Deserialize(fs);
+                    fs.Close();
+                }
+                catch (Exception ee)
+                {
+                    fs?.Close();
+                    Debug.Log(e + "\n" + ee);
+                }
             }
+
+            foreach (SerializeProxy pair in list.Items) pair.AddPair(values);
+
+            OnLoad.Invoke();
         }
-
-        foreach (SerializeProxy pair in list.Items) pair.AddPair(values);
-
-        OnLoad.Invoke();
     }
 }

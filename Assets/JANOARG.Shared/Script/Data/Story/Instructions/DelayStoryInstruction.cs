@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Text.RegularExpressions;
+using JANOARG.Scripts.Behaviors.Storyteller;
 using UnityEngine;
 
 [Serializable]
