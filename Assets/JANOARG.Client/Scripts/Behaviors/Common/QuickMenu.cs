@@ -1,7 +1,7 @@
 using System.Collections;
 using JANOARG.Client.Scripts.Behaviors.Panels;
 using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;

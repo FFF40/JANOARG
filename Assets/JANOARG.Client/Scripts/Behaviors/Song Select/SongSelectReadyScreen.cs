@@ -2,7 +2,7 @@ using System.Collections;
 using JANOARG.Client.Scripts.Behaviors.Common;
 using JANOARG.Client.Scripts.Behaviors.Player;
 using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

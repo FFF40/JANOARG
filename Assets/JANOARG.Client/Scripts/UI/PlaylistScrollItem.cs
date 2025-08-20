@@ -1,5 +1,5 @@
 using System.Globalization;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

@@ -6,7 +6,7 @@ using JANOARG.Client.Scripts.Behaviors.Song_Select;
 using JANOARG.Client.Scripts.Data.Storage;
 using JANOARG.Client.Scripts.UI;
 using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;

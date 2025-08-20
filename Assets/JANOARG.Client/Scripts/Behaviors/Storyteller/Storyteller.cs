@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using JANOARG.Client.Scripts.Data.Constant;
-using JANOARG.Shared.Script.Data.ChartInfo;
-using JANOARG.Shared.Script.Data.Story;
-using JANOARG.Shared.Script.Data.Story.TypeEffects;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.Story;
+using JANOARG.Shared.Scripts.Data.Story.TypeEffects;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

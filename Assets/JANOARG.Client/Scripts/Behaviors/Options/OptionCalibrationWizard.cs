@@ -1,7 +1,7 @@
 using System.Collections;
 using JANOARG.Client.Scripts.Behaviors.Common;
 using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;

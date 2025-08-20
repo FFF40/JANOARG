@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
 using JANOARG.Client.Scripts.UI;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

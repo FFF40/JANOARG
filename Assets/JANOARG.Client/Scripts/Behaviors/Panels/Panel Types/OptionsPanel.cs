@@ -7,7 +7,7 @@ using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
 using JANOARG.Client.Scripts.Behaviors.Player;
 using JANOARG.Client.Scripts.UI;
 using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

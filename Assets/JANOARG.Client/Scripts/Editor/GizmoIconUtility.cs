@@ -1,4 +1,4 @@
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;

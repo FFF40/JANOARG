@@ -5,7 +5,7 @@ using System.Globalization;
 using JANOARG.Client.Scripts.Data.Storage;
 using JANOARG.Client.Scripts.UI;
 using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEditor;
 using UnityEngine;

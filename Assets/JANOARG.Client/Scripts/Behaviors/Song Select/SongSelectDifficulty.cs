@@ -1,6 +1,6 @@
 using System;
 using JANOARG.Client.Scripts.Data.Storage;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

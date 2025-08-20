@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using UnityEngine;
 
 namespace JANOARG.Client.Scripts.Utils

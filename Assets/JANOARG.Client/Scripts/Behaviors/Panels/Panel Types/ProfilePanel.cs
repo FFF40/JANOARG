@@ -3,7 +3,7 @@ using System.IO;
 using JANOARG.Client.Scripts.Behaviors.Common;
 using JANOARG.Client.Scripts.Data.Storage;
 using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JANOARG.Client.Scripts.Behaviors.Common;
 using JANOARG.Client.Scripts.Behaviors.Player;
-using JANOARG.Shared.Script.Data.ChartInfo;
+using JANOARG.Shared.Scripts.Data.ChartInfo;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
