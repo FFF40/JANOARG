@@ -1,14 +1,14 @@
 using System;
 using System.Collections;
-using JANOARG.Client.Scripts.Data.Constant;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
-using JANOARG.Shared.Scripts.Data.Story;
-using JANOARG.Shared.Scripts.Data.Story.TypeEffects;
+using JANOARG.Client.Data.Constant;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Story;
+using JANOARG.Shared.Data.Story.TypeEffects;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Storyteller
+namespace JANOARG.Client.Behaviors.Storyteller
 {
     public class Storyteller : MonoBehaviour
     {

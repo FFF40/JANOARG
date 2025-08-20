@@ -1,8 +1,8 @@
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Shared.Scripts.Data.Story;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Shared.Data.Story;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Storyteller
+namespace JANOARG.Client.Behaviors.Storyteller
 {
     public class StorytellerScreen : MonoBehaviour
     {
@@ -21,7 +21,7 @@ namespace JANOARG.Client.Scripts.Behaviors.Storyteller
         {
             if (ScriptToPlay) 
             {
-                global::JANOARG.Client.Scripts.Behaviors.Storyteller.Storyteller.main.PlayScript(ScriptToPlay);
+                global::JANOARG.Client.Behaviors.Storyteller.Storyteller.main.PlayScript(ScriptToPlay);
             }
         }
 

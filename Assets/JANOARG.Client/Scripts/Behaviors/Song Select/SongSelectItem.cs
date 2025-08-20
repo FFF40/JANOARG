@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
 using System.IO;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Song_Select
+namespace JANOARG.Client.Behaviors.Song_Select
 {
     public class SongSelectItem : MonoBehaviour
     {

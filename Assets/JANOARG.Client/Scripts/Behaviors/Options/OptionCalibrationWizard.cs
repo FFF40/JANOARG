@@ -1,7 +1,7 @@
 using System.Collections;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Options.Input_Types;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,7 +9,7 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.UI;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
-namespace JANOARG.Client.Scripts.Behaviors.Options
+namespace JANOARG.Client.Behaviors.Options
 {
     public class OptionCalibrationWizard : MonoBehaviour
     {

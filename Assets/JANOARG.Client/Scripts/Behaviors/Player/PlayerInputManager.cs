@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Behaviors.Player;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Player;
+using JANOARG.Shared.Data.ChartInfo;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;

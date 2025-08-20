@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.UI
+namespace JANOARG.Client.UI
 {
     public class Themer : MonoBehaviour
     {

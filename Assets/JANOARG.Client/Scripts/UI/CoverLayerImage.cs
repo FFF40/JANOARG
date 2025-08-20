@@ -1,9 +1,9 @@
 using System;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.UI
+namespace JANOARG.Client.UI
 {
     public class CoverLayerImage : MonoBehaviour
     {

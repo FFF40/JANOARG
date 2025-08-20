@@ -1,12 +1,12 @@
 using System.Collections;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Behaviors.Song_Select;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Player
+namespace JANOARG.Client.Behaviors.Player
 {
     public class PlayerScreenPause : MonoBehaviour
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Options.Input_Types
+namespace JANOARG.Client.Behaviors.Options.Input_Types
 {
     public class ListOptionInput<T> : OptionInput<T>
     {

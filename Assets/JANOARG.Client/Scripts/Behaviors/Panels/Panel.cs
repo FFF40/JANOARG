@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace JANOARG.Client.Scripts.Behaviors.Panels
+namespace JANOARG.Client.Behaviors.Panels
 {
     public class Panel : MonoBehaviour
     {

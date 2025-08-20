@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using JANOARG.Client.Scripts.Data.Storage;
+using JANOARG.Client.Data.Storage;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace JANOARG.Shared.Scripts.Data.ChartInfo
+namespace JANOARG.Shared.Data.ChartInfo
 {
     public class Storage 
     {

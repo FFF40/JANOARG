@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Globalization;
-using JANOARG.Client.Scripts.Data.Constant;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Data.Constant;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
     public class CommonSys : MonoBehaviour
     {

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using JANOARG.Client.Scripts.Behaviors.Common;
+using JANOARG.Client.Behaviors.Common;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Player
+namespace JANOARG.Client.Behaviors.Player
 {
     internal class PlayerHitboxVisualizer : MonoBehaviour
     {

@@ -1,13 +1,13 @@
 using System.Collections;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Behaviors.Player;
-using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Player;
+using JANOARG.Client.Utils;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Song_Select
+namespace JANOARG.Client.Behaviors.Song_Select
 {
     public class SongSelectReadyScreen : MonoBehaviour
     {

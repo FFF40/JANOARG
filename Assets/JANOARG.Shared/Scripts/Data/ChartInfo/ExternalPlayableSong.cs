@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace JANOARG.Shared.Scripts.Data.ChartInfo
+namespace JANOARG.Shared.Data.ChartInfo
 {
     public class ExternalPlayableSong : ScriptableObject
     {

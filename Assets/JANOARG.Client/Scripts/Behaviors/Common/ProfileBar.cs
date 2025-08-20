@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using JANOARG.Client.Scripts.Data.Storage;
-using JANOARG.Client.Scripts.UI;
-using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Data.Storage;
+using JANOARG.Client.UI;
+using JANOARG.Client.Utils;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +13,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
 
     public class ProfileBar : MonoBehaviour
@@ -120,17 +120,17 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
         public void UpdateLabels()
         {
             // Name
-            NameLabel.text = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Name", "JANOARG");
+            NameLabel.text = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Name", "JANOARG");
         
             // Levels
-            int level = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Level", 1);
+            int level = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Level", 1);
             LevelText.text = level.ToString();
             LevelProgressBar.maxValue = Helper.GetLevelGoal(level);
-            LevelProgressBar.value = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:LevelProgress", 0L);
+            LevelProgressBar.value = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:LevelProgress", 0L);
 
             // Currencies
-            CoinLabel.text = Helper.FormatCurrency(global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Coins", 0L));
-            OrbLabel.text = Helper.FormatCurrency(global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Orbs", 0L));
+            CoinLabel.text = Helper.FormatCurrency(global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Coins", 0L));
+            OrbLabel.text = Helper.FormatCurrency(global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Orbs", 0L));
 
             // AR & Essence
             AbilityRatingText.text = AbilityRating.ToString("F2", CultureInfo.InvariantCulture);
@@ -237,15 +237,15 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
             long finalOrbs = (long)(baseOrbs * (1 + TotalEssence / 100));
 
             // Increase coins and orbs
-            long orbsOld = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Orbs", 0L),
+            long orbsOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Orbs", 0L),
                 orbsNew = orbsOld + finalOrbs;
-            long coinsOld = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Coins", 0L),
+            long coinsOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Coins", 0L),
                 coinsNew = coinsOld + finalCoins;
 
             // Calculate final level and progress
-            int levelOld = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Level", 1),
+            int levelOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Level", 1),
                 levelNew = levelOld;
-            long progOld = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:LevelProgress", 0L),
+            long progOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:LevelProgress", 0L),
                 progNew = progOld + finalOrbs;
             long levelGoal = Helper.GetLevelGoal(levelNew);
             while (progNew >= levelGoal) 
@@ -256,11 +256,11 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
             }
 
             // Save
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Set("CURR:Coins", coinsNew);
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Set("CURR:Orbs", orbsNew);
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Set("INFO:Level", levelNew);
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Set("INFO:LevelProgress", progNew);
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Save();
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("CURR:Coins", coinsNew);
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("CURR:Orbs", orbsNew);
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:Level", levelNew);
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:LevelProgress", progNew);
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Save();
 
             // For testing
             // arChange += 1; AbilityRating += 1; 
@@ -385,7 +385,7 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
                     }
                 }
 
-                int index = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusCount", 0) - 1;
+                int index = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusCount", 0) - 1;
                 BonusLabel.text = bonusMult + "× BONUS!";
                 ChangeCoinLabel.text = "+" + Helper.FormatCurrency(finalCoins) + " (×" +bonusMult + ")";
                 yield return Ease.Animate(1f, (x) => {
@@ -479,8 +479,8 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
         {
             SongGainSkipQueued = SongGainSkipLock = false;
 
-            bonusCount = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusCount", 0);
-            bonusReset = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusReset", 0L);
+            bonusCount = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusCount", 0);
+            bonusReset = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusReset", 0L);
             long now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
             if (now >= bonusReset) 
@@ -506,8 +506,8 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
                 bonusCount++;
             }
 
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Set("INFO:BonusCount", bonusCount);
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Set("INFO:BonusReset", bonusReset);
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:BonusCount", bonusCount);
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:BonusReset", bonusReset);
             return multi;
         }
 

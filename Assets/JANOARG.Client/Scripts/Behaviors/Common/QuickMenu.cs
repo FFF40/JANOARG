@@ -1,13 +1,13 @@
 using System.Collections;
-using JANOARG.Client.Scripts.Behaviors.Panels;
-using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Panels;
+using JANOARG.Client.Utils;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
     public class QuickMenu : MonoBehaviour
     {
@@ -44,7 +44,7 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
         {
             IsAnimating = true;
 
-            MainBackground.color = global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.MainCamera.backgroundColor * new Color(1, 1, 1, 0) + new Color(0, 0, 0, 0.75f);
+            MainBackground.color = global::JANOARG.Client.Behaviors.Common.CommonSys.main.MainCamera.backgroundColor * new Color(1, 1, 1, 0) + new Color(0, 0, 0, 0.75f);
 
             AudioManager.main.SetSceneLayerLowPassCutoff(1000, 0.5f);
 

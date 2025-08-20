@@ -1,14 +1,14 @@
 using System.Collections;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Behaviors.Song_Select;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Intro
+namespace JANOARG.Client.Behaviors.Intro
 {
     public class IntroScreen : MonoBehaviour
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.Text.RegularExpressions;
-using JANOARG.Client.Scripts.Behaviors.Storyteller;
-using JANOARG.Shared.Scripts.Data.Files;
+using JANOARG.Client.Behaviors.Storyteller;
+using JANOARG.Shared.Data.Files;
 
-namespace JANOARG.Shared.Scripts.Data.Story.Instructions
+namespace JANOARG.Shared.Data.Story.Instructions
 {
     [Serializable]
     public class DelayStoryInstruction : StoryInstruction 

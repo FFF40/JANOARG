@@ -1,9 +1,9 @@
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Editor
+namespace JANOARG.Client.Editor
 {
 	public class GizmoIconUtility 
 	{

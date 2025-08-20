@@ -1,11 +1,11 @@
 using System.Collections;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.UI
+namespace JANOARG.Client.UI
 {
     [ExecuteAlways][RequireComponent(typeof(CanvasRenderer))]
     public class AnimatedToggle : Selectable, IPointerClickHandler

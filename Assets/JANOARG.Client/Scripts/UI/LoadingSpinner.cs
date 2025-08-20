@@ -1,7 +1,7 @@
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.UI
+namespace JANOARG.Client.UI
 {
     public class LoadingSpinner : MonoBehaviour
     {

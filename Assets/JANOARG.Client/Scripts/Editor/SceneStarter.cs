@@ -3,7 +3,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace JANOARG.Client.Scripts.Editor
+namespace JANOARG.Client.Editor
 {
 	[InitializeOnLoad]
 	public static class SceneStarter

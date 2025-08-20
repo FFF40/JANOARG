@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace JANOARG.Client.Scripts.Behaviors.Player
+namespace JANOARG.Client.Behaviors.Player
 {
     public class HeadlessPlayerStarter : MonoBehaviour
     {

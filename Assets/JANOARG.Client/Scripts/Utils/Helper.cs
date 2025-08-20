@@ -1,9 +1,9 @@
 using System;
 using System.Globalization;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Utils
+namespace JANOARG.Client.Utils
 {
     public static class Helper 
     {

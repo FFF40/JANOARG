@@ -1,6 +1,6 @@
 using UnityEngine.SceneManagement;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
     public class CommonScene
     {

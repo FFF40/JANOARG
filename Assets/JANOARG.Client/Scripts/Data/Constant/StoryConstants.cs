@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Data.Constant
+namespace JANOARG.Client.Data.Constant
 {
     [CreateAssetMenu(fileName = "Story Constants", menuName = "JANOARG/Story Constants")]
     public class StoryConstants : ScriptableObject

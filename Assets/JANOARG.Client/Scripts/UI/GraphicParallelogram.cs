@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.UI
+namespace JANOARG.Client.UI
 {
     [ExecuteAlways][RequireComponent(typeof(CanvasRenderer))]
     public class GraphicParallelogram : MaskableGraphic

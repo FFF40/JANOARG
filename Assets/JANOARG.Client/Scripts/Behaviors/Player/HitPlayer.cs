@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Player
+namespace JANOARG.Client.Behaviors.Player
 {
     public class HitPlayer : MonoBehaviour
     {

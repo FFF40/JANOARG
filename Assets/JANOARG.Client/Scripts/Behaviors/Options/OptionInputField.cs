@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Options
+namespace JANOARG.Client.Behaviors.Options
 {
     public class OptionInputField : MonoBehaviour
     {

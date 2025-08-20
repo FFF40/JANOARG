@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Intro
+namespace JANOARG.Client.Behaviors.Intro
 {
     public class IntroFlick : MonoBehaviour
     {

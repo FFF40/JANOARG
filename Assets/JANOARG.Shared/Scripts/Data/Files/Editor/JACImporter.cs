@@ -1,9 +1,9 @@
 using System.IO;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
-namespace JANOARG.Shared.Scripts.Data.Files.Editor
+namespace JANOARG.Shared.Data.Files.Editor
 {
     [ScriptedImporter(2, "jac", 1001)]
     public class JACImporter : ScriptedImporter

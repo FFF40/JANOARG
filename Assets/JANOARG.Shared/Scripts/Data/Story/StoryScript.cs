@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using JANOARG.Shared.Scripts.Data.Story.Instructions;
+using JANOARG.Shared.Data.Story.Instructions;
 using UnityEngine;
 
-namespace JANOARG.Shared.Scripts.Data.Story
+namespace JANOARG.Shared.Data.Story
 {
     public class StoryScript : ScriptableObject
     {

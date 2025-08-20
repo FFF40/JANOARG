@@ -1,6 +1,6 @@
-using JANOARG.Client.Scripts.UI;
+using JANOARG.Client.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Options.Input_Types
+namespace JANOARG.Client.Behaviors.Options.Input_Types
 {
     public class BooleanOptionInput : OptionInput<bool>
     {

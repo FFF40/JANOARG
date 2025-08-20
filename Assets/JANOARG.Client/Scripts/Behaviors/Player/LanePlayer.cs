@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace JANOARG.Client.Scripts.Behaviors.Player
+namespace JANOARG.Client.Behaviors.Player
 {
     public class LanePlayer : MonoBehaviour
     {

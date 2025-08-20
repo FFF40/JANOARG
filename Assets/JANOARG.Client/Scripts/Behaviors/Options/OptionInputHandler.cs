@@ -2,14 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
-using JANOARG.Client.Scripts.UI;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Options.Input_Types;
+using JANOARG.Client.UI;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Options
+namespace JANOARG.Client.Behaviors.Options
 {
     public class OptionInputHandler : MonoBehaviour
     {

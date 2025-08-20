@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace JANOARG.Shared.Scripts.Data.ChartInfo
+namespace JANOARG.Shared.Data.ChartInfo
 {
     [Serializable]
     public struct BeatPosition : IComparable<BeatPosition>

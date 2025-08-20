@@ -1,13 +1,13 @@
 using System.Collections;
 using System.IO;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Data.Storage;
-using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Data.Storage;
+using JANOARG.Client.Utils;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Panels.Panel_Types
+namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 {
     public class ProfilePanel : MonoBehaviour
     {

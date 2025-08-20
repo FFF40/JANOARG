@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace JANOARG.Shared.Scripts.Data.ChartInfo
+namespace JANOARG.Shared.Data.ChartInfo
 {
     public class ChartManager 
     {

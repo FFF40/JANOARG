@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using JANOARG.Client.Scripts.Behaviors.Storyteller;
+using JANOARG.Client.Behaviors.Storyteller;
 
-namespace JANOARG.Shared.Scripts.Data.Story.Instructions
+namespace JANOARG.Shared.Data.Story.Instructions
 {
     [Serializable]
     public class SetActorStoryInstruction : StoryInstruction 

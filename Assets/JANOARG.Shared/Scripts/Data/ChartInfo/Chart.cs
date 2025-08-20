@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace JANOARG.Shared.Scripts.Data.ChartInfo
+namespace JANOARG.Shared.Data.ChartInfo
 {
     public interface IDeepClonable<T>
     {

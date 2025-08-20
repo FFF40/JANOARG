@@ -1,10 +1,10 @@
 using System.IO;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
-namespace JANOARG.Shared.Scripts.Data.Files.Editor
+namespace JANOARG.Shared.Data.Files.Editor
 {
     [ScriptedImporter(1, "japs", 1000)]
     public class JAPSImporter : ScriptedImporter

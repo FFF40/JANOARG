@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
     public class LoadingBar : MonoBehaviour
     {

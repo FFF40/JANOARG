@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Utils
+namespace JANOARG.Client.Utils
 {
     public struct Vector4Frag 
     {

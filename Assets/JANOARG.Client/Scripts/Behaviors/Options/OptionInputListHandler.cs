@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
+using JANOARG.Client.Behaviors.Options.Input_Types;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace JANOARG.Client.Scripts.Behaviors.Options
+namespace JANOARG.Client.Behaviors.Options
 {
     public class OptionInputListHandler : MonoBehaviour, IInitializePotentialDragHandler, IDragHandler, IEndDragHandler, IPointerUpHandler
     {

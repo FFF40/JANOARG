@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using JANOARG.Shared.Scripts.Data.Story;
-using JANOARG.Shared.Scripts.Data.Story.Instructions;
+using JANOARG.Shared.Data.Story;
+using JANOARG.Shared.Data.Story.Instructions;
 using UnityEditor.Callbacks;
 
 #if UNITY_EDITOR
 using UnityEngine;
 #endif
 
-namespace JANOARG.Shared.Scripts.Data.Files
+namespace JANOARG.Shared.Data.Files
 {
 
     public class StoryDecoder

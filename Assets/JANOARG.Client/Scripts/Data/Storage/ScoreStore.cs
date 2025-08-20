@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
-using JANOARG.Client.Scripts.Behaviors.Common;
+using JANOARG.Client.Behaviors.Common;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Data.Storage
+namespace JANOARG.Client.Data.Storage
 {
     public class ScoreStore 
     {

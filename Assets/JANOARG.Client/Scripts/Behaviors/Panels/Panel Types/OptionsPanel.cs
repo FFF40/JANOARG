@@ -1,18 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using JANOARG.Client.Scripts.Behaviors.Common;
-using JANOARG.Client.Scripts.Behaviors.Options;
-using JANOARG.Client.Scripts.Behaviors.Options.Input_Types;
-using JANOARG.Client.Scripts.Behaviors.Player;
-using JANOARG.Client.Scripts.UI;
-using JANOARG.Client.Scripts.Utils;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Options;
+using JANOARG.Client.Behaviors.Options.Input_Types;
+using JANOARG.Client.Behaviors.Player;
+using JANOARG.Client.UI;
+using JANOARG.Client.Utils;
+using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Scripts.Behaviors.Panels.Panel_Types
+namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 {
     public class OptionsPanel : MonoBehaviour
     {

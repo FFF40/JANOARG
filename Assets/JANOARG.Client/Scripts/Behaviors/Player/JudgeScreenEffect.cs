@@ -1,9 +1,9 @@
 using System.Collections;
-using JANOARG.Client.Scripts.UI;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Client.UI;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Player
+namespace JANOARG.Client.Behaviors.Player
 {
     public class JudgeScreenEffect : MonoBehaviour
     {

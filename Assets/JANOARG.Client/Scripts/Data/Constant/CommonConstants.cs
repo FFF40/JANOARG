@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Data.Constant
+namespace JANOARG.Client.Data.Constant
 {
     [CreateAssetMenu(fileName = "Common Constants", menuName = "JANOARG/Common Constants")]
     public class CommonConstants : ScriptableObject

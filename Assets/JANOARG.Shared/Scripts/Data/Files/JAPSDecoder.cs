@@ -1,8 +1,8 @@
 using System.Globalization;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Shared.Scripts.Data.Files
+namespace JANOARG.Shared.Data.Files
 {
     public class JAPSDecoder
     {

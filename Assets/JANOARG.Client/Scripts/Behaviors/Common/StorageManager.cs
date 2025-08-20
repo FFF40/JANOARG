@@ -1,7 +1,7 @@
-using JANOARG.Client.Scripts.Data.Storage;
+using JANOARG.Client.Data.Storage;
 using UnityEngine;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
     public class StorageManager : MonoBehaviour
     {
@@ -23,7 +23,7 @@ namespace JANOARG.Client.Scripts.Behaviors.Common
         public void Save() 
         {
             Scores.Save();
-            global::JANOARG.Client.Scripts.Behaviors.Common.CommonSys.main.Storage.Save();
+            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Save();
         }
     }
 }

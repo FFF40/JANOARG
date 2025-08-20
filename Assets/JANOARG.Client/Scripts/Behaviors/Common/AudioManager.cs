@@ -1,9 +1,9 @@
 using System.Collections;
-using JANOARG.Shared.Scripts.Data.ChartInfo;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace JANOARG.Client.Scripts.Behaviors.Common
+namespace JANOARG.Client.Behaviors.Common
 {
     public class AudioManager : MonoBehaviour
     {

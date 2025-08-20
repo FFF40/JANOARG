@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
-using JANOARG.Client.Scripts.Behaviors.Storyteller;
+using JANOARG.Client.Behaviors.Storyteller;
 using TMPro;
 
-namespace JANOARG.Shared.Scripts.Data.Story.TypeEffects
+namespace JANOARG.Shared.Data.Story.TypeEffects
 {
     [Serializable]
     public abstract class StoryTypeEffect
