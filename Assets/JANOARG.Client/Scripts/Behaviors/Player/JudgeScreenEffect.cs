@@ -27,6 +27,8 @@ namespace JANOARG.Client.Behaviors.Player
             else 
             {
                 Debug.Log(acc);
+                Size = 120;
+                RingBackground.Resolution = RingFill1.Resolution = RingFill2.Resolution = 90;
                 RingFill1.FillAmount = RingFill2.FillAmount = (1 - Mathf.Abs((float)acc)) / 2;
                 RingFill1.rectTransform.localEulerAngles = Vector3.back * Mathf.Max((float)acc * 180, 0);
                 RingFill2.rectTransform.localEulerAngles = Vector3.forward * (RingFill1.rectTransform.localEulerAngles.z + 180);
@@ -39,7 +41,9 @@ namespace JANOARG.Client.Behaviors.Player
             CircleFill.color = RingBackground.color = color * new Color(1, 1, 1, .3f);
         }
 
-        public IEnumerator Start()
+        public void Play() => StartCoroutine(Animate(false));
+        public void PlayOneShot() => StartCoroutine(Animate(true));
+        public IEnumerator Animate(bool isOneShot)
         {
             yield return Ease.Animate(0.4f, (x) => {
                 float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2);
@@ -49,11 +53,12 @@ namespace JANOARG.Client.Behaviors.Player
                 float ease2 = Ease.Get(x, EaseFunction.Circle, EaseMode.In);
                 Group.alpha = 1 - ease2;
 
-                float ease3 = (1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2)) * .96f + x * .04f;
+                float ease3 = ease * .96f + x * .04f;
                 RingBackground.InsideRadius = RingFill1.InsideRadius = RingFill2.InsideRadius = ease3;
             });
 
-            Destroy(gameObject);
+            if (isOneShot) Destroy(gameObject);
+            else PlayerScreen.main.judgeScreenManager.ReturnEffect(this);
         }
     }
 }

@@ -28,11 +28,15 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool LaneStepDirty = false;
     
+        private Mesh _mesh;
         private List<Vector3> _verts = new();
         private List<int> _tris = new();
 
         public void Init() 
         {
+            _mesh = new Mesh();
+            _mesh.MarkDynamic();
+            MeshFilter.mesh = _mesh;
             var metronome = PlayerScreen.TargetSong.Timing;
             foreach (LaneStep step in Current.LaneSteps)
             {
@@ -82,9 +86,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void UpdateMesh(float time, float beat, float maxDistance = 200)
         {
-            // New mesh if MeshFilter doesn't have one
-            Mesh mesh = MeshFilter.mesh ?? new Mesh();
-        
+            // No Mesh instantiation
+
             _verts.Clear();
             _tris.Clear();
         
@@ -112,12 +115,14 @@ namespace JANOARG.Client.Behaviors.Player
                 Current.LaneSteps.RemoveAt(0);
             }
 
-            if (Current.LaneSteps.Count < 1) 
-            {
-                if (TimeStamps[0] < time)
-                    Destroy(mesh);
-                return;
-            }
+            // No need to destory Mesh
+
+            // if (Current.LaneSteps.Count < 1) 
+            // {
+            //     if (TimeStamps[0] < time)
+            //         Destroy(mesh);
+            //     return;
+            // }
         
             Current.LaneSteps[0].Advance(beat);
         
@@ -251,10 +256,10 @@ namespace JANOARG.Client.Behaviors.Player
                     break;
             }
 
-            mesh.Clear();
-            mesh.SetVertices(_verts);
-            mesh.SetTriangles(_tris, 0);
-            MeshFilter.mesh = mesh;
+            _mesh.Clear();
+            _mesh.SetVertices(_verts);
+            _mesh.SetTriangles(_tris, 0, false);
+            _mesh.RecalculateBounds();
         }
 
         private float _hitObjectTime = float.NaN;
@@ -312,7 +317,13 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float GetZPosition(float time) 
         {
-            int index = TimeStamps.FindIndex(x => x >= time);
+            int index = -1;
+            for (int i = 0; i < TimeStamps.Count; i++){
+                if (TimeStamps[i] >= time){
+                    index = i;
+                    break;
+                }
+            }
             if (index < 0) return PositionPoints[^1] + (time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.main.Speed; 
             index = Mathf.Min(index, PositionPoints.Count - 1);
             return PositionPoints[index] + (time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.main.Speed; 
@@ -320,7 +331,13 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end) 
         {
-            int index = TimeStamps.FindIndex(x => x >= time);
+            int index = -1;
+            for (int i = 0; i < TimeStamps.Count; i++){
+                if (TimeStamps[i] >= time){
+                    index = i;
+                    break;
+                }
+            }
             if (index < 0)
             {
                 start = Current.LaneSteps[^1].StartPos;
@@ -387,7 +404,13 @@ namespace JANOARG.Client.Behaviors.Player
 
             float time = Mathf.Max(PlayerScreen.main.CurrentTime + PlayerScreen.main.Settings.VisualOffset, hit.Time);
 
-            int index = TimeStamps.FindIndex(x => x > time);
+            int index = -1;
+            for (int i = 0; i < TimeStamps.Count; i++){
+                if (TimeStamps[i] >= time){
+                    index = i;
+                    break;
+                }
+            }
             if (index <= 0 || PositionPoints.Count <= index) return;
             index = Mathf.Max(index, 1);
         
