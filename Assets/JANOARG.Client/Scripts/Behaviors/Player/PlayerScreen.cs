@@ -58,6 +58,8 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text ComboLabel;
         public RectTransform JudgeScreenHolder;
         [Space]
+        public JudgeScreenManager judgeScreenManager;
+        [Space]
         public TMP_Text PauseLabel;
         [Space]
         [Header("Samples")]
@@ -763,9 +765,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (spawnEffect)
             {
-                var effect = Instantiate(JudgeScreenSample, JudgeScreenHolder);
-                effect.SetAccuracy(acc);
-                effect.SetColor(CurrentChart.Palette.InterfaceColor);
+                var effect = PlayerScreen.main.judgeScreenManager.BorrowEffect(acc, PlayerScreen.CurrentChart.Palette.InterfaceColor);
                 var rt = (RectTransform)effect.transform;
                 rt.position = hit.HitCoord.Position;
 

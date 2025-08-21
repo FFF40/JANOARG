@@ -11970,6 +11970,7 @@ MonoBehaviour:
   ComboGroup: {fileID: 80537442}
   ComboLabel: {fileID: 80537440}
   JudgeScreenHolder: {fileID: 324592700}
+  judgeScreenManager: {fileID: 1551788793}
   PauseLabel: {fileID: 664049825}
   LaneGroupSample: {fileID: 7932530262983194933, guid: 9f163d8f499bace4694fcbbda4c1d6b3, type: 3}
   LaneSample: {fileID: 2572600698700152797, guid: 21d1e5daa792aad4599081b3d9a9aa5a, type: 3}
@@ -12036,7 +12037,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1551788786}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a6a4bfa751512848bc43d2424a79ca2, type: 3}
+  m_Script: {fileID: 11500000, guid: a1512a5b9f1005144b3ab2ee4734fae5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &1551788794
