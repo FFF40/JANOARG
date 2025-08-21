@@ -15,16 +15,16 @@ namespace JANOARG.Client.Behaviors.Player
     public class JudgeScreenManager : MonoBehaviour
     {
         public Stack<JudgeScreenEffect> judgeScreenEffects;
-        private int totalMaxInstances = 32;
-        private int totalInstances = 0;
+        private int _totalMaxInstances = 32;
+        private int _totalInstances = 0;
 
         private void Start()
         {
             // Initialize judge screen effects
             if (judgeScreenEffects == null || judgeScreenEffects.Count == 0)
             {
-                judgeScreenEffects = new Stack<JudgeScreenEffect>(totalMaxInstances);
-                for (int i = 0; i < totalMaxInstances; i++)
+                judgeScreenEffects = new Stack<JudgeScreenEffect>(_totalMaxInstances);
+                for (int i = 0; i < _totalMaxInstances; i++)
                 {
                     var effect = Instantiate(PlayerScreen.main.JudgeScreenSample, PlayerScreen.main.JudgeScreenHolder);
                     judgeScreenEffects.Push(effect);
@@ -37,7 +37,7 @@ namespace JANOARG.Client.Behaviors.Player
         public JudgeScreenEffect BorrowEffect(float? accuracy, Color color)
         {
             // Debug.Log($"Borrowing JudgeScreenEffect: Accuracy={accuracy}, Color={color}, TotalInstances={totalInstances}");
-            if (totalInstances > totalMaxInstances)
+            if (_totalInstances > _totalMaxInstances)
             {
                 var newEffect = Instantiate(PlayerScreen.main.JudgeScreenSample, PlayerScreen.main.JudgeScreenHolder);
                 newEffect.SetAccuracy(accuracy);
@@ -52,7 +52,7 @@ namespace JANOARG.Client.Behaviors.Player
             effect.SetAccuracy(accuracy);
             effect.SetColor(color);
             effect.Play();
-            totalInstances++;
+            _totalInstances++;
             return effect;
         }
 
@@ -61,7 +61,7 @@ namespace JANOARG.Client.Behaviors.Player
         {
             effect.gameObject.SetActive(false);
             judgeScreenEffects.Push(effect);
-            totalInstances--;
+            _totalInstances--;
         }
     }
 }

@@ -29,8 +29,11 @@ namespace JANOARG.Client.Behaviors.Player
         public bool LaneStepDirty = false;
     
         private Mesh _mesh;
-        private List<Vector3> _verts = new();
-        private List<int> _tris = new();
+        
+        // WARNING :
+        // THIS IS NOT THREAD SAFE
+        private static List<Vector3> _verts = new();
+        private static List<int> _tris = new();
 
         public void Init() 
         {
@@ -406,7 +409,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             int index = -1;
             for (int i = 0; i < TimeStamps.Count; i++){
-                if (TimeStamps[i] >= time){
+                if (TimeStamps[i] > time){
                     index = i;
                     break;
                 }
@@ -494,7 +497,7 @@ namespace JANOARG.Client.Behaviors.Player
             mesh.Clear();
             mesh.SetVertices(_verts);
             mesh.SetTriangles(_tris, 0);
-            hit.HoldMesh.mesh = mesh;
+            // hit.HoldMesh.mesh = mesh;
         }
 
         float InverseLerpUnclamped(float start, float end, float val) => (val - start) / (end - start);
