@@ -593,9 +593,11 @@ namespace JANOARG.Client.Behaviors.Player
 
             
                 // Prevents from going to negative values, which might break things
-                float ChartUpdateTime(float time) => time < 0 ? 0 : time ;
+                // float ChartUpdateTime(float time) => time < 0 ? 0 : time ;
+
+                // Your code break things, great job :thumbs_up:
             
-                float visualTime = ChartUpdateTime(CurrentTime + Settings.VisualOffset) ;
+                float visualTime = CurrentTime + Settings.VisualOffset;
                 float visualBeat = TargetSong.Timing.ToBeat(visualTime);
             
             
