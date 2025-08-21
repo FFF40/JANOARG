@@ -602,7 +602,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
             yield return new WaitForSeconds(2);
 
-            CommonSys.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
+            CommonSys.LoadScene("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
                 SongSelectReadyScreen.main.EndLaunch();
             }, false);
             SceneManager.UnloadSceneAsync("Song Select");

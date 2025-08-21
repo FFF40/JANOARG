@@ -164,7 +164,7 @@ namespace JANOARG.Client.Behaviors.Player
             yield return new WaitForSeconds(1);
 
             LoadingBar.main.Show();
-            CommonSys.Load("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
+            CommonSys.LoadScene("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
                 LoadingBar.main.Hide();
                 SongSelectScreen.main.Intro();
             }, false);

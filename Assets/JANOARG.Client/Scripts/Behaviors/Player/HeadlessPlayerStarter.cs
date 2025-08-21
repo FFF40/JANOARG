@@ -36,14 +36,14 @@ namespace JANOARG.Client.Behaviors.Player
             _targetChartMeta = _targetSong.Charts.Find(meta => meta.DifficultyName == Chart.Data.DifficultyName);
         
             // Prepare scene
-            PlayerScreen.HeadlessInitialised = true;
+            PlayerScreen.HeadlessInitialized = true;
         
             CommonSys.main.MainCamera.backgroundColor = _targetSong.BackgroundColor;
             PlayerScreen.TargetSong = _targetSong;
             PlayerScreen.TargetSongPath = _targetSongPath;
             PlayerScreen.TargetChartMeta = _targetChartMeta;
         
-            CommonSys.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => { PlayerScreen.main.BeginReadyAnim(); }, true);
+            CommonSys.LoadScene("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => { PlayerScreen.main.BeginReadyAnim(); }, true);
         
             SceneManager.UnloadSceneAsync("HeadlessPlayerStarter");
             Resources.UnloadUnusedAssets();

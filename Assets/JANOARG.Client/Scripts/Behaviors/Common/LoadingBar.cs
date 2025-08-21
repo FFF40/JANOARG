@@ -28,6 +28,11 @@ namespace JANOARG.Client.Behaviors.Common
         [HideInInspector]
         public bool IsAnimating;
 
+        /**
+            <summary>
+                List of flavor text entries to pick randomly when the loading bar appears.
+            </summary>
+        */
         public static readonly FlavorTextEntry[] FlavorTextEntries = new[] {
 
             /* ----- TIPS ----- */
@@ -60,6 +65,11 @@ namespace JANOARG.Client.Behaviors.Common
             new FlavorTextEntry("<b>🐌"),
         };
 
+        /**
+            <summary>
+                List of flavor text entries to pick randomly when the loading completes.
+            </summary>
+        */
         public static readonly FlavorTextEntry[] CompletedStatuses = new[] {
 
             // Always shown
@@ -77,6 +87,11 @@ namespace JANOARG.Client.Behaviors.Common
             gameObject.SetActive(false);
         }
 
+        /**
+            <summary>
+                Show the loading bar.
+            </summary>
+        */
         public void Show()
         {
             gameObject.SetActive(true);
@@ -87,7 +102,12 @@ namespace JANOARG.Client.Behaviors.Common
             StartCoroutine(ShowAnim());
         }
 
-        public IEnumerator ShowAnim()
+        /**
+            <summary>
+                Animation to be played when the loading bar appears.
+            </summary>
+        */
+        IEnumerator ShowAnim()
         {
             IsAnimating = true;
             StatusText.text = "NOW LOADING...";
@@ -106,13 +126,23 @@ namespace JANOARG.Client.Behaviors.Common
             IsAnimating = false;
         }
 
+        /**
+            <summary>
+                Hide the loading bar.
+            </summary>
+        */
         public void Hide()
         {
             StopCoroutine(ShowAnim());
             StartCoroutine(HideAnim());
         }
 
-        public IEnumerator HideAnim()
+        /**
+            <summary>
+                Animation to be played when the loading bar hides.
+            </summary>
+        */
+        IEnumerator HideAnim()
         {
             IsAnimating = true;
             StatusCompletedText.text = FlavorTextEntry.GetRandom(CompletedStatuses).Message;
@@ -140,18 +170,35 @@ namespace JANOARG.Client.Behaviors.Common
             IsAnimating = false;
         }
 
+        /**
+            <summary>
+                Do a loading operation—show the loading bar, wait for <c>isLoaded</c> to return true, 
+                then call the <c>onLoad</c> action and hide the loading bar.
+            </summary>
+        */
         public void Load(Func<bool> isLoaded, Action onLoad) 
         {
             StartCoroutine(LoadAnim(isLoaded, onLoad));
         }
 
-        public IEnumerator LoadAnim(Func<bool> isLoaded, Action onLoad) 
+        /**
+            <summary>
+                Animation to be played when <c>Load</c> method is called.
+            </summary>
+        */
+        IEnumerator LoadAnim(Func<bool> isLoaded, Action onLoad) 
         {
             yield return ShowAnim();
             yield return new WaitWhile(isLoaded);
+            onLoad();
             yield return HideAnim();
         }
 
+        /**
+            <summary>
+                Set the flavor text to be displayed on the loading bar
+            </summary>
+        */
         public void SetFlavorText(string text) 
         {
             FlavorText.text = text;

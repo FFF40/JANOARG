@@ -147,11 +147,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         private int _totalObjects;
         private int _loadedObjects;
-        internal static bool HeadlessInitialised = false;
+        internal static bool HeadlessInitialized = false;
 
         private void Update_LoadingBarHolder(int increments, string currentProgress)
         {
-            if (HeadlessInitialised) return;
+            if (HeadlessInitialized) return;
         
             _loadedObjects += increments;
         
@@ -169,7 +169,7 @@ namespace JANOARG.Client.Behaviors.Player
                 HeadlessPlayerStarter.Chart = Chart;
                 HeadlessPlayerStarter.RunChart = RunChart;
 
-                CommonSys.Load("HeadlessPlayerStarter", null, null);
+                CommonSys.LoadScene("HeadlessPlayerStarter", null, null);
             
                 SceneManager.UnloadSceneAsync("Player");
                 Resources.UnloadUnusedAssets();
@@ -182,7 +182,7 @@ namespace JANOARG.Client.Behaviors.Player
                 DifficultyNameLabel.text = TargetChartMeta.DifficultyName;
                 DifficultyLabel.text = TargetChartMeta.DifficultyLevel;
 
-                if (!HeadlessInitialised)
+                if (!HeadlessInitialized)
                 {
                     SongSelectReadyScreen.main.LoadingBarHolder.gameObject.SetActive(true);
                     SongSelectReadyScreen.main.OverallProgress.text = "0/0";
@@ -197,7 +197,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 yield return new WaitUntil(() => thing.isDone && TargetSong.Clip.loadState != AudioDataLoadState.Loading);
 
-                if (!HeadlessInitialised)
+                if (!HeadlessInitialized)
                     SongSelectReadyScreen.main.CurrentProgress.text += "Done.";
 
                 TargetChart = thing.asset as ExternalChart;
@@ -277,7 +277,7 @@ namespace JANOARG.Client.Behaviors.Player
             ScaledExtraRadius = dpi * 0.2f;
             ScaledMinimumRadius = MinimumRadius * screenUnit;
 
-            StartCoroutine(LaneLoader());
+            StartCoroutine(LaneLoaderRoutine());
             yield return new WaitUntil(() => _loadState[0]);
         
             Update_LoadingBarHolder(0, $"Finished {(_loadState[1] ? "with errors.":"!")}");
@@ -292,7 +292,12 @@ namespace JANOARG.Client.Behaviors.Player
             yield return new WaitForEndOfFrame();
         }
 
-        private IEnumerator LaneLoader()
+        /** 
+            <summary>
+                Coroutine to load all lanes.
+            </summary>
+        */
+        private IEnumerator LaneLoaderRoutine()
         {
             int loadedLanes = 0;
             bool[] instantiatedLane = new bool[TargetChart.Data.Lanes.Count];
@@ -300,7 +305,7 @@ namespace JANOARG.Client.Behaviors.Player
             while (loadedLanes < TargetChart.Data.Lanes.Count)
             {
                 bool progressMade = false;
-            
+
                 for (int a = 0; a < TargetChart.Data.Lanes.Count; a++)
                 {
                     if (instantiatedLane[a])
@@ -314,7 +319,7 @@ namespace JANOARG.Client.Behaviors.Player
                     LaneGroupPlayer laneInGroup = noParent ? null : LaneGroups.Find(x => x.Current.Name == laneData.Group);
 
                     //Debug.Log($"[LaneInit] Processing lane {a}: group = '{laneData.Group}'");
-                
+
                     // Only continue if no parent is needed, or parent exists
                     if (!noParent && laneInGroup == null)
                     {
@@ -330,12 +335,12 @@ namespace JANOARG.Client.Behaviors.Player
                     instancedLane.Group = laneInGroup;
                     instancedLane.Original = TargetChart.Data.Lanes[a];
                     instancedLane.Current = CurrentChart.Lanes[a];
-                
+
                     instancedLane.Init();
                     Lanes.Add(instancedLane);
-                
+
                     float time = float.NaN;
-                    Vector3 startPos = Vector3.zero, 
+                    Vector3 startPos = Vector3.zero,
                         endPos = Vector3.zero; //Declare 2 points of lane show in screen
                     foreach (HitObject laneHitobject in instancedLane.Original.Objects)
                     {
@@ -347,7 +352,7 @@ namespace JANOARG.Client.Behaviors.Player
                             TotalExScore += 1;
                             if (!float.IsNaN(laneHitobject.FlickDirection)) TotalExScore += 1;
                         }
-    
+
                         if (!Mathf.Approximately(time, laneHitobject.Offset))
                         {
                             // Set camera distance and rotation to hit time of the note?
@@ -355,14 +360,14 @@ namespace JANOARG.Client.Behaviors.Player
                             Pseudocamera.transform.localPosition = hitObjectCamera.CameraPivot;
                             Pseudocamera.transform.localEulerAngles = hitObjectCamera.CameraRotation;
                             Pseudocamera.transform.Translate(Vector3.back * hitObjectCamera.PivotDistance);
-    
+
                             // Set 2 points of lane?
                             Lane lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
                             LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, TargetSong.Timing);
                             startPos = Quaternion.Euler(lane.Rotation) * positionStep.StartPosition + lane.Position;
                             endPos = Quaternion.Euler(lane.Rotation) * positionStep.EndPosition + lane.Position;
                             LaneGroupPlayer group = laneInGroup;
-    
+
                             // Loop to get localPosition of 2 points of lane?
                             while (group)
                             {
@@ -372,13 +377,13 @@ namespace JANOARG.Client.Behaviors.Player
                                 group = group.Parent;
                             }
                         }
-    
+
                         HitObject hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); //Get current HitObject?
                         Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
                         Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
-    
+
                         float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
-    
+
                         //Add hit coords
                         instancedLane.HitCoords.Add(new HitScreenCoord
                         {
@@ -386,24 +391,24 @@ namespace JANOARG.Client.Behaviors.Player
                             Radius = Mathf.Max(radius, ScaledMinimumRadius)
                         });
                     }
-    
+
                     HitsRemaining += instancedLane.Original.Objects.Count;
-    
+
                     loadedLanes++;
                     instantiatedLane[a] = true;
                     progressMade = true;
-                
-                    Update_LoadingBarHolder(1, $"Loading lane {a}...({loadedLanes} of {TargetChart.Data.Lanes.Count})");;
-                
+
+                    Update_LoadingBarHolder(1, $"Loading lane {a}...({loadedLanes} of {TargetChart.Data.Lanes.Count})"); ;
+
                     //yield return new WaitForEndOfFrame();
                 }
-            
+
                 if (!progressMade)
                 {
                     // Try loading the lanegroup again once
                     yield return LaneGroupLoader();
                     yield return this;
-                
+
                     int err = 0;
                     List<string> errDetails = new();
                     for (var i = 0; i < instantiatedLane.Length; i++)
@@ -425,13 +430,13 @@ namespace JANOARG.Client.Behaviors.Player
                         }
                         return final;
                     }
-                
+
                     Debug.LogError($"Failed to resolve {err} lane dependencies. Possible circular or missing references. {(errDetails.Count > 0 ? "\n" + PrintDepDetails() : String.Empty)}");
-                
+
                     Update_LoadingBarHolder(Math.Abs(TargetChart.Data.Lanes.Count - loadedLanes), $"Failed to load {err} lanes!");
                     _loadState[1] = true;
                     yield return new WaitForSeconds(0.5f);
-                
+
                     break;
                 }
             }
@@ -655,8 +660,15 @@ namespace JANOARG.Client.Behaviors.Player
             PlayerInputManager.Instance.UpdateInput();
         }
 
-        Coroutine judgAnim;
+        Coroutine judgmentAnim;
 
+        /** 
+            <summary>
+                Give score to the player, update the combo counter and add a judgment entry 
+            </summary>
+            <param name="score">Amount of EX score to give.</param>
+            <param name="acc">Accuracy value (negative = early, positive = late, values in -1~1 indicates successful hit).</param>
+        */
         public void AddScore(float score, float? acc)
         {
             CurrentExScore += score;
@@ -687,12 +699,17 @@ namespace JANOARG.Client.Behaviors.Player
                 JudgmentLabel.text = score > 0 ? "FLAWLESS" : "MISS";
             }
 
-            if (judgAnim != null) StopCoroutine(judgAnim);
-            judgAnim = StartCoroutine(JudgmentAnim());
+            if (judgmentAnim != null) StopCoroutine(judgmentAnim);
+            judgmentAnim = StartCoroutine(JudgmentAnim());
 
             TotalCombo++;
         }
 
+        /**
+            <summary>
+                Animation to be played when a hit object is judged.
+            </summary>
+        */
         IEnumerator JudgmentAnim() 
         {
             yield return Ease.Animate(.6f, (x) => {
@@ -705,10 +722,13 @@ namespace JANOARG.Client.Behaviors.Player
                 JudgmentGroup.alpha = val2;
             });
         }
-
-
-
-        public void RemoveHitPlayer(HitPlayer hit) 
+        
+        /**
+            <summary>
+                Remove a hit object player from the scene.
+            </summary>
+        */
+        public void RemoveHitPlayer(HitPlayer hit)
         {
             if (hit.HoldMesh != null)
             {
@@ -717,13 +737,21 @@ namespace JANOARG.Client.Behaviors.Player
             }
             if (hit.gameObject != null)
                 Destroy(hit.gameObject);
-        
+
             hit.Lane.HitObjects.Remove(hit);
 
             HitsRemaining--;
         }
 
-        public void Hit(HitPlayer hit, float offset, bool spawnEffect = true)
+        /**
+            <summary>
+                Hit a hit object—calculate and add score, remove it from the scene, and play judgment effects.
+            </summary>
+            <param name="hit">The hit object to hit.</param>
+            <param name="offsetMs">The player offset in milliseconds.</param>
+            <param name="spawnEffect">Whether to spawn the judgment effects.</param>
+        */
+        public void Hit(HitPlayer hit, float offsetMs, bool spawnEffect = true)
         {
             // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
 
@@ -735,7 +763,7 @@ namespace JANOARG.Client.Behaviors.Player
                     score += 1;
             }
         
-            float offsetAbs = Mathf.Abs(offset);
+            float offsetAbs = Mathf.Abs(offsetMs);
             float? acc = null;
             if (hit.Current.Flickable || hit.Current.Type == HitObject.HitType.Catch)
             {
@@ -753,10 +781,10 @@ namespace JANOARG.Client.Behaviors.Player
             else 
             {
                 acc = 0;
-                if (offsetAbs > GoodWindow) acc = Mathf.Sign(offset);
-                else if (offsetAbs > PerfectWindow) acc = Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
+                if (offsetAbs > GoodWindow) acc = Mathf.Sign(offsetMs);
+                else if (offsetAbs > PerfectWindow) acc = Mathf.Sign(offsetMs) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
                 AddScore(score * (1 - Mathf.Abs((float)acc)), acc);
-                HitObjectHistory.Add(new (hit, offset));
+                HitObjectHistory.Add(new (hit, offsetMs));
             }
 
             if (spawnEffect)
@@ -792,19 +820,33 @@ namespace JANOARG.Client.Behaviors.Player
                 hit.IsProcessed = true;
             }
         }
-        public void SetBackgroundColor(Color color) 
+        
+        
+        /** 
+            <summary>
+                Set the background to a given color.
+            </summary>
+            <param name="color">The target color.</param>
+        */
+        public void SetBackgroundColor(Color color)
         {
             CommonSys.main.MainCamera.backgroundColor = color;
             RenderSettings.fogColor = color;
         }
 
-        public void SetInterfaceColor(Color color) 
+        /** 
+            <summary>
+                Set all interface elements to a given color.
+            </summary>
+            <param name="color">The target color.</param>
+        */
+        public void SetInterfaceColor(Color color)
         {
-            SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color = 
-                SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color = 
+            SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color =
+                SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color =
                     PauseLabel.color = color;
             foreach (Graphic g in ScoreDigits) g.color = color;
-            SongProgressBody.color = color * new Color (1, 1, 1, .5f);
+            SongProgressBody.color = color * new Color(1, 1, 1, .5f);
         }
 
         private void InitFlickMeshes()

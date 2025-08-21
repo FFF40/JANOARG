@@ -23,7 +23,7 @@ namespace JANOARG.Client.Behaviors.Common
         public void Save() 
         {
             Scores.Save();
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Save();
+            CommonSys.main.Storage.Save();
         }
     }
 }

@@ -120,17 +120,17 @@ namespace JANOARG.Client.Behaviors.Common
         public void UpdateLabels()
         {
             // Name
-            NameLabel.text = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Name", "JANOARG");
+            NameLabel.text = CommonSys.main.Storage.Get("INFO:Name", "JANOARG");
         
             // Levels
-            int level = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Level", 1);
+            int level = CommonSys.main.Storage.Get("INFO:Level", 1);
             LevelText.text = level.ToString();
             LevelProgressBar.maxValue = Helper.GetLevelGoal(level);
-            LevelProgressBar.value = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:LevelProgress", 0L);
+            LevelProgressBar.value = CommonSys.main.Storage.Get("INFO:LevelProgress", 0L);
 
             // Currencies
-            CoinLabel.text = Helper.FormatCurrency(global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Coins", 0L));
-            OrbLabel.text = Helper.FormatCurrency(global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Orbs", 0L));
+            CoinLabel.text = Helper.FormatCurrency(CommonSys.main.Storage.Get("CURR:Coins", 0L));
+            OrbLabel.text = Helper.FormatCurrency(CommonSys.main.Storage.Get("CURR:Orbs", 0L));
 
             // AR & Essence
             AbilityRatingText.text = AbilityRating.ToString("F2", CultureInfo.InvariantCulture);
@@ -220,6 +220,11 @@ namespace JANOARG.Client.Behaviors.Common
             }
         }
 
+        /**
+            <summary>
+                Currency gain logic and animation from song
+            </summary>  
+        */
         IEnumerator SongGainRoutine(long baseOrbs, long baseCoins)
         {
             SongGainSkipQueued = SongGainSkipLock = false;
@@ -231,21 +236,21 @@ namespace JANOARG.Client.Behaviors.Common
             float arChange = AbilityRating - arOld;
             float essenceChange = TotalEssence - essenceOld;
 
-            // TODO daily bonus
+            // Daily bonus
             int bonusMult = GetDailyCoinBonus();
             long finalCoins = baseCoins * bonusMult;
             long finalOrbs = (long)(baseOrbs * (1 + TotalEssence / 100));
 
             // Increase coins and orbs
-            long orbsOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Orbs", 0L),
+            long orbsOld = CommonSys.main.Storage.Get("CURR:Orbs", 0L),
                 orbsNew = orbsOld + finalOrbs;
-            long coinsOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("CURR:Coins", 0L),
+            long coinsOld = CommonSys.main.Storage.Get("CURR:Coins", 0L),
                 coinsNew = coinsOld + finalCoins;
 
             // Calculate final level and progress
-            int levelOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:Level", 1),
+            int levelOld = CommonSys.main.Storage.Get("INFO:Level", 1),
                 levelNew = levelOld;
-            long progOld = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:LevelProgress", 0L),
+            long progOld = CommonSys.main.Storage.Get("INFO:LevelProgress", 0L),
                 progNew = progOld + finalOrbs;
             long levelGoal = Helper.GetLevelGoal(levelNew);
             while (progNew >= levelGoal) 
@@ -256,11 +261,11 @@ namespace JANOARG.Client.Behaviors.Common
             }
 
             // Save
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("CURR:Coins", coinsNew);
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("CURR:Orbs", orbsNew);
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:Level", levelNew);
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:LevelProgress", progNew);
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Save();
+            CommonSys.main.Storage.Set("CURR:Coins", coinsNew);
+            CommonSys.main.Storage.Set("CURR:Orbs", orbsNew);
+            CommonSys.main.Storage.Set("INFO:Level", levelNew);
+            CommonSys.main.Storage.Set("INFO:LevelProgress", progNew);
+            CommonSys.main.Storage.Save();
 
             // For testing
             // arChange += 1; AbilityRating += 1; 
@@ -385,7 +390,7 @@ namespace JANOARG.Client.Behaviors.Common
                     }
                 }
 
-                int index = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusCount", 0) - 1;
+                int index = CommonSys.main.Storage.Get("INFO:BonusCount", 0) - 1;
                 BonusLabel.text = bonusMult + "× BONUS!";
                 ChangeCoinLabel.text = "+" + Helper.FormatCurrency(finalCoins) + " (×" +bonusMult + ")";
                 yield return Ease.Animate(1f, (x) => {
@@ -424,12 +429,22 @@ namespace JANOARG.Client.Behaviors.Common
             yield return null;
         }
 
+        /**
+            <summary>
+                Skip the current currency gain animation
+            </summary>  
+        */
         public void SkipSongGain() 
         {
             StopCoroutine(songGainAnim);
             StartCoroutine(SkipSongGainAnim());
         }
 
+        /**
+            <summary>
+                Animation played when the player skip the currency gain animation
+            </summary>  
+        */
         IEnumerator SkipSongGainAnim()
         {
             foreach (var particle in CollectingParticleHolder.GetComponentsInChildren<CollectingParticle>())
@@ -450,22 +465,31 @@ namespace JANOARG.Client.Behaviors.Common
             });
         }
 
+        /**
+            <summary>
+                Animation played when the player levels up
+            </summary>  
+        */
         IEnumerator LevelUpAnim(int level)
         {
             LevelUpHolder.SetActive(true);
             LevelUpLevelGraphic.rectTransform.anchorMin = new (0, 0);
             LevelUpLabelGraphic.rectTransform.anchorMin = new (0, 0);
+
             StartCoroutine(Ease.Animate(1.2f, (x) => {
                 LevelUpLevelText.text = $"<alpha=#{(int)Math.Clamp((x * 2 + Random.value) * 256, 0, 255):x2}>" + (level - 1) 
                     + $"<alpha=#{(int)Math.Clamp((x * 2 - .5 + Random.value) * 256, 0, 255):x2}>" + " → " 
                     + $"<alpha=#{(int)Math.Clamp((x * 2 - 1 + Random.value) * 256, 0, 255):x2}>" + level;
             }));
-            yield return Ease.Animate(.7f, (x) => {
+            
+            yield return Ease.Animate(.7f, (x) =>
+            {
                 float lerp = Ease.Get(Mathf.Pow(x, .7f), EaseFunction.Exponential, EaseMode.Out);
-                LevelUpLevelGraphic.rectTransform.anchorMax = new (lerp, 1);
+                LevelUpLevelGraphic.rectTransform.anchorMax = new(lerp, 1);
                 float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-                LevelUpLabelText.rectTransform.anchoredPosition = new (0, -50 * (1 - lerp2));
+                LevelUpLabelText.rectTransform.anchoredPosition = new(0, -50 * (1 - lerp2));
             });
+
             LevelText.text = level.ToString();
             yield return Ease.Animate(0.7f, (x) => {
                 float lerp = Ease.Get(Mathf.Pow(x, 1.5f), EaseFunction.Exponential, EaseMode.In);
@@ -475,12 +499,17 @@ namespace JANOARG.Client.Behaviors.Common
             levelUpAnim = null;
         }
 
+        /**
+            <summary>
+                Update the current daily coin bonus usage and reset time
+            </summary>  
+        */
         void UpdateDailyCoinBonus() 
         {
             SongGainSkipQueued = SongGainSkipLock = false;
 
-            bonusCount = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusCount", 0);
-            bonusReset = global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Get("INFO:BonusReset", 0L);
+            bonusCount = CommonSys.main.Storage.Get("INFO:BonusCount", 0);
+            bonusReset = CommonSys.main.Storage.Get("INFO:BonusReset", 0L);
             long now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
             if (now >= bonusReset) 
@@ -491,6 +520,11 @@ namespace JANOARG.Client.Behaviors.Common
             }
         }
 
+        /**
+            <summary>
+                Consume and return one of the daily coin bonuses
+            </summary>  
+        */
         int GetDailyCoinBonus() 
         {
             UpdateDailyCoinBonus();
@@ -506,11 +540,18 @@ namespace JANOARG.Client.Behaviors.Common
                 bonusCount++;
             }
 
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:BonusCount", bonusCount);
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Set("INFO:BonusReset", bonusReset);
+            CommonSys.main.Storage.Set("INFO:BonusCount", bonusCount);
+            CommonSys.main.Storage.Set("INFO:BonusReset", bonusReset);
             return multi;
         }
 
+        /**
+            <summary>
+                Spawn a currency particle that starts from <c>source</c> and flies towards</target>
+            </summary>  
+            <param name="sample">The particle to be spawned</param>
+            <param name="source">The transform object to be 
+        */
         CollectingParticle SpawnParticle(CollectingParticle sample, RectTransform source, RectTransform target, Action onComplete) 
         {
             var particle = Instantiate(sample, CollectingParticleHolder);

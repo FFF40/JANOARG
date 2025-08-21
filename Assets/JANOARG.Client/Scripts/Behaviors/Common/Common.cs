@@ -43,12 +43,23 @@ namespace JANOARG.Client.Behaviors.Common
             main = main == this ? null : main;
         }
 
-        public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+        /** 
+            <summary>
+                Load a scene named <c>target</c>, wait until <c>completed</c> return true,
+                and call <c>onComplete</c> when done.
+            </summary>
+        */
+        public static Coroutine LoadScene(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
-            main.StartCoroutine(main.LoadAnim(target, completed, onComplete, showBar) );
+            return main.StartCoroutine(main.LoadSceneAnim(target, completed, onComplete, showBar));
         }
 
-        public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+        /** 
+            <summary>
+                Animation to be played when <c>LoadScene</c> is called
+            </summary>
+        */
+        IEnumerator LoadSceneAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
         {
             yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target, UnityEngine.SceneManagement.LoadSceneMode.Additive);
             yield return Resources.UnloadUnusedAssets();

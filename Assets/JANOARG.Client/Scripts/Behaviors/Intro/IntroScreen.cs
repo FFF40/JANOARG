@@ -216,7 +216,7 @@ namespace JANOARG.Client.Behaviors.Intro
             CommonSys.main.MainCamera.backgroundColor = Color.black;
 
             LoadingBar.main.Show();
-            CommonSys.Load("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
+            CommonSys.LoadScene("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
                 LoadingBar.main.Hide();
                 SongSelectScreen.main.Intro();
             }, false);

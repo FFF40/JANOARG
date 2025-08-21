@@ -5,12 +5,17 @@ using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Options
 {
-    public class OptionItem : MonoBehaviour
+    public abstract class OptionItem : MonoBehaviour
     {
         public TMP_Text TitleLabel;
+
+        public virtual void SetupHandler(OptionInputHandler handler)
+        {
+            return;
+        }
     }
 
-    public class OptionInput<T> : OptionItem
+    public abstract class OptionInput<T> : OptionItem
     {
         public T CurrentValue;
 
@@ -22,12 +27,12 @@ namespace JANOARG.Client.Behaviors.Options
             OnSet(value);
         }
 
-        public void UpdateValue() 
+        public void UpdateValue()
         {
             CurrentValue = OnGet();
         }
 
-        public void Start() 
+        public void Start()
         {
             UpdateValue();
         }

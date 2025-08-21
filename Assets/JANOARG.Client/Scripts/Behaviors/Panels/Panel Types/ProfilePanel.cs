@@ -27,7 +27,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         {
             Storage Storage = CommonSys.main.Storage;
 
-            PlayerName.text = Storage.Get("INFO:Name", "JANOARG");
+            PlayerName.text = Storage.Get("INFO:Name", Storage.Get("INFO:Name", "JANOARG"));
             PlayerTitle.text = Storage.Get("INFO:Title", "Perfectly Generic Player");
 
             // TODO: Leveling Stuff
@@ -89,20 +89,17 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             int ClearedCount = 0;
             int UnlockedCount = 0;
 
+            ClearedCount++;
+            UnlockedCount++;
             if (record.PerfectCount == record.MaxCombo)
             {
                 AllFlawlessCount++;
-                FullStreakCount++;
-               
             }
-            else if (record.BadCount == 0)
+            if (record.BadCount == 0)
             {
                 FullStreakCount++;              
             }
-            else {}
 
-            ClearedCount++;
-            UnlockedCount++;
 
             return new int[] { AllFlawlessCount, FullStreakCount, ClearedCount, UnlockedCount };
         
@@ -110,6 +107,11 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
         public bool IsAnimating { get; private set; }
 
+        /**
+            <summary>
+                Create a screenshot with given <c>width</c> and <c>height</c> in pixels.
+            </summary>
+        */
         public Texture2D Screenshot(int width, int height)
         {
             RenderTexture rTex = new (width, height, 16, RenderTextureFormat.ARGB32);
@@ -129,12 +131,22 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             return tex2D;
         }
 
+        /**
+            <summary>
+                Create a screenshot of the rating breakdown and invoke sharing mechanisms.
+            </summary>
+        */
         public void ScreenshotRatingBreakdown()
         {
-            if (!IsAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
+            if (!IsAnimating) StartCoroutine(ScreenshotRatingBreakdownRoutine());
         }
 
-        public IEnumerator ScreenshotRatingBreakdownAnim()
+        /**
+            <summary>
+                Coroutine of <c>ScreenshotRatingBreakdown</c>.
+            </summary>
+        */
+        IEnumerator ScreenshotRatingBreakdownRoutine()
         {
             IsAnimating = true;
             Texture2D image = Screenshot(3072, 1280);
@@ -142,6 +154,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             IsAnimating = false;
         }
 
+        // TODO implement actual share logic
         public IEnumerator Share(Texture2D image)
         {
             var task = File.WriteAllBytesAsync(Application.persistentDataPath + "/screenshot.png", ImageConversion.EncodeToPNG(image));

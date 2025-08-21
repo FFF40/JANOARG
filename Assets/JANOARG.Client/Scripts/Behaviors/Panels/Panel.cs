@@ -37,13 +37,17 @@ namespace JANOARG.Client.Behaviors.Panels
             Panels.Remove(this);
         }
 
-        public IEnumerator IntroAnim() 
+        /**
+            <summary>Animation to be played when this panel appears.</summary>
+        */
+        public IEnumerator IntroAnim()
         {
             IsAnimating = true;
 
             HolderGroup.blocksRaycasts = true;
 
-            yield return Ease.Animate(.2f, a => {
+            yield return Ease.Animate(.2f, a =>
+            {
                 SetPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             });
 
@@ -70,12 +74,12 @@ namespace JANOARG.Client.Behaviors.Panels
                 SetPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
             });
 
-            CommonSys.main.StartCoroutine(UnloadAnim());
+            CommonSys.main.StartCoroutine(UnloadRoutine());
 
             IsAnimating = false;
         }
 
-        public IEnumerator UnloadAnim() 
+        public IEnumerator UnloadRoutine() 
         {
             yield return SceneManager.UnloadSceneAsync(SceneName);
             if (Panels.Count <= 1) QuickMenu.main.HideFromPanel();

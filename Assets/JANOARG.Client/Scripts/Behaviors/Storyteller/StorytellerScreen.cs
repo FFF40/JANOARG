@@ -21,7 +21,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
         {
             if (ScriptToPlay) 
             {
-                global::JANOARG.Client.Behaviors.Storyteller.Storyteller.main.PlayScript(ScriptToPlay);
+                Storyteller.main.PlayScript(ScriptToPlay);
             }
         }
 
