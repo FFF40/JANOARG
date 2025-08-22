@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
+    /// <summary>
+    /// Class for handling mapping between real time (seconds) and song time (beats).
+    /// </summary>
     [System.Serializable]
     public class Metronome
     {
@@ -35,19 +38,21 @@ namespace JANOARG.Shared.Data.ChartInfo
             return beat;
         }
 
-        public float ToSeconds(float beat) {
+        
+        public float ToSeconds(float beat)
+        {
             if (Stops.Count == 0) return float.NaN;
-            for (int a = 0; a < Stops.Count; a++) 
+            for (int a = 0; a < Stops.Count; a++)
             {
                 BPMStop stop = Stops[a];
                 float b = beat * (60 / Stops[a].BPM) + Stops[a].Offset;
-                if (a + 1 < Stops.Count) 
+                if (a + 1 < Stops.Count)
                 {
-                    float c = (Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM);
+                    float c = (Stops[a + 1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM);
                     if (beat <= c) return b;
                     beat -= c;
                 }
-                else 
+                else
                 {
                     return b;
                 }
