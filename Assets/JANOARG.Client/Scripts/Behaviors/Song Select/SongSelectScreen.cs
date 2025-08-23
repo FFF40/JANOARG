@@ -720,7 +720,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
             yield return new WaitForSeconds(2);
 
-            CommonSys.Load("Player", () => PlayerScreen.sMain && PlayerScreen.sMain.IsReady, () =>
+            CommonSys.LoadScene("Player", () => PlayerScreen.sMain && PlayerScreen.sMain.IsReady, () =>
             {
                 SongSelectReadyScreen.sMain.EndLaunch();
             }, false);

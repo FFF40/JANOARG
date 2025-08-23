@@ -65,6 +65,7 @@ namespace JANOARG.Client.Behaviors.Options
             }
         }
 
+        #region Unity input events
         public void OnDrag(PointerEventData data)
         {
             if (!IsPointerDown)
@@ -98,6 +99,7 @@ namespace JANOARG.Client.Behaviors.Options
             IsPointerDown = false;
             ScrollOffset = Mathf.Clamp(ScrollOffset, ItemHeight * -.4f, ItemHeight * (Items.Count - .6f));
         }
+        #endregion
 
         public void Finish()
         {
@@ -105,6 +107,11 @@ namespace JANOARG.Client.Behaviors.Options
                 .OnSelect();
         }
 
+        /// <summary>
+        /// Initialize this handler using the given list input field.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <typeparam name="T"></typeparam>
         public void SetList<T>(ListOptionInput<T> input)
         {
             ClearList();
@@ -140,18 +147,30 @@ namespace JANOARG.Client.Behaviors.Options
             SetItemActive(Items[CurrentPosition], true);
         }
 
+        /// <summary>
+        /// Clear all items in the list
+        /// </summary>
         public void ClearList()
         {
             foreach (OptionInputListItem item in Items) Destroy(item.gameObject);
             Items.Clear();
         }
 
+        /// <summary>
+        /// Set the active state of a list item.
+        /// </summary>
+        /// <param name="item">The target item to set the state.</param>
+        /// <param name="active">The target active state.</param>
         public void SetItemActive(OptionInputListItem item, bool active)
         {
             item.Button.interactable = !active;
             item.Text.color = active ? SelectedTextColor : NormalTextColor;
         }
 
+        /// <summary>
+        /// Smoothly scroll to the given item at <c>index</c>
+        /// </summary>
+        /// <param name="index">The item index to scroll to.</param>
         public void ScrollToItem(int index)
         {
             IsPointerDown = false;

@@ -53,7 +53,7 @@ namespace JANOARG.Client.Behaviors.Player
             PlayerScreen.sTargetSongPath = s_targetSongPath;
             PlayerScreen.sTargetChartMeta = s_targetChartMeta;
 
-            CommonSys.Load(
+            CommonSys.LoadScene(
                 "Player", () => PlayerScreen.sMain && PlayerScreen.sMain.IsReady,
                 () => { PlayerScreen.sMain.BeginReadyAnim(); });
 

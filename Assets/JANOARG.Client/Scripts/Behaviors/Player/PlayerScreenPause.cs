@@ -208,7 +208,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             LoadingBar.sMain.Show();
 
-            CommonSys.Load(
+            CommonSys.LoadScene(
                 "Song Select", () => !LoadingBar.sMain.IsAnimating && SongSelectScreen.sMain?.IsInit == true,
                 () =>
                 {

@@ -235,6 +235,11 @@ namespace JANOARG.Client.Behaviors.Common
             AbilityRating /= 30;
         }
 
+        /// <summary>
+        /// Currency gain logic and animation from song
+        /// </summary>
+        /// <param name="baseOrbs"></param>
+        /// <param name="baseCoins"></param>
         private IEnumerator SongGainRoutine(long baseOrbs, long baseCoins)
         {
             _SongGainSkipQueued = _SongGainSkipLock = false;
@@ -246,7 +251,7 @@ namespace JANOARG.Client.Behaviors.Common
             float arChange = AbilityRating - arOld;
             float essenceChange = totalEssence - essenceOld;
 
-            // TODO daily bonus
+            // Daily bonus
             int bonusMult = GetDailyCoinBonus();
             long finalCoins = baseCoins * bonusMult;
             var finalOrbs = (long)(baseOrbs * (1 + totalEssence / 100));
@@ -529,12 +534,18 @@ namespace JANOARG.Client.Behaviors.Common
             yield return null;
         }
 
+        /// <summary>
+        /// Skip the current currency gain animation
+        /// </summary>
         public void SkipSongGain()
         {
             StopCoroutine(_SongCurrencyGainAnimation);
             StartCoroutine(SkipSongGainAnim());
         }
 
+        /// <summary>
+        /// Animation played when the player skip the currency gain animation
+        /// </summary>
         private IEnumerator SkipSongGainAnim()
         {
             foreach (CollectingParticle particle in CollectingParticleHolder
@@ -559,6 +570,10 @@ namespace JANOARG.Client.Behaviors.Common
                 });
         }
 
+        /// <summary>
+        /// Animation played when the player levels up
+        /// </summary>
+        /// <param name="level"></param>
         private IEnumerator LevelUpAnim(int level)
         {
             LevelUpHolder.SetActive(true);
@@ -611,6 +626,9 @@ namespace JANOARG.Client.Behaviors.Common
             _LevelUpAnimation = null;
         }
 
+        /// <summary>
+        /// Update the current daily coin bonus usage and reset time
+        /// </summary>
         private void UpdateDailyCoinBonus()
         {
             _SongGainSkipQueued = _SongGainSkipLock = false;
@@ -627,6 +645,9 @@ namespace JANOARG.Client.Behaviors.Common
             }
         }
 
+        /// <summary>
+        /// Consume and return one of the daily coin bonuses
+        /// </summary>
         private int GetDailyCoinBonus()
         {
             UpdateDailyCoinBonus();
@@ -651,6 +672,14 @@ namespace JANOARG.Client.Behaviors.Common
             return multi;
         }
 
+        /// <summary>
+        /// Spawn a currency particle that starts from <c>source</c> and flies towards <see cref="target"/>
+        /// </summary>
+        /// <param name="sample">The particle to be spawned</param>
+        /// <param name="source">The transform object to be spawned from</param>
+        /// <param name="target"></param>
+        /// <param name="onComplete"></param>
+        /// <returns></returns>
         private CollectingParticle SpawnParticle(CollectingParticle sample, RectTransform source, RectTransform target,
             Action onComplete)
         {

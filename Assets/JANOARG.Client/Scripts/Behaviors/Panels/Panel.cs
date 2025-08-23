@@ -35,6 +35,9 @@ namespace JANOARG.Client.Behaviors.Panels
             if (!IsAnimating) StartCoroutine(IntroAnim());
         }
 
+        /// <summary>
+        /// Animation to be played when this panel appears.
+        /// </summary>
         public IEnumerator IntroAnim()
         {
             IsAnimating = true;
@@ -68,12 +71,12 @@ namespace JANOARG.Client.Behaviors.Panels
                     SetPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
                 });
 
-            CommonSys.sMain.StartCoroutine(UnloadAnim());
+            CommonSys.sMain.StartCoroutine(UnloadRoutine());
 
             IsAnimating = false;
         }
 
-        public IEnumerator UnloadAnim()
+        public IEnumerator UnloadRoutine()
         {
             yield return SceneManager.UnloadSceneAsync(SceneName);
 

@@ -120,6 +120,12 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             return new[] { allFlawlessCount, fullStreakCount, clearedCount, unlockedCount };
         }
 
+        /// <summary>
+        /// Create a screenshot with given <c>width</c> and <c>height</c> in pixels.
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
         public Texture2D Screenshot(int width, int height)
         {
             RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);
@@ -139,11 +145,18 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             return tex2D;
         }
 
+        /// <summary>
+        ///  Create a screenshot of the rating breakdown and invoke sharing mechanisms.
+        /// </summary>
         public void ScreenshotRatingBreakdown()
         {
-            if (!isAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
+            if (!isAnimating) 
+                StartCoroutine(ScreenshotRatingBreakdownAnim());
         }
 
+        /// <summary>
+        /// Coroutine of <see cref="ScreenshotRatingBreakdown"/>
+        /// </summary>
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
@@ -154,6 +167,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             isAnimating = false;
         }
 
+        // TODO implement actual share logic
         public IEnumerator Share(Texture2D image)
         {
             Task task = File.WriteAllBytesAsync(

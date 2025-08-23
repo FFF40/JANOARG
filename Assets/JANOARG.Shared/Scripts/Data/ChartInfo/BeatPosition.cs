@@ -3,21 +3,28 @@ using System.Globalization;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
+    /// <summary>
+    /// Represents time position in a song in beats. expressed as a compounding fraction format.
+    /// </summary>
     [Serializable]
     public struct BeatPosition : IComparable<BeatPosition>
     {
+        #region Fields and work constants
         public int Number;
         public int Numerator;
         public int Denominator;
 
-        public const double Precision = 1e-5;
+        public const double PRECISION = 1e-5;
+        #endregion
 
+        #region Constructors
         public BeatPosition(int a)
         {
             Number = a;
             Numerator = 0;
             Denominator = 1;
         }
+        
 
         public BeatPosition(int a, int b, int c)
         {
@@ -28,6 +35,9 @@ namespace JANOARG.Shared.Data.ChartInfo
             Denominator = c;
             Normalize();
         }
+        #endregion
+
+        #region String handling
 
         public override string ToString()
         {
@@ -79,7 +89,10 @@ namespace JANOARG.Shared.Data.ChartInfo
                 return false;
             }
         }
+        #endregion
 
+
+        #region Conversion operators
         public static implicit operator double(BeatPosition a)
         {
             return a.Number + (double)a.Numerator / a.Denominator;
@@ -107,12 +120,12 @@ namespace JANOARG.Shared.Data.ChartInfo
                 int medianNumerator = minNumerator + maxNumerator;
                 int medianDenominator = minDenominator + maxDenominator;
 
-                if (medianNumerator > medianDenominator * (a + Precision))
+                if (medianNumerator > medianDenominator * (a + PRECISION))
                 {
                     maxNumerator = medianNumerator;
                     maxDenominator = medianDenominator;
                 }
-                else if (medianDenominator * (a - Precision) > medianNumerator)
+                else if (medianDenominator * (a - PRECISION) > medianNumerator)
                 {
                     minNumerator = medianNumerator;
                     minDenominator = medianDenominator;
@@ -123,7 +136,9 @@ namespace JANOARG.Shared.Data.ChartInfo
                 }
             }
         }
+        #endregion
 
+        #region Operators
         public static BeatPosition operator +(BeatPosition a, BeatPosition b)
         {
             int greatestCommonDivisor = GreatestCommonDivisor(a.Denominator, b.Denominator);
@@ -174,7 +189,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             return a.CompareTo(b) >= 0;
         }
-
+        #endregion
+        
         private void Normalize()
         {
             if (Denominator <= 0) return;
@@ -237,6 +253,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 }
             }
 
+            // Simplify fraction
             int greatestCommonDivisor = GreatestCommonDivisor(Math.Abs(Numerator), Denominator);
             Numerator /= greatestCommonDivisor;
             Denominator /= greatestCommonDivisor;
@@ -253,6 +270,8 @@ namespace JANOARG.Shared.Data.ChartInfo
             return a | b;
         }
 
+
+        #region Constants and checks
         // ReSharper disable once InconsistentNaming
         public static readonly BeatPosition NaN = new() { Number = 0, Numerator = 0, Denominator = 0 };
 
@@ -260,13 +279,14 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             return a.Denominator <= 0;
         }
-
+        #endregion
+        
+        #region Math functions
         public readonly int CompareTo(BeatPosition other)
         {
             return ((float)this).CompareTo((float)other);
         }
-
-        // -------------------- Math functions
+        
         public static BeatPosition Min(BeatPosition a, BeatPosition b)
         {
             return a < b ? a : b;
@@ -276,5 +296,6 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             return a > b ? a : b;
         }
+        #endregion
     }
 }

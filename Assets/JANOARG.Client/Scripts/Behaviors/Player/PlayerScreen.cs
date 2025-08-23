@@ -211,7 +211,7 @@ namespace JANOARG.Client.Behaviors.Player
                 HeadlessPlayerStarter.sChart = Chart;
                 HeadlessPlayerStarter.sRunChart = RunChart;
 
-                CommonSys.Load("HeadlessPlayerStarter", null, null);
+                CommonSys.LoadScene("HeadlessPlayerStarter", null, null);
 
                 SceneManager.UnloadSceneAsync("Player");
                 Resources.UnloadUnusedAssets();
@@ -320,7 +320,7 @@ namespace JANOARG.Client.Behaviors.Player
             ScaledExtraRadius = dpi * 0.2f;
             ScaledMinimumRadius = MinimumRadius * screenUnit;
 
-            StartCoroutine(LaneLoader());
+            StartCoroutine(LaneLoaderRoutine());
 
             yield return new WaitUntil(() => _LoadState[0]);
 
@@ -337,7 +337,10 @@ namespace JANOARG.Client.Behaviors.Player
             yield return new WaitForEndOfFrame();
         }
 
-        private IEnumerator LaneLoader()
+        /// <summary>
+        /// Coroutine to load all lanes.
+        /// </summary>
+        private IEnumerator LaneLoaderRoutine()
         {
             var loadedLanes = 0;
             var instantiatedLane = new bool[sTargetChart.Data.Lanes.Count];
@@ -732,6 +735,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         private Coroutine _JudgeAnimation;
 
+        /// <summary>
+        /// Give score to the player, update the combo counter and add a judgment entry 
+        /// </summary>
+        /// <param name="score">Amount of EX score to give.</param>
+        /// <param name="acc">Accuracy value (negative = early, positive = late, values in -1~1 indicates 
         public void AddScore(float score, float? acc)
         {
             CurrentExScore += score;
@@ -776,6 +784,9 @@ namespace JANOARG.Client.Behaviors.Player
             TotalCombo++;
         }
 
+        /// <summary>
+        ///  Animation to be played when a hit object is judged.
+        /// </summary>
         private IEnumerator JudgmentAnim()
         {
             yield return Ease.Animate(.6f, (x) =>
@@ -790,7 +801,9 @@ namespace JANOARG.Client.Behaviors.Player
             });
         }
 
-
+        /// <summary>
+        /// Remove a hit object player from the scene.
+        /// </summary>
         public void RemoveHitPlayer(HitPlayer hitObject)
         {
             if (hitObject.HoldMesh != null)
@@ -807,7 +820,13 @@ namespace JANOARG.Client.Behaviors.Player
             HitsRemaining--;
         }
 
-        public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
+        /// <summary>
+        /// Hit a hit object—calculate and add score, remove it from the scene, and play judgment effects.
+        /// </summary>
+        /// <param name="hitObject">The hit object to hit.</param>
+        /// <param name="offsetMs">The player offset in milliseconds.</param>
+        /// <param name="spawnEffect">Whether to spawn the judgment effects.</param>
+        public void Hit(HitPlayer hitObject, float offsetMs, bool spawnEffect = true)
         {
             // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
 
@@ -821,7 +840,7 @@ namespace JANOARG.Client.Behaviors.Player
                     score += 1;
             }
 
-            float offsetAbs = Mathf.Abs(offset);
+            float offsetAbs = Mathf.Abs(offsetMs);
             float? acc = null;
 
             if (hitObject.Current.Flickable || hitObject.Current.Type == HitObject.HitType.Catch)
@@ -842,13 +861,13 @@ namespace JANOARG.Client.Behaviors.Player
                 acc = 0;
 
                 if (offsetAbs > GoodWindow)
-                    acc = Mathf.Sign(offset);
+                    acc = Mathf.Sign(offsetMs);
                 else if (offsetAbs > PerfectWindow)
-                    acc = Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
+                    acc = Mathf.Sign(offsetMs) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
 
                 AddScore(score * (1 - Mathf.Abs((float)acc)), acc);
 
-                HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, offset));
+                HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, offsetMs));
             }
 
             if (spawnEffect)
@@ -883,12 +902,20 @@ namespace JANOARG.Client.Behaviors.Player
                 hitObject.IsProcessed = true;
         }
 
+        /// <summary>
+        /// Set the background to a given color.
+        /// </summary>
+        /// <param name="color">The target color.</param>
         public void SetBackgroundColor(Color color)
         {
             CommonSys.sMain.MainCamera.backgroundColor = color;
             RenderSettings.fogColor = color;
         }
 
+        /// <summary>
+        /// Set all interface elements to a given color.
+        /// </summary>
+        /// <param name="color">The target color.</param>
         public void SetInterfaceColor(Color color)
         {
             SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color =

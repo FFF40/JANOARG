@@ -44,18 +44,35 @@ namespace JANOARG.Client.Behaviors.Common
             sMain = sMain == this ? null : sMain;
         }
 
-        public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)
+        /// <summary>
+        /// Load a scene named <see cref="target"/>, wait until <see cref="completed"/> return true,
+        /// and call <see cref="onComplete"/> when done.
+        /// </summary>
+        /// <param name="target">Target scene to load (in string)</param>
+        /// <param name="completed">Function that will return true to signal completion</param>
+        /// <param name="onComplete">Action to do when <see cref="completed"/> is true</param>
+        /// <param name="showBar">Show loading bar (unused)</param>
+        public static void LoadScene(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
-            sMain.StartCoroutine(sMain.LoadAnim(target, completed, onComplete, showBar));
+            sMain.StartCoroutine(sMain.LoadSceneAnimation(target, completed, onComplete, showBar));
         }
 
-        public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true)
+        /// <summary>
+        /// Animation to be played when <see cref="LoadScene"/> is called
+        /// </summary>
+        /// <param name="target">Target scene to load (in string)</param>
+        /// <param name="completed">Function that will return true to signal completion</param>
+        /// <param name="onComplete">Action to do when <see cref="completed"/> is true</param>
+        /// <param name="showBar">Show loading bar (unused)</param>
+        /// <returns>Serves as a coroutine.</returns>
+        public IEnumerator LoadSceneAnimation(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
             yield return SceneManager.LoadSceneAsync(target, LoadSceneMode.Additive);
             yield return Resources.UnloadUnusedAssets();
             yield return new WaitUntil(completed);
 
-            if (onComplete != null) onComplete();
+            if (onComplete != null) 
+                onComplete();
         }
     }
 }

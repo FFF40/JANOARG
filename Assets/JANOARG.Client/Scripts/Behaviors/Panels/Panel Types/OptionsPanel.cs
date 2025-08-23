@@ -266,7 +266,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                     SubtitleLabel.text = " > Gameplay";
                     SetScrollerWidth(360);
 
-                    Spawn<OptionCategoryTitle>("Syncronization");
+                    Spawn<OptionCategoryTitle>("Synchronization");
 
                     var sample = GetOptionItemSample<FloatOptionInput>();
                     sample.Min = -500;
