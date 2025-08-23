@@ -77,7 +77,7 @@ namespace JANOARG.Client.Behaviors.Options
 
                     if (Mathf.Abs(
                             loopTime -
-                            (float)CalibrationLoopPlayer.timeSamples / CalibrationLoopPlayer.clip.frequency) >
+                            ((float)CalibrationLoopPlayer.timeSamples / CalibrationLoopPlayer.clip.frequency)) >
                         SyncThreshold)
                     {
                         Debug.Log(loopTime + "\n" + CalibrationLoopPlayer.time);
@@ -87,13 +87,13 @@ namespace JANOARG.Client.Behaviors.Options
                 else if (CurrentOptionInput is VisualOffsetOptionInput)
                 {
                     float trialDuration = 60 / CalibrationLoopBPM * 4;
-                    float time = CurrentTime / trialDuration % 1;
+                    float time = (CurrentTime / trialDuration) % 1;
 
-                    float pos = Ease.Get(time, EaseFunction.Quartic, EaseMode.InOut) * 400 - 200;
+                    float pos = (Ease.Get(time, EaseFunction.Quartic, EaseMode.InOut) * 400) - 200;
                     VisualOffsetLeft.rectTransform.anchoredPosition = new Vector2(-pos, 0);
                     VisualOffsetRight.rectTransform.anchoredPosition = new Vector2(pos, 0);
 
-                    float opacity = 1 - Ease.Get(Mathf.Abs(time * 2 - 1), EaseFunction.Cubic, EaseMode.In);
+                    float opacity = 1 - Ease.Get(Mathf.Abs((time * 2) - 1), EaseFunction.Cubic, EaseMode.In);
                     VisualOffsetLeft.color = VisualOffsetRight.color = new Color(1, 1, 1, opacity);
                 }
             }
@@ -140,7 +140,7 @@ namespace JANOARG.Client.Behaviors.Options
                         new Vector2(Background.rectTransform.sizeDelta.x, ease * 100);
 
                     float ease2 = Ease.Get(
-                        x * 1.5f - .5f, EaseFunction.Cubic,
+                        (x * 1.5f) - .5f, EaseFunction.Cubic,
                         EaseMode.Out);
 
                     FaderGroup.alpha = ease2;
@@ -225,7 +225,7 @@ namespace JANOARG.Client.Behaviors.Options
 
             _LastTrialIndex = trialIndex;
 
-            float trialOffset = trialTime - (trialIndex + .5f) * trialDuration;
+            float trialOffset = trialTime - ((trialIndex + .5f) * trialDuration);
             _CumulativeOffset += trialOffset;
             _Samples++;
 

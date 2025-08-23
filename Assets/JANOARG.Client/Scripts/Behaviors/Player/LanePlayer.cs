@@ -145,7 +145,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             CurrentPosition = TimeStamps.Count <= 1 || TimeStamps[0] > time
                 ? time * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed
-                : (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0];
+                : ((time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed) + PositionPoints[0];
 
             float progress = TimeStamps.Count <= 1
                 ? 0
@@ -158,9 +158,9 @@ namespace JANOARG.Client.Behaviors.Player
                 return;
 
             if (PositionPoints.Count <= 2)
-                PositionPoints.Add((TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0]);
+                PositionPoints.Add(((TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed) + PositionPoints[0]);
             else
-                PositionPoints[1] = PositionPoints[0] + (TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed;
+                PositionPoints[1] = PositionPoints[0] + ((TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed);
             {
                 float position = Mathf.Lerp(PositionPoints[0], PositionPoints[1], progress);
                 LaneStep currentLaneStep = Current.LaneSteps[1];
@@ -168,8 +168,8 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (currentLaneStep.isLinear)
                 {
-                    startPoint = Vector3.Lerp(Current.LaneSteps[0].StartPointPosition, Current.LaneSteps[1].StartPointPosition, progress) + Vector3.forward * position;
-                    endPoint = Vector3.Lerp(Current.LaneSteps[0].EndPointPosition, Current.LaneSteps[1].EndPointPosition, progress) + Vector3.forward * position;
+                    startPoint = Vector3.Lerp(Current.LaneSteps[0].StartPointPosition, Current.LaneSteps[1].StartPointPosition, progress) + (Vector3.forward * position);
+                    endPoint = Vector3.Lerp(Current.LaneSteps[0].EndPointPosition, Current.LaneSteps[1].EndPointPosition, progress) + (Vector3.forward * position);
                 }
                 else
                 {
@@ -234,7 +234,7 @@ namespace JANOARG.Client.Behaviors.Player
                     }
                 }
 
-                float calculatedPosition = PositionPoints[currentTimestamp - 1] + (TimeStamps[currentTimestamp] - TimeStamps[currentTimestamp - 1]) * currentLaneStep.Speed * PlayerScreen.sMain.Speed;
+                float calculatedPosition = PositionPoints[currentTimestamp - 1] + ((TimeStamps[currentTimestamp] - TimeStamps[currentTimestamp - 1]) * currentLaneStep.Speed * PlayerScreen.sMain.Speed);
 
                 if (PositionPoints.Count <= currentTimestamp)
                     PositionPoints.Add(calculatedPosition);
@@ -244,15 +244,15 @@ namespace JANOARG.Client.Behaviors.Player
                 if (currentLaneStep.isLinear)
                 {
                     f_addLine(
-                        (Vector3)currentLaneStep.StartPointPosition + Vector3.forward * calculatedPosition,
-                        (Vector3)currentLaneStep.EndPointPosition + Vector3.forward * calculatedPosition
+                        (Vector3)currentLaneStep.StartPointPosition + (Vector3.forward * calculatedPosition),
+                        (Vector3)currentLaneStep.EndPointPosition + (Vector3.forward * calculatedPosition)
                     );
                 }
                 else
                 {
                     LaneStep previousStep = Current.LaneSteps[currentTimestamp - 1];
 
-                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16; x <= 1; x = Mathf.Floor(x * 16 + 1.01f) / 16)
+                    for (float x = Mathf.Floor((progress * 16) + 1.01f) / 16; x <= 1; x = Mathf.Floor((x * 16) + 1.01f) / 16)
                         f_addLine(
                             new Vector3(
                                 Mathf.LerpUnclamped(previousStep.StartPointPosition.x, currentLaneStep.StartPointPosition.x, currentLaneStep.StartEaseX.Get(x)),
@@ -348,11 +348,11 @@ namespace JANOARG.Client.Behaviors.Player
             int index = TimeStamps.FindIndex(x => x >= time);
 
             if (index < 0)
-                return PositionPoints[^1] + (time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.sMain.Speed;
+                return PositionPoints[^1] + ((time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.sMain.Speed);
 
             index = Mathf.Min(index, PositionPoints.Count - 1);
 
-            return PositionPoints[index] + (time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.sMain.Speed;
+            return PositionPoints[index] + ((time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.sMain.Speed);
         }
 
         public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end)
@@ -434,7 +434,6 @@ namespace JANOARG.Client.Behaviors.Player
 
             float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
             Vector3 previousStepStartPointPosition, previousStepEndPointPosition, currentStepStartPointPosition, currentStepEndPointPosition;
-
             {
                 float position = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], progress);
                 LaneStep previousStep = Current.LaneSteps[index - 1];
@@ -447,8 +446,8 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (currentStep.isLinear)
                     f_addLine(
-                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, progress) + Vector3.forward * position,
-                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, progress) + Vector3.forward * position);
+                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, progress) + (Vector3.forward * position),
+                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, progress) + (Vector3.forward * position));
                 else
                     f_addLine(
                         new Vector3(
@@ -476,15 +475,15 @@ namespace JANOARG.Client.Behaviors.Player
                 if (currentStep.isLinear)
                 {
                     f_addLine(
-                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, endStepProgress) + Vector3.forward * endStepPosition,
-                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, endStepProgress) + Vector3.forward * endStepPosition
+                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, endStepProgress) + (Vector3.forward * endStepPosition),
+                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, endStepProgress) + (Vector3.forward * endStepPosition)
                     );
                 }
                 else
                 {
                     LaneStep previousStep = Current.LaneSteps[index - 1];
 
-                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;; x = Mathf.Min(endStepProgress, Mathf.Floor(x * 16 + 1.01f) / 16))
+                    for (float x = Mathf.Floor((progress * 16) + 1.01f) / 16;; x = Mathf.Min(endStepProgress, Mathf.Floor((x * 16) + 1.01f) / 16))
                     {
                         f_addLine(
                             new Vector3(

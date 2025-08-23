@@ -51,9 +51,9 @@ namespace JANOARG.Client.Behaviors.Player
                                          EaseMode.In), 2);
 
                     RingBackground.rectTransform.sizeDelta =
-                        Vector2.one * (40 + Size * ease + x * 10);
+                        Vector2.one * (40 + (Size * ease) + (x * 10));
 
-                    float ease3 = (1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2)) * .96f + x * .04f;
+                    float ease3 = ((1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2)) * .96f) + (x * .04f);
                     RingBackground.InsideRadius = RingFill1.InsideRadius = RingFill2.InsideRadius = ease3;
                 });
 

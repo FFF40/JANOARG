@@ -154,7 +154,7 @@ namespace JANOARG.Client.Behaviors.Player
                         new Vector2(0, .5f * (1 - lerp2));
 
                     RetryBackground.rectTransform.anchorMax =
-                        new Vector2(1, 1 - .5f * (1 - lerp2));
+                        new Vector2(1, 1 - (.5f * (1 - lerp2)));
 
                     RetryBackground.rectTransform.sizeDelta =
                         new Vector2(0, 100 * (1 - lerp2));
@@ -198,7 +198,7 @@ namespace JANOARG.Client.Behaviors.Player
                     float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
 
                     Background.color = CommonSys.sMain.MainCamera.backgroundColor *
-                                       new Color(1, 1, 1, ease * 0.2f + 0.8f);
+                                       new Color(1, 1, 1, (ease * 0.2f) + 0.8f);
 
                     OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
                     OptionGroup.alpha = 1 - ease;

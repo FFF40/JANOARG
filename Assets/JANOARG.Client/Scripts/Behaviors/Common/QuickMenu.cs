@@ -43,7 +43,7 @@ namespace JANOARG.Client.Behaviors.Common
         {
             IsAnimating = true;
 
-            MainBackground.color = CommonSys.sMain.MainCamera.backgroundColor * new Color(1, 1, 1, 0) +
+            MainBackground.color = (CommonSys.sMain.MainCamera.backgroundColor * new Color(1, 1, 1, 0)) +
                                    new Color(0, 0, 0, 0.75f);
 
             AudioManager.sMain.SetSceneLayerLowPassCutoff(1000, 0.5f);

@@ -296,14 +296,12 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     LaneStyles.Add(new LaneStyleManager(style));
                     Update_LoadingBarHolder(1, $"Loading lanestyle {style.Name}...({LaneStyles.Count} of {sCurrentChart.Palette.LaneStyles.Count})");
-                    ;
                 }
 
                 foreach (HitStyle style in sCurrentChart.Palette.HitStyles)
                 {
                     HitStyles.Add(new HitStyleManager(style));
                     Update_LoadingBarHolder(1, $"Loading hitstyle {style.Name}...({HitStyles.Count} of {sCurrentChart.Palette.HitStyles.Count})");
-                    ;
                 }
 
                 StartCoroutine(LaneGroupLoader());
@@ -412,16 +410,16 @@ namespace JANOARG.Client.Behaviors.Player
                             // Set 2 points of lane?
                             var lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
                             LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, sTargetSong.Timing);
-                            startPos = Quaternion.Euler(lane.Rotation) * positionStep.StartPosition + lane.Position;
-                            endPos = Quaternion.Euler(lane.Rotation) * positionStep.EndPosition + lane.Position;
+                            startPos = (Quaternion.Euler(lane.Rotation) * positionStep.StartPosition) + lane.Position;
+                            endPos = (Quaternion.Euler(lane.Rotation) * positionStep.EndPosition) + lane.Position;
                             LaneGroupPlayer group = laneInGroup;
 
                             // Loop to get localPosition of 2 points of lane?
                             while (group)
                             {
                                 var laneGroup = (LaneGroup)group.Original.GetStoryboardableObject(laneHitobject.Offset);
-                                startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
-                                endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
+                                startPos = (Quaternion.Euler(laneGroup.Rotation) * startPos) + laneGroup.Position;
+                                endPos = (Quaternion.Euler(laneGroup.Rotation) * endPos) + laneGroup.Position;
                                 group = group.Parent;
                             }
                         }
@@ -430,7 +428,7 @@ namespace JANOARG.Client.Behaviors.Player
                         Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
                         Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
 
-                        float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
+                        float radius = (Vector2.Distance(hitStart, hitEnd) / 2) + ScaledExtraRadius;
 
                         // Add hit coords
                         instancedLane.HitCoords.Add(new HitScreenCoord
@@ -447,7 +445,6 @@ namespace JANOARG.Client.Behaviors.Player
                     progressMade = true;
 
                     Update_LoadingBarHolder(1, $"Loading lane {a}...({loadedLanes} of {sTargetChart.Data.Lanes.Count})");
-                    ;
 
                     // yield return new WaitForEndOfFrame();
                 }
@@ -605,7 +602,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 SetInterfaceColor(sTargetSong.InterfaceColor * new Color(1, 1, 1, ease));
 
-                PlayerHUD.transform.localScale = Vector3.one * (ease * .05f + .95f);
+                PlayerHUD.transform.localScale = Vector3.one * ((ease * .05f) + .95f);
             });
 
             for (var a = 0; a < ScoreCounter.Digits.Count; a++) ScoreCounter.Digits[a].Speed = 9;
@@ -630,7 +627,7 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     if (Music.isPlaying)
                     {
-                        if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
+                        if (Mathf.Abs(CurrentTime - ((float)Music.timeSamples / Music.clip.frequency)) > SyncThreshold)
                         {
                             Music.time = CurrentTime;
                         }
@@ -782,8 +779,8 @@ namespace JANOARG.Client.Behaviors.Player
                 float val2 = 1 - Ease.Get(x, EaseFunction.Quintic, EaseMode.In);
 
                 ComboGroup.alpha = Combo == 0 ? 0 : val + 1;
-                ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
-                JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
+                ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + (2 * val * val));
+                JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + (2 * val * val));
                 JudgmentGroup.alpha = val2;
             });
         }

@@ -176,12 +176,12 @@ namespace JANOARG.Client.Behaviors.Player
                 4, x =>
                 {
                     FlashBackground.color = new Color(
-                        1f - x * 2, 1f - x * 2, 1f - x * 2,
-                        Ease.Get(
+                        1f - (x * 2), 1f - (x * 2), 1f - (x * 2),
+                        (Ease.Get(
                             Mathf.Clamp01(x * 2),
                             EaseFunction.Circle,
                             EaseMode.InOut) *
-                        .2f +
+                        .2f) +
                         .2f
                     );
 
@@ -202,13 +202,13 @@ namespace JANOARG.Client.Behaviors.Player
                         2);
 
                     ResultText.characterSpacing = 15 / ease;
-                    ResultTextBig.characterSpacing = 25 * ease - 40;
+                    ResultTextBig.characterSpacing = (25 * ease) - 40;
 
                     ResultBackground.rectTransform.sizeDelta = new Vector2(
                         ResultBackground
                             .rectTransform
                             .sizeDelta.y,
-                        Mathf.Pow(
+                        (Mathf.Pow(
                             Ease.Get(
                                 Mathf
                                     .Clamp01(
@@ -219,7 +219,7 @@ namespace JANOARG.Client.Behaviors.Player
                                 EaseMode
                                     .Out),
                             2) *
-                        50 +
+                        50) +
                         50
                     );
 
@@ -240,14 +240,14 @@ namespace JANOARG.Client.Behaviors.Player
 
                     ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward *
                                                                             (-90 +
-                                                                             360 *
+                                                                             (360 *
                                                                              Ease.Get(
                                                                                  x *
                                                                                  1.5f,
                                                                                  EaseFunction
                                                                                      .Cubic,
                                                                                  EaseMode
-                                                                                     .Out));
+                                                                                     .Out)));
                 });
 
             yield return new WaitWhile(() => PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length);
@@ -306,12 +306,12 @@ namespace JANOARG.Client.Behaviors.Player
                         ResultBackground
                             .rectTransform
                             .sizeDelta.x,
-                        ease1 * -10 + 100
+                        (ease1 * -10) + 100
                     );
 
                     ResultText.fontSize = 50 * (1 - ease1);
                     ResultText.characterSpacing = 15 / Mathf.Pow(1 - ease1, 3);
-                    FanfareSource.volume = (x * .3f + .3f) * Settings.BackgroundMusicVolume;
+                    FanfareSource.volume = ((x * .3f) + .3f) * Settings.BackgroundMusicVolume;
 
                     Details.Container.rectTransform.localScale =
                         new Vector3(1, .5f * ease2, 1);
@@ -328,13 +328,13 @@ namespace JANOARG.Client.Behaviors.Player
 
                     ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward *
                                                                             (55 +
-                                                                             360 *
+                                                                             (360 *
                                                                              Ease.Get(
                                                                                  x,
                                                                                  EaseFunction
                                                                                      .Cubic,
                                                                                  EaseMode
-                                                                                     .In));
+                                                                                     .In)));
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one *
                                                                      (500 /
@@ -387,14 +387,14 @@ namespace JANOARG.Client.Behaviors.Player
                         ResultBackground
                             .rectTransform
                             .sizeDelta.x,
-                        ease1 * -10 + 90
+                        (ease1 * -10) + 90
                     );
 
                     ScoreHolder.anchoredPosition =
-                        new Vector2(50 - 550 * (1 - ease1) * (1 - ease1), 0);
+                        new Vector2(50 - (550 * (1 - ease1) * (1 - ease1)), 0);
 
                     ScoreText.rectTransform.anchoredPosition *=
-                        new Vector2Frag(150 * ease3 - 100);
+                        new Vector2Frag((150 * ease3) - 100);
 
                     Details.SpawnPins(ease2);
 
@@ -402,7 +402,7 @@ namespace JANOARG.Client.Behaviors.Player
                         new Vector2Frag(500 * (1 - ease1));
 
                     Details.Container.rectTransform.localScale =
-                        new Vector3(1, .5f + .5f * ease1, 1);
+                        new Vector3(1, .5f + (.5f * ease1), 1);
 
                     float scoreLerp =
                         score * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
@@ -412,7 +412,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreRings[0].fillAmount = scoreLerp;
 
                     for (var a = 1; a < ScoreRings.Count; a++)
-                        ScoreRings[a].fillAmount = ScoreRings[a - 1].fillAmount * 10 - 9;
+                        ScoreRings[a].fillAmount = (ScoreRings[a - 1].fillAmount * 10) - 9;
 
                     ScoreBarHolder.anchorMin *=
                         new Vector2Frag(-4 * Mathf.Pow(scoreLerp, 6));
@@ -420,10 +420,10 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreBarFill.anchorMax *= new Vector2Frag(scoreLerp);
 
                     float ease4 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
-                    ScoreExplosionRings[0].InsideRadius = 1 - ease4 - x * .01f;
+                    ScoreExplosionRings[0].InsideRadius = 1 - ease4 - (x * .01f);
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
-                        Vector2.one * (600 / ease1 * (1 - ease4) + 100);
+                        Vector2.one * ((600 / ease1 * (1 - ease4)) + 100);
 
                     ScoreExplosionRings[0].rectTransform.position =
                         ScoreRings[0].rectTransform.position;
@@ -431,23 +431,23 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreExplosionRings[0].rectTransform.localEulerAngles =
                         Vector3.forward *
                         (55 +
-                         360 * Ease.Get(x * 1.2f, EaseFunction.Cubic, EaseMode.Out));
+                         (360 * Ease.Get(x * 1.2f, EaseFunction.Cubic, EaseMode.Out)));
 
                     float ease5 = Ease.Get(
-                        x * 1.5f - .5f, EaseFunction.Exponential,
+                        (x * 1.5f) - .5f, EaseFunction.Exponential,
                         EaseMode.In);
 
-                    ScoreExplosionRings[1].InsideRadius = 1 - ease5 - x * .01f;
+                    ScoreExplosionRings[1].InsideRadius = 1 - ease5 - (x * .01f);
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta =
-                        Vector2.one * (900 / ease1 * (1 - ease4) + 100);
+                        Vector2.one * ((900 / ease1 * (1 - ease4)) + 100);
 
                     ScoreExplosionRings[1].rectTransform.position =
                         ScoreRings[0].rectTransform.position;
 
                     ScoreExplosionRings[1].rectTransform.localEulerAngles =
                         Vector3.forward *
-                        (55 + 360 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+                        (55 + (360 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out)));
 
                     if (markIndex < ScoreBarMarks.Count &&
                         scoreLerp >= ScoreBarMarks[markIndex].anchorMin.x)
@@ -460,7 +460,7 @@ namespace JANOARG.Client.Behaviors.Player
                     }
 
                     FanfareSource.volume =
-                        (x * .4f + .6f) * Settings.BackgroundMusicVolume;
+                        ((x * .4f) + .6f) * Settings.BackgroundMusicVolume;
                 });
 
             RankText.text = rank.Replace("+", "<size=70%><voffset=.5em>+");
@@ -494,19 +494,19 @@ namespace JANOARG.Client.Behaviors.Player
                         Mathf.Pow(x, .4f), EaseFunction.Exponential,
                         EaseMode.Out);
 
-                    RankHolder.localScale = Vector2.one * (ease1 * 1.1f - ease2 * .1f);
+                    RankHolder.localScale = Vector2.one * ((ease1 * 1.1f) - (ease2 * .1f));
 
                     RankHolder.localEulerAngles =
                         -(RankText.rectTransform.localEulerAngles *=
-                            new Vector3Frag(z: -10 + 90 * (1 - ease3)));
+                            new Vector3Frag(z: -10 + (90 * (1 - ease3))));
 
                     RankText.color = new Color(1 - x, 1 - x, 1 - x);
 
                     ScoreBarHolder.anchoredPosition *=
-                        new Vector2Frag(100 - 1000 * ease2);
+                        new Vector2Frag(100 - (1000 * ease2));
 
                     ScoreText.rectTransform.anchoredPosition *=
-                        new Vector2Frag(50 + 110 * ease3);
+                        new Vector2Frag(50 + (110 * ease3));
                 });
 
             DetailsHolder.gameObject.SetActive(true);
@@ -546,15 +546,15 @@ namespace JANOARG.Client.Behaviors.Player
 
                     BestScoreTransform.anchoredPosition =
                         new Vector2(
-                            -1010 + 10 * ease3,
+                            -1010 + (10 * ease3),
                             BestScoreTransform.anchoredPosition.y);
 
                     SongInfoTransform.anchoredPosition =
                         new Vector2(
-                            SongInfoTransform.anchoredPosition.x, 40 - 10 * ease3);
+                            SongInfoTransform.anchoredPosition.x, 40 - (10 * ease3));
 
                     DetailsTransform.anchoredPosition =
-                        new Vector2(DetailsTransform.anchoredPosition.x, 10 * ease3 - 50);
+                        new Vector2(DetailsTransform.anchoredPosition.x, (10 * ease3) - 50);
 
                     LeftActionsTransform.anchoredPosition =
                         new Vector2(
@@ -587,11 +587,11 @@ namespace JANOARG.Client.Behaviors.Player
             float baseOrbs = Helper.CalculateBaseSongGain(
                 PlayerScreen.sTargetSong, PlayerScreen.sCurrentChart, score);
 
-            float baseCoins = baseOrbs / 5 +
-                              PlayerScreen.sTargetSong.Clip.length *
+            float baseCoins = (baseOrbs / 5) +
+                              (PlayerScreen.sTargetSong.Clip.length *
                               PlayerScreen.sCurrentChart.ChartConstant *
                               score /
-                              600e6f;
+                              600e6f);
 
             if (PlayerScreen.sMain.BadCount == 0)
             {
@@ -615,13 +615,13 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(
                 2.5f, x =>
                 {
-                    FlashBackground.color = new Color(0, 0, 0, .8f - .4f * x);
+                    FlashBackground.color = new Color(0, 0, 0, .8f - (.4f * x));
 
                     float ease2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
                     ScoreExplosionRings[0].InsideRadius = ease2;
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
-                        Vector2.one * (700 * ease2 + 100);
+                        Vector2.one * ((700 * ease2) + 100);
 
                     float ease4 = Ease.Get(
                         x * 1.5f, EaseFunction.Exponential,
@@ -630,19 +630,19 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreExplosionRings[1].InsideRadius = ease4;
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta =
-                        Vector2.one * (1400 * ease4 + 100);
+                        Vector2.one * ((1400 * ease4) + 100);
 
                     float ease1 = Ease.Get(
-                        x * 1.2f - .2f, EaseFunction.Exponential,
+                        (x * 1.2f) - .2f, EaseFunction.Exponential,
                         EaseMode.Out);
 
                     ScoreExplosionRings[2].InsideRadius = ease1;
 
                     ScoreExplosionRings[2].rectTransform.sizeDelta =
-                        Vector2.one * (2400 * ease2 + 100);
+                        Vector2.one * ((2400 * ease2) + 100);
 
                     FanfareSource.volume =
-                        (x * .4f + .6f) * Settings.BackgroundMusicVolume;
+                        ((x * .4f) + .6f) * Settings.BackgroundMusicVolume;
                 });
         }
 
@@ -690,10 +690,10 @@ namespace JANOARG.Client.Behaviors.Player
                     FanfareSource.volume = (1 - a) * Settings.BackgroundMusicVolume;
 
                     SongInfoTransform.anchoredPosition =
-                        new Vector2(SongInfoTransform.anchoredPosition.x, 30 + 10 * lerp);
+                        new Vector2(SongInfoTransform.anchoredPosition.x, 30 + (10 * lerp));
 
                     DetailsTransform.anchoredPosition =
-                        new Vector2(DetailsTransform.anchoredPosition.x, -10 * lerp - 40);
+                        new Vector2(DetailsTransform.anchoredPosition.x, (-10 * lerp) - 40);
 
                     LeftActionsTransform.anchoredPosition =
                         new Vector2(-10 * lerp, LeftActionsTransform.anchoredPosition.y);
@@ -709,7 +709,7 @@ namespace JANOARG.Client.Behaviors.Player
                         new Vector2(0, .5f * (1 - lerp2));
 
                     RetryBackground.rectTransform.anchorMax =
-                        new Vector2(1, 1 - .5f * (1 - lerp2));
+                        new Vector2(1, 1 - (.5f * (1 - lerp2)));
 
                     RetryBackground.rectTransform.sizeDelta =
                         new Vector2(
@@ -778,10 +778,10 @@ namespace JANOARG.Client.Behaviors.Player
                     FanfareSource.volume = (1 - a) * Settings.BackgroundMusicVolume;
 
                     SongInfoTransform.anchoredPosition *=
-                        new Vector2Frag(null, 30 + 10 * lerp);
+                        new Vector2Frag(null, 30 + (10 * lerp));
 
                     DetailsTransform.anchoredPosition *=
-                        new Vector2Frag(null, -10 * lerp - 40);
+                        new Vector2Frag(null, (-10 * lerp) - 40);
 
                     LeftActionsTransform.anchoredPosition *= new Vector2Frag(-10 * lerp);
                     RightActionsTransform.anchoredPosition *= new Vector2Frag(10 * lerp);
@@ -859,9 +859,9 @@ namespace JANOARG.Client.Behaviors.Player
                     float prog1 = 1 - Mathf.Abs(target - 1 + ease1);
 
                     SongInfoTransform.anchoredPosition *=
-                        new Vector2Frag(150 - 1150 * prog1);
+                        new Vector2Frag(150 - (1150 * prog1));
 
-                    ScoreHolder.anchoredPosition *= new Vector2Frag(50 - 1150 * prog1);
+                    ScoreHolder.anchoredPosition *= new Vector2Frag(50 - (1150 * prog1));
 
                     Details.LerpDetailed(target - 1 + (target == 0 ? x : ease1));
                 });

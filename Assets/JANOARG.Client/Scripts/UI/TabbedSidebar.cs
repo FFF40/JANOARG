@@ -90,7 +90,7 @@ namespace JANOARG.Client.UI
                 float max = Mathf.Lerp(oldRT.anchoredPosition.y, newRT.anchoredPosition.y, oldIndex < index ? ease2 : ease);
 
                 TabButtonIndicator.anchoredPosition = Vector2.up * min;
-                TabButtonIndicator.sizeDelta = sizeDelta + Vector2.up * (max - min);
+                TabButtonIndicator.sizeDelta = sizeDelta + (Vector2.up * (max - min));
             }
 
             void f_lerpContent(float value)
@@ -113,7 +113,7 @@ namespace JANOARG.Client.UI
                 }
 
                 f_lerpIndicator(a);
-                f_lerpContent(a < .25f ? 1 - a * 4 : (a - .25f) / .75f);
+                f_lerpContent(a < .25f ? 1 - (a * 4) : (a - .25f) / .75f);
 
                 yield return null;
             }

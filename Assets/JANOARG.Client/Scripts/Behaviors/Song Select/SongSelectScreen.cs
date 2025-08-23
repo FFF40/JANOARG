@@ -229,7 +229,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 previewVolumeSpeed = -0.4f;
 
 
-            PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
+            PreviewVolume = Mathf.Clamp01(PreviewVolume + (previewVolumeSpeed * Time.deltaTime));
             PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
 
             if (PreviewVolume <= 0)
@@ -459,7 +459,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
             yield return Ease.Animate(.9f, a =>
             {
-                float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
+                float lerp = Ease.Get((a * 3) - 1, EaseFunction.Cubic, EaseMode.Out);
                 LerpInfo(lerp);
 
                 float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
@@ -472,7 +472,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
                 foreach (SongSelectItem item in itemList)
                     item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1)
-                                             * (lerp2 * .5f + lerp4 * .5f);
+                                             * ((lerp2 * .5f) + (lerp4 * .5f));
 
                 IsDirty = true;
             });
@@ -568,7 +568,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
 
                 RT(target.Holder)
-                    .anchoredPosition = new Vector2(0, 7 - 2 * lerp);
+                    .anchoredPosition = new Vector2(0, 7 - (2 * lerp));
 
                 RT(target.Holder)
                     .localEulerAngles = 10 * (1 - lerp) * Vector3.back;
@@ -596,7 +596,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
             TargetSongCoverHolder.anchorMin = Vector2.Lerp(new Vector2(0, .5f), new Vector2(0, .5f), a);
             TargetSongCoverHolder.anchorMax = Vector2.Lerp(new Vector2(0, .5f), new Vector2(1, .5f), a);
-            TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new Vector2(180 + .26795f * offset, offset), new Vector2(0, offset / 2), a);
+            TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new Vector2(180 + (.26795f * offset), offset), new Vector2(0, offset / 2), a);
             TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new Vector2(36, 36), new Vector2(4 - SafeAreaHolder.sizeDelta.x, 128), a);
 
             TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
@@ -617,7 +617,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
             {
                 RawImage image = layer.Image;
 
-                Vector2 position = layer.Layer.Position + parallaxOffset * layer.Layer.ParallaxFactor;
+                Vector2 position = layer.Layer.Position + (parallaxOffset * layer.Layer.ParallaxFactor);
                 Vector2 size = 880 * layer.Layer.Scale * new Vector2(1, (float)image.texture.height / image.texture.width);
 
                 if (layer.Layer.Tiling)
@@ -629,7 +629,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                     image.rectTransform.localScale = Vector3.one;
 
                     image.uvRect = new Rect(
-                        ((size - coverSize / coverScale) / 2 - position) / size,
+                        (((size - (coverSize / coverScale)) / 2) - position) / size,
                         coverSize / coverScale / size
                     );
                 }
@@ -685,7 +685,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 float offset = scrollOffset - TargetSongOffset;
 
                 TargetSongCoverHolder.anchorMin = new Vector2(0, .5f * (1 - lerp2));
-                TargetSongCoverHolder.anchorMax = new Vector2(1, 1 - .5f * (1 - lerp2));
+                TargetSongCoverHolder.anchorMax = new Vector2(1, 1 - (.5f * (1 - lerp2)));
                 TargetSongCoverHolder.anchoredPosition = new Vector2(0, offset / 2 * (1 - lerp2));
                 TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: 128 * (1 - lerp2));
 
@@ -695,7 +695,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 RT(LaunchTextHolder)
                     .sizeDelta = new Vector2(LaunchText.preferredWidth * lerp3, RT(LaunchTextHolder)
                     .sizeDelta.y);
-                LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
+                LaunchTextHolder.alpha = Random.Range(1, 2f) - (lerp2 * 2);
                 TargetSongCoverFlash.color = new Color(1, 1, 1, 1 - lerp3);
             });
 
@@ -722,7 +722,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
             TargetSongInfoHolder.alpha = a * a;
             TargetSongInfoHolder.blocksRaycasts = Mathf.Approximately(a, 1);
             RT(TargetSongInfoHolder)
-                .anchoredPosition = new Vector2(50 + 10 * a, RT(TargetSongInfoHolder)
+                .anchoredPosition = new Vector2(50 + (10 * a), RT(TargetSongInfoHolder)
                 .anchoredPosition.y);
         }
 
@@ -761,11 +761,11 @@ namespace JANOARG.Client.Behaviors.Song_Select
             {
                 ItemGroup.alpha = x * 1e10f;
 
-                float xPosition = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                float xPosition = 120 + (60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out));
 
                 ItemTrack.color = new Color(1, 1, 1, Mathf.Clamp01(x * 3));
 
-                BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
+                BackgroundGroup.alpha = Mathf.Clamp01((x * 3) - 1);
 
                 ItemTrack.rectTransform.anchoredPosition = new Vector2(xPosition - 180, ItemTrack.rectTransform.anchoredPosition.y);
 

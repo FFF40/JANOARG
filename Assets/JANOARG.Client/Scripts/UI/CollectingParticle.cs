@@ -42,7 +42,7 @@ namespace JANOARG.Client.UI
             }
             else if (_RT.anchoredPosition.x > parent.rect.width)
             {
-                _RT.anchoredPosition = new Vector2(parent.rect.width * 2 - _RT.anchoredPosition.x, _RT.anchoredPosition.y);
+                _RT.anchoredPosition = new Vector2((parent.rect.width * 2) - _RT.anchoredPosition.x, _RT.anchoredPosition.y);
                 Velocity = new Vector2(-0.5f * Velocity.x, Velocity.y);
             }
 
@@ -53,7 +53,7 @@ namespace JANOARG.Client.UI
             }
             else if (_RT.anchoredPosition.y > parent.rect.height)
             {
-                _RT.anchoredPosition = new Vector2(_RT.anchoredPosition.x, parent.rect.height * 2 - _RT.anchoredPosition.y);
+                _RT.anchoredPosition = new Vector2(_RT.anchoredPosition.x, (parent.rect.height * 2) - _RT.anchoredPosition.y);
                 Velocity = new Vector2(Velocity.x, -0.5f * Velocity.y);
             }
 
@@ -80,7 +80,7 @@ namespace JANOARG.Client.UI
                     progress == 0 ? 0 : Mathf.Pow(progress, Time.deltaTime * 2)
                 );
 
-                _RT.sizeDelta = _Size * (1 - .5f * Ease.Get(1 - progress, EaseFunction.Exponential, EaseMode.In)) * Vector2.one;
+                _RT.sizeDelta = _Size * (1 - (.5f * Ease.Get(1 - progress, EaseFunction.Exponential, EaseMode.In))) * Vector2.one;
 
                 Tail.alpha = 1 - progress;
 
