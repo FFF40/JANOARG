@@ -3,14 +3,23 @@ using System.Globalization;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
+    /// <summary>
+    /// Represents time position in a song in beats. expressed as a compounding fraction format.
+    /// </summary>
     [Serializable]
     public struct BeatPosition : IComparable<BeatPosition>
     {
+        #region Fields and work constants
+
         public int Number;
         public int Numerator;
         public int Denominator;
 
         public const double Precision = 1e-5;
+
+        #endregion 
+
+        #region Constructors
 
         public BeatPosition(int a)
         {
@@ -28,23 +37,37 @@ namespace JANOARG.Shared.Data.ChartInfo
             Normalize();
         }
 
+        #endregion
+
+        #region String handling
+
         public override string ToString()
         {
-            if (Numerator == 0) return Number + "b";
-            else return (Numerator < 0 ? "-" : "") + Math.Abs(Number) + "b" + Math.Abs(Numerator) + "/" + Denominator;
+            return ToString(CultureInfo.InvariantCulture);
         }
 
         public string ToString(CultureInfo cultureInfo)
         {
+            if (Denominator <= 0) return "NaN";
             if (Numerator == 0) return Number.ToString(cultureInfo) + "b";
-            else return (Numerator < 0 ? "-" : "") + Math.Abs(Number).ToString(cultureInfo) + "b" + Math.Abs(Numerator).ToString(cultureInfo) + "/" + Denominator.ToString(cultureInfo);
+            return (Numerator < 0 ? "-" : "")
+                + Math.Abs(Number).ToString(cultureInfo)
+                + "b" + Math.Abs(Numerator).ToString(cultureInfo)
+                + "/" + Denominator.ToString(cultureInfo);
         }
 
+        /// <summary>
+        /// Parse a beat position representation string.
+        /// </summary>
+        /// <param name="number">The beat position representation.</param>
+        /// <param name="culture">The culture info to use.</param>
+        /// <returns>The output beat position.</returns>
         public static BeatPosition Parse(string number, CultureInfo culture = null)
         {
             int slashPos = number.IndexOf('/');
             if (slashPos >= 0)
             {
+                // Get X, Y, Z in XbY/Z
                 int bPos = number.IndexOf('b');
                 return new BeatPosition(
                     int.Parse(number[..bPos], culture),
@@ -54,10 +77,18 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
             else 
             {
+                // Consider XbY as a decimal number
                 return (BeatPosition)float.Parse(number.Replace('b', '.'), culture);
             }
         }
 
+        /// <summary>
+        /// Try to parse a beat position representation string.
+        /// </summary>
+        /// <param name="number">The beat position representation.</param>
+        /// <param name="output">The output beat position. Outputs <c>BeatPosition.NaN</c> if can't be parsed.</param>
+        /// <param name="culture">The culture info to use.</param>
+        /// <returns>Whether the string is successfully parsed.</returns>
         public static bool TryParse(string number, out BeatPosition output, CultureInfo culture = null)
         {
             try
@@ -72,17 +103,22 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
         }
 
+        #endregion
+
+        #region Conversions
+
         public static implicit operator double(BeatPosition a) => a.Number + (double)a.Numerator / a.Denominator;
         public static implicit operator float(BeatPosition a) => a.Number + (float)a.Numerator / a.Denominator;
 
-        public static explicit operator BeatPosition(double a) 
+        public static explicit operator BeatPosition(double a)
         {
             int num = (int)Math.Floor(a);
             a -= num;
-            if (a == 0) return new BeatPosition(num);
+            if (a == 0) return new BeatPosition(num); // Skip the decimal to fraction logic if number is already integer
 
+            // Converts the decimal part to our fraction representation
             int minN = 0, minD = 1, maxN = 1, maxD = 1;
-            while (true) 
+            while (true)
             {
                 int midN = minN + maxN;
                 int midD = minD + maxD;
@@ -94,13 +130,17 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     minN = midN; minD = midD;
                 }
-                else 
+                else
                 {
                     return new BeatPosition(num, midN, midD);
                 }
-            
+
             }
         }
+
+        #endregion
+
+        #region Operators
 
         public static BeatPosition operator +(BeatPosition a, BeatPosition b)
         {
@@ -148,6 +188,10 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             return a.CompareTo(b) >= 0;
         }
+
+        #endregion
+
+        #region Normalize
 
         void Normalize()
         {
@@ -209,6 +253,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 }
             }
 
+            // Simplify fraction
             int gcd = GCD(Math.Abs(Numerator), Denominator);
             Numerator /= gcd;
             Denominator /= gcd;
@@ -224,18 +269,25 @@ namespace JANOARG.Shared.Data.ChartInfo
             return a | b;
         }
 
+        #endregion
+
+        #region Constants and checks
+
         public static readonly BeatPosition NaN = new() { Number = 0, Numerator = 0, Denominator = 0 };
         public static bool IsNaN(BeatPosition a)
         {
             return a.Denominator <= 0;
         }
 
+        #endregion
+
+        #region Math functions
+
         public readonly int CompareTo(BeatPosition other)
         {
             return ((float)this).CompareTo((float)other);
         }
 
-        // -------------------- Math functions
         static public BeatPosition Min(BeatPosition a, BeatPosition b)
         {
             return a < b ? a : b;
@@ -244,5 +296,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             return a > b ? a : b;
         }
+
+        #endregion
+
     }
 }
