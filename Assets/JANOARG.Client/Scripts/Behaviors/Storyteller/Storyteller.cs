@@ -3,6 +3,7 @@ using System.Collections;
 using JANOARG.Client.Data.Constant;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Data.Story;
+using JANOARG.Shared.Data.Story.Instructions;
 using JANOARG.Shared.Data.Story.TypeEffects;
 using TMPro;
 using UnityEngine;
@@ -12,35 +13,41 @@ namespace JANOARG.Client.Behaviors.Storyteller
 {
     public class Storyteller : MonoBehaviour
     {
-        public static Storyteller main;
+        public static Storyteller sMain;
 
         public StoryConstants Constants;
+
         [Space]
         public StoryScript CurrentScript;
+
         public int CurrentChunkIndex;
         public int CurrentCharacterIndex;
+
         [Space]
         public TMP_Text DialogueLabel;
-        public TMP_Text NameLabel;
+
+        public TMP_Text      NameLabel;
         public RectTransform NameLabelHolder;
-        public CanvasGroup NameLabelGroup;
-        public Graphic NextChunkIndicator;
+        public CanvasGroup   NameLabelGroup;
+        public Graphic       NextChunkIndicator;
+
         [Space]
         public float CharacterDuration = 0.01f;
+
         public float SpeedFactor = 1;
 
-        public StoryTypeEffect currentRevealEffect;
+        public StoryTypeEffect CurrentRevealEffect;
 
         public int[] CurrentVertexIndexes;
 
-        bool IsPlaying = false;
-        [NonSerialized] public bool IsMeshDirty;
-        [NonSerialized] public float TimeBuffer = 0;
-        [NonSerialized] public int ActiveCoroutines = 0;
+        private                bool  _IsPlaying = false;
+        [NonSerialized] public bool  IsMeshDirty;
+        [NonSerialized] public float TimeBuffer       = 0;
+        [NonSerialized] public int   ActiveCoroutines = 0;
 
         public void Awake()
         {
-            main = this;
+            sMain = this;
         }
 
         public void Start()
@@ -50,11 +57,9 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void Update()
         {
-            if (IsPlaying) 
-            {
-                TimeBuffer += Time.deltaTime * SpeedFactor;
-            }
-            if (IsMeshDirty) 
+            if (_IsPlaying) TimeBuffer += Time.deltaTime * SpeedFactor;
+
+            if (IsMeshDirty)
             {
                 DialogueLabel.ForceMeshUpdate();
                 ResetDialogueMesh();
@@ -64,10 +69,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void LateUpdate()
         {
-            if (IsMeshDirty) 
-            {
-                UpdateDialogueMesh();
-            }
+            if (IsMeshDirty) UpdateDialogueMesh();
         }
 
         public void PlayScript(StoryScript script)
@@ -78,77 +80,85 @@ namespace JANOARG.Client.Behaviors.Storyteller
             StartCoroutine(PlayChunk());
         }
 
-        public void OnScreenClick() 
+        public void OnScreenClick()
         {
-            if (IsPlaying) 
-            {
+            if (_IsPlaying)
                 SpeedFactor *= 5;
-            }
-            else 
-            {
+            else
                 PlayNextChunk();
-            }
         }
 
-        public void PlayNextChunk() 
+        public void PlayNextChunk()
         {
             CurrentChunkIndex++;
             StartCoroutine(PlayChunk());
         }
 
-        public IEnumerator PlayChunk() 
+        public IEnumerator PlayChunk()
         {
-            IsPlaying = true;
+            _IsPlaying = true;
             StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
 
             SetNextChunkIndicatorState(0);
             Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
-            yield return Ease.Animate(0.2f, (x) => {
+
+            yield return Ease.Animate(0.2f, (x) =>
+            {
                 float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
                 DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
+
                 float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.In);
                 DialogueLabel.rectTransform.anchoredPosition = dialoguePos + ease2 * 5 * Vector2.down;
             });
+
             DialogueLabel.text = "";
             DialogueLabel.color = Color.white;
             DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
 
-            foreach (var ins in chunk.Instructions) ins.OnTextBuild(this);
+            foreach (StoryInstruction instruction in chunk.Instructions)
+                instruction.OnTextBuild(this);
 
             CurrentCharacterIndex = 0;
             TimeBuffer = 0;
             SpeedFactor = 1;
             CurrentVertexIndexes = new int[DialogueLabel.textInfo.meshInfo.Length];
-            currentRevealEffect = new FloatInTypeEffect();
+            CurrentRevealEffect = new FloatInTypeEffect();
             IsMeshDirty = true;
             ResetDialogueMesh();
 
-            foreach (var ins in chunk.Instructions)
+            foreach (StoryInstruction instruction in chunk.Instructions)
             {
-                var crt = ins.OnTextReveal(this);
-                if (crt != null) yield return crt;
+                IEnumerator chunkRoutine = instruction.OnTextReveal(this);
+
+                if (chunkRoutine != null) yield return chunkRoutine;
             }
+
             yield return new WaitWhile(() => ActiveCoroutines > 0);
 
-            IsPlaying = false;
+            _IsPlaying = false;
             SetNextChunkIndicatorState(1);
         }
-    
-        public void ResetDialogueMesh() 
+
+        public void ResetDialogueMesh()
         {
-            var textInfo = DialogueLabel.textInfo;
-            for (int i = 0; i < textInfo.meshInfo.Length; i++)
+            TMP_TextInfo textInfo = DialogueLabel.textInfo;
+
+            for (var i = 0; i < textInfo.meshInfo.Length; i++)
             {
                 for (int j = CurrentVertexIndexes[i]; j < textInfo.meshInfo[i].colors32.Length; j++)
-                    textInfo.meshInfo[i].colors32[j].a = 0;
+                    textInfo.meshInfo[i]
+                        .colors32[j].a = 0;
+
                 textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
                 DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
             }
         }
-        public void UpdateDialogueMesh() 
+
+        public void UpdateDialogueMesh()
         {
-            var textInfo = DialogueLabel.textInfo;
-            for (int i = 0; i < textInfo.meshInfo.Length; i++)
+            TMP_TextInfo textInfo = DialogueLabel.textInfo;
+
+            for (var i = 0; i < textInfo.meshInfo.Length; i++)
             {
                 textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
                 textInfo.meshInfo[i].mesh.colors32 = textInfo.meshInfo[i].colors32;
@@ -158,63 +168,71 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void RegisterCoroutine(IEnumerator routine)
         {
-            IEnumerator r() 
+            IEnumerator f_registration()
             {
                 ActiveCoroutines++;
+
                 yield return routine;
+
                 ActiveCoroutines--;
             }
-            StartCoroutine(r());
+
+            StartCoroutine(f_registration());
         }
 
-        float currentNCIPos = 0;
-        Coroutine currentNCIRoutine = null;
+        private float     _CurrentNextChunkIndicatorPosition = 0;
+        private Coroutine _CurrentNextChunkIndicatorRoutine  = null;
+
         public void SetNextChunkIndicatorState(float target)
         {
-            if (currentNCIRoutine != null) StopCoroutine(currentNCIRoutine);
-            currentNCIRoutine = StartCoroutine(NextChunkIndicatorAnim(target));
+            if (_CurrentNextChunkIndicatorRoutine != null) StopCoroutine(_CurrentNextChunkIndicatorRoutine);
+            _CurrentNextChunkIndicatorRoutine = StartCoroutine(NextChunkIndicatorAnim(target));
         }
-        IEnumerator NextChunkIndicatorAnim(float target)
+
+        private IEnumerator NextChunkIndicatorAnim(float target)
         {
-            float from = currentNCIPos;
-            yield return Ease.Animate(0.2f, (x) => {
+            float from = _CurrentNextChunkIndicatorPosition;
+
+            yield return Ease.Animate(0.2f, (x) =>
+            {
                 x = Mathf.Lerp(from, target, x);
-                currentNCIPos = x;
+                _CurrentNextChunkIndicatorPosition = x;
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 NextChunkIndicator.color = new Color(1, 1, 1, x);
                 NextChunkIndicator.rectTransform.anchoredPosition = 5 * (1 - ease) * Vector2.down;
             });
         }
 
-        Coroutine currentNFRoutine = null;
-        public void SetNameLabelText(string name)
+        private Coroutine _CurrentNameFieldRoutine = null;
+
+        public void SetNameLabelText(string label)
         {
-            if (currentNFRoutine != null) StopCoroutine(currentNFRoutine);
-            currentNFRoutine = StartCoroutine(NameLabelAnim(name));
+            if (_CurrentNameFieldRoutine != null) StopCoroutine(_CurrentNameFieldRoutine);
+            _CurrentNameFieldRoutine = StartCoroutine(NameLabelAnim(label));
         }
-        IEnumerator NameLabelAnim(string name)
+
+        private IEnumerator NameLabelAnim(string label)
         {
             float fromAlpha = NameLabelGroup.alpha;
-            float toAlpha = string.IsNullOrWhiteSpace(name) ? 0 : 1;
+            float toAlpha = string.IsNullOrWhiteSpace(label) ? 0 : 1;
             float fromXPos = NameLabelHolder.anchorMin.x;
             float toXPos = 0;
 
-            if (toAlpha > 0) 
+            if (toAlpha > 0)
             {
-                NameLabel.text = name;
-                NameLabelHolder.sizeDelta = new (NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
-            }
-            if (fromAlpha == 0) 
-            {
-                fromXPos = toXPos;
+                NameLabel.text = label;
+                NameLabelHolder.sizeDelta = new Vector2(NameLabel.preferredWidth, NameLabelHolder.sizeDelta.y);
             }
 
-            yield return Ease.Animate(0.2f, (x) => {
+            if (fromAlpha == 0) fromXPos = toXPos;
+
+            yield return Ease.Animate(0.2f, (x) =>
+            {
                 float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
                 NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
                 float xPos = Mathf.Lerp(fromXPos, toXPos, ease);
-                NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new(xPos, 0.5f);
-                NameLabelHolder.anchoredPosition = new (0, (1 - NameLabelGroup.alpha) * -5);
+                NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new Vector2(xPos, 0.5f);
+                NameLabelHolder.anchoredPosition = new Vector2(0, (1 - NameLabelGroup.alpha) * -5);
             });
         }
     }

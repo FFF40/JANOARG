@@ -6,22 +6,22 @@ namespace JANOARG.Client.Behaviors.Options.Input_Types
     {
         public AnimatedToggle Toggle;
 
-        public new void Start() 
+        public new void Start()
         {
             UpdateValue();
         }
 
-        public new void UpdateValue() 
+        public new void UpdateValue()
         {
             base.UpdateValue();
-            Toggle.Value = CurrentValue;
+            Toggle.value = CurrentValue;
         }
 
         public void OnToggle()
         {
-            if (Toggle.Value != CurrentValue)
+            if (Toggle.value != CurrentValue)
             {
-                CurrentValue = Toggle.Value;
+                CurrentValue = Toggle.value;
                 Set(CurrentValue);
             }
         }

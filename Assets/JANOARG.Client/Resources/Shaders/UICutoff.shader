@@ -48,7 +48,7 @@ Shader "UI/Cutoff"
         Pass
         {
             Name "Default"
-        CGPROGRAM
+            CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 2.0
@@ -61,17 +61,17 @@ Shader "UI/Cutoff"
 
             struct appdata_t
             {
-                float4 vertex   : POSITION;
-                float4 color    : COLOR;
+                float4 vertex : POSITION;
+                float4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
-                float4 vertex   : SV_POSITION;
-                fixed4 color    : COLOR;
-                float2 texcoord  : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+                fixed4 color : COLOR;
+                float2 texcoord : TEXCOORD0;
                 float4 worldPosition : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -99,7 +99,7 @@ Shader "UI/Cutoff"
             fixed4 frag(v2f IN) : SV_Target
             {
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
- 
+
                 color.a = color.a / IN.color.a > 1 - IN.color.a ? 1 : 0;
 
                 #ifdef UNITY_UI_CLIP_RECT
@@ -112,7 +112,7 @@ Shader "UI/Cutoff"
 
                 return color;
             }
-        ENDCG
+            ENDCG
         }
     }
 }

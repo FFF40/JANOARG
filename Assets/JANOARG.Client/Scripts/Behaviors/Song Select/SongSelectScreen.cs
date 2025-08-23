@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Player;
+using JANOARG.Client.Data.Storage;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
@@ -11,6 +12,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -18,76 +20,97 @@ namespace JANOARG.Client.Behaviors.Song_Select
 {
     public class SongSelectScreen : MonoBehaviour
     {
-        public static SongSelectScreen main;
+        public static SongSelectScreen sMain;
 
         public Playlist Playlist;
-        public List<PlayableSong> SongList { get; private set; } = new();
+        public List<PlayableSong> songList { get; private set; } = new();
+
         [Space]
         public SongSelectItem ItemSample;
+
         public RectTransform ItemHolder;
-        public CanvasGroup ItemGroup;
-        public List<SongSelectItem> ItemList { get; private set; } = new();
+        public CanvasGroup   ItemGroup;
+        public List<SongSelectItem> itemList { get; private set; } = new();
         public Graphic ItemTrack;
         public Graphic ItemCursor;
+
         [Space]
         public RectTransform BackgroundHolder;
-        public CanvasGroup BackgroundGroup;
+
+        public CanvasGroup   BackgroundGroup;
         public RectTransform SafeAreaHolder;
+
         [Space]
         public CanvasGroup TargetSongInfoHolder;
+
         public TMP_Text TargetSongInfoName;
         public TMP_Text TargetSongInfoArtist;
         public TMP_Text TargetSongInfoInfo;
+
         [Space]
         public RectTransform TargetSongCoverHolder;
-        public Image TargetSongCoverBackground;
-        public Shadow TargetSongCoverShadow;
-        public Image TargetSongCoverFlash;
-        public CoverLayerImage CoverLayerSample;
-        public RectTransform TargetSongCoverLayerHolder;
+
+        public Image                 TargetSongCoverBackground;
+        public Shadow                TargetSongCoverShadow;
+        public Image                 TargetSongCoverFlash;
+        public CoverLayerImage       CoverLayerSample;
+        public RectTransform         TargetSongCoverLayerHolder;
         public List<CoverLayerImage> TargetSongCoverLayers;
+
         [Space]
         public CanvasGroup DifficultyHolder;
-        public RectTransform DifficultyListHolder;
-        public SongSelectDifficulty DifficultySample;
-        public List<SongSelectDifficulty> DifficultyList { get; private set; } = new();
 
-        public int SelectedDifficulty;
+        public RectTransform        DifficultyListHolder;
+        public SongSelectDifficulty DifficultySample;
+        public List<SongSelectDifficulty> difficultyList { get; private set; } = new();
+
+        public int                  SelectedDifficulty;
         public SongSelectDifficulty TargetDifficulty;
-        public TMP_Text TargetDifficultyName;
-        public TMP_Text TargetDifficultyScore;
-        public GameObject TargetDifficultyNewIndicator;
+        public TMP_Text             TargetDifficultyName;
+        public TMP_Text             TargetDifficultyScore;
+        public GameObject           TargetDifficultyNewIndicator;
+
         [Space]
         public CanvasGroup LeftActionsHolder;
+
         public CanvasGroup RightActionsHolder;
+
         [Space]
         public CanvasGroup LaunchTextHolder;
+
         public TMP_Text LaunchText;
+
         [Space]
         public SongSelectReadyScreen ReadyScreen;
+
         [Space]
         public float ScrollOffset;
-        public float ScrollVelocity;
-        public float TargetScrollOffset;
-        float lastScrollOffset;
-        public bool IsReady;
-        public bool IsDirty;
-        public bool IsPointerDown;
-        public bool IsTargetSongHidden;
-        public bool TargetSongHiddenTarget;
-        public float TargetSongOffset;
-        public bool IsAnimating;
-        public bool IsInit;
+
+        public  float ScrollVelocity;
+        public  float TargetScrollOffset;
+        private float _LastScrollOffset;
+        public  bool  IsReady;
+        public  bool  IsDirty;
+        public  bool  IsPointerDown;
+        public  bool  IsTargetSongHidden;
+        public  bool  TargetSongHiddenTarget;
+        public  float TargetSongOffset;
+        public  bool  IsAnimating;
+        public  bool  IsInit;
+
         [Space]
         public AudioSource PreviewSource;
-        public float PreviewVolume;
-        public float PreviewVolumeMulti;
+
+        public float     PreviewVolume;
+        public float     PreviewVolumeMulti;
         public AudioClip CurrentPreviewClip;
-        public Vector2 CurrentPreviewRange;
-        [Space]
-        public AudioSource SFXSource;
-        public AudioClip SFXTickClip;
-        public float SFXVolume;
+        public Vector2   CurrentPreviewRange;
+
+        [FormerlySerializedAs("SFXSource")] [Space]
+        public AudioSource SoundEffectSource;
+
+        public AudioClip SoundEffectTickClip;
+        public float     SoundEffectVolume;
 
         public Coroutine TargetSongAnim;
 
@@ -95,57 +118,58 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
         public void Awake()
         {
-            main = this;
+            sMain = this;
             CommonScene.Load();
         }
 
         public void Start()
         {
             OnSettingDirty();
-            CommonSys.main.Storage.OnSave.AddListener(OnSave);
+            CommonSys.sMain.Storage.OnSave.AddListener(OnSave);
             StartCoroutine(InitPlaylist());
         }
 
         public void OnDestroy()
         {
-            CommonSys.main.Storage.OnSave.RemoveListener(OnSave);
+            CommonSys.sMain.Storage.OnSave.RemoveListener(OnSave);
         }
 
-        public void OnSave() 
+        public void OnSave()
         {
             OnSettingDirty();
         }
 
-        public void OnSettingDirty() 
+        public void OnSettingDirty()
         {
-            PreviewVolumeMulti = CommonSys.main.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
-            SFXVolume = CommonSys.main.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
+            PreviewVolumeMulti = CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+            SoundEffectVolume = CommonSys.sMain.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
         }
 
-        public void Update() 
+        public void Update()
         {
             if (!IsReady) return;
 
-            if (IsPointerDown) 
+            if (IsPointerDown)
             {
-                ScrollVelocity = (lastScrollOffset - ScrollOffset) / Time.deltaTime;
-                lastScrollOffset = ScrollOffset;
+                ScrollVelocity = (_LastScrollOffset - ScrollOffset) / Time.deltaTime;
+                _LastScrollOffset = ScrollOffset;
             }
-            else 
+            else
             {
                 if (Mathf.Abs(ScrollVelocity) > 10)
                 {
                     ScrollOffset -= ScrollVelocity * Time.deltaTime;
                     ScrollVelocity *= Mathf.Pow(0.2f, Time.deltaTime);
 
-                    float minBound = ItemList[0].Position - 20; 
-                    float maxBound = ItemList[^1].Position + 20;
-                    if (ScrollOffset < minBound) 
+                    float minBound = itemList[0].Position - 20;
+                    float maxBound = itemList[^1].Position + 20;
+
+                    if (ScrollOffset < minBound)
                     {
                         ScrollOffset = minBound;
                         ScrollVelocity = 0;
                     }
-                    else if (ScrollOffset > maxBound) 
+                    else if (ScrollOffset > maxBound)
                     {
                         ScrollOffset = maxBound;
                         ScrollVelocity = 0;
@@ -154,53 +178,65 @@ namespace JANOARG.Client.Behaviors.Song_Select
                     UpdateTarget();
                     IsDirty = true;
                 }
-                else 
+                else
                 {
-                    if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f) 
+                    if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f)
                     {
                         ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
                         IsDirty = true;
                     }
+
                     TargetSongHiddenTarget = false;
                 }
             }
 
-            if (TargetSongHiddenTarget) 
-            {
+            if (TargetSongHiddenTarget)
                 ItemCursor.color += new Color(0, 0, 0, (1 - ItemCursor.color.a) * Mathf.Pow(5e-3f, Time.deltaTime));
-            }
-            else 
-            {
+            else
                 ItemCursor.color *= new Color(1, 1, 1, Mathf.Pow(.001f, Time.deltaTime));
-            }
 
-            if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden) 
+            if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden)
             {
                 IsTargetSongHidden = TargetSongHiddenTarget;
-                if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
-                if (IsTargetSongHidden) TargetSongAnim = StartCoroutine(TargetSongHideAnim());
-                else TargetSongAnim = StartCoroutine(TargetSongShowAnim());
+                if (TargetSongAnim != null)
+                    StopCoroutine(TargetSongAnim);
+
+                if (IsTargetSongHidden)
+                    TargetSongAnim = StartCoroutine(TargetSongHideAnim());
+                else
+                    TargetSongAnim = StartCoroutine(TargetSongShowAnim());
             }
-            if (IsDirty) 
+
+            if (IsDirty)
             {
                 UpdateItems();
                 IsDirty = false;
             }
 
             float previewVolumeSpeed = 1;
-            if (ReadyScreen.IsAnimating) previewVolumeSpeed = -0.5f;
-            else if (CurrentPreviewClip != PreviewSource.clip) previewVolumeSpeed = -2;
-            else if (!CurrentPreviewClip) previewVolumeSpeed = -2;
-            else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded) previewVolumeSpeed = -1;
-            else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume) previewVolumeSpeed = -1;
-            else if (IsTargetSongHidden) previewVolumeSpeed = -0.4f;
+
+            if (ReadyScreen.IsAnimating)
+                previewVolumeSpeed = -0.5f;
+            else if (CurrentPreviewClip != PreviewSource.clip)
+                previewVolumeSpeed = -2;
+            else if (!CurrentPreviewClip)
+                previewVolumeSpeed = -2;
+            else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded)
+                previewVolumeSpeed = -1;
+            else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume)
+                previewVolumeSpeed = -1;
+            else if (IsTargetSongHidden)
+                previewVolumeSpeed = -0.4f;
+
+
             PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
             PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
-            if (PreviewVolume <= 0) 
+
+            if (PreviewVolume <= 0)
             {
                 if (CurrentPreviewClip != PreviewSource.clip)
                 {
-                    if (!PreviewSource.clip) 
+                    if (!PreviewSource.clip)
                     {
                         PreviewSource.clip = CurrentPreviewClip;
                         PreviewSource.Play();
@@ -214,181 +250,215 @@ namespace JANOARG.Client.Behaviors.Song_Select
                         PreviewSource.time = CurrentPreviewRange.x;
                     }
                 }
-                else if (PreviewSource.time > CurrentPreviewRange.y) 
+                else if (PreviewSource.time > CurrentPreviewRange.y)
                 {
                     PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
                 }
             }
-        
         }
 
         public IEnumerator InitPlaylist()
         {
-            int index = 0;
-            int pos = 0;
+            var index = 0;
+            var pos = 0;
+
             foreach (string path in Playlist.ItemPaths)
             {
-                ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
-                yield return new WaitUntil(() => req.isDone);
-                if (!req.asset) 
+                ResourceRequest request = Resources.LoadAsync<ExternalPlayableSong>(path);
+
+                yield return new WaitUntil(() => request.isDone);
+
+                if (!request.asset)
                 {
                     Debug.LogWarning("Couldn't load Playable Song at " + path);
+
                     continue;
                 }
-                PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
-                SongList.Add(song);
+
+                PlayableSong song = ((ExternalPlayableSong)request.asset).Data;
+                songList.Add(song);
 
                 SongSelectItem item = Instantiate(ItemSample, ItemHolder);
                 item.SetItem(path, song, index, pos);
-                ItemList.Add(item);
+                itemList.Add(item);
                 index++;
                 pos += 48;
-            
             }
+
             IsInit = true;
-        
-            if (!LoadingBar.main.gameObject.activeSelf) Intro();
+
+            if (!LoadingBar.sMain.gameObject.activeSelf) Intro();
         }
 
         public void UpdateItems(bool cap = true)
         {
             float scrollOfs = ScrollOffset;
-            if (cap) scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+            if (cap) scrollOfs = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
 
-            foreach (SongSelectItem item in ItemList)
+            foreach (SongSelectItem item in itemList)
             {
-                RectTransform rt = (RectTransform)item.transform;
+                var rt = (RectTransform)item.transform;
                 rt.anchoredPosition = new Vector2(-.26795f, -1) * (item.Position + item.PositionOffset - scrollOfs);
             }
-            ItemCursor.rectTransform.anchoredPosition = new(ItemCursor.rectTransform.anchoredPosition.x, scrollOfs - TargetScrollOffset);
+
+            ItemCursor.rectTransform.anchoredPosition = new Vector2(ItemCursor.rectTransform.anchoredPosition.x, scrollOfs - TargetScrollOffset);
+
             if (!IsAnimating && TargetSongAnim == null)
             {
                 float offset = scrollOfs - TargetSongOffset;
-                TargetSongCoverHolder.anchoredPosition = new(0, offset / 2);
+                TargetSongCoverHolder.anchoredPosition = new Vector2(0, offset / 2);
             }
         }
 
-        public void UpdateTarget() 
+        public void UpdateTarget()
         {
             float lastTarget = TargetScrollOffset;
             float tsDist = float.PositiveInfinity;
-            foreach (SongSelectItem item in ItemList)
-            {
-                if (Mathf.Abs(item.Position - ScrollOffset) < tsDist) 
+
+            foreach (SongSelectItem item in itemList)
+                if (Mathf.Abs(item.Position - ScrollOffset) < tsDist)
                 {
                     TargetScrollOffset = item.Position;
                     tsDist = Mathf.Abs(item.Position - ScrollOffset);
                 }
-                else break;
-            }
-            if (lastTarget != TargetScrollOffset) 
+                else
+                {
+                    break;
+                }
+
+            if (!Mathf.Approximately(lastTarget, TargetScrollOffset))
             {
                 TargetSongHiddenTarget = true;
-                SFXSource.PlayOneShot(SFXTickClip, SFXVolume);
+                SoundEffectSource.PlayOneShot(SoundEffectTickClip, SoundEffectVolume);
             }
         }
 
-        public void OnListPointerDown(BaseEventData data) 
+        public void OnListPointerDown(BaseEventData data)
         {
-            lastScrollOffset = ScrollOffset;
+            _LastScrollOffset = ScrollOffset;
             ScrollVelocity = 0;
             IsPointerDown = true;
         }
 
-        public void OnListDrag(BaseEventData data) 
+        public void OnListDrag(BaseEventData data)
         {
             ScrollOffset += ((PointerEventData)data).delta.y / transform.lossyScale.x;
             UpdateTarget();
             IsDirty = true;
         }
 
-        public void OnListPointerUp(BaseEventData data) 
+        public void OnListPointerUp(BaseEventData data)
         {
-            if (ItemList.Count < 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
-            else ScrollOffset = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
+            if (itemList.Count < 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
+            else ScrollOffset = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
             IsPointerDown = false;
         }
 
         public IEnumerator TargetSongShowAnim()
         {
             TargetSongOffset = TargetScrollOffset;
-            SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
-            if (TargetSong)
+            SongSelectItem targetSong = itemList.Find(item => Mathf.Approximately(TargetScrollOffset, item.Position));
+
+            if (targetSong)
             {
-                TargetSongInfoName.text = TargetSong.Song.SongName;
-                TargetSongInfoArtist.text = TargetSong.Song.SongArtist;
-            
-                float songLength = TargetSong.Song.Clip.length;
+                TargetSongInfoName.text = targetSong.Song.SongName;
+                TargetSongInfoArtist.text = targetSong.Song.SongArtist;
+
+                float songLength = targetSong.Song.Clip.length;
                 TargetSongInfoInfo.text = Mathf.Floor(songLength / 60) + "m " + Mathf.Floor(songLength % 60) + "s";
 
                 float minBPM = float.PositiveInfinity, maxBPM = float.NegativeInfinity;
-                foreach (BPMStop stop in TargetSong.Song.Timing.Stops)
-                {
+
+                foreach (BPMStop stop in targetSong.Song.Timing.Stops)
                     if (stop.Significant)
                     {
                         minBPM = Mathf.Min(minBPM, stop.BPM);
                         maxBPM = Mathf.Max(maxBPM, stop.BPM);
                     }
-                }
-                TargetSongInfoInfo.text += " - BPM " + (minBPM == maxBPM ? minBPM : minBPM + "~" + maxBPM);
 
-                TargetSongInfoInfo.text += " - " + TargetSong.Song.Genre.ToUpper();
+                TargetSongInfoInfo.text += " - BPM " + (Mathf.Approximately(minBPM, maxBPM) ? minBPM : minBPM + "~" + maxBPM);
+
+                TargetSongInfoInfo.text += " - " + targetSong.Song.Genre.ToUpper();
             }
 
-            CurrentPreviewClip = TargetSong.Song.Clip;
-            CurrentPreviewRange = TargetSong.Song.PreviewRange;
+            CurrentPreviewClip = targetSong.Song.Clip;
+            CurrentPreviewRange = targetSong.Song.PreviewRange;
 
-            string songPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
+            string songPath = Playlist.ItemPaths[songList.IndexOf(targetSong.Song)];
             string songID = Path.GetFileNameWithoutExtension(songPath);
-            foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
-            DifficultyList.Clear();
-            var target = GetNearestDifficulty(TargetSong.Song.Charts);
-            foreach (ExternalChartMeta chart in TargetSong.Song.Charts) 
+
+            foreach (SongSelectDifficulty diff in difficultyList)
+                Destroy(diff.gameObject);
+
+            difficultyList.Clear();
+
+            ExternalChartMeta target = GetNearestDifficulty(targetSong.Song.Charts);
+
+            foreach (ExternalChartMeta chart in targetSong.Song.Charts)
             {
                 string chartID = Path.GetFileNameWithoutExtension(chart.Target);
-                var record = StorageManager.main.Scores.Get(songID, chartID);
+                ScoreStoreEntry record = StorageManager.sMain.Scores.Get(songID, chartID);
 
-                SongSelectDifficulty diff = Instantiate(DifficultySample, DifficultyListHolder);
-                diff.SetItem(chart, record, CommonSys.main.Constants.GetDifficultyColor(chart.DifficultyIndex));
-                diff.Button.onClick.AddListener(() => ChangeDiff(diff));
-                DifficultyList.Add(diff);
-                if (chart == target) TargetDifficulty = diff;
+                SongSelectDifficulty difficulty = Instantiate(DifficultySample, DifficultyListHolder);
+
+                difficulty.SetItem(chart, record, CommonSys.sMain.Constants.GetDifficultyColor(chart.DifficultyIndex));
+                difficulty.Button.onClick.AddListener(() => ChangeDiff(difficulty));
+
+                difficultyList.Add(difficulty);
+
+                if (chart == target)
+                    TargetDifficulty = difficulty;
             }
-            TargetDifficulty.SetSelectability(1);
-            rt(TargetDifficulty.Holder).anchoredPosition = new(0, 5);
-            SetScoreInfo(TargetDifficulty);
-            LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
 
-            TargetSongCoverBackground.color = TargetSong.Song.Cover.BackgroundColor;
+            TargetDifficulty.SetSelectability(1);
+            RT(TargetDifficulty.Holder)
+                .anchoredPosition = new Vector2(0, 5);
+            SetScoreInfo(TargetDifficulty);
+            LayoutRebuilder.MarkLayoutForRebuild(RT(DifficultyHolder.transform));
+
+            TargetSongCoverBackground.color = targetSong.Song.Cover.BackgroundColor;
             TargetSongCoverHolder.gameObject.SetActive(false);
-            if (CurrentCover != TargetSong.Song.Cover) 
+
+            if (CurrentCover != targetSong.Song.Cover)
             {
-                CurrentCover = TargetSong.Song.Cover;
-                foreach (var layer in TargetSongCoverLayers) 
+                CurrentCover = targetSong.Song.Cover;
+
+                foreach (CoverLayerImage layer in TargetSongCoverLayers)
                 {
                     Resources.UnloadAsset(layer.Image.texture);
                     Destroy(layer.gameObject);
                 }
+
                 TargetSongCoverLayers.Clear();
+
                 foreach (CoverLayer layer in CurrentCover.Layers)
                 {
-                    string path = Path.Combine(Path.GetDirectoryName(TargetSong.SongPath), layer.Target);
-                    if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
-                    var req = Resources.LoadAsync<Texture2D>(path);
-                    yield return new WaitUntil(() => req.isDone);
-                    if (req.asset)
+                    string path = Path.Combine(Path.GetDirectoryName(targetSong.SongPath)!, layer.Target);
+
+                    if (Path.HasExtension(path))
+                        path = Path.ChangeExtension(path, "")[0..^1];
+
+                    ResourceRequest request = Resources.LoadAsync<Texture2D>(path);
+
+                    yield return new WaitUntil(() => request.isDone);
+
+                    if (request.asset)
                     {
-                        Texture2D tex = (Texture2D)req.asset;
-                        var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
+                        var texture = (Texture2D)request.asset;
+
+                        CoverLayerImage layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
                         layerImage.Layer = layer;
-                        layerImage.Image.texture = tex;
+                        layerImage.Image.texture = texture;
+
                         TargetSongCoverLayers.Add(layerImage);
                     }
                 }
             }
+
             TargetSongCoverHolder.gameObject.SetActive(true);
 
-            yield return Ease.Animate(.9f, a => {
+            yield return Ease.Animate(.9f, a =>
+            {
                 float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
                 LerpInfo(lerp);
 
@@ -398,17 +468,16 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
                 float lerp3 = Ease.Get(a * 3, EaseFunction.Cubic, EaseMode.Out);
                 LerpUI(lerp3);
-            
+
                 float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
-                foreach (SongSelectItem item in ItemList)
-                {
+                foreach (SongSelectItem item in itemList)
                     item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1)
                                              * (lerp2 * .5f + lerp4 * .5f);
-                }
+
                 IsDirty = true;
             });
 
-            if (TargetSongOffset != TargetScrollOffset) 
+            if (!Mathf.Approximately(TargetSongOffset, TargetScrollOffset))
             {
                 IsTargetSongHidden = true;
                 StartCoroutine(TargetSongHideAnim());
@@ -419,48 +488,57 @@ namespace JANOARG.Client.Behaviors.Song_Select
 
         public ExternalChartMeta GetNearestDifficulty(List<ExternalChartMeta> charts)
         {
-            int dist = int.MaxValue;
+            var distance = int.MaxValue;
+
             ExternalChartMeta target = null;
-            foreach (var chart in charts)
+
+            foreach (ExternalChartMeta chart in charts)
             {
                 int chartDiff = Mathf.Abs((chart.DifficultyIndex - SelectedDifficulty + 100) % 100);
-                if (dist > chartDiff)
+
+                if (distance > chartDiff)
                 {
-                    dist = chartDiff;
+                    distance = chartDiff;
                     target = chart;
                 }
-
             }
+
             return target;
         }
 
         public IEnumerator TargetSongHideAnim()
         {
-            float lerpCoverStart = coverLerp;
-            yield return Ease.Animate(.3f, a => {
+            float lerpCoverStart = _CoverLerp;
+
+            yield return Ease.Animate(.3f, a =>
+            {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(1 - lerp); 
+                LerpInfo(1 - lerp);
                 LerpUI(1 - lerp);
 
                 float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
                 LerpCover((1 - lerp2) * lerpCoverStart);
-                foreach (SongSelectItem item in ItemList)
-                {
+                foreach (SongSelectItem item in itemList)
                     item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
-                }
+
                 IsDirty = true;
             });
+
             TargetSongCoverHolder.gameObject.SetActive(false);
 
             TargetSongAnim = null;
         }
-    
+
         public void ChangeDiff(SongSelectDifficulty target)
         {
-            if (IsAnimating || TargetDifficulty == target) return;
+            if (IsAnimating || TargetDifficulty == target)
+                return;
+
             SelectedDifficulty = target.Chart.DifficultyIndex;
+
             StartCoroutine(ChangeDiffAnim(target));
         }
+
         public IEnumerator ChangeDiffAnim(SongSelectDifficulty target)
         {
             IsAnimating = true;
@@ -468,26 +546,35 @@ namespace JANOARG.Client.Behaviors.Song_Select
             SongSelectDifficulty oldTarget = TargetDifficulty;
             TargetDifficulty = target;
 
-            foreach (var item in ItemList) 
-            {
+            foreach (SongSelectItem item in itemList)
                 item.SetDifficulty(GetNearestDifficulty(item.Song.Charts));
-            }
 
             SetScoreInfo(target);
 
-            StartCoroutine(Ease.Animate(.1f, a => {
+            StartCoroutine(Ease.Animate(.1f, a =>
+            {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                oldTarget.SetSelectability(1 - lerp);
-                target.SetSelectability(lerp);
-                rt(oldTarget.Holder).anchoredPosition = new(0, 5 * (1 - lerp));
-            }));
-            yield return Ease.Animate(.15f, a => {
-                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                rt(target.Holder).anchoredPosition = new(0, 7 - 2 * lerp);
-                rt(target.Holder).localEulerAngles = 10 * (1 - lerp) * Vector3.back;
-            });
-            IsAnimating = false;
 
+                oldTarget.SetSelectability(1 - lerp);
+
+                target.SetSelectability(lerp);
+
+                RT(oldTarget.Holder)
+                    .anchoredPosition = new Vector2(0, 5 * (1 - lerp));
+            }));
+
+            yield return Ease.Animate(.15f, a =>
+            {
+                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+
+                RT(target.Holder)
+                    .anchoredPosition = new Vector2(0, 7 - 2 * lerp);
+
+                RT(target.Holder)
+                    .localEulerAngles = 10 * (1 - lerp) * Vector3.back;
+            });
+
+            IsAnimating = false;
         }
 
         public void SetScoreInfo(SongSelectDifficulty target)
@@ -498,59 +585,70 @@ namespace JANOARG.Client.Behaviors.Song_Select
                                          + "<size=60%><b>ppm";
         }
 
-        float coverLerp = 0;
-        public void LerpCover(float a) 
+        private float _CoverLerp;
+
+        public void LerpCover(float a)
         {
-            coverLerp = a;
-            float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
-            float offset = scrollOfs - TargetSongOffset;
-            TargetSongCoverHolder.anchorMin = Vector2.Lerp(new(0, .5f), new(0, .5f), a);
-            TargetSongCoverHolder.anchorMax = Vector2.Lerp(new(0, .5f), new(1, .5f), a);
-            TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new(180 + .26795f * offset, offset), new(0, offset / 2), a);
-            TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4 - SafeAreaHolder.sizeDelta.x, 128), a);
+            _CoverLerp = a;
+
+            float scrollOffset = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
+            float offset = scrollOffset - TargetSongOffset;
+
+            TargetSongCoverHolder.anchorMin = Vector2.Lerp(new Vector2(0, .5f), new Vector2(0, .5f), a);
+            TargetSongCoverHolder.anchorMax = Vector2.Lerp(new Vector2(0, .5f), new Vector2(1, .5f), a);
+            TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new Vector2(180 + .26795f * offset, offset), new Vector2(0, offset / 2), a);
+            TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new Vector2(36, 36), new Vector2(4 - SafeAreaHolder.sizeDelta.x, 128), a);
+
             TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
-            TargetSongCoverLayerHolder.anchoredPosition = new (-4 * a, 0);
+
+            TargetSongCoverLayerHolder.anchoredPosition = new Vector2(-4 * a, 0);
+
             UpdateCover();
         }
 
-        public void UpdateCover() 
+        public void UpdateCover()
         {
-            Vector2 parallaxOffset = CurrentCover.IconCenter * (1 - coverLerp);
+            Vector2 parallaxOffset = CurrentCover.IconCenter * (1 - _CoverLerp);
 
             float coverScale = TargetSongCoverLayerHolder.rect.width
-                               / Mathf.Lerp(CurrentCover.IconSize, 880, coverLerp);
+                               / Mathf.Lerp(CurrentCover.IconSize, 880, _CoverLerp);
 
-            foreach (var layer in TargetSongCoverLayers) 
+            foreach (CoverLayerImage layer in TargetSongCoverLayers)
             {
                 RawImage image = layer.Image;
 
                 Vector2 position = layer.Layer.Position + parallaxOffset * layer.Layer.ParallaxFactor;
                 Vector2 size = 880 * layer.Layer.Scale * new Vector2(1, (float)image.texture.height / image.texture.width);
-            
+
                 if (layer.Layer.Tiling)
                 {
                     Vector2 coverSize = TargetSongCoverLayerHolder.rect.size;
+
                     image.rectTransform.sizeDelta = coverSize;
                     image.rectTransform.anchoredPosition = Vector2.zero;
                     image.rectTransform.localScale = Vector3.one;
-                    image.uvRect = new Rect (
+
+                    image.uvRect = new Rect(
                         ((size - coverSize / coverScale) / 2 - position) / size,
                         coverSize / coverScale / size
                     );
                 }
-                else 
+                else
                 {
                     image.rectTransform.sizeDelta = size;
                     image.rectTransform.anchoredPosition = position * coverScale;
                     image.rectTransform.localScale = Vector3.one * coverScale;
+
                     image.uvRect = new Rect(0, 0, 1, 1);
                 }
             }
         }
 
-        public void Launch() 
+        public void Launch()
         {
-            if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+            if (TargetSongAnim != null)
+                StopCoroutine(TargetSongAnim);
+
             StartCoroutine(LaunchAnim());
         }
 
@@ -558,52 +656,62 @@ namespace JANOARG.Client.Behaviors.Song_Select
         {
             IsAnimating = true;
 
-            string[] launchTextList = new []{
+            var launchTextList = new[]
+            {
                 "LET'S GO",
                 "LET'S DO THIS",
                 "HERE WE GO",
                 "NOW LAUNCHING",
                 "NOW APPROACHING",
-                "NEXT DESTINATION",
+                "NEXT DESTINATION"
             };
             LaunchText.text = launchTextList[Random.Range(0, launchTextList.Length)];
-        
+
             LerpInfo(0);
 
-            SongSelectItem TargetSong = ItemList.Find(item => TargetScrollOffset == item.Position);
-            TargetSongCoverLayerHolder.gameObject.SetActive(false);
-            TargetSongCoverBackground.color = TargetSong.Song.BackgroundColor;
+            SongSelectItem targetSong = itemList.Find(item => Mathf.Approximately(TargetScrollOffset, item.Position));
 
-            yield return Ease.Animate(0.8f, a => {
+            TargetSongCoverLayerHolder.gameObject.SetActive(false);
+            TargetSongCoverBackground.color = targetSong.Song.BackgroundColor;
+
+            yield return Ease.Animate(0.8f, a =>
+            {
                 float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
                 LerpUI(1 - lerp);
-                foreach (SongSelectItem item in ItemList) item.SetVisibilty(1 - lerp);
+                foreach (SongSelectItem item in itemList) item.SetVisibilty(1 - lerp);
 
                 float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
-                float scrollOfs = Mathf.Clamp(ScrollOffset, ItemList[0].Position - 20, ItemList[^1].Position + 20);
-                float offset = scrollOfs - TargetSongOffset;
-                TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp2));
-                TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp2));
-                TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp2));
+                float scrollOffset = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
+                float offset = scrollOffset - TargetSongOffset;
+
+                TargetSongCoverHolder.anchorMin = new Vector2(0, .5f * (1 - lerp2));
+                TargetSongCoverHolder.anchorMax = new Vector2(1, 1 - .5f * (1 - lerp2));
+                TargetSongCoverHolder.anchoredPosition = new Vector2(0, offset / 2 * (1 - lerp2));
                 TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: 128 * (1 - lerp2));
+
                 IsDirty = true;
-            
+
                 float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
-                rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp3, rt(LaunchTextHolder).sizeDelta.y);
+                RT(LaunchTextHolder)
+                    .sizeDelta = new Vector2(LaunchText.preferredWidth * lerp3, RT(LaunchTextHolder)
+                    .sizeDelta.y);
                 LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
-                TargetSongCoverFlash.color = new (1, 1, 1, 1 - lerp3);
+                TargetSongCoverFlash.color = new Color(1, 1, 1, 1 - lerp3);
             });
 
-            PlayerScreen.TargetSongPath = Playlist.ItemPaths[SongList.IndexOf(TargetSong.Song)];
-            PlayerScreen.TargetSong = TargetSong.Song;
-            PlayerScreen.TargetChartMeta = TargetDifficulty.Chart;
-            CommonSys.main.MainCamera.backgroundColor = TargetSong.Song.BackgroundColor;
+            PlayerScreen.sTargetSongPath = Playlist.ItemPaths[songList.IndexOf(targetSong.Song)];
+            PlayerScreen.sTargetSong = targetSong.Song;
+            PlayerScreen.sTargetChartMeta = TargetDifficulty.Chart;
+
+            CommonSys.sMain.MainCamera.backgroundColor = targetSong.Song.BackgroundColor;
+
             ReadyScreen.BeginLaunch();
 
             yield return new WaitForSeconds(2);
 
-            CommonSys.Load("Player", () => PlayerScreen.main && PlayerScreen.main.IsReady, () => {
-                SongSelectReadyScreen.main.EndLaunch();
+            CommonSys.Load("Player", () => PlayerScreen.sMain && PlayerScreen.sMain.IsReady, () =>
+            {
+                SongSelectReadyScreen.sMain.EndLaunch();
             }, false);
             SceneManager.UnloadSceneAsync("Song Select");
             Resources.UnloadUnusedAssets();
@@ -612,21 +720,29 @@ namespace JANOARG.Client.Behaviors.Song_Select
         public void LerpInfo(float a)
         {
             TargetSongInfoHolder.alpha = a * a;
-            TargetSongInfoHolder.blocksRaycasts = a == 1;
-            rt(TargetSongInfoHolder).anchoredPosition = new (50 + 10 * a, rt(TargetSongInfoHolder).anchoredPosition.y);
+            TargetSongInfoHolder.blocksRaycasts = Mathf.Approximately(a, 1);
+            RT(TargetSongInfoHolder)
+                .anchoredPosition = new Vector2(50 + 10 * a, RT(TargetSongInfoHolder)
+                .anchoredPosition.y);
         }
 
         public void LerpUI(float a)
         {
             LeftActionsHolder.alpha = RightActionsHolder.alpha = DifficultyHolder.alpha = a * a;
-            LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = DifficultyHolder.blocksRaycasts = a == 1;
-        
-            rt(LeftActionsHolder).anchoredPosition  = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
-            rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
-            rt(DifficultyHolder).anchoredPosition   = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
-        
-            if (!QuickMenu.main || !QuickMenu.main.gameObject.activeSelf) 
-                ProfileBar.main.SetVisibilty(a);
+            LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = DifficultyHolder.blocksRaycasts = Mathf.Approximately(a, 1);
+
+            RT(LeftActionsHolder)
+                .anchoredPosition = new Vector2(-10 * (1 - a), RT(LeftActionsHolder)
+                .anchoredPosition.y);
+            RT(RightActionsHolder)
+                .anchoredPosition = new Vector2(10 * (1 - a), RT(RightActionsHolder)
+                .anchoredPosition.y);
+            RT(DifficultyHolder)
+                .anchoredPosition = new Vector2(10 * (1 - a), RT(DifficultyHolder)
+                .anchoredPosition.y);
+
+            if (!QuickMenu.sMain || !QuickMenu.sMain.gameObject.activeSelf)
+                ProfileBar.sMain.SetVisibilty(a);
         }
 
         public void Intro()
@@ -634,29 +750,40 @@ namespace JANOARG.Client.Behaviors.Song_Select
             if (!IsAnimating) StartCoroutine(IntroAnim());
         }
 
-        public IEnumerator IntroAnim() 
+        public IEnumerator IntroAnim()
         {
             IsAnimating = true;
 
-            ScrollOffset = Screen.height / 2 / CommonSys.main.CommonCanvas.localScale.x;
+            ScrollOffset = Screen.height / 2f / CommonSys.sMain.CommonCanvas.localScale.x;
             UpdateItems(false);
 
-            yield return StartCoroutine(Ease.Animate(1, x => {
+            yield return StartCoroutine(Ease.Animate(1, x =>
+            {
                 ItemGroup.alpha = x * 1e10f;
-                float xPos = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-                ItemTrack.color = new (1, 1, 1, Mathf.Clamp01(x * 3));
-                BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
-                ItemTrack.rectTransform.anchoredPosition = new (xPos - 180, ItemTrack.rectTransform.anchoredPosition.y);
-                BackgroundHolder.anchoredPosition = new (xPos, BackgroundHolder.anchoredPosition.y);
 
-                ScrollOffset = Screen.height / 2 / CommonSys.main.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
+                float xPosition = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+
+                ItemTrack.color = new Color(1, 1, 1, Mathf.Clamp01(x * 3));
+
+                BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
+
+                ItemTrack.rectTransform.anchoredPosition = new Vector2(xPosition - 180, ItemTrack.rectTransform.anchoredPosition.y);
+
+                BackgroundHolder.anchoredPosition = new Vector2(xPosition, BackgroundHolder.anchoredPosition.y);
+
+                ScrollOffset = Screen.height / 2f / CommonSys.sMain.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
+
                 UpdateItems(false);
+
                 IsReady = x > 0.6f;
             }));
 
             IsAnimating = false;
         }
 
-        RectTransform rt (Component obj) => obj.transform as RectTransform;
+        private RectTransform RT(Component obj)
+        {
+            return obj.transform as RectTransform;
+        }
     }
 }

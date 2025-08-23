@@ -12,7 +12,7 @@ namespace JANOARG.Shared.Data.Files.Editor
         {
             Chart chart = JACDecoder.Decode(File.ReadAllText(ctx.assetPath));
 
-            ExternalChart ext = ScriptableObject.CreateInstance<ExternalChart>();
+            var ext = ScriptableObject.CreateInstance<ExternalChart>();
             ext.Data = chart;
 
             ctx.AddObjectToAsset("main obj", ext);

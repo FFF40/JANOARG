@@ -1,17 +1,15 @@
-
-
 using UnityEngine;
 
 namespace JANOARG.Client.Utils
 {
-    public struct Vector4Frag 
+    public struct Vector4Frag
     {
         public float? x { get; set; }
         public float? y { get; set; }
         public float? z { get; set; }
         public float? w { get; set; }
 
-        public Vector4Frag(float? x = null, float? y = null, float? z = null, float? w = null) 
+        public Vector4Frag(float? x = null, float? y = null, float? z = null, float? w = null)
         {
             this.x = x;
             this.y = y;
@@ -25,6 +23,7 @@ namespace JANOARG.Client.Utils
             if (right.y.HasValue) left.y = right.y.Value;
             if (right.z.HasValue) left.z = right.z.Value;
             if (right.w.HasValue) left.w = right.w.Value;
+
             return left;
         }
     }

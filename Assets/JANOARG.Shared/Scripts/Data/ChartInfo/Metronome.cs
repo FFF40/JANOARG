@@ -3,101 +3,146 @@ using System.Collections.Generic;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
-    [System.Serializable]
+    [Serializable]
     public class Metronome
     {
-        public List<BPMStop> Stops = new List<BPMStop>();
+        public static Metronome     sIdentity = new(60);
+        public        List<BPMStop> Stops     = new();
 
-        public Metronome(float startBPM) {
+        public Metronome(float startBPM)
+        {
             Stops.Add(new BPMStop(startBPM, 0));
         }
-        public Metronome(float startBPM, float startOffset) {
-            Stops.Add(new BPMStop(startBPM, startOffset));
+
+        public Metronome(float startBpm, float startOffset)
+        {
+            Stops.Add(new BPMStop(startBpm, startOffset));
         }
 
-        public float ToBeat(float seconds) {
+        public float ToBeat(float seconds)
+        {
             if (Stops.Count == 0) return float.NaN;
-            float beat = 0;
-            for (int a = 0; a < Stops.Count; a++) 
+
+            float totalBeats = 0;
+
+            for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
-                float b = (seconds - Stops[a].Offset) / (60 / Stops[a].BPM);
-                if (a + 1 < Stops.Count) 
+                float currentBeatPosition = (seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM);
+
+                if (stopIndex + 1 < Stops.Count)
                 {
-                    float c = (Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM);
-                    if (b <= c) return beat + b;
-                    beat += c;
+                    float sectionBeats = (Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) /
+                                         (60 / Stops[stopIndex].BPM);
+
+                    if (currentBeatPosition <= sectionBeats) return totalBeats + currentBeatPosition;
+
+                    totalBeats += sectionBeats;
                 }
-                else 
+                else
                 {
-                    return beat + b;
+                    return totalBeats + currentBeatPosition;
                 }
             }
-            return beat;
+
+            return totalBeats;
         }
 
-        public float ToSeconds(float beat) {
+        public float ToSeconds(float beat)
+        {
             if (Stops.Count == 0) return float.NaN;
-            for (int a = 0; a < Stops.Count; a++) 
+
+            for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
-                BPMStop stop = Stops[a];
-                float b = beat * (60 / Stops[a].BPM) + Stops[a].Offset;
-                if (a + 1 < Stops.Count) 
+                BPMStop stop = Stops[stopIndex];
+                float timeInSeconds = beat * (60 / Stops[stopIndex].BPM) + Stops[stopIndex].Offset;
+
+                if (stopIndex + 1 < Stops.Count)
                 {
-                    float c = (Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM);
-                    if (beat <= c) return b;
-                    beat -= c;
+                    float sectionBeats = (Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) /
+                                         (60 / Stops[stopIndex].BPM);
+
+                    if (beat <= sectionBeats) return timeInSeconds;
+
+                    beat -= sectionBeats;
                 }
-                else 
+                else
                 {
-                    return b;
+                    return timeInSeconds;
                 }
             }
+
             return 0;
         }
 
-        public float ToBar(float seconds, float beat = 0) {
+        public float ToBar(float seconds, float beat = 0)
+        {
             if (Stops.Count == 0) return float.NaN;
-            float bar = 0;
-            for (int a = 0; a < Stops.Count; a++) 
+
+            float totalBars = 0;
+
+            for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
-                float b = ((seconds - Stops[a].Offset) / (60 / Stops[a].BPM) + beat) / Stops[a].Signature;
-                if (a + 1 < Stops.Count) 
+                float currentBarPosition =
+                    ((seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM) + beat) /
+                    Stops[stopIndex].Signature;
+
+                if (stopIndex + 1 < Stops.Count)
                 {
-                    float c = ((Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM) + beat) / Stops[a].Signature;
-                    if (b <= c) return bar + b;
-                    bar += c;
+                    float sectionBars =
+                        ((Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM) +
+                         beat) /
+                        Stops[stopIndex].Signature;
+
+                    if (currentBarPosition <= sectionBars) return totalBars + currentBarPosition;
+
+                    totalBars += sectionBars;
                 }
-                else 
+                else
                 {
-                    return bar + b;
+                    return totalBars + currentBarPosition;
                 }
             }
-            return bar;
+
+            return totalBars;
         }
 
-        public float ToDividedBeat(float seconds, float beat = 0) {
+        public float ToDividedBeat(float seconds, float beat = 0)
+        {
             if (Stops.Count == 0) return float.NaN;
-            for (int a = 0; a < Stops.Count; a++) 
+
+            for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
-                float b = (seconds - Stops[a].Offset) / (60 / Stops[a].BPM) + beat;
-                float bb = ((b % Stops[a].Signature) + Stops[a].Signature) % Stops[a].Signature;
-                if (a + 1 < Stops.Count) 
+                float currentBeatPosition =
+                    (seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM) + beat;
+
+                float beatInBar = (currentBeatPosition % Stops[stopIndex].Signature + Stops[stopIndex].Signature) %
+                                  Stops[stopIndex].Signature;
+
+                if (stopIndex + 1 < Stops.Count)
                 {
-                    float c = (Stops[a+1].Offset - Stops[a].Offset) / (60 / Stops[a].BPM) + beat;
-                    if (b <= c) return bb;
+                    float sectionBeats = (Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) /
+                                         (60 / Stops[stopIndex].BPM) +
+                                         beat;
+
+                    if (currentBeatPosition <= sectionBeats) return beatInBar;
                 }
-                else 
+                else
                 {
-                    return bb;
+                    return beatInBar;
                 }
             }
+
             return 0;
         }
 
-        public BPMStop GetStop(float seconds, out int tag) {
+        public BPMStop GetStop(float seconds, out int tag)
+        {
             tag = 0;
+
             if (Stops.Count == 0) return null;
+
             while (tag < Stops.Count - 1 && Stops[tag + 1].Offset < seconds) tag++;
+
             return Stops[tag];
         }
 
@@ -105,30 +150,30 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             throw new NotImplementedException();
         }
-
-        public static Metronome Identity = new Metronome(60);
     }
 
-    [System.Serializable]
+    [Serializable]
     public class BPMStop : IDeepClonable<BPMStop>
     {
         public float Offset;
         public float BPM;
-        public int Signature = 4;
+        public int   Signature = 4;
 
         public bool Significant = true;
 
-        public BPMStop(float bpm, float offset) {
+        public BPMStop(float bpm, float offset)
+        {
             Offset = offset;
             BPM = bpm;
         }
 
         public BPMStop DeepClone()
         {
-            BPMStop clone = new BPMStop(BPM, Offset)
+            BPMStop clone = new(BPM, Offset)
             {
-                Signature = Signature,
+                Signature = Signature
             };
+
             return clone;
         }
     }

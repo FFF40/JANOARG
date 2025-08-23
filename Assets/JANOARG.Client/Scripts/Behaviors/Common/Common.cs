@@ -4,24 +4,25 @@ using System.Globalization;
 using JANOARG.Client.Data.Constant;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace JANOARG.Client.Behaviors.Common
 {
     public class CommonSys : MonoBehaviour
     {
-        public static CommonSys main;
+        public static CommonSys sMain;
 
-        public Camera MainCamera;
-        public RectTransform CommonCanvas;
+        public Camera          MainCamera;
+        public RectTransform   CommonCanvas;
         public CommonConstants Constants;
 
         public LoadingBar LoadingBar;
-        public Storage Storage;
-        public Storage Preferences;
+        public Storage    Preferences;
+        public Storage    Storage;
 
         public void Awake()
         {
-            main = this;
+            sMain = this;
 
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -38,21 +39,22 @@ namespace JANOARG.Client.Behaviors.Common
             CommonScene.LoadAlt("Intro");
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
-            main = main == this ? null : main;
+            sMain = sMain == this ? null : sMain;
         }
 
-        public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+        public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
-            main.StartCoroutine(main.LoadAnim(target, completed, onComplete, showBar) );
+            sMain.StartCoroutine(sMain.LoadAnim(target, completed, onComplete, showBar));
         }
 
-        public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+        public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
-            yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            yield return SceneManager.LoadSceneAsync(target, LoadSceneMode.Additive);
             yield return Resources.UnloadUnusedAssets();
             yield return new WaitUntil(completed);
+
             if (onComplete != null) onComplete();
         }
     }
