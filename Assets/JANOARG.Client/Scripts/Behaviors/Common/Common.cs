@@ -4,24 +4,25 @@ using System.Globalization;
 using JANOARG.Client.Data.Constant;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace JANOARG.Client.Behaviors.Common
 {
     public class CommonSys : MonoBehaviour
     {
-        public static CommonSys main;
+        public static CommonSys sMain;
 
-        public Camera MainCamera;
-        public RectTransform CommonCanvas;
+        public Camera          MainCamera;
+        public RectTransform   CommonCanvas;
         public CommonConstants Constants;
 
         public LoadingBar LoadingBar;
-        public Storage Storage;
-        public Storage Preferences;
+        public Storage    Preferences;
+        public Storage    Storage;
 
         public void Awake()
         {
-            main = this;
+            sMain = this;
 
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -38,33 +39,40 @@ namespace JANOARG.Client.Behaviors.Common
             CommonScene.LoadAlt("Intro");
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
-            main = main == this ? null : main;
+            sMain = sMain == this ? null : sMain;
         }
 
-        /** 
-            <summary>
-                Load a scene named <c>target</c>, wait until <c>completed</c> return true,
-                and call <c>onComplete</c> when done.
-            </summary>
-        */
-        public static Coroutine LoadScene(string target, Func<bool> completed, Action onComplete, bool showBar = true)
+        /// <summary>
+        /// Load a scene named <see cref="target"/>, wait until <see cref="completed"/> return true,
+        /// and call <see cref="onComplete"/> when done.
+        /// </summary>
+        /// <param name="target">Target scene to load (in string)</param>
+        /// <param name="completed">Function that will return true to signal completion</param>
+        /// <param name="onComplete">Action to do when <see cref="completed"/> is true</param>
+        /// <param name="showBar">Show loading bar (unused)</param>
+        public static void LoadScene(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
-            return main.StartCoroutine(main.LoadSceneAnim(target, completed, onComplete, showBar));
+            sMain.StartCoroutine(sMain.LoadSceneAnimation(target, completed, onComplete, showBar));
         }
 
-        /** 
-            <summary>
-                Animation to be played when <c>LoadScene</c> is called
-            </summary>
-        */
-        IEnumerator LoadSceneAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
+        /// <summary>
+        /// Animation to be played when <see cref="LoadScene"/> is called
+        /// </summary>
+        /// <param name="target">Target scene to load (in string)</param>
+        /// <param name="completed">Function that will return true to signal completion</param>
+        /// <param name="onComplete">Action to do when <see cref="completed"/> is true</param>
+        /// <param name="showBar">Show loading bar (unused)</param>
+        /// <returns>Serves as a coroutine.</returns>
+        public IEnumerator LoadSceneAnimation(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
-            yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            yield return SceneManager.LoadSceneAsync(target, LoadSceneMode.Additive);
             yield return Resources.UnloadUnusedAssets();
             yield return new WaitUntil(completed);
-            if (onComplete != null) onComplete();
+
+            if (onComplete != null) 
+                onComplete();
         }
     }
 }

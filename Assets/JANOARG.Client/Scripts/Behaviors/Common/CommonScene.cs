@@ -4,9 +4,9 @@ namespace JANOARG.Client.Behaviors.Common
 {
     public class CommonScene
     {
-        public static bool isLoaded {get; private set;}
+        public static bool isLoaded { get; private set; }
 
-        public static void Load ()
+        public static void Load()
         {
             if (!isLoaded)
             {
@@ -15,7 +15,7 @@ namespace JANOARG.Client.Behaviors.Common
             }
         }
 
-        public static void LoadAlt (string targetScene)
+        public static void LoadAlt(string targetScene)
         {
             if (!isLoaded)
             {
@@ -23,6 +23,5 @@ namespace JANOARG.Client.Behaviors.Common
                 isLoaded = true;
             }
         }
-    
     }
 }

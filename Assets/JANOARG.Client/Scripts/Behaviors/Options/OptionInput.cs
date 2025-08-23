@@ -19,8 +19,13 @@ namespace JANOARG.Client.Behaviors.Options
     {
         public T CurrentValue;
 
-        public Func<T> OnGet;
+        public Func<T>   OnGet;
         public Action<T> OnSet;
+
+        public void Start()
+        {
+            UpdateValue();
+        }
 
         public void Set(T value)
         {
@@ -31,36 +36,32 @@ namespace JANOARG.Client.Behaviors.Options
         {
             CurrentValue = OnGet();
         }
-
-        public void Start()
-        {
-            UpdateValue();
-        }
     }
 
-    public enum MultiValueType
-    {
-        PerJudgment,
-        PerHitType,
-    }
+    public enum MultiValueType { PerJudgment, PerHitType }
 
-    public class MultiValueFieldData 
+    public class MultiValueFieldData
     {
-        public string Name;
-        public Color Color;
-    
-
-        public static Dictionary<MultiValueType, List<MultiValueFieldData>> Info = new()
+        public static Dictionary<MultiValueType, List<MultiValueFieldData>> sInfo = new()
         {
-            {MultiValueType.PerJudgment, new () {
-                new () { Name = "Flawless", Color = new (1, 1, .6f) },
-                new () { Name = "Misaligned", Color = new (.6f, .7f, 1) },
-                new () { Name = "Broken", Color = new (.6f, .6f, .6f) },
-            }},
-            {MultiValueType.PerHitType, new () {
-                new () { Name = "Normal", Color = new (.8f, .9f, 1) },
-                new () { Name = "Catch", Color = new (1, 1, .8f) },
-            }},
+            {
+                MultiValueType.PerJudgment, new List<MultiValueFieldData>
+                {
+                    new() { Name = "Flawless", Color = new Color(1, 1, .6f) },
+                    new() { Name = "Misaligned", Color = new Color(.6f, .7f, 1) },
+                    new() { Name = "Broken", Color = new Color(.6f, .6f, .6f) }
+                }
+            },
+            {
+                MultiValueType.PerHitType, new List<MultiValueFieldData>
+                {
+                    new() { Name = "Normal", Color = new Color(.8f, .9f, 1) },
+                    new() { Name = "Catch", Color = new Color(1, 1, .8f) }
+                }
+            }
         };
+
+        public Color  Color;
+        public string Name;
     }
 }

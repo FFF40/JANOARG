@@ -5,21 +5,22 @@ namespace JANOARG.Client.Behaviors.Options.Input_Types
 {
     public class FloatOptionInput : OptionInput<float>
     {
-        [Space]
-        public float Min = 0;
-        public float Max = 100;
-        public float Step = 1;
+        [Space] public float Min;
+
+        public float  Max  = 100;
+        public float  Step = 1;
         public string Unit;
-        [Space]
-        public TMP_Text ValueHolder;
+
+        [Space] public TMP_Text ValueHolder;
+
         public TMP_Text UnitLabel;
 
-        public new void Start() 
+        public new void Start()
         {
             UpdateValue();
         }
 
-        public new void UpdateValue() 
+        public new void UpdateValue()
         {
             base.UpdateValue();
             ValueHolder.text = CurrentValue.ToString();
@@ -28,7 +29,7 @@ namespace JANOARG.Client.Behaviors.Options.Input_Types
 
         public void Edit()
         {
-            OptionInputHandler.main.Edit(this);
+            OptionInputHandler.sMain.Edit(this);
         }
     }
 }

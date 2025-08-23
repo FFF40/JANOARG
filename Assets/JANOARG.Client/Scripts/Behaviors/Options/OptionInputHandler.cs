@@ -13,55 +13,71 @@ namespace JANOARG.Client.Behaviors.Options
 {
     public class OptionInputHandler : MonoBehaviour
     {
-        public static OptionInputHandler main;
+        public static OptionInputHandler sMain;
+
         [Space]
         public Graphic Background;
+
         public Graphic InputBackground;
+
         [Space]
         public GameObject MainHolder;
-        public TMP_Text TitleText;
-        public CanvasGroup RightHolder;
+
+        public TMP_Text      TitleText;
+        public CanvasGroup   RightHolder;
         public RectTransform RightTransform;
+
         [Space]
         public TMP_Text BeforeText;
+
         public TMP_Text AfterText;
+
         [Space]
         public CanvasGroup AdvancedInputGroup;
-        public RectTransform AdvancedInputTransform;
+
+        public RectTransform  AdvancedInputTransform;
         public AnimatedToggle AdvancedInputToggle;
+
         [Space]
         public CanvasGroup ListGroup;
-        public RectTransform ListTransform;
+
+        public RectTransform          ListTransform;
         public OptionInputListHandler ListHandler;
 
         [Space]
         public OptionInputField InputSample;
-        public RectTransform InputHolder;
+
+        public RectTransform          InputHolder;
         public List<OptionInputField> CurrentInputs;
-        public LayoutGroup InputLayout;
-        public CanvasGroup InputGroup;
+        public LayoutGroup            InputLayout;
+        public CanvasGroup            InputGroup;
+
         [Space]
         public OptionCalibrationWizard CalibrationWizard;
+
         [Space]
         public TMP_Text TextAnimSample;
-        public RectTransform TextAnimHolder;
+
+        public RectTransform  TextAnimHolder;
         public List<TMP_Text> TextAnimLabels;
 
         [HideInInspector]
         public bool IsAnimating;
+
         [HideInInspector]
         public bool IsAdvanced;
+
         [HideInInspector]
         public OptionItem CurrentItem;
 
-        bool recursionBuster = false;
+        private bool _RecursionBuster = false;
 
-        public void Awake() 
+        public void Awake()
         {
-            main = this;
+            sMain = this;
         }
 
-        public void Start() 
+        public void Start()
         {
             Background.gameObject.SetActive(false);
             MainHolder.SetActive(false);
@@ -81,113 +97,210 @@ namespace JANOARG.Client.Behaviors.Options
             switch (item)
             {
                 case StringOptionInput:
+                {
+                    var stringItem = (StringOptionInput)item;
+
+                    OptionInputField field = Instantiate(InputSample, InputHolder);
+                    field.Slider.gameObject.SetActive(false);
+                    field.InputField.text = stringItem.CurrentValue;
+                    field.InputField.characterLimit = stringItem.Limit;
+                    CurrentInputs.Add(field);
+
+                    TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    var corners = new Vector3[4];
+                    stringItem.ValueHolder.rectTransform.GetWorldCorners(corners);
+                    textAnim.rectTransform.position = corners[3];
+                    textAnim.text = stringItem.CurrentValue;
+                    TextAnimLabels.Add(textAnim);
+
+                    BeforeText.gameObject.SetActive(false);
+                    AfterText.gameObject.SetActive(true);
+                    AfterText.text = stringItem.CurrentValue.Length.ToString() + " / " + stringItem.Limit.ToString();
+                    AdvancedInputGroup.gameObject.SetActive(false);
+
+                    field.InputField.onValueChanged.AddListener(value =>
                     {
-                        StringOptionInput i = (StringOptionInput)item;
+                        AfterText.text = value.Length.ToString() + " / " + stringItem.Limit.ToString();
+                    });
 
-                        OptionInputField field = Instantiate(InputSample, InputHolder);
-                        field.Slider.gameObject.SetActive(false);
-                        field.InputField.text = i.CurrentValue;
-                        field.InputField.characterLimit = i.Limit;
-                        CurrentInputs.Add(field);
+                    field.InputField.onEndEdit.AddListener(value =>
+                    {
+                        textAnim.text = value;
+                        stringItem.Set(value);
+                        stringItem.UpdateValue();
+                    });
 
-                        TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                        Vector3[] corners = new Vector3[4];
-                        i.ValueHolder.rectTransform.GetWorldCorners(corners);
-                        textAnim.rectTransform.position = corners[3];
-                        textAnim.text = i.CurrentValue;
-                        TextAnimLabels.Add(textAnim);
-
-                        BeforeText.gameObject.SetActive(false);
-                        AfterText.gameObject.SetActive(true);
-                        AfterText.text = i.CurrentValue.Length.ToString() + " / " + i.Limit.ToString();
-                        AdvancedInputGroup.gameObject.SetActive(false);
-                        field.InputField.onValueChanged.AddListener(value =>
-                        {
-                            AfterText.text = value.Length.ToString() + " / " + i.Limit.ToString();
-                        });
-                        field.InputField.onEndEdit.AddListener(value =>
-                        {
-                            textAnim.text = value;
-                            i.Set(value);
-                            i.UpdateValue();
-                        });
-                        break;
-                    }
+                    break;
+                }
 
                 case JudgmentOffsetOptionInput:
                 case VisualOffsetOptionInput:
+                {
+                    var visualOffsetItem = (FloatOptionInput)item;
+
+                    AdvancedInputGroup.gameObject.SetActive(false);
+                    BeforeText.gameObject.SetActive(false);
+                    AfterText.gameObject.SetActive(false);
+                    CalibrationWizard.IntializeWizard((FloatOptionInput)item);
+
+                    TMP_InputField field = CalibrationWizard.InputField;
+                    field.text = visualOffsetItem.CurrentValue.ToString();
+
+                    TMP_Text unit = CalibrationWizard.InputFieldUnit;
+                    unit.text = "<alpha=#77>" + visualOffsetItem.Unit;
+
+                    TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    var corners = new Vector3[4];
+                    visualOffsetItem.ValueHolder.rectTransform.GetWorldCorners(corners);
+                    textAnim.rectTransform.position = corners[3];
+                    textAnim.text = visualOffsetItem.ValueHolder.text;
+                    TextAnimLabels.Add(textAnim);
+
+                    TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    visualOffsetItem.UnitLabel.rectTransform.GetWorldCorners(corners);
+                    unitAnim.rectTransform.position = corners[3];
+                    unitAnim.font = visualOffsetItem.UnitLabel.font;
+                    unitAnim.text = visualOffsetItem.UnitLabel.text;
+                    TextAnimLabels.Add(unitAnim);
+
+                    field.onEndEdit.AddListener(value =>
                     {
-                        FloatOptionInput i = (FloatOptionInput)item;
+                        if (_RecursionBuster) return;
 
-                        AdvancedInputGroup.gameObject.SetActive(false);
-                        BeforeText.gameObject.SetActive(false);
-                        AfterText.gameObject.SetActive(false);
-                        CalibrationWizard.IntializeWizard((FloatOptionInput)item);
+                        _RecursionBuster = true;
+                        bool valid = float.TryParse(value, out float val);
 
-                        TMP_InputField field = CalibrationWizard.InputField;
-                        field.text = i.CurrentValue.ToString();
-
-                        TMP_Text unit = CalibrationWizard.InputFieldUnit;
-                        unit.text = "<alpha=#77>" + i.Unit;
-
-                        TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                        Vector3[] corners = new Vector3[4];
-                        i.ValueHolder.rectTransform.GetWorldCorners(corners);
-                        textAnim.rectTransform.position = corners[3];
-                        textAnim.text = i.ValueHolder.text;
-                        TextAnimLabels.Add(textAnim);
-
-                        TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                        i.UnitLabel.rectTransform.GetWorldCorners(corners);
-                        unitAnim.rectTransform.position = corners[3];
-                        unitAnim.font = i.UnitLabel.font;
-                        unitAnim.text = i.UnitLabel.text;
-                        TextAnimLabels.Add(unitAnim);
-                        field.onEndEdit.AddListener(value =>
+                        if (valid)
                         {
-                            if (recursionBuster) return;
-                            recursionBuster = true;
-                            bool valid = float.TryParse(value, out float val);
-                            if (valid)
-                            {
-                                val = Mathf.Clamp(val, i.Min, i.Max);
-                                if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
-                                i.Set(val);
-                                i.UpdateValue();
-                            }
-                            textAnim.text = field.text = i.CurrentValue.ToString();
-                            recursionBuster = false;
-                        });
+                            val = Mathf.Clamp(val, visualOffsetItem.Min, visualOffsetItem.Max);
+                            if (visualOffsetItem.Step != 0) val = Mathf.Round(val / visualOffsetItem.Step) * visualOffsetItem.Step;
+                            visualOffsetItem.Set(val);
+                            visualOffsetItem.UpdateValue();
+                        }
 
-                        break;
-                    }
+                        textAnim.text = field.text = visualOffsetItem.CurrentValue.ToString();
+                        _RecursionBuster = false;
+                    });
+
+                    break;
+                }
 
                 case FloatOptionInput:
+                {
+                    var floatItem = (FloatOptionInput)item;
+
+                    OptionInputField field = Instantiate(InputSample, InputHolder);
+                    field.InputField.text = floatItem.CurrentValue.ToString();
+
+                    field.InputField.contentType = floatItem.Step != 0 && floatItem.Step % 1 == 0
+                        ? TMP_InputField.ContentType.IntegerNumber
+                        : TMP_InputField.ContentType.DecimalNumber;
+
+                    field.Slider.minValue = floatItem.Min;
+                    field.Slider.maxValue = floatItem.Max;
+                    field.Slider.value = floatItem.CurrentValue;
+                    CurrentInputs.Add(field);
+
+                    TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    var corners = new Vector3[4];
+                    floatItem.ValueHolder.rectTransform.GetWorldCorners(corners);
+                    textAnim.rectTransform.position = corners[3];
+                    textAnim.text = field.InputField.text;
+                    TextAnimLabels.Add(textAnim);
+
+                    TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    floatItem.UnitLabel.rectTransform.GetWorldCorners(corners);
+                    unitAnim.rectTransform.position = corners[3];
+                    unitAnim.font = floatItem.UnitLabel.font;
+                    field.UnitLabel.text = unitAnim.text = floatItem.UnitLabel.text;
+                    TextAnimLabels.Add(unitAnim);
+
+                    BeforeText.gameObject.SetActive(true);
+                    BeforeText.text = floatItem.Min + "<alpha=#77>" + floatItem.Unit + "<alpha=#ff> ≤";
+                    AfterText.gameObject.SetActive(true);
+                    AfterText.text = "≤ " + floatItem.Max + "<alpha=#77>" + floatItem.Unit;
+                    AdvancedInputGroup.gameObject.SetActive(false);
+
+                    field.InputField.onEndEdit.AddListener(value =>
                     {
-                        FloatOptionInput i = (FloatOptionInput)item;
+                        if (_RecursionBuster) return;
+
+                        _RecursionBuster = true;
+                        bool valid = float.TryParse(value, out float val);
+
+                        if (valid)
+                        {
+                            val = Mathf.Clamp(val, floatItem.Min, floatItem.Max);
+                            if (floatItem.Step != 0) val = Mathf.Round(val / floatItem.Step) * floatItem.Step;
+                            field.Slider.value = val;
+                            floatItem.Set(val);
+                            floatItem.UpdateValue();
+                        }
+
+                        textAnim.text = field.InputField.text = floatItem.CurrentValue.ToString();
+                        _RecursionBuster = false;
+                    });
+
+                    field.Slider.onValueChanged.AddListener(val =>
+                    {
+                        if (_RecursionBuster) return;
+
+                        val = Mathf.Clamp(val, floatItem.Min, floatItem.Max);
+                        if (floatItem.Step != 0) val = Mathf.Round(val / floatItem.Step) * floatItem.Step;
+                        textAnim.text = field.InputField.text = val.ToString();
+                        floatItem.Set(val);
+                        floatItem.UpdateValue();
+                        _RecursionBuster = false;
+                    });
+
+                    break;
+                }
+
+                case MultiFloatOptionInput:
+                {
+                    var multiFloatInput = (MultiFloatOptionInput)item;
+                    List<MultiValueFieldData> fieldInfos = MultiValueFieldData.sInfo[multiFloatInput.ValueType];
+                    var recursionBuster = false;
+
+                    IsAdvanced = multiFloatInput.CurrentValue.Length > 1;
+
+                    for (var a = 0; a < fieldInfos.Count; a++)
+                    {
+                        int aa = a;
+                        MultiValueFieldData fieldInfo = fieldInfos[a];
 
                         OptionInputField field = Instantiate(InputSample, InputHolder);
-                        field.InputField.text = i.CurrentValue.ToString();
-                        field.InputField.contentType = i.Step != 0 && i.Step % 1 == 0
+                        field.InputField.text = (multiFloatInput.CurrentValue.Length > 1 ? multiFloatInput.CurrentValue[a] : multiFloatInput.CurrentValue[0]).ToString();
+
+                        field.InputField.contentType = multiFloatInput.Step != 0 && multiFloatInput.Step % 1 == 0
                             ? TMP_InputField.ContentType.IntegerNumber
                             : TMP_InputField.ContentType.DecimalNumber;
-                        field.Slider.minValue = i.Min;
-                        field.Slider.maxValue = i.Max;
-                        field.Slider.value = i.CurrentValue;
+
+                        field.UnitLabel.text = "<alpha=#77>" + multiFloatInput.Unit;
+                        field.Slider.minValue = multiFloatInput.Min;
+                        field.Slider.maxValue = multiFloatInput.Max;
+                        field.Slider.value = multiFloatInput.CurrentValue.Length > 1 ? multiFloatInput.CurrentValue[a] : multiFloatInput.CurrentValue[0];
+                        field.SetColor(fieldInfo.Color);
                         CurrentInputs.Add(field);
 
                         TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                        Vector3[] corners = new Vector3[4];
-                        i.ValueHolder.rectTransform.GetWorldCorners(corners);
+                        var corners = new Vector3[4];
+
+                        multiFloatInput.ValueHolders[a]
+                            .rectTransform.GetWorldCorners(corners);
+
                         textAnim.rectTransform.position = corners[3];
-                        textAnim.text = field.InputField.text;
+                        textAnim.text = multiFloatInput.ValueHolders[a].text;
                         TextAnimLabels.Add(textAnim);
 
                         TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                        i.UnitLabel.rectTransform.GetWorldCorners(corners);
+
+                        multiFloatInput.UnitLabels[a]
+                            .rectTransform.GetWorldCorners(corners);
+
                         unitAnim.rectTransform.position = corners[3];
-                        unitAnim.font = i.UnitLabel.font;
-                        field.UnitLabel.text = unitAnim.text = i.UnitLabel.text;
+                        unitAnim.font = multiFloatInput.UnitLabels[a].font;
+                        unitAnim.text = multiFloatInput.UnitLabels[a].text;
                         TextAnimLabels.Add(unitAnim);
 
                         BeforeText.gameObject.SetActive(true);
@@ -199,27 +312,36 @@ namespace JANOARG.Client.Behaviors.Options
                         field.InputField.onEndEdit.AddListener(value =>
                         {
                             if (recursionBuster) return;
+
                             recursionBuster = true;
                             bool valid = float.TryParse(value, out float val);
+
                             if (valid)
                             {
-                                val = Mathf.Clamp(val, i.Min, i.Max);
-                                if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
+                                val = Mathf.Clamp(val, multiFloatInput.Min, multiFloatInput.Max);
+                                if (multiFloatInput.Step != 0) val = Mathf.Round(val / multiFloatInput.Step) * multiFloatInput.Step;
                                 field.Slider.value = val;
-                                i.Set(val);
-                                i.UpdateValue();
+                                multiFloatInput.CurrentValue[aa] = val;
+                                multiFloatInput.Set(multiFloatInput.CurrentValue);
+                                multiFloatInput.UpdateValue();
                             }
-                            textAnim.text = field.InputField.text = i.CurrentValue.ToString();
+
+                            textAnim.text = field.InputField.text = multiFloatInput.CurrentValue[aa]
+                                .ToString();
+
                             recursionBuster = false;
                         });
+
                         field.Slider.onValueChanged.AddListener(val =>
                         {
                             if (recursionBuster) return;
-                            val = Mathf.Clamp(val, i.Min, i.Max);
-                            if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
+
+                            val = Mathf.Clamp(val, multiFloatInput.Min, multiFloatInput.Max);
+                            if (multiFloatInput.Step != 0) val = Mathf.Round(val / multiFloatInput.Step) * multiFloatInput.Step;
                             textAnim.text = field.InputField.text = val.ToString();
-                            i.Set(val);
-                            i.UpdateValue();
+                            multiFloatInput.CurrentValue[aa] = val;
+                            multiFloatInput.Set(multiFloatInput.CurrentValue);
+                            multiFloatInput.UpdateValue();
                             recursionBuster = false;
                         });
                         break;
@@ -309,17 +431,30 @@ namespace JANOARG.Client.Behaviors.Options
                         break;
                     }
 
-                case ListOptionInput:
-                    {
-                        Debug.Log("ListOptionInput");
-                        ListOptionInput i = (ListOptionInput)item;
+                    BeforeText.gameObject.SetActive(true);
+                    BeforeText.text = multiFloatInput.Min + "<alpha=#77>" + multiFloatInput.Unit + "<alpha=#ff> ≤";
+                    AfterText.gameObject.SetActive(true);
+                    AfterText.text = "≤ " + multiFloatInput.Max + "<alpha=#77>" + multiFloatInput.Unit;
+                    AdvancedInputGroup.gameObject.SetActive(true);
+                    recursionBuster = true;
+                    AdvancedInputToggle.value = IsAdvanced;
+                    recursionBuster = false;
+                    SetAdvancedInput(multiFloatInput.ValueType, IsAdvanced);
 
-                        TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                        Vector3[] corners = new Vector3[4];
-                        i.ValueHolder.rectTransform.GetWorldCorners(corners);
-                        textAnim.rectTransform.position = corners[3];
-                        textAnim.text = i.ValueHolder.text;
-                        TextAnimLabels.Add(textAnim);
+                    break;
+                }
+
+                case ListOptionInput:
+                {
+                    Debug.Log("ListOptionInput");
+                    var listInput = (ListOptionInput)item;
+
+                    TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
+                    var corners = new Vector3[4];
+                    listInput.ValueHolder.rectTransform.GetWorldCorners(corners);
+                    textAnim.rectTransform.position = corners[3];
+                    textAnim.text = listInput.ValueHolder.text;
+                    TextAnimLabels.Add(textAnim);
 
                         ListHandler.gameObject.SetActive(true);
                         ListHandler.SetList(item as ListOptionInput<string>);
@@ -334,9 +469,7 @@ namespace JANOARG.Client.Behaviors.Options
             }
 
             if (CurrentInputs.Count > 0)
-            {
                 SelectInputField(CurrentInputs[0].InputField);
-            }
 
             CurrentItem = item;
             StartCoroutine(EditIntro(item));
@@ -350,117 +483,139 @@ namespace JANOARG.Client.Behaviors.Options
         public IEnumerator SelectInputFieldAnim(TMP_InputField field)
         {
             field.Select();
+
             yield return null;
+
             field.ActivateInputField();
         }
 
-        // TODO refactor
         public void GetItemLerpFunctions(OptionItem item, out Action<float> inputLerp, out Action endLerp)
         {
             switch (item)
             {
                 case StringOptionInput:
+                {
+                    var stringInput = (StringOptionInput)item;
+
+                    inputLerp = x =>
                     {
-                        StringOptionInput input = (StringOptionInput)item;
-                        inputLerp = x =>
-                        {
-                            LerpText(TextAnimLabels[0], input.ValueHolder, CurrentInputs[0].InputField.textComponent, x);
-                        };
-                        endLerp = () =>
-                        {
-                        };
-                        break;
-                    }
+                        LerpText(TextAnimLabels[0], stringInput.ValueHolder, CurrentInputs[0].InputField.textComponent, x);
+                    };
+
+                    endLerp = () =>
+                    {
+                    };
+
+                    break;
+                }
                 case JudgmentOffsetOptionInput:
                 case VisualOffsetOptionInput:
+                {
+                    var input = (FloatOptionInput)item;
+
+                    inputLerp = x =>
                     {
-                        FloatOptionInput input = (FloatOptionInput)item;
-                        inputLerp = x =>
-                        {
-                            LerpText(TextAnimLabels[0], input.ValueHolder, CalibrationWizard.InputField.textComponent, x);
-                            LerpText(TextAnimLabels[1], input.UnitLabel, CalibrationWizard.InputFieldUnit, x);
-                        };
-                        endLerp = () =>
-                        {
-                        };
-                        break;
-                    }
+                        LerpText(TextAnimLabels[0], input.ValueHolder, CalibrationWizard.InputField.textComponent, x);
+                        LerpText(TextAnimLabels[1], input.UnitLabel, CalibrationWizard.InputFieldUnit, x);
+                    };
+
+                    endLerp = () =>
+                    {
+                    };
+
+                    break;
+                }
                 case FloatOptionInput:
+                {
+                    var floatInput = (FloatOptionInput)item;
+
+                    inputLerp = x =>
                     {
-                        FloatOptionInput input = (FloatOptionInput)item;
-                        inputLerp = x =>
-                        {
-                            LerpText(TextAnimLabels[0], input.ValueHolder, CurrentInputs[0].InputField.textComponent, x);
-                            LerpText(TextAnimLabels[1], input.UnitLabel, CurrentInputs[0].UnitLabel, x);
-                        };
-                        endLerp = () =>
-                        {
-                        };
-                        break;
-                    }
+                        LerpText(TextAnimLabels[0], floatInput.ValueHolder, CurrentInputs[0].InputField.textComponent, x);
+                        LerpText(TextAnimLabels[1], floatInput.UnitLabel, CurrentInputs[0].UnitLabel, x);
+                    };
+
+                    endLerp = () =>
+                    {
+                    };
+
+                    break;
+                }
                 case MultiFloatOptionInput:
+                {
+                    var multiFloatInput = (MultiFloatOptionInput)item;
+
+                    inputLerp = x =>
                     {
-                        MultiFloatOptionInput input = (MultiFloatOptionInput)item;
-                        inputLerp = x =>
+                        for (var a = 0; a < CurrentInputs.Count; a++)
                         {
-                            for (int a = 0; a < CurrentInputs.Count; a++)
-                            {
-                                LerpText(TextAnimLabels[a * 2], input.ValueHolders[a], CurrentInputs[a].InputField.textComponent, x);
-                                LerpText(TextAnimLabels[a * 2 + 1], input.UnitLabels[a], CurrentInputs[a].UnitLabel, x);
-                            }
-                        };
-                        endLerp = () =>
-                        {
-                        };
-                        break;
-                    }
+                            LerpText(TextAnimLabels[a * 2], multiFloatInput.ValueHolders[a], CurrentInputs[a].InputField.textComponent, x);
+                            LerpText(TextAnimLabels[a * 2 + 1], multiFloatInput.UnitLabels[a], CurrentInputs[a].UnitLabel, x);
+                        }
+                    };
+
+                    endLerp = () =>
+                    {
+                    };
+
+                    break;
+                }
                 case ListOptionInput:
+                {
+                    var listInput = (ListOptionInput)item;
+
+                    inputLerp = x =>
                     {
-                        ListOptionInput input = (ListOptionInput)item;
-                        inputLerp = x =>
-                        {
-                            LerpText(TextAnimLabels[0], input.ValueHolder, ListHandler.Items[ListHandler.CurrentPosition].Text, x);
-                        };
-                        endLerp = () =>
-                        {
-                        };
-                        break;
-                    }
+                        LerpText(TextAnimLabels[0], listInput.ValueHolder, ListHandler.Items[ListHandler.CurrentPosition].Text, x);
+                    };
+
+                    endLerp = () =>
+                    {
+                    };
+
+                    break;
+                }
 
                 default:
-                    {
-                        inputLerp = _ => { };
-                        endLerp = () => { };
-                        break;
-                    }
+                {
+                    inputLerp = _ => { };
+                    endLerp = () => { };
+
+                    break;
+                }
             }
         }
 
-        // TODO refactor
-        public void GetItemFinishFunctions(OptionItem item, out Action onFinish) 
+        public void GetItemFinishFunctions(OptionItem item, out Action onFinish)
         {
-            switch (item) 
+            switch (item)
             {
-                case JudgmentOffsetOptionInput: case VisualOffsetOptionInput: 
+                case JudgmentOffsetOptionInput:
+                case VisualOffsetOptionInput:
                 {
-                    onFinish = () => {
+                    onFinish = () =>
+                    {
                         CalibrationWizard.HideWizard();
                     };
+
                     break;
                 }
 
-                case ListOptionInput: 
+                case ListOptionInput:
                 {
-                    onFinish = () => {
+                    onFinish = () =>
+                    {
                         ListHandler.Finish();
                         TextAnimLabels[0].text = ListHandler.Items[ListHandler.CurrentPosition].Text.text;
                     };
+
                     break;
                 }
 
                 default:
                 {
-                    onFinish = () => {};
+                    onFinish = () => { };
+
                     break;
                 }
             }
@@ -488,10 +643,9 @@ namespace JANOARG.Client.Behaviors.Options
 
             yield return Ease.Animate(.45f, x =>
             {
-
                 float ease = Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out);
                 Background.color = new Color(0, 0, 0, .5f * ease);
-                InputBackground.rectTransform.sizeDelta = new(InputBackground.rectTransform.sizeDelta.x, ease * 40);
+                InputBackground.rectTransform.sizeDelta = new Vector2(InputBackground.rectTransform.sizeDelta.x, ease * 40);
 
                 float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 float offset = 30 * (1 - ease2);
@@ -501,10 +655,12 @@ namespace JANOARG.Client.Behaviors.Options
 
                 float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
                 TitleText.alpha = RightHolder.alpha = ListGroup.alpha = ease3;
-                AdvancedInputTransform.anchoredPosition = new(
+
+                AdvancedInputTransform.anchoredPosition = new Vector2(
                     (IsAdvanced ? -690 : -190) - 10 * ease3,
                     AdvancedInputTransform.anchoredPosition.y
                 );
+
                 AdvancedInputGroup.alpha = ease3;
 
                 inputLerp(ease);
@@ -515,14 +671,11 @@ namespace JANOARG.Client.Behaviors.Options
             IsAnimating = false;
         }
 
-        /**
-            <summary>
-                End the edit and hide the input handler.
-            </summary>
-        */
-        public void EndEdit() 
+        public void EndEdit()
         {
-            if (IsAnimating) return;
+            if (IsAnimating)
+                return;
+
             StartCoroutine(EditOutro());
         }
 
@@ -542,9 +695,10 @@ namespace JANOARG.Client.Behaviors.Options
             Vector2 rightPos = RightTransform.anchoredPosition;
             Vector2 listPos = ListTransform.anchoredPosition;
 
-            yield return Ease.Animate(.3f, x => {
+            yield return Ease.Animate(.3f, x =>
+            {
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                InputBackground.rectTransform.sizeDelta = new (InputBackground.rectTransform.sizeDelta.x, (1 - ease) * 40);
+                InputBackground.rectTransform.sizeDelta = new Vector2(InputBackground.rectTransform.sizeDelta.x, (1 - ease) * 40);
                 Background.color = new Color(0, 0, 0, .5f * (1 - ease));
 
                 float offset = 10 * ease;
@@ -553,20 +707,26 @@ namespace JANOARG.Client.Behaviors.Options
                 ListTransform.anchoredPosition = listPos + Vector2.right * offset;
                 TitleText.alpha = RightHolder.alpha = ListGroup.alpha = 1 - ease;
 
-                AdvancedInputTransform.anchoredPosition = new (
-                    (IsAdvanced ? -700 : -200) + 10 * ease, 
+                AdvancedInputTransform.anchoredPosition = new Vector2(
+                    (IsAdvanced ? -700 : -200) + 10 * ease,
                     AdvancedInputTransform.anchoredPosition.y
                 );
+
                 AdvancedInputGroup.alpha = 1 - ease;
 
                 inputLerp(1 - ease);
             });
 
-            foreach (var field in CurrentInputs) Destroy(field.gameObject);
+            foreach (OptionInputField field in CurrentInputs)
+                Destroy(field.gameObject);
+
             CurrentInputs.Clear();
-            foreach (var textAnim in TextAnimLabels) Destroy(textAnim.gameObject);
+
+            foreach (TMP_Text textAnim in TextAnimLabels)
+                Destroy(textAnim.gameObject);
+
             TextAnimLabels.Clear();
-        
+
             Background.gameObject.SetActive(false);
             MainHolder.SetActive(false);
             ListHandler.gameObject.SetActive(false);
@@ -589,10 +749,10 @@ namespace JANOARG.Client.Behaviors.Options
         public static void LerpText(TMP_Text textAnim, TMP_Text from, TMP_Text to, float lerp)
         {
             from.alpha = lerp == 0 ? 1 : 0;
-            to.alpha = lerp == 1 ? 1 : 0;
-            textAnim.gameObject.SetActive(lerp != 0 && lerp != 1);
+            to.alpha = Mathf.Approximately(lerp, 1) ? 1 : 0;
+            textAnim.gameObject.SetActive(lerp != 0 && !Mathf.Approximately(lerp, 1));
 
-            Vector3[] corners = new Vector3[4];
+            var corners = new Vector3[4];
             from.rectTransform.GetWorldCorners(corners);
             Vector3 cornerFrom = corners[0];
             to.rectTransform.GetWorldCorners(corners);
@@ -600,66 +760,62 @@ namespace JANOARG.Client.Behaviors.Options
             textAnim.rectTransform.position = Vector3.Lerp(cornerFrom, cornerTo, lerp);
         }
 
-        /**
-            <summary>
-                Toggle the advanced state of the current input field.
-            </summary>
-        */
-        public void UpdateAdvancedInput() 
+        public void UpdateAdvancedInput()
         {
-            if (IsAnimating || recursionBuster) 
+            if (IsAnimating || _RecursionBuster)
             {
-                recursionBuster = true;
-                AdvancedInputToggle.Value = !AdvancedInputToggle.Value;
-                recursionBuster = false;
+                _RecursionBuster = true;
+                AdvancedInputToggle.value = !AdvancedInputToggle.value;
+                _RecursionBuster = false;
+
                 return;
             }
 
             MultiValueType type;
 
-            // TODO refactor
             switch (CurrentItem)
             {
                 case MultiFloatOptionInput:
+                {
+                    var multiFloatInput = (MultiFloatOptionInput)CurrentItem;
+                    type = multiFloatInput.ValueType;
+
+                    multiFloatInput.Set(AdvancedInputToggle.value ? CurrentInputs.Select(x => x.Slider.value)
+                        .ToArray() : new[]
                     {
-                        MultiFloatOptionInput input = (MultiFloatOptionInput)CurrentItem;
-                        type = input.ValueType;
-                        input.Set(AdvancedInputToggle.Value ? CurrentInputs.Select(x => x.Slider.value).ToArray() : new[] {
-                        CurrentInputs[0].Slider.value,
+                        CurrentInputs[0].Slider.value
                     });
-                        input.UpdateValue();
-                        break;
-                    }
+
+                    multiFloatInput.UpdateValue();
+
+                    break;
+                }
 
                 default: return;
             }
 
-            StartCoroutine(AdvancedInputAnim(type, AdvancedInputToggle.Value));
+            StartCoroutine(AdvancedInputAnim(type, AdvancedInputToggle.value));
         }
 
-        /**
-            <summary>
-                Set the advanced state of the current input field.
-            </summary>
-            <param name="type">The multi value type.</param>
-            <param name="active">The target active state</param>
-        */
-        public void SetAdvancedInput(MultiValueType type, bool active) 
+        public void SetAdvancedInput(MultiValueType type, bool active)
         {
             IsAdvanced = active;
-            var list = MultiValueFieldData.Info[type];
+            List<MultiValueFieldData> list = MultiValueFieldData.sInfo[type];
 
             Color firstColor = active ? list[0].Color : Color.white;
             TextAnimLabels[0].color = TextAnimLabels[1].color = firstColor;
-            CurrentInputs[0].SetColor(firstColor);
-        
-            for (int a = 0; a < CurrentInputs.Count; a++)
-            {
+
+            CurrentInputs[0]
+                .SetColor(firstColor);
+
+            for (var a = 0; a < CurrentInputs.Count; a++)
                 CurrentInputs[a].Title.text = active ? list[a].Name : "";
-            }
-            for (int a = 1; a < CurrentInputs.Count; a++)
+
+            for (var a = 1; a < CurrentInputs.Count; a++)
             {
-                CurrentInputs[a].gameObject.SetActive(active);
+                CurrentInputs[a]
+                    .gameObject.SetActive(active);
+
                 TextAnimLabels[a * 2].text = active ? CurrentInputs[a].InputField.text : "";
                 TextAnimLabels[a * 2 + 1].text = active ? CurrentInputs[a].UnitLabel.text : "";
             }
@@ -675,31 +831,31 @@ namespace JANOARG.Client.Behaviors.Options
             IsAnimating = true;
 
             if (active)
-            {
-                StartCoroutine(Ease.Animate(.4f, x => {
+                StartCoroutine(Ease.Animate(.4f, x =>
+                {
                     float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                    AdvancedInputTransform.anchoredPosition = new (-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
+                    AdvancedInputTransform.anchoredPosition = new Vector2(-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
                 }));
-            }
-            else 
-            {
-                StartCoroutine(Ease.Animate(.5f, x => {
+            else
+                StartCoroutine(Ease.Animate(.5f, x =>
+                {
                     float ease2 = Ease.Get(Mathf.Clamp01(x * 1.2f - .2f), EaseFunction.Cubic, EaseMode.Out);
-                    AdvancedInputTransform.anchoredPosition = new (-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
+                    AdvancedInputTransform.anchoredPosition = new Vector2(-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
                 }));
-            }
 
-            yield return Ease.Animate(.2f, x => {
+            yield return Ease.Animate(.2f, x =>
+            {
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * ease);
+                InputHolder.sizeDelta = new Vector2(InputHolder.sizeDelta.x, -30 * ease);
                 InputGroup.alpha = (1 - ease) * (1 - ease);
             });
 
             SetAdvancedInput(type, active);
 
-            yield return Ease.Animate(.4f, x => {
+            yield return Ease.Animate(.4f, x =>
+            {
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                InputHolder.sizeDelta = new (InputHolder.sizeDelta.x, -30 * (1 - ease));
+                InputHolder.sizeDelta = new Vector2(InputHolder.sizeDelta.x, -30 * (1 - ease));
                 InputGroup.alpha = ease * ease;
             });
 

@@ -7,22 +7,23 @@ namespace JANOARG.Client.UI
     {
         public RectTransform Spinner;
 
-        float Timer;
+        private float _Timer;
 
-        IEaseDirective SpinEasing = new CubicBezierEaseDirective(.2f, 1.5f, 0, 1);
+        private IEaseDirective _SpinEasing = new CubicBezierEaseDirective(.2f, 1.5f, 0, 1);
 
-        void Start()
+        private void Start()
         {
-            Timer = 0;  
+            _Timer = 0;
         }
 
-        void Update()
+        private void Update()
         {
-            Timer += Time.deltaTime;
-            float interval = .8f;
-            Spinner.localEulerAngles = 
-                (Mathf.Floor(Timer / interval) + SpinEasing.Get(Timer % interval))
-                * 45 * Vector3.back;  
+            _Timer += Time.deltaTime;
+            var interval = .8f;
+
+            Spinner.localEulerAngles =
+                (Mathf.Floor(_Timer / interval) + _SpinEasing.Get(_Timer % interval))
+                * 45 * Vector3.back;
         }
     }
 }
