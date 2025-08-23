@@ -5,16 +5,16 @@ namespace JANOARG.Client.Behaviors.Options.Input_Types
 {
     public class StringOptionInput : OptionInput<string>
     {
-        [Space]
-        public int Limit = 16;
+        [Space] public int Limit = 16;
+
         public TMP_Text ValueHolder;
 
-        public new void Start() 
+        public new void Start()
         {
             UpdateValue();
         }
 
-        public new void UpdateValue() 
+        public new void UpdateValue()
         {
             base.UpdateValue();
             ValueHolder.text = CurrentValue;
@@ -22,7 +22,7 @@ namespace JANOARG.Client.Behaviors.Options.Input_Types
 
         public void Edit()
         {
-            OptionInputHandler.main.Edit(this);
+            OptionInputHandler.sMain.Edit(this);
         }
     }
 }

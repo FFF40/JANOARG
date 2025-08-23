@@ -6,29 +6,25 @@ namespace JANOARG.Client.Behaviors.Storyteller
 {
     public class StorytellerScreen : MonoBehaviour
     {
-        public static StorytellerScreen main;
+        public static StorytellerScreen sMain;
 
         public StoryScript ScriptToPlay;
 
         public void Awake()
         {
-            main = this;
+            sMain = this;
             CommonScene.Load();
         }
 
         // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
-            if (ScriptToPlay) 
-            {
-                global::JANOARG.Client.Behaviors.Storyteller.Storyteller.main.PlayScript(ScriptToPlay);
-            }
+            if (ScriptToPlay) Storyteller.sMain.PlayScript(ScriptToPlay);
         }
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
-        
         }
     }
 }

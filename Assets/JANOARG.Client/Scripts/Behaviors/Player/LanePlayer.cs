@@ -9,46 +9,53 @@ namespace JANOARG.Client.Behaviors.Player
     {
         public Lane Original;
         public Lane Current;
+
         [Space]
         public Transform Holder;
-        public MeshFilter MeshFilter;
+
+        public MeshFilter   MeshFilter;
         public MeshRenderer MeshRenderer;
+
         public LaneGroupPlayer Group;
+
         [Space]
         public MeshRenderer JudgeLine;
-        [FormerlySerializedAs("JudgeLeft")] public MeshRenderer JudgePointLeft;
-        [FormerlySerializedAs("JudgeRight")] public MeshRenderer JudgePointRight;
+
+        public MeshRenderer JudgePointLeft;
+        public MeshRenderer JudgePointRight;
 
         public List<float> PositionPoints = new();
-        public List<float> TimeStamps = new();
-        public float CurrentPosition;
+        public List<float> TimeStamps     = new();
+        public float       CurrentPosition;
 
-        public List<HitPlayer> HitObjects = new();
-        public List<HitScreenCoord> HitCoords = new();
+        public List<HitPlayer>      HitObjects = new();
+        public List<HitScreenCoord> HitCoords  = new();
 
         public bool LaneStepDirty = false;
-    
-        private List<Vector3> _verts = new();
-        private List<int> _tris = new();
 
-        public void Init() 
+        private List<Vector3> _verts = new();
+        private List<int>     _tris  = new();
+
+        private Mesh          _Mesh;
+        private List<Vector3> _Verts = new();
+        private List<int>     _Tris  = new();
+
+        public void Init()
         {
-            var metronome = PlayerScreen.TargetSong.Timing;
-            foreach (LaneStep step in Current.LaneSteps)
+            Metronome metronome = PlayerScreen.sTargetSong.Timing;
+            foreach (LaneStep step in Current.LaneSteps) TimeStamps.Add(metronome.ToSeconds(step.Offset));
+
+            if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.LaneStyles.Count)
             {
-                TimeStamps.Add(metronome.ToSeconds(step.Offset));
-            }
-            if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.main.LaneStyles.Count)
-            {
-                LaneStyleManager style = PlayerScreen.main.LaneStyles[Current.StyleIndex];
-                MeshRenderer.sharedMaterial = style.LaneMaterial; 
-            
-                JudgeLine.sharedMaterial = 
-                    JudgePointLeft.sharedMaterial = 
-                        JudgePointRight.sharedMaterial = 
+                LaneStyleManager style = PlayerScreen.sMain.LaneStyles[Current.StyleIndex];
+                MeshRenderer.sharedMaterial = style.LaneMaterial;
+
+                JudgeLine.sharedMaterial =
+                    JudgePointLeft.sharedMaterial =
+                        JudgePointRight.sharedMaterial =
                             style.JudgeMaterial;
             }
-            else 
+            else
             {
                 MeshRenderer.enabled = false;
                 JudgeLine.gameObject.SetActive(false);
@@ -59,24 +66,26 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void UpdateSelf(float time, float beat)
         {
-            if (Current != null) 
+            if (Current != null)
                 Current.Advance(beat);
-            else 
+            else
                 Current = (Lane)Original.GetStoryboardableObject(beat);
 
             UpdateMesh(time, beat);
-        
-            transform.localPosition    = Current.Position;
+
+            transform.localPosition = Current.Position;
             transform.localEulerAngles = Current.Rotation;
-            Holder.localPosition       = Vector3.back * CurrentPosition;
-        
+            Holder.localPosition = Vector3.back * CurrentPosition;
+
             if (CurrentPosition - PositionPoints[0] > -200)
             {
                 transform.gameObject.SetActive(true);
                 UpdateHitObjects(time, beat);
             }
             else
+            {
                 transform.gameObject.SetActive(false);
+            }
         }
 
 
@@ -84,170 +93,181 @@ namespace JANOARG.Client.Behaviors.Player
         {
             // New mesh if MeshFilter doesn't have one
             Mesh mesh = MeshFilter.mesh ?? new Mesh();
-        
+
             _verts.Clear();
             _tris.Clear();
-        
-            void AddLine(Vector3 start, Vector3 end) 
+
+            void f_addLine(Vector3 start, Vector3 end)
             {
                 // No AddRange here because the alloc overhead adds up
-                _verts.Add(start);
-                _verts.Add(end);
+                _Verts.Add(start);
+                _Verts.Add(end);
 
-                if (_verts.Count > 2)
+                if (_Verts.Count > 2)
                 {
-                    _tris.Add(_verts.Count - 4);
-                    _tris.Add(_verts.Count - 2);
-                    _tris.Add(_verts.Count - 3);
-                    _tris.Add(_verts.Count - 2);
-                    _tris.Add(_verts.Count - 1);
-                    _tris.Add(_verts.Count - 3);
+                    _Tris.Add(_Verts.Count - 4);
+                    _Tris.Add(_Verts.Count - 2);
+                    _Tris.Add(_Verts.Count - 3);
+                    _Tris.Add(_Verts.Count - 2);
+                    _Tris.Add(_Verts.Count - 1);
+                    _Tris.Add(_Verts.Count - 3);
                 }
             }
 
-            while (TimeStamps.Count > 2 && TimeStamps[1] < time) 
+            while (TimeStamps.Count > 2 && TimeStamps[1] < time)
             {
                 TimeStamps.RemoveAt(0);
                 PositionPoints.RemoveAt(0);
                 Current.LaneSteps.RemoveAt(0);
             }
 
-            if (Current.LaneSteps.Count < 1) 
+            if (Current.LaneSteps.Count < 1)
             {
                 if (TimeStamps[0] < time)
                     Destroy(mesh);
+
                 return;
             }
-        
-            Current.LaneSteps[0].Advance(beat);
-        
-            if (Current.LaneSteps.Count > 1) 
-                Current.LaneSteps[1].Advance(beat);
 
-            CurrentPosition = (TimeStamps.Count <= 1 || TimeStamps[0] > time) 
-                ? time * Current.LaneSteps[0].Speed * PlayerScreen.main.Speed 
-                : (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.main.Speed + PositionPoints[0];
-        
-            float progress = TimeStamps.Count <= 1 
-                ? 0 
+            Current.LaneSteps[0]
+                .Advance(beat);
+
+            if (Current.LaneSteps.Count > 1)
+                Current.LaneSteps[1]
+                    .Advance(beat);
+
+            Current.LaneSteps[0]
+                .Advance(beat);
+
+            if (Current.LaneSteps.Count > 1)
+                Current.LaneSteps[1]
+                    .Advance(beat);
+
+            CurrentPosition = TimeStamps.Count <= 1 || TimeStamps[0] > time
+                ? time * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed
+                : (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0];
+
+            float progress = TimeStamps.Count <= 1
+                ? 0
                 : Mathf.InverseLerp(TimeStamps[0], TimeStamps[1], time);
 
             if (PositionPoints.Count <= 1)
-                PositionPoints.Add(TimeStamps[0] * Current.LaneSteps[0].Speed * PlayerScreen.main.Speed);
-        
+                PositionPoints.Add(TimeStamps[0] * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed);
+
             if (TimeStamps.Count <= 1)
                 return;
-        
+
             if (PositionPoints.Count <= 2)
-                PositionPoints.Add((TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.main.Speed + PositionPoints[0]);
-            else 
-                PositionPoints[1] = PositionPoints[0] + (TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.main.Speed;
-
+                PositionPoints.Add((TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0]);
+            else
+                PositionPoints[1] = PositionPoints[0] + (TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed;
             {
-
                 float position = Mathf.Lerp(PositionPoints[0], PositionPoints[1], progress);
                 LaneStep currentLaneStep = Current.LaneSteps[1];
-                Vector3 start, end;
+                Vector3 startPoint, endPoint;
 
-                if (currentLaneStep.IsLinear)
+                if (currentLaneStep.isLinear)
                 {
-                    start = Vector3.Lerp(Current.LaneSteps[0].StartPos, Current.LaneSteps[1].StartPos, progress) + Vector3.forward * position;
-                    end = Vector3.Lerp(Current.LaneSteps[0].EndPos, Current.LaneSteps[1].EndPos, progress) + Vector3.forward * position;
+                    startPoint = Vector3.Lerp(Current.LaneSteps[0].StartPointPosition, Current.LaneSteps[1].StartPointPosition, progress) + Vector3.forward * position;
+                    endPoint = Vector3.Lerp(Current.LaneSteps[0].EndPointPosition, Current.LaneSteps[1].EndPointPosition, progress) + Vector3.forward * position;
                 }
-                else 
+                else
                 {
-                    start = new Vector3(
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.x, Current.LaneSteps[1].StartPos.x, currentLaneStep.StartEaseX.Get(progress)),
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPos.y, Current.LaneSteps[1].StartPos.y, currentLaneStep.StartEaseY.Get(progress)),
+                    startPoint = new Vector3(
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPointPosition.x, Current.LaneSteps[1].StartPointPosition.x, currentLaneStep.StartEaseX.Get(progress)),
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].StartPointPosition.y, Current.LaneSteps[1].StartPointPosition.y, currentLaneStep.StartEaseY.Get(progress)),
                         position
                     );
-                    end = new Vector3(
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.x, Current.LaneSteps[1].EndPos.x, currentLaneStep.EndEaseX.Get(progress)),
-                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPos.y, Current.LaneSteps[1].EndPos.y, currentLaneStep.EndEaseY.Get(progress)),
+                    endPoint = new Vector3(
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPointPosition.x, Current.LaneSteps[1].EndPointPosition.x, currentLaneStep.EndEaseX.Get(progress)),
+                        Mathf.LerpUnclamped(Current.LaneSteps[0].EndPointPosition.y, Current.LaneSteps[1].EndPointPosition.y, currentLaneStep.EndEaseY.Get(progress)),
                         position
                     );
                 }
 
-                AddLine(start, end);
-            
-                JudgeLine.enabled = 
-                    JudgePointLeft.enabled = 
-                        JudgePointRight.enabled = 
+                f_addLine(startPoint, endPoint);
+
+                JudgeLine.enabled =
+                    JudgePointLeft.enabled =
+                        JudgePointRight.enabled =
                             TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
-            
-                if (JudgeLine.enabled && JudgeLine.gameObject.activeSelf) 
+
+                if (JudgeLine.enabled && JudgeLine.gameObject.activeSelf)
                 {
-                    JudgeLine.transform.localPosition    = (start + end) / 2;
-                    JudgeLine.transform.localScale       = new Vector3(Vector2.Distance(start, end), .05f, .05f);
-                    JudgeLine.transform.localRotation    = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.right, end - start));
-                
-                    JudgePointLeft.transform.localPosition  = start;
-                    JudgePointRight.transform.localPosition = end;
+                    JudgeLine.transform.localPosition = (startPoint + endPoint) / 2;
+                    JudgeLine.transform.localScale = new Vector3(Vector2.Distance(startPoint, endPoint), .05f, .05f);
+                    JudgeLine.transform.localRotation = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.right, endPoint - startPoint));
+
+                    JudgePointLeft.transform.localPosition = startPoint;
+                    JudgePointRight.transform.localPosition = endPoint;
                 }
-            
+
                 if (!JudgeLine.enabled)
                     transform.gameObject.SetActive(false);
             }
 
 
-            if (Current.LaneSteps[0].IsDirty) 
+            if (Current.LaneSteps[0].IsDirty)
             {
                 LaneStepDirty = true;
                 Current.LaneSteps[0].IsDirty = false;
             }
-            if (Current.LaneSteps[1].IsDirty) 
+
+            if (Current.LaneSteps[1].IsDirty)
             {
                 LaneStepDirty = true;
                 Current.LaneSteps[1].IsDirty = false;
             }
 
-            for (int currentTimestamp = 1; currentTimestamp < TimeStamps.Count; currentTimestamp++) 
+            for (var currentTimestamp = 1; currentTimestamp < TimeStamps.Count; currentTimestamp++)
             {
-                var currentLaneStep = Current.LaneSteps[currentTimestamp];
-                if (currentTimestamp > 1) 
+                LaneStep currentLaneStep = Current.LaneSteps[currentTimestamp];
+
+                if (currentTimestamp > 1)
                 {
                     currentLaneStep.Advance(beat);
-                    if (currentLaneStep.IsDirty) 
+
+                    if (currentLaneStep.IsDirty)
                     {
                         LaneStepDirty = true;
                         currentLaneStep.IsDirty = false;
                     }
                 }
-                float calculatedPosition = PositionPoints[currentTimestamp - 1] + (TimeStamps[currentTimestamp] - TimeStamps[currentTimestamp - 1]) * currentLaneStep.Speed * PlayerScreen.main.Speed;
-            
-                if (PositionPoints.Count <= currentTimestamp) 
-                    PositionPoints.Add(calculatedPosition); 
-                else 
+
+                float calculatedPosition = PositionPoints[currentTimestamp - 1] + (TimeStamps[currentTimestamp] - TimeStamps[currentTimestamp - 1]) * currentLaneStep.Speed * PlayerScreen.sMain.Speed;
+
+                if (PositionPoints.Count <= currentTimestamp)
+                    PositionPoints.Add(calculatedPosition);
+                else
                     PositionPoints[currentTimestamp] = calculatedPosition;
-            
-                if (currentLaneStep.IsLinear)
+
+                if (currentLaneStep.isLinear)
                 {
-                    AddLine(
-                        (Vector3)currentLaneStep.StartPos + Vector3.forward * calculatedPosition, 
-                        (Vector3)currentLaneStep.EndPos + Vector3.forward * calculatedPosition
+                    f_addLine(
+                        (Vector3)currentLaneStep.StartPointPosition + Vector3.forward * calculatedPosition,
+                        (Vector3)currentLaneStep.EndPointPosition + Vector3.forward * calculatedPosition
                     );
                 }
-                else 
+                else
                 {
-                    var previousStep = Current.LaneSteps[currentTimestamp - 1];
-                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16; x <= 1; x = Mathf.Floor(x * 16 + 1.01f) / 16)
-                    {
-                        AddLine(
-                            new Vector3(
-                                Mathf.LerpUnclamped(previousStep.StartPos.x, currentLaneStep.StartPos.x, currentLaneStep.StartEaseX.Get(x)),
-                                Mathf.LerpUnclamped(previousStep.StartPos.y, currentLaneStep.StartPos.y, currentLaneStep.StartEaseY.Get(x)),
-                                Mathf.Lerp(PositionPoints[currentTimestamp - 1], calculatedPosition, x)), 
+                    LaneStep previousStep = Current.LaneSteps[currentTimestamp - 1];
 
+                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16; x <= 1; x = Mathf.Floor(x * 16 + 1.01f) / 16)
+                        f_addLine(
                             new Vector3(
-                                Mathf.LerpUnclamped(previousStep.EndPos.x, currentLaneStep.EndPos.x, currentLaneStep.EndEaseX.Get(x)),
-                                Mathf.LerpUnclamped(previousStep.EndPos.y, currentLaneStep.EndPos.y, currentLaneStep.EndEaseY.Get(x)),
+                                Mathf.LerpUnclamped(previousStep.StartPointPosition.x, currentLaneStep.StartPointPosition.x, currentLaneStep.StartEaseX.Get(x)),
+                                Mathf.LerpUnclamped(previousStep.StartPointPosition.y, currentLaneStep.StartPointPosition.y, currentLaneStep.StartEaseY.Get(x)),
+                                Mathf.Lerp(PositionPoints[currentTimestamp - 1], calculatedPosition, x)),
+                            new Vector3(
+                                Mathf.LerpUnclamped(previousStep.EndPointPosition.x, currentLaneStep.EndPointPosition.x, currentLaneStep.EndEaseX.Get(x)),
+                                Mathf.LerpUnclamped(previousStep.EndPointPosition.y, currentLaneStep.EndPointPosition.y, currentLaneStep.EndEaseY.Get(x)),
                                 Mathf.Lerp(PositionPoints[currentTimestamp - 1], calculatedPosition, x))
                         );
-                    }
                 }
+
                 progress = 0;
-            
-                if (currentTimestamp >= PositionPoints.Count && calculatedPosition - CurrentPosition > 200) 
+
+                if (currentTimestamp >= PositionPoints.Count && calculatedPosition - CurrentPosition > 200)
                     break;
             }
 
@@ -257,98 +277,117 @@ namespace JANOARG.Client.Behaviors.Player
             MeshFilter.mesh = mesh;
         }
 
-        private float _hitObjectTime = float.NaN;
-        private int _hitObjectOffset = 0;
+        private float _HitObjectTime   = float.NaN;
+        private int   _HitObjectOffset = 0;
 
-        private void UpdateHitObjects(float time, float beat, float maxDistance = 200) 
+        private void UpdateHitObjects(float time, float beat, float maxDistance = 200)
         {
-            while (Current.Objects.Count > 0) 
+            while (Current.Objects.Count > 0)
             {
                 HitObject hit = Current.Objects[0];
-                if (float.IsNaN(_hitObjectTime)) _hitObjectTime = PlayerScreen.TargetSong.Timing.ToSeconds(hit.Offset);
-                if (GetZPosition(_hitObjectTime) <= CurrentPosition + maxDistance) 
+                if (float.IsNaN(_HitObjectTime)) _HitObjectTime = PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset);
+
+                if (GetZPosition(_HitObjectTime) <= CurrentPosition + maxDistance)
                 {
-                    HitPlayer player = Instantiate(PlayerScreen.main.HitSample, Holder);
-               
-                    player.Original = Original.Objects[_hitObjectOffset];
+                    HitPlayer player = Instantiate(PlayerScreen.sMain.HitSample, Holder);
+
+                    player.Original = Original.Objects[_HitObjectOffset];
                     player.Current = Current.Objects[0];
-                
-                    player.Time = _hitObjectTime;
-                    player.EndTime = player.Current.HoldLength > 0 ? PlayerScreen.TargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : _hitObjectTime;
+
+                    player.Time = _HitObjectTime;
+                    player.EndTime = player.Current.HoldLength > 0 ? PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : _HitObjectTime;
                     player.HitCoord = HitCoords[0];
+
                     if (player.Current.HoldLength > 0)
                     {
-                        for (float a = 0.5f; a < player.Current.HoldLength; a += 0.5f) player.HoldTicks.Add(PlayerScreen.TargetSong.Timing.ToSeconds(hit.Offset + a));
+                        for (var a = 0.5f; a < player.Current.HoldLength; a += 0.5f) player.HoldTicks.Add(PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + a));
                         player.HoldTicks.Add(player.EndTime);
                         UpdateHoldMesh(player);
                     }
-                
+
                     player.Lane = this;
                     HitObjects.Add(player);
-                    //PlayerInputManager.main.AddToQueue(player);
-                    PlayerInputManager.Instance.AddToQueue(player);
+
+                    // PlayerInputManager.main.AddToQueue(player);
+                    PlayerInputManager.sInstance.AddToQueue(player);
                     player.Init();
 
                     Current.Objects.RemoveAt(0);
                     HitCoords.RemoveAt(0);
-                    _hitObjectTime = float.NaN;
-                    _hitObjectOffset++;
+                    _HitObjectTime = float.NaN;
+                    _HitObjectOffset++;
                 }
-                else 
+                else
                 {
                     break;
                 }
             }
-            bool active = true;
-            for (int a = 0; a < HitObjects.Count; a++) 
+
+            var active = true;
+
+            foreach (HitPlayer hitObject in HitObjects)
             {
-                if (active) HitObjects[a].UpdateSelf(time, beat, LaneStepDirty);
-                if (active && HitObjects[a].CurrentPosition > CurrentPosition + 200) active = false;
-                HitObjects[a].gameObject.SetActive(active);
-                if (HitObjects[a].HoldMesh) HitObjects[a].HoldMesh.gameObject.SetActive(active);
+                if (active)
+                    hitObject
+                        .UpdateSelf(time, beat, LaneStepDirty);
+
+                if (active && hitObject.CurrentPosition > CurrentPosition + 200)
+                    active = false;
+
+                hitObject.gameObject.SetActive(active);
+
+                if (hitObject.HoldMesh)
+                    hitObject.HoldMesh.gameObject.SetActive(active);
             }
+
             LaneStepDirty = false;
         }
 
-        public float GetZPosition(float time) 
+        public float GetZPosition(float time)
         {
             int index = TimeStamps.FindIndex(x => x >= time);
-            if (index < 0) return PositionPoints[^1] + (time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.main.Speed; 
+
+            if (index < 0)
+                return PositionPoints[^1] + (time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.sMain.Speed;
+
             index = Mathf.Min(index, PositionPoints.Count - 1);
-            return PositionPoints[index] + (time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.main.Speed; 
+
+            return PositionPoints[index] + (time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.sMain.Speed;
         }
 
-        public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end) 
+        public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end)
         {
             int index = TimeStamps.FindIndex(x => x >= time);
+
             if (index < 0)
             {
-                start = Current.LaneSteps[^1].StartPos;
-                end = Current.LaneSteps[^1].EndPos;
+                start = Current.LaneSteps[^1].StartPointPosition;
+                end = Current.LaneSteps[^1].EndPointPosition;
             }
             else if (index == 0)
             {
-                start = Current.LaneSteps[0].StartPos;
-                end = Current.LaneSteps[0].EndPos;
+                start = Current.LaneSteps[0].StartPointPosition;
+                end = Current.LaneSteps[0].EndPointPosition;
             }
-            else 
+            else
             {
-                var cur = Current.LaneSteps[index];
-                var pre = Current.LaneSteps[index - 1];
+                LaneStep currentStep = Current.LaneSteps[index];
+                LaneStep previousStep = Current.LaneSteps[index - 1];
                 float progress = Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
-                if (cur.IsLinear) 
+
+                if (currentStep.isLinear)
                 {
-                    start = Vector2.Lerp(pre.StartPos, cur.StartPos, progress);
-                    end = Vector2.Lerp(pre.EndPos, cur.EndPos, progress);
+                    start = Vector2.Lerp(previousStep.StartPointPosition, currentStep.StartPointPosition, progress);
+                    end = Vector2.Lerp(previousStep.EndPointPosition, currentStep.EndPointPosition, progress);
                 }
-                else 
+                else
                 {
                     start = new Vector2(
-                        Mathf.LerpUnclamped(pre.StartPos.x, cur.StartPos.x, cur.StartEaseX.Get(progress)), 
-                        Mathf.LerpUnclamped(pre.StartPos.y, cur.StartPos.y, cur.StartEaseY.Get(progress)));
+                        Mathf.LerpUnclamped(previousStep.StartPointPosition.x, currentStep.StartPointPosition.x, currentStep.StartEaseX.Get(progress)),
+                        Mathf.LerpUnclamped(previousStep.StartPointPosition.y, currentStep.StartPointPosition.y, currentStep.StartEaseY.Get(progress)));
                     end = new Vector2(
-                        Mathf.LerpUnclamped(pre.EndPos.x, cur.EndPos.x, cur.EndEaseX.Get(progress)), 
-                        Mathf.LerpUnclamped(pre.EndPos.y, cur.EndPos.y, cur.EndEaseY.Get(progress)));
+                        Mathf.LerpUnclamped(previousStep.EndPointPosition.x, currentStep.EndPointPosition.x, currentStep.EndEaseX.Get(progress)),
+                        Mathf.LerpUnclamped(previousStep.EndPointPosition.y, currentStep.EndPointPosition.y, currentStep.EndEaseY.Get(progress)));
                 }
             }
         }
@@ -357,129 +396,139 @@ namespace JANOARG.Client.Behaviors.Player
         {
             if (hit.HoldRenderer == null)
             {
-                hit.HoldRenderer = Instantiate(PlayerScreen.main.HoldSample, Holder);
+                hit.HoldRenderer = Instantiate(PlayerScreen.sMain.HoldSample, Holder);
                 hit.HoldMesh = hit.HoldRenderer.GetComponent<MeshFilter>();
             }
-            if (hit.HoldMesh.mesh == null)
-            {
-                hit.HoldMesh.mesh = new Mesh();
-            }
+
+            if (hit.HoldMesh.mesh == null) hit.HoldMesh.mesh = new Mesh();
+
             Mesh mesh = hit.HoldMesh.mesh;
-            _verts.Clear();
-            _tris.Clear();
-        
-            void AddLine(Vector3 start, Vector3 end) 
+
+            _Verts.Clear();
+            _Tris.Clear();
+
+            void f_addLine(Vector3 start, Vector3 end)
             {
                 // No AddRange here because the alloc overhead adds up
-                _verts.Add(start);
-                _verts.Add(end);
+                _Verts.Add(start);
+                _Verts.Add(end);
 
-                if (_verts.Count > 2)
+                if (_Verts.Count > 2)
                 {
-                    _tris.Add(_verts.Count - 4);
-                    _tris.Add(_verts.Count - 2);
-                    _tris.Add(_verts.Count - 3);
-                    _tris.Add(_verts.Count - 2);
-                    _tris.Add(_verts.Count - 1);
-                    _tris.Add(_verts.Count - 3);
+                    _Tris.Add(_Verts.Count - 4);
+                    _Tris.Add(_Verts.Count - 2);
+                    _Tris.Add(_Verts.Count - 3);
+                    _Tris.Add(_Verts.Count - 2);
+                    _Tris.Add(_Verts.Count - 1);
+                    _Tris.Add(_Verts.Count - 3);
                 }
             }
 
-            float time = Mathf.Max(PlayerScreen.main.CurrentTime + PlayerScreen.main.Settings.VisualOffset, hit.Time);
+            float time = Mathf.Max(PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
 
             int index = TimeStamps.FindIndex(x => x > time);
+
             if (index <= 0 || PositionPoints.Count <= index) return;
+
             index = Mathf.Max(index, 1);
-        
+
             float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
-            Vector3 preStartPos, preEndPos, curStartPos, curEndPos;
-        
+            Vector3 previousStepStartPointPosition, previousStepEndPointPosition, currentStepStartPointPosition, currentStepEndPointPosition;
+
             {
                 float position = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], progress);
-                var pre = Current.LaneSteps[index - 1];
-                var cur = Current.LaneSteps[index];
+                LaneStep previousStep = Current.LaneSteps[index - 1];
+                LaneStep currentStep = Current.LaneSteps[index];
 
-                preStartPos = Vector3.LerpUnclamped(pre.StartPos, pre.EndPos, hit.Current.Position);
-                preEndPos = Vector3.LerpUnclamped(pre.StartPos, pre.EndPos, hit.Current.Position + hit.Current.Length);
-                curStartPos = Vector3.LerpUnclamped(cur.StartPos, cur.EndPos, hit.Current.Position);
-                curEndPos = Vector3.LerpUnclamped(cur.StartPos, cur.EndPos, hit.Current.Position + hit.Current.Length);
+                previousStepStartPointPosition = Vector3.LerpUnclamped(previousStep.StartPointPosition, previousStep.EndPointPosition, hit.Current.Position);
+                previousStepEndPointPosition = Vector3.LerpUnclamped(previousStep.StartPointPosition, previousStep.EndPointPosition, hit.Current.Position + hit.Current.Length);
+                currentStepStartPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position);
+                currentStepEndPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position + hit.Current.Length);
 
-                if (cur.IsLinear)
-                {
-                    AddLine(
-                        Vector3.Lerp(preStartPos, curStartPos, progress) + Vector3.forward * position, 
-                        Vector3.Lerp(preEndPos, curEndPos, progress) + Vector3.forward * position);
-                }
-                else 
-                {
-                    AddLine(
+                if (currentStep.isLinear)
+                    f_addLine(
+                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, progress) + Vector3.forward * position,
+                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, progress) + Vector3.forward * position);
+                else
+                    f_addLine(
                         new Vector3(
-                            Mathf.LerpUnclamped(preStartPos.x, curStartPos.x, cur.StartEaseX.Get(progress)), 
-                            Mathf.LerpUnclamped(preStartPos.y, curStartPos.y, cur.StartEaseY.Get(progress)),
-                            position), 
+                            Mathf.LerpUnclamped(previousStepStartPointPosition.x, currentStepStartPointPosition.x, currentStep.StartEaseX.Get(progress)),
+                            Mathf.LerpUnclamped(previousStepStartPointPosition.y, currentStepStartPointPosition.y, currentStep.StartEaseY.Get(progress)),
+                            position),
                         new Vector3(
-                            Mathf.LerpUnclamped(preEndPos.x, curEndPos.x, cur.EndEaseX.Get(progress)), 
-                            Mathf.LerpUnclamped(preEndPos.y, curEndPos.y, cur.EndEaseY.Get(progress)),
-                            position));
-                }
+                            Mathf.LerpUnclamped(previousStepEndPointPosition.x, currentStepEndPointPosition.x, currentStep.EndEaseX.Get(progress)),
+                            Mathf.LerpUnclamped(previousStepEndPointPosition.y, currentStepEndPointPosition.y, currentStep.EndEaseY.Get(progress)),
+                            position)
+                    );
             }
 
-            int ai = 0;
-            for (; index < Mathf.Min(PositionPoints.Count, TimeStamps.Count); index++) 
+            var failsafeIteration = 0;
+
+            for (; index < Mathf.Min(PositionPoints.Count, TimeStamps.Count); index++)
             {
-                float endProg = InverseLerpUnclamped(TimeStamps[index - 1], TimeStamps[index], hit.EndTime);
-                float endPos = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], endProg);
-                var cur = Current.LaneSteps[index];
+                float endStepProgress = InverseLerpUnclamped(TimeStamps[index - 1], TimeStamps[index], hit.EndTime);
+                float endStepPosition = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], endStepProgress);
+                LaneStep currentStep = Current.LaneSteps[index];
 
-                curStartPos = Vector3.LerpUnclamped(cur.StartPos, cur.EndPos, hit.Current.Position);
-                curEndPos = Vector3.LerpUnclamped(cur.StartPos, cur.EndPos, hit.Current.Position + hit.Current.Length);
+                currentStepStartPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position);
+                currentStepEndPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position + hit.Current.Length);
 
-                if (cur.IsLinear)
+                if (currentStep.isLinear)
                 {
-                    AddLine(
-                        Vector3.Lerp(preStartPos, curStartPos, endProg) + Vector3.forward * endPos, 
-                        Vector3.Lerp(preEndPos, curEndPos, endProg) + Vector3.forward * endPos
+                    f_addLine(
+                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, endStepProgress) + Vector3.forward * endStepPosition,
+                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, endStepProgress) + Vector3.forward * endStepPosition
                     );
                 }
-                else 
+                else
                 {
-                    var pre = Current.LaneSteps[index - 1];
-                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;; x = Mathf.Min(endProg, Mathf.Floor(x * 16 + 1.01f) / 16))
+                    LaneStep previousStep = Current.LaneSteps[index - 1];
+
+                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;; x = Mathf.Min(endStepProgress, Mathf.Floor(x * 16 + 1.01f) / 16))
                     {
-                        AddLine(
+                        f_addLine(
                             new Vector3(
-                                Mathf.LerpUnclamped(preStartPos.x, curStartPos.x, cur.StartEaseX.Get(x)), 
-                                Mathf.LerpUnclamped(preStartPos.y, curStartPos.y, cur.StartEaseY.Get(x)),
-                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x)), 
+                                Mathf.LerpUnclamped(previousStepStartPointPosition.x, currentStepStartPointPosition.x, currentStep.StartEaseX.Get(x)),
+                                Mathf.LerpUnclamped(previousStepStartPointPosition.y, currentStepStartPointPosition.y, currentStep.StartEaseY.Get(x)),
+                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x)),
                             new Vector3(
-                                Mathf.LerpUnclamped(preEndPos.x, curEndPos.x, cur.EndEaseX.Get(x)), 
-                                Mathf.LerpUnclamped(preEndPos.y, curEndPos.y, cur.EndEaseY.Get(x)),
+                                Mathf.LerpUnclamped(previousStepEndPointPosition.x, currentStepEndPointPosition.x, currentStep.EndEaseX.Get(x)),
+                                Mathf.LerpUnclamped(previousStepEndPointPosition.y, currentStepEndPointPosition.y, currentStep.EndEaseY.Get(x)),
                                 Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x))
                         );
-                        if (x >= Mathf.Min(endProg, 1)) break;
+
+                        if (x >= Mathf.Min(endStepProgress, 1))
+                            break;
                     }
                 }
+
                 progress = 0;
 
-                ai++;
-                if (endProg <= 1 || ai > 1000) break;
+                failsafeIteration++;
 
-                preStartPos = curStartPos;
-                preEndPos = curEndPos;
+                if (endStepProgress <= 1 || failsafeIteration > 1000)
+                    break;
+
+                previousStepStartPointPosition = currentStepStartPointPosition;
+                previousStepEndPointPosition = currentStepEndPointPosition;
             }
 
             mesh.Clear();
-            mesh.SetVertices(_verts);
-            mesh.SetTriangles(_tris, 0);
+            mesh.SetVertices(_Verts);
+            mesh.SetTriangles(_Tris, 0);
             hit.HoldMesh.mesh = mesh;
         }
 
-        float InverseLerpUnclamped(float start, float end, float val) => (val - start) / (end - start);
+        private float InverseLerpUnclamped(float start, float end, float val)
+        {
+            return (val - start) / (end - start);
+        }
     }
 
     [System.Serializable]
-    public struct HitScreenCoord {
+    public struct HitScreenCoord
+    {
         public Vector2 Position;
-        public float Radius;
+        public float   Radius;
     }
 }

@@ -6,73 +6,86 @@ namespace JANOARG.Client.Behaviors.Player
 {
     internal class PlayerHitboxVisualizer : MonoBehaviour
     {
-        public static PlayerHitboxVisualizer main;
+        public static PlayerHitboxVisualizer sMain;
+
+        private static readonly int sr_SrcBlend = Shader.PropertyToID("_SrcBlend");
+        private static readonly int sr_DstBlend = Shader.PropertyToID("_DstBlend");
+        private static readonly int sr_Cull     = Shader.PropertyToID("_Cull");
+        private static readonly int sr_ZWrite   = Shader.PropertyToID("_ZWrite");
+
         public void Awake()
         {
-            main = this;
+            sMain = this;
         }
 
-        List<HitScreenCoord> DebugCoords = new();
-        List<Color> DebugColors = new();
-        Material DebugLineMaterial;
+        private List<HitScreenCoord> _DebugCoords = new();
+        private List<Color>          _DebugColors = new();
+        private Material             _DebugLineMaterial;
 
         public void DrawHitScreenCoordDebug(HitScreenCoord coord, Color color)
         {
-            if (!DebugLineMaterial)
+            if (!_DebugLineMaterial)
             {
                 Shader shader = Shader.Find("Hidden/Internal-Colored");
-                DebugLineMaterial = new Material(shader);
-                DebugLineMaterial.hideFlags = HideFlags.HideAndDontSave;
-                DebugLineMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                DebugLineMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                DebugLineMaterial.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
-                DebugLineMaterial.SetInt("_ZWrite", 0);
+                _DebugLineMaterial = new Material(shader);
+                _DebugLineMaterial.hideFlags = HideFlags.HideAndDontSave;
+                _DebugLineMaterial.SetInt(sr_SrcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                _DebugLineMaterial.SetInt(sr_DstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                _DebugLineMaterial.SetInt(sr_Cull, (int)UnityEngine.Rendering.CullMode.Off);
+                _DebugLineMaterial.SetInt(sr_ZWrite, 0);
 
 
                 Camera.onPostRender += PostRender;
             }
 
-            DebugCoords.Add(coord);
-            DebugColors.Add(color);
+            _DebugCoords.Add(coord);
+            _DebugColors.Add(color);
         }
-    
+
         public void PostRender(Camera cam)
         {
-            if (DebugCoords.Count == 0) return;
+            if (_DebugCoords.Count == 0) return;
 
 
-            DebugLineMaterial.SetPass(0);
+            _DebugLineMaterial.SetPass(0);
 
             GL.PushMatrix();
             GL.Begin(GL.LINES);
 
             // Draw circles
-            int steps = 16;
+            var steps = 16;
             float angleStep = Mathf.PI * 2 / steps;
-            for (int idx = 0; idx < DebugCoords.Count; idx++)
+
+            for (var index = 0; index < _DebugCoords.Count; index++)
             {
-                var coord = DebugCoords[idx];
+                HitScreenCoord coord = _DebugCoords[index];
                 float angle = 0;
-                Vector3 vec = new();
-                void updateVec()
+                Vector3 vectors;
+
+                void f_updateVectors()
                 {
-                    vec = CommonSys.main.MainCamera.ScreenToWorldPoint(new (Mathf.Cos(angle) * coord.Radius + coord.Position.x, Mathf.Sin(angle) * coord.Radius + coord.Position.y, 10));
+                    vectors = CommonSys.sMain.MainCamera.ScreenToWorldPoint(new Vector3(Mathf.Cos(angle) * coord.Radius + coord.Position.x, Mathf.Sin(angle) * coord.Radius + coord.Position.y, 10));
                 }
-                updateVec();
-                for (int i = 0; i < steps; i++)
+
+                f_updateVectors();
+
+                for (var i = 0; i < steps; i++)
                 {
-                    GL.Color(DebugColors[idx]);
-                    GL.Vertex(vec);
+                    GL.Color(_DebugColors[index]);
+                    GL.Vertex(vectors);
+
                     angle += angleStep;
-                    updateVec();
-                    GL.Vertex(vec);
+
+                    f_updateVectors();
+                    GL.Vertex(vectors);
                 }
             }
 
             GL.End();
             GL.PopMatrix();
-            DebugCoords.Clear();
-            DebugColors.Clear();
+
+            _DebugCoords.Clear();
+            _DebugColors.Clear();
         }
     }
 }

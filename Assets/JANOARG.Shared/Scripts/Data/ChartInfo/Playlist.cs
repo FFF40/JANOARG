@@ -9,5 +9,3 @@ namespace JANOARG.Shared.Data.ChartInfo
         public List<string> ItemPaths;
     }
 }
-
-
