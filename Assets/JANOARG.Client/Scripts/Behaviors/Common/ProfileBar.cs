@@ -249,7 +249,7 @@ namespace JANOARG.Client.Behaviors.Common
             // TODO daily bonus
             int bonusMult = GetDailyCoinBonus();
             long finalCoins = baseCoins * bonusMult;
-            var finalOrbs = (long)(baseOrbs * (1 + (totalEssence / 100)));
+            var finalOrbs = (long)(baseOrbs * (1 + totalEssence / 100));
 
             // Increase coins and orbs
             long orbsOld = CommonSys.sMain.Storage.Get("CURR:Orbs", 0L),
@@ -345,31 +345,18 @@ namespace JANOARG.Client.Behaviors.Common
                             coinsOld += amount;
                             CoinLabel.text = Helper.FormatCurrency(coinsOld);
                             SetRewardLerp(1);
-                            if (coinAnim != null) StopCoroutine(coinAnim);
+
+                            if (coinAnim != null)
+                                StopCoroutine(coinAnim);
 
                             coinAnim = StartCoroutine(
                                 Ease.Animate(
                                     .2f, x =>
                                     {
                                         CoinLabel.margin *=
-                                            new Vector4Frag(
-                                                y:
-                                                3 -
-                                                (3 *
-                                                Ease
-                                                    .Get(
-                                                        x,
-                                                        EaseFunction
-                                                            .Cubic,
-                                                        EaseMode
-                                                            .Out)));
+                                            new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
 
-                                        ParticleCoinFlash
-                                                .color *=
-                                            new ColorFrag(
-                                                a:
-                                                1 -
-                                                x);
+                                        ParticleCoinFlash.color *= new ColorFrag(a: 1 - x);
                                     }));
                         }));
             }
@@ -398,87 +385,41 @@ namespace JANOARG.Client.Behaviors.Common
                         progOld +=
                             amount;
 
-                        if (progOld >=
-                            levelGoal)
+                        if (progOld >= levelGoal)
                         {
                             levelOld++;
 
-                            progOld -=
-                                levelGoal;
+                            progOld -= levelGoal;
 
-                            levelGoal =
-                                Helper
-                                    .GetLevelGoal(
-                                        levelNew);
+                            levelGoal = Helper.GetLevelGoal(levelNew);
 
-                            if
-                                (_LevelUpAnimation !=
-                                 null)
-                                StopCoroutine(
-                                    _LevelUpAnimation);
+                            if (_LevelUpAnimation != null)
+                                StopCoroutine(_LevelUpAnimation);
 
                             _LevelUpAnimation =
-                                StartCoroutine(
-                                    LevelUpAnim(
-                                        levelOld));
+                                StartCoroutine(LevelUpAnim(levelOld));
                         }
 
-                        LevelProgressText
-                                .text =
-                            Helper
-                                .FormatCurrency(
-                                    progOld) +
-                            " / " +
-                            Helper
-                                .FormatCurrency(
-                                    levelGoal);
+                        LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
 
-                        LevelProgressBar
-                                .maxValue =
-                            levelGoal;
+                        LevelProgressBar.maxValue = levelGoal;
 
-                        LevelProgressBar
-                                .value =
-                            progOld;
+                        LevelProgressBar.value = progOld;
 
-                        SetRewardLerp(
-                            1);
+                        SetRewardLerp(1);
 
-                        if (orbAnim !=
-                            null)
-                            StopCoroutine(
-                                orbAnim);
+                        if (orbAnim != null)
+                            StopCoroutine(orbAnim);
 
                         orbAnim =
-                            StartCoroutine(
-                                Ease
-                                    .Animate(
-                                        .2f,
-                                        x =>
-                                        {
-                                            OrbLabel
-                                                    .margin *=
-                                                new
-                                                    Vector4Frag(
-                                                        y:
-                                                        3 -
-                                                        (3 *
-                                                        Ease
-                                                            .Get(
-                                                                x,
-                                                                EaseFunction
-                                                                    .Cubic,
-                                                                EaseMode
-                                                                    .Out)));
+                            StartCoroutine(Ease.Animate(.2f, x =>
+                                    {
+                                        OrbLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
 
-                                            ParticleOrbFlash
-                                                    .color *=
-                                                new
-                                                    ColorFrag(
-                                                        a:
-                                                        1 -
-                                                        x);
-                                        }));
+                                        ParticleOrbFlash.color *= new ColorFrag(a: 1 - x);
+                                    }
+                                )
+                            );
                     });
             }
 
@@ -487,57 +428,21 @@ namespace JANOARG.Client.Behaviors.Common
             pCount = essenceOld == totalEssence ? 0 : (int)Mathf.Clamp(essenceChange * 10, 1, 50);
 
             for (var i = 0; i < pCount; i++)
-                SpawnParticle(
-                    EssenceParticleSample, RT(ChangeEssenceIcon.transform), ParticleEssenceTarget, () =>
+                SpawnParticle(EssenceParticleSample, RT(ChangeEssenceIcon.transform), ParticleEssenceTarget, () =>
+                {
+                    essenceOld += essenceChange / pCount;
+                    arOld += arChange / pCount;
+                    AbilityRatingText.text = arOld.ToString("F2", CultureInfo.InvariantCulture);
+                    EssenceLabel.text = "+" + essenceOld.ToString("F1", CultureInfo.InvariantCulture) + "%";
+
+                    if (essenceAnim != null)
+                        StopCoroutine(essenceAnim);
+
+                    essenceAnim = StartCoroutine(Ease.Animate(.2f, x =>
                     {
-                        essenceOld +=
-                            essenceChange /
-                            pCount;
-
-                        arOld +=
-                            arChange /
-                            pCount;
-
-                        AbilityRatingText
-                                .text =
-                            arOld
-                                .ToString(
-                                    "F2",
-                                    CultureInfo
-                                        .InvariantCulture);
-
-                        EssenceLabel
-                                .text =
-                            "+" +
-                            essenceOld
-                                .ToString(
-                                    "F1",
-                                    CultureInfo
-                                        .InvariantCulture) +
-                            "%";
-
-                        if
-                            (essenceAnim !=
-                             null)
-                            StopCoroutine(
-                                essenceAnim);
-
-                        essenceAnim =
-                            StartCoroutine(
-                                Ease
-                                    .Animate(
-                                        .2f,
-                                        x =>
-                                        {
-                                            ParticleEssenceFlash
-                                                    .color *=
-                                                new
-                                                    ColorFrag(
-                                                        a:
-                                                        1 -
-                                                        x);
-                                        }));
-                    });
+                        ParticleEssenceFlash.color *= new ColorFrag(a: 1 - x);
+                    }));
+                });
 
             _SongGainSkipLock = true;
 
@@ -581,7 +486,7 @@ namespace JANOARG.Client.Behaviors.Common
                         SetRewardLerp(1);
 
                         float lerp2 = Ease.Get(
-                            (x * 2) - 1, EaseFunction.Exponential,
+                            x * 2 - 1, EaseFunction.Exponential,
                             EaseMode.In);
 
                         BonusLabel.alpha = 1 - lerp2;
@@ -612,7 +517,7 @@ namespace JANOARG.Client.Behaviors.Common
                     SetRewardLerp(1 - lerp);
 
                     float lerp2 = Ease.Get(
-                        (x / .6f) - .2f, EaseFunction.Quintic,
+                        x / .6f - .2f, EaseFunction.Quintic,
                         EaseMode.Out);
 
                     SetChangeLerp(1 - lerp2);
@@ -649,7 +554,7 @@ namespace JANOARG.Client.Behaviors.Common
 
                     SetRewardLerp(1 - lerp);
 
-                    float lerp2 = Ease.Get((x * 3) - 2, EaseFunction.Quintic, EaseMode.Out);
+                    float lerp2 = Ease.Get(x * 3 - 2, EaseFunction.Quintic, EaseMode.Out);
                     SetChangeLerp(1 - lerp2);
                 });
         }
@@ -666,11 +571,11 @@ namespace JANOARG.Client.Behaviors.Common
                     x =>
                     {
                         LevelUpLevelText.text =
-                            $"<alpha=#{(int)Math.Clamp(((x * 2) + Random.value) * 256, 0, 255):x2}>" +
+                            $"<alpha=#{(int)Math.Clamp((x * 2 + Random.value) * 256, 0, 255):x2}>" +
                             (level - 1) +
-                            $"<alpha=#{(int)Math.Clamp(((x * 2) - .5 + Random.value) * 256, 0, 255):x2}>" +
+                            $"<alpha=#{(int)Math.Clamp((x * 2 - .5 + Random.value) * 256, 0, 255):x2}>" +
                             " → " +
-                            $"<alpha=#{(int)Math.Clamp(((x * 2) - 1 + Random.value) * 256, 0, 255):x2}>" +
+                            $"<alpha=#{(int)Math.Clamp((x * 2 - 1 + Random.value) * 256, 0, 255):x2}>" +
                             level;
                     }));
 
@@ -774,31 +679,29 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void SetRewardLerp(float lerp)
         {
-            AbilityRatingHolder.sizeDelta *= new Vector2Frag(60 + (20 * lerp));
-            LevelHolder.anchoredPosition  *= new Vector2Frag(AbilityRatingHolder.rect.xMin - 1);
-            LevelHolder.sizeDelta         *= new Vector2Frag(60 + (60 * lerp));
-            
-            LevelLabel.rectTransform.sizeDelta         = new Vector2(-12 - (80 * lerp), 0);
-            AbilityRatingLabel.rectTransform.sizeDelta = new Vector2(-12 - (6 * lerp), 0);
-            LevelText.rectTransform.sizeDelta          = new Vector2(-12 - (6 * lerp), -2 * lerp);
-            AbilityRatingText.rectTransform.sizeDelta  = new Vector2(-12 - (16 * lerp), -28 * lerp);
+            AbilityRatingHolder.sizeDelta *= new Vector2Frag(60 + 20 * lerp);
+            LevelHolder.anchoredPosition *= new Vector2Frag(AbilityRatingHolder.rect.xMin - 1);
+            LevelHolder.sizeDelta *= new Vector2Frag(60 + 60 * lerp);
 
-            AbilityRatingText.fontSize = LevelText.fontSize = 8 + (3 * lerp);
+            LevelLabel.rectTransform.sizeDelta = new Vector2(-12 - 80 * lerp, 0);
+            AbilityRatingLabel.rectTransform.sizeDelta = new Vector2(-12 - 6 * lerp, 0);
+            LevelText.rectTransform.sizeDelta = new Vector2(-12 - 6 * lerp, -2 * lerp);
+            AbilityRatingText.rectTransform.sizeDelta = new Vector2(-12 - 16 * lerp, -28 * lerp);
 
-            NameLabel.alpha = TitleLabel.alpha = MenuButtonGroup.alpha = 
+            AbilityRatingText.fontSize = LevelText.fontSize = 8 + 3 * lerp;
+
+            NameLabel.alpha = TitleLabel.alpha = MenuButtonGroup.alpha =
                 AvatarGroup.alpha = 1 - lerp;
-            
+
             LevelProgressText.alpha = lerp;
-            
+
             LevelText.color = LevelLabel.color = Color.Lerp(Color.black, Color.white, lerp);
-            LevelBackgroundGraphic.color       = new Color(1, 1, 1, .75f - (.6f * lerp));
-            LevelFillGraphic.color             = new Color(1, 1, 1, 1 - (.6f * lerp));
+            LevelBackgroundGraphic.color = new Color(1, 1, 1, .75f - .6f * lerp);
+            LevelFillGraphic.color = new Color(1, 1, 1, 1 - .6f * lerp);
 
             float width = 300 + RightLayout.preferredWidth - RightLayout.minWidth;
 
-            float safeOffset = -RT(this)
-                                   .sizeDelta.x /
-                               2;
+            float safeOffset = -RT(this).sizeDelta.x / 2;
 
             RT(LeftLayout)
                 .anchoredPosition = new Vector2(
@@ -806,12 +709,12 @@ namespace JANOARG.Client.Behaviors.Common
                     -1000,
                     -500 -
                     safeOffset -
-                    (width / 2) -
+                    width / 2 -
                     (LeftLayout.preferredWidth - LeftLayout.minWidth), lerp),
                 0);
 
             RT(RightLayout)
-                .anchoredPosition = new Vector2(Mathf.Lerp(1000, 600 + safeOffset + (width / 2), lerp), 0);
+                .anchoredPosition = new Vector2(Mathf.Lerp(1000, 600 + safeOffset + width / 2, lerp), 0);
         }
 
         public void SetChangeLerp(float lerp)
@@ -832,8 +735,8 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void SetBonusBlock(Graphic target, float lerp)
         {
-            target.rectTransform.sizeDelta *= new Vector2Frag(y: 1 + (6 * lerp));
-            target.color *= new ColorFrag(a: .6f + (.4f * lerp));
+            target.rectTransform.sizeDelta *= new Vector2Frag(y: 1 + 6 * lerp);
+            target.color *= new ColorFrag(a: .6f + .4f * lerp);
         }
 
         private RectTransform RT(Component obj)

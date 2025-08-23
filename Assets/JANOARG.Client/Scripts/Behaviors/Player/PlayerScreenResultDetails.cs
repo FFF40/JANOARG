@@ -79,10 +79,10 @@ namespace JANOARG.Client.Behaviors.Player
             LerpDetailed(-1);
             float ratio = PlayerScreen.sMain.PerfectWindow / PlayerScreen.sMain.GoodWindow;
 
-            EarlyLine.anchorMin *= new Vector2Frag(y: .5f + (ratio / 2));
-            EarlyLine.anchorMax *= new Vector2Frag(y: .5f + (ratio / 2));
-            LateLine.anchorMin *= new Vector2Frag(y: .5f - (ratio / 2));
-            LateLine.anchorMax *= new Vector2Frag(y: .5f - (ratio / 2));
+            EarlyLine.anchorMin *= new Vector2Frag(y: .5f + ratio / 2);
+            EarlyLine.anchorMax *= new Vector2Frag(y: .5f + ratio / 2);
+            LateLine.anchorMin *= new Vector2Frag(y: .5f - ratio / 2);
+            LateLine.anchorMax *= new Vector2Frag(y: .5f - ratio / 2);
         }
 
         public void Reset()
@@ -181,7 +181,7 @@ namespace JANOARG.Client.Behaviors.Player
                         new Vector2(
                             item.Time / PlayerScreen.sTargetSong.Clip.length,
                             item.Type == HitObjectHistoryType.Timing
-                                ? Mathf.Clamp01(.5f - (item.Offset / PlayerScreen.sMain.GoodWindow / 2))
+                                ? Mathf.Clamp01(.5f - item.Offset / PlayerScreen.sMain.GoodWindow / 2)
                                 : 0.5f
                         );
 
@@ -218,16 +218,16 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (RectTransform line in Lines)
             {
                 line.anchorMin *= new Vector2Frag(x: -2 * ease1);
-                line.anchorMax *= new Vector2Frag(x: 1 + (2 * ease1));
+                line.anchorMax *= new Vector2Frag(x: 1 + 2 * ease1);
             }
 
-            Container.rectTransform.sizeDelta *= new Vector2Frag(y: 110 - (60 * ease1));
+            Container.rectTransform.sizeDelta *= new Vector2Frag(y: 110 - 60 * ease1);
             Container.rectTransform.anchoredPosition *= new Vector2Frag(y: 25 * (1 - ease1));
-            TimingPinHolder.sizeDelta = new Vector2((100 * ease1) - 120, -80 + (40 * ease1));
-            CatchPinHolder.anchoredPosition *= new Vector2Frag(y: 35 - (20 * ease1));
-            CatchPinHolder.sizeDelta = new Vector2((100 * ease1) - 120, 20 - (10 * ease1));
-            FlickPinHolder.anchoredPosition *= new Vector2Frag(y: 10 - (5 * ease1));
-            FlickPinHolder.sizeDelta = new Vector2((100 * ease1) - 120, 20 - (10 * ease1));
+            TimingPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, -80 + 40 * ease1);
+            CatchPinHolder.anchoredPosition *= new Vector2Frag(y: 35 - 20 * ease1);
+            CatchPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
+            FlickPinHolder.anchoredPosition *= new Vector2Frag(y: 10 - 5 * ease1);
+            FlickPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
 
             var anchoredPositionFrag = new Vector2Frag(x: -1000 * ease1);
             TimingLabelHolder.anchoredPosition *= anchoredPositionFrag;
@@ -236,7 +236,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             float f_getLerp(float x)
             {
-                return Mathf.Clamp01(2 - (Mathf.Abs(value + ((value + 1) / 2) - x) * 2));
+                return Mathf.Clamp01(2 - Mathf.Abs(value + (value + 1) / 2 - x) * 2);
             }
 
             TimingEarlyTitle.alpha = Ease.Get(f_getLerp(0), EaseFunction.Cubic, EaseMode.Out) / 2;

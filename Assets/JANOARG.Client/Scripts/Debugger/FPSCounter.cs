@@ -49,6 +49,7 @@ namespace JANOARG.Client.Debugger
 
                 Text.text = "frame: " + (1 / frame).ToString("0", _Invariant) + "fps " + (1e3 * frame).ToString("0.0", _Invariant) + "ms\n" +
                             "strain: " + (frameTiming > 0 ? cpuStrain.ToString("0.0", _Invariant) + "ms cpu, " + gpuStrain.ToString("0.0", _Invariant) + "ms gpu" : "(unavailable)");
+
                 Timer -= Interval;
             }
         }

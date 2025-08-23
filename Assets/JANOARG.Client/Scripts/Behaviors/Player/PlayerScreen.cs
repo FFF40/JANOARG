@@ -357,6 +357,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                     Lane laneData = sTargetChart.Data.Lanes[a];
                     bool noParent = string.IsNullOrEmpty(laneData.Group);
+
                     LaneGroupPlayer laneInGroup = noParent
                         ? null : LaneGroups.Find(x => x.Current.Name == laneData.Group);
 
@@ -384,6 +385,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Lanes.Add(instancedLane);
 
                     float time = float.NaN;
+
                     Vector3 startPos = Vector3.zero,
                         endPos = Vector3.zero; // Declare 2 points of lane show in screen
 
@@ -410,16 +412,16 @@ namespace JANOARG.Client.Behaviors.Player
                             // Set 2 points of lane?
                             var lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
                             LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, sTargetSong.Timing);
-                            startPos = (Quaternion.Euler(lane.Rotation) * positionStep.StartPosition) + lane.Position;
-                            endPos = (Quaternion.Euler(lane.Rotation) * positionStep.EndPosition) + lane.Position;
+                            startPos = Quaternion.Euler(lane.Rotation) * positionStep.StartPosition + lane.Position;
+                            endPos = Quaternion.Euler(lane.Rotation) * positionStep.EndPosition + lane.Position;
                             LaneGroupPlayer group = laneInGroup;
 
                             // Loop to get localPosition of 2 points of lane?
                             while (group)
                             {
                                 var laneGroup = (LaneGroup)group.Original.GetStoryboardableObject(laneHitobject.Offset);
-                                startPos = (Quaternion.Euler(laneGroup.Rotation) * startPos) + laneGroup.Position;
-                                endPos = (Quaternion.Euler(laneGroup.Rotation) * endPos) + laneGroup.Position;
+                                startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
+                                endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
                                 group = group.Parent;
                             }
                         }
@@ -428,7 +430,7 @@ namespace JANOARG.Client.Behaviors.Player
                         Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
                         Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
 
-                        float radius = (Vector2.Distance(hitStart, hitEnd) / 2) + ScaledExtraRadius;
+                        float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
 
                         // Add hit coords
                         instancedLane.HitCoords.Add(new HitScreenCoord
@@ -589,6 +591,7 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 ScoreCounter.Digits[a]
                     .list.Clear();
+
                 ScoreCounter.Digits[a].Speed = 3;
 
                 for (int b = 9 - a; b <= 10; b++)
@@ -602,7 +605,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 SetInterfaceColor(sTargetSong.InterfaceColor * new Color(1, 1, 1, ease));
 
-                PlayerHUD.transform.localScale = Vector3.one * ((ease * .05f) + .95f);
+                PlayerHUD.transform.localScale = Vector3.one * (ease * .05f + .95f);
             });
 
             for (var a = 0; a < ScoreCounter.Digits.Count; a++) ScoreCounter.Digits[a].Speed = 9;
@@ -627,7 +630,7 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     if (Music.isPlaying)
                     {
-                        if (Mathf.Abs(CurrentTime - ((float)Music.timeSamples / Music.clip.frequency)) > SyncThreshold)
+                        if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
                         {
                             Music.time = CurrentTime;
                         }
@@ -672,6 +675,7 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     sCurrentChart.Palette.LaneStyles[a]
                         .Advance(visualBeat);
+
                     LaneStyles[a]
                         .Update(sCurrentChart.Palette.LaneStyles[a]);
                 }
@@ -680,6 +684,7 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     sCurrentChart.Palette.HitStyles[a]
                         .Advance(visualBeat);
+
                     HitStyles[a]
                         .Update(sCurrentChart.Palette.HitStyles[a]);
                 }
@@ -779,8 +784,8 @@ namespace JANOARG.Client.Behaviors.Player
                 float val2 = 1 - Ease.Get(x, EaseFunction.Quintic, EaseMode.In);
 
                 ComboGroup.alpha = Combo == 0 ? 0 : val + 1;
-                ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + (2 * val * val));
-                JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + (2 * val * val));
+                ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
+                JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
                 JudgmentGroup.alpha = val2;
             });
         }
@@ -811,6 +816,7 @@ namespace JANOARG.Client.Behaviors.Player
             if (hitObject.Current.Flickable)
             {
                 score += 1;
+
                 if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional
                     score += 1;
             }
@@ -834,6 +840,7 @@ namespace JANOARG.Client.Behaviors.Player
             else
             {
                 acc = 0;
+
                 if (offsetAbs > GoodWindow)
                     acc = Mathf.Sign(offset);
                 else if (offsetAbs > PerfectWindow)
@@ -983,9 +990,11 @@ namespace JANOARG.Client.Behaviors.Player
         public HitObjectHistoryItem(HitPlayer hit, float offset)
         {
             Time = hit.Time;
+
             Type = hit.Current.Flickable ? HitObjectHistoryType.Flick :
                 hit.Current.Type == HitObject.HitType.Catch ? HitObjectHistoryType.Catch :
                 HitObjectHistoryType.Timing;
+
             Offset = offset;
         }
 

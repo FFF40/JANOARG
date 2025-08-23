@@ -42,13 +42,13 @@ namespace JANOARG.Client.Behaviors.Common
                         "SceneLayerVolume",
                         cutoff <= 10
                             ? -80
-                            : (Mathf.Clamp01(
+                            : Mathf.Clamp01(
                                   Mathf.Pow(
                                       cutoffLog /
                                       Mathf.Log10(
                                           22000),
                                       .2f)) *
-                              80) -
+                              80 -
                               80);
                 });
         }

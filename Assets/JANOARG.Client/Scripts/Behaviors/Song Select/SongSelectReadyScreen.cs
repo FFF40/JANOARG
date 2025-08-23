@@ -83,13 +83,14 @@ namespace JANOARG.Client.Behaviors.Song_Select
             {
                 TMP_MeshInfo meshInfo = SongArtistText.textInfo.meshInfo[info.materialReferenceIndex];
                 int index = info.vertexIndex;
-                float ease = Ease.Get(x * 2, EaseFunction.Exponential, EaseMode.Out) + .05f - (.05f * Ease.Get((x * 1.4f) - 0.4f, EaseFunction.Bounce, EaseMode.Out));
+                float ease = Ease.Get(x * 2, EaseFunction.Exponential, EaseMode.Out) + .05f - .05f * Ease.Get(x * 1.4f - 0.4f, EaseFunction.Bounce, EaseMode.Out);
                 Vector3 offset = 400 * (1 - ease) * new Vector3(-.26795f, -1);
                 meshInfo.vertices[index] += offset;
                 meshInfo.vertices[index + 1] += offset;
                 meshInfo.vertices[index + 2] += offset;
                 meshInfo.vertices[index + 3] += offset;
             }));
+
             StartCoroutine(Ease.AnimateText(SongNameText, 1.5f, 1 / 400f, (info2, x) =>
             {
                 TMP_MeshInfo meshInfo = SongNameText.textInfo.meshInfo[info2.materialReferenceIndex];
@@ -106,7 +107,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
             StartCoroutine(Ease.Animate(1, x =>
             {
                 DifficultyInfoHolder.anchoredPosition = new Vector2(
-                    -912 + (1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out)),
+                    -912 + 1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out),
                     DifficultyInfoHolder.anchoredPosition.y);
             }));
 
@@ -117,22 +118,22 @@ namespace JANOARG.Client.Behaviors.Song_Select
                     100 * Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.Out));
 
                 ExtraInfoBackground2.sizeDelta = new Vector2(ExtraInfoBackground2.sizeDelta.x,
-                    100 * Ease.Get((x * 1.3f) - .2f, EaseFunction.Exponential, EaseMode.Out));
+                    100 * Ease.Get(x * 1.3f - .2f, EaseFunction.Exponential, EaseMode.Out));
 
                 ExtraInfoBackground3.sizeDelta = new Vector2(ExtraInfoBackground3.sizeDelta.x,
-                    96 * Ease.Get((x * 1.3f) - .3f, EaseFunction.Exponential, EaseMode.Out));
+                    96 * Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.Out));
 
                 CoverArtistNameLabel.rectTransform.anchoredPosition = new Vector2(CoverArtistNameLabel.rectTransform.anchoredPosition.x,
-                    -200 + (200 * Ease.Get(x * 1.4f, EaseFunction.Exponential, EaseMode.Out)));
+                    -200 + 200 * Ease.Get(x * 1.4f, EaseFunction.Exponential, EaseMode.Out));
 
                 CoverArtistNameText.rectTransform.anchoredPosition = new Vector2(CoverArtistNameText.rectTransform.anchoredPosition.x,
-                    -210 + (200 * Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.Out)));
+                    -210 + 200 * Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.Out));
 
                 CharterNameLabel.rectTransform.anchoredPosition = new Vector2(CharterNameLabel.rectTransform.anchoredPosition.x,
-                    -200 + (200 * Ease.Get(x * 1.2f, EaseFunction.Exponential, EaseMode.Out)));
+                    -200 + 200 * Ease.Get(x * 1.2f, EaseFunction.Exponential, EaseMode.Out));
 
                 CharterNameText.rectTransform.anchoredPosition = new Vector2(CharterNameText.rectTransform.anchoredPosition.x,
-                    -210 + (200 * Ease.Get(x * 1.1f, EaseFunction.Exponential, EaseMode.Out)));
+                    -210 + 200 * Ease.Get(x * 1.1f, EaseFunction.Exponential, EaseMode.Out));
             }));
 
             yield return null;
@@ -167,6 +168,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 meshInfo.vertices[index + 2] += offset;
                 meshInfo.vertices[index + 3] += offset;
             }));
+
             StartCoroutine(Ease.AnimateText(SongNameText, 0.5f, 1 / 500f, (info, x) =>
             {
                 TMP_MeshInfo meshInfo = SongNameText.textInfo.meshInfo[info.materialReferenceIndex];
@@ -183,7 +185,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
             StartCoroutine(Ease.Animate(1, x =>
             {
                 DifficultyInfoHolder.anchoredPosition = new Vector2(
-                    88 + (1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.In)),
+                    88 + 1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.In),
                     DifficultyInfoHolder.anchoredPosition.y);
             }));
 
@@ -191,25 +193,25 @@ namespace JANOARG.Client.Behaviors.Song_Select
             StartCoroutine(Ease.Animate(1f, x =>
             {
                 ExtraInfoBackground.sizeDelta = new Vector2(ExtraInfoBackground.sizeDelta.x,
-                    100 * (1 - Ease.Get((x * 1.3f) - .3f, EaseFunction.Exponential, EaseMode.In)));
+                    100 * (1 - Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.In)));
 
                 ExtraInfoBackground2.sizeDelta = new Vector2(ExtraInfoBackground2.sizeDelta.x,
-                    100 * (1 - Ease.Get((x * 1.3f) - .1f, EaseFunction.Exponential, EaseMode.In)));
+                    100 * (1 - Ease.Get(x * 1.3f - .1f, EaseFunction.Exponential, EaseMode.In)));
 
                 ExtraInfoBackground3.sizeDelta = new Vector2(ExtraInfoBackground3.sizeDelta.x,
                     96 * (1 - Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.In)));
 
                 CoverArtistNameLabel.rectTransform.anchoredPosition = new Vector2(CoverArtistNameLabel.rectTransform.anchoredPosition.x,
-                    -0 + (200 * Ease.Get((x * 1.1f) - .1f, EaseFunction.Exponential, EaseMode.In)));
+                    -0 + 200 * Ease.Get(x * 1.1f - .1f, EaseFunction.Exponential, EaseMode.In));
 
                 CoverArtistNameText.rectTransform.anchoredPosition = new Vector2(CoverArtistNameText.rectTransform.anchoredPosition.x,
-                    -10 + (200 * Ease.Get((x * 1.2f) - .2f, EaseFunction.Exponential, EaseMode.In)));
+                    -10 + 200 * Ease.Get(x * 1.2f - .2f, EaseFunction.Exponential, EaseMode.In));
 
                 CharterNameLabel.rectTransform.anchoredPosition = new Vector2(CharterNameLabel.rectTransform.anchoredPosition.x,
-                    -0 + (200 * Ease.Get((x * 1.3f) - .3f, EaseFunction.Exponential, EaseMode.In)));
+                    -0 + 200 * Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.In));
 
                 CharterNameText.rectTransform.anchoredPosition = new Vector2(CharterNameText.rectTransform.anchoredPosition.x,
-                    -10 + (200 * Ease.Get((x * 1.4f) - .4f, EaseFunction.Exponential, EaseMode.In)));
+                    -10 + 200 * Ease.Get(x * 1.4f - .4f, EaseFunction.Exponential, EaseMode.In));
             }));
 
             yield return new WaitForSeconds(2);

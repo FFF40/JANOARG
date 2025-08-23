@@ -42,16 +42,16 @@ namespace JANOARG.Client.Behaviors.Options
             {
                 MultiValueType.PerJudgment, new List<MultiValueFieldData>
                 {
-                    new() { Name = "Flawless",   Color = new Color(1, 1, .6f)     },
-                    new() { Name = "Misaligned", Color = new Color(.6f, .7f, 1)   },
-                    new() { Name = "Broken",     Color = new Color(.6f, .6f, .6f) }
+                    new() { Name = "Flawless", Color = new Color(1, 1, .6f) },
+                    new() { Name = "Misaligned", Color = new Color(.6f, .7f, 1) },
+                    new() { Name = "Broken", Color = new Color(.6f, .6f, .6f) }
                 }
             },
             {
                 MultiValueType.PerHitType, new List<MultiValueFieldData>
                 {
                     new() { Name = "Normal", Color = new Color(.8f, .9f, 1) },
-                    new() { Name = "Catch",  Color = new Color(1, 1, .8f)   }
+                    new() { Name = "Catch", Color = new Color(1, 1, .8f) }
                 }
             }
         };

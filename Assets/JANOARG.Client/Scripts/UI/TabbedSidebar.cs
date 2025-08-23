@@ -54,14 +54,18 @@ namespace JANOARG.Client.UI
         {
             Tabs[CurrentTab]
                 .Target.gameObject.SetActive(false);
+
             CurrentTab = index;
 
             Tabs[CurrentTab]
                 .Target.gameObject.SetActive(true);
+
             ScrollView.content = Tabs[CurrentTab].Target;
+
             TabButtonIndicator.anchoredPosition = Tabs[CurrentTab]
                 .Button.GetComponent<RectTransform>()
                 .anchoredPosition;
+
             TabLabel.text = " > " + Tabs[CurrentTab].Name;
         }
 
@@ -75,10 +79,13 @@ namespace JANOARG.Client.UI
             isAnimating = true;
 
             int oldIndex = CurrentTab;
+
             var oldRT = Tabs[oldIndex]
                 .Button.GetComponent<RectTransform>();
+
             var newRT = Tabs[index]
                 .Button.GetComponent<RectTransform>();
+
             Vector2 sizeDelta = TabButtonIndicator.sizeDelta;
 
             void f_lerpIndicator(float value)
@@ -90,7 +97,7 @@ namespace JANOARG.Client.UI
                 float max = Mathf.Lerp(oldRT.anchoredPosition.y, newRT.anchoredPosition.y, oldIndex < index ? ease2 : ease);
 
                 TabButtonIndicator.anchoredPosition = Vector2.up * min;
-                TabButtonIndicator.sizeDelta = sizeDelta + (Vector2.up * (max - min));
+                TabButtonIndicator.sizeDelta = sizeDelta + Vector2.up * (max - min);
             }
 
             void f_lerpContent(float value)
@@ -113,7 +120,7 @@ namespace JANOARG.Client.UI
                 }
 
                 f_lerpIndicator(a);
-                f_lerpContent(a < .25f ? 1 - (a * 4) : (a - .25f) / .75f);
+                f_lerpContent(a < .25f ? 1 - a * 4 : (a - .25f) / .75f);
 
                 yield return null;
             }

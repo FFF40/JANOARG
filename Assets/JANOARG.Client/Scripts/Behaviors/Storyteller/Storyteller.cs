@@ -108,7 +108,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
 
                 float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.In);
-                DialogueLabel.rectTransform.anchoredPosition = dialoguePos + (ease2 * 5 * Vector2.down);
+                DialogueLabel.rectTransform.anchoredPosition = dialoguePos + ease2 * 5 * Vector2.down;
             });
 
             DialogueLabel.text = "";

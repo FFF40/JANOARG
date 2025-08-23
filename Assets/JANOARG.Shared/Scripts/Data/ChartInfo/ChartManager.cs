@@ -46,10 +46,12 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 var group = (LaneGroup)CurrentChart.Groups[a]
                     .GetStoryboardableObject(pos);
+
                 if (Groups.ContainsKey(group.Name))
                     Groups[group.Name]
                         .Update(group, pos, this);
                 else Groups.Add(group.Name, new LaneGroupManager(group, pos, this));
+
                 Groups[group.Name].IsTouched = true;
             }
 
@@ -77,6 +79,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 Lanes[CurrentChart.Lanes.Count]
                     .Dispose();
+
                 Lanes.RemoveAt(CurrentChart.Lanes.Count);
             }
 
@@ -120,6 +123,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 LaneStyles[pallete.LaneStyles.Count]
                     .Dispose();
+
                 LaneStyles.RemoveAt(pallete.LaneStyles.Count);
             }
 
@@ -127,6 +131,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 var style = (HitStyle)pallete.HitStyles[a]
                     .GetStoryboardableObject(pos);
+
                 if (HitStyles.Count <= a) HitStyles.Add(new HitStyleManager(style));
                 else
                     HitStyles[a]
@@ -137,6 +142,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 HitStyles[pallete.HitStyles.Count]
                     .Dispose();
+
                 HitStyles.RemoveAt(pallete.HitStyles.Count);
             }
         }
@@ -235,7 +241,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public void Get(ref Vector3 pos, ref Quaternion rot)
         {
-            pos = (FinalRotation * pos) + FinalPosition;
+            pos = FinalRotation * pos + FinalPosition;
             rot = FinalRotation * rot;
         }
 
@@ -256,7 +262,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 else
                 {
                     if (group.IsDirty) group.UpdatePosition(main, original);
-                    FinalPosition = (group.FinalRotation * FinalPosition) + group.FinalPosition;
+                    FinalPosition = group.FinalRotation * FinalPosition + group.FinalPosition;
                     FinalRotation = group.FinalRotation * FinalRotation;
                 }
             }
@@ -305,6 +311,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             for (var a = 0; a < CurrentLane.LaneSteps.Count; a++)
             {
                 if (Steps.Count <= a) Steps.Add(new LaneStepManager());
+
                 var step = (LaneStep)CurrentLane.LaneSteps[a]
                     .GetStoryboardableObject(pos);
 
@@ -320,13 +327,14 @@ namespace JANOARG.Shared.Data.ChartInfo
                 if (force)
                 {
                     LaneStepManager prev = a < 1 ? new LaneStepManager() : Steps[a - 1];
-                    Steps[a].Distance = prev.Distance + (CurrentSpeed * step.Speed * (Steps[a].Offset - prev.Offset));
+                    Steps[a].Distance = prev.Distance + CurrentSpeed * step.Speed * (Steps[a].Offset - prev.Offset);
                 }
 
                 Steps[a].CurrentStep = step;
 
                 stepCount += float.IsNaN(offset) ? 1 :
                     Mathf.CeilToInt((offset == Steps[a].Offset ? Steps[a].Offset > time ? 1 : 0 : Mathf.Clamp01((time - Steps[a].Offset) / (offset - Steps[a].Offset))) * (step.isLinear ? 1 : 16));
+
                 offset = Steps[a].Offset;
             }
 
@@ -345,15 +353,15 @@ namespace JANOARG.Shared.Data.ChartInfo
 
                     if (next == null)
                     {
-                        verts[index] = (Vector3)curr.CurrentStep.StartPointPosition + (Vector3.forward * curr.Distance);
-                        verts[index + 1] = (Vector3)curr.CurrentStep.EndPointPosition + (Vector3.forward * curr.Distance);
+                        verts[index] = (Vector3)curr.CurrentStep.StartPointPosition + Vector3.forward * curr.Distance;
+                        verts[index + 1] = (Vector3)curr.CurrentStep.EndPointPosition + Vector3.forward * curr.Distance;
 
                         // Debug.Log(index + "/" + verts.Length + " " + verts[index] + " " + verts[index + 1]);
                         index += 2;
 
                         if (index >= verts.Length)
                         {
-                            CurrentDistance = curr.Distance + (curr.CurrentStep.Speed * CurrentSpeed * (time - curr.Offset));
+                            CurrentDistance = curr.Distance + curr.CurrentStep.Speed * CurrentSpeed * (time - curr.Offset);
 
                             break;
                         }
@@ -362,8 +370,8 @@ namespace JANOARG.Shared.Data.ChartInfo
                     {
                         float p = curr.Offset == next.Offset ? curr.Offset < time ? 1 : 0 : Mathf.Clamp01((time - curr.Offset) / (next.Offset - curr.Offset));
                         float dist = Mathf.Lerp(curr.Distance, next.Distance, p);
-                        verts[index] = Vector3.Lerp(curr.CurrentStep.StartPointPosition, next.CurrentStep.StartPointPosition, p) + (Vector3.forward * dist);
-                        verts[index + 1] = Vector3.Lerp(curr.CurrentStep.EndPointPosition, next.CurrentStep.EndPointPosition, p) + (Vector3.forward * dist);
+                        verts[index] = Vector3.Lerp(curr.CurrentStep.StartPointPosition, next.CurrentStep.StartPointPosition, p) + Vector3.forward * dist;
+                        verts[index + 1] = Vector3.Lerp(curr.CurrentStep.EndPointPosition, next.CurrentStep.EndPointPosition, p) + Vector3.forward * dist;
 
                         // Debug.Log(index + "/" + verts.Length + " " + verts[index] + " " + verts[index + 1]);
                         index += 2;
@@ -386,10 +394,13 @@ namespace JANOARG.Shared.Data.ChartInfo
                         {
                             float x = Math.Max(i / 16f, p);
                             dist = Mathf.Lerp(curr.Distance, next.Distance, x);
+
                             verts[index] = new Vector3(Mathf.LerpUnclamped(curr.CurrentStep.StartPointPosition.x, next.CurrentStep.StartPointPosition.x, next.CurrentStep.StartEaseX.Get(x)),
                                 Mathf.LerpUnclamped(curr.CurrentStep.StartPointPosition.y, next.CurrentStep.StartPointPosition.y, next.CurrentStep.StartEaseY.Get(x)), dist);
+
                             verts[index + 1] = new Vector3(Mathf.LerpUnclamped(curr.CurrentStep.EndPointPosition.x, next.CurrentStep.EndPointPosition.x, next.CurrentStep.EndEaseX.Get(x)),
                                 Mathf.LerpUnclamped(curr.CurrentStep.EndPointPosition.y, next.CurrentStep.EndPointPosition.y, next.CurrentStep.EndEaseY.Get(x)), dist);
+
                             index += 2;
 
                             if (x == p || index >= verts.Length) break;
@@ -408,7 +419,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     next = curr;
                 }
 
-            if (float.IsNaN(CurrentDistance) && Steps.Count > 0) CurrentDistance = Steps[0].Distance + (Steps[0].CurrentStep.Speed * CurrentSpeed * (time - Steps[0].Offset));
+            if (float.IsNaN(CurrentDistance) && Steps.Count > 0) CurrentDistance = Steps[0].Distance + Steps[0].CurrentStep.Speed * CurrentSpeed * (time - Steps[0].Offset);
 
             for (var a = 0; a < verts.Length; a++) uvs[a] = new Vector2(a % 2, verts[a].z);
 
@@ -435,14 +446,15 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             FinalPosition = CurrentLane.Position;
             FinalRotation = Quaternion.Euler(CurrentLane.Rotation);
+
             if (!string.IsNullOrEmpty(CurrentLane.Group) && main.Groups.ContainsKey(CurrentLane.Group))
                 main.Groups[CurrentLane.Group]
                     .Get(ref FinalPosition, ref FinalRotation);
 
-            StartPosLocal = StartPos = verts[(stepCount * 2) - 2] - (Vector3.forward * CurrentDistance);
-            StartPos = (FinalRotation * StartPos) + FinalPosition;
-            EndPosLocal = EndPos = verts[(stepCount * 2) - 1] - (Vector3.forward * CurrentDistance);
-            EndPos = (FinalRotation * EndPos) + FinalPosition;
+            StartPosLocal = StartPos = verts[stepCount * 2 - 2] - Vector3.forward * CurrentDistance;
+            StartPos = FinalRotation * StartPos + FinalPosition;
+            EndPosLocal = EndPos = verts[stepCount * 2 - 1] - Vector3.forward * CurrentDistance;
+            EndPos = FinalRotation * EndPos + FinalPosition;
 
 
 
@@ -450,6 +462,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 var hit = (HitObject)CurrentLane.Objects[a]
                     .GetStoryboardableObject(pos);
+
                 if (Objects.Count <= a) Objects.Add(new HitObjectManager(hit, time, this, main));
                 else
                     Objects[a]
@@ -486,8 +499,8 @@ namespace JANOARG.Shared.Data.ChartInfo
                         Vector3 currEnd = Vector3.LerpUnclamped(curr.CurrentStep.StartPointPosition, curr.CurrentStep.EndPointPosition, xPos + xLength);
                         Vector3 nextStart = Vector3.LerpUnclamped(next.CurrentStep.StartPointPosition, next.CurrentStep.EndPointPosition, xPos);
                         Vector3 nextEnd = Vector3.LerpUnclamped(next.CurrentStep.StartPointPosition, next.CurrentStep.EndPointPosition, xPos + xLength);
-                        verts.Add(Vector3.Lerp(currStart, nextStart, pEnd) + (Vector3.forward * dist));
-                        verts.Add(Vector3.Lerp(currEnd, nextEnd, pEnd) + (Vector3.forward * dist));
+                        verts.Add(Vector3.Lerp(currStart, nextStart, pEnd) + Vector3.forward * dist);
+                        verts.Add(Vector3.Lerp(currEnd, nextEnd, pEnd) + Vector3.forward * dist);
 
                         // Debug.Log(index + "/" + verts.Length + " " + verts[index] + " " + verts[index + 1]);
                     }
@@ -500,8 +513,10 @@ namespace JANOARG.Shared.Data.ChartInfo
                         Vector3 nextEnd = Vector3.LerpUnclamped(next.CurrentStep.StartPointPosition, next.CurrentStep.EndPointPosition, xPos + xLength);
                         float x = pEnd;
                         dist = Mathf.Lerp(curr.Distance, next.Distance, x);
+
                         verts.Add(new Vector3(Mathf.LerpUnclamped(currStart.x, nextStart.x, next.CurrentStep.StartEaseX.Get(x)),
                             Mathf.LerpUnclamped(currStart.y, nextStart.y, next.CurrentStep.StartEaseY.Get(x)), dist));
+
                         verts.Add(new Vector3(Mathf.LerpUnclamped(currEnd.x, nextEnd.x, next.CurrentStep.EndEaseX.Get(x)),
                             Mathf.LerpUnclamped(currEnd.y, nextEnd.y, next.CurrentStep.EndEaseY.Get(x)), dist));
                     }
@@ -514,8 +529,8 @@ namespace JANOARG.Shared.Data.ChartInfo
                     Vector3 currEnd = Vector3.LerpUnclamped(curr.CurrentStep.StartPointPosition, curr.CurrentStep.EndPointPosition, xPos + xLength);
                     Vector3 nextStart = Vector3.LerpUnclamped(next.CurrentStep.StartPointPosition, next.CurrentStep.EndPointPosition, xPos);
                     Vector3 nextEnd = Vector3.LerpUnclamped(next.CurrentStep.StartPointPosition, next.CurrentStep.EndPointPosition, xPos + xLength);
-                    verts.Add(Vector3.Lerp(currStart, nextStart, pStart) + (Vector3.forward * dist));
-                    verts.Add(Vector3.Lerp(currEnd, nextEnd, pStart) + (Vector3.forward * dist));
+                    verts.Add(Vector3.Lerp(currStart, nextStart, pStart) + Vector3.forward * dist);
+                    verts.Add(Vector3.Lerp(currEnd, nextEnd, pStart) + Vector3.forward * dist);
 
                     // Debug.Log(index + "/" + verts.Length + " " + verts[index] + " " + verts[index + 1]);
                 }
@@ -531,8 +546,10 @@ namespace JANOARG.Shared.Data.ChartInfo
                     {
                         float x = Math.Max(i / 16f, pStart);
                         dist = Mathf.Lerp(curr.Distance, next.Distance, x);
+
                         verts.Add(new Vector3(Mathf.LerpUnclamped(currStart.x, nextStart.x, next.CurrentStep.StartEaseX.Get(x)),
                             Mathf.LerpUnclamped(currStart.y, nextStart.y, next.CurrentStep.StartEaseY.Get(x)), dist));
+
                         verts.Add(new Vector3(Mathf.LerpUnclamped(currEnd.x, nextEnd.x, next.CurrentStep.EndEaseX.Get(x)),
                             Mathf.LerpUnclamped(currEnd.y, nextEnd.y, next.CurrentStep.EndEaseY.Get(x)), dist));
 
@@ -560,14 +577,14 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     StartPosition = CurrentLane.LaneSteps[0].StartPointPosition,
                     EndPosition = CurrentLane.LaneSteps[0].EndPointPosition,
-                    Offset = Steps[0].Distance - (Steps[0].CurrentStep.Speed * speed * (Steps[0].Offset - sec))
+                    Offset = Steps[0].Distance - Steps[0].CurrentStep.Speed * speed * (Steps[0].Offset - sec)
                 };
             else if (sec > Steps[Steps.Count - 1].Offset)
                 return new LanePosition
                 {
                     StartPosition = CurrentLane.LaneSteps[Steps.Count - 1].StartPointPosition,
                     EndPosition = CurrentLane.LaneSteps[Steps.Count - 1].EndPointPosition,
-                    Offset = Steps[Steps.Count - 1].Distance + (Steps[Steps.Count - 1].CurrentStep.Speed * speed * (sec - Steps[Steps.Count - 1].Offset))
+                    Offset = Steps[Steps.Count - 1].Distance + Steps[Steps.Count - 1].CurrentStep.Speed * speed * (sec - Steps[Steps.Count - 1].Offset)
                 };
             else
                 for (var i = 1; i < Steps.Count; i++)
@@ -587,7 +604,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                         {
                             StartPosition = Vector2.LerpUnclamped(prevS.StartPointPosition, currS.StartPointPosition, p),
                             EndPosition = Vector2.LerpUnclamped(prevS.EndPointPosition, currS.EndPointPosition, p),
-                            Offset = prev.Distance + (currS.Speed * speed * (sec - prev.Offset))
+                            Offset = prev.Distance + currS.Speed * speed * (sec - prev.Offset)
                         };
                     else
                         return new LanePosition
@@ -596,7 +613,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                                 Mathf.LerpUnclamped(prevS.StartPointPosition.y, currS.StartPointPosition.y, currS.StartEaseY.Get(p))),
                             EndPosition = new Vector2(Mathf.LerpUnclamped(prevS.EndPointPosition.x, currS.EndPointPosition.x, currS.EndEaseX.Get(p)),
                                 Mathf.LerpUnclamped(prevS.EndPointPosition.y, currS.EndPointPosition.y, currS.EndEaseY.Get(p))),
-                            Offset = prev.Distance + (currS.Speed * speed * (sec - prev.Offset))
+                            Offset = prev.Distance + currS.Speed * speed * (sec - prev.Offset)
                         };
                 }
 
@@ -614,13 +631,13 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             for (var a = 0; a < stepCount - 1; a++)
             {
-                tris[(a * 6) + 0] = a * 2;
-                tris[(a * 6) + 1] = (a * 2) + 1;
-                tris[(a * 6) + 2] = (a * 2) + 2;
+                tris[a * 6 + 0] = a * 2;
+                tris[a * 6 + 1] = a * 2 + 1;
+                tris[a * 6 + 2] = a * 2 + 2;
 
-                tris[(a * 6) + 3] = (a * 2) + 2;
-                tris[(a * 6) + 4] = (a * 2) + 1;
-                tris[(a * 6) + 5] = (a * 2) + 3;
+                tris[a * 6 + 3] = a * 2 + 2;
+                tris[a * 6 + 4] = a * 2 + 1;
+                tris[a * 6 + 5] = a * 2 + 3;
             }
 
             mesh.SetTriangles(tris, 0);
@@ -731,21 +748,24 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
                                   * .2f;
-                    AddStep((Vector3)startPos + (Vector3.right * .2f) + ofs, (Vector3)endPos - (Vector3.right * .2f) + ofs);
+
+                    AddStep((Vector3)startPos + Vector3.right * .2f + ofs, (Vector3)endPos - Vector3.right * .2f + ofs);
                 }
 
                 for (float ang = 45; ang <= 405; ang += 90)
                 {
                     Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
                                   * .2f;
-                    AddStep((Vector3)startPos + ofs, (Vector3)startPos + (Vector3.right * .1f) + ofs, ang != 45);
+
+                    AddStep((Vector3)startPos + ofs, (Vector3)startPos + Vector3.right * .1f + ofs, ang != 45);
                 }
 
                 for (float ang = 45; ang <= 405; ang += 90)
                 {
                     Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
                                   * .2f;
-                    AddStep((Vector3)endPos - (Vector3.right * .1f) + ofs, (Vector3)endPos + ofs, ang != 45);
+
+                    AddStep((Vector3)endPos - Vector3.right * .1f + ofs, (Vector3)endPos + ofs, ang != 45);
                 }
             }
             else if (type == HitObject.HitType.Catch)
@@ -754,21 +774,24 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
                                   * .1f;
-                    AddStep((Vector3)startPos + (Vector3.right * .1f) + ofs, (Vector3)endPos - (Vector3.right * .1f) + ofs);
+
+                    AddStep((Vector3)startPos + Vector3.right * .1f + ofs, (Vector3)endPos - Vector3.right * .1f + ofs);
                 }
 
                 for (float ang = 45; ang <= 405; ang += 90)
                 {
                     Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
                                   * .2f;
-                    AddStep((Vector3)startPos + ofs, (Vector3)startPos + (Vector3.right * .1f) + ofs, ang != 45);
+
+                    AddStep((Vector3)startPos + ofs, (Vector3)startPos + Vector3.right * .1f + ofs, ang != 45);
                 }
 
                 for (float ang = 45; ang <= 405; ang += 90)
                 {
                     Vector3 ofs = new Vector3(0, Mathf.Cos(ang * Mathf.Deg2Rad), Mathf.Sin(ang * Mathf.Deg2Rad))
                                   * .2f;
-                    AddStep((Vector3)endPos - (Vector3.right * .1f) + ofs, (Vector3)endPos + ofs, ang != 45);
+
+                    AddStep((Vector3)endPos - Vector3.right * .1f + ofs, (Vector3)endPos + ofs, ang != 45);
                 }
             }
 

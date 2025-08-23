@@ -82,12 +82,12 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public static implicit operator double(BeatPosition a)
         {
-            return a.Number + ((double)a.Numerator / a.Denominator);
+            return a.Number + (double)a.Numerator / a.Denominator;
         }
 
         public static implicit operator float(BeatPosition a)
         {
-            return a.Number + ((float)a.Numerator / a.Denominator);
+            return a.Number + (float)a.Numerator / a.Denominator;
         }
 
         public static explicit operator BeatPosition(double a)
@@ -130,7 +130,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             return new BeatPosition(
                 a.Number + b.Number,
-                (b.Denominator / greatestCommonDivisor * a.Numerator) + (a.Denominator / greatestCommonDivisor * b.Numerator),
+                b.Denominator / greatestCommonDivisor * a.Numerator + a.Denominator / greatestCommonDivisor * b.Numerator,
                 a.Denominator / greatestCommonDivisor * b.Denominator
             );
         }
@@ -150,7 +150,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             return new BeatPosition(
                 a.Number - b.Number,
-                (b.Denominator / greatestCommonDivisor * a.Numerator) - (a.Denominator / greatestCommonDivisor * b.Numerator),
+                b.Denominator / greatestCommonDivisor * a.Numerator - a.Denominator / greatestCommonDivisor * b.Numerator,
                 a.Denominator / greatestCommonDivisor * b.Denominator
             );
         }
@@ -189,7 +189,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 }
                 else if (Numerator > 0)
                 {
-                    int offset = (Numerator / Denominator) + 1;
+                    int offset = Numerator / Denominator + 1;
                     Number += offset;
                     Numerator -= offset * Denominator;
 
@@ -210,7 +210,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 }
                 else if (Numerator < 0)
                 {
-                    int offset = (-Numerator / Denominator) + 1;
+                    int offset = -Numerator / Denominator + 1;
                     Number -= offset;
                     Numerator += offset * Denominator;
 

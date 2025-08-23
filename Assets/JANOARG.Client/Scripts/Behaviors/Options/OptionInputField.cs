@@ -21,8 +21,9 @@ namespace JANOARG.Client.Behaviors.Options
             InputUnderline.color = InputField.textComponent.color =
                 Title.color = UnitLabel.color = color;
 
-            foreach (Graphic graphic in SliderTints) 
+            foreach (Graphic graphic in SliderTints)
                 graphic.color = color;
+
 
             InputField.selectionColor = color * new Color(1, 1, 1, .4f);
         }

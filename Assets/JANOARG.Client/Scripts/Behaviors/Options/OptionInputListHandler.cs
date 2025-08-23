@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 namespace JANOARG.Client.Behaviors.Options
 {
     public class OptionInputListHandler : MonoBehaviour, IInitializePotentialDragHandler, IDragHandler, IEndDragHandler,
-        IPointerUpHandler
+                                          IPointerUpHandler
     {
         public static OptionInputListHandler sMain;
 
@@ -67,7 +67,7 @@ namespace JANOARG.Client.Behaviors.Options
 
         public void OnDrag(PointerEventData data)
         {
-            if (!IsPointerDown) 
+            if (!IsPointerDown)
                 return;
 
             float delta = data.delta.y / transform.lossyScale.x;
@@ -126,10 +126,10 @@ namespace JANOARG.Client.Behaviors.Options
 
                 item.Button.onClick.AddListener(() => { ScrollToItem(i); });
                 Items.Add(item);
-                
-                if (Equals(value.Key, input.CurrentValue)) 
+
+                if (Equals(value.Key, input.CurrentValue))
                     CurrentPosition = index;
-                
+
                 index++;
             }
 

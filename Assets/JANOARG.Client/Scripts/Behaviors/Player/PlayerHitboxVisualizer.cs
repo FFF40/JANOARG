@@ -64,7 +64,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 void f_updateVectors()
                 {
-                    vectors = CommonSys.sMain.MainCamera.ScreenToWorldPoint(new Vector3((Mathf.Cos(angle) * coord.Radius) + coord.Position.x, (Mathf.Sin(angle) * coord.Radius) + coord.Position.y, 10));
+                    vectors = CommonSys.sMain.MainCamera.ScreenToWorldPoint(new Vector3(Mathf.Cos(angle) * coord.Radius + coord.Position.x, Mathf.Sin(angle) * coord.Radius + coord.Position.y, 10));
                 }
 
                 f_updateVectors();

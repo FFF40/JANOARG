@@ -567,10 +567,10 @@ public class PlayerInputManager : MonoBehaviour
 
                     // current beat
 
-                    Vector3 startHoldPosition = (Quaternion.Euler(laneHoldNote.Rotation) * step.StartPosition) +
+                    Vector3 startHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.StartPosition +
                                                 laneHoldNote.Position;
 
-                    Vector3 endHoldPosition = (Quaternion.Euler(laneHoldNote.Rotation) * step.EndPosition) +
+                    Vector3 endHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.EndPosition +
                                               laneHoldNote.Position;
 
                     LaneGroupPlayer currentHoldGroupPlayer = holdNoteEntry.HitObject.Lane.Group;
@@ -588,10 +588,10 @@ public class PlayerInputManager : MonoBehaviour
 
                         // group
 
-                        startHoldPosition = (Quaternion.Euler(currentLaneGroup.Rotation) * startHoldPosition) +
+                        startHoldPosition = Quaternion.Euler(currentLaneGroup.Rotation) * startHoldPosition +
                                             currentLaneGroup.Position; // Apply transform manually
 
-                        endHoldPosition = (Quaternion.Euler(currentLaneGroup.Rotation) * endHoldPosition) +
+                        endHoldPosition = Quaternion.Euler(currentLaneGroup.Rotation) * endHoldPosition +
                                           currentLaneGroup.Position;
 
                         currentHoldGroupPlayer = currentHoldGroupPlayer.Parent; // Go to the parent LaneGroupPlayer
@@ -634,7 +634,7 @@ public class PlayerInputManager : MonoBehaviour
                     {
                         Position = (holdNoteHitboxStart + holdNoteHitboxEnd) / 2,
                         Radius = Mathf.Max(
-                            (Vector2.Distance(holdNoteHitboxStart, holdNoteHitboxEnd) / 2) +
+                            Vector2.Distance(holdNoteHitboxStart, holdNoteHitboxEnd) / 2 +
                             Player.ScaledExtraRadius,
                             Player.ScaledMinimumRadius
                         )
@@ -674,9 +674,9 @@ public class PlayerInputManager : MonoBehaviour
                     // Update Drain value
                     holdNoteEntry.holdPassDrainValue = Mathf.Clamp01(
                         holdNoteEntry.holdPassDrainValue +
-                        (Time.deltaTime /
+                        Time.deltaTime /
                         Player.PassWindow *
-                        (holdNoteEntry.IsPlayerHolding ? 1f : -1f))
+                        (holdNoteEntry.IsPlayerHolding ? 1f : -1f)
                     );
 
                     Debug.Log($"Updating drain value: {holdNoteEntry.holdPassDrainValue}");

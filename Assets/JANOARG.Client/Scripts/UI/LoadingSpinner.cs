@@ -20,6 +20,7 @@ namespace JANOARG.Client.UI
         {
             _Timer += Time.deltaTime;
             var interval = .8f;
+
             Spinner.localEulerAngles =
                 (Mathf.Floor(_Timer / interval) + _SpinEasing.Get(_Timer % interval))
                 * 45 * Vector3.back;

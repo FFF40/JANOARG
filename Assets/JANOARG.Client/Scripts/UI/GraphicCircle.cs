@@ -59,8 +59,8 @@ namespace JANOARG.Client.UI
 
                     if (a > 0)
                     {
-                        vertexHelper.AddTriangle((a * 2) - 1, (a * 2) + 1, a * 2);
-                        vertexHelper.AddTriangle((a * 2) - 1, a * 2, (a * 2) - 2);
+                        vertexHelper.AddTriangle(a * 2 - 1, a * 2 + 1, a * 2);
+                        vertexHelper.AddTriangle(a * 2 - 1, a * 2, a * 2 - 2);
                     }
 
                     if (a >= FillAmount * Resolution) break;

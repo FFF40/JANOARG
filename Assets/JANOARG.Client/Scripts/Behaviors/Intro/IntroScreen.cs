@@ -47,7 +47,7 @@ namespace JANOARG.Client.Behaviors.Intro
             CoverMiddle.anchorMax = new Vector2(0, CoverMiddle.anchorMax.y);
             PostTitleCover1.anchorMin = PostTitleCover2.anchorMin = new Vector2(0, 0);
             PostTitleCover1.anchorMax = PostTitleCover2.anchorMax = new Vector2(1, 0);
-            CoverMiddleImage.color = (CoverMiddleImage.color * new Color(1, 1, 1, 0)) + new Color(0, 0, 0, 1);
+            CoverMiddleImage.color = CoverMiddleImage.color * new Color(1, 1, 1, 0) + new Color(0, 0, 0, 1);
             StartCoroutine(IntroRoutine());
         }
 
@@ -72,10 +72,10 @@ namespace JANOARG.Client.Behaviors.Intro
             {
                 for (float a = 0; a < 1; a += Time.deltaTime * 5)
                 {
-                    if (ScreenTouchedThisFrame()) 
+                    if (ScreenTouchedThisFrame())
                         isTouched = true;
 
-                    if (isTouched && !IsFirstStart) 
+                    if (isTouched && !IsFirstStart)
                         break;
 
                     DisclaimerTitle.alpha = Mathf.Min(a, 1);
@@ -89,7 +89,7 @@ namespace JANOARG.Client.Behaviors.Intro
                         if (ScreenTouchedThisFrame())
                             isTouched = true;
 
-                        if (isTouched && !IsFirstStart) 
+                        if (isTouched && !IsFirstStart)
                             break;
 
                         p.alpha = Mathf.Min(a, 1);
@@ -101,7 +101,7 @@ namespace JANOARG.Client.Behaviors.Intro
 
                 for (float a = 0; a < 1; a += Time.deltaTime * 5)
                 {
-                    if (ScreenTouchedThisFrame()) 
+                    if (ScreenTouchedThisFrame())
                         isTouched = true;
 
                     if (isTouched)
@@ -131,7 +131,8 @@ namespace JANOARG.Client.Behaviors.Intro
                         break;
 
                     DisclaimerTitle.alpha = Mathf.Min(a, 1);
-                    foreach (TMP_Text paragraph in DisclaimerParagraphs) 
+
+                    foreach (TMP_Text paragraph in DisclaimerParagraphs)
                         paragraph.alpha = Mathf.Min(a, 1);
 
                     yield return null;
@@ -154,9 +155,10 @@ namespace JANOARG.Client.Behaviors.Intro
                 if (ScreenTouchedThisFrame()) isTouched = true;
                 float subSpeed = Time.deltaTime * speed / 3;
                 float max = DisclaimerTitle.alpha -= subSpeed;
-                
-                foreach (TMP_Text paragraph in DisclaimerParagraphs) 
+
+                foreach (TMP_Text paragraph in DisclaimerParagraphs)
                     max = Mathf.Max(max, paragraph.alpha -= subSpeed);
+
                 max = Mathf.Max(max, DisclaimerActionLabel.alpha -= subSpeed * 8);
 
                 if (max <= 0)
@@ -209,11 +211,11 @@ namespace JANOARG.Client.Behaviors.Intro
                         centerSize * (1 - lerp));
 
                     CoverMiddle.anchorMax =
-                        (CoverTop.anchorMin = new Vector2(0, .5f + (.5f * lerp))) +
+                        (CoverTop.anchorMin = new Vector2(0, .5f + .5f * lerp)) +
                         Vector2.right;
 
                     CoverMiddle.anchorMin =
-                        (CoverBottom.anchorMax = new Vector2(1, .5f - (.5f * lerp))) +
+                        (CoverBottom.anchorMax = new Vector2(1, .5f - .5f * lerp)) +
                         Vector2.left;
 
                     CoverTop.sizeDelta = CoverBottom.sizeDelta =
@@ -248,7 +250,7 @@ namespace JANOARG.Client.Behaviors.Intro
                 float lerp = Mathf.Pow(Ease.Get(a * 2, EaseFunction.Exponential, EaseMode.Out), 2);
 
                 TitleLogo.rectTransform.anchoredPosition =
-                    new Vector2(TitleLogo.rectTransform.anchoredPosition.x, 10 + (lerp * 10));
+                    new Vector2(TitleLogo.rectTransform.anchoredPosition.x, 10 + lerp * 10);
 
                 float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Quintic, EaseMode.Out);
                 TitleActionLabel.alpha = 1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.5f), 2);
@@ -256,16 +258,16 @@ namespace JANOARG.Client.Behaviors.Intro
                 TitleActionLabel.rectTransform.anchoredPosition =
                     new Vector2(TitleActionLabel.rectTransform.anchoredPosition.x, lerp2 * -36);
 
-                float lerp3 = Ease.Get((a * 1.2f) - .2f, EaseFunction.Quintic, EaseMode.Out);
-                TitleFooter.alpha = (1 - Mathf.Pow(1 - Mathf.Clamp01((a * 1.2f) - .2f), 2)) * .5f;
+                float lerp3 = Ease.Get(a * 1.2f - .2f, EaseFunction.Quintic, EaseMode.Out);
+                TitleFooter.alpha = (1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.2f - .2f), 2)) * .5f;
 
                 TitleFooter.rectTransform.anchoredPosition =
-                    new Vector2(TitleFooter.rectTransform.anchoredPosition.x, 80 - (lerp3 * 30));
+                    new Vector2(TitleFooter.rectTransform.anchoredPosition.x, 80 - lerp3 * 30);
             }
 
             for (float a = 0; a < 1; a += Time.deltaTime / 2)
             {
-                if (ScreenTouchedThisFrame()) 
+                if (ScreenTouchedThisFrame())
                     isTouched = true;
 
                 if (isTouched)
@@ -283,13 +285,13 @@ namespace JANOARG.Client.Behaviors.Intro
             {
                 if (ScreenTouchedThisFrame())
                     isTouched = true;
-                
+
                 waitTime += Time.deltaTime;
 
                 TitleActionLabel.rectTransform.anchoredPosition = new Vector2(
                     TitleActionLabel.rectTransform
                         .anchoredPosition.x,
-                    -33 - (3 * Mathf.Cos(waitTime)));
+                    -33 - 3 * Mathf.Cos(waitTime));
 
                 yield return null;
             }
@@ -297,8 +299,8 @@ namespace JANOARG.Client.Behaviors.Intro
 
         public IEnumerator IntroExitRoutine()
         {
-            float yPos = (TitleActionLabel.rectTransform.anchoredPosition.y /
-                         ((RectTransform)TitleActionLabel.rectTransform.parent).rect.height) +
+            float yPos = TitleActionLabel.rectTransform.anchoredPosition.y /
+                         ((RectTransform)TitleActionLabel.rectTransform.parent).rect.height +
                          0.5f;
 
             PostTitleLabel.rectTransform.anchorMin = new Vector2(PostTitleLabel.rectTransform.anchorMin.x, yPos);
@@ -323,7 +325,7 @@ namespace JANOARG.Client.Behaviors.Intro
 
                     float lerp2 = Mathf.Pow(
                         Ease.Get(
-                            (a * 1.5f) - 0.5f, EaseFunction.Circle,
+                            a * 1.5f - 0.5f, EaseFunction.Circle,
                             EaseMode.In), 2);
 
                     PostTitleCover2.anchorMin = new Vector2(

@@ -93,6 +93,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             CommonSys.sMain.Storage.Save();
             CommonSys.sMain.Preferences.Save();
             ProfileBar.sMain.UpdateLabels();
+
             if (CurrentTab == 1)
                 StartCoroutine(PreviewAnim(false));
 
@@ -125,7 +126,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
                     SubtitleLabel.alpha = 1 - ease;
                     SubtitleLabel.rectTransform.anchoredPosition = Vector2.left * 10 * ease;
-                    ContentViewport.anchoredPosition = basePos + (Vector2.left * 10 * ease);
+                    ContentViewport.anchoredPosition = basePos + Vector2.left * 10 * ease;
                     ContentGroup.alpha = 1 - ease;
                 });
 
@@ -146,7 +147,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                         Vector2.left * 10 * (1 - ease);
 
                     ContentViewport.anchoredPosition =
-                        basePos + (Vector2.left * 10 * (1 - ease));
+                        basePos + Vector2.left * 10 * (1 - ease);
 
                     ContentGroup.alpha = ease;
                 });
@@ -161,10 +162,10 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                 width, RT(ContentScroller)
                     .sizeDelta.y);
 
-            ContentLayout.padding.right = (int)(30 - (width / 20));
+            ContentLayout.padding.right = (int)(30 - width / 20);
 
             RT(ContentScrollBar)
-                .anchoredPosition *= new Vector2Frag(y: (width * Mathf.Tan(15 * Mathf.Deg2Rad)) + 40);
+                .anchoredPosition *= new Vector2Frag(y: width * Mathf.Tan(15 * Mathf.Deg2Rad) + 40);
         }
 
         public void MakeTab(int tab)
@@ -442,6 +443,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         {
             float width = 5;
             PlayerSettings settings = new();
+
             {
                 float scale = settings.HitObjectScale[1];
                 PreviewCatchCenter.localScale = new Vector3(width, .2f * scale, .2f * scale);
@@ -452,9 +454,9 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
             {
                 float scale = settings.HitObjectScale[0];
-                PreviewNormalCenter.localScale = new Vector3(width - (.2f * scale), .4f * scale, .4f * scale);
+                PreviewNormalCenter.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
                 PreviewNormalLeft.localScale = PreviewNormalRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
-                PreviewNormalRight.localPosition = Vector3.right * ((width / 2) + (.2f * scale));
+                PreviewNormalRight.localPosition = Vector3.right * (width / 2 + .2f * scale);
                 PreviewNormalLeft.localPosition = -PreviewNormalRight.localPosition;
             }
 
@@ -495,7 +497,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
         private IEnumerator PreviewAnim(bool shown)
         {
-            if (shown) 
+            if (shown)
                 PreviewCamera.gameObject.SetActive(true);
 
             yield return Ease.Animate(
@@ -506,10 +508,10 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                         shown ? EaseMode.Out : EaseMode.In);
 
                     PreviewCamera.transform.localPosition =
-                        new Vector3(0, (shown ? 12 : 0) - (12 * ease1), 0);
+                        new Vector3(0, (shown ? 12 : 0) - 12 * ease1, 0);
 
                     PreviewCamera.transform.localEulerAngles =
-                        new Vector3(0, (shown ? 180 : 0) - (180 * ease1), 0);
+                        new Vector3(0, (shown ? 180 : 0) - 180 * ease1, 0);
                 });
 
             if (!shown)

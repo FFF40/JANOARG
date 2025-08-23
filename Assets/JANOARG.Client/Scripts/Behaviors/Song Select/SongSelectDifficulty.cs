@@ -61,7 +61,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
             foreach (Image image in ScoreDials)
             {
                 image.fillAmount = score / 1e6f;
-                score = (score * 10) - 9e6f;
+                score = score * 10 - 9e6f;
             }
 
             foreach (Graphic graphic in IndicatorGraphics) graphic.color = color;

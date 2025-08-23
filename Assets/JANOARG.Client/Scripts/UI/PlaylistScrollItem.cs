@@ -23,6 +23,7 @@ namespace JANOARG.Client.UI
             Path = path;
             SongNameLabel.text = altLevel >= 1 && !string.IsNullOrWhiteSpace(song.AltSongName) ? song.AltSongName : song.SongName;
             ArtistNameLabel.text = altLevel >= 2 && !string.IsNullOrWhiteSpace(song.AltSongArtist) ? song.AltSongArtist : song.SongArtist;
+
             DataText = song.Location.ToUpper() + " • " + song.Genre.ToUpper() +
                        " • " + FormatBpm(song.Timing) + " • " + FormatDuration(song.Clip.length);
 
