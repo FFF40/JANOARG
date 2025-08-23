@@ -119,7 +119,7 @@ namespace JANOARG.Client.Behaviors.Common
                         new Vector2(FlavorBackground.rectTransform.sizeDelta.x, lerp * 100);
 
                     float lerp2 = Ease.Get(
-                        a * 3f - 0.15f, EaseFunction.Exponential,
+                        (a * 3f) - 0.15f, EaseFunction.Exponential,
                         EaseMode.Out);
 
                     FlavorBackground2.rectTransform.sizeDelta =
@@ -131,15 +131,15 @@ namespace JANOARG.Client.Behaviors.Common
 
                     StatusHolder.anchoredPosition = new Vector2(
                         1000 +
-                        (StatusHolder.rect.width -
+                        ((StatusHolder.rect.width -
                          1000 +
-                         _Self.sizeDelta.x / -2) *
-                        (1 - lerp3), 0);
+                         (_Self.sizeDelta.x / -2)) *
+                        (1 - lerp3)), 0);
 
                     float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
 
                     FlavorText.rectTransform.anchoredPosition =
-                        new Vector2(1200 - 100 * lerp4, 0);
+                        new Vector2(1200 - (100 * lerp4), 0);
                 });
 
             IsAnimating = false;
@@ -167,7 +167,7 @@ namespace JANOARG.Client.Behaviors.Common
                 1, a =>
                 {
                     float lerp = Ease.Get(
-                        a * 1.2f - 0.1f, EaseFunction.Exponential,
+                        (a * 1.2f) - 0.1f, EaseFunction.Exponential,
                         EaseMode.In);
 
                     float lerp2 = Ease.Get(a * 1.2f, EaseFunction.Exponential, EaseMode.In);
@@ -175,31 +175,31 @@ namespace JANOARG.Client.Behaviors.Common
                     float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
 
                     float lerp5 = Ease.Get(
-                        a * 1.5f - 0.5f, EaseFunction.Exponential,
+                        (a * 1.5f) - 0.5f, EaseFunction.Exponential,
                         EaseMode.In);
 
                     FlavorBackground.rectTransform.sizeDelta =
                         new Vector2(
                             FlavorBackground.rectTransform.sizeDelta.x,
-                            (1 - lerp) * 100 * (1 - .3f * lerp3));
+                            (1 - lerp) * 100 * (1 - (.3f * lerp3)));
 
                     FlavorBackground2.rectTransform.sizeDelta =
                         new Vector2(
                             FlavorBackground2.rectTransform.sizeDelta.x,
-                            (1 - lerp2) * 100 * (1 - .35f * lerp3));
+                            (1 - lerp2) * 100 * (1 - (.35f * lerp3)));
 
                     StatusCompletedHolder.sizeDelta =
                         new Vector2((width + padding) * lerp3, 0);
 
                     FlavorText.rectTransform.anchoredPosition =
-                        new Vector2(1100 - 300 * lerp4, 0);
+                        new Vector2(1100 - (300 * lerp4), 0);
 
                     StatusHolder.anchoredPosition = new Vector2(
                         1000 -
-                        (width -
+                        ((width -
                          StatusHolder.rect.width +
                          1000) *
-                        lerp3, 0);
+                        lerp3), 0);
 
                     StatusHolder.anchoredPosition +=
                         new Vector2((width + padding) * lerp5, 0);

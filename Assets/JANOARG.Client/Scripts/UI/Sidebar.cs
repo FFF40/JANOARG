@@ -27,7 +27,7 @@ namespace JANOARG.Client.UI
             {
                 float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
 
-                rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * (1 - ease));
+                rt.anchoredPosition = Vector3.left * (2000 + ((Width - (SafeArea.sizeDelta.y / 2)) * (1 - ease)));
             }
 
             for (float a = 0; a < 1; a += Time.deltaTime / .4f)
@@ -56,7 +56,7 @@ namespace JANOARG.Client.UI
             {
                 float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.In);
 
-                rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * ease);
+                rt.anchoredPosition = Vector3.left * (2000 + ((Width - (SafeArea.sizeDelta.y / 2)) * ease));
             }
 
             for (float a = 0; a < 1; a += Time.deltaTime / .3f)

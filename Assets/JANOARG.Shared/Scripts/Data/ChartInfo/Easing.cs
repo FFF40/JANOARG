@@ -75,7 +75,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     if (!charInfo.isVisible) continue;
 
                     if (!float.IsFinite(minPosition)) minPosition = charInfo.vertex_BL.position.x;
-                    float prog = Mathf.Clamp01((x - xOffset * (charInfo.vertex_BL.position.x - minPosition)) / duration);
+                    float prog = Mathf.Clamp01((x - (xOffset * (charInfo.vertex_BL.position.x - minPosition))) / duration);
                     letterCallback(charInfo, prog);
                     if (prog < 1) finished = false;
                 }
@@ -129,7 +129,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     Out = (x) => 1 - Mathf.Pow(1 - x, 2),
                     InOut = (x) => x < 0.5f
                         ? 2 * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 2) / 2
+                        : 1 - (Mathf.Pow((-2 * x) + 2, 2) / 2)
                 }
             },
             {
@@ -139,7 +139,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     Out = (x) => 1 - Mathf.Pow(1 - x, 3),
                     InOut = (x) => x < 0.5f
                         ? 4 * x * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 3) / 2
+                        : 1 - (Mathf.Pow((-2 * x) + 2, 3) / 2)
                 }
             },
             {
@@ -149,7 +149,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     Out = (x) => 1 - Mathf.Pow(1 - x, 4),
                     InOut = (x) => x < 0.5f
                         ? 8 * x * x * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 4) / 2
+                        : 1 - (Mathf.Pow((-2 * x) + 2, 4) / 2)
                 }
             },
             {
@@ -160,7 +160,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     Out = (x) => 1 - Mathf.Pow(1 - x, 5),
                     InOut = (x) => x < 0.5f
                         ? 16 * x * x * x * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 5) / 2
+                        : 1 - (Mathf.Pow((-2 * x) + 2, 5) / 2)
                 }
             },
             {
@@ -168,17 +168,17 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     In = (x) => x == 0
                         ? 0
-                        : Mathf.Pow(2, 10 * x - 10) - 0.0009765625f * (1 - x),
+                        : Mathf.Pow(2, (10 * x) - 10) - (0.0009765625f * (1 - x)),
                     Out = (x) => Mathf.Approximately(x, 1)
                         ? 1
-                        : 1 - Mathf.Pow(2, -10 * x) + 0.0009765625f * x,
+                        : 1 - Mathf.Pow(2, -10 * x) + (0.0009765625f * x),
                     InOut = (x) => x == 0
                         ? 0
                         : Mathf.Approximately(x, 1)
                             ? 1
                             : x < 0.5
-                                ? Mathf.Pow(2, 20 * x - 10) / 2 - 0.0009765625f * (1 - x)
-                                : (2 - Mathf.Pow(2, -20 * x + 10)) / 2 + 0.0009765625f * x
+                                ? (Mathf.Pow(2, (20 * x) - 10) / 2) - (0.0009765625f * (1 - x))
+                                : ((2 - Mathf.Pow(2, (-20 * x) + 10)) / 2) + (0.0009765625f * x)
                 }
             },
             {
@@ -188,7 +188,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     Out = (x) => Mathf.Sqrt(1 - Mathf.Pow(x - 1, 2)),
                     InOut = (x) => x < 0.5
                         ? (1 - Mathf.Sqrt(1 - Mathf.Pow(2 * x, 2))) / 2
-                        : (Mathf.Sqrt(1 - Mathf.Pow(-2 * x + 2, 2)) + 1) / 2
+                        : (Mathf.Sqrt(1 - Mathf.Pow((-2 * x) + 2, 2)) + 1) / 2
                 }
             },
             {
@@ -198,13 +198,13 @@ namespace JANOARG.Shared.Data.ChartInfo
                     {
                         const float OVERSHOOT = 1.70158f;
 
-                        return 2.70158f * x * x * x - OVERSHOOT * x * x;
+                        return (2.70158f * x * x * x) - (OVERSHOOT * x * x);
                     },
                     Out = (x) =>
                     {
                         const float OVERSHOOT = 1.70158f;
 
-                        return 1 + 2.70158f * Mathf.Pow(x - 1, 3) + OVERSHOOT * Mathf.Pow(x - 1, 2);
+                        return 1 + (2.70158f * Mathf.Pow(x - 1, 3)) + (OVERSHOOT * Mathf.Pow(x - 1, 2));
                     },
                     InOut = (x) =>
                     {
@@ -212,8 +212,8 @@ namespace JANOARG.Shared.Data.ChartInfo
                         const float SCALED_OVERSHOOT = OVERSHOOT * 1.525f;
 
                         return x < 0.5f
-                            ? Mathf.Pow(2 * x, 2) * ((SCALED_OVERSHOOT + 1) * 2 * x - SCALED_OVERSHOOT) / 2
-                            : (Mathf.Pow(2 * x - 2, 2) * ((SCALED_OVERSHOOT + 1) * (x * 2 - 2) + SCALED_OVERSHOOT) + 2) / 2;
+                            ? Mathf.Pow(2 * x, 2) * (((SCALED_OVERSHOOT + 1) * 2 * x) - SCALED_OVERSHOOT) / 2
+                            : ((Mathf.Pow((2 * x) - 2, 2) * (((SCALED_OVERSHOOT + 1) * ((x * 2) - 2)) + SCALED_OVERSHOOT)) + 2) / 2;
                     }
                 }
             },
@@ -227,7 +227,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                         if (x == 0) return 0;
                         if (Mathf.Approximately(x, 1)) return 1;
 
-                        return -Mathf.Pow(2, 10 * x - 10) * Mathf.Sin((x * 10 - 10.75f) * PERIOD);
+                        return -Mathf.Pow(2, (10 * x) - 10) * Mathf.Sin(((x * 10) - 10.75f) * PERIOD);
                     },
                     Out = (x) =>
                     {
@@ -239,7 +239,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                         if (Mathf.Approximately(x, 1))
                             return 1;
 
-                        return Mathf.Pow(2, -10 * x) * Mathf.Sin((x * 10 - 0.75f) * PERIOD) + 1;
+                        return (Mathf.Pow(2, -10 * x) * Mathf.Sin(((x * 10) - 0.75f) * PERIOD)) + 1;
                     },
                     InOut = (x) =>
                     {
@@ -252,13 +252,12 @@ namespace JANOARG.Shared.Data.ChartInfo
                             return 1;
 
                         if (x < 0.5)
-                            return -(Mathf.Pow(2, 20 * x - 10) * Mathf.Sin((20 * x - 11.125f) * PERIOD)) / 2;
+                            return -(Mathf.Pow(2, (20 * x) - 10) * Mathf.Sin(((20 * x) - 11.125f) * PERIOD)) / 2;
 
-                        return Mathf.Pow(2, -20 * x + 10) * Mathf.Sin((20 * x - 11.125f) * PERIOD) / 2 + 1;
+                        return (Mathf.Pow(2, (-20 * x) + 10) * Mathf.Sin(((20 * x) - 11.125f) * PERIOD) / 2) + 1;
                     }
                 }
             },
-
             {
                 EaseFunction.Bounce, new Ease
                 {
@@ -271,19 +270,18 @@ namespace JANOARG.Shared.Data.ChartInfo
                         if (x < 1 / BOUNCE_THRESHOLD)
                             return BOUNCE_CONSTANT * Mathf.Pow(x, 2);
 
-                        ;
 
                         if (x < 2 / BOUNCE_THRESHOLD)
-                            return BOUNCE_CONSTANT * (x -= 1.5f / BOUNCE_THRESHOLD) * x + 0.75f;
+                            return (BOUNCE_CONSTANT * (x -= 1.5f / BOUNCE_THRESHOLD) * x) + 0.75f;
 
                         if (x < 2.5 / BOUNCE_THRESHOLD)
-                            return BOUNCE_CONSTANT * (x -= 2.25f / BOUNCE_THRESHOLD) * x + 0.9375f;
+                            return (BOUNCE_CONSTANT * (x -= 2.25f / BOUNCE_THRESHOLD) * x) + 0.9375f;
 
-                        return BOUNCE_CONSTANT * (x -= 2.625f / BOUNCE_THRESHOLD) * x + 0.984375f;
+                        return (BOUNCE_CONSTANT * (x -= 2.625f / BOUNCE_THRESHOLD) * x) + 0.984375f;
                     },
                     InOut = (x) => x < 0.5
-                        ? (1 - Get(1 - 2 * x, EaseFunction.Bounce, EaseMode.Out)) / 2
-                        : (1 + Get(2 * x - 1, EaseFunction.Bounce, EaseMode.Out)) / 2
+                        ? (1 - Get(1 - (2 * x), EaseFunction.Bounce, EaseMode.Out)) / 2
+                        : (1 + Get((2 * x) - 1, EaseFunction.Bounce, EaseMode.Out)) / 2
                 }
             }
         };
@@ -373,7 +371,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             if (slope >= _NEWTON_MIN_SLOPE)
                 t = NewtonSolveApprox(x, t);
-            else if (slope != 0) t = BinarySearchApprox(x, nIndex * step, nIndex * step + step);
+            else if (slope != 0) t = BinarySearchApprox(x, nIndex * step, (nIndex * step) + step);
 
             float ans = GetBezier(t, Point1.y, Point2.y);
 
@@ -382,20 +380,20 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         private float GetBezier(float t, float point1, float point2)
         {
-            float cubicCoefficient = 1 - 3 * point2 + 3 * point1;
-            float quadraticCoefficient = 3 * point2 - 6 * point1;
+            float cubicCoefficient = 1 - (3 * point2) + (3 * point1);
+            float quadraticCoefficient = (3 * point2) - (6 * point1);
             float linearCoefficient = 3 * point1;
 
-            return ((cubicCoefficient * t + quadraticCoefficient) * t + linearCoefficient) * t;
+            return ((((cubicCoefficient * t) + quadraticCoefficient) * t) + linearCoefficient) * t;
         }
 
         private float GetBezierSlope(float t, float point1, float point2)
         {
-            float cubicCoefficient = 1 - 3 * point2 + 3 * point1;
-            float quadraticCoefficient = 3 * point2 - 6 * point1;
+            float cubicCoefficient = 1 - (3 * point2) + (3 * point1);
+            float quadraticCoefficient = (3 * point2) - (6 * point1);
             float linearCoefficient = 3 * point1;
 
-            return 3 * cubicCoefficient * t * t + 2 * quadraticCoefficient * t + linearCoefficient;
+            return (3 * cubicCoefficient * t * t) + (2 * quadraticCoefficient * t) + linearCoefficient;
         }
 
         private float BinarySearchApprox(float x, float minBound, float maxBound)

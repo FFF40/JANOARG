@@ -587,7 +587,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                         {
                             StartPosition = Vector2.LerpUnclamped(previousStep.StartPointPosition, step.StartPointPosition, percentageDifference),
                             EndPosition = Vector2.LerpUnclamped(previousStep.EndPointPosition, step.EndPointPosition, percentageDifference),
-                            Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN
+                            Offset = laneTime < time ? offset + ((timeT - t) * step.Speed) : BeatPosition.NaN
                         };
                     else
                         return new LanePosition
@@ -596,7 +596,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                                 Mathf.LerpUnclamped(previousStep.StartPointPosition.y, step.StartPointPosition.y, step.StartEaseY.Get(percentageDifference))),
                             EndPosition = new Vector2(Mathf.LerpUnclamped(previousStep.EndPointPosition.x, step.EndPointPosition.x, step.EndEaseX.Get(percentageDifference)),
                                 Mathf.LerpUnclamped(previousStep.EndPointPosition.y, step.EndPointPosition.y, step.EndEaseY.Get(percentageDifference))),
-                            Offset = laneTime < time ? offset + (timeT - t) * step.Speed : BeatPosition.NaN
+                            Offset = laneTime < time ? offset + ((timeT - t) * step.Speed) : BeatPosition.NaN
                         };
                 }
             }
@@ -609,7 +609,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     StartPosition = steps[^1].StartPointPosition,
                     EndPosition = steps[^1].EndPointPosition,
-                    Offset = laneTime < time ? offset + (timeT - t) * LaneSteps[^1].Speed : float.NaN
+                    Offset = laneTime < time ? offset + ((timeT - t) * LaneSteps[^1].Speed) : float.NaN
                 };
             }
         }

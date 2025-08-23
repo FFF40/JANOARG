@@ -12,7 +12,7 @@ namespace JANOARG.Client.Data.Storage
 
         public void Load()
         {
-            ScoreStoreEntry[] entryList = CommonSys.sMain.Storage.Get("ScoreStore", new ScoreStoreEntry[0]);
+            ScoreStoreEntry[] entryList = CommonSys.sMain.Storage.Get("ScoreStore", Array.Empty<ScoreStoreEntry>());
 
             foreach (ScoreStoreEntry entry in entryList) entries[entry.SongID + "/" + entry.ChartID] = entry;
         }

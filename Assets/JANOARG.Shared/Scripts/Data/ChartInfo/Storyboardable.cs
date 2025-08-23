@@ -72,7 +72,7 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public Storyboard Storyboard = new();
 
-        public static TimestampType[] sTimestampTypes = { };
+        public static TimestampType[] sTimestampTypes = Array.Empty<TimestampType>();
 
         protected TimestampType[] TimestampTypesP;
 

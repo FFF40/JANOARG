@@ -116,8 +116,8 @@ namespace JANOARG.Client.Behaviors.Player
 
             Lane.GetStartEndPosition(time, out Vector2 start, out Vector2 end);
 
-            transform.localPosition = Vector3.LerpUnclamped(start, end, Current.Position + Current.Length / 2) +
-                                      Vector3.forward * zPosition;
+            transform.localPosition = Vector3.LerpUnclamped(start, end, Current.Position + (Current.Length / 2)) +
+                                      (Vector3.forward * zPosition);
 
             transform.localEulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.right, end - start);
 
@@ -135,9 +135,9 @@ namespace JANOARG.Client.Behaviors.Player
             else
             {
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[0];
-                Center.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
+                Center.transform.localScale = new Vector3(width - (.2f * scale), .4f * scale, .4f * scale);
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
-                RightPoint.transform.localPosition = Vector3.right * (width / 2 + .2f * scale);
+                RightPoint.transform.localPosition = Vector3.right * ((width / 2) + (.2f * scale));
                 LeftPoint.transform.localPosition = -RightPoint.transform.localPosition;
             }
         }

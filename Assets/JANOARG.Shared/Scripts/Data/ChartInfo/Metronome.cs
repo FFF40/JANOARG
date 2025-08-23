@@ -54,7 +54,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
                 BPMStop stop = Stops[stopIndex];
-                float timeInSeconds = beat * (60 / Stops[stopIndex].BPM) + Stops[stopIndex].Offset;
+                float timeInSeconds = (beat * (60 / Stops[stopIndex].BPM)) + Stops[stopIndex].Offset;
 
                 if (stopIndex + 1 < Stops.Count)
                 {
@@ -83,13 +83,13 @@ namespace JANOARG.Shared.Data.ChartInfo
             for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
                 float currentBarPosition =
-                    ((seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM) + beat) /
+                    (((seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM)) + beat) /
                     Stops[stopIndex].Signature;
 
                 if (stopIndex + 1 < Stops.Count)
                 {
                     float sectionBars =
-                        ((Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM) +
+                        (((Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM)) +
                          beat) /
                         Stops[stopIndex].Signature;
 
@@ -113,15 +113,15 @@ namespace JANOARG.Shared.Data.ChartInfo
             for (var stopIndex = 0; stopIndex < Stops.Count; stopIndex++)
             {
                 float currentBeatPosition =
-                    (seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM) + beat;
+                    ((seconds - Stops[stopIndex].Offset) / (60 / Stops[stopIndex].BPM)) + beat;
 
-                float beatInBar = (currentBeatPosition % Stops[stopIndex].Signature + Stops[stopIndex].Signature) %
+                float beatInBar = ((currentBeatPosition % Stops[stopIndex].Signature) + Stops[stopIndex].Signature) %
                                   Stops[stopIndex].Signature;
 
                 if (stopIndex + 1 < Stops.Count)
                 {
-                    float sectionBeats = (Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) /
-                                         (60 / Stops[stopIndex].BPM) +
+                    float sectionBeats = ((Stops[stopIndex + 1].Offset - Stops[stopIndex].Offset) /
+                                         (60 / Stops[stopIndex].BPM)) +
                                          beat;
 
                     if (currentBeatPosition <= sectionBeats) return beatInBar;

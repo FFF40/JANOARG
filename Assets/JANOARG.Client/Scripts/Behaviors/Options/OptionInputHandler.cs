@@ -435,7 +435,7 @@ namespace JANOARG.Client.Behaviors.Options
                         for (int a = 0; a < CurrentInputs.Count; a++)
                         {
                             LerpText(TextAnimLabels[a * 2], multiFloatInput.ValueHolders[a], CurrentInputs[a].InputField.textComponent, x);
-                            LerpText(TextAnimLabels[a * 2 + 1], multiFloatInput.UnitLabels[a], CurrentInputs[a].UnitLabel, x);
+                            LerpText(TextAnimLabels[(a * 2) + 1], multiFloatInput.UnitLabels[a], CurrentInputs[a].UnitLabel, x);
                         }
                     };
                     endLerp = () =>
@@ -525,14 +525,14 @@ namespace JANOARG.Client.Behaviors.Options
 
                 float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 float offset = 30 * (1 - ease2);
-                TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
-                RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
-                ListTransform.anchoredPosition = listPos + Vector2.right * offset;
+                TitleText.rectTransform.anchoredPosition = titlePos + (Vector2.left * offset);
+                RightTransform.anchoredPosition = rightPos + (Vector2.right * offset);
+                ListTransform.anchoredPosition = listPos + (Vector2.right * offset);
 
-                float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
+                float ease3 = Ease.Get((x * 1.5f) - .5f, EaseFunction.Cubic, EaseMode.Out);
                 TitleText.alpha = RightHolder.alpha = ListGroup.alpha = ease3;
                 AdvancedInputTransform.anchoredPosition = new(
-                    (IsAdvanced ? -690 : -190) - 10 * ease3,
+                    (IsAdvanced ? -690 : -190) - (10 * ease3),
                     AdvancedInputTransform.anchoredPosition.y
                 );
                 AdvancedInputGroup.alpha = ease3;
@@ -571,13 +571,13 @@ namespace JANOARG.Client.Behaviors.Options
                 Background.color = new Color(0, 0, 0, .5f * (1 - ease));
 
                 float offset = 10 * ease;
-                TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
-                RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
-                ListTransform.anchoredPosition = listPos + Vector2.right * offset;
+                TitleText.rectTransform.anchoredPosition = titlePos + (Vector2.left * offset);
+                RightTransform.anchoredPosition = rightPos + (Vector2.right * offset);
+                ListTransform.anchoredPosition = listPos + (Vector2.right * offset);
                 TitleText.alpha = RightHolder.alpha = ListGroup.alpha = 1 - ease;
 
                 AdvancedInputTransform.anchoredPosition = new(
-                    (IsAdvanced ? -700 : -200) + 10 * ease,
+                    (IsAdvanced ? -700 : -200) + (10 * ease),
                     AdvancedInputTransform.anchoredPosition.y
                 );
                 AdvancedInputGroup.alpha = 1 - ease;
@@ -672,7 +672,7 @@ namespace JANOARG.Client.Behaviors.Options
                 CurrentInputs[a]
                     .gameObject.SetActive(active);
                 TextAnimLabels[a * 2].text = active ? CurrentInputs[a].InputField.text : "";
-                TextAnimLabels[a * 2 + 1].text = active ? CurrentInputs[a].UnitLabel.text : "";
+                TextAnimLabels[(a * 2) + 1].text = active ? CurrentInputs[a].UnitLabel.text : "";
             }
         }
 
@@ -685,15 +685,15 @@ namespace JANOARG.Client.Behaviors.Options
                 StartCoroutine(Ease.Animate(.4f, x =>
                 {
                     float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                    AdvancedInputTransform.anchoredPosition = new(-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
+                    AdvancedInputTransform.anchoredPosition = new(-200 - (500 * ease), AdvancedInputTransform.anchoredPosition.y);
                 }));
             }
             else
             {
                 StartCoroutine(Ease.Animate(.5f, x =>
                 {
-                    float ease2 = Ease.Get(Mathf.Clamp01(x * 1.2f - .2f), EaseFunction.Cubic, EaseMode.Out);
-                    AdvancedInputTransform.anchoredPosition = new(-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
+                    float ease2 = Ease.Get(Mathf.Clamp01((x * 1.2f) - .2f), EaseFunction.Cubic, EaseMode.Out);
+                    AdvancedInputTransform.anchoredPosition = new(-700 + (500 * ease2), AdvancedInputTransform.anchoredPosition.y);
                 }));
             }
 

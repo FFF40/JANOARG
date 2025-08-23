@@ -13,7 +13,7 @@ namespace JANOARG.Client.UI
         {
             Fill.rectTransform.anchorMin = new Vector2(1 - amount, 0);
             Icon.color = Color.Lerp(Color.white, Color.black, amount);
-            Holder.sizeDelta = new Vector2(54 + 10 * amount, Holder.sizeDelta.y);
+            Holder.sizeDelta = new Vector2(54 + (10 * amount), Holder.sizeDelta.y);
         }
     }
 }
