@@ -43,8 +43,8 @@ namespace JANOARG.Client.Behaviors.Player
         {
             yield return Ease.Animate(0.4f, (x) => {
                 float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2);
-                RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + Size * ease + x * 10);
-                CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - 30 * ease);
+                RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + (Size * ease) + (x * 10));
+                CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - (30 * ease));
 
                 float ease2 = Ease.Get(x, EaseFunction.Circle, EaseMode.In);
                 Group.alpha = 1 - ease2;
