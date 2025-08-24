@@ -18,7 +18,9 @@ namespace JANOARG.Client.Behaviors.Player
         public float       CurrentPosition;
 
         public MeshRenderer Center;
+        [FormerlySerializedAs("Left")]
         public MeshRenderer LeftPoint;
+        [FormerlySerializedAs("Right")]
         public MeshRenderer RightPoint;
 
         public MeshFilter   HoldMesh;

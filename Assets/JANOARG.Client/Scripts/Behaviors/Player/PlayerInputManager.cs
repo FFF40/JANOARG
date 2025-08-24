@@ -833,6 +833,8 @@ public class PlayerInputManager : MonoBehaviour
                         effect.SetColor(PlayerScreen.sCurrentChart.Palette.InterfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
+                        
+                        currentHit.HoldTicks.RemoveAt(0);
                     }
 
                     if (currentHit.HoldTicks.Count == 0)

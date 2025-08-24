@@ -694,10 +694,12 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public BeatPosition Offset = new();
 
+        [FormerlySerializedAs("StartPos")]
         public                      Vector2        StartPointPosition;
         [SerializeReference] public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
         [SerializeReference] public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
+        [FormerlySerializedAs("EndPos")]
         public                      Vector2        EndPointPosition;
         [SerializeReference] public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
         [SerializeReference] public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);

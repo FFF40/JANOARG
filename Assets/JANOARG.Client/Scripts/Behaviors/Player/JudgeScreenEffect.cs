@@ -41,21 +41,17 @@ namespace JANOARG.Client.Behaviors.Player
 
         public IEnumerator Start()
         {
-            yield return Ease.Animate(
-                0.4f, x =>
-                {
-                    float ease = 1 -
-                                 Mathf.Pow(
-                                     Ease.Get(
-                                         1 - x, EaseFunction.Exponential,
-                                         EaseMode.In), 2);
+            yield return Ease.Animate(0.4f, (x) => {
+                float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2);
+                RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + (Size * ease) + (x * 10));
+                CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - (30 * ease));
 
-                    RingBackground.rectTransform.sizeDelta =
-                        Vector2.one * (40 + Size * ease + x * 10);
+                float ease2 = Ease.Get(x, EaseFunction.Circle, EaseMode.In);
+                Group.alpha = 1 - ease2;
 
-                    float ease3 = (1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2)) * .96f + x * .04f;
-                    RingBackground.InsideRadius = RingFill1.InsideRadius = RingFill2.InsideRadius = ease3;
-                });
+                float ease3 = (1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2)) * .96f + x * .04f;
+                RingBackground.InsideRadius = RingFill1.InsideRadius = RingFill2.InsideRadius = ease3;
+            });
 
             Destroy(gameObject);
         }
