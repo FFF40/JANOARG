@@ -4,35 +4,73 @@ using UnityEngine.Serialization;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
+    /// <summary>
+    /// Interface for deep cloning objects.
+    /// </summary>
     public interface IDeepClonable<T>
     {
+        /// <summary>
+        /// Returns a deep clone of the object.
+        /// </summary>
         public T DeepClone();
     }
 
+    /// <summary>
+    /// Represents a playable chart, containing all lanes, groups, camera, and style information for a song difficulty.
+    /// </summary>
     [System.Serializable]
     public class Chart : IDeepClonable<Chart>
     {
+        /// <summary>
+        /// The display name of the difficulty (e.g., "Normal").
+        /// </summary>
         public string DifficultyName  = "Normal";
+        /// <summary>
+        /// The level of the difficulty (e.g., "6").
+        /// </summary>
         public string DifficultyLevel = "6";
+        /// <summary>
+        /// The index of the difficulty (for sorting).
+        /// </summary>
         public int    DifficultyIndex = 1;
+        /// <summary>
+        /// The chart constant (difficulty rating used for ability rating calculation).
+        /// </summary>
         public float  ChartConstant   = 6;
 
+        /// <summary>
+        /// The main name of the charter.
+        /// </summary>
         public string CharterName    = "";
+        /// <summary>
+        /// Alternative name of the charter.
+        /// </summary>
         public string AltCharterName = "";
 
+        /// <summary>
+        /// List of lane groups in this chart.
+        /// </summary>
         public List<LaneGroup> Groups = new();
+        /// <summary>
+        /// List of lanes in this chart.
+        /// </summary>
         public List<Lane>      Lanes  = new();
 
+        /// <summary>
+        /// The camera controller for this chart.
+        /// </summary>
         public CameraController Camera = new();
-        public Vector3          CameraPivot;
-        public Vector3          CameraRotation;
 
+        /// <summary>
+        /// The palette (style) for this chart.
+        /// </summary>
         public Palette Palette = new();
 
         public Chart()
         {
         }
 
+        /// <inheritdoc/>
         public Chart DeepClone()
         {
             Chart clone = new()
@@ -43,8 +81,6 @@ namespace JANOARG.Shared.Data.ChartInfo
                 ChartConstant = ChartConstant,
                 Camera = Camera.DeepClone(),
                 Palette = Palette.DeepClone(),
-                CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
-                CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z)
             };
 
             foreach (LaneGroup group in Groups)
@@ -57,11 +93,23 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Controls the camera's position, distance, and rotation for a chart.
+    /// </summary>
     [System.Serializable]
     public class CameraController : Storyboardable, IDeepClonable<CameraController>
     {
+        /// <summary>
+        /// The pivot point of the camera.
+        /// </summary>
         public Vector3 CameraPivot;
+        /// <summary>
+        /// The distance from the pivot point.
+        /// </summary>
         public float   PivotDistance = 10;
+        /// <summary>
+        /// The rotation of the camera.
+        /// </summary>
         public Vector3 CameraRotation;
 
         public static new TimestampType[] TimestampTypes =
@@ -136,14 +184,28 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
-// Style 
+    /// <summary>
+    /// Defines the color palette and style for a chart, including lane and hit styles.
+    /// </summary>
     [System.Serializable]
     public class Palette : Storyboardable, IDeepClonable<Palette>
     {
+        /// <summary>
+        /// The color of the background.
+        /// </summary>
         public Color BackgroundColor = Color.black;
+        /// <summary>
+        /// The interface color
+        /// </summary>
         public Color InterfaceColor  = Color.white;
 
+        /// <summary>
+        /// List of lane styles.
+        /// </summary>
         public List<LaneStyle> LaneStyles = new();
+        /// <summary>
+        /// List of hit styles.
+        /// </summary>
         public List<HitStyle>  HitStyles  = new();
 
         public static new TimestampType[] TimestampTypes =
@@ -220,17 +282,41 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Defines the style for a lane, including materials and colors for the lane and judgment line.
+    /// </summary>
     [System.Serializable]
     public class LaneStyle : Storyboardable, IDeepClonable<LaneStyle>
     {
+        /// <summary>
+        /// The name of this lane style.
+        /// </summary>
         public string Name;
 
+        /// <summary>
+        /// The material used for the lane.
+        /// </summary>
         public string LaneMaterial    = "Default";
+        /// <summary>
+        /// The shader property for the lane color.
+        /// </summary>
         public string LaneColorTarget = "_Color";
+        /// <summary>
+        /// The color of the lane.
+        /// </summary>
         public Color  LaneColor       = Color.black;
 
+        /// <summary>
+        /// The material used for the judgment line.
+        /// </summary>
         public string JudgeMaterial    = "Default";
+        /// <summary>
+        /// The shader property for the judgment line color.
+        /// </summary>
         public string JudgeColorTarget = "_Color";
+        /// <summary>
+        /// The color of the judgment line.
+        /// </summary>
         public Color  JudgeColor       = Color.black;
 
         public static new TimestampType[] TimestampTypes =
@@ -315,18 +401,45 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Defines the style for hit objects, including materials and colors for hit objects and hold tails.
+    /// </summary>
     [System.Serializable]
     public class HitStyle : Storyboardable, IDeepClonable<HitStyle>
     {
+        /// <summary>
+        /// The name of this hit style.
+        /// </summary>
         public string Name;
 
+        /// <summary>
+        /// The material for the body of the hit object.
+        /// </summary>
         public string MainMaterial    = "Default";
+        /// <summary>
+        /// The shader property for the body color.
+        /// </summary>
         public string MainColorTarget = "_Color";
+        /// <summary>
+        /// The color for normal notes.
+        /// </summary>
         public Color  NormalColor     = Color.black;
+        /// <summary>
+        /// The color for catch notes.
+        /// </summary>
         public Color  CatchColor      = Color.blue;
 
+        /// <summary>
+        /// The material for the hold tail.
+        /// </summary>
         public string HoldTailMaterial    = "Default";
+        /// <summary>
+        /// The shader property for the hold tail color.
+        /// </summary>
         public string HoldTailColorTarget = "_Color";
+        /// <summary>
+        /// The color for the hold tail.
+        /// </summary>
         public Color  HoldTailColor       = Color.black;
 
         public static new TimestampType[] TimestampTypes =
@@ -443,12 +556,27 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
-    [System.Serializable]
+    /// <summary>
+    /// Represents a group for organization and bulk-transformation of lanes.
+    /// </summary>
+    /// <remarks>
     public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     {
+        /// <summary>
+        /// The name of this lane group.
+        /// </summary>
         public string  Name;
+        /// <summary>
+        /// The position of this group.
+        /// </summary>
         public Vector3 Position;
+        /// <summary>
+        /// The rotation of this group.
+        /// </summary>
         public Vector3 Rotation;
+        /// <summary>
+        /// The parent group's name.
+        /// </summary>
         public string  Group;
 
         public static new TimestampType[] TimestampTypes =
@@ -517,30 +645,66 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Represents the position and offset of a lane at a given time.
+    /// </summary>
     [System.Serializable]
     public class LanePosition
     {
+        /// <summary>
+        /// The start position of the lane.
+        /// </summary>
         [FormerlySerializedAs("StartPos")] public Vector2 StartPosition;
+        /// <summary>
+        /// The end position of the lane.
+        /// </summary>
         [FormerlySerializedAs("EndPos")]   public Vector2 EndPosition;
+        /// <summary>
+        /// The offset value for the lane.
+        /// </summary>
         public                                    float   Offset;
     }
 
+    /// <summary>
+    /// Represents a lane in a chart, containing hit objects, steps, and position/rotation data.
+    /// </summary>
     [System.Serializable]
     public class Lane : DirtyTrackedStoryboardable, IDeepClonable<Lane>
     {
+        /// <summary>
+        /// The name of this lane.
+        /// </summary>
         public string Name;
 
+        /// <summary>
+        /// List of hit objects in this lane.
+        /// </summary>
         public List<HitObject> Objects   = new();
+        /// <summary>
+        /// List of this lane's steps.
+        /// </summary>
         public List<LaneStep>  LaneSteps = new();
 
+        /// <summary>
+        /// The position offset of the lane.
+        /// </summary>
         [FormerlySerializedAs("Offset")]
         public Vector3 Position;
 
+        /// <summary>
+        /// The rotation offset of the lane.
+        /// </summary>
         [FormerlySerializedAs("OffsetRotation")]
         public Vector3 Rotation;
 
+        /// <summary>
+        /// The name of the <see cref="LaneGroup"/> this lane belongs to.
+        /// </summary>
         public string Group;
 
+        /// <summary>
+        /// The style index for this lane.
+        /// </summary>
         public int StyleIndex = 0;
 
         public LanePosition GetLanePosition(float time, float laneTime, Metronome timing)
@@ -689,21 +853,51 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Represents a point of a Lane, which defines the lane's position, shape, and scroll speed.
+    /// </summary>
     [System.Serializable]
     public class LaneStep : DirtyTrackedStoryboardable, IDeepClonable<LaneStep>
     {
+        /// <summary>
+        /// The time position of this step, in song beats.
+        /// </summary>
         public BeatPosition Offset = new();
 
+        /// <summary>
+        /// The start point position of the lane at this step.
+        /// </summary>
         public                      Vector2        StartPointPosition;
+        /// <summary>
+        /// The easing directive for the X component of the start point.
+        /// </summary>
         [SerializeReference] public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+        /// <summary>
+        /// The easing directive for the Y component of the start point.
+        /// </summary>
         [SerializeReference] public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
+        /// <summary>
+        /// The end point position of the lane at this step.
+        /// </summary>
         public                      Vector2        EndPointPosition;
+        /// <summary>
+        /// The easing directive for the X component of the end point.
+        /// </summary>
         [SerializeReference] public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
+        /// <summary>
+        /// The easing directive for the Y component of the end point.
+        /// </summary>
         [SerializeReference] public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
+        /// <summary>
+        /// The speed of the lane during this step.
+        /// </summary>
         public float Speed = 1;
 
+        /// <summary>
+        /// Returns true if all easing is linear.
+        /// </summary>
         public bool isLinear =>
             StartEaseX is BasicEaseDirective startEaseX &&
             StartEaseY is BasicEaseDirective startEaseY &&
@@ -778,22 +972,58 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Represents a hit object (note) on a lane.
+    /// </summary>
     [System.Serializable]
     public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
     {
+        /// <summary>
+        /// The type of hit object (normal or catch).
+        /// </summary>
         public HitType      Type;
+        /// <summary>
+        /// The time position of this step, in song beats.
+        /// </summary>
         public BeatPosition Offset = new();
+        /// <summary>
+        /// The position of the hit object (0~1 range).
+        /// </summary>
         public float        Position;
+        /// <summary>
+        /// The length of the hit object (0~1 range).
+        /// </summary>
         public float        Length;
+        /// <summary>
+        /// The hold duration of the hit object, in beats.
+        /// </summary>
         public float        HoldLength = 0;
+        /// <summary>
+        /// Whether this hit object is flickable.
+        /// </summary>
         public bool         Flickable;
-        public float        FlickDirection = -1;
+        /// <summary>
+        /// The direction of the flick (in degrees), or NaN for omni-directional flick.
+        /// </summary>
+        public float        FlickDirection = float.NaN;
 
+        /// <summary>
+        /// The style index for this hit object.
+        /// </summary>
         public int StyleIndex = 0;
 
+        /// <summary>
+        /// The type of hit object.
+        /// </summary>
         public enum HitType
         {
+            /// <summary>
+            /// A normal (tap) note.
+            /// </summary>
             Normal,
+            /// <summary>
+            /// A catch note.
+            /// </summary>
             Catch
         }
 
@@ -834,10 +1064,22 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Specifies the coordinate mode for lane/group/global positioning.
+    /// </summary>
     public enum CoordinateMode
     {
+        /// <summary>
+        /// Local coordinates (relative to lane).
+        /// </summary>
         Local,
+        /// <summary>
+        /// Group coordinates (relative to group).
+        /// </summary>
         Group,
+        /// <summary>
+        /// Global coordinates (absolute).
+        /// </summary>
         Global
     }
 }

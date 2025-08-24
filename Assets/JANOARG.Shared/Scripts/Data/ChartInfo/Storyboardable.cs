@@ -5,17 +5,38 @@ using UnityEngine.Serialization;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
+    /// <summary>
+    /// Represents a single timestamped value change for a storyboardable property.
+    /// </summary>
     [Serializable]
     public class Timestamp : IDeepClonable<Timestamp>
     {
+        /// <summary>
+        /// The offset (in beats) at which this timestamp occurs.
+        /// </summary>
         [FormerlySerializedAs("Time")]
         public BeatPosition Offset;
 
+        /// <summary>
+        /// The duration (in beats) over which the value changes.
+        /// </summary>
         public float  Duration;
+        /// <summary>
+        /// The ID/type of the property this timestamp affects.
+        /// </summary>
         public string ID;
+        /// <summary>
+        /// The starting value (if not NaN) for the transition.
+        /// </summary>
         public float  From = float.NaN;
+        /// <summary>
+        /// The target value at the end of the transition.
+        /// </summary>
         public float  Target;
 
+        /// <summary>
+        /// The easing directive for the transition.
+        /// </summary>
         [SerializeReference]
         public IEaseDirective Easing = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
@@ -35,30 +56,60 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Describes a type of timestamped property for storyboardable objects.
+    /// </summary>
     public class TimestampType
     {
+        /// <summary>
+        /// The unique ID for this property type.
+        /// </summary>
         public string                        ID;
+        /// <summary>
+        /// The display name for this property type.
+        /// </summary>
         public string                        Name;
+        /// <summary>
+        /// Function to get the current value from a storyboardable object.
+        /// </summary>
         public Func<Storyboardable, float>   StoryboardGetter;
+        /// <summary>
+        /// Function to set the value on a storyboardable object.
+        /// </summary>
         public Action<Storyboardable, float> StoryboardSetter;
     }
 
+    /// <summary>
+    /// Holds a list of timestamped value changes for a storyboardable object.
+    /// </summary>
     [Serializable]
     public class Storyboard
     {
+        /// <summary>
+        /// The list of all timestamps in this storyboard.
+        /// </summary>
         public List<Timestamp> Timestamps = new();
 
+        /// <summary>
+        /// Adds a timestamp and keeps the list sorted by offset.
+        /// </summary>
         public void Add(Timestamp timestamp)
         {
             Timestamps.Add(timestamp);
             Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
 
+        /// <summary>
+        /// Returns all timestamps of a given type.
+        /// </summary>
         public List<Timestamp> FromType(string type)
         {
             return Timestamps.FindAll(x => x.ID == type);
         }
 
+        /// <summary>
+        /// Deep clones this storyboard and all its timestamps.
+        /// </summary>
         public Storyboard DeepClone()
         {
             var clone = new Storyboard();
@@ -68,14 +119,29 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+    /// <summary>
+    /// Base class for objects that can be animated via a storyboard (timestamped value changes).
+    /// </summary>
     public abstract class Storyboardable
     {
+        /// <summary>
+        /// The storyboard containing all timestamped value changes for this object.
+        /// </summary>
         public Storyboard Storyboard = new();
 
+        /// <summary>
+        /// Static array of supported timestamp types for this class.
+        /// </summary>
         public static TimestampType[] sTimestampTypes = Array.Empty<TimestampType>();
 
+        /// <summary>
+        /// Cached array of timestamp types for this instance.
+        /// </summary>
         protected TimestampType[] TimestampTypesP;
 
+        /// <summary>
+        /// Returns a clone of this object with all properties advanced to the given time.
+        /// </summary>
         public Storyboardable GetStoryboardableObject(float time)
         {
             if (TimestampTypesP == null)
@@ -125,10 +191,22 @@ namespace JANOARG.Shared.Data.ChartInfo
             return obj;
         }
 
+        /// <summary>
+        /// Stores the current values for each timestamp type.
+        /// </summary>
         protected Dictionary<string, float> CurrentValues;
 
+        /// <summary>
+        /// The current time for this storyboardable object.
+        /// </summary>
         protected float CurrentTime;
 
+        /// <summary>
+        /// Advances all properties to the given time, applying any relevant timestamps.
+        /// </summary>
+        /// <remarks>
+        /// This operation is destructive.
+        /// </remarks>
         public virtual void Advance(float time)
         {
             if (TimestampTypesP == null)

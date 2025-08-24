@@ -125,13 +125,13 @@ namespace JANOARG.Client.Behaviors.Song_Select
         public void Start()
         {
             OnSettingDirty();
-            CommonSys.sMain.Storage.OnSave.AddListener(OnSave);
+            CommonSys.sMain.Storage.OnAfterSave.AddListener(OnSave);
             StartCoroutine(InitPlaylist());
         }
 
         public void OnDestroy()
         {
-            CommonSys.sMain.Storage.OnSave.RemoveListener(OnSave);
+            CommonSys.sMain.Storage.OnAfterSave.RemoveListener(OnSave);
         }
 
         public void OnSave()

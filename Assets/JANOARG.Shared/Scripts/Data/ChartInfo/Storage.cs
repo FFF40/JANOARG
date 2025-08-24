@@ -9,12 +9,25 @@ using UnityEngine.Events;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
+    /// <summary>
+    /// Class for handling player data persistence.
+    /// </summary>
     public class Storage
     {
-        public UnityEvent OnLoad = new();
+        /// <summary>
+        /// Unity event called when the storage class finished loading.
+        /// </summary>
+        public UnityEvent OnAfterLoad = new();
+        /// <summary>
+        /// Unity event called when the storage class finished saving.
+        /// </summary>
+        public UnityEvent OnAfterSave = new();
 
-        public UnityEvent                 OnSave = new();
-        public string                     SaveName;
+        /// <summary>
+        /// The name of the save, used for determining file names.
+        /// </summary>
+        public string SaveName;
+        
         public Dictionary<string, object> Values = new();
 
         public Storage(string path)
@@ -23,6 +36,13 @@ namespace JANOARG.Shared.Data.ChartInfo
             Load();
         }
 
+        /// <summary>
+        /// Retrieve an object given a key.
+        /// </summary>
+        /// <typeparam name="T">Type of returning object.</typeparam>
+        /// <param name="key">The object key.</param>
+        /// <param name="fallback">The object to return if there's no object at the given key.</param>
+        /// <returns>The object at the given key, or <c>default</c> if key doesn't contain an item.</returns>
         public T Get<T>(string key, T fallback)
         {
             if (Values.ContainsKey(key)) return (T)Values[key];
@@ -30,6 +50,13 @@ namespace JANOARG.Shared.Data.ChartInfo
             return fallback;
         }
 
+        /// <summary>
+        /// Retrieve an object given a key.
+        /// </summary>
+        /// <typeparam name="T">Type of returning object.</typeparam>
+        /// <param name="key">The object key.</param>
+        /// <param name="fallback">The object to return if there's no object at the given key.</param>
+        /// <returns>The object at the given key, or <c>default</c> if key doesn't contain an item.</returns>
         public T[] Get<T>(string key, T[] fallback)
         {
             if (Values.ContainsKey(key))
@@ -44,11 +71,19 @@ namespace JANOARG.Shared.Data.ChartInfo
             return fallback;
         }
 
+        /// <summary>
+        /// Store an object at the given key.
+        /// </summary>
+        /// <param name="key">The object key.</param>
+        /// <param name="value">The object to set to.</param>
         public void Set(string key, object value)
         {
             Values[key] = value;
         }
 
+        /// <summary>
+        /// Save this storage object to persistent storage.
+        /// </summary>
         public void Save()
         {
             SerializeProxyList list = new();
@@ -67,9 +102,12 @@ namespace JANOARG.Shared.Data.ChartInfo
             serializer.Serialize(fileStream, list);
             fileStream.Close();
 
-            OnSave.Invoke();
+            OnAfterSave.Invoke();
         }
 
+        /// <summary>
+        /// Load this storage object from persistent storage.
+        /// </summary>
         public void Load()
         {
             SerializeProxyList list = new();
@@ -101,9 +139,12 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             foreach (SerializeProxy pair in list.Items) pair.AddPair(Values);
 
-            OnLoad.Invoke();
+            OnAfterLoad.Invoke();
         }
 
+        /// <summary>
+        /// Class for handling serialization of an individual item in <see cref="Storage"/>'s object dictionary.
+        /// </summary>
         [XmlInclude(typeof(ScoreStoreEntry))]
         public class SerializeProxy
         {
@@ -140,6 +181,9 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
         }
 
+        /// <summary>
+        /// Class for handling serialization of a collection.
+        /// </summary>
         public class CollectionProxy
         {
             [XmlElement("Item")] public object[] Value;
@@ -155,6 +199,9 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
         }
 
+        /// <summary>
+        /// Class for handling serialization of <see cref="Storage"/>'s object dictionary.
+        /// </summary>
         [XmlRoot("ItemList")]
         [XmlInclude(typeof(CollectionProxy))]
         public class SerializeProxyList

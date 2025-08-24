@@ -291,6 +291,12 @@ namespace JANOARG.Client.Behaviors.Player
         private float _HitObjectTime   = float.NaN;
         private int   _HitObjectOffset = 0;
 
+        /// <summary>
+        /// Update this lane's hit objects.
+        /// </summary>
+        /// <param name="time">Current song time in seconds.</param>
+        /// <param name="beat">Current song time in beats.</param>
+        /// <param name="maxDistance">Max distance to render in Unity units.</param>
         private void UpdateHitObjects(float time, float beat, float maxDistance = 200)
         {
             while (Current.Objects.Count > 0)
@@ -298,7 +304,7 @@ namespace JANOARG.Client.Behaviors.Player
                 HitObject hit = Current.Objects[0];
                 if (float.IsNaN(_HitObjectTime)) _HitObjectTime = PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset);
 
-                if (GetZPosition(_HitObjectTime) <= CurrentPosition + maxDistance)
+                if (GetZPosition(_HitObjectTime) <= CurrentPosition + maxDistance) // While hit object is in view
                 {
                     HitPlayer player = Instantiate(PlayerScreen.sMain.HitSample, Holder);
 
@@ -354,6 +360,14 @@ namespace JANOARG.Client.Behaviors.Player
             LaneStepDirty = false;
         }
 
+        /// <summary>
+        /// Converts a given song time to the corresponding Z position on this lane.
+        /// </summary>
+        /// <remarks>
+        /// This function uses the internal current time as storyboard time.
+        /// </remarks>
+        /// <param name="time">Song time in seconds.</param>
+        /// <returns>The Z position the judgement line will be at the given song time.</returns>
         public float GetZPosition(float time)
         {
             int index = TimeStamps.FindIndex(x => x >= time);
@@ -366,6 +380,15 @@ namespace JANOARG.Client.Behaviors.Player
             return PositionPoints[index] + (time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.sMain.Speed;
         }
 
+        /// <summary>
+        /// Calculates this lane's judgment line's start and end position at the given song time.
+        /// </summary>
+        /// <remarks>
+        /// This function uses the internal current time as storyboard time.
+        /// </remarks>
+        /// <param name="time">Song time in seconds.</param>
+        /// <param name="start">The resulting start position.</param>
+        /// <param name="end">The resulting end position.</param>
         public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end)
         {
             int index = TimeStamps.FindIndex(x => x >= time);
@@ -404,6 +427,11 @@ namespace JANOARG.Client.Behaviors.Player
             }
         }
 
+
+        /// <summary>
+        /// Updates a given hit object's hold tail mesh.
+        /// </summary>
+        /// <param name="hit">The hit object to update the hold tail.</param>
         public void UpdateHoldMesh(HitPlayer hit)
         {
             if (hit.HoldRenderer == null)
