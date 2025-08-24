@@ -109,6 +109,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
         [FormerlySerializedAs("SFXSource")] [Space]
         public AudioSource SoundEffectSource;
 
+        [FormerlySerializedAs("SFXTickClip")]
         public AudioClip SoundEffectTickClip;
         public float     SoundEffectVolume;
 

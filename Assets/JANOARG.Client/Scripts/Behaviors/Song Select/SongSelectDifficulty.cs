@@ -17,8 +17,9 @@ namespace JANOARG.Client.Behaviors.Song_Select
         public Image CoverImage;
         public Image CoverBorder;
 
-        public GameObject FullStreakIndicator;
-        public GameObject AllFlawlessIndicator;
+        [FormerlySerializedAs("FCIndicator")]public GameObject FullStreakIndicator;
+        
+        [FormerlySerializedAs("APIndicator")]public GameObject AllFlawlessIndicator;
         public Graphic[]  IndicatorGraphics;
 
         public Image[]   ScoreDials;

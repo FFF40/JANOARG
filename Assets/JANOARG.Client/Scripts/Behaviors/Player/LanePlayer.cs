@@ -21,8 +21,8 @@ namespace JANOARG.Client.Behaviors.Player
         [Space]
         public MeshRenderer JudgeLine;
 
-        public MeshRenderer JudgePointLeft;
-        public MeshRenderer JudgePointRight;
+        [FormerlySerializedAs("JudgeRight")] public MeshRenderer JudgePointLeft;
+        [FormerlySerializedAs("JudgeLeft")]  public MeshRenderer JudgePointRight;
 
         public List<float> PositionPoints = new();
         public List<float> TimeStamps     = new();
@@ -32,10 +32,7 @@ namespace JANOARG.Client.Behaviors.Player
         public List<HitScreenCoord> HitCoords  = new();
 
         public bool LaneStepDirty = false;
-
-        private List<Vector3> _verts = new();
-        private List<int>     _tris  = new();
-
+        
         private Mesh          _Mesh;
         private List<Vector3> _Verts = new();
         private List<int>     _Tris  = new();
@@ -94,8 +91,8 @@ namespace JANOARG.Client.Behaviors.Player
             // New mesh if MeshFilter doesn't have one
             Mesh mesh = MeshFilter.mesh ?? new Mesh();
 
-            _verts.Clear();
-            _tris.Clear();
+            _Verts.Clear();
+            _Tris.Clear();
 
             void f_addLine(Vector3 start, Vector3 end)
             {
@@ -274,8 +271,8 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             mesh.Clear();
-            mesh.SetVertices(_verts);
-            mesh.SetTriangles(_tris, 0);
+            mesh.SetVertices(_Verts);
+            mesh.SetTriangles(_Tris, 0);
             MeshFilter.mesh = mesh;
         }
 
