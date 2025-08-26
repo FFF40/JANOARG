@@ -39,8 +39,12 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             Ease ease = sEases[easeFunc];
             Func<float, float> func = ease.InOut;
-            if (mode == EaseMode.In) func = ease.In;
-            if (mode == EaseMode.Out) func = ease.Out;
+            
+            if (mode == EaseMode.In) 
+                func = ease.In;
+            
+            if (mode == EaseMode.Out) 
+                func = ease.Out;
 
             return func(Mathf.Clamp01(x));
         }

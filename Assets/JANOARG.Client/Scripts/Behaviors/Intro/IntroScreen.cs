@@ -1,6 +1,7 @@
 using System.Collections;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
@@ -178,18 +179,11 @@ namespace JANOARG.Client.Behaviors.Intro
             {
                 var goal = 1.005f;
 
-                CoverMiddle.anchorMax = new Vector2(
-                    Mathf.Lerp(
-                        CoverMiddle.anchorMax.x, goal,
-                        1 - Mathf.Pow(0.05f, Time.deltaTime)),
-                    CoverMiddle.anchorMax.y
-                );
+                CoverMiddle.anchorMax = 
+                    new Vector2(Mathf.Lerp(CoverMiddle.anchorMax.x, goal, 1 - Mathf.Pow(0.05f, Time.deltaTime)), CoverMiddle.anchorMax.y);
 
-                CoverMiddleInfo.anchoredPosition = new Vector2(
-                    CoverMiddleInfo.anchoredPosition.x *
-                    Mathf.Pow(0.02f, Time.deltaTime),
-                    CoverMiddleInfo.anchoredPosition.y
-                );
+                CoverMiddleInfo.anchoredPosition =
+                    new Vector2(CoverMiddleInfo.anchoredPosition.x * Mathf.Pow(0.02f, Time.deltaTime), CoverMiddleInfo.anchoredPosition.y);
 
                 yield return null;
             }
@@ -202,43 +196,26 @@ namespace JANOARG.Client.Behaviors.Intro
             yield return Ease.Animate(
                 1, a =>
                 {
-                    float lerp = Mathf.Pow(
-                        Ease.Get(a, EaseFunction.Circle, EaseMode.In),
-                        2);
+                    float lerp = 
+                        Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
 
-                    CoverMiddle.sizeDelta = new Vector2(
-                        CoverMiddle.sizeDelta.x,
-                        centerSize * (1 - lerp));
+                    CoverMiddle.sizeDelta *= 
+                        new Vector2Frag(y: centerSize * (1 - lerp));
 
                     CoverMiddle.anchorMax =
-                        (CoverTop.anchorMin = new Vector2(0, .5f + .5f * lerp)) +
-                        Vector2.right;
+                        (CoverTop.anchorMin = new Vector2(0, .5f + .5f * lerp)) + Vector2.right;
 
                     CoverMiddle.anchorMin =
-                        (CoverBottom.anchorMax = new Vector2(1, .5f - .5f * lerp)) +
-                        Vector2.left;
+                        (CoverBottom.anchorMax = new Vector2(1, .5f - .5f * lerp)) + Vector2.left;
 
                     CoverTop.sizeDelta = CoverBottom.sizeDelta =
                         new Vector2(0, -.5f * centerSize * (1 - lerp));
 
-                    CoverMiddleInfo.anchorMin = CoverMiddle.anchorMin = new Vector2(
-                        Mathf.Pow(
-                            Ease
-                                .Get(
-                                    a *
-                                    1.05f,
-                                    EaseFunction
-                                        .Exponential,
-                                    EaseMode
-                                        .Out),
-                            2),
-                        CoverMiddle
-                            .anchorMin
-                            .y
-                    );
+                    CoverMiddleInfo.anchorMin = CoverMiddle.anchorMin *= 
+                        new Vector2Frag(x: Mathf.Pow(Ease.Get(a * 1.05f, EaseFunction.Exponential, EaseMode.Out), 2));
 
-                    TitleLogo.rectTransform.anchoredPosition =
-                        new Vector2(TitleLogo.rectTransform.anchoredPosition.x, lerp * 10);
+                    TitleLogo.rectTransform.anchoredPosition *=
+                        new Vector2Frag(y: lerp * 10);
 
                     TitleActionLabel.alpha = TitleFooter.alpha = 0;
                 });
@@ -247,22 +224,29 @@ namespace JANOARG.Client.Behaviors.Intro
 
             void f_animate(float a)
             {
-                float lerp = Mathf.Pow(Ease.Get(a * 2, EaseFunction.Exponential, EaseMode.Out), 2);
+                float lerp = 
+                    Mathf.Pow(Ease.Get(a * 2, EaseFunction.Exponential, EaseMode.Out), 2);
 
-                TitleLogo.rectTransform.anchoredPosition =
-                    new Vector2(TitleLogo.rectTransform.anchoredPosition.x, 10 + lerp * 10);
+                float lerp2 = 
+                    Ease.Get(a * 1.5f, EaseFunction.Quintic, EaseMode.Out);
+                
+                float lerp3 = 
+                    Ease.Get(a * 1.2f - .2f, EaseFunction.Quintic, EaseMode.Out);
+                
+                TitleLogo.rectTransform.anchoredPosition *=
+                    new Vector2Frag(y: 10 + lerp * 10);
+                
+                TitleActionLabel.alpha = 
+                    1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.5f), 2);
 
-                float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Quintic, EaseMode.Out);
-                TitleActionLabel.alpha = 1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.5f), 2);
+                TitleActionLabel.rectTransform.anchoredPosition *=
+                    new Vector2Frag(y: lerp2 * -36);
+                
+                TitleFooter.alpha = 
+                    (1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.2f - .2f), 2)) * .5f;
 
-                TitleActionLabel.rectTransform.anchoredPosition =
-                    new Vector2(TitleActionLabel.rectTransform.anchoredPosition.x, lerp2 * -36);
-
-                float lerp3 = Ease.Get(a * 1.2f - .2f, EaseFunction.Quintic, EaseMode.Out);
-                TitleFooter.alpha = (1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.2f - .2f), 2)) * .5f;
-
-                TitleFooter.rectTransform.anchoredPosition =
-                    new Vector2(TitleFooter.rectTransform.anchoredPosition.x, 80 - lerp3 * 30);
+                TitleFooter.rectTransform.anchoredPosition *=
+                    new Vector2Frag(y: 80 - lerp3 * 30);
             }
 
             for (float a = 0; a < 1; a += Time.deltaTime / 2)
@@ -288,10 +272,8 @@ namespace JANOARG.Client.Behaviors.Intro
 
                 waitTime += Time.deltaTime;
 
-                TitleActionLabel.rectTransform.anchoredPosition = new Vector2(
-                    TitleActionLabel.rectTransform
-                        .anchoredPosition.x,
-                    -33 - 3 * Mathf.Cos(waitTime));
+                TitleActionLabel.rectTransform.anchoredPosition *= 
+                    new Vector2Frag(y: -33 - 3 * Mathf.Cos(waitTime));
 
                 yield return null;
             }
@@ -299,42 +281,33 @@ namespace JANOARG.Client.Behaviors.Intro
 
         public IEnumerator IntroExitRoutine()
         {
-            float yPos = TitleActionLabel.rectTransform.anchoredPosition.y /
-                         ((RectTransform)TitleActionLabel.rectTransform.parent).rect.height +
-                         0.5f;
+            float yPos = 
+                TitleActionLabel.rectTransform.anchoredPosition.y / ((RectTransform)TitleActionLabel.rectTransform.parent).rect.height + 0.5f;
 
-            PostTitleLabel.rectTransform.anchorMin = new Vector2(PostTitleLabel.rectTransform.anchorMin.x, yPos);
-            PostTitleLabel.rectTransform.anchorMax = new Vector2(PostTitleLabel.rectTransform.anchorMax.x, yPos);
+            PostTitleLabel.rectTransform.anchorMax *= new Vector2Frag(y: yPos);
+            PostTitleLabel.rectTransform.anchorMin *= new Vector2Frag(y: yPos);
             Debug.Log(TitleActionLabel.rectTransform.rect);
 
             yield return Ease.Animate(
                 1f, a =>
                 {
-                    float lerp = Mathf.Pow(
-                        Ease.Get(
-                            a * 1.5f, EaseFunction.Circle,
-                            EaseMode.Out), 2);
+                    float lerp = 
+                        Mathf.Pow(Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out), 2);
 
-                    PostTitleCover1.anchorMin = new Vector2(
-                        PostTitleCover1.anchorMin.x,
-                        Mathf.Lerp(yPos, 0, lerp));
+                    float lerp2 = 
+                        Mathf.Pow(Ease.Get(a * 1.5f - 0.5f, EaseFunction.Circle, EaseMode.In), 2);
 
-                    PostTitleCover1.anchorMax = new Vector2(
-                        PostTitleCover1.anchorMax.x,
-                        Mathf.Lerp(yPos, 1, lerp));
+                    PostTitleCover1.anchorMin *= 
+                        new Vector2Frag(y: Mathf.Lerp(yPos, 0, lerp));
 
-                    float lerp2 = Mathf.Pow(
-                        Ease.Get(
-                            a * 1.5f - 0.5f, EaseFunction.Circle,
-                            EaseMode.In), 2);
+                    PostTitleCover1.anchorMax *=
+                        new Vector2Frag(y: Mathf.Lerp(yPos, 1, lerp));
+                    
+                    PostTitleCover2.anchorMin *= 
+                        new Vector2Frag(y: Mathf.Lerp(yPos, 0, lerp2));
 
-                    PostTitleCover2.anchorMin = new Vector2(
-                        PostTitleCover2.anchorMin.x,
-                        Mathf.Lerp(yPos, 0, lerp2));
-
-                    PostTitleCover2.anchorMax = new Vector2(
-                        PostTitleCover2.anchorMax.x,
-                        Mathf.Lerp(yPos, 1, lerp2));
+                    PostTitleCover2.anchorMax *= 
+                        new Vector2Frag(y: Mathf.Lerp(yPos, 1, lerp2));
                 });
 
             yield return new WaitForSecondsRealtime(1);

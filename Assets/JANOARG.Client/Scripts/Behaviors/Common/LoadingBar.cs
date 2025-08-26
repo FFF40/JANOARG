@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
@@ -113,29 +114,20 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 3f, a =>
                 {
-                    float lerp = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-
-                    FlavorBackground.rectTransform.sizeDelta =
-                        new Vector2(FlavorBackground.rectTransform.sizeDelta.x, lerp * 100);
-
-                    float lerp2 = Ease.Get(
-                        a * 3f - 0.15f, EaseFunction.Exponential,
-                        EaseMode.Out);
-
-                    FlavorBackground2.rectTransform.sizeDelta =
-                        new Vector2(
-                            FlavorBackground2.rectTransform.sizeDelta.x,
-                            lerp2 * 100);
-
+                    float lerp  = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
+                    float lerp2 = Ease.Get(a * 3f - 0.15f, EaseFunction.Exponential, EaseMode.Out);
                     float lerp3 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-
-                    StatusHolder.anchoredPosition = new Vector2(
-                        1000 +
-                        (StatusHolder.rect.width - 1000 + _Self.sizeDelta.x / -2) *
-                        (1 - lerp3), 0);
-
                     float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
 
+                    FlavorBackground.rectTransform.sizeDelta *=
+                        new Vector2Frag(y: lerp * 100);
+
+                    FlavorBackground2.rectTransform.sizeDelta *=
+                        new Vector2Frag(y: lerp2 * 100);
+
+                    StatusHolder.anchoredPosition =
+                        new Vector2(1000 + (StatusHolder.rect.width - 1000 + _Self.sizeDelta.x / -2) * (1 - lerp3), 0);
+                    
                     FlavorText.rectTransform.anchoredPosition =
                         new Vector2(1200 - 100 * lerp4, 0);
                 });
@@ -164,27 +156,17 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 1, a =>
                 {
-                    float lerp = Ease.Get(
-                        a * 1.2f - 0.1f, EaseFunction.Exponential,
-                        EaseMode.In);
-
+                    float lerp  = Ease.Get(a * 1.2f - 0.1f, EaseFunction.Exponential, EaseMode.In);
                     float lerp2 = Ease.Get(a * 1.2f, EaseFunction.Exponential, EaseMode.In);
                     float lerp3 = Ease.Get(a * 2f, EaseFunction.Exponential, EaseMode.Out);
                     float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
+                    float lerp5 = Ease.Get(a * 1.5f - 0.5f, EaseFunction.Exponential, EaseMode.In);
 
-                    float lerp5 = Ease.Get(
-                        a * 1.5f - 0.5f, EaseFunction.Exponential,
-                        EaseMode.In);
+                    FlavorBackground.rectTransform.sizeDelta *=
+                        new Vector2Frag(y: (1 - lerp) * 100 * (1 - .3f * lerp3));
 
-                    FlavorBackground.rectTransform.sizeDelta =
-                        new Vector2(
-                            FlavorBackground.rectTransform.sizeDelta.x,
-                            (1 - lerp) * 100 * (1 - .3f * lerp3));
-
-                    FlavorBackground2.rectTransform.sizeDelta =
-                        new Vector2(
-                            FlavorBackground2.rectTransform.sizeDelta.x,
-                            (1 - lerp2) * 100 * (1 - .35f * lerp3));
+                    FlavorBackground2.rectTransform.sizeDelta *=
+                        new Vector2Frag(y: (1 - lerp2) * 100 * (1 - .35f * lerp3));
 
                     StatusCompletedHolder.sizeDelta =
                         new Vector2((width + padding) * lerp3, 0);
@@ -192,9 +174,8 @@ namespace JANOARG.Client.Behaviors.Common
                     FlavorText.rectTransform.anchoredPosition =
                         new Vector2(1100 - 300 * lerp4, 0);
 
-                    StatusHolder.anchoredPosition = new Vector2(
-                        1000 - (width - StatusHolder.rect.width + 1000) * lerp3, 0
-                    );
+                    StatusHolder.anchoredPosition = 
+                        new Vector2(1000 - (width - StatusHolder.rect.width + 1000) * lerp3, 0);
 
                     StatusHolder.anchoredPosition +=
                         new Vector2((width + padding) * lerp5, 0);
