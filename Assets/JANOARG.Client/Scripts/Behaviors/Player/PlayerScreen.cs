@@ -69,7 +69,8 @@ namespace JANOARG.Client.Behaviors.Player
         public CanvasGroup   ComboGroup;
         public TMP_Text      ComboLabel;
         public RectTransform JudgeScreenHolder;
-
+        [Space]
+        public JudgeScreenManager judgeScreenManager;
         [Space]
         public TMP_Text PauseLabel;
 
@@ -608,7 +609,8 @@ namespace JANOARG.Client.Behaviors.Player
                 PlayerHUD.transform.localScale = Vector3.one * (ease * .05f + .95f);
             });
 
-            for (var a = 0; a < ScoreCounter.Digits.Count; a++) ScoreCounter.Digits[a].Speed = 9;
+            foreach (ScrollingCounterDigit digit in ScoreCounter.Digits)
+                digit.Speed = 9;
 
             IsPlaying = true;
             _LastDSPTime = AudioSettings.dspTime;
@@ -723,6 +725,7 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     if (hit.HoldMesh) 
                         lane.UpdateHoldMesh(hit);
+
                 }
 
             // PlayerInputManager.main.UpdateTouches();
@@ -816,7 +819,8 @@ namespace JANOARG.Client.Behaviors.Player
         {
             // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
 
-            int score = hitObject.Current.Type == HitObject.HitType.Normal ? 3 : 1;
+            int score = hitObject.Current.Type == HitObject.HitType.Normal 
+                ? 3 : 1;
 
             if (hitObject.Current.Flickable)
             {
@@ -858,10 +862,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (spawnEffect)
             {
-                JudgeScreenEffect effect = Instantiate(JudgeScreenSample, JudgeScreenHolder);
-                effect.SetAccuracy(acc);
-                effect.SetColor(sCurrentChart.Palette.InterfaceColor);
-
+                var effect = sMain.judgeScreenManager.BorrowEffect(acc, sCurrentChart.Palette.InterfaceColor);
                 var rt = (RectTransform)effect.transform;
                 rt.position = hitObject.HitCoord.Position;
 
