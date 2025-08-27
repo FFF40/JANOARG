@@ -5,7 +5,6 @@ namespace JANOARG.Client.Behaviors.Intro
 {
     public class IntroScene : MonoBehaviour
     {
-
         public void Awake()
         {
             CommonScene.Load();

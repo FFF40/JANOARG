@@ -11,22 +11,22 @@ namespace JANOARG.Client.Behaviors.Song_Select
 {
     public class SongSelectItem : MonoBehaviour
     {
-        public TMP_Text SongNameLabel;
-        public TMP_Text SongArtistLabel;
-        public TMP_Text ChartDifficultyLabel;
+        public TMP_Text    SongNameLabel;
+        public TMP_Text    SongArtistLabel;
+        public TMP_Text    ChartDifficultyLabel;
         public CanvasGroup MainGroup;
 
         public RawImage CoverImage;
-        public Image CoverBorder;
-        public Image CoverStatusBorder;
+        public Image    CoverBorder;
+        public Image    CoverStatusBorder;
 
-        [NonSerialized] public int Index;
-        [NonSerialized] public float Position;
-        [NonSerialized] public float PositionOffset;
-        [NonSerialized] public string SongPath;
+        [NonSerialized] public int          Index;
+        [NonSerialized] public float        Position;
+        [NonSerialized] public float        PositionOffset;
+        [NonSerialized] public string       SongPath;
         [NonSerialized] public PlayableSong Song;
 
-        public void SetItem(string path, PlayableSong song, int index, float pos) 
+        public void SetItem(string path, PlayableSong song, int index, float pos)
         {
             SongNameLabel.text = song.SongName;
             SongArtistLabel.text = song.SongArtist;
@@ -37,18 +37,19 @@ namespace JANOARG.Client.Behaviors.Song_Select
             Song = song;
             SongPath = path;
 
-            SetDifficulty(SongSelectScreen.main.GetNearestDifficulty(song.Charts));
+            SetDifficulty(SongSelectScreen.sMain.GetNearestDifficulty(song.Charts));
             LoadCoverImage();
         }
 
-        public void SetDifficulty(ExternalChartMeta chart) 
+        public void SetDifficulty(ExternalChartMeta chart)
         {
             ChartDifficultyLabel.text = chart.DifficultyLevel;
-            ChartDifficultyLabel.color = CommonSys.main.Constants.GetDifficultyColor(chart.DifficultyIndex);
+            ChartDifficultyLabel.color = CommonSys.sMain.Constants.GetDifficultyColor(chart.DifficultyIndex);
         }
 
         public Coroutine CoverLoadRoutine = null;
-        public void LoadCoverImage() 
+
+        public void LoadCoverImage()
         {
             Resources.UnloadAsset(CoverImage.texture);
             CoverImage.texture = null;
@@ -56,16 +57,18 @@ namespace JANOARG.Client.Behaviors.Song_Select
             if (CoverLoadRoutine != null) StopCoroutine(CoverLoadRoutine);
             CoverLoadRoutine = StartCoroutine(LoadCoverImageRoutine());
         }
-    
-        private IEnumerator LoadCoverImageRoutine() 
+
+        private IEnumerator LoadCoverImageRoutine()
         {
-            string path = Path.Combine(Path.GetDirectoryName(SongPath), Song.Cover.IconTarget);
+            string path = Path.Combine(Path.GetDirectoryName(SongPath)!, Song.Cover.IconTarget);
             if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
             ResourceRequest req = Resources.LoadAsync<Texture2D>(path);
+
             yield return new WaitUntil(() => req.isDone);
-            if (req.asset) 
+
+            if (req.asset)
             {
-                Texture2D tex = (Texture2D)req.asset;
+                var tex = (Texture2D)req.asset;
                 CoverImage.texture = tex;
                 CoverImage.color = Color.white;
             }

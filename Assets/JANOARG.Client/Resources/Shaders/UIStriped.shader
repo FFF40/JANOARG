@@ -54,7 +54,7 @@ Shader "UI/Striped"
         Pass
         {
             Name "Default"
-        CGPROGRAM
+            CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 2.0
@@ -67,17 +67,17 @@ Shader "UI/Striped"
 
             struct appdata_t
             {
-                float4 vertex   : POSITION;
-                float4 color    : COLOR;
+                float4 vertex : POSITION;
+                float4 color : COLOR;
                 float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
-                float4 vertex   : SV_POSITION;
-                fixed4 color    : COLOR;
-                float2 texcoord  : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+                fixed4 color : COLOR;
+                float2 texcoord : TEXCOORD0;
                 float4 worldPos : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -113,7 +113,7 @@ Shader "UI/Striped"
                 half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
                 float val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * _StripeSpeed + 10000;
-    
+
                 if (val % _StripeSize < _StripeSize * _StripeBalance)
                 {
                     color.r = _StripeVis + color.r * (1 - _StripeVis * 2);
@@ -132,7 +132,7 @@ Shader "UI/Striped"
 
                 return color;
             }
-        ENDCG
+            ENDCG
         }
     }
 }

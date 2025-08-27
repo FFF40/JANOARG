@@ -5,25 +5,25 @@ namespace JANOARG.Client.Behaviors.Common
 {
     public class StorageManager : MonoBehaviour
     {
-        public static StorageManager main;
+        public static StorageManager sMain;
 
         public ScoreStore Scores = new();
 
-        void Awake()
+        private void Awake()
         {
-            main = this;
+            sMain = this;
             Load();
-        } 
+        }
 
         public void Load()
         {
             Scores.Load();
         }
 
-        public void Save() 
+        public void Save()
         {
             Scores.Save();
-            global::JANOARG.Client.Behaviors.Common.CommonSys.main.Storage.Save();
+            CommonSys.sMain.Storage.Save();
         }
     }
 }

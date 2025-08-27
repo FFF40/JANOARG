@@ -7,11 +7,11 @@ namespace JANOARG.Client.Data.Constant
     public class CommonConstants : ScriptableObject
     {
         public List<Color> DifficultyColors;
-        public Color SpecialDifficultyColor;
+        public Color       SpecialDifficultyColor;
 
         public Color GetDifficultyColor(int index)
         {
-            return (index < 0 || index >= DifficultyColors.Count)
+            return index < 0 || index >= DifficultyColors.Count
                 ? SpecialDifficultyColor
                 : DifficultyColors[index];
         }

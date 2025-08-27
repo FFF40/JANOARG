@@ -10,53 +10,60 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         [FormerlySerializedAs("Time")]
         public BeatPosition Offset;
-        public float Duration;
+
+        public float  Duration;
         public string ID;
-        public float From = float.NaN;
-        public float Target;
+        public float  From = float.NaN;
+        public float  Target;
+
         [SerializeReference]
         public IEaseDirective Easing = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
         public Timestamp DeepClone()
         {
-            Timestamp clone = new Timestamp() 
+            var clone = new Timestamp
             {
                 Offset = Offset,
                 Duration = Duration,
                 ID = ID,
                 From = From,
                 Target = Target,
-                Easing = Easing,
+                Easing = Easing
             };
+
             return clone;
         }
     }
 
-    public class TimestampType {
-        public string ID;
-        public string Name;
-        public Func<Storyboardable, float> Get;
-        public Action<Storyboardable, float> Set;
+    public class TimestampType
+    {
+        public string                        ID;
+        public string                        Name;
+        public Func<Storyboardable, float>   StoryboardGetter;
+        public Action<Storyboardable, float> StoryboardSetter;
     }
 
     [Serializable]
-    public class Storyboard 
+    public class Storyboard
     {
-        public List<Timestamp> Timestamps = new List<Timestamp>();
+        public List<Timestamp> Timestamps = new();
 
-        public void Add(Timestamp timestamp) {
+        public void Add(Timestamp timestamp)
+        {
             Timestamps.Add(timestamp);
             Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset));
         }
 
-        public List<Timestamp> FromType(string type) {
+        public List<Timestamp> FromType(string type)
+        {
             return Timestamps.FindAll(x => x.ID == type);
         }
 
         public Storyboard DeepClone()
         {
-            Storyboard clone = new Storyboard();
-            foreach (Timestamp ts in Timestamps) clone.Timestamps.Add(ts.DeepClone());
+            var clone = new Storyboard();
+            foreach (Timestamp timestamp in Timestamps) clone.Timestamps.Add(timestamp.DeepClone());
+
             return clone;
         }
     }
@@ -74,51 +81,55 @@ namespace JANOARG.Shared.Data.ChartInfo
             foreach(TimestampType timestampType in TimestampTypes) 
                 try {
                     List<Timestamp> storyboard = Storyboard.FromType(timestampType.ID);
-                
-                    float value = timestampType.Get(this);
-                
-                    foreach (Timestamp timestamp in storyboard) 
-                    {
-                        if (time >= timestamp.Offset + timestamp.Duration) 
-                            value = timestamp.Target;
-                        else if (time > timestamp.Offset) 
+
+                    float value = timestampType.StoryboardGetter(this);
+
+                    foreach (Timestamp timestamp in storyboard)
+                        if (time >= timestamp.Offset + timestamp.Duration)
                         {
-                            if (!float.IsNaN(timestamp.From)) 
+                            value = timestamp.Target;
+                        }
+                        else if (time > timestamp.Offset)
+                        {
+                            if (!float.IsNaN(timestamp.From))
                                 value = timestamp.From;
-                        
+
                             value = Mathf.LerpUnclamped(
-                                value, 
-                                timestamp.Target, 
+                                value,
+                                timestamp.Target,
                                 timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration)
                             );
-                        
+
                             break;
                         }
-                        else 
+                        else
+                        {
                             break;
-                    }
-                    timestampType.Set(obj, value);
-                } 
-                catch (Exception e) 
-                {
-                    Debug.LogError(this.GetType() + " " + timestampType.ID + "\n" + e);
+                        }
+
+                    timestampType.StoryboardSetter(obj, value);
                 }
+                catch (Exception e)
+                {
+                    Debug.LogError(GetType() + " " + timestampType.ID + "\n" + e);
+                }
+
             return obj;
         }
 
         protected Dictionary<string, float> CurrentValues;
-    
+
         protected float CurrentTime;
-    
-        public virtual void Advance (float time) 
+
+        public virtual void Advance(float time)
         {
         
             if (CurrentValues == null) 
             {
                 CurrentValues = new Dictionary<string, float>();
-            
-                foreach (TimestampType timestampType in TimestampTypes) 
-                    CurrentValues.Add(timestampType.ID, timestampType.Get(this));
+
+                foreach (TimestampType timestampType in TimestampTypes)
+                    CurrentValues.Add(timestampType.ID, timestampType.StoryboardGetter(this));
             }
         
             foreach (TimestampType timestampType in TimestampTypes)
@@ -159,26 +170,23 @@ namespace JANOARG.Shared.Data.ChartInfo
                         Storyboard.Timestamps.Remove(timestamp);
                     }
                 }
-                timestampType.Set(this, value);
+                timestampType.StoryboardSetter(this, value);
             }
         
             CurrentTime = time;
         }
     }
 
-    public abstract class DirtyTrackedStoryboardable : Storyboardable 
+    public abstract class DirtyTrackedStoryboardable : Storyboardable
     {
         public bool IsDirty;
 
-        public override void Advance (float time) 
+        public override void Advance(float time)
         {
             if (CurrentValues == null) 
             {
                 CurrentValues = new Dictionary<string, float>();
-                foreach (TimestampType timestampType in TimestampTypes) 
-                {
-                    CurrentValues.Add(timestampType.ID, timestampType.Get(this));
-                }
+                foreach (TimestampType timestampType in TimestampTypes) CurrentValues.Add(timestampType.ID, timestampType.StoryboardGetter(this));
             }
             foreach(TimestampType timestampType in TimestampTypes){
                 if (!CurrentValues.ContainsKey(timestampType.ID))
@@ -211,7 +219,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                         IsDirty = true;
                     }
                 }
-                timestampType.Set(this, value);
+                timestampType.StoryboardSetter(this, value);
             }
             CurrentTime = time;
         }

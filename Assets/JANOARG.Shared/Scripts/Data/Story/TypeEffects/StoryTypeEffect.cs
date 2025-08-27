@@ -8,7 +8,9 @@ namespace JANOARG.Shared.Data.Story.TypeEffects
     [Serializable]
     public abstract class StoryTypeEffect
     {
-        public virtual IEnumerator OnCharacterReveal(Storyteller teller, TMP_Text text, int index, float startTime) 
-        { yield return null; }
+        public virtual IEnumerator OnCharacterReveal(Storyteller teller, TMP_Text text, int index, float startTime)
+        {
+            yield return null;
+        }
     }
 }

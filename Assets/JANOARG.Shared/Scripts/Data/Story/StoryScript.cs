@@ -13,7 +13,6 @@ namespace JANOARG.Shared.Data.Story
     [Serializable]
     public class StoryChunk
     {
-        [SerializeReference]
-        public List<StoryInstruction> Instructions = new();
+        [SerializeReference] public List<StoryInstruction> Instructions = new();
     }
 }

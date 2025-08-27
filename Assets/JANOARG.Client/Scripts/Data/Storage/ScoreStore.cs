@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -6,40 +7,42 @@ using UnityEngine;
 
 namespace JANOARG.Client.Data.Storage
 {
-    public class ScoreStore 
+    public class ScoreStore
     {
-        public Dictionary<string, ScoreStoreEntry> Entries { get; private set; } = new();
+        public Dictionary<string, ScoreStoreEntry> entries { get; private set; } = new();
 
-        public void Load() 
+        public void Load()
         {
-            ScoreStoreEntry[] entryList = CommonSys.main.Storage.Get("ScoreStore", new ScoreStoreEntry[0]);
-            foreach (ScoreStoreEntry entry in entryList) 
-            {
-                Entries[entry.SongID + "/" + entry.ChartID] = entry;
-            }
+            ScoreStoreEntry[] entryList = CommonSys.sMain.Storage.Get("ScoreStore", Array.Empty<ScoreStoreEntry>());
+
+            foreach (ScoreStoreEntry entry in entryList) entries[entry.SongID + "/" + entry.ChartID] = entry;
         }
 
-        public void Save() 
+        public void Save()
         {
-            CommonSys.main.Storage.Set("ScoreStore", Entries.Values.ToArray());
+            CommonSys.sMain.Storage.Set("ScoreStore", entries.Values.ToArray());
         }
 
-        public ScoreStoreEntry Get(string SongID, string ChartID)
+        public ScoreStoreEntry Get(string songID, string chartID)
         {
             ScoreStoreEntry value;
-            if (Entries.TryGetValue(SongID + "/" + ChartID, out value)) return value;
+
+            if (entries.TryGetValue(songID + "/" + chartID, out value))
+                return value;
+
             return null;
         }
 
         public void Register(ScoreStoreEntry entry)
         {
             ScoreStoreEntry oldEntry = Get(entry.SongID, entry.ChartID);
-            if (oldEntry == null || oldEntry.Score < entry.Score) 
+
+            if (oldEntry == null || oldEntry.Score < entry.Score)
             {
                 string id = entry.SongID + "/" + entry.ChartID;
-                Entries[id] = entry;
+                entries[id] = entry;
             }
-            else 
+            else
             {
                 oldEntry.Rating = Mathf.Max(oldEntry.Rating, entry.Rating);
                 oldEntry.MaxCombo = Mathf.Max(oldEntry.MaxCombo, entry.MaxCombo);
@@ -49,14 +52,14 @@ namespace JANOARG.Client.Data.Storage
 
     public class ScoreStoreEntry
     {
-        [XmlAttribute("SongID")] public string SongID;
+        [XmlAttribute("SongID")]  public string SongID;
         [XmlAttribute("ChartID")] public string ChartID;
 
-        [XmlAttribute("Score")] public int Score;
+        [XmlAttribute("Score")]        public int Score;
         [XmlAttribute("PerfectCount")] public int PerfectCount;
-        [XmlAttribute("GoodCount")] public int GoodCount;
-        [XmlAttribute("BadCount")] public int BadCount;
-        [XmlAttribute("MaxCombo")] public int MaxCombo;
+        [XmlAttribute("GoodCount")]    public int GoodCount;
+        [XmlAttribute("BadCount")]     public int BadCount;
+        [XmlAttribute("MaxCombo")]     public int MaxCombo;
 
         [XmlAttribute("Rating")] public float Rating;
     }

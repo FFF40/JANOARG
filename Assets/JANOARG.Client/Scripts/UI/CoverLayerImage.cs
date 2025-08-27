@@ -8,6 +8,6 @@ namespace JANOARG.Client.UI
     public class CoverLayerImage : MonoBehaviour
     {
         [NonSerialized] public CoverLayer Layer;
-        public RawImage Image;
+        public                 RawImage   Image;
     }
 }

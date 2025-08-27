@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace JANOARG.Shared.Data.ChartInfo
@@ -7,17 +8,17 @@ namespace JANOARG.Shared.Data.ChartInfo
         public Chart Data;
     }
 
-    [System.Serializable]
+    [Serializable]
     public class ExternalChartMeta
     {
         public string Target;
 
-        public string DifficultyName = "Normal";
+        public string DifficultyName  = "Normal";
         public string DifficultyLevel = "6";
-        public int DifficultyIndex = 1;
-        public float ChartConstant = 6;
+        public int    DifficultyIndex = 1;
+        public float  ChartConstant   = 6;
 
-        public string CharterName = "";
+        public string CharterName    = "";
         public string AltCharterName = "";
     }
 }

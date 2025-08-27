@@ -5,19 +5,19 @@ namespace JANOARG.Client.Behaviors.Player
 {
     public class LaneGroupPlayer : MonoBehaviour
     {
-        public LaneGroup Original; 
+        public LaneGroup Original;
         public LaneGroup Current;
 
         public LaneGroupPlayer Parent;
-    
+
         public void UpdateSelf(float time, float beat)
         {
-            if (Current != null) 
+            if (Current != null)
                 Current.Advance(beat);
-            else 
+            else
                 Current = (LaneGroup)Original.GetStoryboardableObject(beat);
-        
-            transform.localPosition    = Current.Position;
+
+            transform.localPosition = Current.Position;
             transform.localEulerAngles = Current.Rotation;
         }
     }
