@@ -314,9 +314,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 0.5f, x =>
                 {
-                    float lerp = Ease.Get(
-                        Mathf.Pow(x, 0.5f), EaseFunction.Exponential,
-                        EaseMode.Out);
+                    float lerp = Ease.Get(Mathf.Pow(x, 0.5f), EaseFunction.Exponential, EaseMode.Out);
 
                     SetRewardLerp(lerp);
 

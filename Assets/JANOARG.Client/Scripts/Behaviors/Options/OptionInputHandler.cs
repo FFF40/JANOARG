@@ -539,19 +539,19 @@ namespace JANOARG.Client.Behaviors.Options
             Vector2 rightPos = RightTransform.anchoredPosition;
             Vector2 listPos = ListTransform.anchoredPosition;
 
-            yield return Ease.Animate(.45f, x =>
+            yield return Ease.Animate(.45f, EaseFunction.Cubic, EaseMode.Out, (x, f, m) =>
             {
-                float ease = Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out);
+                float ease = Ease.Get(x * 1.5f, f, m);
                 Background.color = new Color(0, 0, 0, .5f * ease);
                 InputBackground.rectTransform.sizeDelta = new Vector2(InputBackground.rectTransform.sizeDelta.x, ease * 40);
 
-                float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                float ease2 = Ease.Get(x, f, m);
                 float offset = 30 * (1 - ease2);
                 TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
                 RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
                 ListTransform.anchoredPosition = listPos + Vector2.right * offset;
 
-                float ease3 = Ease.Get(x * 1.5f - .5f, EaseFunction.Cubic, EaseMode.Out);
+                float ease3 = Ease.Get(x * 1.5f - .5f, f, m);
                 TitleText.alpha = RightHolder.alpha = ListGroup.alpha = ease3;
 
                 AdvancedInputTransform.anchoredPosition = new Vector2(

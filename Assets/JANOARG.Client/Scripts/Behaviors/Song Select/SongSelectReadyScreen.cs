@@ -104,36 +104,37 @@ namespace JANOARG.Client.Behaviors.Song_Select
             }));
 
             // Difficulty info
-            StartCoroutine(Ease.Animate(1, x =>
+            StartCoroutine(Ease.Animate(1, EaseFunction.Exponential, EaseMode.Out, (x, f, m) =>
             {
-                DifficultyInfoHolder.anchoredPosition = new Vector2(
-                    -912 + 1000 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out),
-                    DifficultyInfoHolder.anchoredPosition.y);
+                float ease = Ease.Get(x, f, m);
+                
+                DifficultyInfoHolder.anchoredPosition *= 
+                    new Vector2Frag(x: -912 + 1000 * ease);
             }));
 
             // Extra info
-            StartCoroutine(Ease.Animate(1.3f, x =>
+            StartCoroutine(Ease.Animate(1.3f, EaseFunction.Exponential, EaseMode.Out, (x, f, m) =>
             {
                 ExtraInfoBackground.sizeDelta *= 
-                    new Vector2Frag(y: 100 * Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: 100 * Ease.Get(x * 1.3f, f, m));
 
                 ExtraInfoBackground2.sizeDelta *= 
-                    new Vector2Frag(y: 100 * Ease.Get(x * 1.3f - .2f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: 100 * Ease.Get(x * 1.3f - .2f, f, m));
 
                 ExtraInfoBackground3.sizeDelta *= 
-                    new Vector2Frag(y: 96 * Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: 96 * Ease.Get(x * 1.3f - .3f, f, m));
 
                 CoverArtistNameLabel.rectTransform.anchoredPosition *= 
-                    new Vector2Frag(y: -200 + 200 * Ease.Get(x * 1.4f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: -200 + 200 * Ease.Get(x * 1.4f, f, m));
 
                 CoverArtistNameText.rectTransform.anchoredPosition *= 
-                    new Vector2Frag(y: -210 + 200 * Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: -210 + 200 * Ease.Get(x * 1.3f, f, m));
 
                 CharterNameLabel.rectTransform.anchoredPosition *= 
-                    new Vector2Frag(y: -200 + 200 * Ease.Get(x * 1.2f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: -200 + 200 * Ease.Get(x * 1.2f, f, m));
 
                 CharterNameText.rectTransform.anchoredPosition *= 
-                    new Vector2Frag(y: -210 + 200 * Ease.Get(x * 1.1f, EaseFunction.Exponential, EaseMode.Out));
+                    new Vector2Frag(y: -210 + 200 * Ease.Get(x * 1.1f, f, m));
             }));
 
             yield return null;
@@ -175,6 +176,7 @@ namespace JANOARG.Client.Behaviors.Song_Select
                 int index = info.vertexIndex;
                 float ease = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
                 Vector3 offset = -1000 * ease * Vector2.right;
+                
                 meshInfo.vertices[index] += offset;
                 meshInfo.vertices[index + 1] += offset;
                 meshInfo.vertices[index + 2] += offset;
@@ -189,28 +191,28 @@ namespace JANOARG.Client.Behaviors.Song_Select
             }));
 
             // Extra info
-            StartCoroutine(Ease.Animate(1f, x =>
+            StartCoroutine(Ease.Animate(1f, EaseFunction.Exponential, EaseMode.In, (x, f, m) =>
             {
                 ExtraInfoBackground.sizeDelta *=
-                    new Vector2Frag(y: 100 * (1 - Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.In)));
+                    new Vector2Frag(y: 100 * (1 - Ease.Get(x * 1.3f - .3f, f, m)));
 
                 ExtraInfoBackground2.sizeDelta *=
-                    new Vector2Frag(y: 100 * (1 - Ease.Get(x * 1.3f - .1f, EaseFunction.Exponential, EaseMode.In)));
+                    new Vector2Frag(y: 100 * (1 - Ease.Get(x * 1.3f - .1f, f, m)));
 
                 ExtraInfoBackground3.sizeDelta *=
-                    new Vector2Frag(y: 96 * (1 - Ease.Get(x * 1.3f, EaseFunction.Exponential, EaseMode.In)));
+                    new Vector2Frag(y: 96 * (1 - Ease.Get(x * 1.3f, f, m)));
 
                 CoverArtistNameLabel.rectTransform.anchoredPosition *=
-                    new Vector2Frag(y: -0 + 200 * Ease.Get(x * 1.1f - .1f, EaseFunction.Exponential, EaseMode.In));
+                    new Vector2Frag(y: -0 + 200 * Ease.Get(x * 1.1f - .1f, f, m));
 
                 CoverArtistNameText.rectTransform.anchoredPosition *=
-                    new Vector2Frag(y: -10 + 200 * Ease.Get(x * 1.2f - .2f, EaseFunction.Exponential, EaseMode.In));
+                    new Vector2Frag(y: -10 + 200 * Ease.Get(x * 1.2f - .2f, f, m));
 
                 CharterNameLabel.rectTransform.anchoredPosition *=
-                    new Vector2Frag(y: -0 + 200 * Ease.Get(x * 1.3f - .3f, EaseFunction.Exponential, EaseMode.In));
+                    new Vector2Frag(y: -0 + 200 * Ease.Get(x * 1.3f - .3f, f, m));
 
                 CharterNameText.rectTransform.anchoredPosition *=
-                    new Vector2Frag(y: -10 + 200 * Ease.Get(x * 1.4f - .4f, EaseFunction.Exponential, EaseMode.In));
+                    new Vector2Frag(y: -10 + 200 * Ease.Get(x * 1.4f - .4f, f, m));
             }));
 
             yield return new WaitForSeconds(2);

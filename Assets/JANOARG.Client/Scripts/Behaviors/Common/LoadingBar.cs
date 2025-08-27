@@ -111,13 +111,12 @@ namespace JANOARG.Client.Behaviors.Common
             StatusText.text = "NOW LOADING...";
             StatusCompletedHolder.sizeDelta = new Vector2(0, 0);
 
-            yield return Ease.Animate(
-                3f, a =>
+            yield return Ease.Animate(3f, EaseFunction.Exponential, EaseMode.Out, (a, f, m) =>
                 {
-                    float lerp  = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-                    float lerp2 = Ease.Get(a * 3f - 0.15f, EaseFunction.Exponential, EaseMode.Out);
-                    float lerp3 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-                    float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+                    float lerp  = Ease.Get(a * 3f, f, m);
+                    float lerp2 = Ease.Get(a * 3f - 0.15f, f, m);
+                    float lerp3 = Ease.Get(a * 3f, f, m);
+                    float lerp4 = Ease.Get(a, f, m);
 
                     FlavorBackground.rectTransform.sizeDelta *=
                         new Vector2Frag(y: lerp * 100);
@@ -153,14 +152,13 @@ namespace JANOARG.Client.Behaviors.Common
             float padding = -_Self.sizeDelta.x / 2;
             StatusCompletedText.rectTransform.anchoredPosition = new Vector2(-padding / 2, 0);
 
-            yield return Ease.Animate(
-                1, a =>
+            yield return Ease.Animate(1, EaseFunction.Exponential, EaseMode.In, (a, f, m) =>
                 {
-                    float lerp  = Ease.Get(a * 1.2f - 0.1f, EaseFunction.Exponential, EaseMode.In);
-                    float lerp2 = Ease.Get(a * 1.2f, EaseFunction.Exponential, EaseMode.In);
+                    float lerp  = Ease.Get(a * 1.2f - 0.1f, f, m);
+                    float lerp2 = Ease.Get(a * 1.2f, f, m);
                     float lerp3 = Ease.Get(a * 2f, EaseFunction.Exponential, EaseMode.Out);
-                    float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
-                    float lerp5 = Ease.Get(a * 1.5f - 0.5f, EaseFunction.Exponential, EaseMode.In);
+                    float lerp4 = Ease.Get(a, f, m);
+                    float lerp5 = Ease.Get(a * 1.5f - 0.5f, f, m);
 
                     FlavorBackground.rectTransform.sizeDelta *=
                         new Vector2Frag(y: (1 - lerp) * 100 * (1 - .3f * lerp3));

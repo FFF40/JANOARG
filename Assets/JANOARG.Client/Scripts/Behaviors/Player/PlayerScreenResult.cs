@@ -511,19 +511,18 @@ namespace JANOARG.Client.Behaviors.Player
         private IEnumerator RankExplosionAnim()
         {
             yield return Ease.Animate(
-                2.5f, x =>
+                2.5f,EaseFunction.Exponential, EaseMode.Out, (x, f, m) =>
                 {
                     FlashBackground.color = new Color(0, 0, 0, .8f - .4f * x);
 
-                    float ease2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    float ease2 = Ease.Get(x, f, m);
                     ScoreExplosionRings[0].InsideRadius = ease2;
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
                         Vector2.one * (700 * ease2 + 100);
 
                     float ease4 = Ease.Get(
-                        x * 1.5f, EaseFunction.Exponential,
-                        EaseMode.Out);
+                        x * 1.5f, f, m);
 
                     ScoreExplosionRings[1].InsideRadius = ease4;
 
@@ -531,8 +530,7 @@ namespace JANOARG.Client.Behaviors.Player
                         Vector2.one * (1400 * ease4 + 100);
 
                     float ease1 = Ease.Get(
-                        x * 1.2f - .2f, EaseFunction.Exponential,
-                        EaseMode.Out);
+                        x * 1.2f - .2f, f, m);
 
                     ScoreExplosionRings[2].InsideRadius = ease1;
 
