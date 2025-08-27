@@ -63,8 +63,9 @@ namespace JANOARG.Shared.Data.ChartInfo
         public Vector3 CameraPivot;
         public float   PivotDistance = 10;
         public Vector3 CameraRotation;
-
-        public static new TimestampType[] TimestampTypes =
+    
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = 
         {
             #region Camera Pivot
             new()
@@ -146,7 +147,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         public List<LaneStyle> LaneStyles = new();
         public List<HitStyle>  HitStyles  = new();
 
-        public static new TimestampType[] TimestampTypes =
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = 
         {
             #region Background Color (RGB)
             new()
@@ -233,7 +235,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         public string JudgeColorTarget = "_Color";
         public Color  JudgeColor       = Color.black;
 
-        public static new TimestampType[] TimestampTypes =
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = 
         {
             #region Lane Color
             new()
@@ -329,8 +332,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         public string HoldTailColorTarget = "_Color";
         public Color  HoldTailColor       = Color.black;
 
-        public static new TimestampType[] TimestampTypes =
-        {
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = {
             #region Tap Note Color
             new()
             {
@@ -451,8 +454,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         public Vector3 Rotation;
         public string  Group;
 
-        public static new TimestampType[] TimestampTypes =
-        {
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = {
             #region Position
             new()
             {
@@ -617,7 +620,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
 
         // More as offset
-        public static new TimestampType[] TimestampTypes =
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = 
         {
             #region Position
             new()
@@ -706,17 +710,21 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public float Speed = 1;
 
-        public bool isLinear =>
-            StartEaseX is BasicEaseDirective startEaseX &&
-            StartEaseY is BasicEaseDirective startEaseY &&
-            EndEaseX is BasicEaseDirective endEaseX &&
-            EndEaseY is BasicEaseDirective endEaseY &&
-            startEaseX.Function == EaseFunction.Linear &&
-            startEaseY.Function == EaseFunction.Linear &&
-            endEaseX.Function == EaseFunction.Linear &&
-            endEaseY.Function == EaseFunction.Linear;
+        public bool IsLinear => 
+            StartEaseX is BasicEaseDirective startEaseX && 
+            StartEaseY is BasicEaseDirective startEaseY && 
+        
+            EndEaseX   is BasicEaseDirective endEaseX && 
+            EndEaseY   is BasicEaseDirective endEaseY &&
+        
+            startEaseX.Function == EaseFunction.Linear && 
+            startEaseY.Function == EaseFunction.Linear && 
+        
+            endEaseX.Function   == EaseFunction.Linear && 
+            endEaseY.Function   == EaseFunction.Linear;
 
-        public static new TimestampType[] TimestampTypes =
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = 
         {
             #region Start Position
             new()
@@ -799,7 +807,8 @@ namespace JANOARG.Shared.Data.ChartInfo
             Catch
         }
 
-        public static new TimestampType[] TimestampTypes =
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public static TimestampType[] ThisTimestampTypes = 
         {
             new()
             {

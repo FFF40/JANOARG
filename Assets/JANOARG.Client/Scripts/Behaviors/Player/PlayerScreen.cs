@@ -69,7 +69,8 @@ namespace JANOARG.Client.Behaviors.Player
         public CanvasGroup   ComboGroup;
         public TMP_Text      ComboLabel;
         public RectTransform JudgeScreenHolder;
-
+        [Space]
+        public JudgeScreenManager judgeScreenManager;
         [Space]
         public TMP_Text PauseLabel;
 
@@ -853,10 +854,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (spawnEffect)
             {
-                JudgeScreenEffect effect = Instantiate(JudgeScreenSample, JudgeScreenHolder);
-                effect.SetAccuracy(acc);
-                effect.SetColor(sCurrentChart.Palette.InterfaceColor);
-
+                var effect = PlayerScreen.main.judgeScreenManager.BorrowEffect(acc, PlayerScreen.CurrentChart.Palette.InterfaceColor);
                 var rt = (RectTransform)effect.transform;
                 rt.position = hitObject.HitCoord.Position;
 
