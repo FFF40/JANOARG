@@ -41,9 +41,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Init()
         {
-            _mesh = new Mesh();
-            _mesh.MarkDynamic();
-            MeshFilter.mesh = _mesh;
+            if (_Mesh == null){
+                _Mesh = new Mesh();
+                MeshFilter.mesh = _Mesh;
+            }
+            _Mesh.MarkDynamic();
             Metronome metronome = PlayerScreen.sTargetSong.Timing;
             foreach (LaneStep step in Current.LaneSteps) TimeStamps.Add(metronome.ToSeconds(step.Offset));
 
