@@ -587,7 +587,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     LaneStep previousStep = steps[a - 1];
                     float percentageDifference = (time - previousStep.Offset) / (step.Offset - previousStep.Offset);
 
-                    if (step.isLinear)
+                    if (step.IsLinear)
                         return new LanePosition
                         {
                             StartPosition = Vector2.LerpUnclamped(previousStep.StartPointPosition, step.StartPointPosition, percentageDifference),

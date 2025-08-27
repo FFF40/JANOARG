@@ -26,7 +26,7 @@ namespace JANOARG.Client.Behaviors.Player
                 judgeScreenEffects = new Stack<JudgeScreenEffect>(_totalMaxInstances);
                 for (int i = 0; i < _totalMaxInstances; i++)
                 {
-                    var effect = Instantiate(PlayerScreen.main.JudgeScreenSample, PlayerScreen.main.JudgeScreenHolder);
+                    var effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreenHolder);
                     judgeScreenEffects.Push(effect);
                     effect.gameObject.SetActive(false);
                 }
@@ -39,7 +39,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Debug.Log($"Borrowing JudgeScreenEffect: Accuracy={accuracy}, Color={color}, TotalInstances={totalInstances}");
             if (_totalInstances > _totalMaxInstances)
             {
-                var newEffect = Instantiate(PlayerScreen.main.JudgeScreenSample, PlayerScreen.main.JudgeScreenHolder);
+                var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreenHolder);
                 newEffect.SetAccuracy(accuracy);
                 newEffect.SetColor(color);
                 newEffect.PlayOneShot();

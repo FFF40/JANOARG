@@ -170,7 +170,7 @@ namespace JANOARG.Client.Behaviors.Player
                 LaneStep currentLaneStep = Current.LaneSteps[1];
                 Vector3 startPoint, endPoint;
 
-                if (currentLaneStep.isLinear)
+                if (currentLaneStep.IsLinear)
                 {
                     startPoint = Vector3.Lerp(Current.LaneSteps[0].StartPointPosition, Current.LaneSteps[1].StartPointPosition, progress) + Vector3.forward * position;
                     endPoint = Vector3.Lerp(Current.LaneSteps[0].EndPointPosition, Current.LaneSteps[1].EndPointPosition, progress) + Vector3.forward * position;
@@ -246,7 +246,7 @@ namespace JANOARG.Client.Behaviors.Player
                 else
                     PositionPoints[currentTimestamp] = calculatedPosition;
 
-                if (currentLaneStep.isLinear)
+                if (currentLaneStep.IsLinear)
                 {
                     f_addLine(
                         (Vector3)currentLaneStep.StartPointPosition + Vector3.forward * calculatedPosition,
@@ -277,8 +277,8 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             _Mesh.Clear();
-            _Mesh.SetVertices(_verts);
-            _Mesh.SetTriangles(_tris, 0, false);
+            _Mesh.SetVertices(_Verts);
+            _Mesh.SetTriangles(_Tris, 0, false);
             _Mesh.RecalculateBounds();
         }
 
@@ -357,7 +357,7 @@ namespace JANOARG.Client.Behaviors.Player
                     break;
                 }
             }
-            if (index < 0) return PositionPoints[^1] + (time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.main.Speed; 
+            if (index < 0) return PositionPoints[^1] + (time - TimeStamps[PositionPoints.Count - 1]) * Current.LaneSteps[PositionPoints.Count - 1].Speed * PlayerScreen.sMain.Speed; 
             index = Mathf.Min(index, PositionPoints.Count - 1);
 
             return PositionPoints[index] + (time - TimeStamps[index]) * Current.LaneSteps[index].Speed * PlayerScreen.sMain.Speed;
@@ -388,7 +388,7 @@ namespace JANOARG.Client.Behaviors.Player
                 LaneStep previousStep = Current.LaneSteps[index - 1];
                 float progress = Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
 
-                if (currentStep.isLinear)
+                if (currentStep.IsLinear)
                 {
                     start = Vector2.Lerp(previousStep.StartPointPosition, currentStep.StartPointPosition, progress);
                     end = Vector2.Lerp(previousStep.EndPointPosition, currentStep.EndPointPosition, progress);
@@ -464,7 +464,7 @@ namespace JANOARG.Client.Behaviors.Player
                 currentStepStartPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position);
                 currentStepEndPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position + hit.Current.Length);
 
-                if (currentStep.isLinear)
+                if (currentStep.IsLinear)
                     f_addLine(
                         Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, progress) + Vector3.forward * position,
                         Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, progress) + Vector3.forward * position);
@@ -492,7 +492,7 @@ namespace JANOARG.Client.Behaviors.Player
                 currentStepStartPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position);
                 currentStepEndPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position + hit.Current.Length);
 
-                if (currentStep.isLinear)
+                if (currentStep.IsLinear)
                 {
                     f_addLine(
                         Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, endStepProgress) + Vector3.forward * endStepPosition,
@@ -533,8 +533,8 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             mesh.Clear();
-            mesh.SetVertices(_verts);
-            mesh.SetTriangles(_tris, 0);
+            mesh.SetVertices(_Verts);
+            mesh.SetTriangles(_Tris, 0);
             // hit.HoldMesh.mesh = mesh;
         }
 

@@ -854,7 +854,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (spawnEffect)
             {
-                var effect = PlayerScreen.main.judgeScreenManager.BorrowEffect(acc, PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                var effect = sMain.judgeScreenManager.BorrowEffect(acc, sCurrentChart.Palette.InterfaceColor);
                 var rt = (RectTransform)effect.transform;
                 rt.position = hitObject.HitCoord.Position;
 

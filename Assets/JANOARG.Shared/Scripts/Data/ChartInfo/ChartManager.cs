@@ -333,7 +333,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 Steps[a].CurrentStep = step;
 
                 stepCount += float.IsNaN(offset) ? 1 :
-                    Mathf.CeilToInt((offset == Steps[a].Offset ? Steps[a].Offset > time ? 1 : 0 : Mathf.Clamp01((time - Steps[a].Offset) / (offset - Steps[a].Offset))) * (step.isLinear ? 1 : 16));
+                    Mathf.CeilToInt((offset == Steps[a].Offset ? Steps[a].Offset > time ? 1 : 0 : Mathf.Clamp01((time - Steps[a].Offset) / (offset - Steps[a].Offset))) * (step.IsLinear ? 1 : 16));
 
                 offset = Steps[a].Offset;
             }
@@ -366,7 +366,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                             break;
                         }
                     }
-                    else if (next.CurrentStep.isLinear)
+                    else if (next.CurrentStep.IsLinear)
                     {
                         float p = curr.Offset == next.Offset ? curr.Offset < time ? 1 : 0 : Mathf.Clamp01((time - curr.Offset) / (next.Offset - curr.Offset));
                         float dist = Mathf.Lerp(curr.Distance, next.Distance, p);
@@ -492,7 +492,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
                 if (verts.Count < 1)
                 {
-                    if (next.CurrentStep.isLinear)
+                    if (next.CurrentStep.IsLinear)
                     {
                         float dist = Mathf.Lerp(curr.Distance, next.Distance, pEnd);
                         Vector3 currStart = Vector3.LerpUnclamped(curr.CurrentStep.StartPointPosition, curr.CurrentStep.EndPointPosition, xPos);
@@ -522,7 +522,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     }
                 }
 
-                if (next.CurrentStep.isLinear)
+                if (next.CurrentStep.IsLinear)
                 {
                     float dist = Mathf.Lerp(curr.Distance, next.Distance, pStart);
                     Vector3 currStart = Vector3.LerpUnclamped(curr.CurrentStep.StartPointPosition, curr.CurrentStep.EndPointPosition, xPos);
@@ -599,7 +599,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
                     float p = (sec - prev.Offset) / (curr.Offset - prev.Offset);
 
-                    if (currS.isLinear)
+                    if (currS.IsLinear)
                         return new LanePosition
                         {
                             StartPosition = Vector2.LerpUnclamped(prevS.StartPointPosition, currS.StartPointPosition, p),

@@ -727,7 +727,7 @@ public class PlayerInputManager : MonoBehaviour
                         // Handle hold tick just like how HitPlayer does
                         if (holdNoteEntry.IsScoring)
                         {
-                            var effect = PlayerScreen.main.judgeScreenManager.BorrowEffect(null, PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                            var effect = PlayerScreen.sMain.judgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
                             var rt = (RectTransform)effect.transform;
 
                             rt.position =
@@ -825,7 +825,7 @@ public class PlayerInputManager : MonoBehaviour
                     {
                         Player.AddScore(1, null);
 
-                        var effect = PlayerScreen.main.judgeScreenManager.BorrowEffect(null, PlayerScreen.CurrentChart.Palette.InterfaceColor);
+                        var effect = PlayerScreen.sMain.judgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                         
