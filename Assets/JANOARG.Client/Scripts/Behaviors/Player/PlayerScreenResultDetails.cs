@@ -221,29 +221,41 @@ namespace JANOARG.Client.Behaviors.Player
                 line.anchorMax *= new Vector2Frag(x: 1 + 2 * ease1);
             }
 
-            Container.rectTransform.sizeDelta *= new Vector2Frag(y: 110 - 60 * ease1);
-            Container.rectTransform.anchoredPosition *= new Vector2Frag(y: 25 * (1 - ease1));
-            TimingPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, -80 + 40 * ease1);
-            CatchPinHolder.anchoredPosition *= new Vector2Frag(y: 35 - 20 * ease1);
-            CatchPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
-            FlickPinHolder.anchoredPosition *= new Vector2Frag(y: 10 - 5 * ease1);
-            FlickPinHolder.sizeDelta = new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
+            Container.rectTransform.sizeDelta *= 
+                new Vector2Frag(y: 110 - 60 * ease1);
+            Container.rectTransform.anchoredPosition *= 
+                new Vector2Frag(y: 25 * (1 - ease1));
+            TimingPinHolder.sizeDelta = 
+                new Vector2(100 * ease1 - 120, -80 + 40 * ease1);
+            CatchPinHolder.anchoredPosition *= 
+                new Vector2Frag(y: 35 - 20 * ease1);
+            CatchPinHolder.sizeDelta = 
+                new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
+            FlickPinHolder.anchoredPosition *= 
+                new Vector2Frag(y: 10 - 5 * ease1);
+            FlickPinHolder.sizeDelta = 
+                new Vector2(100 * ease1 - 120, 20 - 10 * ease1);
 
             var anchoredPositionFrag = new Vector2Frag(x: -1000 * ease1);
             TimingLabelHolder.anchoredPosition *= anchoredPositionFrag;
-            CatchLabelHolder.anchoredPosition *= anchoredPositionFrag;
-            FlickLabelHolder.anchoredPosition *= anchoredPositionFrag;
+            CatchLabelHolder.anchoredPosition  *= anchoredPositionFrag;
+            FlickLabelHolder.anchoredPosition  *= anchoredPositionFrag;
 
             float f_getLerp(float x)
             {
                 return Mathf.Clamp01(2 - Mathf.Abs(value + (value + 1) / 2 - x) * 2);
             }
 
-            TimingEarlyTitle.alpha = Ease.Get(f_getLerp(0), EaseFunction.Cubic, EaseMode.Out) / 2;
-            TimingLateTitle.alpha = Ease.Get(f_getLerp(.2f), EaseFunction.Cubic, EaseMode.Out) / 2;
-            TimingTitle.alpha = Ease.Get(f_getLerp(.4f), EaseFunction.Cubic, EaseMode.Out);
-            CatchTitle.alpha = Ease.Get(f_getLerp(.6f), EaseFunction.Cubic, EaseMode.Out);
-            FlickTitle.alpha = Ease.Get(f_getLerp(.8f), EaseFunction.Cubic, EaseMode.Out);
+            TimingEarlyTitle.alpha = 
+                Ease.Get(f_getLerp(0), EaseFunction.Cubic, EaseMode.Out) / 2;
+            TimingLateTitle.alpha =
+                Ease.Get(f_getLerp(.2f), EaseFunction.Cubic, EaseMode.Out) / 2;
+            TimingTitle.alpha = 
+                Ease.Get(f_getLerp(.4f), EaseFunction.Cubic, EaseMode.Out);
+            CatchTitle.alpha =
+                Ease.Get(f_getLerp(.6f), EaseFunction.Cubic, EaseMode.Out);
+            FlickTitle.alpha = 
+                Ease.Get(f_getLerp(.8f), EaseFunction.Cubic, EaseMode.Out);
         }
     }
 }

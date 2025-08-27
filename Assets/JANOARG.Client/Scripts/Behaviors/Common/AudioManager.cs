@@ -38,18 +38,8 @@ namespace JANOARG.Client.Behaviors.Common
                     float cutoff = Mathf.Pow(10, cutoffLog);
                     AudioMixer.SetFloat("SceneLayerLowPassCutoff", cutoff);
 
-                    AudioMixer.SetFloat(
-                        "SceneLayerVolume",
-                        cutoff <= 10
-                            ? -80
-                            : Mathf.Clamp01(
-                                  Mathf.Pow(
-                                      cutoffLog /
-                                      Mathf.Log10(
-                                          22000),
-                                      .2f)) *
-                              80 -
-                              80);
+                    AudioMixer.SetFloat("SceneLayerVolume", cutoff <= 10 
+                            ? -80 : Mathf.Clamp01(Mathf.Pow(cutoffLog / Mathf.Log10(22000), .2f)) * 80 - 80);
                 });
         }
     }

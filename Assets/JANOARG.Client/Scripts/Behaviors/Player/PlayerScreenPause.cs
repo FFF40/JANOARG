@@ -83,7 +83,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Continue()
         {
-            if (CurrentAnimation != null) return;
+            if (CurrentAnimation != null) 
+                return;
 
             CurrentAnimation = StartCoroutine(ContinueAnim());
         }
@@ -97,7 +98,8 @@ namespace JANOARG.Client.Behaviors.Player
                         float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                         OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
                         OptionGroup.alpha = 1 - ease;
-                    }));
+                    })
+                );
 
             PlayerScreen.sMain.CurrentTime -= 1.5f;
             PlayerScreen.sMain.Resync();
@@ -110,11 +112,12 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
 
-                    Background.color = CommonSys.sMain.MainCamera.backgroundColor *
-                                       new Color(1, 1, 1, (1 - ease) * 0.8f);
+                    Background.color = 
+                        CommonSys.sMain.MainCamera.backgroundColor * new Color(1, 1, 1, (1 - ease) * 0.8f);
 
                     PlayerScreen.sMain.Music.volume = a * targetVolume;
-                });
+                }
+            );
 
             Background.gameObject.SetActive(false);
             UIHolder.SetActive(false);
@@ -146,25 +149,22 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(
                 1, a =>
                 {
-                    float lerp2 = Mathf.Pow(
-                        Ease.Get(a, EaseFunction.Circle, EaseMode.In),
-                        2);
+                    float lerp1 = 
+                        Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
+                    
+                    float lerp2 = 
+                        Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
 
                     RetryBackground.rectTransform.anchorMin =
-                        new Vector2(0, .5f * (1 - lerp2));
+                        new Vector2(0, .5f * (1 - lerp1));
 
                     RetryBackground.rectTransform.anchorMax =
-                        new Vector2(1, 1 - .5f * (1 - lerp2));
+                        new Vector2(1, 1 - .5f * (1 - lerp1));
 
                     RetryBackground.rectTransform.sizeDelta =
-                        new Vector2(0, 100 * (1 - lerp2));
+                        new Vector2(0, 100 * (1 - lerp1));
 
-                    float lerp3 = Mathf.Pow(
-                        Ease.Get(
-                            a, EaseFunction.Exponential,
-                            EaseMode.Out), 0.5f);
-
-                    RetryFlash.color = new Color(1, 1, 1, 1 - lerp3);
+                    RetryFlash.color = new Color(1, 1, 1, 1 - lerp2);
                 });
 
             yield return new WaitForSeconds(1);

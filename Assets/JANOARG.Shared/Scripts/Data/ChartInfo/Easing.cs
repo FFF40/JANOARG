@@ -37,10 +37,14 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public static float Get(float x, EaseFunction easeFunc, EaseMode mode)
         {
-            Ease ease = sEases[easeFunc];
+            Ease ease = srEases[easeFunc];
             Func<float, float> func = ease.InOut;
-            if (mode == EaseMode.In) func = ease.In;
-            if (mode == EaseMode.Out) func = ease.Out;
+            
+            if (mode == EaseMode.In) 
+                func = ease.In;
+            
+            if (mode == EaseMode.Out) 
+                func = ease.Out;
 
             return func(Mathf.Clamp01(x));
         }
@@ -56,6 +60,18 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
 
             callback(1);
+        }
+        
+        public static IEnumerator Animate(float duration, EaseFunction function, EaseMode mode, Action<float, EaseFunction, EaseMode> callback)
+        {
+            for (float a = 0; a < 1; a += Time.deltaTime / duration)
+            {
+                callback(a, function, mode);
+
+                yield return null;
+            }
+
+            callback(1, function, mode);
         }
 
         public static IEnumerator AnimateText(TMP_Text text, float duration, float xOffset, Action<TMP_CharacterInfo, float> letterCallback)
@@ -104,7 +120,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
         }
 
-        public static Dictionary<EaseFunction, Ease> sEases = new()
+        public static readonly Dictionary<EaseFunction, Ease> srEases = new()
         {
             {
                 EaseFunction.Linear, new Ease

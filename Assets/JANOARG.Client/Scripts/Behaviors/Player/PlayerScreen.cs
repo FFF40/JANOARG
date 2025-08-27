@@ -693,10 +693,10 @@ namespace JANOARG.Client.Behaviors.Player
 
                 // Update camera
                 sCurrentChart.Camera.Advance(visualBeat);
-                Camera camera = CommonSys.sMain.MainCamera;
-                camera.transform.position = sCurrentChart.Camera.CameraPivot;
-                camera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
-                camera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
+                Camera chartCamera = CommonSys.sMain.MainCamera;
+                chartCamera.transform.position = sCurrentChart.Camera.CameraPivot;
+                chartCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
+                chartCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
 
                 // Update scene
                 foreach (LaneGroupPlayer group in LaneGroups)
@@ -718,12 +718,14 @@ namespace JANOARG.Client.Behaviors.Player
             _LastDSPTime = AudioSettings.dspTime;
         }
 
-        public void CheckHitObjects()
+        private void CheckHitObjects()
         {
             foreach (LanePlayer lane in Lanes)
                 foreach (HitPlayer hit in lane.HitObjects)
                 {
-                    if (hit.HoldMesh) lane.UpdateHoldMesh(hit);
+                    if (hit.HoldMesh) 
+                        lane.UpdateHoldMesh(hit);
+
                 }
 
             // PlayerInputManager.main.UpdateTouches();
@@ -783,9 +785,15 @@ namespace JANOARG.Client.Behaviors.Player
                 float val = Mathf.Pow(1 - x, 5);
                 float val2 = 1 - Ease.Get(x, EaseFunction.Quintic, EaseMode.In);
 
-                ComboGroup.alpha = Combo == 0 ? 0 : val + 1;
-                ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
-                JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
+                ComboGroup.alpha = Combo == 0 
+                    ? 0 : val + 1;
+                
+                ComboLabel.rectTransform.anchoredPosition *= 
+                    new Vector2Frag(y: -25 + 2 * val * val);
+                
+                JudgmentLabel.rectTransform.anchoredPosition *= 
+                    new Vector2Frag(y: -25 + 2 * val * val);
+                
                 JudgmentGroup.alpha = val2;
             });
         }
