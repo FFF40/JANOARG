@@ -520,9 +520,8 @@ public class PlayerInputManager : MonoBehaviour
 
             if (HoldQueue.Count != 0) // Hold note processor
             {
-                // // Camera handling and other extra stuff is done here to calculate hold note hitboxes and positions
-                // on the fly
-                // // As it has dynamic attributes as it progresses, unlike normal hitobjects.
+                //// Camera handling and other extra stuff is done here to calculate hold note hitboxes and positions on the fly
+                //// As it has dynamic attributes as it progresses, unlike normal hitobjects.
 
                 float beat = PlayerScreen.sTargetSong.Timing.ToBeat(judgementOffsetTime); // Get current BPM
 
@@ -633,11 +632,10 @@ public class PlayerInputManager : MonoBehaviour
                     holdNoteEntry.HitObject.HitCoord = new HitScreenCoord
                     {
                         Position = (holdNoteHitboxStart + holdNoteHitboxEnd) / 2,
-                        Radius = Mathf.Max(
-                            Vector2.Distance(holdNoteHitboxStart, holdNoteHitboxEnd) / 2 +
-                            Player.ScaledExtraRadius,
-                            Player.ScaledMinimumRadius
-                        )
+                        Radius = Mathf.Max( 
+                                Vector2.Distance(holdNoteHitboxStart, holdNoteHitboxEnd) / 2 + Player.ScaledExtraRadius,
+                                Player.ScaledMinimumRadius
+                                )
                     };
 
                     // Draw the hitobject radius
@@ -656,27 +654,16 @@ public class PlayerInputManager : MonoBehaviour
                     holdNoteEntry.AssignedTouch = null;
 
                     // Assigned a new touch
-                    holdNoteEntry.AssignedTouch = TouchClasses.Find(touch => Vector2.Distance(
-                                                                                 touch.Touch
-                                                                                     .screenPosition,
-                                                                                 holdNoteEntry.HitObject
-                                                                                     .HitCoord
-                                                                                     .Position
-                                                                             ) <=
-                                                                             holdNoteEntry.HitObject.HitCoord
-                                                                                 .Radius // Be careful, it's
-                        // <= not <
+                    holdNoteEntry.AssignedTouch = TouchClasses.Find(touch => 
+                            Vector2.Distance( touch.Touch .screenPosition, holdNoteEntry.HitObject .HitCoord .Position ) <= holdNoteEntry.HitObject.HitCoord .Radius // Be careful, it's <= not <
                     );
 
                     // Taking advantage of inline checks, since List<T>.Find() can give null
                     holdNoteEntry.IsPlayerHolding = holdNoteEntry.AssignedTouch != null;
 
                     // Update Drain value
-                    holdNoteEntry.holdPassDrainValue = Mathf.Clamp01(
-                        holdNoteEntry.holdPassDrainValue +
-                        Time.deltaTime /
-                        Player.PassWindow *
-                        (holdNoteEntry.IsPlayerHolding ? 1f : -1f)
+                    holdNoteEntry.holdPassDrainValue = Mathf.Clamp01( holdNoteEntry.holdPassDrainValue + Time.deltaTime / Player.PassWindow * (holdNoteEntry.IsPlayerHolding 
+                                                                                                                                                                    ? 1f : -1f)
                     );
 
                     Debug.Log($"Updating drain value: {holdNoteEntry.holdPassDrainValue}");
@@ -695,8 +682,7 @@ public class PlayerInputManager : MonoBehaviour
                     {
                         Player.AddScore(
                             holdNoteEntry.IsScoring
-                                ? 1
-                                : 0,
+                                ? 1 : 0,
                             null
                         );
 
@@ -705,16 +691,8 @@ public class PlayerInputManager : MonoBehaviour
                             $"HoldEligible: {holdNoteEntry.IsScoring}, Score: {(holdNoteEntry.IsScoring ? 1 : 0)}");
 
                         Player.HitObjectHistory.Add(
-                            new HitObjectHistoryItem(
-                                holdNoteEntry.HitObject.HoldTicks[0],
-                                HitObjectHistoryType.Catch,
-                                holdNoteEntry.IsScoring
-                                    ? 0
-                                    : float
-                                        .PositiveInfinity // Catch
-                                // note-like
-                                // hitobject
-                                // history
+                            new HitObjectHistoryItem( holdNoteEntry.HitObject.HoldTicks[0], HitObjectHistoryType.Catch, holdNoteEntry.IsScoring 
+                                                                                                                                        ? 0 : float .PositiveInfinity // Catch note-like hitobject history
                             )
                         );
 
@@ -823,6 +801,7 @@ public class PlayerInputManager : MonoBehaviour
                 {
                     while (currentHit.HoldTicks.Count > 0 && currentHit.HoldTicks[0] <= Player.CurrentTime)
                     {
+                        //// Special judgement handling for hold ticks (nothing else handles this)
                         Player.AddScore(1, null);
 
                         var effect = PlayerScreen.sMain.judgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);

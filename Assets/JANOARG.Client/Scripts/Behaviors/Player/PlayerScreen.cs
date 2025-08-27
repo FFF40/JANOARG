@@ -609,7 +609,8 @@ namespace JANOARG.Client.Behaviors.Player
                 PlayerHUD.transform.localScale = Vector3.one * (ease * .05f + .95f);
             });
 
-            for (var a = 0; a < ScoreCounter.Digits.Count; a++) ScoreCounter.Digits[a].Speed = 9;
+            foreach (ScrollingCounterDigit digit in ScoreCounter.Digits)
+                digit.Speed = 9;
 
             IsPlaying = true;
             _LastDSPTime = AudioSettings.dspTime;
@@ -720,10 +721,8 @@ namespace JANOARG.Client.Behaviors.Player
         public void CheckHitObjects()
         {
             foreach (LanePlayer lane in Lanes)
-                for (var a = 0; a < lane.HitObjects.Count; a++)
+                foreach (HitPlayer hit in lane.HitObjects)
                 {
-                    HitPlayer hit = lane.HitObjects[a];
-
                     if (hit.HoldMesh) lane.UpdateHoldMesh(hit);
                 }
 
@@ -812,7 +811,8 @@ namespace JANOARG.Client.Behaviors.Player
         {
             // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
 
-            int score = hitObject.Current.Type == HitObject.HitType.Normal ? 3 : 1;
+            int score = hitObject.Current.Type == HitObject.HitType.Normal 
+                ? 3 : 1;
 
             if (hitObject.Current.Flickable)
             {

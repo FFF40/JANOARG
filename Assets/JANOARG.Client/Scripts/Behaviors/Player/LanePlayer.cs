@@ -91,6 +91,8 @@ namespace JANOARG.Client.Behaviors.Player
                 transform.gameObject.SetActive(false);
             }
         }
+        
+        
 
 
         private void UpdateMesh(float time, float beat, float maxDistance = 200)
@@ -300,7 +302,8 @@ namespace JANOARG.Client.Behaviors.Player
                     player.Current = Current.Objects[0];
 
                     player.Time = _HitObjectTime;
-                    player.EndTime = player.Current.HoldLength > 0 ? PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : _HitObjectTime;
+                    player.EndTime = player.Current.HoldLength > 0 
+                        ? PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : _HitObjectTime;
                     player.HitCoord = HitCoords[0];
 
                     if (player.Current.HoldLength > 0)
