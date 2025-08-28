@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+// TODO: REWRITE THIS ASAP
+
 namespace JANOARG.Shared.Data.ChartInfo
 {
     [Serializable]
