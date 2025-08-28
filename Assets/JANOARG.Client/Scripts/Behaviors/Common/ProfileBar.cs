@@ -17,9 +17,12 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
 namespace JANOARG.Client.Behaviors.Common
 {
+    /// <summary>
+    /// The profile bar at the top of the screen.
+    /// </summary>
     public class ProfileBar : MonoBehaviour
     {
-        public const  int        BONUS_CAP = 5;
+        public const int BONUS_CAP = 5;
         public static ProfileBar sMain;
 
         [Header("Data")]
@@ -27,7 +30,8 @@ namespace JANOARG.Client.Behaviors.Common
 
         public float SongEssence;
 
-        [FormerlySerializedAs("bonusCount")] [Space]
+        [FormerlySerializedAs("bonusCount")]
+        [Space]
         public int BonusCount;
 
         [FormerlySerializedAs("bonusReset")] public long BonusReset;
@@ -36,8 +40,8 @@ namespace JANOARG.Client.Behaviors.Common
         public CanvasGroup LeftPane;
 
         public LayoutGroup LeftLayout;
-        public TMP_Text    NameLabel;
-        public TMP_Text    TitleLabel;
+        public TMP_Text NameLabel;
+        public TMP_Text TitleLabel;
         public CanvasGroup MenuButtonGroup;
         public CanvasGroup AvatarGroup;
 
@@ -46,15 +50,15 @@ namespace JANOARG.Client.Behaviors.Common
         public TMP_Text LevelLabel;
         public TMP_Text LevelText;
         public TMP_Text LevelProgressText;
-        public Slider   LevelProgressBar;
-        public Graphic  LevelBackgroundGraphic;
-        public Graphic  LevelFillGraphic;
+        public Slider LevelProgressBar;
+        public Graphic LevelBackgroundGraphic;
+        public Graphic LevelFillGraphic;
 
         [Space] public GameObject LevelUpHolder;
 
-        public Graphic  LevelUpLevelGraphic;
+        public Graphic LevelUpLevelGraphic;
         public TMP_Text LevelUpLevelText;
-        public Graphic  LevelUpLabelGraphic;
+        public Graphic LevelUpLabelGraphic;
         public TMP_Text LevelUpLabelText;
 
         [Space] public RectTransform AbilityRatingHolder;
@@ -66,11 +70,11 @@ namespace JANOARG.Client.Behaviors.Common
         public CanvasGroup RightPane;
 
         public LayoutGroup RightLayout;
-        public TMP_Text    CoinLabel;
-        public TMP_Text    OrbLabel;
-        public TMP_Text    EssenceLabel;
-        public TMP_Text    BonusLabel;
-        public Graphic[]   BonusBlocks;
+        public TMP_Text CoinLabel;
+        public TMP_Text OrbLabel;
+        public TMP_Text EssenceLabel;
+        public TMP_Text BonusLabel;
+        public Graphic[] BonusBlocks;
 
         [Header("Change Header")]
         public CanvasGroup ChangeHeader;
@@ -78,33 +82,33 @@ namespace JANOARG.Client.Behaviors.Common
         public LayoutGroup ChangeLayout;
         public LayoutGroup ChangeCurrencyPane;
         public LayoutGroup ChangeAREssencePane;
-        public GameObject  ChangeCoinIcon;
-        public TMP_Text    ChangeCoinLabel;
-        public GameObject  ChangeOrbIcon;
-        public TMP_Text    ChangeOrbLabel;
-        public GameObject  ChangeARIcon;
-        public TMP_Text    ChangeARLabel;
-        public GameObject  ChangeEssenceIcon;
-        public TMP_Text    ChangeEssenceLabel;
+        public GameObject ChangeCoinIcon;
+        public TMP_Text ChangeCoinLabel;
+        public GameObject ChangeOrbIcon;
+        public TMP_Text ChangeOrbLabel;
+        public GameObject ChangeARIcon;
+        public TMP_Text ChangeARLabel;
+        public GameObject ChangeEssenceIcon;
+        public TMP_Text ChangeEssenceLabel;
 
         [Header("Collecting Particle")]
         public RectTransform CollectingParticleHolder;
 
-        public  CollectingParticle CoinParticleSample;
-        public  CollectingParticle OrbParticleSample;
-        public  CollectingParticle EssenceParticleSample;
-        public  RectTransform      ParticleCoinTarget;
-        public  RectTransform      ParticleOrbTarget;
-        public  RectTransform      ParticleEssenceTarget;
-        public  Graphic            ParticleCoinFlash;
-        public  Graphic            ParticleOrbFlash;
-        public  Graphic            ParticleEssenceFlash;
-        private Coroutine          _LevelUpAnimation;
+        public CollectingParticle CoinParticleSample;
+        public CollectingParticle OrbParticleSample;
+        public CollectingParticle EssenceParticleSample;
+        public RectTransform ParticleCoinTarget;
+        public RectTransform ParticleOrbTarget;
+        public RectTransform ParticleEssenceTarget;
+        public Graphic ParticleCoinFlash;
+        public Graphic ParticleOrbFlash;
+        public Graphic ParticleEssenceFlash;
+        private Coroutine _LevelUpAnimation;
 
 
         private Coroutine _SongCurrencyGainAnimation;
-        private bool      _SongGainSkipLock;
-        private bool      _SongGainSkipQueued;
+        private bool _SongGainSkipLock;
+        private bool _SongGainSkipQueued;
 
         public float totalEssence => SongEssence;
 

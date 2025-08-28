@@ -9,6 +9,9 @@ using UnityEngine.UI;
 
 namespace JANOARG.Client.Behaviors.Common
 {
+    /// <summary>
+    /// The quick menus that appears when the player press on the hamburger icons on the profile bar.
+    /// </summary>
     public class QuickMenu : MonoBehaviour
     {
         public static QuickMenu sMain;

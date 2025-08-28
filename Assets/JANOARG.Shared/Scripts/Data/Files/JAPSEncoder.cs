@@ -4,11 +4,20 @@ using UnityEngine;
 
 namespace JANOARG.Shared.Data.Files
 {
+    /// <summary>
+    /// Utility class to encode a Playable Song into a .JAPS file.
+    /// </summary>
     public class JAPSEncoder
     {
         public const int FORMAT_VERSION = 2;
         public const int INDENT_SIZE    = 2;
 
+        /// <summary>
+        /// Encode a Playable Song into a .JAPS file.
+        /// </summary>
+        /// <param name="song">The Playable Song object.</param>
+        /// <param name="clipName">Name of the song audio file.</param>
+        /// <returns>A string under the .JAPS file format.</returns>
         public static string Encode(PlayableSong song, string clipName)
         {
             var str = "JANOARG Playable Song Format\ngithub.com/FFF40/JANOARG";

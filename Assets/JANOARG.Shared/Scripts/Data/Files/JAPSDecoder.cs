@@ -5,11 +5,20 @@ using UnityEngine;
 
 namespace JANOARG.Shared.Data.Files
 {
+    /// <summary>
+    /// Utility class to decode a .JAPS file into a Playable Song.
+    /// </summary>
     public class JAPSDecoder
     {
         public const int FORMAT_VERSION = 2;
-        public const int INDENT_SIZE    = 2;
+        public const int INDENT_SIZE = 2;
 
+        /// <summary>
+        /// Parse a .JAPS file's content.
+        /// </summary>
+        /// <param name="str">Content of the .JAPS file.</param>
+        /// <returns>A Playable Song represent by the .JAPS file.</returns>
+        /// <exception cref="Exception">Exception that's thrown when parsing encounters an error.</exception>
         public static PlayableSong Decode(string str)
         {
             PlayableSong decodingSong = new();

@@ -5,11 +5,19 @@ using UnityEngine;
 
 namespace JANOARG.Shared.Data.Files
 {
+    /// <summary>
+    /// Utility class to encode a Chart into a .JAC file.
+    /// </summary>
     public class JACEncoder
     {
         public const int FORMAT_VERSION = 1;
         public const int INDENT_SIZE    = 2;
 
+        /// <summary>
+        /// Encode a Chart into a .JAC file.
+        /// </summary>
+        /// <param name="chart">The Chart object.</param>
+        /// <returns>A string under the .JAC file format<./returns>
         public static string Encode(Chart chart)
         {
             var str = "JANOARG Chart Format\ngithub.com/FFF40/JANOARG";

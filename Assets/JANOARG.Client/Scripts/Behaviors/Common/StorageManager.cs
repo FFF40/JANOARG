@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Common
 {
+    /// <summary>
+    /// Class for handling the storage of common variables, such as high scores.
+    /// </summary>
     public class StorageManager : MonoBehaviour
     {
         public static StorageManager sMain;

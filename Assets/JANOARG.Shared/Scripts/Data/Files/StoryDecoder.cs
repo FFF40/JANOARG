@@ -12,10 +12,13 @@ using UnityEngine;
 
 namespace JANOARG.Shared.Data.Files
 {
+    /// <summary>
+    /// Utility class for converting a .STORY file into a StoryScript object.
+    /// </summary>
     public class StoryDecoder
     {
         public const int FORMAT_VERSION = 1;
-        public const int INDENT_SIZE    = 2;
+        public const int INDENT_SIZE = 2;
 
         private static Dictionary<string, StoryTagInfo> s_StoryTags;
 
@@ -35,20 +38,24 @@ namespace JANOARG.Shared.Data.Files
                 if (!typeof(StoryInstruction).IsAssignableFrom(cls)) continue;
 
                 foreach (ConstructorInfo cons in cls.GetConstructors())
-                foreach (Attribute attr in cons.GetCustomAttributes())
-                {
-                    if (attr is not StoryTagAttribute tagAttr) continue;
-
-                    s_StoryTags[tagAttr.Keyword] = new StoryTagInfo
+                    foreach (Attribute attr in cons.GetCustomAttributes())
                     {
-                        Keyword = tagAttr.Keyword,
-                        DefaultParameters = tagAttr.DefaultParameters,
-                        Constructor = cons
-                    };
-                }
+                        if (attr is not StoryTagAttribute tagAttr) continue;
+
+                        s_StoryTags[tagAttr.Keyword] = new StoryTagInfo
+                        {
+                            Keyword = tagAttr.Keyword,
+                            DefaultParameters = tagAttr.DefaultParameters,
+                            Constructor = cons
+                        };
+                    }
             }
         }
-
+        /// <summary>
+        /// Parse a .STORY file.
+        /// </summary>
+        /// <param name="str">The content of the .STORY file.</param>
+        /// <returns>A StoryScript object represented by the .STORY file.</returns>
         public static StoryScript Decode(string str)
         {
             if (s_StoryTags == null) InitiateStoryTags();
@@ -61,8 +68,10 @@ namespace JANOARG.Shared.Data.Files
 
             foreach (string line in lines)
             {
-                var index = 0;
+                int index = 0;
 
+                // Create a new story chunk when an empty line is encountered
+                // (end of a paragraph)
                 if (string.IsNullOrEmpty(line))
                 {
                     if (currentChunk.Instructions.Count > 0)
@@ -74,8 +83,10 @@ namespace JANOARG.Shared.Data.Files
                     continue;
                 }
 
+                // Skip comments
                 if (line.StartsWith("#")) continue;
 
+                // Get actors
                 if (currentChunk.Instructions.Count == 0)
                 {
                     Match match;
@@ -95,6 +106,7 @@ namespace JANOARG.Shared.Data.Files
                 // Skip white space
                 while (index < line.Length && char.IsWhiteSpace(line[index])) index++;
 
+                // Parse until end
                 while (index < line.Length)
                 {
                     StringBuilder storyboard;

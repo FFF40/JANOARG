@@ -5,11 +5,21 @@ using UnityEngine;
 
 namespace JANOARG.Shared.Data.Files
 {
+    /// <summary>
+    /// Utility class to decode a .JAC file into a Chart.
+    /// </summary>
     public class JACDecoder
     {
         public const int FORMAT_VERSION = 1;
         public const int INDENT_SIZE    = 2;
 
+
+        /// <summary>
+        /// Parse a .JAC file's content.
+        /// </summary>
+        /// <param name="str">Content of the .JAC file.</param>
+        /// <returns>A Chart represent by the .JAC file.</returns>
+        /// <exception cref="Exception">Exception that's thrown when parsing encounters an error.</exception>
         public static Chart Decode(string str)
         {
             Chart chart = new();
@@ -70,7 +80,7 @@ namespace JANOARG.Shared.Data.Files
                             throw new Exception("The specified mode " + mode + " is not a valid mode.");
                         }
                     }
-                    else if (line.StartsWith("$"))
+                    else if (line.StartsWith("$")) // Storyboard
                     {
                         string[] tokens = line.Split(' ');
 
@@ -93,7 +103,7 @@ namespace JANOARG.Shared.Data.Files
                             throw new Exception("Not enough tokens (minimum 6, got " + tokens.Length + ").");
                         }
                     }
-                    else if (line.StartsWith("+"))
+                    else if (line.StartsWith("+")) // Child objects
                     {
                         string[] tokens = line.Split(' ');
 
@@ -251,7 +261,7 @@ namespace JANOARG.Shared.Data.Files
                             throw new Exception("The specified object " + tokens[1] + " is not a valid object.");
                         }
                     }
-                    else if (line.Contains(": "))
+                    else if (line.Contains(": ")) // Property
                     {
                         int pos = line.IndexOf(": ");
                         string key = line[..pos];

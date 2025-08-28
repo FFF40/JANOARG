@@ -8,6 +8,9 @@ using Random = UnityEngine.Random;
 
 namespace JANOARG.Client.Behaviors.Common
 {
+    /// <summary>
+    /// The loading bar that appears when the game is loading something.
+    /// </summary>
     public class LoadingBar : MonoBehaviour
     {
         public static LoadingBar sMain;
@@ -71,9 +74,9 @@ namespace JANOARG.Client.Behaviors.Common
         };
 
         public RectTransform StatusHolder;
-        public TMP_Text      StatusText;
+        public TMP_Text StatusText;
         public RectTransform StatusCompletedHolder;
-        public TMP_Text      StatusCompletedText;
+        public TMP_Text StatusCompletedText;
 
         [Space]
         public TMP_Text FlavorText;
@@ -85,7 +88,7 @@ namespace JANOARG.Client.Behaviors.Common
         public Slider ProgressBar;
 
         public RectTransform ProgressBarHolder;
-        public Image         ProgressBarFill;
+        public Image ProgressBarFill;
 
         [HideInInspector] public bool IsAnimating;
 

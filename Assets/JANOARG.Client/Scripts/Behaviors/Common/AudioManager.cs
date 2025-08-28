@@ -5,6 +5,9 @@ using UnityEngine.Audio;
 
 namespace JANOARG.Client.Behaviors.Common
 {
+    /// <summary>
+    /// The common audio manager, controls the global audio mixer.
+    /// </summary>
     public class AudioManager : MonoBehaviour
     {
         public static AudioManager sMain;

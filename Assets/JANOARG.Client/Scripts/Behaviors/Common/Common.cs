@@ -8,17 +8,20 @@ using UnityEngine.SceneManagement;
 
 namespace JANOARG.Client.Behaviors.Common
 {
+    /// <summary>
+    /// The common object, used by various objects to access common data and behaviors.
+    /// </summary>
     public class CommonSys : MonoBehaviour
     {
         public static CommonSys sMain;
 
-        public Camera          MainCamera;
-        public RectTransform   CommonCanvas;
+        public Camera MainCamera;
+        public RectTransform CommonCanvas;
         public CommonConstants Constants;
 
         public LoadingBar LoadingBar;
-        public Storage    Preferences;
-        public Storage    Storage;
+        public Storage Preferences;
+        public Storage Storage;
 
         public void Awake()
         {
@@ -71,7 +74,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Resources.UnloadUnusedAssets();
             yield return new WaitUntil(completed);
 
-            if (onComplete != null) 
+            if (onComplete != null)
                 onComplete();
         }
     }
