@@ -37,12 +37,15 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public static float Get(float x, EaseFunction easeFunc, EaseMode mode)
         {
-            Ease ease = sEases[easeFunc];
-            Func<float, float> func = ease.InOut;
-            if (mode == EaseMode.In) func = ease.In;
-            if (mode == EaseMode.Out) func = ease.Out;
+            Ease ease = sEases[(int)easeFunc];
+            x = Mathf.Clamp01(x);
 
-            return func(Mathf.Clamp01(x));
+            return mode switch
+            {
+                EaseMode.In => ease.In(x),
+                EaseMode.Out => ease.Out(x),
+                _ => ease.InOut(x)
+            };
         }
 
         // We don't need DOTween, guys
@@ -104,187 +107,180 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
         }
 
-        public static Dictionary<EaseFunction, Ease> sEases = new()
+        public static Ease[] sEases;
+
+        static Ease()
         {
+            sEases = new Ease[Enum.GetValues(typeof(EaseFunction)).Length];
+
+            sEases[(int)EaseFunction.Linear] = new Ease
             {
-                EaseFunction.Linear, new Ease
-                {
-                    In = (x) => x,
-                    Out = (x) => x,
-                    InOut = (x) => x
-                }
-            },
+                In = (x) => x,
+                Out = (x) => x,
+                InOut = (x) => x
+            };
+
+            sEases[(int)EaseFunction.Sine] = new Ease
             {
-                EaseFunction.Sine, new Ease
-                {
-                    In = (x) => 1 - Mathf.Cos(x * Mathf.PI / 2),
-                    Out = (x) => Mathf.Sin(x * Mathf.PI / 2),
-                    InOut = (x) => (1 - Mathf.Cos(x * Mathf.PI)) / 2
-                }
-            },
+                In = (x) => 1 - Mathf.Cos(x * Mathf.PI / 2),
+                Out = (x) => Mathf.Sin(x * Mathf.PI / 2),
+                InOut = (x) => (1 - Mathf.Cos(x * Mathf.PI)) / 2
+            };
+
+            sEases[(int)EaseFunction.Quadratic] = new Ease
             {
-                EaseFunction.Quadratic, new Ease
-                {
-                    In = (x) => x * x,
-                    Out = (x) => 1 - Mathf.Pow(1 - x, 2),
-                    InOut = (x) => x < 0.5f
-                        ? 2 * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 2) / 2
-                }
-            },
+                In = (x) => x * x,
+                Out = (x) => 1 - Mathf.Pow(1 - x, 2),
+                InOut = (x) => x < 0.5f
+                    ? 2 * x * x
+                    : 1 - Mathf.Pow(-2 * x + 2, 2) / 2
+            };
+
+            sEases[(int)EaseFunction.Cubic] = new Ease
             {
-                EaseFunction.Cubic, new Ease
-                {
-                    In = (x) => x * x * x,
-                    Out = (x) => 1 - Mathf.Pow(1 - x, 3),
-                    InOut = (x) => x < 0.5f
-                        ? 4 * x * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 3) / 2
-                }
-            },
+                In = (x) => x * x * x,
+                Out = (x) => 1 - Mathf.Pow(1 - x, 3),
+                InOut = (x) => x < 0.5f
+                    ? 4 * x * x * x
+                    : 1 - Mathf.Pow(-2 * x + 2, 3) / 2
+            };
+
+            sEases[(int)EaseFunction.Quartic] = new Ease
             {
-                EaseFunction.Quartic, new Ease
-                {
-                    In = (x) => x * x * x * x,
-                    Out = (x) => 1 - Mathf.Pow(1 - x, 4),
-                    InOut = (x) => x < 0.5f
-                        ? 8 * x * x * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 4) / 2
-                }
-            },
+                In = (x) => x * x * x * x,
+                Out = (x) => 1 - Mathf.Pow(1 - x, 4),
+                InOut = (x) => x < 0.5f
+                    ? 8 * x * x * x * x
+                    : 1 - Mathf.Pow(-2 * x + 2, 4) / 2
+            };
+
+            // For fuck's sake, why do C# not have an exponent operator??
+            // Maybe exponent is not ALU standard
+            sEases[(int)EaseFunction.Quintic] = new Ease
             {
-                // For fuck's sake, why do C# not have an exponent operator??
-                EaseFunction.Quintic, new Ease
-                {
-                    In = (x) => x * x * x * x * x,
-                    Out = (x) => 1 - Mathf.Pow(1 - x, 5),
-                    InOut = (x) => x < 0.5f
-                        ? 16 * x * x * x * x * x
-                        : 1 - Mathf.Pow(-2 * x + 2, 5) / 2
-                }
-            },
+                In = (x) => x * x * x * x * x,
+                Out = (x) => 1 - Mathf.Pow(1 - x, 5),
+                InOut = (x) => x < 0.5f
+                    ? 16 * x * x * x * x * x
+                    : 1 - Mathf.Pow(-2 * x + 2, 5) / 2
+            };
+
+            sEases[(int)EaseFunction.Exponential] = new Ease
             {
-                EaseFunction.Exponential, new Ease
-                {
-                    In = (x) => x == 0
-                        ? 0
-                        : Mathf.Pow(2, 10 * x - 10) - 0.0009765625f * (1 - x),
-                    Out = (x) => Mathf.Approximately(x, 1)
+                In = (x) => x == 0
+                    ? 0
+                    : Mathf.Pow(2, 10 * x - 10) - 0.0009765625f * (1 - x),
+                Out = (x) => Mathf.Approximately(x, 1)
+                    ? 1
+                    : 1 - Mathf.Pow(2, -10 * x) + 0.0009765625f * x,
+                InOut = (x) => x == 0
+                    ? 0
+                    : Mathf.Approximately(x, 1)
                         ? 1
-                        : 1 - Mathf.Pow(2, -10 * x) + 0.0009765625f * x,
-                    InOut = (x) => x == 0
-                        ? 0
-                        : Mathf.Approximately(x, 1)
-                            ? 1
-                            : x < 0.5
-                                ? Mathf.Pow(2, 20 * x - 10) / 2 - 0.0009765625f * (1 - x)
-                                : (2 - Mathf.Pow(2, -20 * x + 10)) / 2 + 0.0009765625f * x
-                }
-            },
+                        : x < 0.5
+                            ? Mathf.Pow(2, 20 * x - 10) / 2 - 0.0009765625f * (1 - x)
+                            : (2 - Mathf.Pow(2, -20 * x + 10)) / 2 + 0.0009765625f * x
+            };
+
+            sEases[(int)EaseFunction.Circle] = new Ease
             {
-                EaseFunction.Circle, new Ease
-                {
-                    In = (x) => 1 - Mathf.Sqrt(1 - Mathf.Pow(x, 2)),
-                    Out = (x) => Mathf.Sqrt(1 - Mathf.Pow(x - 1, 2)),
-                    InOut = (x) => x < 0.5
-                        ? (1 - Mathf.Sqrt(1 - Mathf.Pow(2 * x, 2))) / 2
-                        : (Mathf.Sqrt(1 - Mathf.Pow(-2 * x + 2, 2)) + 1) / 2
-                }
-            },
+                In = (x) => 1 - Mathf.Sqrt(1 - Mathf.Pow(x, 2)),
+                Out = (x) => Mathf.Sqrt(1 - Mathf.Pow(x - 1, 2)),
+                InOut = (x) => x < 0.5
+                    ? (1 - Mathf.Sqrt(1 - Mathf.Pow(2 * x, 2))) / 2
+                    : (Mathf.Sqrt(1 - Mathf.Pow(-2 * x + 2, 2)) + 1) / 2
+            };
+
+            sEases[(int)EaseFunction.Back] = new Ease
             {
-                EaseFunction.Back, new Ease
+                In = (x) =>
                 {
-                    In = (x) =>
-                    {
-                        const float OVERSHOOT = 1.70158f;
+                    const float OVERSHOOT = 1.70158f;
 
-                        return 2.70158f * x * x * x - OVERSHOOT * x * x;
-                    },
-                    Out = (x) =>
-                    {
-                        const float OVERSHOOT = 1.70158f;
+                    return 2.70158f * x * x * x - OVERSHOOT * x * x;
+                },
+                Out = (x) =>
+                {
+                    const float OVERSHOOT = 1.70158f;
 
-                        return 1 + 2.70158f * Mathf.Pow(x - 1, 3) + OVERSHOOT * Mathf.Pow(x - 1, 2);
-                    },
-                    InOut = (x) =>
-                    {
-                        const float OVERSHOOT = 1.70158f;
-                        const float SCALED_OVERSHOOT = OVERSHOOT * 1.525f;
+                    return 1 + 2.70158f * Mathf.Pow(x - 1, 3) + OVERSHOOT * Mathf.Pow(x - 1, 2);
+                },
+                InOut = (x) =>
+                {
+                    const float OVERSHOOT = 1.70158f;
+                    const float SCALED_OVERSHOOT = OVERSHOOT * 1.525f;
 
-                        return x < 0.5f
-                            ? Mathf.Pow(2 * x, 2) * ((SCALED_OVERSHOOT + 1) * 2 * x - SCALED_OVERSHOOT) / 2
-                            : (Mathf.Pow(2 * x - 2, 2) * ((SCALED_OVERSHOOT + 1) * (x * 2 - 2) + SCALED_OVERSHOOT) + 2) / 2;
-                    }
+                    return x < 0.5f
+                        ? Mathf.Pow(2 * x, 2) * ((SCALED_OVERSHOOT + 1) * 2 * x - SCALED_OVERSHOOT) / 2
+                        : (Mathf.Pow(2 * x - 2, 2) * ((SCALED_OVERSHOOT + 1) * (x * 2 - 2) + SCALED_OVERSHOOT) + 2) / 2;
                 }
-            },
+            };
+
+            sEases[(int)EaseFunction.Elastic] = new Ease
             {
-                EaseFunction.Elastic, new Ease
+                In = (x) =>
                 {
-                    In = (x) =>
-                    {
-                        const float PERIOD = Mathf.PI * 2 / 3;
+                    const float PERIOD = Mathf.PI * 2 / 3;
 
-                        if (x == 0) return 0;
-                        if (Mathf.Approximately(x, 1)) return 1;
+                    if (x == 0) return 0;
+                    if (Mathf.Approximately(x, 1)) return 1;
 
-                        return -Mathf.Pow(2, 10 * x - 10) * Mathf.Sin((x * 10 - 10.75f) * PERIOD);
-                    },
-                    Out = (x) =>
-                    {
-                        const float PERIOD = Mathf.PI * 2 / 3;
+                    return -Mathf.Pow(2, 10 * x - 10) * Mathf.Sin((x * 10 - 10.75f) * PERIOD);
+                },
+                Out = (x) =>
+                {
+                    const float PERIOD = Mathf.PI * 2 / 3;
 
-                        if (x == 0)
-                            return 0;
+                    if (x == 0)
+                        return 0;
 
-                        if (Mathf.Approximately(x, 1))
-                            return 1;
+                    if (Mathf.Approximately(x, 1))
+                        return 1;
 
-                        return Mathf.Pow(2, -10 * x) * Mathf.Sin((x * 10 - 0.75f) * PERIOD) + 1;
-                    },
-                    InOut = (x) =>
-                    {
-                        const float PERIOD = Mathf.PI * 2 / 4.5f;
+                    return Mathf.Pow(2, -10 * x) * Mathf.Sin((x * 10 - 0.75f) * PERIOD) + 1;
+                },
+                InOut = (x) =>
+                {
+                    const float PERIOD = Mathf.PI * 2 / 4.5f;
 
-                        if (x == 0)
-                            return 0;
+                    if (x == 0)
+                        return 0;
 
-                        if (Mathf.Approximately(x, 1))
-                            return 1;
+                    if (Mathf.Approximately(x, 1))
+                        return 1;
 
-                        if (x < 0.5)
-                            return -(Mathf.Pow(2, 20 * x - 10) * Mathf.Sin((20 * x - 11.125f) * PERIOD)) / 2;
+                    if (x < 0.5)
+                        return -(Mathf.Pow(2, 20 * x - 10) * Mathf.Sin((20 * x - 11.125f) * PERIOD)) / 2;
 
-                        return Mathf.Pow(2, -20 * x + 10) * Mathf.Sin((20 * x - 11.125f) * PERIOD) / 2 + 1;
-                    }
+                    return Mathf.Pow(2, -20 * x + 10) * Mathf.Sin((20 * x - 11.125f) * PERIOD) / 2 + 1;
                 }
-            },
+            };
+
+            sEases[(int)EaseFunction.Bounce] = new Ease
             {
-                EaseFunction.Bounce, new Ease
+                In = (x) => 1 - Get(1 - x, EaseFunction.Bounce, EaseMode.Out),
+                Out = (x) =>
                 {
-                    In = (x) => 1 - Get(1 - x, EaseFunction.Bounce, EaseMode.Out),
-                    Out = (x) =>
-                    {
-                        const float BOUNCE_CONSTANT = 7.5625f;
-                        const float BOUNCE_THRESHOLD = 2.75f;
+                    const float BOUNCE_CONSTANT = 7.5625f;
+                    const float BOUNCE_THRESHOLD = 2.75f;
 
-                        if (x < 1 / BOUNCE_THRESHOLD)
-                            return BOUNCE_CONSTANT * Mathf.Pow(x, 2);
+                    if (x < 1 / BOUNCE_THRESHOLD)
+                        return BOUNCE_CONSTANT * Mathf.Pow(x, 2);
 
 
-                        if (x < 2 / BOUNCE_THRESHOLD)
-                            return BOUNCE_CONSTANT * (x -= 1.5f / BOUNCE_THRESHOLD) * x + 0.75f;
+                    if (x < 2 / BOUNCE_THRESHOLD)
+                        return BOUNCE_CONSTANT * (x -= 1.5f / BOUNCE_THRESHOLD) * x + 0.75f;
 
-                        if (x < 2.5 / BOUNCE_THRESHOLD)
-                            return BOUNCE_CONSTANT * (x -= 2.25f / BOUNCE_THRESHOLD) * x + 0.9375f;
+                    if (x < 2.5 / BOUNCE_THRESHOLD)
+                        return BOUNCE_CONSTANT * (x -= 2.25f / BOUNCE_THRESHOLD) * x + 0.9375f;
 
-                        return BOUNCE_CONSTANT * (x -= 2.625f / BOUNCE_THRESHOLD) * x + 0.984375f;
-                    },
-                    InOut = (x) => x < 0.5
-                        ? (1 - Get(1 - 2 * x, EaseFunction.Bounce, EaseMode.Out)) / 2
-                        : (1 + Get(2 * x - 1, EaseFunction.Bounce, EaseMode.Out)) / 2
-                }
-            }
-        };
+                    return BOUNCE_CONSTANT * (x -= 2.625f / BOUNCE_THRESHOLD) * x + 0.984375f;
+                },
+                InOut = (x) => x < 0.5
+                    ? (1 - Get(1 - 2 * x, EaseFunction.Bounce, EaseMode.Out)) / 2
+                    : (1 + Get(2 * x - 1, EaseFunction.Bounce, EaseMode.Out)) / 2
+            };
+        }
     }
 
 
