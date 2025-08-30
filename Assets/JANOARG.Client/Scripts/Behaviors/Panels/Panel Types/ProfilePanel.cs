@@ -104,8 +104,9 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             var clearedCount = 0;
             var unlockedCount = 0;
 
-            ClearedCount++;
-            UnlockedCount++;
+            clearedCount++;
+            unlockedCount++;
+
             if (record.PerfectCount == record.MaxCombo)
             {
                 allFlawlessCount++;

@@ -304,9 +304,9 @@ namespace JANOARG.Client.Behaviors.Options
                         TextAnimLabels.Add(unitAnim);
 
                         BeforeText.gameObject.SetActive(true);
-                        BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> ≤";
+                        BeforeText.text = multiFloatInput.Min + "<alpha=#77>" +multiFloatInput.Unit + "<alpha=#ff> ≤";
                         AfterText.gameObject.SetActive(true);
-                        AfterText.text = "≤ " + i.Max + "<alpha=#77>" + i.Unit;
+                        AfterText.text = "≤ " + multiFloatInput.Max + "<alpha=#77>" + multiFloatInput.Unit;
                         AdvancedInputGroup.gameObject.SetActive(false);
 
                         field.InputField.onEndEdit.AddListener(value =>
@@ -344,91 +344,6 @@ namespace JANOARG.Client.Behaviors.Options
                             multiFloatInput.UpdateValue();
                             recursionBuster = false;
                         });
-                        break;
-                    }
-
-                case MultiFloatOptionInput:
-                    {
-                        MultiFloatOptionInput i = (MultiFloatOptionInput)item;
-                        var fieldInfos = MultiValueFieldData.Info[i.ValueType];
-                        bool recursionBuster = false;
-
-                        IsAdvanced = i.CurrentValue.Length > 1;
-
-                        for (int a = 0; a < fieldInfos.Count; a++)
-                        {
-                            int aa = a;
-                            var fieldInfo = fieldInfos[a];
-
-                            OptionInputField field = Instantiate(InputSample, InputHolder);
-                            field.InputField.text = (i.CurrentValue.Length > 1 ? i.CurrentValue[a] : i.CurrentValue[0]).ToString();
-                            field.InputField.contentType = i.Step != 0 && i.Step % 1 == 0
-                                ? TMP_InputField.ContentType.IntegerNumber
-                                : TMP_InputField.ContentType.DecimalNumber;
-                            field.UnitLabel.text = "<alpha=#77>" + i.Unit;
-                            field.Slider.minValue = i.Min;
-                            field.Slider.maxValue = i.Max;
-                            field.Slider.value = i.CurrentValue.Length > 1 ? i.CurrentValue[a] : i.CurrentValue[0];
-                            field.SetColor(fieldInfo.Color);
-                            CurrentInputs.Add(field);
-
-                            TMP_Text textAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                            Vector3[] corners = new Vector3[4];
-                            i.ValueHolders[a].rectTransform.GetWorldCorners(corners);
-                            textAnim.rectTransform.position = corners[3];
-                            textAnim.text = i.ValueHolders[a].text;
-                            TextAnimLabels.Add(textAnim);
-
-                            TMP_Text unitAnim = Instantiate(TextAnimSample, TextAnimHolder);
-                            i.UnitLabels[a].rectTransform.GetWorldCorners(corners);
-                            unitAnim.rectTransform.position = corners[3];
-                            unitAnim.font = i.UnitLabels[a].font;
-                            unitAnim.text = i.UnitLabels[a].text;
-                            TextAnimLabels.Add(unitAnim);
-
-                            textAnim.color = unitAnim.color = fieldInfo.Color;
-
-                            field.InputField.onEndEdit.AddListener(value =>
-                            {
-                                if (recursionBuster) return;
-                                recursionBuster = true;
-                                bool valid = float.TryParse(value, out float val);
-                                if (valid)
-                                {
-                                    val = Mathf.Clamp(val, i.Min, i.Max);
-                                    if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
-                                    field.Slider.value = val;
-                                    i.CurrentValue[aa] = val;
-                                    i.Set(i.CurrentValue);
-                                    i.UpdateValue();
-                                }
-                                textAnim.text = field.InputField.text = i.CurrentValue[aa].ToString();
-                                recursionBuster = false;
-                            });
-                            field.Slider.onValueChanged.AddListener(val =>
-                            {
-                                if (recursionBuster) return;
-                                val = Mathf.Clamp(val, i.Min, i.Max);
-                                if (i.Step != 0) val = Mathf.Round(val / i.Step) * i.Step;
-                                textAnim.text = field.InputField.text = val.ToString();
-                                i.CurrentValue[aa] = val;
-                                i.Set(i.CurrentValue);
-                                i.UpdateValue();
-                                recursionBuster = false;
-                            });
-                        }
-
-                        BeforeText.gameObject.SetActive(true);
-                        BeforeText.text = i.Min + "<alpha=#77>" + i.Unit + "<alpha=#ff> ≤";
-                        AfterText.gameObject.SetActive(true);
-                        AfterText.text = "≤ " + i.Max + "<alpha=#77>" + i.Unit;
-                        AdvancedInputGroup.gameObject.SetActive(true);
-                        recursionBuster = true;
-                        AdvancedInputToggle.Value = IsAdvanced;
-                        recursionBuster = false;
-                        SetAdvancedInput(i.ValueType, IsAdvanced);
-
-                        break;
                     }
 
                     BeforeText.gameObject.SetActive(true);
