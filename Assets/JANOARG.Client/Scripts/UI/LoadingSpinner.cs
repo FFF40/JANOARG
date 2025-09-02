@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// The loading spinner on the now loading popup
+    /// </summary>
     public class LoadingSpinner : MonoBehaviour
     {
         public RectTransform Spinner;

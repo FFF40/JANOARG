@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// Draws a parallelogram
+    /// </summary>
     [ExecuteAlways]
     [RequireComponent(typeof(CanvasRenderer))]
     public class GraphicParallelogram : MaskableGraphic

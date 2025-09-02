@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// The animated toggle shown in the settings panel
+    /// </summary>
     [ExecuteAlways] [RequireComponent(typeof(CanvasRenderer))]
     public class AnimatedToggle : Selectable, IPointerClickHandler
     {

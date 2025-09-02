@@ -4,20 +4,23 @@ using UnityEngine.Events;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// A particle that moves to a specified destination
+    /// </summary>
     public class CollectingParticle : MonoBehaviour
     {
         public RectTransform Target;
-        public Vector2       Velocity;
-        public float         SpinVelocity;
-        public float         Lifetime;
-        public UnityEvent    OnComplete;
-        public CanvasGroup   Tail;
+        public Vector2 Velocity;
+        public float SpinVelocity;
+        public float Lifetime;
+        public UnityEvent OnComplete;
+        public CanvasGroup Tail;
 
         private bool _IsCompleted;
 
-        private float         _Time;
+        private float _Time;
         private RectTransform _RT;
-        private float         _Size = 0;
+        private float _Size = 0;
 
         private void Awake()
         {

@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// Draws a circle
+    /// </summary>
     [ExecuteAlways] [RequireComponent(typeof(CanvasRenderer))]
     public class GraphicCircle : MaskableGraphic
     {

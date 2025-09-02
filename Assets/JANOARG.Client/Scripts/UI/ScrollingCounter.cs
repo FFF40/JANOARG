@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// A number display with scrolling digits
+    /// </summary>
     public class ScrollingCounter : MonoBehaviour
     {
         public List<ScrollingCounterDigit> Digits;

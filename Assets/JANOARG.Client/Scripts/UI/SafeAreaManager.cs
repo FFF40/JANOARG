@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// Resize the applied rect transform to enter safe area
+    /// </summary>
     public class SafeAreaManager : MonoBehaviour
     {
         private void Awake()

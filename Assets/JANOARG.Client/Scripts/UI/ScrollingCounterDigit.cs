@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace JANOARG.Client.UI
 {
+    /// <summary>
+    /// A digit from <see cref="ScrollingCounter"/>
+    /// </summary>
     public class ScrollingCounterDigit : MonoBehaviour
     {
         public TMP_Text TopLabel;
