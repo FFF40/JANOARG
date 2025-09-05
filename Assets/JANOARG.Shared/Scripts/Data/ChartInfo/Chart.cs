@@ -64,27 +64,27 @@ namespace JANOARG.Shared.Data.ChartInfo
         public float   PivotDistance = 10;
         public Vector3 CameraRotation;
     
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = 
         {
             #region Camera Pivot
             new()
             {
-                ID = "CameraPivot_X",
+                ID = TimestampIDs.CameraPivot_X,
                 Name = "Camera Pivot X",
                 StoryboardGetter = (x) => ((CameraController)x).CameraPivot.x,
                 StoryboardSetter = (x, a) => { ((CameraController)x).CameraPivot.x = a; }
             },
             new()
             {
-                ID = "CameraPivot_Y",
+                ID = TimestampIDs.CameraPivot_Y,
                 Name = "Camera Pivot Y",
                 StoryboardGetter = (x) => ((CameraController)x).CameraPivot.y,
                 StoryboardSetter = (x, a) => { ((CameraController)x).CameraPivot.y = a; }
             },
             new()
             {
-                ID = "CameraPivot_Z",
+                ID = TimestampIDs.CameraPivot_Z,
                 Name = "Camera Pivot Z",
                 StoryboardGetter = (x) => ((CameraController)x).CameraPivot.z,
                 StoryboardSetter = (x, a) => { ((CameraController)x).CameraPivot.z = a; }
@@ -93,7 +93,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             new()
             {
-                ID = "PivotDistance",
+                ID = TimestampIDs.PivotDistance,
                 Name = "Pivot Distance",
                 StoryboardGetter = (x) => ((CameraController)x).PivotDistance,
                 StoryboardSetter = (x, a) => { ((CameraController)x).PivotDistance = a; }
@@ -102,21 +102,21 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Camera Rotation
             new()
             {
-                ID = "CameraRotation_X",
+                ID = TimestampIDs.CameraRotation_X,
                 Name = "Camera Rotation X",
                 StoryboardGetter = (x) => ((CameraController)x).CameraRotation.x,
                 StoryboardSetter = (x, a) => { ((CameraController)x).CameraRotation.x = a; }
             },
             new()
             {
-                ID = "CameraRotation_Y",
+                ID = TimestampIDs.CameraRotation_Y,
                 Name = "Camera Rotation Y",
                 StoryboardGetter = (x) => ((CameraController)x).CameraRotation.y,
                 StoryboardSetter = (x, a) => { ((CameraController)x).CameraRotation.y = a; }
             },
             new()
             {
-                ID = "CameraRotation_Z",
+                ID = TimestampIDs.CameraRotation_Z,
                 Name = "Camera Rotation Z",
                 StoryboardGetter = (x) => ((CameraController)x).CameraRotation.z,
                 StoryboardSetter = (x, a) => { ((CameraController)x).CameraRotation.z = a; }
@@ -128,7 +128,7 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             CameraController clone = new()
             {
-                Storyboard = Storyboard.DeepClone(),
+                Storyboard = Storyboard.SelfReference(),
                 CameraPivot = new Vector3(CameraPivot.x, CameraPivot.y, CameraPivot.z),
                 CameraRotation = new Vector3(CameraRotation.x, CameraRotation.y, CameraRotation.z)
             };
@@ -147,27 +147,27 @@ namespace JANOARG.Shared.Data.ChartInfo
         public List<LaneStyle> LaneStyles = new();
         public List<HitStyle>  HitStyles  = new();
 
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = 
         {
             #region Background Color (RGB)
             new()
             {
-                ID = "BackgroundColor_R",
+                ID = TimestampIDs.BackgroundColor_R,
                 Name = "Background Color R",
                 StoryboardGetter = (x) => ((Palette)x).BackgroundColor.r,
                 StoryboardSetter = (x, a) => { ((Palette)x).BackgroundColor.r = a; }
             },
             new()
             {
-                ID = "BackgroundColor_G",
+                ID = TimestampIDs.BackgroundColor_G,
                 Name = "Background Color G",
                 StoryboardGetter = (x) => ((Palette)x).BackgroundColor.g,
                 StoryboardSetter = (x, a) => { ((Palette)x).BackgroundColor.g = a; }
             },
             new()
             {
-                ID = "BackgroundColor_B",
+                ID = TimestampIDs.BackgroundColor_B,
                 Name = "Background Color B",
                 StoryboardGetter = (x) => ((Palette)x).BackgroundColor.b,
                 StoryboardSetter = (x, a) => { ((Palette)x).BackgroundColor.b = a; }
@@ -177,28 +177,28 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Interface Color (RGBA)
             new()
             {
-                ID = "InterfaceColor_R",
+                ID = TimestampIDs.InterfaceColor_R,
                 Name = "Interface Color R",
                 StoryboardGetter = (x) => ((Palette)x).InterfaceColor.r,
                 StoryboardSetter = (x, a) => { ((Palette)x).InterfaceColor.r = a; }
             },
             new()
             {
-                ID = "InterfaceColor_G",
+                ID = TimestampIDs.InterfaceColor_G,
                 Name = "Interface Color G",
                 StoryboardGetter = (x) => ((Palette)x).InterfaceColor.g,
                 StoryboardSetter = (x, a) => { ((Palette)x).InterfaceColor.g = a; }
             },
             new()
             {
-                ID = "InterfaceColor_B",
+                ID = TimestampIDs.InterfaceColor_B,
                 Name = "Interface Color B",
                 StoryboardGetter = (x) => ((Palette)x).InterfaceColor.b,
                 StoryboardSetter = (x, a) => { ((Palette)x).InterfaceColor.b = a; }
             },
             new()
             {
-                ID = "InterfaceColor_A",
+                ID = TimestampIDs.InterfaceColor_A,
                 Name = "Interface Color A",
                 StoryboardGetter = (x) => ((Palette)x).InterfaceColor.a,
                 StoryboardSetter = (x, a) => { ((Palette)x).InterfaceColor.a = a; }
@@ -212,7 +212,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             {
                 BackgroundColor = new Color(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, BackgroundColor.a),
                 InterfaceColor = new Color(InterfaceColor.r, InterfaceColor.g, InterfaceColor.b, InterfaceColor.a),
-                Storyboard = Storyboard.DeepClone()
+                Storyboard = Storyboard.SelfReference()
             };
 
             foreach (LaneStyle ls in LaneStyles) clone.LaneStyles.Add(ls.DeepClone());
@@ -235,34 +235,34 @@ namespace JANOARG.Shared.Data.ChartInfo
         public string JudgeColorTarget = "_Color";
         public Color  JudgeColor       = Color.black;
 
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = 
         {
             #region Lane Color
             new()
             {
-                ID = "LaneColor_R",
+                ID = TimestampIDs.LaneColor_R,
                 Name = "Lane Color R",
                 StoryboardGetter = (x) => ((LaneStyle)x).LaneColor.r,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).LaneColor.r = a; }
             },
             new()
             {
-                ID = "LaneColor_G",
+                ID = TimestampIDs.LaneColor_G,
                 Name = "Lane Color G",
                 StoryboardGetter = (x) => ((LaneStyle)x).LaneColor.g,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).LaneColor.g = a; }
             },
             new()
             {
-                ID = "LaneColor_B",
+                ID = TimestampIDs.LaneColor_B,
                 Name = "Lane Color B",
                 StoryboardGetter = (x) => ((LaneStyle)x).LaneColor.b,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).LaneColor.b = a; }
             },
             new()
             {
-                ID = "LaneColor_A",
+                ID = TimestampIDs.LaneColor_A,
                 Name = "Lane Color A",
                 StoryboardGetter = (x) => ((LaneStyle)x).LaneColor.a,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).LaneColor.a = a; }
@@ -272,28 +272,28 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Judgeline Color
             new()
             {
-                ID = "JudgeColor_R",
+                ID = TimestampIDs.JudgeColor_R,
                 Name = "Judge Color R",
                 StoryboardGetter = (x) => ((LaneStyle)x).JudgeColor.r,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).JudgeColor.r = a; }
             },
             new()
             {
-                ID = "JudgeColor_G",
+                ID = TimestampIDs.JudgeColor_G,
                 Name = "Judge Color G",
                 StoryboardGetter = (x) => ((LaneStyle)x).JudgeColor.g,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).JudgeColor.g = a; }
             },
             new()
             {
-                ID = "JudgeColor_B",
+                ID = TimestampIDs.JudgeColor_B,
                 Name = "Judge Color B",
                 StoryboardGetter = (x) => ((LaneStyle)x).JudgeColor.b,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).JudgeColor.b = a; }
             },
             new()
             {
-                ID = "JudgeColor_A",
+                ID = TimestampIDs.JudgeColor_A,
                 Name = "Judge Color A",
                 StoryboardGetter = (x) => ((LaneStyle)x).JudgeColor.a,
                 StoryboardSetter = (x, a) => { ((LaneStyle)x).JudgeColor.a = a; }
@@ -311,7 +311,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 JudgeMaterial = JudgeMaterial,
                 JudgeColorTarget = JudgeColorTarget,
                 JudgeColor = new Color(JudgeColor.r, JudgeColor.g, JudgeColor.b, JudgeColor.a),
-                Storyboard = Storyboard.DeepClone()
+                Storyboard = Storyboard.SelfReference()
             };
 
             return clone;
@@ -332,33 +332,33 @@ namespace JANOARG.Shared.Data.ChartInfo
         public string HoldTailColorTarget = "_Color";
         public Color  HoldTailColor       = Color.black;
 
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = {
             #region Tap Note Color
             new()
             {
-                ID = "NormalColor_R",
+                ID = TimestampIDs.NormalColor_R,
                 Name = "Normal Color R",
                 StoryboardGetter = (x) => ((HitStyle)x).NormalColor.r,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).NormalColor.r = a; }
             },
             new()
             {
-                ID = "NormalColor_G",
+                ID = TimestampIDs.NormalColor_G,
                 Name = "Normal Color G",
                 StoryboardGetter = (x) => ((HitStyle)x).NormalColor.g,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).NormalColor.g = a; }
             },
             new()
             {
-                ID = "NormalColor_B",
+                ID = TimestampIDs.NormalColor_B,
                 Name = "Normal Color B",
                 StoryboardGetter = (x) => ((HitStyle)x).NormalColor.b,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).NormalColor.b = a; }
             },
             new()
             {
-                ID = "NormalColor_A",
+                ID = TimestampIDs.NormalColor_A,
                 Name = "Normal Color A",
                 StoryboardGetter = (x) => ((HitStyle)x).NormalColor.a,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).NormalColor.a = a; }
@@ -368,28 +368,28 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Catch Note Color
             new()
             {
-                ID = "CatchColor_R",
+                ID = TimestampIDs.CatchColor_R,
                 Name = "Catch Color R",
                 StoryboardGetter = (x) => ((HitStyle)x).CatchColor.r,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).CatchColor.r = a; }
             },
             new()
             {
-                ID = "CatchColor_G",
+                ID = TimestampIDs.CatchColor_G,
                 Name = "Catch Color G",
                 StoryboardGetter = (x) => ((HitStyle)x).CatchColor.g,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).CatchColor.g = a; }
             },
             new()
             {
-                ID = "CatchColor_B",
+                ID = TimestampIDs.CatchColor_B,
                 Name = "Catch Color B",
                 StoryboardGetter = (x) => ((HitStyle)x).CatchColor.b,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).CatchColor.b = a; }
             },
             new()
             {
-                ID = "CatchColor_A",
+                ID = TimestampIDs.CatchColor_A,
                 Name = "Catch Color A",
                 StoryboardGetter = (x) => ((HitStyle)x).CatchColor.a,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).CatchColor.a = a; }
@@ -399,28 +399,28 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Hold Note Color (Tail)
             new()
             {
-                ID = "HoldTailColor_R",
+                ID = TimestampIDs.HoldTailColor_R,
                 Name = "Hold Tail Color R",
                 StoryboardGetter = (x) => ((HitStyle)x).HoldTailColor.r,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).HoldTailColor.r = a; }
             },
             new()
             {
-                ID = "HoldTailColor_G",
+                ID = TimestampIDs.HoldTailColor_G,
                 Name = "Hold Tail Color G",
                 StoryboardGetter = (x) => ((HitStyle)x).HoldTailColor.g,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).HoldTailColor.g = a; }
             },
             new()
             {
-                ID = "HoldTailColor_B",
+                ID = TimestampIDs.HoldTailColor_B,
                 Name = "Hold Tail Color B",
                 StoryboardGetter = (x) => ((HitStyle)x).HoldTailColor.b,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).HoldTailColor.b = a; }
             },
             new()
             {
-                ID = "HoldTailColor_A",
+                ID = TimestampIDs.HoldTailColor_A,
                 Name = "Hold Tail Color A",
                 StoryboardGetter = (x) => ((HitStyle)x).HoldTailColor.a,
                 StoryboardSetter = (x, a) => { ((HitStyle)x).HoldTailColor.a = a; }
@@ -439,7 +439,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 HoldTailMaterial = HoldTailMaterial,
                 HoldTailColorTarget = HoldTailColorTarget,
                 HoldTailColor = new Color(HoldTailColor.r, HoldTailColor.g, HoldTailColor.b, HoldTailColor.a),
-                Storyboard = Storyboard.DeepClone()
+                Storyboard = Storyboard.SelfReference()
             };
 
             return clone;
@@ -454,26 +454,26 @@ namespace JANOARG.Shared.Data.ChartInfo
         public Vector3 Rotation;
         public string  Group;
 
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = {
             #region Position
             new()
             {
-                ID = "Position_X",
+                ID = TimestampIDs.Position_X,
                 Name = "Position X",
                 StoryboardGetter = (x) => ((LaneGroup)x).Position.x,
                 StoryboardSetter = (x, a) => { ((LaneGroup)x).Position.x = a; }
             },
             new()
             {
-                ID = "Position_Y",
+                ID = TimestampIDs.Position_Y,
                 Name = "Position Y",
                 StoryboardGetter = (x) => ((LaneGroup)x).Position.y,
                 StoryboardSetter = (x, a) => { ((LaneGroup)x).Position.y = a; }
             },
             new()
             {
-                ID = "Position_Z",
+                ID = TimestampIDs.Position_Z,
                 Name = "Position Z",
                 StoryboardGetter = (x) => ((LaneGroup)x).Position.z,
                 StoryboardSetter = (x, a) => { ((LaneGroup)x).Position.z = a; }
@@ -483,21 +483,21 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Rotation
             new()
             {
-                ID = "Rotation_X",
+                ID = TimestampIDs.Rotation_X,
                 Name = "Rotation X",
                 StoryboardGetter = (x) => ((LaneGroup)x).Rotation.x,
                 StoryboardSetter = (x, a) => { ((LaneGroup)x).Rotation.x = a; }
             },
             new()
             {
-                ID = "Rotation_Y",
+                ID = TimestampIDs.Rotation_Y,
                 Name = "Rotation Y",
                 StoryboardGetter = (x) => ((LaneGroup)x).Rotation.y,
                 StoryboardSetter = (x, a) => { ((LaneGroup)x).Rotation.y = a; }
             },
             new()
             {
-                ID = "Rotation_Z",
+                ID = TimestampIDs.Rotation_Z,
                 Name = "Rotation Z",
                 StoryboardGetter = (x) => ((LaneGroup)x).Rotation.z,
                 StoryboardSetter = (x, a) => { ((LaneGroup)x).Rotation.z = a; }
@@ -512,7 +512,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 Name = Name,
                 Position = new Vector3(Position.x, Position.y, Position.z),
                 Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
-                Storyboard = Storyboard.DeepClone(),
+                Storyboard = Storyboard.SelfReference(),
                 Group = Group
             };
 
@@ -620,27 +620,27 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
 
         // More as offset
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = 
         {
             #region Position
             new()
             {
-                ID = "Offset_X",
+                ID = TimestampIDs.Offset_X,
                 Name = "Position X",
                 StoryboardGetter = (x) => ((Lane)x).Position.x,
                 StoryboardSetter = (x, a) => { ((Lane)x).Position.x = a; }
             },
             new()
             {
-                ID = "Offset_Y",
+                ID = TimestampIDs.Offset_Y,
                 Name = "Position Y",
                 StoryboardGetter = (x) => ((Lane)x).Position.y,
                 StoryboardSetter = (x, a) => { ((Lane)x).Position.y = a; }
             },
             new()
             {
-                ID = "Offset_Z",
+                ID = TimestampIDs.Offset_Z,
                 Name = "Position Z",
                 StoryboardGetter = (x) => ((Lane)x).Position.z,
                 StoryboardSetter = (x, a) => { ((Lane)x).Position.z = a; }
@@ -650,21 +650,21 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region Rotation
             new()
             {
-                ID = "OffsetRotation_X",
+                ID = TimestampIDs.OffsetRotation_X,
                 Name = "Rotation X",
                 StoryboardGetter = (x) => ((Lane)x).Rotation.x,
                 StoryboardSetter = (x, a) => { ((Lane)x).Rotation.x = a; }
             },
             new()
             {
-                ID = "OffsetRotation_Y",
+                ID = TimestampIDs.OffsetRotation_Y,
                 Name = "Rotation Y",
                 StoryboardGetter = (x) => ((Lane)x).Rotation.y,
                 StoryboardSetter = (x, a) => { ((Lane)x).Rotation.y = a; }
             },
             new()
             {
-                ID = "OffsetRotation_Z",
+                ID = TimestampIDs.OffsetRotation_Z,
                 Name = "Rotation Z",
                 StoryboardGetter = (x) => ((Lane)x).Rotation.z,
                 StoryboardSetter = (x, a) => { ((Lane)x).Rotation.z = a; }
@@ -680,7 +680,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
                 Group = Group,
                 StyleIndex = StyleIndex,
-                Storyboard = Storyboard.DeepClone()
+                Storyboard = Storyboard.SelfReference()
             };
 
             foreach (HitObject obj in Objects)
@@ -723,20 +723,20 @@ namespace JANOARG.Shared.Data.ChartInfo
             endEaseX.Function   == EaseFunction.Linear && 
             endEaseY.Function   == EaseFunction.Linear;
 
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = 
         {
             #region Start Position
             new()
             {
-                ID = "StartPos_X",
+                ID = TimestampIDs.StartPos_X,
                 Name = "Start Position X",
                 StoryboardGetter = (x) => ((LaneStep)x).StartPointPosition.x,
                 StoryboardSetter = (x, a) => { ((LaneStep)x).StartPointPosition.x = a; }
             },
             new()
             {
-                ID = "StartPos_Y",
+                ID = TimestampIDs.StartPos_Y,
                 Name = "Start Position Y",
                 StoryboardGetter = (x) => ((LaneStep)x).StartPointPosition.y,
                 StoryboardSetter = (x, a) => { ((LaneStep)x).StartPointPosition.y = a; }
@@ -746,14 +746,14 @@ namespace JANOARG.Shared.Data.ChartInfo
             #region End Position
             new()
             {
-                ID = "EndPos_X",
+                ID = TimestampIDs.EndPos_X,
                 Name = "End Position X",
                 StoryboardGetter = (x) => ((LaneStep)x).EndPointPosition.x,
                 StoryboardSetter = (x, a) => { ((LaneStep)x).EndPointPosition.x = a; }
             },
             new()
             {
-                ID = "EndPos_Y",
+                ID = TimestampIDs.EndPos_Y,
                 Name = "End Position Y",
                 StoryboardGetter = (x) => ((LaneStep)x).EndPointPosition.y,
                 StoryboardSetter = (x, a) => { ((LaneStep)x).EndPointPosition.y = a; }
@@ -762,7 +762,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             new()
             {
-                ID = "Speed",
+                ID = TimestampIDs.Speed,
                 Name = "Speed",
                 StoryboardGetter = (x) => ((LaneStep)x).Speed,
                 StoryboardSetter = (x, a) => { ((LaneStep)x).Speed = a; }
@@ -781,7 +781,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 EndEaseX = EndEaseX,
                 EndEaseY = EndEaseY,
                 Speed = Speed,
-                Storyboard = Storyboard.DeepClone()
+                Storyboard = Storyboard.SelfReference()
             };
 
             return clone;
@@ -807,19 +807,19 @@ namespace JANOARG.Shared.Data.ChartInfo
             Catch
         }
 
-        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+        public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = 
         {
             new()
             {
-                ID = "Position",
+                ID = TimestampIDs.Position,
                 Name = "Position",
                 StoryboardGetter = (x) => ((HitObject)x).Position,
                 StoryboardSetter = (x, a) => { ((HitObject)x).Position = a; }
             },
             new()
             {
-                ID = "Length",
+                ID = TimestampIDs.Length,
                 Name = "Length",
                 StoryboardGetter = (x) => ((HitObject)x).Length,
                 StoryboardSetter = (x, a) => { ((HitObject)x).Length = a; }
@@ -838,7 +838,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 Flickable = Flickable,
                 FlickDirection = FlickDirection,
                 StyleIndex = StyleIndex,
-                Storyboard = Storyboard.DeepClone()
+                Storyboard = Storyboard.SelfReference()
             };
 
             return clone;

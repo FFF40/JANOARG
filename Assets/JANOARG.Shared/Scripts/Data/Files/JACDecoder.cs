@@ -78,7 +78,7 @@ namespace JANOARG.Shared.Data.Files
                         {
                             Timestamp ts = new()
                             {
-                                ID = tokens[1],
+                                ID = (TimestampIDs)Enum.Parse(typeof(TimestampIDs), tokens[1]),
                                 Offset = ParseTime(tokens[2]),
                                 Duration = ParseFloat(tokens[3]),
                                 Target = ParseFloat(tokens[4]),
