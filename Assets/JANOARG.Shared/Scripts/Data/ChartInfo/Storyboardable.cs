@@ -15,7 +15,7 @@ namespace JANOARG.Shared.Data.ChartInfo
         public BeatPosition Offset;
 
         public float  Duration;
-        public string ID;
+        public TimestampIDs ID;
         public float  From = float.NaN;
         public float  Target;
 
@@ -40,7 +40,7 @@ namespace JANOARG.Shared.Data.ChartInfo
     
     public class TimestampType
     {
-        public string                        ID;
+        public TimestampIDs                        ID;
         public string                        Name;
         public Func<Storyboardable, float>   StoryboardGetter;
         public Action<Storyboardable, float> StoryboardSetter;
@@ -57,26 +57,24 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             Timestamps.Add(timestamp);
             Timestamps.Sort((x, y) => x.Offset.CompareTo(y.Offset)); // Probably not a big deal; only called on file import
+            
             _TypeCache.Clear(); // Invalidate cache when timestamps change
         }
 
-        public Timestamp[] FromType(string type)
+        public Timestamp[] FromType(TimestampIDs type)
         {
-            if (!_TypeCache.TryGetValue(type, out Timestamp[] array))
+            if (!_TypeCache.TryGetValue(type.ToString(), out Timestamp[] array))
             {
                 array = Timestamps.Where(x => x.ID == type).ToArray();
-                _TypeCache[type] = array;
+                _TypeCache[type.ToString()] = array;
             }
             return array;
 
         }
-
-        public Storyboard DeepClone()
+    
+        public Storyboard SelfReference()
         {
-            var clone = new Storyboard();
-            foreach (Timestamp timestamp in Timestamps) clone.Timestamps.Add(timestamp.DeepClone());
-
-            return clone;
+            return this;
         }
     }
 
@@ -99,9 +97,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
                     foreach (Timestamp timestamp in storyboard)
                         if (time >= timestamp.Offset + timestamp.Duration)
-                        {
                             value = timestamp.Target;
-                        }
                         else if (time > timestamp.Offset)
                         {
                             if (!float.IsNaN(timestamp.From))
@@ -116,9 +112,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                             break;
                         }
                         else
-                        {
                             break;
-                        }
 
                     timestampType.StoryboardSetter(obj, value);
                 }
@@ -130,46 +124,44 @@ namespace JANOARG.Shared.Data.ChartInfo
             return obj;
         }
 
-        protected Dictionary<string, float> CurrentValues;
+        protected float[] CurrentValues;
 
         protected float CurrentTime;
-        
-        protected Dictionary<string, Queue<Timestamp>> timestampsByType;
 
         public virtual void Advance(float time)
         {
             // Initialize current value of each timestamp type if they don't exist
             if (CurrentValues == null) 
             {
-                CurrentValues = new Dictionary<string, float>();
-
+                // Initialize array with size equal to number of enum values
+                CurrentValues = new float[Enum.GetValues(typeof(TimestampIDs)).Length];
+            
                 foreach (TimestampType timestampType in timestampTypes)
-                    CurrentValues.Add(timestampType.ID, timestampType.StoryboardGetter(this));
+                    CurrentValues[(int)timestampType.ID] = timestampType.StoryboardGetter(this);
             }
 
             // Loop through each timestamp type
             foreach (TimestampType timestampType in timestampTypes)
             {
                 // Skip if there isn't any timestamp of the given type, otherwise assign to value
-                if (!CurrentValues.TryGetValue(timestampType.ID, out float value))
-                {
-                    continue;
-                    // Debug.LogError(this.GetType() + " " + timestampType.ID + "\n" + e);
-                }
+                float value = CurrentValues[(int)timestampType.ID];
 
                 // Navigate forward
                 while (true) 
                 {
                     // Get the next timestamp in the list
                     Timestamp timestamp = null;
-                    foreach (Timestamp thisTimeStamp in Storyboard.Timestamps)
+
+                    timestamp = Storyboard.Timestamps.Find(storyboardTimestamp => storyboardTimestamp.ID == timestampType.ID);
+                    
+                    /*foreach (Timestamp storyboardTimestamp in Storyboard.Timestamps)
                     {
-                        if (timestampType.ID == thisTimeStamp.ID)
+                        if (timestampType.ID == storyboardTimestamp.ID)
                         {
-                            timestamp = thisTimeStamp;
+                            timestamp = storyboardTimestamp;
                             break;
                         }
-                    }
+                    }*/
                 
                     // Skip if there's no timestamp or it's not yet the start of the next timestamp
                     if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset))
@@ -180,7 +172,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     {
                         // NaN means lerp from the previous value
                         if (!float.IsNaN(timestamp.From))
-                            CurrentValues[timestampType.ID] = value = timestamp.From;
+                            CurrentValues[(int)timestampType.ID] = value = timestamp.From;
                     
                         // Get the current value
                         value = Mathf.LerpUnclamped(value, timestamp.Target, timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration));
@@ -190,7 +182,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     else
                     {
                         // Set value to destination and pop the timestamp off the list
-                        CurrentValues[timestampType.ID] = value = timestamp.Target;
+                        CurrentValues[(int)timestampType.ID] = value = timestamp.Target;
                         Storyboard.Timestamps.Remove(timestamp);
                     }
                 }
@@ -209,27 +201,31 @@ namespace JANOARG.Shared.Data.ChartInfo
         {
             if (CurrentValues == null) 
             {
-                CurrentValues = new Dictionary<string, float>();
-                foreach (TimestampType timestampType in timestampTypes) CurrentValues.Add(timestampType.ID, timestampType.StoryboardGetter(this));
+                // Initialize array with size equal to number of enum values
+                CurrentValues = new float[Enum.GetValues(typeof(TimestampIDs)).Length];
+            
+                foreach (TimestampType timestampType in timestampTypes)
+                    CurrentValues[(int)timestampType.ID] = timestampType.StoryboardGetter(this);
             }
-            foreach(TimestampType timestampType in timestampTypes){
-                if (!CurrentValues.ContainsKey(timestampType.ID))
-                {
-                    continue;
-                    // Debug.LogError(this.GetType() + " " + tst.ID + "\n" + e);
-                }
-                float value = CurrentValues[timestampType.ID];
+            
+            foreach(TimestampType timestampType in timestampTypes)
+            {
+                
+                float value = CurrentValues[(int)timestampType.ID];
+                
                 while (true) 
                 {
-                    Timestamp timestamp = null;
+                    Timestamp timestamp = Storyboard.Timestamps.Find(storyboardTimestamp => storyboardTimestamp.ID == timestampType.ID);
                     
+                    /*
                     // Look for matching timestamp (LINEAR SEARCH AAAAA)
-                    foreach (var thisTimeStamp in Storyboard.Timestamps){
-                        if (thisTimeStamp.ID == timestampType.ID){
-                            timestamp = thisTimeStamp;
+                    foreach (Timestamp storyboardTimestamp in Storyboard.Timestamps)
+                    {
+                        if (storyboardTimestamp.ID == timestampType.ID)
+                        {
+                            timestamp = storyboardTimestamp;
                             break;
-                        }
-                    }
+                        */
                     
                     // If there's no timestamp or it's not yet the start of the next timestamp
                     if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset)) 
@@ -240,7 +236,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     {
                         // Lerp from previous value if it's not NaN
                         if (!float.IsNaN(timestamp.From)) 
-                            CurrentValues[timestampType.ID] = value = timestamp.From;
+                            CurrentValues[(int)timestampType.ID] = value = timestamp.From;
                         
                         // Lerp to target value
                         value = Mathf.LerpUnclamped(value, timestamp.Target, timestamp.Easing.Get((time - timestamp.Offset) / timestamp.Duration));
@@ -250,7 +246,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     else
                     {
                         // Set value to target and pop the timestamp off the list
-                        CurrentValues[timestampType.ID] = value = timestamp.Target;
+                        CurrentValues[(int)timestampType.ID] = value = timestamp.Target;
                         Storyboard.Timestamps.Remove(timestamp);
                         IsDirty = true;
                     }
