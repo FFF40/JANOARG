@@ -36,8 +36,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         // WARNING :
         // THIS IS NOT THREAD SAFE
-        private static List<Vector3> _Verts = new();
-        private static List<int>     _Tris  = new();
+        private static readonly List<Vector3> _Verts = new();
+        private static readonly List<int>     _Tris  = new();
 
         public void Init()
         {
@@ -134,19 +134,15 @@ namespace JANOARG.Client.Behaviors.Player
             //     return;
             // }
 
-            Current.LaneSteps[0]
-                .Advance(beat);
+            Current.LaneSteps[0].Advance(beat);
 
             if (Current.LaneSteps.Count > 1)
-                Current.LaneSteps[1]
-                    .Advance(beat);
+                Current.LaneSteps[1].Advance(beat);
 
-            Current.LaneSteps[0]
-                .Advance(beat);
+            Current.LaneSteps[0].Advance(beat);
 
             if (Current.LaneSteps.Count > 1)
-                Current.LaneSteps[1]
-                    .Advance(beat);
+                Current.LaneSteps[1].Advance(beat);
 
             CurrentPosition = TimeStamps.Count <= 1 || TimeStamps[0] > time
                 ? time * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed

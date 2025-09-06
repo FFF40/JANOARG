@@ -151,17 +151,15 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     // Get the next timestamp in the list
                     Timestamp timestamp = null;
-
-                    timestamp = Storyboard.Timestamps.Find(storyboardTimestamp => storyboardTimestamp.ID == timestampType.ID);
                     
-                    /*foreach (Timestamp storyboardTimestamp in Storyboard.Timestamps)
+                    foreach (Timestamp storyboardTimestamp in Storyboard.Timestamps)
                     {
                         if (timestampType.ID == storyboardTimestamp.ID)
                         {
                             timestamp = storyboardTimestamp;
                             break;
                         }
-                    }*/
+                    }
                 
                     // Skip if there's no timestamp or it's not yet the start of the next timestamp
                     if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset))
@@ -220,12 +218,12 @@ namespace JANOARG.Shared.Data.ChartInfo
                     
                     foreach (Timestamp storyboardTimestamp in Storyboard.Timestamps)
                     {
-                        if (storyboardTimestamp.ID == timestampType.ID)
-                        {
-                            timestamp = storyboardTimestamp;
+                        if (storyboardTimestamp.ID != timestampType.ID)
+                            continue;
 
-                            break;
-                        }
+                        timestamp = storyboardTimestamp;
+
+                        break;
                     }
 
                     // If there's no timestamp or it's not yet the start of the next timestamp
