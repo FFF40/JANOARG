@@ -36,8 +36,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         // WARNING :
         // THIS IS NOT THREAD SAFE
-        private static List<Vector3> _Verts = new();
-        private static List<int>     _Tris  = new();
+        private static readonly List<Vector3> sr_Verts = new(2048);
+        private static readonly List<int>     sr_Tris  = new(2048);
 
         public void Init()
         {
@@ -92,30 +92,50 @@ namespace JANOARG.Client.Behaviors.Player
             }
         }
         
+        public void ResetLane()
+        {
+            // Clear all lists
+            PositionPoints.Clear();
+            TimeStamps.Clear();
+            HitObjects.Clear();
+            HitCoords.Clear();
         
+            // Reset fields
+            Original = null;
+            Current = null;
+            CurrentPosition = 0;
+            LaneStepDirty = false;
+            _HitObjectTime = float.NaN;
+            _HitObjectOffset = 0;
 
-
+            // Clear mesh
+            if (_Mesh != null)
+            {
+                _Mesh.Clear();
+            }
+        }
+        
         private void UpdateMesh(float time, float beat, float maxDistance = 200)
         {
             // No Mesh instantiation
 
-            _Verts.Clear();
-            _Tris.Clear();
+            sr_Verts.Clear();
+            sr_Tris.Clear();
         
             void f_addLine(Vector3 start, Vector3 end)
             {
                 // No AddRange here because the alloc overhead adds up
-                _Verts.Add(start);
-                _Verts.Add(end);
+                sr_Verts.Add(start);
+                sr_Verts.Add(end);
 
-                if (_Verts.Count > 2)
+                if (sr_Verts.Count > 2)
                 {
-                    _Tris.Add(_Verts.Count - 4);
-                    _Tris.Add(_Verts.Count - 2);
-                    _Tris.Add(_Verts.Count - 3);
-                    _Tris.Add(_Verts.Count - 2);
-                    _Tris.Add(_Verts.Count - 1);
-                    _Tris.Add(_Verts.Count - 3);
+                    sr_Tris.Add(sr_Verts.Count - 4);
+                    sr_Tris.Add(sr_Verts.Count - 2);
+                    sr_Tris.Add(sr_Verts.Count - 3);
+                    sr_Tris.Add(sr_Verts.Count - 2);
+                    sr_Tris.Add(sr_Verts.Count - 1);
+                    sr_Tris.Add(sr_Verts.Count - 3);
                 }
             }
 
@@ -279,8 +299,8 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             _Mesh.Clear();
-            _Mesh.SetVertices(_Verts);
-            _Mesh.SetTriangles(_Tris, 0, false);
+            _Mesh.SetVertices(sr_Verts);
+            _Mesh.SetTriangles(sr_Tris, 0, false);
             _Mesh.RecalculateBounds();
         }
 
@@ -292,12 +312,22 @@ namespace JANOARG.Client.Behaviors.Player
             while (Current.Objects.Count > 0)
             {
                 HitObject hit = Current.Objects[0];
-                if (float.IsNaN(_HitObjectTime)) _HitObjectTime = PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset);
+                if (float.IsNaN(_HitObjectTime))
+                    _HitObjectTime = PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset);
 
                 if (GetZPosition(_HitObjectTime) <= CurrentPosition + maxDistance)
                 {
-                    HitPlayer player = Instantiate(PlayerScreen.sMain.HitSample, Holder);
+                    HitPlayer player = PlayerScreen.sMain.hitObjectPool.BorrowHitObject(this);
+            
+                    if (player == null)
+                    {
+                        Debug.LogError("Failed to borrow HitPlayer from pool");
+                        player = Instantiate(PlayerScreen.sMain.HitSample, Holder);
+                    }
 
+                    // Clear previous state
+                    player.HoldTicks.Clear();
+                    
                     player.Original = Original.Objects[_HitObjectOffset];
                     player.Current = Current.Objects[0];
 
@@ -441,23 +471,23 @@ namespace JANOARG.Client.Behaviors.Player
 
             Mesh mesh = hit.HoldMesh.mesh;
 
-            _Verts.Clear();
-            _Tris.Clear();
+            sr_Verts.Clear();
+            sr_Tris.Clear();
 
             void f_addLine(Vector3 start, Vector3 end)
             {
                 // No AddRange here because the alloc overhead adds up
-                _Verts.Add(start);
-                _Verts.Add(end);
+                sr_Verts.Add(start);
+                sr_Verts.Add(end);
 
-                if (_Verts.Count > 2)
+                if (sr_Verts.Count > 2)
                 {
-                    _Tris.Add(_Verts.Count - 4);
-                    _Tris.Add(_Verts.Count - 2);
-                    _Tris.Add(_Verts.Count - 3);
-                    _Tris.Add(_Verts.Count - 2);
-                    _Tris.Add(_Verts.Count - 1);
-                    _Tris.Add(_Verts.Count - 3);
+                    sr_Tris.Add(sr_Verts.Count - 4);
+                    sr_Tris.Add(sr_Verts.Count - 2);
+                    sr_Tris.Add(sr_Verts.Count - 3);
+                    sr_Tris.Add(sr_Verts.Count - 2);
+                    sr_Tris.Add(sr_Verts.Count - 1);
+                    sr_Tris.Add(sr_Verts.Count - 3);
                 }
             }
 
@@ -561,8 +591,8 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             mesh.Clear();
-            mesh.SetVertices(_Verts);
-            mesh.SetTriangles(_Tris, 0);
+            mesh.SetVertices(sr_Verts);
+            mesh.SetTriangles(sr_Tris, 0);
             // hit.HoldMesh.mesh = mesh;
         }
 
