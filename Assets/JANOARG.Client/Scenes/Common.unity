@@ -3850,6 +3850,7 @@ GameObject:
   - component: {fileID: 817025452}
   - component: {fileID: 817025451}
   - component: {fileID: 817025450}
+  - component: {fileID: 817025453}
   m_Layer: 5
   m_Name: FPS Counter
   m_TagString: Untagged
@@ -3990,6 +3991,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 817025448}
   m_CullTransparentMesh: 1
+--- !u!223 &817025453
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 817025448}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &834730481
 GameObject:
   m_ObjectHideFlags: 0
@@ -5204,6 +5228,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1084893987}
   - component: {fileID: 1084893988}
+  - component: {fileID: 1084893989}
   m_Layer: 5
   m_Name: Collecting Particles
   m_TagString: Untagged
@@ -5242,6 +5267,29 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!223 &1084893989
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084893986}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1096749762
 GameObject:
   m_ObjectHideFlags: 0
@@ -6645,6 +6693,7 @@ GameObject:
   - component: {fileID: 1344250017}
   - component: {fileID: 1344250014}
   - component: {fileID: 1344250018}
+  - component: {fileID: 1344250019}
   m_Layer: 5
   m_Name: Top Info
   m_TagString: Untagged
@@ -6765,6 +6814,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b7d6c035f7672f408899b6c6ca87a48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!223 &1344250019
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344250012}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1359830934
 GameObject:
   m_ObjectHideFlags: 0
