@@ -37,14 +37,15 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public static float Get(float x, EaseFunction easeFunc, EaseMode mode)
         {
-            Ease ease = sEases[(int)easeFunc];
-            x = Mathf.Clamp01(x);
-
+            //Ease funcs = sEases[(int)easeFunc];
+            x = x > 1 ? 1 : x;;
+            x = x < 0 ? 0 : x;
+    
             return mode switch
             {
-                EaseMode.In => ease.In(x),
-                EaseMode.Out => ease.Out(x),
-                _ => ease.InOut(x)
+                EaseMode.In => sEases[(int)easeFunc].In(x),
+                EaseMode.Out => sEases[(int)easeFunc].Out(x), 
+                _ => sEases[(int)easeFunc].InOut(x)
             };
         }
 
@@ -109,6 +110,8 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         public static Ease[] sEases;
 
+        // We will reduce as much external calls as possible,
+        // given this library is being called ~3000+ times per frame
         static Ease()
         {
             sEases = new Ease[Enum.GetValues(typeof(EaseFunction)).Length];
@@ -130,28 +133,28 @@ namespace JANOARG.Shared.Data.ChartInfo
             sEases[(int)EaseFunction.Quadratic] = new Ease
             {
                 In = (x) => x * x,
-                Out = (x) => 1 - Mathf.Pow(1 - x, 2),
+                Out = (x) => 1 - ((1 - x) * (1 - x)),
                 InOut = (x) => x < 0.5f
                     ? 2 * x * x
-                    : 1 - Mathf.Pow(-2 * x + 2, 2) / 2
+                    : 1 - ((-2 * x + 2) * (-2 * x + 2)) / 2
             };
 
             sEases[(int)EaseFunction.Cubic] = new Ease
             {
                 In = (x) => x * x * x,
-                Out = (x) => 1 - Mathf.Pow(1 - x, 3),
+                Out = (x) => 1 - ((1 - x) * (1 - x) * (1 - x)),
                 InOut = (x) => x < 0.5f
                     ? 4 * x * x * x
-                    : 1 - Mathf.Pow(-2 * x + 2, 3) / 2
+                    : 1 - ((-2 * x + 2) * (-2 * x + 2) * (-2 * x + 2)) / 2
             };
 
             sEases[(int)EaseFunction.Quartic] = new Ease
             {
                 In = (x) => x * x * x * x,
-                Out = (x) => 1 - Mathf.Pow(1 - x, 4),
+                Out = (x) => 1 - ((1 - x) * (1 - x) * (1 - x) * (1 - x)),
                 InOut = (x) => x < 0.5f
                     ? 8 * x * x * x * x
-                    : 1 - Mathf.Pow(-2 * x + 2, 4) / 2
+                    : 1 - ((-2 * x + 2) * (-2 * x + 2) * (-2 * x + 2) * (-2 * x + 2)) / 2
             };
 
             // For fuck's sake, why do C# not have an exponent operator??
@@ -159,10 +162,10 @@ namespace JANOARG.Shared.Data.ChartInfo
             sEases[(int)EaseFunction.Quintic] = new Ease
             {
                 In = (x) => x * x * x * x * x,
-                Out = (x) => 1 - Mathf.Pow(1 - x, 5),
+                Out = (x) => 1 - ((1 - x) * (1 - x) * (1 - x) * (1 - x) * (1 - x)),
                 InOut = (x) => x < 0.5f
                     ? 16 * x * x * x * x * x
-                    : 1 - Mathf.Pow(-2 * x + 2, 5) / 2
+                    : 1 - ((-2 * x + 2) * (-2 * x + 2) * (-2 * x + 2) * (-2 * x + 2) * (-2 * x + 2)) / 2
             };
 
             sEases[(int)EaseFunction.Exponential] = new Ease
@@ -184,11 +187,11 @@ namespace JANOARG.Shared.Data.ChartInfo
 
             sEases[(int)EaseFunction.Circle] = new Ease
             {
-                In = (x) => 1 - Mathf.Sqrt(1 - Mathf.Pow(x, 2)),
-                Out = (x) => Mathf.Sqrt(1 - Mathf.Pow(x - 1, 2)),
+                In = (x) => 1 - Mathf.Sqrt(1 - (x * x)),
+                Out = (x) => Mathf.Sqrt(1 - ((x - 1) * (x - 1))),
                 InOut = (x) => x < 0.5
-                    ? (1 - Mathf.Sqrt(1 - Mathf.Pow(2 * x, 2))) / 2
-                    : (Mathf.Sqrt(1 - Mathf.Pow(-2 * x + 2, 2)) + 1) / 2
+                    ? (1 - Mathf.Sqrt(1 - ((2 * x) * (2 * x)))) / 2
+                    : (Mathf.Sqrt(1 - ((-2 * x + 2) * (-2 * x + 2))) + 1) / 2
             };
 
             sEases[(int)EaseFunction.Back] = new Ease
@@ -203,7 +206,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                 {
                     const float OVERSHOOT = 1.70158f;
 
-                    return 1 + 2.70158f * Mathf.Pow(x - 1, 3) + OVERSHOOT * Mathf.Pow(x - 1, 2);
+                    return 1 + 2.70158f * ((x - 1) * (x - 1) * (x - 1)) + OVERSHOOT * ((x - 1) * (x - 1));
                 },
                 InOut = (x) =>
                 {
@@ -211,8 +214,8 @@ namespace JANOARG.Shared.Data.ChartInfo
                     const float SCALED_OVERSHOOT = OVERSHOOT * 1.525f;
 
                     return x < 0.5f
-                        ? Mathf.Pow(2 * x, 2) * ((SCALED_OVERSHOOT + 1) * 2 * x - SCALED_OVERSHOOT) / 2
-                        : (Mathf.Pow(2 * x - 2, 2) * ((SCALED_OVERSHOOT + 1) * (x * 2 - 2) + SCALED_OVERSHOOT) + 2) / 2;
+                        ? ((2 * x) * (2 * x)) * ((SCALED_OVERSHOOT + 1) * 2 * x - SCALED_OVERSHOOT) / 2
+                        : (((2 * x - 2) * (2 * x - 2))* ((SCALED_OVERSHOOT + 1) * (x * 2 - 2) + SCALED_OVERSHOOT) + 2) / 2;
                 }
             };
 
@@ -265,7 +268,7 @@ namespace JANOARG.Shared.Data.ChartInfo
                     const float BOUNCE_THRESHOLD = 2.75f;
 
                     if (x < 1 / BOUNCE_THRESHOLD)
-                        return BOUNCE_CONSTANT * Mathf.Pow(x, 2);
+                        return BOUNCE_CONSTANT * (x * x);
 
 
                     if (x < 2 / BOUNCE_THRESHOLD)
