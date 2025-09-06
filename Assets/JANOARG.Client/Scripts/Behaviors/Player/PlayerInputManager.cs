@@ -880,14 +880,15 @@ public class PlayerInputManager : MonoBehaviour
                 }
 
                 if (!isValid)
+                {
                     continue;
+                }
 
                 hitIteration.InDiscreteHitQueue = true;
-
+                                
                 // Reset flick state
                 touch.Flicked = false;
                 touch.FlickCenter = touch.Touch.screenPosition;
-                hitIteration.IsProcessed = true;
 
 
                 if (hitIteration.Current.Type == HitObject.HitType.Normal)
@@ -945,31 +946,30 @@ public class PlayerInputManager : MonoBehaviour
             // Applies to both tap and catch flick (main processor for distance and angle calculations)
             bool f_flickVerifier(HitPlayer hitObject, TouchClass touch, float? angle = null)
             {
-                if (!touch.Flicked ||
-                    (hitObject.Current.Type == HitObject.HitType.Catch && // Only do range check if it's a catch-flick
-                     // None of the positions touched it :(
-                     (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)) >
-                     hitIteration.HitCoord.Radius &&
-                     Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position) >
-                     hitIteration.HitCoord.Radius))
 
+                                
+                if (!touch.Flicked &&
+                    hitObject.Current.Type == HitObject.HitType.Catch && // Only do range check if it's a catch-flick
+                    (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)
+                    ) > hitIteration.HitCoord.Radius &&
+                    Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position) 
+                    > hitIteration.HitCoord.Radius)
+                                    
                     return false;
+                                
+                if (hitObject.Current.Type == HitObject.HitType.Normal){} // Verbosity (to tell that tap flick doesnt have to do anything)
 
-                if (hitObject.Current.Type == HitObject.HitType.Normal)
-                {
-                }
-
-                // Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at
-                // {hitIteration.Time}. Adding to discrete hit queue.");
+                //Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                 if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
                 {
                     float calculatedAngle = angle ?? touch.flickDirection;
 
                     return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
                 }
-
                 // Omnidirectional flick (doesn't give a fuck which direction you flick)
                 return true;
+
+                return false;
             }
             #endregion
 
