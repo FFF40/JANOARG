@@ -26,7 +26,7 @@ namespace JANOARG.Client.Behaviors.Player
             }
             else
             {
-                Debug.Log(acc);
+                //Debug.Log(acc);
                 Size = 120;
                 RingBackground.Resolution = RingFill1.Resolution = RingFill2.Resolution = 90;
                 RingFill1.FillAmount = RingFill2.FillAmount = (1 - Mathf.Abs((float)acc)) / 2;

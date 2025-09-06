@@ -3856,7 +3856,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &817025449
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6688,8 +6688,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AbilityRating: 0
   SongEssence: 0
-  bonusCount: 0
-  bonusReset: 0
+  BonusCount: 0
+  BonusReset: 0
   LeftPane: {fileID: 6479797661661859790}
   LeftLayout: {fileID: 5746686510652200652}
   NameLabel: {fileID: 6479797661813592346}

@@ -34,7 +34,7 @@ namespace JANOARG.Client.Behaviors.Common
 
             Preferences = new Storage("prefs");
 
-            Application.targetFrameRate = 60;
+            Application.targetFrameRate = 90;
 
             CommonScene.LoadAlt("Intro");
         }
