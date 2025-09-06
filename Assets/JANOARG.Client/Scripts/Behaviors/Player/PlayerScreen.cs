@@ -68,14 +68,9 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text      JudgmentLabel;
         public CanvasGroup   ComboGroup;
         public TMP_Text      ComboLabel;
-        
-        [Header("Item pools")]
         public RectTransform JudgeScreenHolder;
-        public Transform HitPool;
-        
         [Space]
         public JudgeScreenManager judgeScreenManager;
-        public HitObjectPool hitObjectPool;
         [Space]
         public TMP_Text PauseLabel;
 
@@ -186,8 +181,6 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Start()
         {
-            ProfileBar.sMain.gameObject.SetActive(false);
-            
             InitFlickMeshes();
             SetInterfaceColor(Color.clear);
             SongProgress.value = 0;
@@ -660,7 +653,7 @@ namespace JANOARG.Client.Behaviors.Player
                 }
 
                 // Check hit objects
-                StartCoroutine(CheckHitObjects());
+                CheckHitObjects();
 
                 // Update song progress slider
                 SongProgress.value = CurrentTime / Music.clip.length;
@@ -676,50 +669,9 @@ namespace JANOARG.Client.Behaviors.Player
 
 
                 // Update palette
-                StartCoroutine(f_scenePalleteUpdater(visualBeat));
-
-                // Update scene
-                StartCoroutine(f_sceneUpdater(visualTime, visualBeat));
-                
-                if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || CurrentTime / Music.clip.length >= 1) && !ResultExec)
-                {
-                    PlayerScreenResult.sMain.StartEndingAnim();
-                    ResultExec = true;
-                }
-            }
-
-            IEnumerator f_sceneUpdater(float visualTime, float visualBeat)
-            {
-                StartCoroutine(f_sceneCameraUpdater(visualBeat));
-                
-                foreach (LaneGroupPlayer group in LaneGroups)
-                    group.UpdateSelf(visualTime, visualBeat);
-
-                foreach (LanePlayer lane in Lanes)
-                    lane.UpdateSelf(visualTime, visualBeat);
-                
-                yield return null;
-            }
-
-            IEnumerator f_sceneCameraUpdater(float visualBeat)
-            {
-                // Update camera
-                sCurrentChart.Camera.Advance(visualBeat);
-                Camera sceneCamera = CommonSys.sMain.MainCamera;
-                sceneCamera.transform.position = sCurrentChart.Camera.CameraPivot;
-                sceneCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
-                sceneCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
-
-                yield return null;
-            }
-
-            IEnumerator f_scenePalleteUpdater(float visualBeat)
-            {
                 sCurrentChart.Palette.Advance(visualBeat);
-                if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
-                    SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
-                if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor) 
-                    SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+                if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor) SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
+                if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor) SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
                 for (var a = 0; a < LaneStyles.Count; a++)
                 {
@@ -738,8 +690,26 @@ namespace JANOARG.Client.Behaviors.Player
                     HitStyles[a]
                         .Update(sCurrentChart.Palette.HitStyles[a]);
                 }
-                
-                yield return null;
+
+                // Update camera
+                sCurrentChart.Camera.Advance(visualBeat);
+                Camera camera = CommonSys.sMain.MainCamera;
+                camera.transform.position = sCurrentChart.Camera.CameraPivot;
+                camera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
+                camera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
+
+                // Update scene
+                foreach (LaneGroupPlayer group in LaneGroups)
+                    group.UpdateSelf(visualTime, visualBeat);
+
+                foreach (LanePlayer lane in Lanes)
+                    lane.UpdateSelf(visualTime, visualBeat);
+
+                if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || CurrentTime / Music.clip.length >= 1) && !ResultExec)
+                {
+                    PlayerScreenResult.sMain.StartEndingAnim();
+                    ResultExec = true;
+                }
             }
         }
 
@@ -748,7 +718,7 @@ namespace JANOARG.Client.Behaviors.Player
             _LastDSPTime = AudioSettings.dspTime;
         }
 
-        public IEnumerator CheckHitObjects()
+        public void CheckHitObjects()
         {
             foreach (LanePlayer lane in Lanes)
                 foreach (HitPlayer hit in lane.HitObjects)
@@ -758,8 +728,6 @@ namespace JANOARG.Client.Behaviors.Player
 
             // PlayerInputManager.main.UpdateTouches();
             PlayerInputManager.sInstance.UpdateInput();
-
-            yield return null;
         }
 
         private Coroutine _JudgeAnimation;
@@ -825,19 +793,23 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void RemoveHitPlayer(HitPlayer hitObject)
         {
-            if (hitObject == null) 
-                return;
-    
-            hitObject.Lane?.HitObjects.Remove(hitObject);
-            PlayerInputManager.sInstance.RemoveFromQueue(hitObject);
-            hitObjectPool.ReturnHitObject(hitObject);
+            if (hitObject.HoldMesh != null)
+            {
+                Destroy(hitObject.HoldMesh.mesh);
+                Destroy(hitObject.HoldMesh.gameObject);
+            }
+
+            if (hitObject.gameObject != null)
+                Destroy(hitObject.gameObject);
+
+            hitObject.Lane.HitObjects.Remove(hitObject);
+
             HitsRemaining--;
         }
 
         public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
-        { 
-            if (hitObject != null)
-                Debug.Log((int)hitObject.Current.Type + ":" + hitObject.Current.Type + " " + offset);
+        {
+            // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
 
             int score = hitObject.Current.Type == HitObject.HitType.Normal 
                 ? 3 : 1;
