@@ -18,27 +18,24 @@ namespace JANOARG.Shared.Data.Files
         public const int FORMAT_VERSION = 1;
         public const int INDENT_SIZE = 2;
 
-        private static Dictionary<string, StoryTagInfo> s_StoryTags;
+        private static Dictionary<string, StoryTagInfo> s_storyTags;
 
-        static Dictionary<string, StoryInstruction> InstructionList = new Dictionary<string, StoryInstruction>();
+        static Dictionary<string, StoryInstruction> s_instructionList = new Dictionary<string, StoryInstruction>();
 
-        static bool isCurrentLineDecisionMaker = false;
-        static bool isCurrentLineFlagChecker = false;
+        static bool s_isCurrentLineDecisionMaker = false;
+        static bool s_isCurrentLineFlagChecker = false;
 
-        static List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
-        static List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
+        static List<DecisionItem> s_currentDecisionItems = new List<DecisionItem>();
+        static List<DecisionItem> s_currentFlagChecks = new List<DecisionItem>();
 
-        private static readonly Regex sr_ActorParseRegex =
-            new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
-
-        static readonly Regex actorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+\??,)*[0-9a-zA-Z]+\??)\s*>\s+(?<content>.*)");
-        static readonly Regex instructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
+        static readonly Regex sr_ActorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+\??,)*[0-9a-zA-Z]+\??)\s*>\s+(?<content>.*)");
+        static readonly Regex sr_InstructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
 
         // Regex for [[id]]
-        static readonly Regex instructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
-        static readonly Regex DecisionParseRegex = new(@"\{([A-Z]+:[^|{}]+)\s*\|\s*([^|{}]+)(?:\s*\|\s*([^{}]+))?\}");
+        static readonly Regex sr_InstructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
+        static readonly Regex sr_DecisionParseRegex = new(@"\{([A-Z]+:[^|{}]+)\s*\|\s*([^|{}]+)(?:\s*\|\s*([^{}]+))?\}");
 
-        static readonly Regex ComparisonParseRegex = new(@"^(!=|>=|<=|=|<|>)\s*(-?[0-9]*\.?[0-9]+)$");
+        static readonly Regex sr_ComparisonParseRegex = new(@"^(!=|>=|<=|=|<|>)\s*(-?[0-9]*\.?[0-9]+)$");
 
 
 #if UNITY_EDITOR
@@ -46,7 +43,7 @@ namespace JANOARG.Shared.Data.Files
 #endif
         public static void InitiateStoryTags()
         {
-            s_StoryTags = new Dictionary<string, StoryTagInfo>();
+            s_storyTags = new Dictionary<string, StoryTagInfo>();
             var asm = Assembly.GetAssembly(typeof(StoryInstruction));
 
             foreach (Type cls in asm.GetTypes())
@@ -58,7 +55,7 @@ namespace JANOARG.Shared.Data.Files
                     {
                         if (attr is not StoryTagAttribute tagAttr) continue;
 
-                        s_StoryTags[tagAttr.Keyword] = new StoryTagInfo
+                        s_storyTags[tagAttr.Keyword] = new StoryTagInfo
                         {
                             Keyword = tagAttr.Keyword,
                             DefaultParameters = tagAttr.DefaultParameters,
@@ -70,7 +67,7 @@ namespace JANOARG.Shared.Data.Files
 
         public static StoryScript Decode(string str)
         {
-            if (s_StoryTags == null) InitiateStoryTags();
+            if (s_storyTags == null) InitiateStoryTags();
 
             StoryScript script = ScriptableObject.CreateInstance<StoryScript>();
             StoryChunk currentChunk = new();
@@ -99,7 +96,7 @@ namespace JANOARG.Shared.Data.Files
                 // Add substitute control tags
                 if (line.StartsWith("[["))
                 {
-                    Match match = instructionParseRegex.Match(line);
+                    Match match = sr_InstructionParseRegex.Match(line);
                     if (match.Success)
                     {
                         string id = match.Groups[1].Value;
@@ -115,12 +112,12 @@ namespace JANOARG.Shared.Data.Files
                         string keyword = parts[0];
                         string[] args = parts.Skip(1).ToArray();
 
-                        if (!s_StoryTags.ContainsKey(keyword))
+                        if (!s_storyTags.ContainsKey(keyword))
                         {
                             Debug.LogWarning($"Unknown story tag keyword \"{keyword}\" in line: {line}");
                         }
 
-                        var tagInfo = s_StoryTags[keyword];
+                        var tagInfo = s_storyTags[keyword];
                         var parameters = tagInfo.Constructor.GetParameters();
                         List<string> stringParams = new();
 
@@ -134,7 +131,7 @@ namespace JANOARG.Shared.Data.Files
                         try
                         {
                             var instruction = (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray());
-                            InstructionList[id] = instruction;
+                            s_instructionList[id] = instruction;
 
                         }
                         catch (Exception ex)
@@ -153,7 +150,7 @@ namespace JANOARG.Shared.Data.Files
                 // Add Decisions
                 if (line.StartsWith("?"))
                 {
-                    Match match = DecisionParseRegex.Match(line);
+                    Match match = sr_DecisionParseRegex.Match(line);
                     if (match.Success)
                     {
                         string key = match.Groups[1].Value;
@@ -161,7 +158,7 @@ namespace JANOARG.Shared.Data.Files
                         string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
 
                         var decision = new DecisionItem(key, value, label);
-                        CurrentDecisionItems.Add(decision);
+                        s_currentDecisionItems.Add(decision);
 
                     }
                     else
@@ -219,7 +216,7 @@ namespace JANOARG.Shared.Data.Files
                             (StoryInstruction)authorIns
                         );
 
-                    if ((match = actorParseRegex.Match(line)).Success)
+                    if ((match = sr_ActorParseRegex.Match(line)).Success)
                     {
                         index = match.Groups["content"].Index;
                         authorIns.Actors.AddRange(match.Groups["actor"].Value.Split(','));
@@ -246,14 +243,14 @@ namespace JANOARG.Shared.Data.Files
                     //Parse reference tags
                     if (line[index] == '[' && line[index + 1] == '[')
                     {
-                        Match match = instructionRefRegex.Match(line, index);
+                        Match match = sr_InstructionRefRegex.Match(line, index);
                         if (match.Success)
                         {
                             string id = match.Groups[1].Value;
 
                             try
                             {
-                                if (InstructionList.TryGetValue(id, out var instruction))
+                                if (s_instructionList.TryGetValue(id, out var instruction))
                                 {
                                     currentChunk.Instructions.Add(instruction);
                                 }
@@ -283,14 +280,14 @@ namespace JANOARG.Shared.Data.Files
                             index++;
                         }
                         string keyword = sb.ToString();
-                        if (!s_StoryTags.ContainsKey(keyword))
+                        if (!s_storyTags.ContainsKey(keyword))
                         {
                             Debug.LogWarning($"Unknown story tag \"{keyword}\"");
                             while (index < line.Length && line[index] != ']') index++;
                             index++;
                             continue;
                         }
-                        var tagInfo = s_StoryTags[keyword];
+                        var tagInfo = s_storyTags[keyword];
                         var parameters = tagInfo.Constructor.GetParameters();
 
                         List<string> stringParams = new();
