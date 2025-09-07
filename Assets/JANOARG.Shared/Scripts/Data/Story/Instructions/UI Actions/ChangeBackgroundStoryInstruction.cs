@@ -6,7 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using JANOARG.Shared.Data.ChartInfo;
-
+using static JANOARG.Shared.Data.Files.StoryDecoder;
 using JANOARG.Client.Behaviors.Storyteller;
 
 namespace JANOARG.Shared.Data.Story.Instructions

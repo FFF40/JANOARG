@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Unity.VisualScripting;
 using UnityEngine;
 using JANOARG.Client.Behaviors.Storyteller;
+using static JANOARG.Shared.Data.Files.StoryDecoder;
 
 namespace JANOARG.Shared.Data.Story.Instructions
 {

@@ -93,7 +93,7 @@ public abstract class StoryInstruction
     }
 
     //Return true if this is scale
-    public bool isDurationScaleable(string duration)
+    public bool IsDurationScaleable(string duration)
     {
         var match = Regex.Match(duration, @"^(?<number>\d+(?:\.\d+)?)(?<unit>s|x|)$");
         if (!match.Success) throw new ArgumentException("Duration value is invalid");
@@ -115,6 +115,16 @@ public abstract class StoryInstruction
     }
 
     public static explicit operator StoryInstruction(FullScreenNarrateStoryInstruction v)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static explicit operator StoryInstruction(ActorActionStoryInstruction v)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static explicit operator StoryInstruction(TextPrintStoryInstruction v)
     {
         throw new NotImplementedException();
     }

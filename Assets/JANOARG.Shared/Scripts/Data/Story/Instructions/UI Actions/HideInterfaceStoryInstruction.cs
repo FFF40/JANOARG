@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using JANOARG.Client.Behaviors.Storyteller;
 using JANOARG.Shared.Data.ChartInfo;
+using static JANOARG.Shared.Data.Files.StoryDecoder;
 
 namespace JANOARG.Shared.Data.Story.Instructions
 {
