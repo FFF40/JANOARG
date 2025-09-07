@@ -21,40 +21,39 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
     {
         Actors.Add(actor);
 
-        Debug.Log($"MoveActorSpriteStoryInstruction: Moving actor {actor} from {source} to {destination} over {duration}s");
         From = ParseParameters(source);
         Destination = ParseParameters(destination);
         Duration = ParseDuration(duration);
 
-        Debug.Log($"MoveActorSpriteStoryInstruction: Parsed From: {From}, Destination: {Destination}, Duration: {Duration}");
     }
 
-    #region Parse Parameters
     string ParseParameters(string input)
     {
         return input switch
         {
-            "r" or "right" => "r",
-            "l" or "left" => "l",
-            "c" or "center" or "middle" => "c",
-            "*" or "self" => "self",
-            "ol" or "outleft" => "ol",
-            "or" or "outright" => "or",
-            _ => throw new ArgumentException($"Input '{input}' is invalid. Expected a keyword like left, right, center, etc."),
+            "r" or "right"                  => "r",
+            "l" or "left"                   => "l",
+            "c" or "center" or "middle"     => "c",
+            "*" or "self"                   => "self",
+            "ol" or "outleft"               => "ol",
+            "or" or "outright"              => "or",
+            _                               => throw new ArgumentException
+                                                    ($"Input '{input}' is invalid. Expected a keyword like left, right, center, etc."),
         };
     }
-    #endregion
 
     public override void OnTextBuild(Storyteller teller)
     {
-        Debug.Log($"MoveActorSpriteStoryInstruction: Moving actor {Actors[0]} from {From} to {Destination} over {Duration}s");
+        //Do nothing if there are no actors
         if (Actors.Count == 0) return;
 
+        //Find the actor in the constants list and initialize its sprite handler
         var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
         InitSpriteHandler(actor.Alias, teller);
         ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
         SpriteSize = TargetActorSpriteHandler.GetSpriteSize();
 
+        //Get the RectTransform of the image holder
         RectTransform rt = TargetActorSpriteHandler.ImageHolder.GetComponentInChildren<Image>().rectTransform;
 
         Vector2 fromScreenPos = ResolvePosition(From, rt);
@@ -63,20 +62,21 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         teller.StartCoroutine(MoveSprite(rt, fromScreenPos, toScreenPos, Duration));
     }
 
+    // Resolves position keywords to actual screen positions
     private Vector2 ResolvePosition(string keyword, RectTransform rt)
     {
         RectTransform parentRT = rt.parent as RectTransform;
         float screenW = parentRT.rect.width;
         float screenH = parentRT.rect.height;
 
-        Debug.Log($"Resolving position for keyword '{keyword}' with screen size ({screenW}, {screenH})");
-
+        // Ensure the sprite size is set
         rt.sizeDelta = SpriteSize;
 
         return keyword switch
         {
             // Left edge: half sprite width from left border
             "l" or "left" => new Vector2(-screenW / 2 + SpriteSize.x / 2, 0),
+            
             // Right edge: half sprite width from right border
             "r" or "right" => new Vector2(screenW / 2 - SpriteSize.x / 2, 0),
 

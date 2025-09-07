@@ -9,19 +9,19 @@ using UnityEngine.UIElements;
 [Serializable]
 public class HideInterfaceStoryInstruction : StoryInstruction
 {
-    public bool isHideInterface;
+    public bool IsHideInterface;
     public float FadeDuration = 1f;
 
     [StoryTag("hideInterface")]
     public HideInterfaceStoryInstruction(string isHide, string duration)
     {
-        isHideInterface = ParseBoolean(isHide);
+        IsHideInterface = ParseBoolean(isHide);
         FadeDuration = ParseDuration(duration);
     }
 
     public override IEnumerator OnInterfaceChange(Storyteller teller)
     {
-        if (isHideInterface == true)
+        if (IsHideInterface == true)
         {
             // Hides in the interface for the duration 
             yield return Ease.Animate(FadeDuration, (a) =>

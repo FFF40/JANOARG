@@ -7,71 +7,27 @@ using UnityEngine;
 [Serializable]
 public class SetBackgroundMusicStoryInstruction : StoryInstruction
 {
-    public string musicName;
+    public string MusicName;
 
     [StoryTag("bgmusic")]
     public SetBackgroundMusicStoryInstruction(string name)
     {
-        musicName = name;
+        MusicName = name;
     }
 
-    //TODO: Add player's volume preference 
     public override void OnMusicChange(Storyteller teller)
     {
-        var musicToBePlayed = teller.AudioConstants.BackgroundMusic.Find(x => x.Name == musicName);
+        var musicToBePlayed = teller.AudioConstants.BackgroundMusic.Find(x => x.Name == MusicName);
         var player = teller.BackgroundMusicPlayer;
         if (musicToBePlayed != null)
         {
-            player.volume = 1f;
+            player.volume = 1f;  //TODO: Add player's volume preference 
             player.clip = musicToBePlayed.BackgroundMusic;
             player.loop = true;
             player.Play();
         }
         else
         {
-            player.Pause();
-            player.clip = null;
-        }
-    }
-}
-
-//TODO: Make it fade also this StoryInstruction is not yet implemented
-[Serializable]
-public class FadeBackgroundMusicStoryInstruction : StoryInstruction 
-{
-    public string musicName;
-
-    [StoryTag("bgmusicfade")]
-    public FadeBackgroundMusicStoryInstruction(string name)
-    {
-        musicName = name;
-    }
-
-    public override IEnumerator OnMusicPlay(Storyteller teller)
-    {
-        var musicToBePlayed = teller.AudioConstants.BackgroundMusic.Find(x => x.Name == musicName);
-        var player = teller.BackgroundMusicPlayer;
-        if (musicToBePlayed != null)
-        {
-            player.volume = 0f;
-            player.clip = musicToBePlayed.BackgroundMusic;
-            player.loop = true;
-            player.Play();
-            
-            yield return Ease.Animate(3f, (a) =>
-            {
-                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                player.volume = lerp * teller.MaxVolume;
-            });
-        }
-        else
-        {
-            yield return Ease.Animate(3f, (a) =>
-            {
-                float lerp = Ease.Get(1-a, EaseFunction.Cubic, EaseMode.Out);
-                player.volume = lerp * teller.MaxVolume;
-            });
-
             player.Pause();
             player.clip = null;
         }

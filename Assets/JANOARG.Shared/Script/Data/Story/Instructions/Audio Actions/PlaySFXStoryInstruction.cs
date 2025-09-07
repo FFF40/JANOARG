@@ -7,17 +7,17 @@ using UnityEngine;
 [Serializable]
 public class PlaySFXStoryInstruction : StoryInstruction
 {
-    public string sfxName;
+    public string SFXName;
 
     [StoryTag("sfx")]
     public PlaySFXStoryInstruction(string name)
     {
-        sfxName = name;
+        SFXName = name;
     }
-
+    
     public override IEnumerator OnSFXPlay(Storyteller teller)
     {
-        var sfxToBePlayed = teller.AudioConstants.SoundEffects.Find(x => x.Name == sfxName);
+        var sfxToBePlayed = teller.AudioConstants.SoundEffects.Find(x => x.Name == SFXName);
         var player = teller.SoundEffectsPlayer;
         if (sfxToBePlayed != null)
         {

@@ -19,8 +19,10 @@ public class DelayStoryInstruction : StoryInstruction
     public override IEnumerator OnTextReveal(Storyteller teller)
     {
         float realDuration = Duration;
-        if (ScaleWithCharacterDuration) realDuration *= teller.CharacterDuration;
-        while (teller.TimeBuffer < realDuration) yield return null;
+        if (ScaleWithCharacterDuration)
+            realDuration *= teller.CharacterDuration;
+        while (teller.TimeBuffer < realDuration)
+            yield return null;
         teller.TimeBuffer -= realDuration;
     }
 }
