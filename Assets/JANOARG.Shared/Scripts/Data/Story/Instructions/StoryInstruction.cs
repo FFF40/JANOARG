@@ -11,8 +11,6 @@ namespace JANOARG.Shared.Data.Story.Instructions
     [Serializable]
     public abstract class StoryInstruction
     {
-        
-
         #region Static
         /// <summary>
         /// This method is called when add the text to the objects
@@ -22,7 +20,6 @@ namespace JANOARG.Shared.Data.Story.Instructions
         /// <summary>
         /// This method is called when the music in the background changes.
         /// </summary>
-
         public virtual void OnMusicChange(JANOARG.Client.Behaviors.Storyteller.Storyteller teller) { }
 
         /// <summary>

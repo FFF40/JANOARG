@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Player;
-using JANOARG.Client.Data.Constant;
+using JANOARG.Client.Data.Constant.Story;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Data.Story;
 using JANOARG.Shared.Data.Story.Instructions;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using JANOARG.Client.Behaviors.Storyteller;
-using JANOARG.Client.Data.Constant;
+using JANOARG.Client.Data.Constant.Story;
 
 namespace JANOARG.Shared.Data.Story.Instructions
 {
