@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,19 +16,34 @@ namespace JANOARG.Shared.Data.Files
     public class StoryDecoder
     {
         public const int FORMAT_VERSION = 1;
-        public const int INDENT_SIZE    = 2;
+        public const int INDENT_SIZE = 2;
 
-        private static Dictionary<string, StoryTagInfo> s_StoryTags;
+        private static Dictionary<string, StoryTagInfo> s_storyTags;
 
-        private static readonly Regex sr_ActorParseRegex =
-            new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
+        static Dictionary<string, StoryInstruction> s_instructionList = new Dictionary<string, StoryInstruction>();
+
+        static bool s_isCurrentLineDecisionMaker = false;
+        static bool s_isCurrentLineFlagChecker = false;
+
+        static List<DecisionItem> s_currentDecisionItems = new List<DecisionItem>();
+        static List<DecisionItem> s_currentFlagChecks = new List<DecisionItem>();
+
+        static readonly Regex sr_ActorParseRegex = new(@"^(?<actor>(?:[0-9a-zA-Z]+\??,)*[0-9a-zA-Z]+\??)\s*>\s+(?<content>.*)");
+        static readonly Regex sr_InstructionParseRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]\s*(.+)");
+
+        // Regex for [[id]]
+        static readonly Regex sr_InstructionRefRegex = new(@"\[\[([a-zA-Z0-9_]+)\]\]");
+        static readonly Regex sr_DecisionParseRegex = new(@"\{([A-Z]+:[^|{}]+)\s*\|\s*([^|{}]+)(?:\s*\|\s*([^{}]+))?\}");
+
+        static readonly Regex sr_ComparisonParseRegex = new(@"^(!=|>=|<=|=|<|>)\s*(-?[0-9]*\.?[0-9]+)$");
+
 
 #if UNITY_EDITOR
         [DidReloadScripts]
 #endif
         public static void InitiateStoryTags()
         {
-            s_StoryTags = new Dictionary<string, StoryTagInfo>();
+            s_storyTags = new Dictionary<string, StoryTagInfo>();
             var asm = Assembly.GetAssembly(typeof(StoryInstruction));
 
             foreach (Type cls in asm.GetTypes())
@@ -35,113 +51,260 @@ namespace JANOARG.Shared.Data.Files
                 if (!typeof(StoryInstruction).IsAssignableFrom(cls)) continue;
 
                 foreach (ConstructorInfo cons in cls.GetConstructors())
-                foreach (Attribute attr in cons.GetCustomAttributes())
-                {
-                    if (attr is not StoryTagAttribute tagAttr) continue;
-
-                    s_StoryTags[tagAttr.Keyword] = new StoryTagInfo
+                    foreach (Attribute attr in cons.GetCustomAttributes())
                     {
-                        Keyword = tagAttr.Keyword,
-                        DefaultParameters = tagAttr.DefaultParameters,
-                        Constructor = cons
-                    };
-                }
+                        if (attr is not StoryTagAttribute tagAttr) continue;
+
+                        s_storyTags[tagAttr.Keyword] = new StoryTagInfo
+                        {
+                            Keyword = tagAttr.Keyword,
+                            DefaultParameters = tagAttr.DefaultParameters,
+                            Constructor = cons
+                        };
+                    }
             }
         }
 
         public static StoryScript Decode(string str)
         {
-            if (s_StoryTags == null) InitiateStoryTags();
+            if (s_storyTags == null) InitiateStoryTags();
 
-            var script = ScriptableObject.CreateInstance<StoryScript>();
+            StoryScript script = ScriptableObject.CreateInstance<StoryScript>();
             StoryChunk currentChunk = new();
             script.Chunks.Add(currentChunk);
 
             string[] lines = str.Split("\n");
-
-            foreach (string line in lines)
+            foreach (var line in lines)
             {
-                var index = 0;
-
+                int index = 0;
                 if (string.IsNullOrEmpty(line))
                 {
                     if (currentChunk.Instructions.Count > 0)
                     {
-                        currentChunk = new StoryChunk();
+                        currentChunk = new();
                         script.Chunks.Add(currentChunk);
                     }
-
                     continue;
                 }
 
-                if (line.StartsWith("#")) continue;
+                // Skip comments
+                if (line.StartsWith("#"))
+                {
+                    continue;
+                }
 
+                // Add substitute control tags
+                if (line.StartsWith("[["))
+                {
+                    Match match = sr_InstructionParseRegex.Match(line);
+                    if (match.Success)
+                    {
+                        string id = match.Groups[1].Value;
+                        string instructionText = match.Groups[2].Value;
+
+
+                        string[] parts = instructionText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length == 0)
+                        {
+                            Debug.LogWarning($"No keyword in instruction: {line}");
+                        }
+
+                        string keyword = parts[0];
+                        string[] args = parts.Skip(1).ToArray();
+
+                        if (!s_storyTags.ContainsKey(keyword))
+                        {
+                            Debug.LogWarning($"Unknown story tag keyword \"{keyword}\" in line: {line}");
+                        }
+
+                        var tagInfo = s_storyTags[keyword];
+                        var parameters = tagInfo.Constructor.GetParameters();
+                        List<string> stringParams = new();
+
+                        for (int i = 0; i < parameters.Length; i++)
+                        {
+                            stringParams.Add(i < args.Length ? args[i] : "");
+                        }
+
+                        Debug.Log($"Instruction ID: {id}, Keyword: {keyword}, Params: {string.Join(", ", stringParams)}");
+
+                        try
+                        {
+                            var instruction = (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray());
+                            s_instructionList[id] = instruction;
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogError($"Error constructing instruction [[{id}]] {keyword}: {ex.Message}");
+                        }
+
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Line format not recognized: {line}");
+                    }
+                    continue;
+                }
+
+                // Add Decisions
+                if (line.StartsWith("?"))
+                {
+                    Match match = sr_DecisionParseRegex.Match(line);
+                    if (match.Success)
+                    {
+                        string key = match.Groups[1].Value;
+                        string value = match.Groups[2].Value;
+                        string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
+
+                        var decision = new DecisionItem(key, value, label);
+                        s_currentDecisionItems.Add(decision);
+
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Line format not recognized: {line}");
+                    }
+                    continue;
+                }
+
+                #region 
+                // //Add Decision Checks
+                // if (line.StartsWith("!"))
+                // {
+                //     Match match = DecisionParseRegex.Match(line);
+                //     if (match.Success)
+                //     {
+                //         string key = match.Groups[1].Value;
+                //         string value = match.Groups[2].Value;
+                //         string label = match.Groups[3].Success ? match.Groups[3].Value : "(no label)";
+
+
+                //     }
+                //     else
+                //     {
+                //         Debug.LogWarning($"Line format not recognized: {line}");
+                //     }
+                //     continue;
+                // }
+                #endregion
+
+                // Add Full Screen Narration
+                if (line.StartsWith("Narrate:"))
+                {
+                    string text = line.Substring("Narrate:".Length).Trim();
+                    Debug.Log($"Full Screen Narration: {text}");
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        currentChunk.Instructions.Add(
+                            (StoryInstruction)new FullScreenNarrateStoryInstruction()
+                            {
+                                Text = text
+                            }
+                        );
+                    }
+                    continue;
+                }
+
+                // Add actors
+                List<string> currentChunkActors = new List<string>();
                 if (currentChunk.Instructions.Count == 0)
                 {
                     Match match;
-                    SetActorStoryInstruction authorIns = new();
-                    currentChunk.Instructions.Add(authorIns);
+                    var authorIns = new SetActorStoryInstruction(){ };
+                    currentChunk.Instructions.Add(
+                            (StoryInstruction)authorIns
+                        );
 
                     if ((match = sr_ActorParseRegex.Match(line)).Success)
                     {
                         index = match.Groups["content"].Index;
-
-                        authorIns.Actors.AddRange(
-                            match.Groups["actor"]
-                                .Value.Split(','));
+                        authorIns.Actors.AddRange(match.Groups["actor"].Value.Split(','));
+                        currentChunkActors.AddRange(match.Groups["actor"].Value.Split(','));
                     }
                 }
 
+
                 // Skip white space
-                while (index < line.Length && char.IsWhiteSpace(line[index])) index++;
+                while (index < line.Length && char.IsWhiteSpace(line[index]))
+                {
+                    index++;
+                }
+
+                //TODO: Call either DecisionItemStoryInstruction or DecisionCheckStoryInstruction based on the current line
+                //TODO: Add logic to handle DecisionItemStoryInstruction and DecisionCheckStoryInstruction
+                //TODO:     Add the list of DecisionItems to the perspective StoryInstruction
+                //TODO:                        
+
 
                 while (index < line.Length)
                 {
-                    StringBuilder storyboard;
-
-                    // Parse control tags
-                    if (line[index] == '[')
+                    StringBuilder sb;
+                    //Parse reference tags
+                    if (line[index] == '[' && line[index + 1] == '[')
                     {
-                        storyboard = new StringBuilder();
-                        index++;
+                        Match match = sr_InstructionRefRegex.Match(line, index);
+                        if (match.Success)
+                        {
+                            string id = match.Groups[1].Value;
 
+                            try
+                            {
+                                if (s_instructionList.TryGetValue(id, out var instruction))
+                                {
+                                    currentChunk.Instructions.Add(instruction);
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"Instruction ID not found: [[{id}]]");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogWarning($"Error adding instruction [[{id}]] from line: {line}");
+                                Debug.LogError(ex);
+                            }
+
+                            index = match.Index + match.Length; // Move index past match
+
+                        }
+                    }
+                    // Parse control tags
+                    else if (line[index] == '[')
+                    {
+                        sb = new();
+                        index++;
                         while (index < line.Length && char.IsLetterOrDigit(line[index]))
                         {
-                            storyboard.Append(line[index]);
+                            sb.Append(line[index]);
                             index++;
                         }
-
-                        var keyword = storyboard.ToString();
-
-                        if (!s_StoryTags.ContainsKey(keyword))
+                        string keyword = sb.ToString();
+                        if (!s_storyTags.ContainsKey(keyword))
                         {
                             Debug.LogWarning($"Unknown story tag \"{keyword}\"");
                             while (index < line.Length && line[index] != ']') index++;
                             index++;
-
                             continue;
                         }
-
-                        StoryTagInfo tagInfo = s_StoryTags[keyword];
-                        ParameterInfo[] parameters = tagInfo.Constructor.GetParameters();
+                        var tagInfo = s_storyTags[keyword];
+                        var parameters = tagInfo.Constructor.GetParameters();
 
                         List<string> stringParams = new();
 
                         // Parse parameters
-                        foreach (ParameterInfo param in parameters)
+                        foreach (var param in parameters)
                         {
                             while (index < line.Length && char.IsWhiteSpace(line[index])) index++;
-                            storyboard = new StringBuilder();
-
+                            sb = new();
                             if (line[index] is '"' or '\'')
                             {
                                 char bound = line[index];
                                 index++;
-
                                 while (index < line.Length && line[index] != bound)
                                 {
                                     if (line[index] == '\\') index++;
-                                    storyboard.Append(line[index]);
+                                    sb.Append(line[index]);
                                     index++;
                                 }
                             }
@@ -149,51 +312,55 @@ namespace JANOARG.Shared.Data.Files
                             {
                                 while (index < line.Length && !char.IsWhiteSpace(line[index]) && line[index] != ']')
                                 {
-                                    storyboard.Append(line[index]);
+                                    sb.Append(line[index]);
                                     index++;
                                 }
                             }
-
-                            Debug.Log($"Param \"{param.Name}\": \"{storyboard}\"");
-                            stringParams.Add(storyboard.ToString());
+                            Debug.Log($"Param \"{param.Name}\": \"{sb}\"");
+                            stringParams.Add(sb.ToString());
                             index++;
                         }
 
-                        Debug.Log(string.Join(", ", stringParams));
+                        Debug.Log($"Line: {line} \n{keyword} : {string.Join(", ", stringParams)}");
 
-                        currentChunk.Instructions.Add(
-                            (StoryInstruction)tagInfo.Constructor.Invoke(
-                                stringParams
-                                    .ToArray())
-                        );
+                        try
+                        {
+                            currentChunk.Instructions.Add(
+                                (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogWarning($"StoryInstruction in line {line} have Error: {keyword},{stringParams[0]},{currentChunkActors[0]}");
+                            Debug.LogError(ex);
+                        }
                     }
-
                     // Parse text
                     else
                     {
-                        storyboard = new StringBuilder();
-
+                        sb = new();
                         while (index < line.Length && line[index] != '[')
                         {
                             if (line[index] == '\\')
                             {
                                 index++;
-                                storyboard.Append(line[index]);
+                                sb.Append(line[index]);
                             }
                             else
                             {
-                                storyboard.Append(line[index]);
+                                sb.Append(line[index]);
                             }
-
                             index++;
                         }
 
                         currentChunk.Instructions.Add(
-                            new TextPrintStoryInstruction
+                            (StoryInstruction)new TextPrintStoryInstruction()
                             {
-                                Text = storyboard.ToString()
+                                Text = sb.ToString()
                             }
                         );
+
+                        
                     }
                 }
             }
@@ -201,26 +368,28 @@ namespace JANOARG.Shared.Data.Files
             if (currentChunk.Instructions.Count == 0) script.Chunks.Remove(currentChunk);
 
             return script;
+
+
         }
-    }
 
-    [AttributeUsage(AttributeTargets.Constructor)]
-    public class StoryTagAttribute : Attribute
-    {
-        public readonly string[] DefaultParameters;
-        public readonly string   Keyword;
-
-        public StoryTagAttribute(string keyword, params string[] defaultParameters)
+        [AttributeUsage(AttributeTargets.Constructor)]
+        public class StoryTagAttribute : Attribute
         {
-            Keyword = keyword;
-            DefaultParameters = defaultParameters;
-        }
-    }
+            public readonly string[] DefaultParameters;
+            public readonly string Keyword;
 
-    public class StoryTagInfo
-    {
-        public ConstructorInfo Constructor;
-        public string[]        DefaultParameters;
-        public string          Keyword;
+            public StoryTagAttribute(string keyword, params string[] defaultParameters)
+            {
+                Keyword = keyword;
+                DefaultParameters = defaultParameters;
+            }
+        }
+
+        public class StoryTagInfo
+        {
+            public ConstructorInfo Constructor;
+            public string[] DefaultParameters;
+            public string Keyword;
+        }
     }
 }
