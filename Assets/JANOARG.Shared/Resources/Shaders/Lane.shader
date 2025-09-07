@@ -9,7 +9,10 @@ Shader "JANOARG/Styles/Default - Lane"
     }
     SubShader
     {
-        Tags { "Queue"="Transparent" "RenderType"="Fade" "IgnoreProjectors"="True" }
+        Tags
+        {
+            "Queue"="Transparent" "RenderType"="Fade" "IgnoreProjectors"="True"
+        }
         LOD 200
         Cull Off
         ZWrite Off
@@ -32,10 +35,10 @@ Shader "JANOARG/Styles/Default - Lane"
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {
             fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-            
+
             o.Albedo = c.rgb;
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
