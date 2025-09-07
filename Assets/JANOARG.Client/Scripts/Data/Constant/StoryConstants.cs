@@ -8,6 +8,9 @@ namespace JANOARG.Client.Data.Constant
     public class StoryConstants : ScriptableObject
     {
         public List<ActorInfo> Actors;
+        public List<BackgroundInfo> Backgrounds;
+
+        public ActorSprite PlaceholderActorSprite;
     }
 
     [Serializable]
@@ -16,5 +19,22 @@ namespace JANOARG.Client.Data.Constant
         public string Name;
         public string Alias;
         public string TextPrefix;
+        public List<ActorSprite> ActorSprites;
+
+    }
+
+    [Serializable]
+    public class ActorSprite
+    {
+        public string Alias;
+        public Sprite Sprite;
+    }
+
+    [Serializable]
+    public class BackgroundInfo
+    {
+        public string Name;
+        public string Alias;
+        public Sprite File;
     }
 }

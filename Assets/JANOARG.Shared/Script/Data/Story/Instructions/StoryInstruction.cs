@@ -3,6 +3,8 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using JANOARG.Shared.Data.Story.Instructions;
+using JANOARG.Client.Behaviors.Storyteller;
 
 [Serializable]
 public abstract class StoryInstruction
@@ -110,6 +112,11 @@ public abstract class StoryInstruction
             Debug.LogWarning("Failed to parse '" + param + "' into a boolean. Defaulting to false.");
             return false;
         }
+    }
+
+    public static explicit operator StoryInstruction(FullScreenNarrateStoryInstruction v)
+    {
+        throw new NotImplementedException();
     }
     #endregion
 }

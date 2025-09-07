@@ -3,16 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using JANOARG.Client.Behaviors.Storyteller;
 
-// STILL IN PROGRESS <-------------------------------------------------------------
-[Serializable]
-public class FlagCheckStoryInstruction : StoryInstruction 
+namespace JANOARG.Shared.Data.Story.Instructions
 {
-    public List<DecisionItem> Items = new List<DecisionItem>();
 
-    public override void AddChoices(Storyteller teller)
+    // STILL IN PROGRESS <-------------------------------------------------------------
+    [Serializable]
+    public class FlagCheckStoryInstruction : StoryInstruction
     {
-        teller.CurrentFlagChecks.Clear();
-        teller.CurrentFlagChecks.AddRange(Items);
+        public List<DecisionItem> Items = new List<DecisionItem>();
+
+        public override void AddChoices(Storyteller teller)
+        {
+            teller.CurrentFlagChecks.Clear();
+            teller.CurrentFlagChecks.AddRange(Items);
+        }
     }
 }

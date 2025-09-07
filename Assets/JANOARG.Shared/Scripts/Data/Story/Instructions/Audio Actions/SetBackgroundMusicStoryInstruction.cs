@@ -3,33 +3,38 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using Unity.VisualScripting;
 using UnityEngine;
+using JANOARG.Client.Behaviors.Storyteller;
 
-[Serializable]
-public class SetBackgroundMusicStoryInstruction : StoryInstruction
+namespace JANOARG.Shared.Data.Story.Instructions
 {
-    public string MusicName;
 
-    [StoryTag("bgmusic")]
-    public SetBackgroundMusicStoryInstruction(string name)
+    [Serializable]
+    public class SetBackgroundMusicStoryInstruction : StoryInstruction
     {
-        MusicName = name;
-    }
+        public string MusicName;
 
-    public override void OnMusicChange(Storyteller teller)
-    {
-        var musicToBePlayed = teller.AudioConstants.BackgroundMusic.Find(x => x.Name == MusicName);
-        var player = teller.BackgroundMusicPlayer;
-        if (musicToBePlayed != null)
+        [StoryTag("bgmusic")]
+        public SetBackgroundMusicStoryInstruction(string name)
         {
-            player.volume = 1f;  //TODO: Add player's volume preference 
-            player.clip = musicToBePlayed.BackgroundMusic;
-            player.loop = true;
-            player.Play();
+            MusicName = name;
         }
-        else
+
+        public override void OnMusicChange(Storyteller teller)
         {
-            player.Pause();
-            player.clip = null;
+            var musicToBePlayed = teller.AudioConstants.BackgroundMusic.Find(x => x.Name == MusicName);
+            var player = teller.BackgroundMusicPlayer;
+            if (musicToBePlayed != null)
+            {
+                player.volume = 1f;  //TODO: Add player's volume preference 
+                player.clip = musicToBePlayed.BackgroundMusic;
+                player.loop = true;
+                player.Play();
+            }
+            else
+            {
+                player.Pause();
+                player.clip = null;
+            }
         }
     }
 }

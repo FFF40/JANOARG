@@ -3,35 +3,40 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using Unity.VisualScripting;
 using UnityEngine;
+using JANOARG.Client.Behaviors.Storyteller;
 
-[Serializable]
-public class PlaySFXStoryInstruction : StoryInstruction
+namespace JANOARG.Shared.Data.Story.Instructions
 {
-    public string SFXName;
 
-    [StoryTag("sfx")]
-    public PlaySFXStoryInstruction(string name)
+    [Serializable]
+    public class PlaySFXStoryInstruction : StoryInstruction
     {
-        SFXName = name;
-    }
-    
-    public override IEnumerator OnSFXPlay(Storyteller teller)
-    {
-        var sfxToBePlayed = teller.AudioConstants.SoundEffects.Find(x => x.Name == SFXName);
-        var player = teller.SoundEffectsPlayer;
-        if (sfxToBePlayed != null)
+        public string SFXName;
+
+        [StoryTag("sfx")]
+        public PlaySFXStoryInstruction(string name)
         {
-            player.volume = 1f; // TODO: Make the volume scale with teller.MaxVolume;
-            player.clip = sfxToBePlayed.SFX;
-            player.loop = false;
-            player.Play();
-
-            yield return new WaitWhile(() => player.isPlaying);
+            SFXName = name;
         }
-        else
+
+        public override IEnumerator OnSFXPlay(Storyteller teller)
         {
-            player.Pause();
-            player.clip = null;
+            var sfxToBePlayed = teller.AudioConstants.SoundEffects.Find(x => x.Name == SFXName);
+            var player = teller.SoundEffectsPlayer;
+            if (sfxToBePlayed != null)
+            {
+                player.volume = 1f; // TODO: Make the volume scale with teller.MaxVolume;
+                player.clip = sfxToBePlayed.SFX;
+                player.loop = false;
+                player.Play();
+
+                yield return new WaitWhile(() => player.isPlaying);
+            }
+            else
+            {
+                player.Pause();
+                player.clip = null;
+            }
         }
     }
 }

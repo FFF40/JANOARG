@@ -8,6 +8,10 @@ using System.Text;
 using System.Linq;
 using System;
 using System.Reflection;
+using JANOARG.Shared.Data.Story;
+using JANOARG.Shared.Data.Story.Instructions;
+
+
 
 #if UNITY_EDITOR
 using UnityEditor;

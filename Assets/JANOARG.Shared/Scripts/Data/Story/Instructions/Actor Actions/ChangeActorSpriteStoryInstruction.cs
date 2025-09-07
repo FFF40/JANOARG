@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-
+using JANOARG.Client.Behaviors.Storyteller;
+using JANOARG.Shared.Data.Story.Instructions;
 [Serializable]
 public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
 {
@@ -29,11 +30,11 @@ public class ChangeActorSpriteStoryInstruction : ActorActionStoryInstruction
                 //Initialize the sprite handler for the actor
                 var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[i]);
                 InitSpriteHandler(actor.Alias, teller);
-                ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
+                ActorSpriteHandler targetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
 
                 // Changes the sprite of the target actor sprite handler
                 TargetActorSprite = GetSprite(actor.Alias, TargetSpriteName, teller);
-                ChangeSprite(TargetActorSpriteHandler, teller, TargetActorSprite, false);
+                ChangeSprite(targetActorSpriteHandler, teller, TargetActorSprite, false);
             }
         }
 

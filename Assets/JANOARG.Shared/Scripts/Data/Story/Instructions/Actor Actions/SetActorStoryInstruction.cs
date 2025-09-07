@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using JANOARG.Client.Behaviors.Storyteller;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Story.Instructions;
 
 //Sets actor names in the Dialogue
 [Serializable]
@@ -21,7 +24,7 @@ public class SetActorStoryInstruction : ActorActionStoryInstruction
         else
         {
             Debug.Log($"Setting actors: {string.Join(", ", Actors)}");
-            string FinalDisplayNames = "";
+            string finalDisplayNames = "";
             for (int i = 0; i < Actors.Count; i++)
             {
                 // Check if the actor name ends with '?', indicating to hide the name of the actor
@@ -38,17 +41,17 @@ public class SetActorStoryInstruction : ActorActionStoryInstruction
                 string displayName = isUnknown ? "???" : actor.Name;
 
                 //Make the actor name stack if there are 2 or more actors
-                FinalDisplayNames += displayName;
+                finalDisplayNames += displayName;
 
                 // Add a comma if not the last actor
                 if (i < Actors.Count - 1)
                 {
-                    FinalDisplayNames += ", ";
+                    finalDisplayNames += ", ";
                 }
 
             }
             
-            teller.SetNameLabelText(FinalDisplayNames);
+            teller.SetNameLabelText(finalDisplayNames);
             teller.DialogueLabel.text += "<color=#bdf>"; //hardcoded for now 
 
         }

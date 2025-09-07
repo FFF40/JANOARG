@@ -5,42 +5,47 @@ using System.Text.RegularExpressions;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using JANOARG.Client.Behaviors.Storyteller;
+using JANOARG.Shared.Data.ChartInfo;
 
-[Serializable]
-public class HideInterfaceStoryInstruction : StoryInstruction
+namespace JANOARG.Shared.Data.Story.Instructions
 {
-    public bool IsHideInterface;
-    public float FadeDuration = 1f;
-
-    [StoryTag("hideInterface")]
-    public HideInterfaceStoryInstruction(string isHide, string duration)
+    [Serializable]
+    public class HideInterfaceStoryInstruction : StoryInstruction
     {
-        IsHideInterface = ParseBoolean(isHide);
-        FadeDuration = ParseDuration(duration);
-    }
+        public bool IsHideInterface;
+        public float FadeDuration = 1f;
 
-    public override IEnumerator OnInterfaceChange(Storyteller teller)
-    {
-        if (IsHideInterface == true)
+        [StoryTag("hideInterface")]
+        public HideInterfaceStoryInstruction(string isHide, string duration)
         {
-            // Hides in the interface for the duration 
-            yield return Ease.Animate(FadeDuration, (a) =>
-            {
-                float lerp = Ease.Get(1 - a, EaseFunction.Cubic, EaseMode.Out);
-                teller.InterfaceGroup.alpha = lerp;
-            });
+            IsHideInterface = ParseBoolean(isHide);
+            FadeDuration = ParseDuration(duration);
         }
-        else
+
+        public override IEnumerator OnInterfaceChange(Storyteller teller)
         {
-            // Shows in the interface for the duration
-            yield return Ease.Animate(FadeDuration, (a) =>
+            if (IsHideInterface == true)
             {
-                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                teller.InterfaceGroup.alpha = lerp;
-            });
+                // Hides in the interface for the duration 
+                yield return Ease.Animate(FadeDuration, (a) =>
+                {
+                    float lerp = Ease.Get(1 - a, EaseFunction.Cubic, EaseMode.Out);
+                    teller.InterfaceGroup.alpha = lerp;
+                });
+            }
+            else
+            {
+                // Shows in the interface for the duration
+                yield return Ease.Animate(FadeDuration, (a) =>
+                {
+                    float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                    teller.InterfaceGroup.alpha = lerp;
+                });
+
+            }
 
         }
-        
-    }
 
+    }
 }

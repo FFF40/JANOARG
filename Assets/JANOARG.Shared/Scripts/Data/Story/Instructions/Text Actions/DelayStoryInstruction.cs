@@ -2,27 +2,32 @@ using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using JANOARG.Client.Behaviors.Storyteller;
 
-[Serializable]
-public class DelayStoryInstruction : StoryInstruction 
+namespace JANOARG.Shared.Data.Story.Instructions
 {
-    public float Duration;
-    public bool ScaleWithCharacterDuration;
 
-    [StoryTag("wait")]
-    public DelayStoryInstruction (string duration) 
+    [Serializable]
+    public class DelayStoryInstruction : StoryInstruction
     {
-        Duration = ParseDuration(duration);
-        ScaleWithCharacterDuration = isDurationScaleable(duration);
-    }
+        public float Duration;
+        public bool ScaleWithCharacterDuration;
 
-    public override IEnumerator OnTextReveal(Storyteller teller)
-    {
-        float realDuration = Duration;
-        if (ScaleWithCharacterDuration)
-            realDuration *= teller.CharacterDuration;
-        while (teller.TimeBuffer < realDuration)
-            yield return null;
-        teller.TimeBuffer -= realDuration;
+        [StoryTag("wait")]
+        public DelayStoryInstruction(string duration)
+        {
+            Duration = ParseDuration(duration);
+            ScaleWithCharacterDuration = IsDurationScaleable(duration);
+        }
+
+        public override IEnumerator OnTextReveal(Storyteller teller)
+        {
+            float realDuration = Duration;
+            if (ScaleWithCharacterDuration)
+                realDuration *= teller.CharacterDuration;
+            while (teller.TimeBuffer < realDuration)
+                yield return null;
+            teller.TimeBuffer -= realDuration;
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using JANOARG.Shared.Data.ChartInfo;
 
 [Serializable]
 public class ActorSpriteHandler : MonoBehaviour
@@ -23,10 +24,10 @@ public class ActorSpriteHandler : MonoBehaviour
     public void SetActorSprite(Sprite sprite, bool isInvisible)
     {
         // Get the Image compoent then change the sprite
-        Image Current = ImageHolder.GetComponentInChildren<Image>();
+        Image current = ImageHolder.GetComponentInChildren<Image>();
 
-        if (isInvisible) Current.color = new Color(0f, 0f, 0f, 0f);
-        Current.sprite = sprite;
+        if (isInvisible) current.color = new Color(0f, 0f, 0f, 0f);
+        current.sprite = sprite;
 
         Vector2 referenceResolution = new Vector2(880, 600);
         float aspectRatio = (float)sprite.texture.width / sprite.texture.height;
@@ -36,7 +37,7 @@ public class ActorSpriteHandler : MonoBehaviour
 
         SpriteSize = new Vector2(targetWidth, targetHeight);
         
-        Current.rectTransform.sizeDelta = SpriteSize;
+        current.rectTransform.sizeDelta = SpriteSize;
 
         StartCoroutine(BounceSprite());
     }
@@ -67,9 +68,9 @@ public class ActorSpriteHandler : MonoBehaviour
     }
 
     #region  WIP
-    public IEnumerator SetActorPosition(float FadeDuration)
+    public IEnumerator SetActorPosition(float fadeDuration)
     {
-        yield return Ease.Animate(FadeDuration, (a) =>
+        yield return Ease.Animate(fadeDuration, (a) =>
         {
             float lerp = Ease.Get(1 - a, EaseFunction.Cubic, EaseMode.Out);
             // ImageHolder.   
@@ -78,30 +79,30 @@ public class ActorSpriteHandler : MonoBehaviour
 
     public void SetSpriteVisible()
     {
-        Image Current = ImageHolder.GetComponentInChildren<Image>();
-        Current.color = new Color(1f, 1f, 1f, 1f);
+        Image current = ImageHolder.GetComponentInChildren<Image>();
+        current.color = new Color(1f, 1f, 1f, 1f);
     }
 
-    public IEnumerator SetSpriteVisible(float FadeDuration)
+    public IEnumerator SetSpriteVisible(float fadeDuration)
     {
-        Image Current = ImageHolder.GetComponentInChildren<Image>();
+        Image current = ImageHolder.GetComponentInChildren<Image>();
 
-        yield return Ease.Animate(FadeDuration, (a) =>
+        yield return Ease.Animate(fadeDuration, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-            Current.color = new Color(1f, 1f, 1f, 1f * lerp);
+            current.color = new Color(1f, 1f, 1f, 1f * lerp);
         });
 
     }
 
-    public IEnumerator MoveSprite(Vector2 startPos, Vector2 endPos, float FadeDuration)
+    public IEnumerator MoveSprite(Vector2 startPos, Vector2 endPos, float fadeDuration)
     {
         RectTransform rectTransform = HandlerCanvas.GetComponent<RectTransform>();
 
-        yield return Ease.Animate(FadeDuration, (a) =>
+        yield return Ease.Animate(fadeDuration, (a) =>
         {
             float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-            // Current.color = new Color(1f, 1f, 1f, 1f*lerp);
+            // current.color = new Color(1f, 1f, 1f, 1f*lerp);
         });
     }
     #endregion

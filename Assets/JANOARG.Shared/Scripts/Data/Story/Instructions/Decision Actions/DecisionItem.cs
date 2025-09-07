@@ -5,25 +5,28 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 // STILL IN PROGRESS <-------------------------------------------------------------
-[Serializable]
-public class DecisionItem
+namespace JANOARG.Shared.Data.Story.Instructions
 {
-    public string StoryFlag;
-    public string Value;
-    public string Dialog;
 
-    public DecisionItem(string flag, string value, string text)
+    [Serializable]
+    public class DecisionItem
     {
-        StoryFlag = flag;
-        Value = value;
-        Dialog = text;
+        public string StoryFlag;
+        public string Value;
+        public string Dialog;
+
+        public DecisionItem(string flag, string value, string text)
+        {
+            StoryFlag = flag;
+            Value = value;
+            Dialog = text;
+        }
+    }
+
+
+    public class FlagCheck : DecisionItem
+    {
+        public FlagCheck(string flag, string value, string text) : base(flag, value, text)
+        { }
     }
 }
-
-
-public class FlagCheck : DecisionItem
-{
-    public FlagCheck(string flag, string value, string text) : base(flag, value, text)
-    { } 
-}
-

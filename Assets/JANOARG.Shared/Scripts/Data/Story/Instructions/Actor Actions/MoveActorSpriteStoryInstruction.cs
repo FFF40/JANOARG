@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using UnityEngine.Rendering;
+using JANOARG.Client.Behaviors.Storyteller;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Story.Instructions;
 
 [Serializable]
 public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
@@ -14,7 +17,7 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
     public string Destination;
     public float Duration;
 
-    private Vector2 SpriteSize;
+    private Vector2 _SpriteSize;
 
     [StoryTag("move")]
     public MoveActorSpriteStoryInstruction(string actor, string source, string destination, string duration)
@@ -50,11 +53,11 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         //Find the actor in the constants list and initialize its sprite handler
         var actor = teller.Constants.Actors.Find(x => x.Alias == Actors[0]);
         InitSpriteHandler(actor.Alias, teller);
-        ActorSpriteHandler TargetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
-        SpriteSize = TargetActorSpriteHandler.GetSpriteSize();
+        ActorSpriteHandler targetActorSpriteHandler = teller.Actors.Find(x => x.CurrentActor == actor.Alias);
+        _SpriteSize = targetActorSpriteHandler.GetSpriteSize();
 
         //Get the RectTransform of the image holder
-        RectTransform rt = TargetActorSpriteHandler.ImageHolder.GetComponentInChildren<Image>().rectTransform;
+        RectTransform rt = targetActorSpriteHandler.ImageHolder.GetComponentInChildren<Image>().rectTransform;
 
         Vector2 fromScreenPos = ResolvePosition(From, rt);
         Vector2 toScreenPos = ResolvePosition(Destination, rt);
@@ -70,22 +73,22 @@ public class MoveActorSpriteStoryInstruction : ActorActionStoryInstruction
         float screenH = parentRT.rect.height;
 
         // Ensure the sprite size is set
-        rt.sizeDelta = SpriteSize;
+        rt.sizeDelta = _SpriteSize;
 
         return keyword switch
         {
             // Left edge: half sprite width from left border
-            "l" or "left" => new Vector2(-screenW / 2 + SpriteSize.x / 2, 0),
+            "l" or "left" => new Vector2(-screenW / 2 + _SpriteSize.x / 2, 0),
             
             // Right edge: half sprite width from right border
-            "r" or "right" => new Vector2(screenW / 2 - SpriteSize.x / 2, 0),
+            "r" or "right" => new Vector2(screenW / 2 - _SpriteSize.x / 2, 0),
 
             "c" or "center" or "middle" => Vector2.zero,
 
             // Out of bounds left
-            "ol" or "outleft" => new Vector2(-screenW / 2 - SpriteSize.x, 0),
+            "ol" or "outleft" => new Vector2(-screenW / 2 - _SpriteSize.x, 0),
             // Out of bounds right
-            "or" or "outright" => new Vector2(screenW / 2 + SpriteSize.x, 0),
+            "or" or "outright" => new Vector2(screenW / 2 + _SpriteSize.x, 0),
 
             "self" => rt.anchoredPosition,
             _ => throw new ArgumentException($"Unknown position keyword: {keyword}")
