@@ -697,11 +697,15 @@ namespace JANOARG.Client.Behaviors.Player
 
             for (var a = 0; a < LaneStyles.Count; a++)
             {
-                sCurrentChart.Palette.LaneStyles[a]
-                    .Advance(visualBeat);
+                sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
 
-                LaneStyles[a]
-                    .Update(sCurrentChart.Palette.LaneStyles[a]);
+                LaneStyles[a].Update(sCurrentChart.Palette.LaneStyles[a]);
+                
+                if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
+                    TransparentMeshLaneIndexes.Remove(a);
+                else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
+                    TransparentMeshLaneIndexes.Add(a);
+                    
             }
 
             for (var a = 0; a < HitStyles.Count; a++)
