@@ -3,8 +3,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
-namespace JANOARG.Shared.Data.Files.Editor
-{
+
     [ScriptedImporter(2, "jac", 1001)]
     public class JACImporter : ScriptedImporter
     {
@@ -19,4 +18,3 @@ namespace JANOARG.Shared.Data.Files.Editor
             ctx.SetMainObject(ext);
         }
     }
-}

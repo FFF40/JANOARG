@@ -3,8 +3,6 @@ using System.Globalization;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Shared.Data.Files
-{
     public class JACEncoder
     {
         public const int FORMAT_VERSION = 1;
@@ -314,4 +312,3 @@ namespace JANOARG.Shared.Data.Files
                    col.a.ToString(CultureInfo.InvariantCulture);
         }
     }
-}

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 using JANOARG.Client.Behaviors.Storyteller;
-using JANOARG.Shared.Data.Files;
 
 namespace JANOARG.Shared.Data.Story.Instructions
 {

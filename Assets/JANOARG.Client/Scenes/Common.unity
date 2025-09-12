@@ -4009,7 +4009,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -6694,6 +6694,7 @@ GameObject:
   - component: {fileID: 1344250014}
   - component: {fileID: 1344250018}
   - component: {fileID: 1344250019}
+  - component: {fileID: 1344250020}
   m_Layer: 5
   m_Name: Top Info
   m_TagString: Untagged
@@ -6832,11 +6833,28 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1344250020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344250012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1359830934
 GameObject:
   m_ObjectHideFlags: 0
@@ -7740,8 +7758,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42acb047d9597b3deae6b6c5ca73147f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AddDebugLogMessages: 1
-  AddDebugWarningMessages: 1
 --- !u!1 &1571469826
 GameObject:
   m_ObjectHideFlags: 0

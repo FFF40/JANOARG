@@ -2,8 +2,7 @@ using System.IO;
 using JANOARG.Shared.Data.Story;
 using UnityEditor.AssetImporters;
 
-namespace JANOARG.Shared.Data.Files.Editor
-{
+
     [ScriptedImporter(1, "story")]
     public class StoryImporter : ScriptedImporter
     {
@@ -15,4 +14,3 @@ namespace JANOARG.Shared.Data.Files.Editor
             ctx.SetMainObject(script);
         }
     }
-}

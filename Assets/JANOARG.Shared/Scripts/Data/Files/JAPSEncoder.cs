@@ -2,8 +2,7 @@ using System.Globalization;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Shared.Data.Files
-{
+
     public class JAPSEncoder
     {
         public const int FORMAT_VERSION = 2;
@@ -156,4 +155,3 @@ namespace JANOARG.Shared.Data.Files
                    col.a.ToString(CultureInfo.InvariantCulture);
         }
     }
-}

@@ -19,6 +19,9 @@ namespace JANOARG.Client.Behaviors.Common
         public LoadingBar LoadingBar;
         public Storage    Preferences;
         public Storage    Storage;
+        
+        private const bool _UNLIMITED_FPS = true; // Change before build
+        private const int  _MAX_FPS       = 120;
 
         public void Awake()
         {
@@ -34,7 +37,8 @@ namespace JANOARG.Client.Behaviors.Common
 
             Preferences = new Storage("prefs");
 
-            Application.targetFrameRate = 90;
+            Application.targetFrameRate = _UNLIMITED_FPS 
+                ? 1000 : _MAX_FPS;
 
             CommonScene.LoadAlt("Intro");
         }

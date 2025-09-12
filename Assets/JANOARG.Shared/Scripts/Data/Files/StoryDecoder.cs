@@ -5,13 +5,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using JANOARG.Shared.Data.Story;
 using JANOARG.Shared.Data.Story.Instructions;
-using UnityEditor.Callbacks;
-#if UNITY_EDITOR
 using UnityEngine;
-#endif
 
-namespace JANOARG.Shared.Data.Files
-{
     public class StoryDecoder
     {
         public const int FORMAT_VERSION = 1;
@@ -23,7 +18,7 @@ namespace JANOARG.Shared.Data.Files
             new(@"^(?<actor>(?:[0-9a-zA-Z]+,)*[0-9a-zA-Z]+)\s*>\s+(?<content>.*)");
 
 #if UNITY_EDITOR
-        [DidReloadScripts]
+        [UnityEditor.Callbacks.DidReloadScripts]
 #endif
         public static void InitiateStoryTags()
         {
@@ -223,4 +218,3 @@ namespace JANOARG.Shared.Data.Files
         public string[]        DefaultParameters;
         public string          Keyword;
     }
-}

@@ -204,11 +204,17 @@ namespace JANOARG.Shared.Data.ChartInfo
                 CatchMaterial = new Material(BaseMainMaterial);
             }
 
-            if (BaseHoldTailMaterial?.name != style.HoldTailMaterial) HoldTailMaterial = new Material(BaseHoldTailMaterial = Resources.Load<Material>("Materials/Hold/" + style.HoldTailMaterial));
+            if (BaseHoldTailMaterial?.name != style.HoldTailMaterial) 
+                HoldTailMaterial = new Material(BaseHoldTailMaterial = Resources.Load<Material>("Materials/Hold/" + style.HoldTailMaterial));
 
-            if (NormalMaterial) NormalMaterial.SetColor(style.MainColorTarget, style.NormalColor);
-            if (CatchMaterial) CatchMaterial.SetColor(style.MainColorTarget, style.CatchColor);
-            if (HoldTailMaterial) HoldTailMaterial.SetColor(style.HoldTailColorTarget, style.HoldTailColor);
+            if (NormalMaterial)
+                NormalMaterial.SetColor(style.MainColorTarget, style.NormalColor);
+            
+            if (CatchMaterial) 
+                CatchMaterial.SetColor(style.MainColorTarget, style.CatchColor);
+            
+            if (HoldTailMaterial) 
+                HoldTailMaterial.SetColor(style.HoldTailColorTarget, style.HoldTailColor);
         }
 
         public void Dispose()

@@ -4,8 +4,7 @@ using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
-namespace JANOARG.Shared.Data.Files.Editor
-{
+
     [ScriptedImporter(1, "japs", 1000)]
     public class JAPSImporter : ScriptedImporter
     {
@@ -25,4 +24,3 @@ namespace JANOARG.Shared.Data.Files.Editor
             ctx.SetMainObject(ext);
         }
     }
-}

@@ -83,7 +83,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
     public abstract class Storyboardable
     {
-        internal static readonly Array TimestampIDValues = Enum.GetValues(typeof(TimestampIDs));
+        internal static readonly Array srTimestampIDValues = Enum.GetValues(typeof(TimestampIDs));
         
         public Storyboard Storyboard = new();
 
@@ -134,7 +134,7 @@ namespace JANOARG.Shared.Data.ChartInfo
             if (CurrentValues == null) 
             {
                 // Initialize array with size equal to number of enum values
-                CurrentValues = new float[TimestampIDValues.Length];
+                CurrentValues = new float[srTimestampIDValues.Length];
             
                 foreach (TimestampType timestampType in timestampTypes)
                     CurrentValues[(int)timestampType.ID] = timestampType.StoryboardGetter(this);
@@ -195,12 +195,28 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public bool IsDirty;
 
+        // Using dictionaries for faster lookup on higher call volumes
+        private Dictionary<TimestampIDs, Queue<Timestamp>> _TimestampsByID;
+
+        // Initialize on storyboard setup
+        private void InitializeTimestampGroups()
+        {
+            _TimestampsByID = new Dictionary<TimestampIDs, Queue<Timestamp>>();
+            
+            // Group timestamps by ID and sort by offset
+            var grouped = Storyboard.Timestamps
+                .GroupBy(t => t.ID)
+                .ToDictionary(g => g.Key, g => new Queue<Timestamp>(g.OrderBy(t => t.Offset)));
+            
+            _TimestampsByID = grouped;
+        }
+
         public override void Advance(float time)
         {
             if (CurrentValues == null) 
             {
-                // Initialize array with size equal to number of enum values
-                CurrentValues = new float[Storyboardable.TimestampIDValues.Length];
+                CurrentValues = new float[srTimestampIDValues.Length];
+                InitializeTimestampGroups();
             
                 foreach (TimestampType timestampType in timestampTypes)
                     CurrentValues[(int)timestampType.ID] = timestampType.StoryboardGetter(this);
@@ -208,26 +224,17 @@ namespace JANOARG.Shared.Data.ChartInfo
             
             foreach(TimestampType timestampType in timestampTypes)
             {
-                
                 float value = CurrentValues[(int)timestampType.ID];
                 
-                while (true) 
-                {
-                    // Look for matching timestamp (LINEAR SEARCH AAAAA)
-                    Timestamp timestamp = null;
+                if (!_TimestampsByID.TryGetValue(timestampType.ID, out Queue<Timestamp> timestamps))
+                    continue;
                     
-                    foreach (Timestamp storyboardTimestamp in Storyboard.Timestamps)
-                    {
-                        if (storyboardTimestamp.ID != timestampType.ID)
-                            continue;
-
-                        timestamp = storyboardTimestamp;
-
-                        break;
-                    }
+                while (timestamps.Count > 0) 
+                {
+                    Timestamp timestamp = timestamps.Peek();
 
                     // If there's no timestamp or it's not yet the start of the next timestamp
-                    if (timestamp == null || (time < timestamp.Offset && CurrentTime < timestamp.Offset)) 
+                    if (time < timestamp.Offset && CurrentTime < timestamp.Offset) 
                         break;
                     
                     // Otherwise
@@ -244,9 +251,9 @@ namespace JANOARG.Shared.Data.ChartInfo
                     }
                     else
                     {
-                        // Set value to target and pop the timestamp off the list
+                        // Set value to target and pop the timestamp off the queue
+                        timestamps.Dequeue(); // Much faster than List.Remove()
                         CurrentValues[(int)timestampType.ID] = value = timestamp.Target;
-                        Storyboard.Timestamps.Remove(timestamp);
                         IsDirty = true;
                     }
                 }

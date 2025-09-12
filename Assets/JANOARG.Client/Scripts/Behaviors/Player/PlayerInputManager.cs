@@ -639,7 +639,7 @@ public class PlayerInputManager : MonoBehaviour
                         //// Special judgement handling for hold ticks (nothing else handles this)
                         Player.AddScore(1, null);
 
-                        var effect = PlayerScreen.sMain.judgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
+                        var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                         
@@ -833,7 +833,7 @@ public class PlayerInputManager : MonoBehaviour
             // Handle hold tick just like how HitPlayer does
             if (holdNoteEntry.IsScoring)
             {
-                var effect = PlayerScreen.sMain.judgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
+                var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
                 var rt = (RectTransform)effect.transform;
 
                 rt.position =

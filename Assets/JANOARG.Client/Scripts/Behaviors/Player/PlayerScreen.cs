@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Song_Select;
 using JANOARG.Client.UI;
@@ -69,8 +70,8 @@ namespace JANOARG.Client.Behaviors.Player
         public CanvasGroup   ComboGroup;
         public TMP_Text      ComboLabel;
         public RectTransform JudgeScreenHolder;
-        [Space]
-        public JudgeScreenManager judgeScreenManager;
+        [FormerlySerializedAs("judgeScreenManager")] [Space]
+        public JudgeScreenManager JudgeScreenManager;
         [Space]
         public TMP_Text PauseLabel;
 
@@ -163,15 +164,14 @@ namespace JANOARG.Client.Behaviors.Player
         [NonSerialized]
         public PlayerSettings Settings = new();
 
-
-        private List<Lane>      _LaneQueues;
-        private List<LaneGroup> _LaneGroupQueues;
-
         [NonSerialized]
         public float ScaledExtraRadius;
 
         [NonSerialized]
         public float ScaledMinimumRadius;
+        
+        internal List<int> TransparentMeshLaneIndexes = new();
+        private List<LanePlayer> _LanesToRender = new();
 
         public void Awake()
         {
@@ -285,7 +285,10 @@ namespace JANOARG.Client.Behaviors.Player
                     LaneGroups[a].Current = sCurrentChart.Groups[a];
 
                 foreach (LanePlayer lane in Lanes)
+                {
                     Destroy(lane.gameObject);
+                    Destroy(lane);
+                }
 
                 Lanes.Clear();
             }
@@ -297,6 +300,17 @@ namespace JANOARG.Client.Behaviors.Player
                 {
                     LaneStyles.Add(new LaneStyleManager(style));
                     Update_LoadingBarHolder(1, $"Loading lanestyle {style.Name}...({LaneStyles.Count} of {sCurrentChart.Palette.LaneStyles.Count})");
+                }
+
+                for (var i = 0; i < sCurrentChart.Palette.LaneStyles.Count; i++)
+                {
+                    LaneStyle laneStyle = sCurrentChart.Palette.LaneStyles[i];
+                    
+                    // For mesh culling on invisible lanes
+                    if (laneStyle.LaneColor.a == 0)
+                        TransparentMeshLaneIndexes.Add(i);
+
+                    TransparentMeshLaneIndexes.Remove(-1);
                 }
 
                 foreach (HitStyle style in sCurrentChart.Palette.HitStyles)
@@ -618,104 +632,129 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool ResultExec = false;
 
+        private Metronome _Met = sTargetSong.Timing;
         public void Update()
         {
-            if (IsPlaying)
-            {
-                double delta = Math.Min(AudioSettings.dspTime - _LastDSPTime, PerfectWindow);
-                if (delta <= 0) delta = Time.unscaledDeltaTime;
-                CurrentTime += (float)delta;
-                _LastDSPTime += delta;
+            if (!IsPlaying)
+                return;
 
-                // Audio sync
-                if (CurrentTime >= 0 && CurrentTime < Music.clip.length)
+            double delta = Math.Min(AudioSettings.dspTime - _LastDSPTime, PerfectWindow);
+            if (delta <= 0) delta = Time.unscaledDeltaTime;
+            CurrentTime += (float)delta;
+            _LastDSPTime += delta;
+
+            // Audio sync
+            if (CurrentTime >= 0 && CurrentTime < Music.clip.length)
+            {
+                if (Music.isPlaying)
                 {
-                    if (Music.isPlaying)
+                    if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
                     {
-                        if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
-                        {
-                            Music.time = CurrentTime;
-                        }
-                        else
-                        {
-                            // CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
-                        }
+                        Music.time = CurrentTime;
                     }
                     else
                     {
-                        Music.Play();
-                        Music.time = CurrentTime;
+                        // CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
                     }
                 }
                 else
                 {
-                    if (Music.isPlaying) Music.Pause();
+                    Music.Play();
+                    Music.time = CurrentTime;
                 }
+            }
+            else if (Music.isPlaying) 
+                    Music.Pause();
 
-                // Check hit objects
-                CheckHitObjects();
+            // Check hit objects
+            CheckHitObjects();
 
-                // Update song progress slider
-                SongProgress.value = CurrentTime / Music.clip.length;
-
-
-                // Prevents from going to negative values, which might break things
-                // float ChartUpdateTime(float time) => time < 0 ? 0 : time ;
-
-                // Your code break things, great job :thumbs_up:
-
-                float visualTime = CurrentTime + Settings.VisualOffset;
-                float visualBeat = sTargetSong.Timing.ToBeat(visualTime);
+            // Update song progress slider
+            SongProgress.value = CurrentTime / Music.clip.length;
 
 
-                // Update palette
-                sCurrentChart.Palette.Advance(visualBeat);
-                if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor) SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
-                if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor) SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+            // Prevents from going to negative values, which might break things
+            // float ChartUpdateTime(float time) => time < 0 ? 0 : time ;
 
-                for (var a = 0; a < LaneStyles.Count; a++)
+            // Your code break things, great job :thumbs_up:
+
+            float visualTime = CurrentTime + Settings.VisualOffset;
+            float visualBeat = sTargetSong.Timing.ToBeat(visualTime);
+
+
+            // Update palette
+            sCurrentChart.Palette.Advance(visualBeat);
+            
+            if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor) 
+                SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
+            
+            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor) 
+                SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+
+            for (var a = 0; a < LaneStyles.Count; a++)
+            {
+                sCurrentChart.Palette.LaneStyles[a]
+                    .Advance(visualBeat);
+
+                LaneStyles[a]
+                    .Update(sCurrentChart.Palette.LaneStyles[a]);
+            }
+
+            for (var a = 0; a < HitStyles.Count; a++)
+            {
+                sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
+
+                HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a]);
+            }
+
+            // Update camera
+            sCurrentChart.Camera.Advance(visualBeat);
+            Camera pseudoCamera = CommonSys.sMain.MainCamera;
+            pseudoCamera.transform.position = sCurrentChart.Camera.CameraPivot;
+            pseudoCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
+            pseudoCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
+
+            // Update scene
+            foreach (LaneGroupPlayer group in LaneGroups)
+                group.UpdateSelf(visualTime, visualBeat);
+
+            for (int i = 0; i < Lanes.Count; i++)
+            {
+                try
                 {
-                    sCurrentChart.Palette.LaneStyles[a]
-                        .Advance(visualBeat);
+                    LanePlayer lane = Lanes[i];
 
-                    LaneStyles[a]
-                        .Update(sCurrentChart.Palette.LaneStyles[a]);
-                }
-
-                for (var a = 0; a < HitStyles.Count; a++)
-                {
-                    sCurrentChart.Palette.HitStyles[a]
-                        .Advance(visualBeat);
-
-                    HitStyles[a]
-                        .Update(sCurrentChart.Palette.HitStyles[a]);
-                }
-
-                // Update camera
-                sCurrentChart.Camera.Advance(visualBeat);
-                Camera camera = CommonSys.sMain.MainCamera;
-                camera.transform.position = sCurrentChart.Camera.CameraPivot;
-                camera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
-                camera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
-
-                // Update scene
-                foreach (LaneGroupPlayer group in LaneGroups)
-                    group.UpdateSelf(visualTime, visualBeat);
-
-                foreach (LanePlayer lane in Lanes)
+                    if (lane.TimeStamps[0] - 8f > visualTime)
+                        continue;
+                        
                     lane.UpdateSelf(visualTime, visualBeat);
 
-                if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || CurrentTime / Music.clip.length >= 1) && !ResultExec)
-                {
-                    PlayerScreenResult.sMain.StartEndingAnim();
-                    ResultExec = true;
+                    if (!lane.MarkedForRemoval || !lane)
+                        continue;
+                    
+                    Lanes.Remove(lane);
+                    Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
                 }
+                catch (MissingReferenceException)
+                {
+                    Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
+                        
+                    Lanes.Remove(Lanes[i]);
+                }
+            }
+
+            // Show ending animation; the failsafe on bugs is on following:
+            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
+            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || CurrentTime / Music.clip.length >= 1) && !ResultExec)
+            {
+                PlayerScreenResult.sMain.StartEndingAnim();
+                ResultExec = true;
             }
         }
 
         public void Resync()
         {
-            _LastDSPTime = AudioSettings.dspTime;
+            _LastDSPTime = AudioSettings.dspTime;   
         }
 
         public void CheckHitObjects()
@@ -854,7 +893,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (spawnEffect)
             {
-                var effect = sMain.judgeScreenManager.BorrowEffect(acc, sCurrentChart.Palette.InterfaceColor);
+                var effect = sMain.JudgeScreenManager.BorrowEffect(acc, sCurrentChart.Palette.InterfaceColor);
                 var rt = (RectTransform)effect.transform;
                 rt.position = hitObject.HitCoord.Position;
 
@@ -939,8 +978,8 @@ namespace JANOARG.Client.Behaviors.Player
                 ArrowFlickIndicator = mesh;
             }
 
-            AssetDatabase.CreateAsset(FreeFlickIndicator, "Assets/JANOARG/Resources/Meshes/FreeFlickIndicator.asset");
-            AssetDatabase.CreateAsset(ArrowFlickIndicator, "Assets/JANOARG/Resources/Meshes/ArrowFlickIndicator.asset");
+            //AssetDatabase.CreateAsset(FreeFlickIndicator, "Assets/JANOARG/Resources/Meshes/FreeFlickIndicator.asset");
+            //AssetDatabase.CreateAsset(ArrowFlickIndicator, "Assets/JANOARG/Resources/Meshes/ArrowFlickIndicator.asset");
         }
     }
 

@@ -3,8 +3,7 @@ using System.Globalization;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-namespace JANOARG.Shared.Data.Files
-{
+
     public class JACDecoder
     {
         public const int FORMAT_VERSION = 1;
@@ -408,4 +407,3 @@ namespace JANOARG.Shared.Data.Files
                 ParseFloat(tokens[3]));
         }
     }
-}

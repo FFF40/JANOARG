@@ -58,7 +58,7 @@ namespace JANOARG.Client.Behaviors.Player
             });
 
             if (isOneShot) Destroy(gameObject);
-            else PlayerScreen.sMain.judgeScreenManager.ReturnEffect(this);
+            else PlayerScreen.sMain.JudgeScreenManager.ReturnEffect(this);
         }
     }
 }

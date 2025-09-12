@@ -80,15 +80,11 @@ namespace JANOARG.Shared.Data.ChartInfo
             }
         }
 
-        public static implicit operator double(BeatPosition a)
-        {
-            return a.Number + (double)a.Numerator / a.Denominator;
-        }
+        public static implicit operator double(BeatPosition a) => 
+            a.Number + (double)a.Numerator / a.Denominator;
 
-        public static implicit operator float(BeatPosition a)
-        {
-            return a.Number + (float)a.Numerator / a.Denominator;
-        }
+        public static implicit operator float(BeatPosition a) => 
+            a.Number + (float)a.Numerator / a.Denominator;
 
         public static explicit operator BeatPosition(double a)
         {
@@ -155,25 +151,17 @@ namespace JANOARG.Shared.Data.ChartInfo
             );
         }
 
-        public static bool operator <(BeatPosition a, BeatPosition b)
-        {
-            return a.CompareTo(b) < 0;
-        }
+        public static bool operator <(BeatPosition a, BeatPosition b) => 
+            a.CompareTo(b) < 0;
 
-        public static bool operator <=(BeatPosition a, BeatPosition b)
-        {
-            return a.CompareTo(b) <= 0;
-        }
+        public static bool operator <=(BeatPosition a, BeatPosition b) => 
+            a.CompareTo(b) <= 0;
 
-        public static bool operator >(BeatPosition a, BeatPosition b)
-        {
-            return a.CompareTo(b) > 0;
-        }
+        public static bool operator >(BeatPosition a, BeatPosition b) => 
+            a.CompareTo(b) > 0;
 
-        public static bool operator >=(BeatPosition a, BeatPosition b)
-        {
-            return a.CompareTo(b) >= 0;
-        }
+        public static bool operator >=(BeatPosition a, BeatPosition b) => 
+            a.CompareTo(b) >= 0;
 
         private void Normalize()
         {
@@ -256,10 +244,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         // ReSharper disable once InconsistentNaming
         public static readonly BeatPosition NaN = new() { Number = 0, Numerator = 0, Denominator = 0 };
 
-        public static bool IsNaN(BeatPosition a)
-        {
-            return a.Denominator <= 0;
-        }
+        public static bool IsNaN(BeatPosition a) => 
+            a.Denominator <= 0;
 
         public readonly int CompareTo(BeatPosition other)
         {
@@ -267,14 +253,10 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
 
         // -------------------- Math functions
-        public static BeatPosition Min(BeatPosition a, BeatPosition b)
-        {
-            return a < b ? a : b;
-        }
+        public static BeatPosition Min(BeatPosition a, BeatPosition b) => 
+            a < b ? a : b;
 
-        public static BeatPosition Max(BeatPosition a, BeatPosition b)
-        {
-            return a > b ? a : b;
-        }
+        public static BeatPosition Max(BeatPosition a, BeatPosition b) => 
+            a > b ? a : b;
     }
 }
