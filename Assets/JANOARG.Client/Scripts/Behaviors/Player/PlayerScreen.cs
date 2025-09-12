@@ -282,13 +282,13 @@ namespace JANOARG.Client.Behaviors.Player
                         .Update(sCurrentChart.Palette.HitStyles[a]);
 
                 for (var a = 0; a < sTargetChart.Data.Groups.Count; a++)
-                    LaneGroups[a].Current = sCurrentChart.Groups[a];
+                        LaneGroups[a].Current = sCurrentChart.Groups.Find(x => x.Name == LaneGroups[a].name);
 
                 foreach (LanePlayer lane in Lanes)
                 {
                     Destroy(lane.gameObject);
-                    Destroy(lane);
                 }
+                
 
                 Lanes.Clear();
             }
@@ -354,8 +354,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         private IEnumerator LaneLoader()
         {
-            var loadedLanes = 0;
-            var instantiatedLane = new bool[sTargetChart.Data.Lanes.Count];
+            int loadedLanes = 0;
+            bool[] instantiatedLane = new bool[sTargetChart.Data.Lanes.Count];
 
             while (loadedLanes < sTargetChart.Data.Lanes.Count)
             {
@@ -374,7 +374,7 @@ namespace JANOARG.Client.Behaviors.Player
                     bool noParent = string.IsNullOrEmpty(laneData.Group);
 
                     LaneGroupPlayer laneInGroup = noParent
-                        ? null : LaneGroups.Find(x => x.Current.Name == laneData.Group);
+                        ? null : LaneGroups.Find(x => x.Original.Name == laneData.Group);
 
                     // Debug.Log($"[LaneInit] Processing lane {a}: group = '{laneData.Group}'");
 
@@ -407,25 +407,29 @@ namespace JANOARG.Client.Behaviors.Player
                     foreach (HitObject laneHitobject in instancedLane.Original.Objects)
                     {
                         // Add ExScore by note type
-                        TotalExScore += laneHitobject.Type == HitObject.HitType.Normal ? 3 : 1;
+                        TotalExScore += laneHitobject.Type == HitObject.HitType.Normal 
+                            ? 3 : 1;
+                        
                         TotalExScore += Mathf.Ceil(laneHitobject.HoldLength / 0.5f);
 
                         if (laneHitobject.Flickable)
                         {
                             TotalExScore += 1;
-                            if (!float.IsNaN(laneHitobject.FlickDirection)) TotalExScore += 1;
+                            
+                            if (!float.IsNaN(laneHitobject.FlickDirection))
+                                TotalExScore += 1;
                         }
 
                         if (!Mathf.Approximately(time, laneHitobject.Offset))
                         {
                             // Set camera distance and rotation to hit time of the note?
-                            var hitObjectCamera = (CameraController)sTargetChart.Data.Camera.GetStoryboardableObject(laneHitobject.Offset);
+                            CameraController hitObjectCamera = (CameraController)sTargetChart.Data.Camera.GetStoryboardableObject(laneHitobject.Offset);
                             Pseudocamera.transform.localPosition = hitObjectCamera.CameraPivot;
                             Pseudocamera.transform.localEulerAngles = hitObjectCamera.CameraRotation;
                             Pseudocamera.transform.Translate(Vector3.back * hitObjectCamera.PivotDistance);
 
                             // Set 2 points of lane?
-                            var lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
+                            Lane lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
                             LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, sTargetSong.Timing);
                             startPos = Quaternion.Euler(lane.Rotation) * positionStep.StartPosition + lane.Position;
                             endPos = Quaternion.Euler(lane.Rotation) * positionStep.EndPosition + lane.Position;
@@ -434,7 +438,7 @@ namespace JANOARG.Client.Behaviors.Player
                             // Loop to get localPosition of 2 points of lane?
                             while (group)
                             {
-                                var laneGroup = (LaneGroup)group.Original.GetStoryboardableObject(laneHitobject.Offset);
+                                LaneGroup laneGroup = (LaneGroup)group.Original.GetStoryboardableObject(laneHitobject.Offset);
                                 startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
                                 endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
                                 group = group.Parent;
