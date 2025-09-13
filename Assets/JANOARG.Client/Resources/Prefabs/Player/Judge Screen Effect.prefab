@@ -67,7 +67,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  Resolution: 90
+  Resolution: 40
   FillAmount: 1
   InsideRadius: 0.98
 --- !u!1 &423507466475153900
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  Resolution: 90
+  Resolution: 12
   FillAmount: 1
   InsideRadius: 0
 --- !u!1 &423507466808756321
@@ -203,7 +203,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  Resolution: 90
+  Resolution: 40
   FillAmount: 0.45
   InsideRadius: 0.98
 --- !u!1 &423507467669762507
@@ -340,6 +340,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  Resolution: 90
+  Resolution: 40
   FillAmount: 0.45
   InsideRadius: 0.98
