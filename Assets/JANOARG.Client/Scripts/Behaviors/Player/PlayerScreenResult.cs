@@ -127,7 +127,7 @@ namespace JANOARG.Client.Behaviors.Player
                     {
                         FlashBackground.color = new Color(1, 1, 1, .2f * (1 - x));
 
-                        ScoreExplosionRings[0].InsideRadius =
+                        ScoreExplosionRings[0].insideRadius =
                             0.9f * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
 
                         ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one *
@@ -223,7 +223,7 @@ namespace JANOARG.Client.Behaviors.Player
                         50
                     );
 
-                    ScoreExplosionRings[1].InsideRadius = 0.95f *
+                    ScoreExplosionRings[1].insideRadius = 0.95f *
                                                           Ease.Get(
                                                               x * 2f,
                                                               EaseFunction.Quintic,
@@ -420,7 +420,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreBarFill.anchorMax *= new Vector2Frag(scoreLerp);
 
                     float ease4 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
-                    ScoreExplosionRings[0].InsideRadius = 1 - ease4 - x * .01f;
+                    ScoreExplosionRings[0].insideRadius = 1 - ease4 - x * .01f;
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
                         Vector2.one * (600 / ease1 * (1 - ease4) + 100);
@@ -437,7 +437,7 @@ namespace JANOARG.Client.Behaviors.Player
                         x * 1.5f - .5f, EaseFunction.Exponential,
                         EaseMode.In);
 
-                    ScoreExplosionRings[1].InsideRadius = 1 - ease5 - x * .01f;
+                    ScoreExplosionRings[1].insideRadius = 1 - ease5 - x * .01f;
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta =
                         Vector2.one * (900 / ease1 * (1 - ease4) + 100);
@@ -618,7 +618,7 @@ namespace JANOARG.Client.Behaviors.Player
                     FlashBackground.color = new Color(0, 0, 0, .8f - .4f * x);
 
                     float ease2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-                    ScoreExplosionRings[0].InsideRadius = ease2;
+                    ScoreExplosionRings[0].insideRadius = ease2;
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
                         Vector2.one * (700 * ease2 + 100);
@@ -627,7 +627,7 @@ namespace JANOARG.Client.Behaviors.Player
                         x * 1.5f, EaseFunction.Exponential,
                         EaseMode.Out);
 
-                    ScoreExplosionRings[1].InsideRadius = ease4;
+                    ScoreExplosionRings[1].insideRadius = ease4;
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta =
                         Vector2.one * (1400 * ease4 + 100);
@@ -636,7 +636,7 @@ namespace JANOARG.Client.Behaviors.Player
                         x * 1.2f - .2f, EaseFunction.Exponential,
                         EaseMode.Out);
 
-                    ScoreExplosionRings[2].InsideRadius = ease1;
+                    ScoreExplosionRings[2].insideRadius = ease1;
 
                     ScoreExplosionRings[2].rectTransform.sizeDelta =
                         Vector2.one * (2400 * ease2 + 100);

@@ -70,7 +70,8 @@ namespace JANOARG.Client.Behaviors.Player
         public CanvasGroup   ComboGroup;
         public TMP_Text      ComboLabel;
         public RectTransform JudgeScreenHolder;
-        [FormerlySerializedAs("judgeScreenManager")] [Space]
+        public RectTransform JudgeScreen;
+        [Space]
         public JudgeScreenManager JudgeScreenManager;
         [Space]
         public TMP_Text PauseLabel;

@@ -35,7 +35,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         private JudgeScreenEffect CreateEffect(float? accuracy, Color color)
         {
-            var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreenHolder);
+            var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
             newEffect.SetAccuracy(accuracy);
             newEffect.SetColor(color);
             newEffect.PlayOneShot();
@@ -57,6 +57,7 @@ namespace JANOARG.Client.Behaviors.Player
             try
             {
                 JudgeScreenEffect effect = judgeScreenEffects.Pop();
+                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
                 effect.gameObject.SetActive(true);
                 effect.SetAccuracy(accuracy);
                 effect.SetColor(color);
@@ -76,6 +77,7 @@ namespace JANOARG.Client.Behaviors.Player
         public void ReturnEffect(JudgeScreenEffect effect)
         {
             effect.gameObject.SetActive(false);
+            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreenHolder);
             judgeScreenEffects.Push(effect);
             _totalInstances--;
         }

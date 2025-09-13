@@ -193,6 +193,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             // Cache last position point (prevent ArgumentOutOfRangeException)
             float lastPositionPoints = PositionPoints.Count > 0 ? PositionPoints[^1] : 0;
+            
             // Calculate the current Z position
             if (TimeStamps.Count <= 1 || TimeStamps[0] > time)
                 CurrentPosition = time * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed;

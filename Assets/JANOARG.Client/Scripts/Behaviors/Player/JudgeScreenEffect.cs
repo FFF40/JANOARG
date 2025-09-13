@@ -7,8 +7,7 @@ namespace JANOARG.Client.Behaviors.Player
 {
     public class JudgeScreenEffect : MonoBehaviour
     {
-        public CanvasGroup Group;
-
+        public CanvasGroup   Group;
         public GraphicCircle RingBackground;
         public GraphicCircle RingFill1;
         public GraphicCircle RingFill2;
@@ -20,16 +19,16 @@ namespace JANOARG.Client.Behaviors.Player
         {
             if (acc == null)
             {
-                RingFill1.FillAmount = RingFill2.FillAmount = 1;
-                RingBackground.Resolution = RingFill1.Resolution = RingFill2.Resolution = 4;
+                RingFill1.fillAmount = RingFill2.fillAmount = 1;
+                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 4;
                 Size = 60;
             }
             else
             {
                 //Debug.Log(acc);
                 Size = 120;
-                RingBackground.Resolution = RingFill1.Resolution = RingFill2.Resolution = 90;
-                RingFill1.FillAmount = RingFill2.FillAmount = (1 - Mathf.Abs((float)acc)) / 2;
+                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 90;
+                RingFill1.fillAmount = RingFill2.fillAmount = (1 - Mathf.Abs((float)acc)) / 2;
                 RingFill1.rectTransform.localEulerAngles = Vector3.back * Mathf.Max((float)acc * 180, 0);
                 RingFill2.rectTransform.localEulerAngles = Vector3.forward * (RingFill1.rectTransform.localEulerAngles.z + 180);
             }
@@ -54,7 +53,7 @@ namespace JANOARG.Client.Behaviors.Player
                 Group.alpha = 1 - ease2;
 
                 float ease3 = ease * .96f + x * .04f;
-                RingBackground.InsideRadius = RingFill1.InsideRadius = RingFill2.InsideRadius = ease3;
+                RingBackground.insideRadius = RingFill1.insideRadius = RingFill2.insideRadius = ease3;
             });
 
             if (isOneShot) Destroy(gameObject);
