@@ -98,15 +98,13 @@ namespace JANOARG.Client.Behaviors.Player
             transform.localPosition = Current.Position;
             transform.localEulerAngles = Current.Rotation;
             Holder.localPosition = Vector3.back * CurrentPosition;
-            
+
             if (CurrentPosition - PositionPoints[0] > -200)
             {
-                transform.gameObject.SetActive(true);
+                if (!transform.gameObject.activeSelf)
+                    transform.gameObject.SetActive(true);
+                
                 UpdateHitObjects(time, beat);
-            }
-            else
-            {
-                transform.gameObject.SetActive(false);
             }
         }
 
@@ -288,18 +286,9 @@ namespace JANOARG.Client.Behaviors.Player
 
                 JudgePointLeft.transform.localPosition = startPoint;
                 JudgePointRight.transform.localPosition = endPoint;
-                
-                if (!JudgeLine.enabled)
-                {
-                    if (gameObject.activeSelf)
-                        gameObject.SetActive(false);
-                }
             }
             sr_MeshLerper.End();
-
-            // Skip rendering for invisible lanes
-            if (isInvisibleMesh && HitObjects.Count == 0)
-                return;
+            
             
             // If our two lane step nearest from current time has dirty values because of storyboard,
             // we mark our lane as dirty for update on the next frame and reset their dirty flags
@@ -386,6 +375,10 @@ namespace JANOARG.Client.Behaviors.Player
                 progress = 0;
             }
             sr_MeshLaneStepLooper.End();
+                            
+            // Skip rendering for invisible lanes
+            if (isInvisibleMesh && HitObjects.Count == 0)
+                return;
             
             sr_MeshUpdater.Begin();
             // Actually update mesh data
@@ -447,8 +440,7 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (HitPlayer hitObject in HitObjects)
             {
                 if (active)
-                    hitObject
-                        .UpdateSelf(time, beat, LaneStepDirty);
+                    hitObject.UpdateSelf(time, beat, LaneStepDirty);
 
                 if (active && hitObject.CurrentPosition > CurrentPosition + 200)
                     active = false;
