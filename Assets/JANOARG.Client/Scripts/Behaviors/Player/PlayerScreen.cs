@@ -17,6 +17,7 @@ using UnityEngine.UI;
 
 namespace JANOARG.Client.Behaviors.Player
 {
+
     public class PlayerScreen : MonoBehaviour
     {
         public static PlayerScreen sMain;
@@ -670,9 +671,10 @@ namespace JANOARG.Client.Behaviors.Player
             }
             else if (Music.isPlaying) 
                     Music.Pause();
+            StartCoroutine(
 
-            // Check hit objects
-            CheckHitObjects();
+                        // Check hit objects
+                        CheckHitObjects());
 
             // Update song progress slider
             SongProgress.value = CurrentTime / Music.clip.length;
@@ -727,37 +729,43 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (LaneGroupPlayer group in LaneGroups)
                 group.UpdateSelf(visualTime, visualBeat);
 
-            for (int i = 0; i < Lanes.Count; i++)
-            {
-                try
-                {
-                    LanePlayer lane = Lanes[i];
-
-                    if (lane.TimeStamps[0] - 8f > visualTime)
-                        continue;
-                        
-                    lane.UpdateSelf(visualTime, visualBeat);
-
-                    if (!lane.MarkedForRemoval || !lane)
-                        continue;
-                    
-                    Lanes.Remove(lane);
-                    Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
-                }
-                catch (MissingReferenceException)
-                {
-                    Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
-                        
-                    Lanes.Remove(Lanes[i]);
-                }
-            }
-
+            StartCoroutine(f_laneUpdater(visualTime, visualBeat));
+            
             // Show ending animation; the failsafe on bugs is on following:
             // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
             if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || CurrentTime / Music.clip.length >= 1) && !ResultExec)
             {
                 PlayerScreenResult.sMain.StartEndingAnim();
                 ResultExec = true;
+            }
+
+            IEnumerator f_laneUpdater(float f, float visualBeat1)
+            {
+                for (int i = Lanes.Count - 1; i >= 0; i--) // Iterate backwards
+                {
+                    try
+                    {
+                        LanePlayer lane = Lanes[i];
+
+                        if (lane.TimeStamps[0] - 5f > f)
+                            continue;
+            
+                        lane.UpdateSelf(f, visualBeat1);
+
+                        if (lane.MarkedForRemoval || lane == null) // Fixed logic
+                        {
+                            Lanes.RemoveAt(i); // More efficient than Remove()
+                            Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
+                        }
+                    }
+                    catch (MissingReferenceException)
+                    {
+                        Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
+                        Lanes.RemoveAt(i);
+                    }
+                }
+
+                yield return null;
             }
         }
 
@@ -766,16 +774,19 @@ namespace JANOARG.Client.Behaviors.Player
             _LastDSPTime = AudioSettings.dspTime;   
         }
 
-        public void CheckHitObjects()
+        public IEnumerator CheckHitObjects()
         {
             foreach (LanePlayer lane in Lanes)
                 foreach (HitPlayer hit in lane.HitObjects)
                 {
-                    if (hit.HoldMesh) lane.UpdateHoldMesh(hit);
+                    if (hit.HoldMesh) 
+                        lane.UpdateHoldMesh(hit);
                 }
 
             // PlayerInputManager.main.UpdateTouches();
             PlayerInputManager.sInstance.UpdateInput();
+            
+            yield return null;
         }
 
         private Coroutine _JudgeAnimation;
