@@ -116,7 +116,8 @@ namespace JANOARG.Client.Behaviors.Player
             ResultTextBig.text = ResultText.text;
             ResultTextBig.alpha = 0;
 
-            foreach (GraphicCircle ring in ScoreExplosionRings) ring.rectTransform.localPosition = Vector2.zero;
+            foreach (GraphicCircle ring in ScoreExplosionRings)
+                ring.rectTransform.localPosition = Vector2.zero;
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
                 PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
@@ -130,40 +131,17 @@ namespace JANOARG.Client.Behaviors.Player
                         ScoreExplosionRings[0].insideRadius =
                             0.9f * Ease.Get(x, EaseFunction.Quintic, EaseMode.Out);
 
-                        ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one *
-                                                                         (200 *
-                                                                          Ease.Get(
-                                                                              x,
-                                                                              EaseFunction
-                                                                                  .Circle,
-                                                                              EaseMode
-                                                                                  .Out));
+                        ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (200 * Ease.Get(x, EaseFunction.Circle, EaseMode.Out));
 
-                        ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward *
-                                                                                (55 *
-                                                                                 Ease.Get(
-                                                                                     x,
-                                                                                     EaseFunction
-                                                                                         .Cubic,
-                                                                                     EaseMode
-                                                                                         .Out));
+                        ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
                     }));
 
-            yield return Ease.Animate(
-                1, x =>
+            yield return Ease.Animate(1, x =>
                 {
                     ResultBackground.rectTransform.sizeDelta = new Vector2(
-                        ResultBackground
-                            .rectTransform
-                            .sizeDelta.y,
-                        Ease.Get(
-                            x,
-                            EaseFunction
-                                .Circle,
-                            EaseMode
-                                .In) *
-                        50
-                    );
+                        ResultBackground.rectTransform.sizeDelta.y,
+                        Ease.Get(x,EaseFunction.Circle,EaseMode.In) * 50
+                        );
                 });
 
             ResultText.gameObject.SetActive(true);
@@ -180,9 +158,7 @@ namespace JANOARG.Client.Behaviors.Player
                         Ease.Get(
                             Mathf.Clamp01(x * 2),
                             EaseFunction.Circle,
-                            EaseMode.InOut) *
-                        .2f +
-                        .2f
+                            EaseMode.InOut) * .2f + .2f
                     );
 
                     ResultTextBig.alpha = 1 -
