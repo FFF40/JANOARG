@@ -7,9 +7,9 @@ namespace JANOARG.Client.UI
     [ExecuteAlways] [RequireComponent(typeof(CanvasRenderer))]
     public class GraphicCircle : MaskableGraphic
     {
-        [FormerlySerializedAs("resolution")]   [SerializeField]               private int   Resolution  = 90;
-        [FormerlySerializedAs("fillAmount")]   [SerializeField] [Range(0, 1)] private float FillAmount   = 1f;
-        [FormerlySerializedAs("insideRadius")] [SerializeField] [Range(0, 1)] private float InsideRadius = 0f;
+        [SerializeField]               private int   Resolution  = 90;
+        [SerializeField] [Range(0, 1)] private float FillAmount   = 1f;
+        [SerializeField] [Range(0, 1)] private float InsideRadius = 0f;
         
         // Cache frequently used values
         private float _LastFillAmount = -1f;
