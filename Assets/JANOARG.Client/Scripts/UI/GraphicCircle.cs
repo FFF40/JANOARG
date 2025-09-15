@@ -4,47 +4,48 @@ using UnityEngine.UI;
 
 namespace JANOARG.Client.UI
 {
-    [ExecuteAlways] [RequireComponent(typeof(CanvasRenderer))]
+    [ExecuteAlways]
+    [RequireComponent(typeof(CanvasRenderer))]
     public class GraphicCircle : MaskableGraphic
     {
-        [SerializeField]               private int   Resolution  = 90;
-        [SerializeField] [Range(0, 1)] private float FillAmount   = 1f;
-        [SerializeField] [Range(0, 1)] private float InsideRadius = 0f;
-        
+        [SerializeField] private int Resolution = 90;
+        [SerializeField][Range(0, 1)] private float FillAmount = 1f;
+        [SerializeField][Range(0, 1)] private float InsideRadius = 0f;
+
         // Cache frequently used values
         private float _LastFillAmount = -1f;
         private int _LastResolution = -1;
         private float _LastInsideRadius = -1f;
         private Vector2 _LastRectSize = Vector2.zero;
-        
-        public int resolution 
-        { 
-            get => Resolution; 
-            set 
-            { 
+
+        public int resolution
+        {
+            get => Resolution;
+            set
+            {
                 Resolution = Mathf.Clamp(value, 3, 1000);
                 SetVerticesDirty();
-            } 
+            }
         }
 
-        public float fillAmount 
-        { 
-            get => FillAmount; 
-            set 
-            { 
+        public float fillAmount
+        {
+            get => FillAmount;
+            set
+            {
                 FillAmount = Mathf.Clamp01(value);
                 SetVerticesDirty();
-            } 
+            }
         }
 
-        public float insideRadius 
-        { 
-            get => InsideRadius; 
-            set 
-            { 
+        public float insideRadius
+        {
+            get => InsideRadius;
+            set
+            {
                 InsideRadius = Mathf.Clamp01(value);
                 SetVerticesDirty();
-            } 
+            }
         }
 
         protected override void OnPopulateMesh(VertexHelper vh)
@@ -52,11 +53,12 @@ namespace JANOARG.Client.UI
             var rect = rectTransform.rect;
             var center = rect.center;
             var radius = new Vector2(rect.width * 0.5f, rect.height * 0.5f);
-            
+
+            // This one breaks stuff so it is disabled in the meantime
             // Early exit if no change
-            if (HasNoChanges(rect.size))
-                return;
-                
+            //if (HasNoChanges(rect.size))
+            //    return;
+
             UpdateCachedValues(rect.size);
 
             vh.Clear();
@@ -64,8 +66,8 @@ namespace JANOARG.Client.UI
             // Clamp resolution and calculate actual segments needed
             var clampedResolution = Mathf.Clamp(Resolution, 3, 1000);
             var actualSegments = Mathf.CeilToInt(clampedResolution * FillAmount);
-            
-            if (actualSegments <= 0) 
+
+            if (actualSegments <= 0)
                 return;
 
             var vert = UIVertex.simpleVert;
@@ -104,13 +106,13 @@ namespace JANOARG.Client.UI
             vertexHelper.AddVert(vert);
 
             var angleStep = (Mathf.PI * 2f) / Resolution;
-            
+
             for (var i = 0; i <= segments; i++)
             {
                 var angle = i * angleStep;
                 var sin = Mathf.Sin(angle);
                 var cos = Mathf.Cos(angle);
-                
+
                 vert.position = new Vector2(sin * radius.x, cos * radius.y) + center;
                 vertexHelper.AddVert(vert);
 
@@ -125,17 +127,17 @@ namespace JANOARG.Client.UI
         {
             var innerRadius = new Vector2(radius.x * InsideRadius, radius.y * InsideRadius);
             var angleStep = (Mathf.PI * 2f) / Resolution;
-            
+
             for (var i = 0; i <= segments; i++)
             {
                 var angle = i * angleStep;
                 var sin = Mathf.Sin(angle);
                 var cos = Mathf.Cos(angle);
-                
+
                 // Inner vertex
                 vert.position = new Vector2(sin * innerRadius.x, cos * innerRadius.y) + center;
                 vertexHelper.AddVert(vert);
-                
+
                 // Outer vertex
                 vert.position = new Vector2(sin * radius.x, cos * radius.y) + center;
                 vertexHelper.AddVert(vert);
@@ -146,7 +148,7 @@ namespace JANOARG.Client.UI
                     var prevOuter = prevInner + 1;
                     var currInner = i * 2;
                     var currOuter = currInner + 1;
-                    
+
                     // Two triangles to form a quad
                     vertexHelper.AddTriangle(prevOuter, currOuter, currInner);
                     vertexHelper.AddTriangle(prevOuter, currInner, prevInner);

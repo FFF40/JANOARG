@@ -671,9 +671,7 @@ namespace JANOARG.Client.Behaviors.Player
             }
             else if (Music.isPlaying) 
                     Music.Pause();
-            StartCoroutine(
-
-                        // Check hit objects
+            StartCoroutine( // Check hit objects
                         CheckHitObjects());
 
             // Update song progress slider
@@ -868,73 +866,119 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
         {
-            // Debug.Log((int)hit.Current.Type + ":" + hit.Current.Type + " " + offset);
-
-            int score = hitObject.Current.Type == HitObject.HitType.Normal 
-                ? 3 : 1;
-
-            if (hitObject.Current.Flickable)
-            {
-                score += 1;
-
-                if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional
-                    score += 1;
-            }
-
+            var hitType = hitObject.Current.Type;
+            bool isFlickable = hitObject.Current.Flickable;
+            bool isCatchType = hitType == HitObject.HitType.Catch;
+            
+            // Calculate base score once
+            int baseScore = CalculateBaseScore(hitType, isFlickable, hitObject.Current.FlickDirection);
+            
             float offsetAbs = Mathf.Abs(offset);
-            float? acc = null;
+            float? accuracy = null;
+            int finalScore;
 
-            if (hitObject.Current.Flickable || hitObject.Current.Type == HitObject.HitType.Catch)
+            // Handle different hit evaluation types
+            if (isFlickable || isCatchType)
             {
-                if (offsetAbs <= PassWindow)
-                {
-                    AddScore(score, null);
-                    HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, 0));
-                }
-                else
-                {
-                    AddScore(0, null);
-                    HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, float.PositiveInfinity));
-                }
+                // Binary hit/miss evaluation
+                bool isHit = offsetAbs <= PassWindow;
+                finalScore = isHit ? baseScore : 0;
+                float historyOffset = isHit ? 0 : float.PositiveInfinity;
+                
+                AddScore(finalScore, null);
+                HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, historyOffset));
             }
             else
             {
-                acc = 0;
-
-                if (offsetAbs > GoodWindow)
-                    acc = Mathf.Sign(offset);
-                else if (offsetAbs > PerfectWindow)
-                    acc = Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
-
-                AddScore(score * (1 - Mathf.Abs((float)acc)), acc);
-
+                // Gradual accuracy evaluation
+                accuracy = CalculateAccuracy(offset, offsetAbs);
+                finalScore = Mathf.RoundToInt(baseScore * (1 - Mathf.Abs(accuracy.Value)));
+                
+                AddScore(finalScore, accuracy);
                 HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, offset));
             }
 
+            // Spawn effects and play sounds
             if (spawnEffect)
             {
-                var effect = sMain.JudgeScreenManager.BorrowEffect(acc, sCurrentChart.Palette.InterfaceColor);
-                var rt = (RectTransform)effect.transform;
-                rt.position = hitObject.HitCoord.Position;
-
-                float hitSoundVolume = Settings.HitsoundVolume[0];
-
-                if (Settings.HitsoundVolume.Length >= 3 && acc != null)
-                {
-                    if (Mathf.Abs((float)acc) >= 1) hitSoundVolume = Settings.HitsoundVolume[2];
-                    else if (Mathf.Abs((float)acc) > 0) hitSoundVolume = Settings.HitsoundVolume[1];
-                }
-
-                if (hitObject.Current.Type is HitObject.HitType.Normal)
-                    Hitsounds.PlayOneShot(NormalHitsound, hitSoundVolume);
-                else
-                    Hitsounds.PlayOneShot(CatchHitsound, hitSoundVolume);
-
-                if (hitObject.Current.Flickable)
-                    Hitsounds.PlayOneShot(FlickHitsound, hitSoundVolume);
+                SpawnHitEffect(hitObject, accuracy);
+                PlayHitSounds(hitObject, accuracy);
             }
 
-            if (Mathf.Approximately(hitObject.Time, hitObject.EndTime))
+            // Handle hit object lifecycle
+            HandleHitObjectCompletion(hitObject);
+        }
+
+        private int CalculateBaseScore(HitObject.HitType hitType, bool isFlickable, float flickDirection)
+        {
+            int score = hitType == HitObject.HitType.Normal ? 3 : 1;
+            
+            if (isFlickable)
+            {
+                score += 1;
+                if (!float.IsNaN(flickDirection)) // Directional flick bonus
+                    score += 1;
+            }
+            
+            return score;
+        }
+
+        private float CalculateAccuracy(float offset, float offsetAbs)
+        {
+            if (offsetAbs > GoodWindow)
+                return Mathf.Sign(offset);
+            
+            if (offsetAbs > PerfectWindow)
+                return Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
+            
+            return 0f; // Perfect hit
+        }
+
+        private void SpawnHitEffect(HitPlayer hitObject, float? accuracy)
+        {
+            var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
+            var rt = (RectTransform)effect.transform;
+            rt.position = hitObject.HitCoord.Position;
+        }
+
+        private void PlayHitSounds(HitPlayer hitObject, float? accuracy)
+        {
+            float volume = GetHitSoundVolume(accuracy);
+            
+            // Play primary hit sound
+            var primarySound = hitObject.Current.Type == HitObject.HitType.Normal 
+                ? NormalHitsound 
+                : CatchHitsound;
+            Hitsounds.PlayOneShot(primarySound, volume);
+            
+            // Play flick sound if applicable
+            if (hitObject.Current.Flickable)
+                Hitsounds.PlayOneShot(FlickHitsound, volume);
+        }
+
+        private float GetHitSoundVolume(float? accuracy)
+        {
+            float[] volumes = Settings.HitsoundVolume;
+            
+            if (volumes.Length < 3 || accuracy == null)
+                return volumes[0];
+            
+            float accValue = Mathf.Abs(accuracy.Value);
+            
+            if (accValue >= 1f)
+                return volumes[2]; // Miss/Bad
+            if (accValue > 0f)
+                return volumes[1]; // Good
+            
+            return volumes[0]; // Perfect
+        }
+
+        private void HandleHitObjectCompletion(HitPlayer hitObject)
+        {
+            bool isHoldNote = hitObject.Current.HoldLength > 0;
+            bool isHoldComplete = isHoldNote && Mathf.Approximately(hitObject.Time, hitObject.EndTime);
+            
+            if (!isHoldNote || isHoldComplete)
                 RemoveHitPlayer(hitObject);
             else
                 hitObject.IsProcessed = true;
