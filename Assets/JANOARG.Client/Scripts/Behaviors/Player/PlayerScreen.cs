@@ -80,7 +80,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public LanePlayer        LaneSample;
         public HitPlayer         HitSample;
-        public MeshRenderer      HoldSample;
+        public TextPlayer TextSample;
+        public MeshRenderer HoldSample;
         public JudgeScreenEffect JudgeScreenSample;
 
         [Space]
@@ -157,6 +158,9 @@ namespace JANOARG.Client.Behaviors.Player
 
         [HideInInspector]
         public List<LanePlayer> Lanes = new();
+
+        [HideInInspector]
+        public List<TextPlayer> Texts = new();
 
         private double _LastDSPTime;
 
@@ -253,6 +257,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public IEnumerator InitChart()
         {
+            Debug.LogWarning(sTargetChart.Data.Lanes.Count + " lanes in chart.");
             sCurrentChart = sTargetChart.Data.DeepClone();
             HitObjectHistory = new List<HitObjectHistoryItem>();
 
@@ -287,7 +292,11 @@ namespace JANOARG.Client.Behaviors.Player
                 foreach (LanePlayer lane in Lanes)
                     Destroy(lane.gameObject);
 
+                foreach (TextPlayer text in Texts)
+                    Destroy(text.gameObject);
+
                 Lanes.Clear();
+                Texts.Clear();
             }
             else
             {
@@ -322,6 +331,17 @@ namespace JANOARG.Client.Behaviors.Player
             ScaledMinimumRadius = MinimumRadius * screenUnit;
 
             StartCoroutine(LaneLoader());
+            
+            for (int t = 0; t < sTargetChart.Data.Texts.Count; t++)
+            {
+                TextPlayer f_Text_Chart = Instantiate(TextSample, Holder);
+
+                f_Text_Chart.Original = sTargetChart.Data.Texts[t];
+                f_Text_Chart.Current = sCurrentChart.Texts[t];
+                f_Text_Chart.Init();
+                Texts.Add(f_Text_Chart);
+
+            }
 
             yield return new WaitUntil(() => _LoadState[0]);
 

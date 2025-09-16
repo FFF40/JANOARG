@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using JANOARG.Client.Behaviors.Player;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
@@ -12,22 +14,24 @@ namespace JANOARG.Shared.Data.ChartInfo
     [System.Serializable]
     public class Chart : IDeepClonable<Chart>
     {
-        public string DifficultyName  = "Normal";
+        public string DifficultyName = "Normal";
         public string DifficultyLevel = "6";
-        public int    DifficultyIndex = 1;
-        public float  ChartConstant   = 6;
+        public int DifficultyIndex = 1;
+        public float ChartConstant = 6;
 
-        public string CharterName    = "";
+        public string CharterName = "";
         public string AltCharterName = "";
 
         public List<LaneGroup> Groups = new();
-        public List<Lane>      Lanes  = new();
+        public List<Lane> Lanes = new();
 
         public CameraController Camera = new();
-        public Vector3          CameraPivot;
-        public Vector3          CameraRotation;
+        public Vector3 CameraPivot;
+        public Vector3 CameraRotation;
 
         public Palette Palette = new();
+
+        public List<Text> Texts = new();
 
         public Chart()
         {
@@ -61,11 +65,11 @@ namespace JANOARG.Shared.Data.ChartInfo
     public class CameraController : Storyboardable, IDeepClonable<CameraController>
     {
         public Vector3 CameraPivot;
-        public float   PivotDistance = 10;
+        public float PivotDistance = 10;
         public Vector3 CameraRotation;
-    
+
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = 
+        public static TimestampType[] ThisTimestampTypes =
         {
             #region Camera Pivot
             new()
@@ -137,18 +141,18 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
-// Style 
+    // Style 
     [System.Serializable]
     public class Palette : Storyboardable, IDeepClonable<Palette>
     {
         public Color BackgroundColor = Color.black;
-        public Color InterfaceColor  = Color.white;
+        public Color InterfaceColor = Color.white;
 
         public List<LaneStyle> LaneStyles = new();
-        public List<HitStyle>  HitStyles  = new();
+        public List<HitStyle> HitStyles = new();
 
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = 
+        public static TimestampType[] ThisTimestampTypes =
         {
             #region Background Color (RGB)
             new()
@@ -227,16 +231,16 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public string Name;
 
-        public string LaneMaterial    = "Default";
+        public string LaneMaterial = "Default";
         public string LaneColorTarget = "_Color";
-        public Color  LaneColor       = Color.black;
+        public Color LaneColor = Color.black;
 
-        public string JudgeMaterial    = "Default";
+        public string JudgeMaterial = "Default";
         public string JudgeColorTarget = "_Color";
-        public Color  JudgeColor       = Color.black;
+        public Color JudgeColor = Color.black;
 
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = 
+        public static TimestampType[] ThisTimestampTypes =
         {
             #region Lane Color
             new()
@@ -323,14 +327,14 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public string Name;
 
-        public string MainMaterial    = "Default";
+        public string MainMaterial = "Default";
         public string MainColorTarget = "_Color";
-        public Color  NormalColor     = Color.black;
-        public Color  CatchColor      = Color.blue;
+        public Color NormalColor = Color.black;
+        public Color CatchColor = Color.blue;
 
-        public string HoldTailMaterial    = "Default";
+        public string HoldTailMaterial = "Default";
         public string HoldTailColorTarget = "_Color";
-        public Color  HoldTailColor       = Color.black;
+        public Color HoldTailColor = Color.black;
 
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = {
@@ -446,13 +450,183 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
+
+    // Refers to the non-lane objects like Text, Images, 3d shapes
+    public class WorldObject : Storyboardable, IDeepClonable<WorldObject>
+    {
+        public string Name;
+        public Vector3 Position;
+        public Vector3 Rotation;
+
+
+        public override TimestampType[] TimestampTypes => sThisTimestampTypes;
+        public static TimestampType[] sThisTimestampTypes = {
+        new() {
+            ID = "Position_X",
+            Name = "Position X",
+            StoryboardGetter  = (x) => ((Text)x).Position.x,
+            StoryboardSetter  = (x, a) => { ((Text)x).Position.x = a; },
+        },
+        new() {
+            ID = "Position_Y",
+            Name = "Position Y",
+            StoryboardGetter  = (x) => ((Text)x).Position.y,
+            StoryboardSetter  = (x, a) => { ((Text)x).Position.y = a; },
+        },
+        new() {
+            ID = "Position_Z",
+            Name = "Position Z",
+            StoryboardGetter = (x) => ((Text)x).Position.z,
+            StoryboardSetter = (x, a) => { ((Text)x).Position.z = a; },
+        },
+        new() {
+            ID = "Rotation_X",
+            Name = "Rotation X",
+            StoryboardGetter = (x) => ((Text)x).Rotation.x,
+            StoryboardSetter = (x, a) => { ((Text)x).Rotation.x = a; },
+        },
+        new() {
+            ID = "Rotation_Y",
+            Name = "Rotation Y",
+            StoryboardGetter = (x) => ((Text)x).Rotation.y,
+            StoryboardSetter = (x, a) => { ((Text)x).Rotation.y = a; },
+        },
+        new() {
+            ID = "Rotation_Z",
+            Name = "Rotation Z",
+            StoryboardGetter = (x) => ((Text)x).Rotation.z,
+            StoryboardSetter = (x, a) => { ((Text)x).Rotation.z = a; },
+        },
+
+
+    };
+
+
+        public virtual WorldObject DeepClone()
+        {
+            return new WorldObject
+            {
+                Name = Name,
+                Position = new Vector3(Position.x, Position.y, Position.z),
+                Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+                Storyboard = Storyboard.DeepClone(),
+            };
+        }
+    }
+
+
+
+    // Text
+    [System.Serializable]
+    public class Text : WorldObject
+    {
+
+        public string DisplayText;
+
+        // Default Values
+        public float TextSize = 7f;
+        public Color TextColor = Color.white;
+        public FontFamily TextFont; //Default value: RobotoMono
+
+        public List<TextStep> TextSteps = new();
+
+        public string GetUpdateText(float time, float beat, string oldText)
+        {
+            string rt = oldText;
+            List<TextStep> steps = TextSteps;
+            for (int i = 0; i < steps.Count; i++)
+            {
+                TextStep step = steps[i];
+                if (beat >= step.Offset)
+                {
+                    rt = step.TextChange;
+                }
+            }
+            return rt;
+        }
+
+        //Append Text Storyboard to the base WorldObject Storyboard
+        public new static TimestampType[] TimestampTypes = sThisTimestampTypes.Concat(new TimestampType[] {
+        new() {
+            ID = "Text_Size",
+            Name = "Text Size",
+            StoryboardGetter = (x) => ((Text)x).TextSize,
+            StoryboardSetter = (x, a) => { ((Text)x).TextSize = a; },
+        },
+        new() {
+            ID = "Text_Color_R",
+            Name = "Text Color R",
+            StoryboardGetter = (x) => ((Text)x).TextColor.r,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.r = a; },
+        },
+        new() {
+            ID = "Text_Color_G",
+            Name = "Text Color G",
+            StoryboardGetter = (x) => ((Text)x).TextColor.g,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.g= a; },
+        },
+        new() {
+            ID = "Text_Color_B",
+            Name = "Text Color B",
+            StoryboardGetter = (x) => ((Text)x).TextColor.r,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.b = a; },
+        },
+        new() {
+            ID = "Text_Color_A",
+            Name = "Text Color A",
+            StoryboardGetter = (x) => ((Text)x).TextColor.r,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.a = a; },
+        },
+    }).ToArray();
+
+        public override WorldObject DeepClone()
+        {
+            Text clone = new Text
+            {
+                Name = Name,
+                Position = new Vector3(Position.x, Position.y, Position.z),
+                Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+                Storyboard = Storyboard.DeepClone(),
+
+                // Text-specific properties
+                TextSize = TextSize,
+                TextFont = TextFont,
+                TextColor = new Color(TextColor.r, TextColor.g, TextColor.b, TextColor.a),
+                DisplayText = DisplayText,
+                TextSteps = new List<TextStep>(TextSteps),
+            };
+            return clone;
+        }
+
+    }
+
+    [System.Serializable]
+    public class TextStep : IDeepClonable<TextStep>
+    {
+        public BeatPosition Offset = new();
+
+        // The new text will replace DisplayText 
+        public string TextChange = "";
+
+        public TextStep DeepClone()
+        {
+            TextStep clone = new()
+            {
+                Offset = Offset,
+                TextChange = TextChange,
+            };
+            return clone;
+        }
+    }
+
+
     [System.Serializable]
     public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     {
-        public string  Name;
+        public string Name;
         public Vector3 Position;
         public Vector3 Rotation;
-        public string  Group;
+        public string Group;
 
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = {
@@ -524,8 +698,8 @@ namespace JANOARG.Shared.Data.ChartInfo
     public class LanePosition
     {
         [FormerlySerializedAs("StartPos")] public Vector2 StartPosition;
-        [FormerlySerializedAs("EndPos")]   public Vector2 EndPosition;
-        public                                    float   Offset;
+        [FormerlySerializedAs("EndPos")] public Vector2 EndPosition;
+        public float Offset;
     }
 
     [System.Serializable]
@@ -533,8 +707,8 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public string Name;
 
-        public List<HitObject> Objects   = new();
-        public List<LaneStep>  LaneSteps = new();
+        public List<HitObject> Objects = new();
+        public List<LaneStep> LaneSteps = new();
 
         [FormerlySerializedAs("Offset")]
         public Vector3 Position;
@@ -621,7 +795,7 @@ namespace JANOARG.Shared.Data.ChartInfo
 
         // More as offset
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = 
+        public static TimestampType[] ThisTimestampTypes =
         {
             #region Position
             new()
@@ -699,32 +873,32 @@ namespace JANOARG.Shared.Data.ChartInfo
         public BeatPosition Offset = new();
 
         [FormerlySerializedAs("StartPos")]
-        public                      Vector2        StartPointPosition;
+        public Vector2 StartPointPosition;
         [SerializeReference] public IEaseDirective StartEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
         [SerializeReference] public IEaseDirective StartEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
         [FormerlySerializedAs("EndPos")]
-        public                      Vector2        EndPointPosition;
+        public Vector2 EndPointPosition;
         [SerializeReference] public IEaseDirective EndEaseX = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
         [SerializeReference] public IEaseDirective EndEaseY = new BasicEaseDirective(EaseFunction.Linear, EaseMode.In);
 
         public float Speed = 1;
 
-        public bool IsLinear => 
-            StartEaseX is BasicEaseDirective startEaseX && 
-            StartEaseY is BasicEaseDirective startEaseY && 
-        
-            EndEaseX   is BasicEaseDirective endEaseX && 
-            EndEaseY   is BasicEaseDirective endEaseY &&
-        
-            startEaseX.Function == EaseFunction.Linear && 
-            startEaseY.Function == EaseFunction.Linear && 
-        
-            endEaseX.Function   == EaseFunction.Linear && 
-            endEaseY.Function   == EaseFunction.Linear;
+        public bool IsLinear =>
+            StartEaseX is BasicEaseDirective startEaseX &&
+            StartEaseY is BasicEaseDirective startEaseY &&
+
+            EndEaseX is BasicEaseDirective endEaseX &&
+            EndEaseY is BasicEaseDirective endEaseY &&
+
+            startEaseX.Function == EaseFunction.Linear &&
+            startEaseY.Function == EaseFunction.Linear &&
+
+            endEaseX.Function == EaseFunction.Linear &&
+            endEaseY.Function == EaseFunction.Linear;
 
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = 
+        public static TimestampType[] ThisTimestampTypes =
         {
             #region Start Position
             new()
@@ -791,13 +965,13 @@ namespace JANOARG.Shared.Data.ChartInfo
     [System.Serializable]
     public class HitObject : DirtyTrackedStoryboardable, IDeepClonable<HitObject>
     {
-        public HitType      Type;
+        public HitType Type;
         public BeatPosition Offset = new();
-        public float        Position;
-        public float        Length;
-        public float        HoldLength = 0;
-        public bool         Flickable;
-        public float        FlickDirection = -1;
+        public float Position;
+        public float Length;
+        public float HoldLength = 0;
+        public bool Flickable;
+        public float FlickDirection = -1;
 
         public int StyleIndex = 0;
 
@@ -808,7 +982,7 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
 
         public override TimestampType[] TimestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = 
+        public static TimestampType[] ThisTimestampTypes =
         {
             new()
             {
@@ -851,4 +1025,11 @@ namespace JANOARG.Shared.Data.ChartInfo
         Group,
         Global
     }
+    public enum FontFamily
+{
+    RobotoMono,
+    Roboto,
+    Garvette,
+    Michroma,
+}
 }
