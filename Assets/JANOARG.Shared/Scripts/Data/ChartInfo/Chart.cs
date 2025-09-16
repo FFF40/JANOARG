@@ -57,6 +57,9 @@ namespace JANOARG.Shared.Data.ChartInfo
             foreach (Lane lane in Lanes)
                 clone.Lanes.Add(lane.DeepClone());
 
+            foreach (Text text in Texts)
+                clone.Texts.Add((Text)text.DeepClone());
+
             return clone;
         }
     }
@@ -545,8 +548,10 @@ namespace JANOARG.Shared.Data.ChartInfo
             return rt;
         }
 
+        public override TimestampType[] TimestampTypes => ThisTimestampTypes;
+
         //Append Text Storyboard to the base WorldObject Storyboard
-        public new static TimestampType[] TimestampTypes = sThisTimestampTypes.Concat(new TimestampType[] {
+        public new static TimestampType[] ThisTimestampTypes = sThisTimestampTypes.Concat(new TimestampType[] {
         new() {
             ID = "Text_Size",
             Name = "Text Size",
@@ -568,20 +573,20 @@ namespace JANOARG.Shared.Data.ChartInfo
         new() {
             ID = "Text_Color_B",
             Name = "Text Color B",
-            StoryboardGetter = (x) => ((Text)x).TextColor.r,
+            StoryboardGetter = (x) => ((Text)x).TextColor.b,
             StoryboardSetter = (x, a) => { ((Text)x).TextColor.b = a; },
         },
         new() {
             ID = "Text_Color_A",
             Name = "Text Color A",
-            StoryboardGetter = (x) => ((Text)x).TextColor.r,
+            StoryboardGetter = (x) => ((Text)x).TextColor.a,
             StoryboardSetter = (x, a) => { ((Text)x).TextColor.a = a; },
         },
     }).ToArray();
 
         public override WorldObject DeepClone()
         {
-            Text clone = new Text
+            Text clone = new Text()
             {
                 Name = Name,
                 Position = new Vector3(Position.x, Position.y, Position.z),
