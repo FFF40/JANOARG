@@ -20,6 +20,7 @@ namespace JANOARG.Shared.Data.Files
             var mode = "";
 
             Lane currentLane = null;
+            Text currentText = null;
             object currentObject = null;
             Storyboard currentStoryboard = null;
 
@@ -63,6 +64,11 @@ namespace JANOARG.Shared.Data.Files
                         else if (mode == "OBJECTS")
                         {
                             currentObject = chart.Lanes;
+                            currentStoryboard = null;
+                        }
+                        else if (mode == "EXTRAS")
+                        {
+                            currentObject = chart.Texts;
                             currentStoryboard = null;
                         }
                         else
@@ -246,6 +252,44 @@ namespace JANOARG.Shared.Data.Files
                                 throw new Exception("Not enough tokens (minimum 9, got " + tokens.Length + ").");
                             }
                         }
+                        else if (tokens[1] == "Text")
+                        {
+                            if (tokens.Length >= 8)
+                            {
+                                Text text_r = new Text
+                                {
+                                    Position = new Vector3(ParseFloat(tokens[2]), ParseFloat(tokens[3]), ParseFloat(tokens[4])),
+                                    Rotation = new Vector3(ParseFloat(tokens[5]), ParseFloat(tokens[6]), ParseFloat(tokens[7])),
+                                    TextFont = ParseEnum<FontFamily>(tokens[8]),
+                                };
+                                currentObject = currentText = text_r;
+                                currentStoryboard = text_r.Storyboard;
+                                chart.Texts.Add(text_r);
+                            }
+                            else
+                            {
+                                throw new System.Exception("Not enough tokens (minimum 8, got " + tokens.Length + ").");
+                            }
+                        }
+                        else if (tokens[1] == "TextStep")
+                        {
+                            Debug.Log(tokens.Length);
+                            if (tokens.Length >= 3)
+                            {
+                                TextStep step = new TextStep
+                                {
+                                    Offset = ParseTime(tokens[2]),
+                                    TextChange = string.Join(" ", tokens[3..]),
+                                };
+                                currentObject = step;
+
+                                currentText.TextSteps.Add(step);
+                            }
+                            else
+                            {
+                                throw new System.Exception("Not enough tokens (minimum 3, got " + tokens.Length + ").");
+                            }
+                        }
                         else
                         {
                             throw new Exception("The specified object " + tokens[1] + " is not a valid object.");
@@ -302,6 +346,11 @@ namespace JANOARG.Shared.Data.Files
                         {
                             if (key == "Name") lane.Name = value;
                             else if (key == "Group") lane.Group = value;
+                        }
+                        else if (currentObject is Text text)
+                        {
+                            if (key == "Name") text.Name = value;
+                            else if (key == "Display") text.DisplayText = value;
                         }
                     }
                     else if (currentObject?.ToString() == "version")

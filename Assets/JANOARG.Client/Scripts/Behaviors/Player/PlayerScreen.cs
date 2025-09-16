@@ -80,7 +80,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public LanePlayer        LaneSample;
         public HitPlayer         HitSample;
-        public MeshRenderer      HoldSample;
+        public TextPlayer TextSample;
+        public MeshRenderer HoldSample;
         public JudgeScreenEffect JudgeScreenSample;
 
         [Space]
@@ -157,6 +158,9 @@ namespace JANOARG.Client.Behaviors.Player
 
         [HideInInspector]
         public List<LanePlayer> Lanes = new();
+
+        [HideInInspector]
+        public List<TextPlayer> Texts = new();
 
         private double _LastDSPTime;
 
@@ -287,7 +291,11 @@ namespace JANOARG.Client.Behaviors.Player
                 foreach (LanePlayer lane in Lanes)
                     Destroy(lane.gameObject);
 
+                foreach (TextPlayer text in Texts)
+                    Destroy(text.gameObject);
+
                 Lanes.Clear();
+                Texts.Clear();
             }
             else
             {
@@ -322,6 +330,7 @@ namespace JANOARG.Client.Behaviors.Player
             ScaledMinimumRadius = MinimumRadius * screenUnit;
 
             StartCoroutine(LaneLoader());
+            TextLoader();
 
             yield return new WaitUntil(() => _LoadState[0]);
 
@@ -342,7 +351,6 @@ namespace JANOARG.Client.Behaviors.Player
         {
             var loadedLanes = 0;
             var instantiatedLane = new bool[sTargetChart.Data.Lanes.Count];
-
             while (loadedLanes < sTargetChart.Data.Lanes.Count)
             {
                 var progressMade = false;
@@ -497,6 +505,18 @@ namespace JANOARG.Client.Behaviors.Player
             yield return new WaitForEndOfFrame();
         }
 
+        private void TextLoader()
+        {
+            for (int t = 0; t < sTargetChart.Data.Texts.Count; t++)
+            {
+                TextPlayer f_Text_Chart = Instantiate(TextSample, Holder);
+
+                f_Text_Chart.Original = sTargetChart.Data.Texts[t];
+                f_Text_Chart.Current = sCurrentChart.Texts[t];
+                f_Text_Chart.Init();
+                Texts.Add(f_Text_Chart);
+            }
+        }
         private IEnumerator LaneGroupLoader()
         {
             var loadedLaneGroups = 0;
@@ -704,6 +724,9 @@ namespace JANOARG.Client.Behaviors.Player
 
                 foreach (LanePlayer lane in Lanes)
                     lane.UpdateSelf(visualTime, visualBeat);
+
+                foreach (TextPlayer text in Texts)
+                    text.UpdateSelf(visualTime, visualBeat);
 
                 if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || CurrentTime / Music.clip.length >= 1) && !ResultExec)
                 {
