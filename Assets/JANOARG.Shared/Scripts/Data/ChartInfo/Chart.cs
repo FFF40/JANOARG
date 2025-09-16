@@ -2,7 +2,6 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
-using JANOARG.Client.Behaviors.Player;
 
 namespace JANOARG.Shared.Data.ChartInfo
 {
@@ -461,7 +460,6 @@ namespace JANOARG.Shared.Data.ChartInfo
         public Vector3 Position;
         public Vector3 Rotation;
 
-
         public override TimestampType[] TimestampTypes => sThisTimestampTypes;
         public static TimestampType[] sThisTimestampTypes = {
         new() {
@@ -504,7 +502,6 @@ namespace JANOARG.Shared.Data.ChartInfo
 
     };
 
-
         public virtual WorldObject DeepClone()
         {
             return new WorldObject
@@ -517,13 +514,10 @@ namespace JANOARG.Shared.Data.ChartInfo
         }
     }
 
-
-
     // Text
     [System.Serializable]
     public class Text : WorldObject
     {
-
         public string DisplayText;
 
         // Default Values
@@ -602,7 +596,6 @@ namespace JANOARG.Shared.Data.ChartInfo
             };
             return clone;
         }
-
     }
 
     [System.Serializable]
@@ -623,7 +616,6 @@ namespace JANOARG.Shared.Data.ChartInfo
             return clone;
         }
     }
-
 
     [System.Serializable]
     public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
@@ -1031,10 +1023,10 @@ namespace JANOARG.Shared.Data.ChartInfo
         Global
     }
     public enum FontFamily
-{
-    RobotoMono,
-    Roboto,
-    Garvette,
-    Michroma,
-}
+    {
+        RobotoMono,
+        Roboto,
+        Garvette,
+        Michroma,
+    }
 }

@@ -512,7 +512,7 @@ namespace JANOARG.Client.Behaviors.Player
                 TextPlayer f_Text_Chart = Instantiate(TextSample, Holder);
 
                 f_Text_Chart.Original = sTargetChart.Data.Texts[t];
-                f_Text_Chart.Current = sCurrentChart.Texts[t]; //main problem since this is zero 
+                f_Text_Chart.Current = sCurrentChart.Texts[t];
                 f_Text_Chart.Init();
                 Texts.Add(f_Text_Chart);
             }

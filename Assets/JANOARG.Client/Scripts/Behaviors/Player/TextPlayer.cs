@@ -47,7 +47,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         TMP_FontAsset InitFontFamily(FontFamily font)
         {
-            //Add a case statement if you added a FontFamily item in FontFamily enum 
+            //Add a case statement if you added a FontFamily item in FontFamily enum (found in Chart.cs)
             TMP_FontAsset rt = font switch
             {
                 FontFamily.RobotoMono => Resources.Load<TMP_FontAsset>("Fonts/RobotoMono-Regular SDF"),
