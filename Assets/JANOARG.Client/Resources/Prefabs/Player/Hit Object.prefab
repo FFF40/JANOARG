@@ -249,8 +249,8 @@ MonoBehaviour:
   HoldTicks: []
   CurrentPosition: 0
   Center: {fileID: 26823659420624253}
-  Left: {fileID: 1571487481991125436}
-  Right: {fileID: 4934770203992688598}
+  LeftPoint: {fileID: 1571487481991125436}
+  RightPoint: {fileID: 4934770203992688598}
   HoldMesh: {fileID: 0}
   HoldRenderer: {fileID: 0}
   FlickMesh: {fileID: 6463587809957732954}
