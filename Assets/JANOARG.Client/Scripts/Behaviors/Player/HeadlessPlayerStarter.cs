@@ -24,6 +24,7 @@ namespace JANOARG.Client.Behaviors.Player
                 throw new NullReferenceException(
                     "RunChart or Chart must be assigned! Assign it from the editor in the PlayerScreen component AND enter playmode from there.");
 
+#if UNITY_EDITOR
             // Prepare variables
             string runChartPath = AssetDatabase.GetAssetPath(sRunChart);
 
@@ -41,9 +42,18 @@ namespace JANOARG.Client.Behaviors.Player
 
             Debug.LogWarning("TargetSong is null, Loading RunChart from " + runChartPath);
 
-            s_targetSong = sRunChart.Data;
-            s_targetSongPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(runChartPath));
-            s_targetChartMeta = s_targetSong.Charts.Find(meta => meta.DifficultyName == sChart.Data.DifficultyName);
+            int attempt = 0;
+            while (s_targetSong == null || s_targetChartMeta == null || s_targetSongPath == null)
+            {
+                Debug.LogWarning($"Attempting to load datas ({attempt})");
+                attempt++;
+                if (attempt > 20)
+                    throw new Exception("Failed to load datas");
+                s_targetSong = sRunChart.Data;
+                s_targetSongPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(runChartPath));
+                s_targetChartMeta = s_targetSong.Charts.Find(meta => meta.DifficultyName == sChart.Data.DifficultyName);
+            }
+#endif
 
             // Prepare scene
             PlayerScreen.sHeadlessInitialised = true;

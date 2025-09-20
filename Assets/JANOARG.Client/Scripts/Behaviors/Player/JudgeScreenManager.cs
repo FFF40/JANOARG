@@ -33,33 +33,51 @@ namespace JANOARG.Client.Behaviors.Player
             }
         }
 
+        private JudgeScreenEffect CreateEffect(float? accuracy, Color color)
+        {
+            var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
+            newEffect.SetAccuracy(accuracy);
+            newEffect.SetColor(color);
+            newEffect.PlayOneShot();
+            Debug.LogWarning("JudgeScreenManager pool exhausted, creating new instance.");
+            
+            return newEffect;
+        }
+        
         // Use effects in the pool
         public JudgeScreenEffect BorrowEffect(float? accuracy, Color color)
         {
             // Debug.Log($"Borrowing JudgeScreenEffect: Accuracy={accuracy}, Color={color}, TotalInstances={totalInstances}");
             if (_totalInstances > _totalMaxInstances)
             {
-                var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreenHolder);
-                newEffect.SetAccuracy(accuracy);
-                newEffect.SetColor(color);
-                newEffect.PlayOneShot();
-                Debug.LogWarning("JudgeScreenManager pool exhausted, creating new instance.");
-                return newEffect;
+                return CreateEffect(accuracy, color);
             }
 
-            JudgeScreenEffect effect = judgeScreenEffects.Pop();
-            effect.gameObject.SetActive(true);
-            effect.SetAccuracy(accuracy);
-            effect.SetColor(color);
-            effect.Play();
-            _totalInstances++;
-            return effect;
+            // In case player calls Borrow too fast (when fast-forwarding in editor) it didn't have time to keep track
+            try
+            {
+                JudgeScreenEffect effect = judgeScreenEffects.Pop();
+                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
+                effect.gameObject.SetActive(true);
+                effect.SetAccuracy(accuracy);
+                effect.SetColor(color);
+                effect.Play();
+                _totalInstances++;
+                return effect;
+            }
+            catch (InvalidOperationException e)
+            {
+                Debug.LogWarning(e.Message + "Skipping effect.");
+
+                return null;
+            }
         }
 
         // Return when finish
         public void ReturnEffect(JudgeScreenEffect effect)
         {
             effect.gameObject.SetActive(false);
+            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreenHolder);
             judgeScreenEffects.Push(effect);
             _totalInstances--;
         }
