@@ -1,6 +1,6 @@
 [submodule "Assets/JANOARG.Assets"]
 	path = Assets/JANOARG.Assets
-	url = ssh://git@github.com/FFF40/JANOARG.Assets.git
+	url = https://github.com/FFF40/JANOARG.Assets.git
 [submodule "Assets/JANOARG.Shared"]
 	path = Assets/JANOARG.Shared
-	url = ssh://git@github.com/FFF40/JANOARG.Shared.git
+	url = https://github.com/FFF40/JANOARG.Shared.git
