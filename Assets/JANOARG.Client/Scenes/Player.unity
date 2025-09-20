@@ -97,7 +97,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 45fb7adad2556908cb22eea7334e6d92, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -803,6 +803,7 @@ GameObject:
   - component: {fileID: 80537441}
   - component: {fileID: 80537440}
   - component: {fileID: 80537442}
+  - component: {fileID: 80537443}
   m_Layer: 5
   m_Name: Combo
   m_TagString: Untagged
@@ -938,6 +939,29 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!223 &80537443
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80537438}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!114 &103336432 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7224664916080416759, guid: 3a6720bb216fc2343a4fb37ed69e6fd8, type: 3}
@@ -2453,7 +2477,7 @@ GameObject:
   m_Component:
   - component: {fileID: 324592700}
   m_Layer: 5
-  m_Name: Judge Screen
+  m_Name: Judge Screen Pool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6404,6 +6428,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 830349783}
   m_CullTransparentMesh: 1
+--- !u!1 &830500996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 830500997}
+  m_Layer: 5
+  m_Name: Judge Screen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &830500997
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830500996}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1551788790}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &860655458
 GameObject:
   m_ObjectHideFlags: 0
@@ -6888,7 +6947,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!20 &939693537
 Camera:
   m_ObjectHideFlags: 0
@@ -7496,7 +7555,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 111.130005, y: -20}
+  m_AnchoredPosition: {x: 111.13013, y: -20}
   m_SizeDelta: {x: 1011.13, y: 40}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1022207194
@@ -8161,6 +8220,7 @@ GameObject:
   - component: {fileID: 1162393574}
   - component: {fileID: 1162393576}
   - component: {fileID: 1162393577}
+  - component: {fileID: 1162393578}
   m_Layer: 0
   m_Name: Score
   m_TagString: Untagged
@@ -8269,6 +8329,29 @@ MonoBehaviour:
   - {fileID: 1933831740}
   - {fileID: 1623016697}
   - {fileID: 1873399777}
+--- !u!223 &1162393578
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1162393572}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1171354394
 GameObject:
   m_ObjectHideFlags: 0
@@ -8545,6 +8628,7 @@ GameObject:
   - component: {fileID: 1214491413}
   - component: {fileID: 1214491412}
   - component: {fileID: 1214491414}
+  - component: {fileID: 1214491415}
   m_Layer: 5
   m_Name: Judgment
   m_TagString: Untagged
@@ -8680,6 +8764,29 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!223 &1214491415
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1214491410}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1218609045
 GameObject:
   m_ObjectHideFlags: 0
@@ -11910,6 +12017,7 @@ RectTransform:
   m_Children:
   - {fileID: 1743933711}
   - {fileID: 324592700}
+  - {fileID: 830500997}
   - {fileID: 150717747}
   - {fileID: 1192416083}
   - {fileID: 1598840471}
@@ -11933,8 +12041,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6a77452eee572143885d7f2de9a957c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RunChart: {fileID: 5022602860645237092, guid: be9b1b2f2d1ed80c7977c6e1a675dd15, type: 3}
-  Chart: {fileID: 5022602860645237092, guid: 62d5153c84ca91ee88cfdd7b488ca242, type: 3}
+  RunChart: {fileID: 5022602860645237092, guid: 5b108402815b5e96b871207ec0a95918, type: 3}
+  Chart: {fileID: 5022602860645237092, guid: 548e97d191bccb271b8e3a5b7a3e11a1, type: 3}
   Music: {fileID: 1395341278}
   Hitsounds: {fileID: 1395341278}
   Pseudocamera: {fileID: 939693537}
@@ -11970,7 +12078,8 @@ MonoBehaviour:
   ComboGroup: {fileID: 80537442}
   ComboLabel: {fileID: 80537440}
   JudgeScreenHolder: {fileID: 324592700}
-  judgeScreenManager: {fileID: 1551788793}
+  JudgeScreen: {fileID: 830500997}
+  JudgeScreenManager: {fileID: 1551788793}
   PauseLabel: {fileID: 664049825}
   LaneGroupSample: {fileID: 7932530262983194933, guid: 9f163d8f499bace4694fcbbda4c1d6b3, type: 3}
   LaneSample: {fileID: 2572600698700152797, guid: 21d1e5daa792aad4599081b3d9a9aa5a, type: 3}
@@ -12594,6 +12703,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1598840471}
   - component: {fileID: 1598840472}
+  - component: {fileID: 1598840473}
   m_Layer: 5
   m_Name: End Flash
   m_TagString: Untagged
@@ -12635,6 +12745,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b7d6c035f7672f408899b6c6ca87a48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!223 &1598840473
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1598840470}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!114 &1602733310 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9170983560658053137, guid: 3a6720bb216fc2343a4fb37ed69e6fd8, type: 3}
@@ -13933,6 +14066,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1743933711}
   - component: {fileID: 1743933712}
+  - component: {fileID: 1743933713}
   m_Layer: 5
   m_Name: Progress
   m_TagString: Untagged
@@ -14011,6 +14145,29 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!223 &1743933713
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743933710}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1764081453
 GameObject:
   m_ObjectHideFlags: 0
@@ -14703,7 +14860,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1984835390}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1871920188
@@ -15747,6 +15905,37 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!1 &1984835389
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1984835390}
+  m_Layer: 0
+  m_Name: HitObject Pool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1984835390
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984835389}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.000015258789, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1854443385}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1991689058
 GameObject:
   m_ObjectHideFlags: 0
