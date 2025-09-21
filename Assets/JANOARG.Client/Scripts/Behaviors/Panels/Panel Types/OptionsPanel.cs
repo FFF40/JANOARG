@@ -102,7 +102,8 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
         public void SetTab(int tab)
         {
-            if (!IsAnimating && tab != CurrentTab) StartCoroutine(SetTabAnim(tab));
+            if (!IsAnimating && tab != CurrentTab) 
+                StartCoroutine(SetTabAnim(tab));
         }
 
         public IEnumerator SetTabAnim(int tab)
@@ -351,26 +352,33 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
                     AboutPane.SetActive(true);
                     OptionAboutEntry entry;
-                    entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
+                    entry = Spawn<OptionAboutEntry>("LEAD DEVELOPER / GAME DESIGNER");
                     entry.BodyLabel.text = "duducat / ducdat0507";
+                    
+                    entry = Spawn<OptionAboutEntry>("DEVELOPERS");
+                    entry.BodyLabel.text = "BashhScriptKid  •  M3galodon";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
                     entry.BodyLabel.text = "Insert name of a famous artist here";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                    entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality";
+                    entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality  •  Pa_lette  •  Rose Quartz";
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
                     entry.BodyLabel.text = "duducat";
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = ":blobcat:  •  R3ality";
+                    entry.BodyLabel.text = ":blobcat:  •  R3ality  •  leko_uname";
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat  •  M3galodon";
+                    entry.BodyLabel.text = "duducat  •  M3galodon  •  KuraNeko";
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
+                    
+                    entry = Spawn<OptionAboutEntry>(string.Empty);
+                    entry.BodyLabel.text = "Did you know your name could be here as well?\n Find out how by clicking the GitHub link above!";
+                    entry.BodyLabel.fontSize = 8;
                 }
 
                     break;
@@ -489,6 +497,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             {
                 "discord" => "https://discord.gg/vXJTPFQBHm",
                 "reddit" => "https://reddit.com/r/fff40",
+                "github" => "https://github.com/FFF40/JANOARG",
                 _ => ""
             };
 
