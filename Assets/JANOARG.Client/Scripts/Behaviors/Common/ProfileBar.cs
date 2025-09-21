@@ -149,7 +149,9 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void CompleteSong(long baseExp, long baseCoins)
         {
-            if (_SongCurrencyGainAnimation != null) StopCoroutine(_SongCurrencyGainAnimation);
+            if (_SongCurrencyGainAnimation != null) 
+                StopCoroutine(_SongCurrencyGainAnimation);
+            
             _SongCurrencyGainAnimation = StartCoroutine(SongGainRoutine(baseExp, baseCoins));
         }
 
