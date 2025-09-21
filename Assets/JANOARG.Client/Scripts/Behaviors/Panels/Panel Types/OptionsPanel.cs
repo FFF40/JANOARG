@@ -518,9 +518,9 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             if (phase == 1)
             {
                 // Phase 2: Falling
-                yield return Ease.Animate(1f, t =>
+                yield return Ease.Animate(0.5f, t =>
                 {
-                    float easedT = Ease.Get(t, EaseFunction.Quartic, EaseMode.In);
+                    float easedT = Ease.Get(t, EaseFunction.Cubic, EaseMode.In);
 
                     float z = Mathf.Lerp(45, 80, easedT);
                     
