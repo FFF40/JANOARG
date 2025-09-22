@@ -518,7 +518,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             if (phase == 1)
             {
                 // Phase 2: Falling
-                yield return Ease.Animate(0.5f, t =>
+                yield return Ease.Animate(0.75f, t =>
                 {
                     float easedT = Ease.Get(t, EaseFunction.Cubic, EaseMode.In);
 
@@ -526,10 +526,10 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                     
                     XSocialIcon.localRotation = Quaternion.Euler(0, 0, z);
 
-                    float y = Mathf.Lerp(-194, -415, easedT);
+                    float y = Mathf.Lerp(XSocialIcon.anchoredPosition.y, -420, easedT);
                     var pos = XSocialIcon.localPosition;
                     pos.y = y;
-                    XSocialIcon.localPosition = pos;
+                    XSocialIcon.anchoredPosition = pos;
                 });
 
                 ElonBanishes = 2;
