@@ -58,11 +58,15 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public Transform  PreviewCatchLeft;
         public Transform  PreviewCatchRight;
         public MeshFilter PreviewCatchFlick;
-
+        
         public Panel CurrentPanel;
 
         [HideInInspector] public bool IsAnimating;
 
+        [Header("Funni")]
+        public RectTransform XSocialIcon;
+        public byte ElonBanishes;
+        
         public Mesh freeFlickIndicator { get; private set; }
         public Mesh arrowFlickIndicator { get; private set; }
 
@@ -102,7 +106,8 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
         public void SetTab(int tab)
         {
-            if (!IsAnimating && tab != CurrentTab) StartCoroutine(SetTabAnim(tab));
+            if (!IsAnimating && tab != CurrentTab) 
+                StartCoroutine(SetTabAnim(tab));
         }
 
         public IEnumerator SetTabAnim(int tab)
@@ -351,26 +356,33 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
                     AboutPane.SetActive(true);
                     OptionAboutEntry entry;
-                    entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
+                    entry = Spawn<OptionAboutEntry>("LEAD DEVELOPER / GAME DESIGNER");
                     entry.BodyLabel.text = "duducat / ducdat0507";
+                    
+                    entry = Spawn<OptionAboutEntry>("DEVELOPERS");
+                    entry.BodyLabel.text = "BashhScriptKid  •  M3galodon";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
                     entry.BodyLabel.text = "Insert name of a famous artist here";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                    entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality";
+                    entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality  •  Pa_lette  •  Rose Quartz";
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
                     entry.BodyLabel.text = "duducat";
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = ":blobcat:  •  R3ality";
+                    entry.BodyLabel.text = ":blobcat:  •  R3ality  •  leko_uname";
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat  •  M3galodon";
+                    entry.BodyLabel.text = "duducat  •  M3galodon  •  KuraNeko";
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
+                    
+                    entry = Spawn<OptionAboutEntry>(string.Empty);
+                    entry.BodyLabel.text = "Did you know your name could be here as well?\n Find out how by clicking the GitHub link above!";
+                    entry.BodyLabel.fontSize = 8;
                 }
 
                     break;
@@ -483,16 +495,69 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             CurrentItems.Clear();
         }
 
+        public void FuckOffElon()
+        {
+            StartCoroutine(FuckOffElonAnimation(ElonBanishes));
+        }
+        
+        private IEnumerator FuckOffElonAnimation(byte phase)
+        {
+            Vector2 startPos = new Vector2(122f, -215f);
+
+            if (phase == 0)
+            {
+                // Phase 1: Hanging down
+                yield return Ease.Animate(1f, t =>
+                {
+                    XSocialIcon.rotation = Quaternion.Euler(0, 0, 45 * Ease.Get(t, EaseFunction.Back, EaseMode.Out));
+                });
+
+                ElonBanishes = 1;
+            }
+
+            if (phase == 1)
+            {
+                // Phase 2: Falling
+                yield return Ease.Animate(0.75f, t =>
+                {
+                    float easedT = Ease.Get(t, EaseFunction.Cubic, EaseMode.In);
+
+                    float z = Mathf.Lerp(45, 80, easedT);
+                    
+                    XSocialIcon.localRotation = Quaternion.Euler(0, 0, z);
+
+                    float y = Mathf.Lerp(XSocialIcon.anchoredPosition.y, -420, easedT);
+                    var pos = XSocialIcon.localPosition;
+                    pos.y = y;
+                    XSocialIcon.anchoredPosition = pos;
+                });
+
+                ElonBanishes = 2;
+            }
+        }
+
+        private IEnumerator TwitterWait()
+        {
+            yield return new WaitForSeconds(2);
+        }
+
         public void GoToSocial(string target)
         {
             string url = target switch
             {
                 "discord" => "https://discord.gg/vXJTPFQBHm",
-                "reddit" => "https://reddit.com/r/fff40",
-                _ => ""
+                "reddit"  => "https://reddit.com/r/fff40", // This one got deleted
+                "twitter" => "https://twitter.com/FFF40_Studios",
+                "github"  => "https://github.com/FFF40/JANOARG",
+                "bsky"    => "https://bsky.app/profile/fff40.studio",
+                _         =>  string.Empty
             };
 
-            if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
+            if (target == "twitter")
+                StartCoroutine(TwitterWait());
+
+            if (!string.IsNullOrEmpty(url)) 
+                Application.OpenURL(url);
         }
 
         private IEnumerator PreviewAnim(bool shown)

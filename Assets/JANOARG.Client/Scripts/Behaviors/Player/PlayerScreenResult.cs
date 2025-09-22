@@ -163,15 +163,9 @@ namespace JANOARG.Client.Behaviors.Player
 
                     ResultTextBig.alpha = 1 -
                                           Random.Range(
-                                              Ease.Get(
-                                                  Mathf.Clamp01(x * 4),
-                                                  EaseFunction.Circle,
-                                                  EaseMode.Out),
-                                              Ease.Get(
-                                                  Mathf.Clamp01(x * 2),
-                                                  EaseFunction.Exponential,
-                                                  EaseMode.Out)
-                                          );
+                                              Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 
+                                              Ease.Get(Mathf.Clamp01(x * 2), EaseFunction.Exponential, EaseMode.Out)
+                                              );
 
                     float ease = Mathf.Pow(
                         Ease.Get(x, EaseFunction.Circle, EaseMode.Out),
@@ -181,49 +175,14 @@ namespace JANOARG.Client.Behaviors.Player
                     ResultTextBig.characterSpacing = 25 * ease - 40;
 
                     ResultBackground.rectTransform.sizeDelta = new Vector2(
-                        ResultBackground
-                            .rectTransform
-                            .sizeDelta.y,
-                        Mathf.Pow(
-                            Ease.Get(
-                                Mathf
-                                    .Clamp01(
-                                        x *
-                                        4),
-                                EaseFunction
-                                    .Circle,
-                                EaseMode
-                                    .Out),
-                            2) *
-                        50 +
-                        50
+                        ResultBackground.rectTransform.sizeDelta.y,
+                        Mathf.Pow(Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 2) * 50 + 50
                     );
 
-                    ScoreExplosionRings[1].insideRadius = 0.95f *
-                                                          Ease.Get(
-                                                              x * 2f,
-                                                              EaseFunction.Quintic,
-                                                              EaseMode.Out);
+                    ScoreExplosionRings[1].insideRadius = 0.95f * Ease.Get(x * 2f, EaseFunction.Quintic, EaseMode.Out);
 
-                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one *
-                                                                     (500 *
-                                                                      Ease.Get(
-                                                                          x * 2f,
-                                                                          EaseFunction
-                                                                              .Circle,
-                                                                          EaseMode
-                                                                              .Out));
-
-                    ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward *
-                                                                            (-90 +
-                                                                             360 *
-                                                                             Ease.Get(
-                                                                                 x *
-                                                                                 1.5f,
-                                                                                 EaseFunction
-                                                                                     .Cubic,
-                                                                                 EaseMode
-                                                                                     .Out));
+                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (500 * Ease.Get(x * 2f, EaseFunction.Circle, EaseMode.Out));
+                    ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward * (-90 + 360 * Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out));
                 });
 
             yield return new WaitWhile(() => PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length);
