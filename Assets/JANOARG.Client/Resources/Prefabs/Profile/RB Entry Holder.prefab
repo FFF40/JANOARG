@@ -735,6 +735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Rating: {fileID: 5790711041402415916}
   Difficulty: {fileID: 5596967830407052020}
+  BestScore: {fileID: 8604523014721603013}
   SongName: {fileID: 5596967829852412492}
   SongArtist: {fileID: 5596967830536910773}
   DifficultyRating: {fileID: 5596967830407052020}

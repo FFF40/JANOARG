@@ -8,6 +8,7 @@ using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 {
@@ -27,8 +28,8 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
 
+        public RatingBreakdownEntry[] RatingBreakdownEntries;
         public bool isAnimating { get; private set; }
-
         public void Awake()
         {
             Storage storage = CommonSys.sMain.Storage;
@@ -71,6 +72,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
             foreach (KeyValuePair<string, ScoreStoreEntry> entry in scores.entries)
             {
+                Debug.Log("Processing entry: " + entry.Key);
                 string key = entry.Key;
                 int slashIndex = key.LastIndexOf('/');
 
@@ -139,14 +141,54 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             return tex2D;
         }
 
+        public void SetRatingBreakdown()
+        {
+            List<ScoreStoreEntry> bestEntries = StorageManager.sMain.Scores.GetBestEntries(33);
+            foreach (var entry in bestEntries)
+            {
+                Debug.Log("Best Entry: " + entry.SongID + "/" + entry.ChartID + " with rating " + entry.Rating);
+
+            }
+
+            for (var i = 0; i < RatingBreakdownEntries.Length; i++)
+            {
+                Debug.Log($"Loop i={i}, bestEntries.Count={bestEntries.Count}");
+                
+                if (i < bestEntries.Count)
+                {
+                    ScoreStoreEntry entry = bestEntries[i];
+
+                    Debug.Log("Setting entry " + i + " to " + entry.SongID + "/" + entry.ChartID + " with rating " + entry.Rating);
+
+                    RatingBreakdownEntries[i].SetEntry(
+                        entry.Rating.ToString("F0"),
+                        entry.ChartID,
+                        entry.Score.ToString(),
+                        entry.SongID,
+                        "???",
+                        "23"
+                    );
+                }
+                else
+                {
+                    RatingBreakdownEntries[i].SetEntry("-", "-", "-", "-", "-", "-");
+                }
+            }
+            
+            Debug.Log("SetRatingBreakdown complete.");
+        }
+
         public void ScreenshotRatingBreakdown()
         {
+            SetRatingBreakdown();
             if (!isAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
         }
 
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
+
+            
             Texture2D image = Screenshot(3072, 1280);
 
             yield return Share(image);
@@ -162,5 +204,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
             yield return new WaitUntil(() => task.IsCompleted);
         }
+
+
     }
 }
