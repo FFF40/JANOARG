@@ -583,7 +583,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -924,9 +924,7 @@ MonoBehaviour:
   - {fileID: 5596967828796867475}
   FullStreakIndicator: {fileID: 8959675981082309327}
   AllFlawlessIndicator: {fileID: 2654592947694407344}
-  SongInfoGraphic: {fileID: 336501056230882758}
-  SongInfoArtist: {fileID: 5596967830536910772}
-  SongInfoName: {fileID: 5596967829852412851}
+  RatingBreakdownGroup: {fileID: 0}
 --- !u!1 &5596967829852412850
 GameObject:
   m_ObjectHideFlags: 0

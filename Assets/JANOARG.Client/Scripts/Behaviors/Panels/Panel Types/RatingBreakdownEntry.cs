@@ -30,9 +30,6 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public GameObject FullStreakIndicator;
         public GameObject AllFlawlessIndicator;
 
-        public RectTransform SongInfoGraphic;
-        public RectTransform SongInfoArtist;
-        public RectTransform SongInfoName;
         private List<SongSelectItem> _SongSelectItems;
         private Color _Color;
 
@@ -78,13 +75,44 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             }
         }
 
-        public void GetCoverLayer(string songID)
+        public void SetCoverLayerColor(string songID)
         {
             var item = GetSong(songID);
     
             //Only solid color for now since cover is using Texture
             BackgroundCover.color = item.Song.Cover.BackgroundColor;
 
+        }
+
+        public IEnumerator GetCoverLayer(ScoreStoreEntry entry)
+        {
+            var item = GetSong(entry.SongID);
+
+            foreach (CoverLayer layer in item.Song.Cover.Layers)
+            {
+                string path = Path.Combine(Path.GetDirectoryName(item.SongPath)!, layer.Target);
+
+                ResourceRequest request = Resources.LoadAsync<Texture2D>(path);
+
+                yield return new WaitUntil(() => request.isDone);
+
+                if (request.asset)
+                {
+                    var texture = (Texture2D)request.asset;
+                    ScreenshotCanvas.sMain.SetBestSongCover(texture);
+                }
+                else
+                {
+                    ScreenshotCanvas.sMain.SetBestSongCover(BackgroundCover.color);
+                }
+                break;
+            }
+            if (item.Song.Cover.Layers.Count == 0)
+            {
+                ScreenshotCanvas.sMain.SetBestSongCover(BackgroundCover.color);    
+            }
+            
+            yield return new WaitUntil(() => ScreenshotCanvas.sMain.IsCoverSet);
         }
 
         public void SetIndicator(ScoreStoreEntry entry)
@@ -103,31 +131,30 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
         }
 
-        public void SetEntry(ScoreStoreEntry entry)
+        public IEnumerator SetEntry(ScoreStoreEntry entry)
         {
-            if (entry == null)
+            if (entry.IsUnityNull())
             {
-                return;
+                yield return null;
             }
 
             PlayableSong songInfo = GetSongInfo(entry.SongID);
             ExternalChartMeta chartInfo = GetSongChart(songInfo, entry.ChartID);
-            _Color = CommonSys.sMain.Constants.GetDifficultyColor(chartInfo.DifficultyIndex);
+            // _Color = CommonSys.sMain.Constants.GetDifficultyColor(chartInfo.DifficultyIndex);
 
             Rating.text = FormatRating(entry.Rating);
             BestScore.text = Helper.PadScore(entry.Score.ToString()) + "<size=50%><b>ppm";
             SongName.text = songInfo.SongName;
             SongArtist.text = songInfo.SongArtist;
-            ChartConstant.text = Helper.FormatDifficulty(chartInfo.DifficultyLevel);
+            // ChartConstant.text = Helper.FormatDifficulty(chartInfo.DifficultyLevel);
             ChartConstant.color = _Color;
-            
+
             StartCoroutine(GetCoverImage(entry.SongID));
-            GetCoverLayer(entry.SongID);
+            SetCoverLayerColor(entry.SongID);
 
             SetIndicator(entry);
-            // StartCoroutine(AdjustSongInfoGraphic());
 
-            Debug.Log("Done");
+            yield return null;
         }
 
         public string FormatRating(float rating)

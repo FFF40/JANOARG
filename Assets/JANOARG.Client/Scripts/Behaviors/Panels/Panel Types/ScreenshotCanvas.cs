@@ -7,12 +7,13 @@ using JANOARG.Client.Behaviors.Common;
 
 public class ScreenshotCanvas : MonoBehaviour
 {
+    public static ScreenshotCanvas sMain;
     public TMP_Text NameLabel;
     public TMP_Text TitleLabel;
 
     public TMP_Text LevelLabel;
     public TMP_Text LevelText;
-  
+
     public Slider LevelProgressBar;
     public Graphic LevelBackgroundGraphic;
     public Graphic LevelFillGraphic;
@@ -20,7 +21,13 @@ public class ScreenshotCanvas : MonoBehaviour
     public TMP_Text AbilityRatingLabel;
     public TMP_Text AbilityRatingText;
 
-    
+    public RawImage BestSongCover;
+    public bool IsCoverSet = false;
+
+    void Awake()
+    {
+        sMain = this;
+    }
 
     private void Start()
     {
@@ -38,4 +45,25 @@ public class ScreenshotCanvas : MonoBehaviour
         AbilityRatingText.text = ProfileBar.sMain.AbilityRatingText.text;
     }
 
+    public void SetBestSongCover(Texture2D texture)
+    {
+        if (IsCoverSet == false)
+        {
+            BestSongCover.texture = texture;
+            BestSongCover.color = Color.gray;
+
+            IsCoverSet = true;
+        }
+    }
+
+    public void SetBestSongCover(Color color)
+    {
+        if (IsCoverSet == false)
+        {
+            BestSongCover.color = new Color(color.r,color.g,color.b,0.75f);
+
+            IsCoverSet = true;
+        }
+    }
+    
 }

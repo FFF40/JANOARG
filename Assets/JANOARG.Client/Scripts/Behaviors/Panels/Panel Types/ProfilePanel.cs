@@ -28,7 +28,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
 
-        private RatingBreakdownEntry[] _RatingBreakdownEntries;
+        public RatingBreakdownEntry[] RatingBreakdownEntries;
         public bool isAnimating { get; private set; }
         public void Awake()
         {
@@ -145,17 +145,20 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         {
             List<ScoreStoreEntry> bestEntries = StorageManager.sMain.Scores.GetBestEntries(33);
 
-            for (var i = 0; i < _RatingBreakdownEntries.Length; i++)
+            for (var i = 0; i < RatingBreakdownEntries.Length; i++)
             {
                 if (i < bestEntries.Count)
                 {
                     ScoreStoreEntry entry = bestEntries[i];
-                    _RatingBreakdownEntries[i].SetEntry(entry);
-                    
+                    StartCoroutine(RatingBreakdownEntries[i].SetEntry(entry));
+
+                    if (i == 0 ) {
+                        StartCoroutine(RatingBreakdownEntries[0].GetCoverLayer(entry));
+                    }
                 }
                 else
                 {
-                    _RatingBreakdownEntries[i].SetEntry(null);
+                    RatingBreakdownEntries[i].SetEntry(null);
                 }
             }
             
@@ -164,14 +167,14 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
         public void ScreenshotRatingBreakdown()
         {
-            SetRatingBreakdown();
             if (!isAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
         }
 
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
-
+            SetRatingBreakdown();
+            yield return null;
             
             Texture2D image = Screenshot(3072, 1280);
 
