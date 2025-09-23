@@ -190,7 +190,5 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
 
             yield return new WaitUntil(() => task.IsCompleted);
         }
-
-
     }
 }
