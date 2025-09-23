@@ -140,13 +140,13 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
             PlayableSong songInfo = GetSongInfo(entry.SongID);
             ExternalChartMeta chartInfo = GetSongChart(songInfo, entry.ChartID);
-            // _Color = CommonSys.sMain.Constants.GetDifficultyColor(chartInfo.DifficultyIndex);
+            _Color = CommonSys.sMain.Constants.GetDifficultyColor(chartInfo.DifficultyIndex);
 
             Rating.text = FormatRating(entry.Rating);
             BestScore.text = Helper.PadScore(entry.Score.ToString()) + "<size=50%><b>ppm";
             SongName.text = songInfo.SongName;
             SongArtist.text = songInfo.SongArtist;
-            // ChartConstant.text = Helper.FormatDifficulty(chartInfo.DifficultyLevel);
+            ChartConstant.text = Helper.FormatDifficulty(chartInfo.DifficultyLevel);
             ChartConstant.color = _Color;
 
             StartCoroutine(GetCoverImage(entry.SongID));

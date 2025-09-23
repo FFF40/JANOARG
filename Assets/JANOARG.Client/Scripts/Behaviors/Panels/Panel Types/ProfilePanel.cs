@@ -161,8 +161,6 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                     RatingBreakdownEntries[i].SetEntry(null);
                 }
             }
-            
-            Debug.Log("SetRatingBreakdown complete.");
         }
 
         public void ScreenshotRatingBreakdown()
@@ -173,6 +171,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
+            
             SetRatingBreakdown();
             yield return null;
             
