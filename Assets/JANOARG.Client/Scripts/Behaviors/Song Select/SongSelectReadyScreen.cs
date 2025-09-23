@@ -3,6 +3,7 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Player;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

@@ -8,6 +8,7 @@ using JANOARG.Client.Behaviors.Player;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;

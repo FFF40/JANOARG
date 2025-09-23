@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Utils;
+using JANOARG.Shared.Utils;
 using TMPro;
 using UnityEngine;
 
