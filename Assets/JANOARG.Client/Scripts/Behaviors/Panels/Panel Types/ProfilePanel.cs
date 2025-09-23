@@ -144,16 +144,9 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public void SetRatingBreakdown()
         {
             List<ScoreStoreEntry> bestEntries = StorageManager.sMain.Scores.GetBestEntries(33);
-            foreach (var entry in bestEntries)
-            {
-                Debug.Log("Best Entry: " + entry.SongID + "/" + entry.ChartID + " with rating " + entry.Rating);
-
-            }
 
             for (var i = 0; i < RatingBreakdownEntries.Length; i++)
-            {
-                Debug.Log($"Loop i={i}, bestEntries.Count={bestEntries.Count}");
-                
+            {  
                 if (i < bestEntries.Count)
                 {
                     ScoreStoreEntry entry = bestEntries[i];
@@ -164,8 +157,8 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
                         entry.Rating.ToString("F0"),
                         entry.ChartID,
                         entry.Score.ToString(),
-                        entry.SongID,
-                        "???",
+                        entry.SongID,   //Song Name
+                        "???",          //Song Artist
                         "23"
                     );
                 }
