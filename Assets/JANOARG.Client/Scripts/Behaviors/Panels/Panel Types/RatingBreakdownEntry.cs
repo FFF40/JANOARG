@@ -81,7 +81,6 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
     
             //Only solid color for now since cover is using Texture
             BackgroundCover.color = item.Song.Cover.BackgroundColor;
-
         }
 
         public IEnumerator GetCoverLayer(ScoreStoreEntry entry)
@@ -125,10 +124,6 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             {
                 FullStreakIndicator.SetActive(true);
             }
-
-            // foreach (Graphic graphic in IndicatorGraphics)
-            //     graphic.color = _Color;
-
         }
 
         public IEnumerator SetEntry(ScoreStoreEntry entry)
@@ -165,7 +160,5 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
                     "<size=50%><b>" +
                     rating_Text.Substring(rating_Text.Length - 2);
         }
-
-        
     }
 }

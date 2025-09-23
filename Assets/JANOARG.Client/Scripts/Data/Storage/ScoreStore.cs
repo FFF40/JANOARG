@@ -73,7 +73,6 @@ namespace JANOARG.Client.Data.Storage
 
                         minimum_Rating = bestEntries[^1].Rating;
                     }
-
             }
 
             bestEntries.Sort((a, b) => b.Rating.CompareTo(a.Rating)); // Sort in descending order by Rating

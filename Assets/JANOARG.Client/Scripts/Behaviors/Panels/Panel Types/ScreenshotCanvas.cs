@@ -67,6 +67,5 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
                 IsCoverSet = true;
             }
         }
-
     }
 }
