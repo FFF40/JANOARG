@@ -10,7 +10,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
-namespace JANOARG.Client.Behaviors.Panels.Panel_Types
+namespace JANOARG.Client.Behaviors.Panels.Profile
 {
     public class ProfilePanel : MonoBehaviour
     {
@@ -171,7 +171,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
-            
+
             SetRatingBreakdown();
             yield return null;
             

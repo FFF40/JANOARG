@@ -13,7 +13,7 @@ using System.IO;
 using JetBrains.Annotations;
 using JANOARG.Client.Utils;
 
-namespace JANOARG.Client.Behaviors.Panels.Panel_Types
+namespace JANOARG.Client.Behaviors.Panels.Profile
 {
     public class RatingBreakdownEntry : MonoBehaviour
     {
