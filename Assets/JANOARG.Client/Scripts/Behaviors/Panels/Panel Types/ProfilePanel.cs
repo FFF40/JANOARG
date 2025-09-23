@@ -28,7 +28,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
 
-        public RatingBreakdownEntry[] RatingBreakdownEntries;
+        private RatingBreakdownEntry[] _RatingBreakdownEntries;
         public bool isAnimating { get; private set; }
         public void Awake()
         {
@@ -145,26 +145,17 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         {
             List<ScoreStoreEntry> bestEntries = StorageManager.sMain.Scores.GetBestEntries(33);
 
-            for (var i = 0; i < RatingBreakdownEntries.Length; i++)
-            {  
+            for (var i = 0; i < _RatingBreakdownEntries.Length; i++)
+            {
                 if (i < bestEntries.Count)
                 {
                     ScoreStoreEntry entry = bestEntries[i];
-
-                    Debug.Log("Setting entry " + i + " to " + entry.SongID + "/" + entry.ChartID + " with rating " + entry.Rating);
-
-                    RatingBreakdownEntries[i].SetEntry(
-                        entry.Rating.ToString("F0"),
-                        entry.ChartID,
-                        entry.Score.ToString(),
-                        entry.SongID,   //Song Name
-                        "???",          //Song Artist
-                        "23"
-                    );
+                    _RatingBreakdownEntries[i].SetEntry(entry);
+                    
                 }
                 else
                 {
-                    RatingBreakdownEntries[i].SetEntry("-", "-", "-", "-", "-", "-");
+                    _RatingBreakdownEntries[i].SetEntry(null);
                 }
             }
             

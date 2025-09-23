@@ -10,7 +10,6 @@ public class ScreenshotCanvas : MonoBehaviour
     public TMP_Text NameLabel;
     public TMP_Text TitleLabel;
 
-
     public TMP_Text LevelLabel;
     public TMP_Text LevelText;
   
@@ -20,6 +19,8 @@ public class ScreenshotCanvas : MonoBehaviour
 
     public TMP_Text AbilityRatingLabel;
     public TMP_Text AbilityRatingText;
+
+    
 
     private void Start()
     {

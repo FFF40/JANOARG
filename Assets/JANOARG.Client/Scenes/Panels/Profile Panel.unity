@@ -9917,6 +9917,8 @@ GameObject:
   - component: {fileID: 1416787046}
   - component: {fileID: 1416787045}
   - component: {fileID: 1416787049}
+  - component: {fileID: 1416787051}
+  - component: {fileID: 1416787050}
   m_Layer: 6
   m_Name: Screenshot Canvas
   m_TagString: Untagged
@@ -10032,6 +10034,41 @@ MonoBehaviour:
   LevelFillGraphic: {fileID: 207893809}
   AbilityRatingLabel: {fileID: 1256289743}
   AbilityRatingText: {fileID: 427696781}
+--- !u!114 &1416787050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1416787044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!222 &1416787051
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1416787044}
+  m_CullTransparentMesh: 1
 --- !u!1001 &1449015748
 PrefabInstance:
   m_ObjectHideFlags: 0
