@@ -11089,7 +11089,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u2630 \u2192 Profile \u2192 Ability Rating \u2192 Share\n<alpha=#77>(imagine
+  m_text: "\u2261 \u2192 Profile \u2192 Ability Rating \u2192 Share\n<alpha=#77>(imagine
     spending a subscription for this lmao)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
