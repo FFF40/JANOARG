@@ -8,8 +8,9 @@ using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
-namespace JANOARG.Client.Behaviors.Panels.Panel_Types
+namespace JANOARG.Client.Behaviors.Panels.Profile
 {
     public class ProfilePanel : MonoBehaviour
     {
@@ -27,8 +28,8 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
 
+        public RatingBreakdownEntry[] RatingBreakdownEntries;
         public bool isAnimating { get; private set; }
-
         public void Awake()
         {
             Storage storage = CommonSys.sMain.Storage;
@@ -71,6 +72,7 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
 
             foreach (KeyValuePair<string, ScoreStoreEntry> entry in scores.entries)
             {
+                Debug.Log("Processing entry: " + entry.Key);
                 string key = entry.Key;
                 int slashIndex = key.LastIndexOf('/');
 
@@ -139,6 +141,28 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
             return tex2D;
         }
 
+        public void SetRatingBreakdown()
+        {
+            List<ScoreStoreEntry> bestEntries = StorageManager.sMain.Scores.GetBestEntries(33);
+
+            for (var i = 0; i < RatingBreakdownEntries.Length; i++)
+            {
+                if (i < bestEntries.Count)
+                {
+                    ScoreStoreEntry entry = bestEntries[i];
+                    StartCoroutine(RatingBreakdownEntries[i].SetEntry(entry));
+
+                    if (i == 0 ) {
+                        StartCoroutine(RatingBreakdownEntries[0].GetCoverLayer(entry));
+                    }
+                }
+                else
+                {
+                    RatingBreakdownEntries[i].SetEntry(null);
+                }
+            }
+        }
+
         public void ScreenshotRatingBreakdown()
         {
             if (!isAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
@@ -147,6 +171,10 @@ namespace JANOARG.Client.Behaviors.Panels.Panel_Types
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
+
+            SetRatingBreakdown();
+            yield return null;
+            
             Texture2D image = Screenshot(3072, 1280);
 
             yield return Share(image);
