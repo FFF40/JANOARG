@@ -8,7 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Behaviors.Song_Select
+namespace JANOARG.Client.Behaviors.SongSelect
 {
     public class SongSelectReadyScreen : MonoBehaviour
     {

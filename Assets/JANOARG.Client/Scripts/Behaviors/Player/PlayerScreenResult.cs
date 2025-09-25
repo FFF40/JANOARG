@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using JANOARG.Client.Behaviors.Common;
-using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Data.Storage;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;

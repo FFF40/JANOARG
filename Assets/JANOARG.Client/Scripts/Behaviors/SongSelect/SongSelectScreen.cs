@@ -17,7 +17,7 @@ using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace JANOARG.Client.Behaviors.Song_Select
+namespace JANOARG.Client.Behaviors.SongSelect
 {
     public class SongSelectScreen : MonoBehaviour
     {

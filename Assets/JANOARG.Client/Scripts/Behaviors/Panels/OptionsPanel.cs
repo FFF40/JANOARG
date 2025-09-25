@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Options;
 using JANOARG.Client.Behaviors.Options.Input_Types;
+using JANOARG.Client.Behaviors.Panels;
 using JANOARG.Client.Behaviors.Player;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
@@ -14,7 +15,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
 
-namespace JANOARG.Client.Behaviors.Panels.Panel_Types
+namespace ANOARG.Client.Behaviors.Panels
 {
     public class OptionsPanel : MonoBehaviour
     {

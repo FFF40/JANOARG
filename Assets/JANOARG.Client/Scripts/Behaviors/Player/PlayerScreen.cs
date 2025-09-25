@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JANOARG.Client.Behaviors.Common;
-using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
