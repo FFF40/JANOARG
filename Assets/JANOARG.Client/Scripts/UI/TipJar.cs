@@ -12,10 +12,10 @@ namespace JANOARG.Client.UI
 
         private void Start()
         {
-            Kofi.Action    = () => Application.OpenURL("https://ko-fi.com/duducat");
+            Kofi.Action      = () => Application.OpenURL("https://ko-fi.com/duducat");
             //Patreon.Action = () => Application.OpenURL("");
             LiberaPay.Action = () => Application.OpenURL("https://en.liberapay.com/ducdat0507");
-            UnityAd.Action = () => throw new System.NotImplementedException("Unity Ad not installed yet (use another PR)");
+            UnityAd.Action   = () => throw new System.NotImplementedException("Unity Ad not installed yet (use another PR)");
         }
         
     }
