@@ -3,37 +3,41 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System;
 using System.Linq;
+using JANOARG.Client.Behaviors.Common;
 
-public class FlagStore
+namespace JANOARG.Client.Data.Storage
 {
-    public HashSet<string> Entries { get; private set; } = new();
-
-    public void Load()
+    public class FlagStore
     {
-        string[] entryList = Common.main.Storage.Get("FlagStore", new string[0]);
-        foreach (string entry in entryList)
+        public HashSet<string> Entries { get; private set; } = new();
+
+        public void Load()
         {
-            Entries.Add(entry);
+            string[] entryList = CommonSys.sMain.Storage.Get("FlagStore", new string[0]);
+            foreach (string entry in entryList)
+            {
+                Entries.Add(entry);
+            }
         }
-    }
 
-    public void Save()
-    {
-        Common.main.Storage.Set("FlagStore", Entries.ToArray());
-    }
+        public void Save()
+        {
+            CommonSys.sMain.Storage.Set("FlagStore", Entries.ToArray());
+        }
 
-    public bool Test(string flag)
-    {
-        return Entries.Contains(flag);
-    }
+        public bool Test(string flag)
+        {
+            return Entries.Contains(flag);
+        }
 
-    public bool Set(string flag)
-    {
-        return Entries.Add(flag);
-    }
+        public bool Set(string flag)
+        {
+            return Entries.Add(flag);
+        }
 
-    public bool Unset(string flag) 
-    {
-        return Entries.Remove(flag);
+        public bool Unset(string flag)
+        {
+            return Entries.Remove(flag);
+        }
     }
 }

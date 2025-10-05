@@ -1,41 +1,43 @@
-using UnityEngine;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
-using System.Collections;
-using UnityEditor.Callbacks;
+using UnityEngine;
 
-public class GizmoIconUtility 
+namespace JANOARG.Client.Editor
 {
-	[DidReloadScripts]
-	static GizmoIconUtility()
-	{
-		EditorApplication.projectWindowItemOnGUI = ItemOnGUI;
-	}
+    public class GizmoIconUtility
+    {
+        static GizmoIconUtility()
+        {
+            EditorApplication.projectWindowItemOnGUI = ItemOnGUI;
+        }
 
-	static void ItemOnGUI(string guid, Rect rect)
-	{
-		string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+        private static void ItemOnGUI(string guid, Rect rect)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-		Object obj = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
+            var obj = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
 
-        if (rect.height > rect.width) rect.height = rect.width;
-        else rect.width = rect.height;
-        if (rect.height == 16) rect.x += 3;
+            if (rect.height > rect.width) rect.height = rect.width;
+            else rect.width = rect.height;
 
-		if (obj is ExternalPlayableSong)
-		{
-			EditorGUI.DrawRect(rect, Color.black);
-		}
-		else if (obj is ExternalChart)
-		{
-            ExternalChart item = (ExternalChart)obj;
-			EditorGUI.DrawRect(rect, Color.white);
+            if (Mathf.Approximately(rect.height, 16)) rect.x += 3;
 
-            GUIStyle diffStyle = new GUIStyle("label");
-            diffStyle.alignment = TextAnchor.MiddleCenter;
-            diffStyle.normal.textColor = Color.black;
-            diffStyle.fontSize = Mathf.RoundToInt(rect.height / 2);
+            if (obj is ExternalPlayableSong)
+            {
+                EditorGUI.DrawRect(rect, Color.black);
+            }
+            else if (obj is ExternalChart)
+            {
+                var item = (ExternalChart)obj;
+                EditorGUI.DrawRect(rect, Color.white);
 
-			GUI.Label(rect, item.Data.DifficultyLevel, diffStyle);
-		}
-	}
+                GUIStyle diffStyle = new("label");
+                diffStyle.alignment = TextAnchor.MiddleCenter;
+                diffStyle.normal.textColor = Color.black;
+                diffStyle.fontSize = Mathf.RoundToInt(rect.height / 2);
+
+                GUI.Label(rect, item.Data.DifficultyLevel, diffStyle);
+            }
+        }
+    }
 }

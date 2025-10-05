@@ -1,28 +1,28 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
-public class StringOptionInput : OptionInput<string>
+namespace JANOARG.Client.Behaviors.Options.Input_Types
 {
-    [Space]
-    public int Limit = 16;
-    public TMP_Text ValueHolder;
-
-    public new void Start() 
+    public class StringOptionInput : OptionInput<string>
     {
-        UpdateValue();
-    }
+        [Space] public int Limit = 16;
 
-    public new void UpdateValue() 
-    {
-        base.UpdateValue();
-        ValueHolder.text = CurrentValue;
-    }
+        public TMP_Text ValueHolder;
 
-    public void Edit()
-    {
-        OptionInputHandler.main.Edit(this);
+        public new void Start()
+        {
+            UpdateValue();
+        }
+
+        public new void UpdateValue()
+        {
+            base.UpdateValue();
+            ValueHolder.text = CurrentValue;
+        }
+
+        public void Edit()
+        {
+            OptionInputHandler.sMain.Edit(this);
+        }
     }
 }

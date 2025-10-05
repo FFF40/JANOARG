@@ -1,40 +1,48 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
-public class Themer : MonoBehaviour
+namespace JANOARG.Client.UI
 {
-    public string Key;
-    public Graphic[] Targets;
-
-    public static Dictionary<string, List<Themer>> Themers = new Dictionary<string, List<Themer>>();
-    public static Dictionary<string, Color> Colors = new Dictionary<string, Color>();
-
-    public static void SetColor(string key, Color color) {
-        Colors[key] = color;
-        if (!Themers.ContainsKey(key)) return;
-        foreach (Themer t in Themers[key]) t.UpdateColors();
-    }
-
-    void OnEnable()
+    public class Themer : MonoBehaviour
     {
-        if (!Themers.ContainsKey(Key)) Themers[Key] = new List<Themer>();
-        Themers[Key].Add(this);
-        UpdateColors();
-    }
+        public static Dictionary<string, List<Themer>> sThemers = new();
+        public static Dictionary<string, Color>        sColors  = new();
 
-    void OnDisable()
-    {
-        Themers[Key].Remove(this);
-    }
+        public string    Key;
+        public Graphic[] Targets;
 
-    public void UpdateColors() {
-        if (!Colors.ContainsKey(Key)) return;
-        Color color = Colors[Key];
-        foreach (Graphic g in Targets) {
-            g.color = color;
+        private void OnEnable()
+        {
+            if (!sThemers.ContainsKey(Key)) sThemers[Key] = new List<Themer>();
+
+            sThemers[Key]
+                .Add(this);
+
+            UpdateColors();
+        }
+
+        private void OnDisable()
+        {
+            sThemers[Key]
+                .Remove(this);
+        }
+
+        public static void SetColor(string key, Color color)
+        {
+            sColors[key] = color;
+
+            if (!sThemers.ContainsKey(key)) return;
+
+            foreach (Themer t in sThemers[key]) t.UpdateColors();
+        }
+
+        public void UpdateColors()
+        {
+            if (!sColors.ContainsKey(Key)) return;
+
+            Color color = sColors[Key];
+            foreach (Graphic g in Targets) g.color = color;
         }
     }
 }

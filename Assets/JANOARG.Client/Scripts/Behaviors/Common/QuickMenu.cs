@@ -1,167 +1,196 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+using JANOARG.Client.Behaviors.Panels;
+using JANOARG.Client.Utils;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class QuickMenu : MonoBehaviour
+namespace JANOARG.Client.Behaviors.Common
 {
-    public static QuickMenu main;
-
-    public CanvasGroup Background;
-    public Graphic MainBackground;
-
-    [Space]
-    public AudioMixer AudioMixer;
-
-    [Space]
-    public RectTransform LeftPanel;
-    public CanvasGroup LeftPanelGroup;
-
-    public bool IsAnimating;
-
-    public void Awake() 
+    public class QuickMenu : MonoBehaviour
     {
-        main = this;
-        gameObject.SetActive(false);
-    }
+        public static QuickMenu sMain;
 
-    public void ShowLeft() 
-    {
-        if (!IsAnimating) 
+        public CanvasGroup Background;
+        public Graphic     MainBackground;
+
+        [Space] public AudioMixer AudioMixer;
+
+        [Space] public RectTransform LeftPanel;
+
+        public CanvasGroup LeftPanelGroup;
+
+        public bool IsAnimating;
+
+        public void Awake()
         {
-            gameObject.SetActive(true);
-            StartCoroutine(ShowLeftAnim());
-        }
-    }
-
-    public IEnumerator ShowLeftAnim() 
-    {
-        IsAnimating = true;
-
-        MainBackground.color = Common.main.MainCamera.backgroundColor * new Color(1, 1, 1, 0) + new Color(0, 0, 0, 0.75f);
-
-        AudioManager.main.SetSceneLayerLowPassCutoff(1000, 0.5f);
-
-        yield return Ease.Animate(.2f, a => {
-            ProfileBar.main.SetVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-            Background.alpha = a;
-        });
-
-        LeftPanel.gameObject.SetActive(true);
-
-        yield return Ease.Animate(.2f, a => {
-            SetLeftPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-        });
-
-        IsAnimating = false;
-    }
-
-    public void HideLeft() 
-    {
-        if (!IsAnimating) 
-        {
-            StartCoroutine(HideLeftAnim());
-        }
-    }
-
-    public IEnumerator HideLeftAnim() 
-    {
-        IsAnimating = true;
-
-        AudioManager.main.SetSceneLayerLowPassCutoff(22050, 0.5f);
-
-        yield return Ease.Animate(.2f, a => {
-            SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-        });
-
-        LeftPanel.gameObject.SetActive(false);
-
-        yield return Ease.Animate(.2f, a => {
-            ProfileBar.main.SetVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-            Background.alpha = 1 - a;
-        });
-
-        IsAnimating = false;
-        gameObject.SetActive(false);
-    }
-
-    public void HideFromPanel() 
-    {
-        if (!IsAnimating) 
-        {
-            StartCoroutine(HideFromPanelAnim());
-        }
-    }
-
-    public IEnumerator HideFromPanelAnim() 
-    {
-        IsAnimating = true;
-
-        AudioManager.main.SetSceneLayerLowPassCutoff(22050, 0.5f);
-
-        yield return Ease.Animate(.2f, a => {
-            ProfileBar.main.SetVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-            Background.alpha = 1 - a;
-        });
-
-        IsAnimating = false;
-        gameObject.SetActive(false);
-    }
-
-    public void SetLeftPanelVisibility(float a)
-    {
-        LeftPanelGroup.alpha = a * a;
-        LeftPanel.anchoredPosition *= new Vector2Frag(-10 * (1 - a), null);
-    }
-
-    public void ShowPanel(string sceneName) 
-    {
-        if (!IsAnimating) 
-        {
-            StartCoroutine(ShowPanelAnim(sceneName));
-        }
-    }
-
-    public IEnumerator ShowPanelAnim(string sceneName) 
-    {
-        IsAnimating = true;
-
-        AudioManager.main.SetSceneLayerLowPassCutoff(9, 2);
-
-        yield return Ease.Animate(.2f, a => {
-            SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-        });
-
-        LeftPanel.gameObject.SetActive(false);
-
-        AsyncOperation sceneReq = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-        float time = 0;
-
-        while (time < .5f || (!sceneReq.isDone && time < 1))
-        {
-            yield return null;
-            time += Time.deltaTime;
-        }
-        
-        if (!sceneReq.isDone)
-        {
-            LoadingBar.main.Show();
-            yield return new WaitWhile(() => LoadingBar.main.IsAnimating || !sceneReq.isDone);
-            LoadingBar.main.Hide();
-            yield return new WaitWhile(() => LoadingBar.main.IsAnimating);
+            sMain = this;
+            gameObject.SetActive(false);
         }
 
-        if (Panel.Panels.Count > 0)
+        public void ShowLeft()
         {
-            Panel panel = Panel.Panels[^1];
-            panel.SceneName = sceneName;
-            panel.Intro();
+            if (!IsAnimating)
+            {
+                gameObject.SetActive(true);
+                StartCoroutine(ShowLeftAnim());
+            }
         }
 
-        IsAnimating = false;
+        public IEnumerator ShowLeftAnim()
+        {
+            IsAnimating = true;
+
+            MainBackground.color = CommonSys.sMain.MainCamera.backgroundColor * new Color(1, 1, 1, 0) +
+                                   new Color(0, 0, 0, 0.75f);
+
+            AudioManager.sMain.SetSceneLayerLowPassCutoff(1000, 0.5f);
+
+            yield return Ease.Animate(
+                .2f, a =>
+                {
+                    ProfileBar.sMain.SetVisibility(
+                        1 -
+                        Ease.Get(
+                            a, EaseFunction.Cubic,
+                            EaseMode.Out));
+
+                    Background.alpha = a;
+                });
+
+            LeftPanel.gameObject.SetActive(true);
+
+            yield return Ease.Animate(
+                .2f,
+                a =>
+                {
+                    SetLeftPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                });
+
+            IsAnimating = false;
+        }
+
+        public void HideLeft()
+        {
+            if (!IsAnimating)
+                StartCoroutine(HideLeftAnim());
+        }
+
+        public IEnumerator HideLeftAnim()
+        {
+            IsAnimating = true;
+
+            AudioManager.sMain.SetSceneLayerLowPassCutoff(22050, 0.5f);
+
+            yield return Ease.Animate(
+                .2f,
+                a =>
+                {
+                    SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                });
+
+            LeftPanel.gameObject.SetActive(false);
+
+            yield return Ease.Animate(
+                .2f, a =>
+                {
+                    ProfileBar.sMain.SetVisibility(
+                        Ease.Get(
+                            a, EaseFunction.Cubic,
+                            EaseMode.Out));
+
+                    Background.alpha = 1 - a;
+                });
+
+            IsAnimating = false;
+            gameObject.SetActive(false);
+        }
+
+        public void HideFromPanel()
+        {
+            if (!IsAnimating) StartCoroutine(HideFromPanelAnim());
+        }
+
+        public IEnumerator HideFromPanelAnim()
+        {
+            IsAnimating = true;
+
+            AudioManager.sMain.SetSceneLayerLowPassCutoff(22050, 0.5f);
+
+            yield return Ease.Animate(
+                .2f, a =>
+                {
+                    ProfileBar.sMain.SetVisibility(
+                        Ease.Get(
+                            a, EaseFunction.Cubic,
+                            EaseMode.Out));
+
+                    Background.alpha = 1 - a;
+                });
+
+            IsAnimating = false;
+            gameObject.SetActive(false);
+        }
+
+        public void SetLeftPanelVisibility(float a)
+        {
+            LeftPanelGroup.alpha = a * a;
+            LeftPanel.anchoredPosition *= new Vector2Frag(-10 * (1 - a));
+        }
+
+        public void ShowPanel(string sceneName)
+        {
+            if (!IsAnimating)
+                StartCoroutine(ShowPanelAnim(sceneName));
+        }
+
+        public IEnumerator ShowPanelAnim(string sceneName)
+        {
+            IsAnimating = true;
+
+            AudioManager.sMain.SetSceneLayerLowPassCutoff(9, 2);
+
+            yield return Ease.Animate(
+                .2f,
+                a =>
+                {
+                    SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                });
+
+            LeftPanel.gameObject.SetActive(false);
+
+            AsyncOperation sceneReq = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            float time = 0;
+
+            while (time < .5f || (!sceneReq.isDone && time < 1))
+            {
+                yield return null;
+
+                time += Time.deltaTime;
+            }
+
+            if (!sceneReq.isDone)
+            {
+                LoadingBar.sMain.Show();
+
+                yield return new WaitWhile(() => LoadingBar.sMain.IsAnimating || !sceneReq.isDone);
+
+                LoadingBar.sMain.Hide();
+
+                yield return new WaitWhile(() => LoadingBar.sMain.IsAnimating);
+            }
+
+            if (Panel.sPanels.Count > 0)
+            {
+                Panel panel = Panel.sPanels[^1];
+                panel.SceneName = sceneName;
+                panel.Intro();
+            }
+
+            IsAnimating = false;
+        }
     }
 }

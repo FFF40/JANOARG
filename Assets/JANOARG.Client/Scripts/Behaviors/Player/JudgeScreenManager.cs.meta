@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/JANOARG.Client/Scripts/Data/Storage/FlagStore.cs.meta
+guid: fc0ffd22f0504f43fb0191180c1ee72e
+========
+guid: a1512a5b9f1005144b3ab2ee4734fae5
+>>>>>>>> master:Assets/JANOARG.Client/Scripts/Behaviors/Player/JudgeScreenManager.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

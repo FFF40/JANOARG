@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/JANOARG.Client/Scripts/Behaviors/Song Select/List/ListItemUIs/SongSelectListHeaderUI.cs.meta
+guid: 8cc2aff354a82bba4abe762e9066207f
+========
+guid: ef1ae68e7730bf41ea6964f1f076fbbd
+>>>>>>>> master:Assets/JANOARG.Client/Scripts/Behaviors/Player/PlayerHitboxVisualizer.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

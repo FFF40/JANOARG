@@ -1,10 +1,6 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-
-public class OptionCategoryTitle : OptionItem
+namespace JANOARG.Client.Behaviors.Options.Input_Types
 {
-    
+    public class OptionCategoryTitle : OptionItem
+    {
+    }
 }

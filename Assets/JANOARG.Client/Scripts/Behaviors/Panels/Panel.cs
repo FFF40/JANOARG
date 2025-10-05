@@ -1,86 +1,92 @@
 using System.Collections;
 using System.Collections.Generic;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Panel : MonoBehaviour
+namespace JANOARG.Client.Behaviors.Panels
 {
-    public static List<Panel> Panels = new();
-
-    public RectTransform Holder;
-    public CanvasGroup HolderGroup;
-    [Space]
-    public string SceneName;
-    [Space]
-    public bool IsAnimating;
-
-    public void Intro() 
+    public class Panel : MonoBehaviour
     {
-        if (!IsAnimating) 
+        public static List<Panel> sPanels = new();
+
+        public RectTransform Holder;
+        public CanvasGroup   HolderGroup;
+
+        [Space] public string SceneName;
+
+        [Space] public bool IsAnimating;
+
+        public void OnEnable()
         {
-            StartCoroutine(IntroAnim());
+            sPanels.Add(this);
+            HolderGroup.alpha = 0;
+            HolderGroup.blocksRaycasts = false;
         }
-    }
 
-    public void OnEnable()
-    {
-        Panels.Add(this);
-        HolderGroup.alpha = 0;
-        HolderGroup.blocksRaycasts = false;
-    }
-    public void OnDisable()
-    {
-        Panels.Remove(this);
-    }
-
-    public IEnumerator IntroAnim() 
-    {
-        IsAnimating = true;
-
-        HolderGroup.blocksRaycasts = true;
-
-        yield return Ease.Animate(.2f, a => {
-            SetPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-        });
-
-        IsAnimating = false;
-    }
-
-    public void Close() 
-    {
-        if (!IsAnimating) 
+        public void OnDisable()
         {
-            StartCoroutine(CloseAnim());
+            sPanels.Remove(this);
         }
-    }
 
-    public IEnumerator CloseAnim() 
-    {
-        IsAnimating = true;
-        
-        HolderGroup.blocksRaycasts = false;
+        public void Intro()
+        {
+            if (!IsAnimating) StartCoroutine(IntroAnim());
+        }
 
-        if (Panels.Count <= 1) AudioManager.main.SetSceneLayerLowPassCutoff(5000, 1f);
+        public IEnumerator IntroAnim()
+        {
+            IsAnimating = true;
 
-        yield return Ease.Animate(.2f, a => {
-            SetPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
-        });
+            HolderGroup.blocksRaycasts = true;
 
-        Common.main.StartCoroutine(UnloadAnim());
+            yield return Ease.Animate(
+                .2f,
+                a => { SetPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out)); });
 
-        IsAnimating = false;
-    }
+            IsAnimating = false;
+        }
 
-    public IEnumerator UnloadAnim() 
-    {
-        yield return SceneManager.UnloadSceneAsync(SceneName);
-        if (Panels.Count <= 1) QuickMenu.main.HideFromPanel();
-        else Panels[^2].Intro();
-    }
+        public void Close()
+        {
+            if (!IsAnimating) StartCoroutine(CloseAnim());
+        }
 
-    public void SetPanelVisibility(float a)
-    {
-        HolderGroup.alpha = a * a;
-        Holder.anchoredPosition = new (-10 * (1 - a), Holder.anchoredPosition.y);
+        public IEnumerator CloseAnim()
+        {
+            IsAnimating = true;
+
+            HolderGroup.blocksRaycasts = false;
+
+            if (sPanels.Count <= 1) AudioManager.sMain.SetSceneLayerLowPassCutoff(5000, 1f);
+
+            yield return Ease.Animate(
+                .2f,
+                a =>
+                {
+                    SetPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                });
+
+            CommonSys.sMain.StartCoroutine(UnloadAnim());
+
+            IsAnimating = false;
+        }
+
+        public IEnumerator UnloadAnim()
+        {
+            yield return SceneManager.UnloadSceneAsync(SceneName);
+
+            if (sPanels.Count <= 1) QuickMenu.sMain.HideFromPanel();
+            else
+                sPanels[^2]
+                    .Intro();
+        }
+
+        public void SetPanelVisibility(float a)
+        {
+            HolderGroup.alpha = a * a;
+            Holder.anchoredPosition = new Vector2(-10 * (1 - a), Holder.anchoredPosition.y);
+        }
     }
 }

@@ -1,71 +1,76 @@
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class Sidebar : MonoBehaviour
+namespace JANOARG.Client.UI
 {
-    public RectTransform SafeArea;
-    public float Width = 750;
-    public bool SetActiveOnHide = false;
-
-    public bool isAnimating { get; protected set; }
-
-    public void Show()
+    public class Sidebar : MonoBehaviour
     {
-        gameObject.SetActive(true);
-        StartCoroutine(ShowAnimation());
-    }
+        public RectTransform SafeArea;
+        public float         Width           = 750;
+        public bool          SetActiveOnHide = false;
 
-    public IEnumerator ShowAnimation()
-    {
-        isAnimating = true;
-        RectTransform rt = GetComponent<RectTransform>();
+        public bool isAnimating { get; protected set; }
 
-        void LerpContent(float value)
+        public void Show()
         {
-            float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
-
-            rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * (1 - ease));
+            gameObject.SetActive(true);
+            StartCoroutine(ShowAnimation());
         }
-        
-        for (float a = 0; a < 1; a += Time.deltaTime / .4f) 
+
+        public IEnumerator ShowAnimation()
         {
-            LerpContent(a);
-            yield return null;
+            isAnimating = true;
+            var rt = GetComponent<RectTransform>();
+
+            void f_lerpContent(float value)
+            {
+                float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
+
+                rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * (1 - ease));
+            }
+
+            for (float a = 0; a < 1; a += Time.deltaTime / .4f)
+            {
+                f_lerpContent(a);
+
+                yield return null;
+            }
+
+            f_lerpContent(1);
+
+            isAnimating = false;
         }
-        LerpContent(1);
 
-        isAnimating = false;
-    }
-
-    public void Hide()
-    {
-        StartCoroutine(HideAnimation());
-    }
-
-    public IEnumerator HideAnimation()
-    {
-        isAnimating = true;
-        RectTransform rt = GetComponent<RectTransform>();
-
-        void LerpContent(float value)
+        public void Hide()
         {
-            float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.In);
-
-            rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * ease);
+            StartCoroutine(HideAnimation());
         }
-        
-        for (float a = 0; a < 1; a += Time.deltaTime / .3f) 
+
+        public IEnumerator HideAnimation()
         {
-            LerpContent(a);
-            yield return null;
+            isAnimating = true;
+            var rt = GetComponent<RectTransform>();
+
+            void f_lerpContent(float value)
+            {
+                float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.In);
+
+                rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * ease);
+            }
+
+            for (float a = 0; a < 1; a += Time.deltaTime / .3f)
+            {
+                f_lerpContent(a);
+
+                yield return null;
+            }
+
+            f_lerpContent(1);
+
+            if (SetActiveOnHide) gameObject.SetActive(false);
+
+            isAnimating = false;
         }
-        LerpContent(1);
-
-        if (SetActiveOnHide) gameObject.SetActive(false);
-
-        isAnimating = false;
     }
 }

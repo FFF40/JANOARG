@@ -1,20 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
-public class LaneGroupPlayer : MonoBehaviour
+namespace JANOARG.Client.Behaviors.Player
 {
-    public LaneGroup Original; 
-    public LaneGroup Current;
-
-    public LaneGroupPlayer Parent;
-
-    public void UpdateSelf(float time, float beat)
+    public class LaneGroupPlayer : MonoBehaviour
     {
-        if (Current != null) Current.Advance(beat);
-        else Current = (LaneGroup)Original.Get(beat);
+        public LaneGroup Original;
+        public LaneGroup Current;
 
-        transform.localPosition = Current.Position;
-        transform.localEulerAngles = Current.Rotation;
+        public LaneGroupPlayer Parent;
+
+        public void UpdateSelf(float time, float beat)
+        {
+            if (Current != null)
+                Current.Advance(beat);
+            else
+                Current = (LaneGroup)Original.GetStoryboardableObject(beat);
+
+            transform.localPosition = Current.Position;
+            transform.localEulerAngles = Current.Rotation;
+        }
     }
 }

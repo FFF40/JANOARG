@@ -1,28 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
-public class LoadingSpinner : MonoBehaviour
+namespace JANOARG.Client.UI
 {
-    public RectTransform Spinner;
-
-    float Timer;
-
-    IEaseDirective SpinEasing = new CubicBezierEaseDirective(.2f, 1.5f, 0, 1);
-
-    void Start()
+    public class LoadingSpinner : MonoBehaviour
     {
-        Timer = 0;  
-    }
+        public RectTransform Spinner;
 
-    void Update()
-    {
-        Timer += Time.deltaTime;
-        float interval = .8f;
-        Spinner.localEulerAngles = 
-            (Mathf.Floor(Timer / interval) + SpinEasing.Get(Timer % interval))
-            * 45 * Vector3.back;  
+        private float _Timer;
+
+        private IEaseDirective _SpinEasing = new CubicBezierEaseDirective(.2f, 1.5f, 0, 1);
+
+        private void Start()
+        {
+            _Timer = 0;
+        }
+
+        private void Update()
+        {
+            _Timer += Time.deltaTime;
+            var interval = .8f;
+
+            Spinner.localEulerAngles =
+                (Mathf.Floor(_Timer / interval) + _SpinEasing.Get(_Timer % interval))
+                * 45 * Vector3.back;
+        }
     }
 }

@@ -1,31 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Data.Story;
 using UnityEngine;
 
-public class StorytellerScreen : MonoBehaviour
+namespace JANOARG.Client.Behaviors.Storyteller
 {
-    public static StorytellerScreen main;
-
-    public StoryScript ScriptToPlay;
-
-    public void Awake()
+    public class StorytellerScreen : MonoBehaviour
     {
-        main = this;
-        CommonScene.Load();
-    }
+        public static StorytellerScreen sMain;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        if (ScriptToPlay) 
+        public StoryScript ScriptToPlay;
+
+        public void Awake()
         {
-            Storyteller.main.PlayScript(ScriptToPlay);
+            sMain = this;
+            CommonScene.Load();
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        // Start is called before the first frame update
+        private void Start()
+        {
+            if (ScriptToPlay) Storyteller.sMain.PlayScript(ScriptToPlay);
+        }
+
+        // Update is called once per frame
+        private void Update()
+        {
+        }
     }
 }

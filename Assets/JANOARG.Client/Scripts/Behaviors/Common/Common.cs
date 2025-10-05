@@ -1,56 +1,65 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
+using JANOARG.Client.Data.Constant;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Common : MonoBehaviour
+namespace JANOARG.Client.Behaviors.Common
 {
-    public static Common main;
-
-    public Camera MainCamera;
-    public RectTransform CommonCanvas;
-    public CommonConstants Constants;
-
-    public LoadingBar LoadingBar;
-    public Storage Storage;
-    public Storage Preferences;
-
-    public void Awake()
+    public class CommonSys : MonoBehaviour
     {
-        main = this;
+        public static CommonSys sMain;
 
-        CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+        public Camera          MainCamera;
+        public RectTransform   CommonCanvas;
+        public CommonConstants Constants;
 
-        Storage = new Storage("save");
-        int count = Storage.Get("STAT:Count", 0) + 1;
-        Storage.Set("STAT:Count", count);
-        Debug.Log(count);
-        Storage.Save();
+        public LoadingBar LoadingBar;
+        public Storage    Preferences;
+        public Storage    Storage;
+        
+        private const bool _UNLIMITED_FPS = true; // Change before build
+        private const int  _MAX_FPS       = 120;
 
-        Preferences = new Storage("prefs");
+        public void Awake()
+        {
+            sMain = this;
 
-        Application.targetFrameRate = 60;
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-        CommonScene.LoadAlt("Intro");
-    }
+            Storage = new Storage("save");
+            int count = Storage.Get("STAT:Count", 0) + 1;
+            Storage.Set("STAT:Count", count);
+            Debug.Log(count);
+            Storage.Save();
 
-    void OnDestroy()
-    {
-        main = main == this ? null : main;
-    }
+            Preferences = new Storage("prefs");
 
-    public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
-    {
-        main.StartCoroutine(main.LoadAnim(target, completed, onComplete, showBar) );
-    }
+            Application.targetFrameRate = _UNLIMITED_FPS 
+                ? 1000 : _MAX_FPS;
 
-    public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true) 
-    {
-        yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target, UnityEngine.SceneManagement.LoadSceneMode.Additive);
-        yield return Resources.UnloadUnusedAssets();
-        yield return new WaitUntil(completed);
-        if (onComplete != null) onComplete();
+            CommonScene.LoadAlt("Intro");
+        }
+
+        private void OnDestroy()
+        {
+            sMain = sMain == this ? null : sMain;
+        }
+
+        public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)
+        {
+            sMain.StartCoroutine(sMain.LoadAnim(target, completed, onComplete, showBar));
+        }
+
+        public IEnumerator LoadAnim(string target, Func<bool> completed, Action onComplete, bool showBar = true)
+        {
+            yield return SceneManager.LoadSceneAsync(target, LoadSceneMode.Additive);
+            yield return Resources.UnloadUnusedAssets();
+            yield return new WaitUntil(completed);
+
+            if (onComplete != null) onComplete();
+        }
     }
 }

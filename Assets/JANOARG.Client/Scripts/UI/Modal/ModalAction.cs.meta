@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/JANOARG.Client/Scripts/Behaviors/Song Select/List/ListItems/SongSelectListSong.cs.meta
+guid: 999e4237353a2ad75bd73c132c8423c7
+========
+guid: 0b1ee04f7fccbd1748ef37f50187e375
+>>>>>>>> master:Assets/JANOARG.Client/Scripts/UI/Modal/ModalAction.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

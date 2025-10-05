@@ -1,148 +1,161 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using JANOARG.Client.Behaviors.Options.Input_Types;
 using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-using UnityEngine.Windows;
 using UnityEngine.EventSystems;
-using System.Linq;
 
-public class OptionInputListHandler : MonoBehaviour, IInitializePotentialDragHandler, IDragHandler, IEndDragHandler, IPointerUpHandler
+namespace JANOARG.Client.Behaviors.Options
 {
-    public static OptionInputListHandler main;
-
-    public RectTransform ListHolder;
-    public OptionInputListItem ItemSample;
-    public List<OptionInputListItem> Items;
-    [Space]
-    public float ItemHeight = 40;
-    [Space]
-    public Color NormalTextColor;
-    public Color SelectedTextColor;
-
-    [HideInInspector]
-    public int CurrentPosition;
-    [HideInInspector]
-    public int OldPosition;
-
-    [HideInInspector]
-    public float ScrollOffset;
-    [HideInInspector]
-    public float ScrollVelocity;
-
-    [HideInInspector]
-    public bool IsPointerDown;
-
-    public void Awake() 
+    public class OptionInputListHandler : MonoBehaviour, IInitializePotentialDragHandler, IDragHandler, IEndDragHandler,
+                                          IPointerUpHandler
     {
-        main = this;
-    }
+        public static OptionInputListHandler sMain;
 
-    public void Update() 
-    {
-        if (!IsPointerDown)
+        public RectTransform             ListHolder;
+        public OptionInputListItem       ItemSample;
+        public List<OptionInputListItem> Items;
+
+        [Space] public float ItemHeight = 40;
+
+        [Space] public Color NormalTextColor;
+
+        public Color SelectedTextColor;
+
+        [HideInInspector] public int CurrentPosition;
+
+        [HideInInspector] public int OldPosition;
+
+        [HideInInspector] public float ScrollOffset;
+
+        [HideInInspector] public float ScrollVelocity;
+
+        [HideInInspector] public bool IsPointerDown;
+
+        public void Awake()
         {
-            float target = CurrentPosition * ItemHeight;
-            if (target == ScrollOffset) 
+            sMain = this;
+        }
+
+        public void Update()
+        {
+            if (!IsPointerDown)
             {
-                // noop
+                float target = CurrentPosition * ItemHeight;
+
+                if (Mathf.Approximately(target, ScrollOffset))
+                {
+                    // noop
+                }
+                else if (Mathf.Abs(target - ScrollOffset) > 1e-3f)
+                {
+                    ScrollOffset = Mathf.Lerp(target, ScrollOffset, Mathf.Pow(1e-3f, Time.deltaTime));
+                    ListHolder.anchoredPosition = new Vector2(ListHolder.anchoredPosition.x, ScrollOffset);
+                }
+                else
+                {
+                    ScrollOffset = target;
+                    ListHolder.anchoredPosition = new Vector2(ListHolder.anchoredPosition.x, ScrollOffset);
+                }
             }
-            else if (Mathf.Abs(target - ScrollOffset) > 1e-3f) 
+
+            if (OldPosition != CurrentPosition)
             {
-                ScrollOffset = Mathf.Lerp(target, ScrollOffset, Mathf.Pow(1e-3f, Time.deltaTime));
-                ListHolder.anchoredPosition = new (ListHolder.anchoredPosition.x, ScrollOffset);
-            }
-            else 
-            {
-                ScrollOffset = target;
-                ListHolder.anchoredPosition = new (ListHolder.anchoredPosition.x, ScrollOffset);
+                if (OldPosition >= 0 && OldPosition < Items.Count) SetItemActive(Items[OldPosition], false);
+                OldPosition = CurrentPosition;
+                SetItemActive(Items[CurrentPosition], true);
             }
         }
-        if (OldPosition != CurrentPosition) 
+
+        public void OnDrag(PointerEventData data)
         {
-            if (OldPosition >= 0 && OldPosition < Items.Count) SetItemActive(Items[OldPosition], false);
+            if (!IsPointerDown)
+                return;
+
+            float delta = data.delta.y / transform.lossyScale.x;
+            ScrollOffset += delta;
+
+            ListHolder.anchoredPosition = new Vector2(
+                ListHolder.anchoredPosition.x,
+                Mathf.Clamp(
+                    ScrollOffset, ItemHeight * -.4f,
+                    ItemHeight * (Items.Count - .6f)));
+
+            CurrentPosition = Mathf.RoundToInt(ListHolder.anchoredPosition.y / ItemHeight);
+        }
+
+        public void OnEndDrag(PointerEventData data)
+        {
+            OnPointerUp(data);
+        }
+
+        public void OnInitializePotentialDrag(PointerEventData data)
+        {
+            IsPointerDown = true;
+            ScrollVelocity = 0;
+        }
+
+        public void OnPointerUp(PointerEventData data)
+        {
+            IsPointerDown = false;
+            ScrollOffset = Mathf.Clamp(ScrollOffset, ItemHeight * -.4f, ItemHeight * (Items.Count - .6f));
+        }
+
+        public void Finish()
+        {
+            Items[OldPosition]
+                .OnSelect();
+        }
+
+        public void SetList<T>(ListOptionInput<T> input)
+        {
+            ClearList();
+            CurrentPosition = -1;
+
+            var index = 0;
+
+            foreach (KeyValuePair<T, string> value in input.ValidValues)
+            {
+                OptionInputListItem item = Instantiate(ItemSample, ListHolder);
+                int i = index;
+                item.Text.text = value.Value;
+
+                item.OnSelect = () =>
+                {
+                    input.Set(value.Key);
+                    input.UpdateValue();
+                };
+
+                item.Button.onClick.AddListener(() => { ScrollToItem(i); });
+                Items.Add(item);
+
+                if (Equals(value.Key, input.CurrentValue))
+                    CurrentPosition = index;
+
+                index++;
+            }
+
+            ScrollOffset = CurrentPosition * ItemHeight;
+            ListHolder.anchoredPosition = new Vector2(ListHolder.anchoredPosition.x, ScrollOffset);
+
             OldPosition = CurrentPosition;
             SetItemActive(Items[CurrentPosition], true);
         }
-    }
 
-    public void Finish() 
-    {
-        Items[OldPosition].OnSelect();
-    }
-
-    public void SetList<T>(ListOptionInput<T> input)
-    {
-        ClearList();
-        CurrentPosition = -1;
-
-        int index = 0;
-        foreach (KeyValuePair<T, string> value in input.ValidValues) 
+        public void ClearList()
         {
-            var item = Instantiate(ItemSample, ListHolder);
-            int i = index;
-            item.Text.text = value.Value;
-            item.OnSelect = () => {
-                input.Set(value.Key);
-                input.UpdateValue();
-            };
-            item.Button.onClick.AddListener(() => {
-                ScrollToItem(i);
-            });
-            Items.Add(item);
-            if (Equals(value.Key, input.CurrentValue)) CurrentPosition = index;
-            index++;
+            foreach (OptionInputListItem item in Items) Destroy(item.gameObject);
+            Items.Clear();
         }
 
-        ScrollOffset = CurrentPosition * ItemHeight;
-        ListHolder.anchoredPosition = new (ListHolder.anchoredPosition.x, ScrollOffset);
+        public void SetItemActive(OptionInputListItem item, bool active)
+        {
+            item.Button.interactable = !active;
+            item.Text.color = active ? SelectedTextColor : NormalTextColor;
+        }
 
-        OldPosition = CurrentPosition;
-        SetItemActive(Items[CurrentPosition], true);
-    }
-
-    public void ClearList() 
-    {
-        foreach (var item in Items) Destroy(item.gameObject);
-        Items.Clear();
-    }
-
-    public void SetItemActive(OptionInputListItem item, bool active) 
-    {
-        item.Button.interactable = !active;
-        item.Text.color = active ? SelectedTextColor : NormalTextColor;
-    }
-
-    public void ScrollToItem(int index) 
-    {
-        IsPointerDown = false;
-        CurrentPosition = index;
-    }
-
-    public void OnInitializePotentialDrag(PointerEventData data)
-    {
-        IsPointerDown = true;
-        ScrollVelocity = 0;
-    }
-
-    public void OnDrag(PointerEventData data)
-    {
-        if (!IsPointerDown) return;
-        float delta = data.delta.y / transform.lossyScale.x;
-        ScrollOffset += delta;
-        ListHolder.anchoredPosition = new (ListHolder.anchoredPosition.x, Mathf.Clamp(ScrollOffset, ItemHeight * -.4f, ItemHeight * (Items.Count - .6f)));
-        CurrentPosition = Mathf.RoundToInt(ListHolder.anchoredPosition.y / ItemHeight);
-    }
-
-    public void OnEndDrag(PointerEventData data)
-    {
-        OnPointerUp(data);
-    }
-
-    public void OnPointerUp(PointerEventData data)
-    {
-        IsPointerDown = false;
-        ScrollOffset = Mathf.Clamp(ScrollOffset, ItemHeight * -.4f, ItemHeight * (Items.Count - .6f));
+        public void ScrollToItem(int index)
+        {
+            IsPointerDown = false;
+            CurrentPosition = index;
+        }
     }
 }

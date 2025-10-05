@@ -1,12 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System;
 
-public class CoverLayerImage : MonoBehaviour
+namespace JANOARG.Client.UI
 {
-    [NonSerialized] public CoverLayer Layer;
-    public RawImage Image;
+    public class CoverLayerImage : MonoBehaviour
+    {
+        [NonSerialized] public CoverLayer Layer;
+        public                 RawImage   Image;
+    }
 }

@@ -1,171 +1,223 @@
 using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.SongSelect;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using UnityEngine.SceneManagement;
-using System.IO;
+using UnityEngine.UI;
 
-public class PlayerScreenPause : MonoBehaviour
+namespace JANOARG.Client.Behaviors.Player
 {
-    public static PlayerScreenPause main;
-
-    public GameObject UIHolder;
-    [Space]
-    public Image Background;
-    public RectTransform OptionHolder;
-    public CanvasGroup OptionGroup;
-    [Space]
-    public Image RetryBackground;
-    public Image RetryFlash;
-    [Space]
-    public Coroutine CurrentAnimation;
-
-    public float PauseTime = -10;
-
-    void Awake() 
+    public class PlayerScreenPause : MonoBehaviour
     {
-        main = this;
-    }
+        public static PlayerScreenPause sMain;
 
-    void Start() 
-    {
-        Background.gameObject.SetActive(false);
-        UIHolder.SetActive(false);
-    }
+        public GameObject UIHolder;
 
-    public void OnPauseButtonClick() 
-    {
-        if (PlayerScreen.main.CurrentTime - PauseTime < 2)
+        [Space] public Image Background;
+
+        public RectTransform OptionHolder;
+        public CanvasGroup   OptionGroup;
+
+        [Space] public Image RetryBackground;
+
+        public Image RetryFlash;
+
+        public float PauseTime = -10;
+
+        [Space] public Coroutine CurrentAnimation;
+
+        private void Awake()
         {
-            PlayerScreen.main.IsPlaying = false;
-            PlayerScreen.main.Music.Pause();
-            PlayerInputManager.main.Fingers.Clear();
-            Show();
+            sMain = this;
         }
-        else 
+
+        private void Start()
         {
-            PauseTime = PlayerScreen.main.CurrentTime; 
+            Background.gameObject.SetActive(false);
+            UIHolder.SetActive(false);
         }
-    }
 
-    public void Show() 
-    {
-        if (CurrentAnimation != null) StopCoroutine(CurrentAnimation);
-        CurrentAnimation = StartCoroutine(ShowAnim());
-    }
+        public void OnPauseButtonClick()
+        {
+            if (PlayerScreen.sMain.CurrentTime - PauseTime < 2)
+            {
+                PlayerScreen.sMain.IsPlaying = false;
+                PlayerScreen.sMain.Music.Pause();
 
-    IEnumerator ShowAnim() 
-    {
-        Background.gameObject.SetActive(true);
-        UIHolder.SetActive(true);
+                // PlayerInputManager.main.Fingers.Clear();
+                PlayerInputManager.sInstance.TouchClasses.Clear();
+                Show();
+            }
+            else
+            {
+                PauseTime = PlayerScreen.sMain.CurrentTime;
+            }
+        }
 
-        yield return Ease.Animate(0.2f, (x) => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            Background.color = Common.main.MainCamera.backgroundColor * new Color(1, 1, 1, ease * 0.8f);
-            OptionHolder.anchoredPosition = (1 - ease) * 20 * Vector2.left;
-            OptionGroup.alpha = ease;
-        });
+        public void Show()
+        {
+            if (CurrentAnimation != null) StopCoroutine(CurrentAnimation);
+            CurrentAnimation = StartCoroutine(ShowAnim());
+        }
 
-        CurrentAnimation = null;
-    }
+        private IEnumerator ShowAnim()
+        {
+            Background.gameObject.SetActive(true);
+            UIHolder.SetActive(true);
 
-    public void Continue() 
-    {
-        if (CurrentAnimation != null) return;
-        CurrentAnimation = StartCoroutine(ContinueAnim());
-    }
+            yield return Ease.Animate(
+                0.2f, x =>
+                {
+                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
 
-    IEnumerator ContinueAnim() 
-    {
-        StartCoroutine(Ease.Animate(0.2f, (x) => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
-            OptionGroup.alpha = 1 - ease;
-        }));
+                    Background.color = CommonSys.sMain.MainCamera.backgroundColor *
+                                       new Color(1, 1, 1, ease * 0.8f);
 
-        PlayerScreen.main.CurrentTime -= 1.5f;
-        PlayerScreen.main.Resync();
-        PlayerScreen.main.IsPlaying = true;
+                    OptionHolder.anchoredPosition = (1 - ease) * 20 * Vector2.left;
+                    OptionGroup.alpha = ease;
+                });
 
-        float targetVolume = PlayerScreen.main.Music.volume;
+            CurrentAnimation = null;
+        }
 
-        yield return Ease.Animate(1.5f, a => {
-            float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
-            Background.color = Common.main.MainCamera.backgroundColor * new Color(1, 1, 1, (1 - ease) * 0.8f);
-            PlayerScreen.main.Music.volume = a * targetVolume;
-        });
+        public void Continue()
+        {
+            if (CurrentAnimation != null) return;
 
-        Background.gameObject.SetActive(false);
-        UIHolder.SetActive(false);
+            CurrentAnimation = StartCoroutine(ContinueAnim());
+        }
 
-        CurrentAnimation = null;
-    }
+        private IEnumerator ContinueAnim()
+        {
+            StartCoroutine(
+                Ease.Animate(
+                    0.2f, x =>
+                    {
+                        float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                        OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
+                        OptionGroup.alpha = 1 - ease;
+                    }));
 
-    public void Retry() 
-    {
-        if (CurrentAnimation != null) return;
-        CurrentAnimation = StartCoroutine(RetryAnim());
-    }
+            PlayerScreen.sMain.CurrentTime -= 1.5f;
+            PlayerScreen.sMain.Resync();
+            PlayerScreen.sMain.IsPlaying = true;
 
-    IEnumerator RetryAnim() 
-    {
-        StartCoroutine(Ease.Animate(0.2f, (x) => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
-            OptionGroup.alpha = 1 - ease;
-        }));
+            float targetVolume = PlayerScreen.sMain.Music.volume;
 
-        RetryBackground.gameObject.SetActive(true);
-        RetryBackground.color = PlayerScreen.TargetSong.BackgroundColor;
+            yield return Ease.Animate(
+                1.5f, a =>
+                {
+                    float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
 
-        yield return Ease.Animate(1, a => {
-            float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
-            RetryBackground.rectTransform.anchorMin = new(0, .5f * (1 - lerp2));
-            RetryBackground.rectTransform.anchorMax = new(1, 1 - .5f * (1 - lerp2));
-            RetryBackground.rectTransform.sizeDelta = new(0, 100 * (1 - lerp2));
-            
-            float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
-            RetryFlash.color = new (1, 1, 1, 1 - lerp3);
-        });
+                    Background.color = CommonSys.sMain.MainCamera.backgroundColor *
+                                       new Color(1, 1, 1, (1 - ease) * 0.8f);
 
-        yield return new WaitForSeconds(1);
+                    PlayerScreen.sMain.Music.volume = a * targetVolume;
+                });
 
-        RetryBackground.gameObject.SetActive(false);
-        Common.main.MainCamera.backgroundColor = PlayerScreen.TargetSong.BackgroundColor;
+            Background.gameObject.SetActive(false);
+            UIHolder.SetActive(false);
 
-        Background.color = PlayerScreen.TargetSong.BackgroundColor;
-        yield return PlayerScreen.main.InitChart();
-        Background.gameObject.SetActive(false);
-        UIHolder.SetActive(false);
-        PlayerScreen.main.BeginReadyAnim();
+            CurrentAnimation = null;
+        }
 
-        CurrentAnimation = null;
-    }
+        public void Retry()
+        {
+            if (CurrentAnimation != null) return;
 
-    public void Quit() 
-    {
-        if (CurrentAnimation != null) return;
-        CurrentAnimation = StartCoroutine(QuitAnim());
-    }
+            CurrentAnimation = StartCoroutine(RetryAnim());
+        }
 
-    IEnumerator QuitAnim() 
-    {
-        yield return Ease.Animate(0.2f, (x) => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            Background.color = Common.main.MainCamera.backgroundColor * new Color(1, 1, 1, ease * 0.2f + 0.8f);
-            OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
-            OptionGroup.alpha = 1 - ease;
-        });
+        private IEnumerator RetryAnim()
+        {
+            StartCoroutine(
+                Ease.Animate(
+                    0.2f, x =>
+                    {
+                        float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                        OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
+                        OptionGroup.alpha = 1 - ease;
+                    }));
 
-        yield return new WaitForSeconds(1);
+            RetryBackground.gameObject.SetActive(true);
+            RetryBackground.color = PlayerScreen.sTargetSong.BackgroundColor;
 
-        LoadingBar.main.Show();
-        Common.Load("Song Select", () => !LoadingBar.main.IsAnimating && (SongSelectScreen.main?.IsInit == true), () => {
-            LoadingBar.main.Hide();
-            SongSelectScreen.main.Intro();
-        }, false);
-        SceneManager.UnloadSceneAsync("Player");
-        Resources.UnloadUnusedAssets();
+            yield return Ease.Animate(
+                1, a =>
+                {
+                    float lerp2 = Mathf.Pow(
+                        Ease.Get(a, EaseFunction.Circle, EaseMode.In),
+                        2);
+
+                    RetryBackground.rectTransform.anchorMin =
+                        new Vector2(0, .5f * (1 - lerp2));
+
+                    RetryBackground.rectTransform.anchorMax =
+                        new Vector2(1, 1 - .5f * (1 - lerp2));
+
+                    RetryBackground.rectTransform.sizeDelta =
+                        new Vector2(0, 100 * (1 - lerp2));
+
+                    float lerp3 = Mathf.Pow(
+                        Ease.Get(
+                            a, EaseFunction.Exponential,
+                            EaseMode.Out), 0.5f);
+
+                    RetryFlash.color = new Color(1, 1, 1, 1 - lerp3);
+                });
+
+            yield return new WaitForSeconds(1);
+
+            RetryBackground.gameObject.SetActive(false);
+            CommonSys.sMain.MainCamera.backgroundColor = PlayerScreen.sTargetSong.BackgroundColor;
+
+            Background.color = PlayerScreen.sTargetSong.BackgroundColor;
+
+            yield return PlayerScreen.sMain.InitChart();
+
+            Background.gameObject.SetActive(false);
+            UIHolder.SetActive(false);
+            PlayerScreen.sMain.BeginReadyAnim();
+
+            CurrentAnimation = null;
+        }
+
+        public void Quit()
+        {
+            if (CurrentAnimation != null) return;
+
+            CurrentAnimation = StartCoroutine(QuitAnim());
+        }
+
+        private IEnumerator QuitAnim()
+        {
+            yield return Ease.Animate(
+                0.2f, x =>
+                {
+                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+
+                    Background.color = CommonSys.sMain.MainCamera.backgroundColor *
+                                       new Color(1, 1, 1, ease * 0.2f + 0.8f);
+
+                    OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
+                    OptionGroup.alpha = 1 - ease;
+                });
+
+            yield return new WaitForSeconds(1);
+
+            LoadingBar.sMain.Show();
+
+            CommonSys.Load(
+                "Song Select", () => !LoadingBar.sMain.IsAnimating && SongSelectScreen.sMain?.IsInit == true,
+                () =>
+                {
+                    LoadingBar.sMain.Hide();
+                    SongSelectScreen.sMain.Intro();
+                }, false);
+
+            SceneManager.UnloadSceneAsync("Player");
+            Resources.UnloadUnusedAssets();
+        }
     }
 }

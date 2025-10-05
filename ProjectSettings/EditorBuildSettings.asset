@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/JANOARG/Scenes/Song Select.unity
     guid: fabf93d875f1f284f966547651d685f0
   - enabled: 1
+    path: Assets/JANOARG/Scenes/HeadlessPlayerStarter.unity
+    guid: df61cfdddab61dcf1ac44ddd7f9057ae
+  - enabled: 1
     path: Assets/JANOARG/Scenes/Player.unity
     guid: 103df8006e925d3469cb1e098bbae915
   - enabled: 1

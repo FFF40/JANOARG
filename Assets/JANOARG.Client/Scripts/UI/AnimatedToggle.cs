@@ -1,78 +1,79 @@
 using System.Collections;
-using System.Collections.Generic;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using System;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-[ExecuteAlways][RequireComponent(typeof(CanvasRenderer))]
-public class AnimatedToggle : Selectable, IPointerClickHandler
+namespace JANOARG.Client.UI
 {
-    bool _value;
-
-    public RectTransform OuterBox;
-    public RectTransform InnerBox;
-    public Graphic Checkmark;
-
-    public UnityEvent<bool> OnValueChanged;
-
-    public bool Value 
+    [ExecuteAlways] [RequireComponent(typeof(CanvasRenderer))]
+    public class AnimatedToggle : Selectable, IPointerClickHandler
     {
-        get 
-        { 
-            return _value; 
-        }
-        set 
-        { 
-            _value = value; 
-            if (routine != null) StopCoroutine(routine);
-            SetToggleEase(_value ? 1 : 0);
-        }
-    }
+        private bool _Value;
 
-    public new void Start ()
-    {
-        base.Start();
-        SetToggleEase(_value ? 1 : 0);
-    }
+        public RectTransform OuterBox;
+        public RectTransform InnerBox;
+        public Graphic       Checkmark;
 
+        public UnityEvent<bool> OnValueChanged;
 
-    public void OnPointerClick (PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        public bool value
         {
-            Toggle();
+            get =>
+                _Value;
+
+            set
+            {
+                _Value = value;
+                if (_Routine != null) StopCoroutine(_Routine);
+                SetToggleEase(_Value ? 1 : 0);
+            }
         }
-    }
 
-    public void Toggle() 
-    {
-        _value = !_value;
-        if (routine != null) StopCoroutine(routine);
-        routine = StartCoroutine(ToggleAnim(_value ? 1 : 0));
-        OnValueChanged.Invoke(_value);
-    }
+        public new void Start()
+        {
+            base.Start();
+            SetToggleEase(_Value ? 1 : 0);
+        }
 
-    float progress;
-    Coroutine routine;
 
-    public IEnumerator ToggleAnim(float to) 
-    {
-        float from = progress;
-        yield return Ease.Animate(0.2f, x => {
-            float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-            SetToggleEase(Mathf.Lerp(from, to, ease));
-        });
-        routine = null;
-    }
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left) Toggle();
+        }
 
-    public void SetToggleEase(float ease)
-    {
-        progress = ease;
-        OuterBox.anchorMin = OuterBox.anchorMax = OuterBox.pivot = new Vector2(ease, .5f);
-        OuterBox.anchoredPosition = Vector2.zero;
-        InnerBox.sizeDelta = (OuterBox.rect.size - new Vector2 (6, 4)) * (1 - ease);
-        Checkmark.color = new (Checkmark.color.r, Checkmark.color.g, Checkmark.color.b, ease);
+        public void Toggle()
+        {
+            _Value = !_Value;
+            if (_Routine != null) StopCoroutine(_Routine);
+            _Routine = StartCoroutine(ToggleAnim(_Value ? 1 : 0));
+            OnValueChanged.Invoke(_Value);
+        }
+
+        private float     _Progress;
+        private Coroutine _Routine;
+
+        public IEnumerator ToggleAnim(float to)
+        {
+            float from = _Progress;
+
+            yield return Ease.Animate(0.2f, x =>
+            {
+                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                SetToggleEase(Mathf.Lerp(from, to, ease));
+            });
+
+            _Routine = null;
+        }
+
+        public void SetToggleEase(float ease)
+        {
+            _Progress = ease;
+            OuterBox.anchorMin = OuterBox.anchorMax = OuterBox.pivot = new Vector2(ease, .5f);
+            OuterBox.anchoredPosition = Vector2.zero;
+            InnerBox.sizeDelta = (OuterBox.rect.size - new Vector2(6, 4)) * (1 - ease);
+            Checkmark.color = new Color(Checkmark.color.r, Checkmark.color.g, Checkmark.color.b, ease);
+        }
     }
 }
