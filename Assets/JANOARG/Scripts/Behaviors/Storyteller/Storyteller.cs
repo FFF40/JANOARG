@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using JANOARG.Shared.Data.Story;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Globalization;
+using JANOARG.Shared.Data.ChartInfo;
 
 
 public class PlaylistScrollItem : MonoBehaviour

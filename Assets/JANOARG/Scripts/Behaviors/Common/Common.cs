@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
 public class Common : MonoBehaviour

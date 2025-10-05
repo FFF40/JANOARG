@@ -8,6 +8,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using System;
 using Random = UnityEngine.Random;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Playlist;
 
 public class SongSelectScreen : MonoBehaviour
 {
