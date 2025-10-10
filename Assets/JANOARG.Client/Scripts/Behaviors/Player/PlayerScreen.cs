@@ -354,6 +354,11 @@ namespace JANOARG.Client.Behaviors.Player
             AlreadyInitialised = true;
             _LastDSPTime = AudioSettings.dspTime;
 
+            const float TARGET_ASPECT = 7 / 4f;
+            float targetHeight = Mathf.Min(Screen.height, Screen.width / TARGET_ASPECT);
+            float camRatio = targetHeight / Screen.height;
+            CommonSys.sMain.MainCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
+
             yield return new WaitForEndOfFrame();
         }
 
