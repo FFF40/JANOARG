@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/JANOARG.Client/Scripts/Behaviors/Song Select/List/ListItems/SongSelectListHeader.cs.meta
-guid: 091325ba26cdb605eac8a48108f80c94
-========
 guid: 26853e47041d8d298b0e4a34ec0303f2
->>>>>>>> master:Assets/JANOARG.Client/Scripts/UI/Modal/Modal.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
