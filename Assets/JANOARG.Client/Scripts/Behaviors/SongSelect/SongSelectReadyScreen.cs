@@ -183,9 +183,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     -10 + 200 * Ease.Get(x * 1.4f - .4f, EaseFunction.Exponential, EaseMode.In));
             }));
 
-            yield return new WaitForSeconds(2);
-
+            yield return new WaitForSeconds(0.8f);
             PlayerScreen.sMain.BeginReadyAnim();
+            yield return new WaitForSeconds(0.5f);
             Destroy(gameObject);
 
             IsAnimating = false;

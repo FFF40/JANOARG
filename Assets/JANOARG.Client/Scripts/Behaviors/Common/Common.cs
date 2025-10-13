@@ -20,7 +20,7 @@ namespace JANOARG.Client.Behaviors.Common
         public Storage    Preferences;
         public Storage    Storage;
         
-        private const bool _UNLIMITED_FPS = true; // Change before build
+        private const bool _UNLIMITED_FPS = false; // Change before build
         private const int  _MAX_FPS       = 120;
 
         public void Awake()

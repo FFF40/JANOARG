@@ -111,7 +111,7 @@ namespace JANOARG.Client.Behaviors.Common
             StatusCompletedHolder.sizeDelta = new Vector2(0, 0);
 
             yield return Ease.Animate(
-                3f, a =>
+                2.5f, a =>
                 {
                     float lerp = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
 
