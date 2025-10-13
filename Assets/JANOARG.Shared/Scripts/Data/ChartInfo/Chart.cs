@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -323,14 +324,14 @@ namespace JANOARG.Shared.Data.ChartInfo
     {
         public string Name;
 
-        public string MainMaterial    = "Default";
+        public string MainMaterial = "Default";
         public string MainColorTarget = "_Color";
-        public Color  NormalColor     = Color.black;
-        public Color  CatchColor      = Color.blue;
+        public Color NormalColor = Color.black;
+        public Color CatchColor = Color.blue;
 
-        public string HoldTailMaterial    = "Default";
+        public string HoldTailMaterial = "Default";
         public string HoldTailColorTarget = "_Color";
-        public Color  HoldTailColor       = Color.black;
+        public Color HoldTailColor = Color.black;
 
         public override TimestampType[] timestampTypes => ThisTimestampTypes;
         public static TimestampType[] ThisTimestampTypes = {
@@ -447,6 +448,171 @@ namespace JANOARG.Shared.Data.ChartInfo
     }
 
     [System.Serializable]
+    // Refers to the non-lane objects like Text, Images, 3d shapes
+    public class WorldObject : Storyboardable, IDeepClonable<WorldObject>
+    {
+        public string Name;
+        public Vector3 Position;
+        public Vector3 Rotation;
+
+        public override TimestampType[] timestampTypes => sThisTimestampTypes;
+        public static TimestampType[] sThisTimestampTypes = {
+        new() {
+            ID = TimestampIDs.ObjectPosition_X,
+            Name = "Position X",
+            StoryboardGetter  = (x) => ((WorldObject)x).Position.x,
+            StoryboardSetter  = (x, a) => { ((WorldObject)x).Position.x = a; },
+        },
+        new() {
+            ID = TimestampIDs.ObjectPosition_Y,
+            Name = "Position Y",
+            StoryboardGetter  = (x) => ((WorldObject)x).Position.y,
+            StoryboardSetter  = (x, a) => { ((WorldObject)x).Position.y = a; },
+        },
+        new() {
+            ID = TimestampIDs.ObjectPosition_Z,
+            Name = "Position Z",
+            StoryboardGetter = (x) => ((WorldObject)x).Position.z,
+            StoryboardSetter = (x, a) => { ((WorldObject)x).Position.z = a; },
+        },
+        new() {
+            ID = TimestampIDs.ObjectRotation_X,
+            Name = "Rotation X",
+            StoryboardGetter = (x) => ((WorldObject)x).Rotation.x,
+            StoryboardSetter = (x, a) => { ((WorldObject)x).Rotation.x = a; },
+        },
+        new() {
+            ID =    TimestampIDs.ObjectRotation_Y,
+            Name = "Rotation Y",
+            StoryboardGetter = (x) => ((WorldObject)x).Rotation.y,
+            StoryboardSetter = (x, a) => { ((WorldObject)x).Rotation.y = a; },
+        },
+        new() {
+            ID =   TimestampIDs.ObjectRotation_Z,
+            Name = "Rotation Z",
+            StoryboardGetter = (x) => ((WorldObject)x).Rotation.z,
+            StoryboardSetter = (x, a) => { ((WorldObject)x).Rotation.z = a; },
+        },
+
+
+    };
+
+        public virtual WorldObject DeepClone()
+        {
+            return new WorldObject
+            {
+                Name = Name,
+                Position = new Vector3(Position.x, Position.y, Position.z),
+                Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+                Storyboard = Storyboard.SelfReference(),
+            };
+        }
+    }
+
+    // Text
+    [System.Serializable]
+    public class Text : WorldObject
+    {
+        public string DisplayText;
+
+        // Default Values
+        public float TextSize = 7f;
+        public Color TextColor = Color.white;
+        public FontFamily TextFont; //Default value: RobotoMono
+
+        public List<TextStep> TextSteps = new();
+
+        public string GetUpdateText(float time, float beat, string oldText)
+        {
+            string rt = oldText;
+            List<TextStep> steps = TextSteps;
+            for (int i = 0; i < steps.Count; i++)
+            {
+                TextStep step = steps[i];
+                if (beat >= step.Offset)
+                {
+                    rt = step.TextChange;
+                }
+            }
+            return rt;
+        }
+
+        public override TimestampType[] timestampTypes => sThisTimestampTypes;
+    
+        //Append Text Storyboard to the base WorldObject Storyboard
+        public new static TimestampType[] sThisTimestampTypes = sThisTimestampTypes.Concat(new TimestampType[] {
+        new() {
+            ID = TimestampIDs.TextSize,
+            Name = "Text Size",
+            StoryboardGetter = (x) => ((Text)x).TextSize,
+            StoryboardSetter = (x, a) => { ((Text)x).TextSize = a; },
+        },
+        new() {
+            ID = TimestampIDs.TextColor_R,
+            Name = "Text Color R",
+            StoryboardGetter = (x) => ((Text)x).TextColor.r,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.r = a; },
+        },
+        new() {
+            ID = TimestampIDs.TextColor_G,
+            Name = "Text Color G",
+            StoryboardGetter = (x) => ((Text)x).TextColor.g,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.g= a; },
+        },
+        new() {
+            ID = TimestampIDs.TextColor_B,
+            Name = "Text Color B",
+            StoryboardGetter = (x) => ((Text)x).TextColor.b,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.b = a; },
+        },
+        new() {
+            ID = TimestampIDs.TextColor_A,
+            Name = "Text Color A",
+            StoryboardGetter = (x) => ((Text)x).TextColor.a,
+            StoryboardSetter = (x, a) => { ((Text)x).TextColor.a = a; },
+        },
+    }).ToArray();
+
+        public override WorldObject DeepClone()
+        {
+            Text clone = new Text()
+            {
+                Name = Name,
+                Position = new Vector3(Position.x, Position.y, Position.z),
+                Rotation = new Vector3(Rotation.x, Rotation.y, Rotation.z),
+                Storyboard = Storyboard.SelfReference(),
+
+                // Text-specific properties
+                TextSize = TextSize,
+                TextFont = TextFont,
+                TextColor = new Color(TextColor.r, TextColor.g, TextColor.b, TextColor.a),
+                DisplayText = DisplayText,
+                TextSteps = new List<TextStep>(TextSteps),
+            };
+            return clone;
+        }
+    }
+
+    [System.Serializable]
+    public class TextStep : IDeepClonable<TextStep>
+    {
+        public BeatPosition Offset = new();
+
+        // The new text will replace DisplayText 
+        public string TextChange = "";
+
+        public TextStep DeepClone()
+        {
+            TextStep clone = new()
+            {
+                Offset = Offset,
+                TextChange = TextChange,
+            };
+            return clone;
+        }
+    }
+
+    [System.Serializable]
     public class LaneGroup : Storyboardable, IDeepClonable<LaneGroup>
     {
         public string  Name;
@@ -454,8 +620,8 @@ namespace JANOARG.Shared.Data.ChartInfo
         public Vector3 Rotation;
         public string  Group;
 
-        public override TimestampType[] timestampTypes => ThisTimestampTypes;
-        public static TimestampType[] ThisTimestampTypes = {
+        public override TimestampType[] timestampTypes => sThisTimestampTypes;
+        public static TimestampType[] sThisTimestampTypes = {
             #region Position
             new()
             {
@@ -850,5 +1016,13 @@ namespace JANOARG.Shared.Data.ChartInfo
         Local,
         Group,
         Global
+    }
+
+    public enum FontFamily
+    {
+        RobotoMono,
+        Roboto,
+        Garvette,
+        Michroma,
     }
 }
