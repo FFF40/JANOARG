@@ -1,6 +1,6 @@
-[submodule "Assets/JANOARG.Shared"]
-	path = Assets/JANOARG.Shared
-	url = https://github.com/FFF40/JANOARG.Shared.git
 [submodule "Assets/JANOARG.Assets"]
 	path = Assets/JANOARG.Assets
 	url = https://github.com/FFF40/JANOARG.Assets.git
+[submodule "JANOARG.Shared"]
+	path = JANOARG.Shared
+	url = https://github.com/FFF40/JANOARG.Shared.git
