@@ -1,6 +1,6 @@
 using System.Collections;
 using JANOARG.Client.Behaviors.Common;
-using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;

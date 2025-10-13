@@ -1332,6 +1332,7 @@ GameObject:
   - component: {fileID: 231156583}
   - component: {fileID: 231156584}
   - component: {fileID: 231156585}
+  - component: {fileID: 231156586}
   m_Layer: 5
   m_Name: Launch Screen
   m_TagString: Untagged
@@ -1404,6 +1405,29 @@ MonoBehaviour:
   Bar: {fileID: 130972534}
   OverallProgress: {fileID: 2056147602}
   CurrentProgress: {fileID: 1389599411}
+--- !u!223 &231156586
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231156582}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &232877801
 GameObject:
   m_ObjectHideFlags: 0
@@ -3102,7 +3126,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 7860dd1c992687342aaea8c5b0101096, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3468,9 +3492,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 879351028}
+  - component: {fileID: 879351033}
   - component: {fileID: 879351030}
   - component: {fileID: 879351031}
   - component: {fileID: 879351032}
+  - component: {fileID: 879351034}
   m_Layer: 5
   m_Name: List
   m_TagString: Untagged
@@ -3581,6 +3607,46 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!223 &879351033
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879351027}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &879351034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 879351027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &885272950
 GameObject:
   m_ObjectHideFlags: 0
@@ -5500,7 +5566,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c35667dc285e4aa40a039b2a37a9ec08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Playlist: {fileID: 11400000, guid: 3d88ca9e8b4956e43b960309e1f6a2a0, type: 2}
+  Playlist: {fileID: 11400000, guid: 9ee93cd3f309325fc8660d1da4a9041e, type: 2}
   ItemSample: {fileID: 1567076798739812424, guid: 70ce51dbf68132e49a34eb0db328beb2, type: 3}
   ItemHolder: {fileID: 879351028}
   ItemGroup: {fileID: 879351032}
@@ -5549,9 +5615,9 @@ MonoBehaviour:
   PreviewVolumeMulti: 0
   CurrentPreviewClip: {fileID: 0}
   CurrentPreviewRange: {x: 0, y: 0}
-  SFXSource: {fileID: 2026222169}
-  SFXTickClip: {fileID: 8300000, guid: 7913ced82b4f22b7f813f72287e1197f, type: 3}
-  SFXVolume: 0
+  SoundEffectSource: {fileID: 2026222169}
+  SoundEffectTickClip: {fileID: 8300000, guid: 7913ced82b4f22b7f813f72287e1197f, type: 3}
+  SoundEffectVolume: 0
 --- !u!1 &1576925517
 GameObject:
   m_ObjectHideFlags: 0
@@ -6614,12 +6680,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1850335546}
+  - component: {fileID: 1850335552}
   - component: {fileID: 1850335548}
   - component: {fileID: 1850335549}
   - component: {fileID: 1850335550}
   - component: {fileID: 1850335551}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Stripes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6641,8 +6708,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -15}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 180, y: 0}
-  m_SizeDelta: {x: 2000, y: 2000}
+  m_AnchoredPosition: {x: 180, y: -17}
+  m_SizeDelta: {x: 686, y: 58}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1850335548
 CanvasRenderer:
@@ -6666,7 +6733,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 2d54788b12f101646aa64f2c2e4c52e8, type: 2}
   m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -6709,6 +6776,29 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!223 &1850335552
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850335545}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1880770615
 GameObject:
   m_ObjectHideFlags: 0
