@@ -16,13 +16,14 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
         [NonSerialized]
         public PlaylistReference Target;
         [NonSerialized]
-        public SongMapItemUI ItemUI;
+        public PlaylistMapItemUI ItemUI;
 
-        public bool IsUnlocked { get; private set; }
-        public bool IsRevealed { get; private set; }
+        public bool isUnlocked { get; private set; }
+        public bool isRevealed { get; private set; }
 
         public void Start()
         {
+            MapManager.sPlaylistMapItemsByID.Add(TargetID, this);
             UpdateStatus();
         }
 
@@ -35,8 +36,24 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
             }
 
             // Update unlock status
-            IsRevealed = GameConditional.TestAll(Target.RevealConditions);
-            IsUnlocked = IsRevealed && GameConditional.TestAll(Target.UnlockConditions);
+            isRevealed = GameConditional.TestAll(Target.RevealConditions);
+            isUnlocked = isRevealed && GameConditional.TestAll(Target.UnlockConditions);
+
+            // Update item UI
+            if (ItemUI == null)
+            {
+                ItemUI = MakeItemUI<PlaylistMapItemUI, PlaylistMapItem>();
+                MapManager.sPlaylistMapItemUIsByID.Add(TargetID, ItemUI);
+            }
+        }
+        
+        public void OnDestroy()
+        {
+            print("on destroy called");
+            MapManager.sItemUIs.Remove(ItemUI);
+            MapManager.sPlaylistMapItemsByID.Remove(TargetID);
+            MapManager.sPlaylistMapItemUIsByID.Remove(TargetID);
+            Destroy(ItemUI.gameObject);        
         }
     }
 }

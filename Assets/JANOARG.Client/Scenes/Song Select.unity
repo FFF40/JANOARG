@@ -4182,6 +4182,7 @@ MonoBehaviour:
     m_Handle: 0
   ItemUISamples:
   - {fileID: 3686334420043380740, guid: b9dc680138eecc9049b3c3a0cb7bf768, type: 3}
+  - {fileID: 3039678423099458909, guid: af1efb22793ac56c2802767ed2f4b7b6, type: 3}
   ItemUIHolder: {fileID: 1221148511}
   DragScale: 17.5
 --- !u!4 &532315936
@@ -6996,7 +6997,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -9243,8 +9244,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1114411600}
   - {fileID: 1221148511}
+  - {fileID: 1114411600}
   - {fileID: 162131310}
   - {fileID: 231156583}
   m_Father: {fileID: 0}
@@ -9266,7 +9267,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c35667dc285e4aa40a039b2a37a9ec08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Playlist: {fileID: 11400000, guid: 8496bc59e6795a44785a16fe995ec357, type: 2}
+  Playlist: {fileID: 11400000, guid: 16788cf8b6448b6f698f7c5b7da1a991, type: 2}
   ListView: {fileID: 879351033}
   MapManager: {fileID: 532315935}
   MapLerpItemHolder: {fileID: 1597500258}

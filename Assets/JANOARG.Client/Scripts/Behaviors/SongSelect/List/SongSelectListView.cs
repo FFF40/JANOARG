@@ -130,7 +130,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
             bool CanAddSong(string songID)
             {
-                return MapManager.SongMapItemsByID[songID].IsRevealed;
+                return MapManager.sSongMapItemsByID[songID].isRevealed;
             }
             void AddSong(string songID)
             {

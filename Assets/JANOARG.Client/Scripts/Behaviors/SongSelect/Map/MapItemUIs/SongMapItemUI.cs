@@ -22,7 +22,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
 
         public void UpdateStatus()
         {
-            if (!Parent.IsRevealed)
+            if (!parent.isRevealed)
             {
                 if (CoverImage.texture) SongSelectCoverManager.sMain.UnregisterUse(CoverImage);
                 gameObject.SetActive(false);
@@ -38,26 +38,26 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
         public Coroutine CoverLoadRoutine = null;
         public void LoadCoverImage()
         {
-            if (!Parent.IsRevealed) return;
+            if (!parent.isRevealed) return;
             if (CoverLoadRoutine != null) StopCoroutine(CoverLoadRoutine);
             CoverLoadRoutine = StartCoroutine(LoadCoverImageRoutine());
         }
         private IEnumerator LoadCoverImageRoutine()
         {
             SongSelectCoverManager.sMain.UnregisterUse(CoverImage);
-            yield return SongSelectCoverManager.sMain.RegisterUse(CoverImage, Parent.TargetID);
+            yield return SongSelectCoverManager.sMain.RegisterUse(CoverImage, parent.TargetID);
         }
 
         public void LerpToListItem(RectTransform cover, float t)
         {
-            Vector3 fromPos = CommonSys.sMain.MainCamera.WorldToScreenPoint(Parent.transform.position);
+            Vector3 fromPos = CommonSys.sMain.MainCamera.WorldToScreenPoint(parent.transform.position);
             Vector3 toPos = cover.position;
             (transform as RectTransform).position = Vector3.Lerp(fromPos, toPos, t);
         }
 
         public void OnClick()
         {
-            MapManager.main.SelectSong(Parent);
+            MapManager.sMain.SelectSong(parent);
         }
     }
 }

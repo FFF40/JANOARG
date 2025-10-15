@@ -134,8 +134,8 @@ namespace JANOARG.Client.Debugger
                         gpuStrain += frameTime.gpuFrameTime;
                     }
 
-                    cpuStrain *= 1e3 / frameTiming;
-                    gpuStrain *= 1e3 / frameTiming;
+                    cpuStrain *= 1d / frameTiming;
+                    gpuStrain *= 1d / frameTiming;
                 }
 #endif
 
@@ -144,8 +144,8 @@ namespace JANOARG.Client.Debugger
                 double avgDelta = _HasValidAverages ? _CachedAvgDelta : Double.NaN;
 
                 // Simple string formatting (reduced allocations)
-                Text.text = $"frame: {fps:0}fps / {delta:0.0}ms, avg: {avgFPS:0.0}fps / {avgDelta:0.0}ms\n" +
-                           $"strain: {(frameTiming > 0 ? $"{cpuStrain:0.0}ms cpu, {gpuStrain:0.0}ms gpu" : "(unavailable)")}";
+                Text.text = $"frame: {fps:0}fps / {delta:0.00}ms, avg: {avgFPS:0.0}fps / {avgDelta:0.00}ms\n" +
+                           $"strain: {(frameTiming > 0 ? $"{cpuStrain:0.00}ms cpu, {gpuStrain:0.00}ms gpu" : "(unavailable)")}";
                 
                 Timer -= Interval;
             }

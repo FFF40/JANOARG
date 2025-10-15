@@ -5,28 +5,28 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 {
     public abstract class MapItemUI : MonoBehaviour
     {
-        public MapItem Parent { get; protected set; }
+        public MapItem parent { get; protected set; }
 
         public abstract void UpdatePosition();
     }
 
     public abstract class MapItemUI<T> : MapItemUI where T : MapItem
     {
-        public new T Parent
+        public new T parent
         {
-            get { return (T)base.Parent; }
-            protected set { base.Parent = value; }
+            get { return (T)base.parent; }
+            protected set { base.parent = value; }
         }
 
         public virtual void SetParent(T parent)
         {
-            Parent = parent;
+            this.parent = parent;
             UpdatePosition();
         }
 
         public override void UpdatePosition()
         {
-            (transform as RectTransform).position = CommonSys.sMain.MainCamera.WorldToScreenPoint(Parent.transform.position);
+            (transform as RectTransform).position = CommonSys.sMain.MainCamera.WorldToScreenPoint(parent.transform.position);
         }
     }
 }
