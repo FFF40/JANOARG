@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
 using TMPro;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UI;
 
