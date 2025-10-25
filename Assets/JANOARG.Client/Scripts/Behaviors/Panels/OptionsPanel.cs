@@ -349,9 +349,9 @@ namespace ANOARG.Client.Behaviors.Panels
                     Spawn <OptionCategoryTitle>("Miscellaneous");
 
                     Spawn<BooleanOptionInput, bool>(
-                        "Hide display judgement on Flawless",
-                        () => preferences.Get("PLYR:NoJudgementTextOnFlawless", false),
-                        x => preferences.Set("PLYR:NoJudgementTextOnFlawless", x)
+                        "Show FLAWLESS judgments",
+                        () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
+                        x => preferences.Set("PLYR:JudgementTextOnFlawless", x)
                     );
                     
                     Spawn<BooleanOptionInput, bool>(

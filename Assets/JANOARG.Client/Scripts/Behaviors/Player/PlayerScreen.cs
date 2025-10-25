@@ -822,7 +822,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
 
-            string flawlessText = Settings.NoFlawlessText ? "✓" : "FLAWLESS";
+            string flawlessText = Settings.ShowFlawlessText ? "FLAWLESS" : "✓";
             if (acc.HasValue)
                 JudgmentLabel.text = acc switch
                 {
@@ -1072,7 +1072,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float JudgmentOffset;
         public float VisualOffset;
-        public bool  NoFlawlessText;
+        public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
 
 
@@ -1081,7 +1081,7 @@ namespace JANOARG.Client.Behaviors.Player
             Storage prefs = CommonSys.sMain != null ? CommonSys.sMain.Preferences : null;
 
             if (prefs == null) return;
-            NoFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:NoJudgementTextOnFlawless", false);
+            ShowFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:JudgementTextOnFlawless", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
