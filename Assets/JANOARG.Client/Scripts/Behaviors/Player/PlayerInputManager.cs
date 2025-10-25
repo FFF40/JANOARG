@@ -575,7 +575,7 @@ public class PlayerInputManager : MonoBehaviour
 
                     hitObject.InDiscreteHitQueue = false;
                     hitObject.IsProcessed = true;
-
+                    
                     // Clear any touch that was assigned to this hit
                     foreach (TouchClass touch in TouchClasses)
                         if (touch.QueuedHit == hitObject)
@@ -587,6 +587,8 @@ public class PlayerInputManager : MonoBehaviour
 
                     EnqueueHoldNote(hitObject: hitObject);
 
+                    if (!hitObject)
+                        continue; // If the hitobject has already been destroyed in runtime
                     DiscreteHitQueue.Remove(hitObject);
                 }
             }
@@ -639,9 +641,11 @@ public class PlayerInputManager : MonoBehaviour
                         //// Special judgement handling for hold ticks (nothing else handles this)
                         Player.AddScore(1, null);
 
-                        var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
+                        Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.4f);
+                        var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
+                        rectTransform.localScale = new Vector3(0.6f, 0.6f);
                         
                         currentHit.HoldTicks.RemoveAt(0);
                     }
@@ -833,13 +837,12 @@ public class PlayerInputManager : MonoBehaviour
             // Handle hold tick just like how HitPlayer does
             if (holdNoteEntry.IsScoring)
             {
-                var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, PlayerScreen.sCurrentChart.Palette.InterfaceColor);
+                Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.32f);
+                var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
                 var rt = (RectTransform)effect.transform;
 
-                rt.position =
-                    CommonSys.sMain.MainCamera.WorldToScreenPoint(
-                        holdNoteEntry.HitObject.transform
-                            .position);
+                rt.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
+                rt.localScale = new Vector3(0.74f, 0.74f);
             }
 
             // Missed hold tick, no effect
@@ -862,7 +865,8 @@ public class PlayerInputManager : MonoBehaviour
 
             foreach (TouchClass touch in TouchClasses)
             {
-                if (touch.QueuedHit != null && !touch.Flicked) continue;
+                if (touch.QueuedHit != null && !touch.Flicked)
+                    continue;
 
                 var isValid = false;
 
@@ -989,8 +993,7 @@ public class PlayerInputManager : MonoBehaviour
                         touch.Tapped &&
                         (
                             distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
-                        ) <
-                        hitIteration.HitCoord.Radius &&
+                        ) < hitIteration.HitCoord.Radius &&
                         (
                             discreteTapProtectionPassed =
                                 !( // Safeguard to prevent false 'early' taps while the player intends to catch notes
