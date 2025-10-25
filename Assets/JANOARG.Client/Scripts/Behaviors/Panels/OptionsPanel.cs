@@ -355,7 +355,7 @@ namespace ANOARG.Client.Behaviors.Panels
                     );
                     
                     Spawn<BooleanOptionInput, bool>(
-                        "Don't show early/late indicator",
+                        "Disable early/late indicator",
                         () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
                         x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
                     );
