@@ -102,6 +102,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public AudioSource SFXSource;
         public AudioClip SFXTickClip;
         public float SFXVolume;
+        [Space]
+        public AudioSource BGMSource;
 
 
         [Header("Data")]
@@ -110,12 +112,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public bool IsInit;
         public bool IsMapView = true;
         public Coroutine TargetSongAnim;
+        private bool _InitSong;
 
         [NonSerialized] public MapItem TargetMapItem;
         [NonSerialized] public PlayableSong TargetSong;
         [NonSerialized] public string TargetSongID;
         [NonSerialized] public Cover CurrentCover;
-
+        
         public void Awake()
         {
             sMain = this;
@@ -147,43 +150,111 @@ namespace JANOARG.Client.Behaviors.SongSelect
             
         public void Update()
         {
-            if (!IsReady) return;
+            if (!IsReady) 
+                return;
 
-            if (ListView) ListView.HandleUpdate();
+            // Preload BGM audio data (reduce switching delay)
+            if (Playlist.BackgroundMusicLoop && !_InitSong)
+                Playlist.BackgroundMusicLoop.LoadAudioData();
+
+            if (Playlist.BackgroundMusicInit && !_InitSong)
+            {
+                BGMSource.clip = Playlist.BackgroundMusicInit;
+                BGMSource.loop = false;
+                _InitSong = true;
+
+            }
+            else if (Playlist.BackgroundMusicLoop && 
+                     (BGMSource.clip == Playlist.BackgroundMusicInit && BGMSource.time >= Playlist.BackgroundMusicInit.length 
+                      || !Playlist.BackgroundMusicInit))
+            {
+                if (BGMSource.clip != Playlist.BackgroundMusicLoop)
+                {
+                    BGMSource.clip = Playlist.BackgroundMusicLoop;
+                    BGMSource.loop = true;
+                    if (IsMapView)
+                        BGMSource.Play();
+                }
+            }
+
+            // Handle pause/resume based on ListView
+            if (!IsMapView || PreviewSource.clip)
+            {
+                StartCoroutine(ToggleBGM(true));
+            }
+            else if (IsMapView || !PreviewSource.clip)
+            {
+                StartCoroutine(ToggleBGM(false));
+            }
+
+
+            if (ListView) 
+                ListView.HandleUpdate();
 
             // Handle song preview
             float previewVolumeSpeed = 1;
-            if (ReadyScreen.IsAnimating) previewVolumeSpeed = -0.5f;
-            else if (CurrentPreviewClip != PreviewSource.clip) previewVolumeSpeed = -2;
-            else if (!CurrentPreviewClip) previewVolumeSpeed = -2;
-            else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded) previewVolumeSpeed = -1;
-            else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume) previewVolumeSpeed = -1;
-            else if (ListView != null && ListView.IsTargetSongHidden) previewVolumeSpeed = -0.4f;
+            if (ReadyScreen.IsAnimating) 
+                previewVolumeSpeed = -0.5f;
+            else if (CurrentPreviewClip != PreviewSource.clip || !CurrentPreviewClip) 
+                previewVolumeSpeed = -2;
+            else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded || CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume) 
+                previewVolumeSpeed = -1;
+            else if (ListView != null && ListView.IsTargetSongHidden)
+                previewVolumeSpeed = -0.4f;
+
             PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
             PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
-            if (PreviewVolume <= 0) 
+
+            if (!(PreviewVolume <= 0))
+                return;
+
+            if (CurrentPreviewClip != PreviewSource.clip)
             {
-                if (CurrentPreviewClip != PreviewSource.clip)
+                StartCoroutine(ToggleBGM(true));
+                if (!PreviewSource.clip) 
                 {
-                    if (!PreviewSource.clip) 
-                    {
-                        PreviewSource.clip = CurrentPreviewClip;
-                        PreviewSource.clip.LoadAudioData();
-                        PreviewSource.Play();
-                        PreviewSource.time = CurrentPreviewRange.x;
-                    }
-                    else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
-                    {
-                        PreviewSource.clip.UnloadAudioData();
-                        PreviewSource.clip = CurrentPreviewClip;
-                        PreviewSource.Play();
-                        PreviewSource.time = CurrentPreviewRange.x;
-                    }
+                    PreviewSource.clip = CurrentPreviewClip;
+                    PreviewSource.clip.LoadAudioData();
+                    PreviewSource.Play();
+                    PreviewSource.time = CurrentPreviewRange.x;
                 }
-                else if (PreviewSource.time > CurrentPreviewRange.y) 
+                else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
                 {
-                    PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
+                    PreviewSource.clip.UnloadAudioData();
+                    PreviewSource.clip = CurrentPreviewClip;
+                    PreviewSource.Play();
+                    PreviewSource.time = CurrentPreviewRange.x;
                 }
+            }
+            else if (PreviewSource.time > CurrentPreviewRange.y) 
+            {
+                PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
+            }
+        }
+
+        private IEnumerator ToggleBGM(bool pause)
+        {
+            if (pause)
+            {
+                yield return Ease.Animate(0.5f, a =>
+                {
+                    BGMSource.volume = (1 - a) * CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+                });
+
+                BGMSource.Pause();
+            }
+            else
+            {
+                if (!BGMSource.isPlaying)
+                    BGMSource.Play();
+                else
+                    BGMSource.UnPause();
+
+                BGMSource.volume = 0;
+                yield return Ease.Animate(0.5f, a =>
+                {
+                    BGMSource.volume = a * CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+                });
             }
         }
 

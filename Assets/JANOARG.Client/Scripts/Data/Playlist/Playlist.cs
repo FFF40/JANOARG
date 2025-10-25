@@ -17,6 +17,9 @@ namespace JANOARG.Client.Data.Playlist
         [FormerlySerializedAs("Items")]
         public PlaylistSong[] Songs;
         public PlaylistReference[] Playlists;
+        [Header("Background Music")]
+        public AudioClip BackgroundMusicInit;
+        public AudioClip BackgroundMusicLoop;
     }
 
     [Serializable]
