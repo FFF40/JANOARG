@@ -30,7 +30,6 @@ RectTransform:
   m_Children:
   - {fileID: 302607909243635452}
   m_Father: {fileID: 425590671774811060}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -49,6 +48,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Toggle
       objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: m_TargetGraphic
+      value: 
+      objectReference: {fileID: 302607909243635454}
     - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
       propertyPath: m_Colors.m_NormalColor.b
       value: 0
@@ -116,6 +119,34 @@ PrefabInstance:
     - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
       propertyPath: m_Colors.m_HighlightedColor.r
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 509537731979037977}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnToggle
+      objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: JANOARG.Client.Behaviors.Options.Input_Types.BooleanOptionInput, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2171962413929625566, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+      propertyPath: OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 2171962413929625567, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
       propertyPath: m_Pivot.x
@@ -223,6 +254,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2171962413929625567, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
   m_PrefabInstance: {fileID: 1880050554075787555}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &302607909243635454 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2171962413929625565, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
+  m_PrefabInstance: {fileID: 1880050554075787555}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad37b21380051fc4f979cda2c02c3e76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &302607909632823877 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2171962413674783590, guid: d0b0a28438956ba4687ba7e4ef713ce7, type: 3}
@@ -431,7 +473,20 @@ MonoBehaviour:
   Checkmark: {fileID: 302607908218108155}
   OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 509537731979037977}
+        m_TargetAssemblyTypeName: JANOARG.Client.Behaviors.Options.Input_Types.BooleanOptionInput,
+          Assembly-CSharp
+        m_MethodName: OnToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &509537731979037977
 MonoBehaviour:
   m_ObjectHideFlags: 0
