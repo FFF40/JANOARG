@@ -269,7 +269,7 @@ namespace ANOARG.Client.Behaviors.Panels
                 case 1:
                 {
                     SubtitleLabel.text = " > Gameplay";
-                    SetScrollerWidth(364);
+                    SetScrollerWidth(360);
 
                     Spawn<OptionCategoryTitle>("Syncronization");
 
