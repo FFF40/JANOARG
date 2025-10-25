@@ -175,7 +175,6 @@ namespace JANOARG.Client.Behaviors.Player
         
         internal List<int> TransparentMeshLaneIndexes = new();
         private List<LanePlayer> _LanesToRender = new();
-
         public void Awake()
         {
             sMain = this;
@@ -455,7 +454,7 @@ namespace JANOARG.Client.Behaviors.Player
                             }
                         }
 
-                        var hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); // Get current HitObject?
+                        HitObject hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); // Get current HitObject?
                         Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
                         Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
 
@@ -823,16 +822,17 @@ namespace JANOARG.Client.Behaviors.Player
 
             ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
 
+            string flawlessText = Settings.NoFlawlessText ? "✓" : "FLAWLESS";
             if (acc.HasValue)
-                JudgmentLabel.text = acc == 0
-                    ? "FLAWLESS" : acc < 0
-                        ? score > 0
-                            ? "EARLY" : "BAD"
-                        : score > 0
-                            ? "LATE" : "MISS";
+                JudgmentLabel.text = acc switch
+                {
+                    0 => flawlessText,
+                    < 0 => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" :"EARLY" : "BAD",
+                    _ => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" : "LATE" : "MISS"
+                };
             else
                 JudgmentLabel.text = score > 0
-                    ? "FLAWLESS" : "MISS";
+                    ? flawlessText : "MISS";
 
             if (_JudgeAnimation != null)
                 StopCoroutine(_JudgeAnimation);
@@ -875,6 +875,10 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
         {
+            // In case of race condition
+            if (!hitObject)
+                return;
+            
             var hitType = hitObject.Current.Type;
             bool isFlickable = hitObject.Current.Flickable;
             bool isCatchType = hitType == HitObject.HitType.Catch;
@@ -948,6 +952,7 @@ namespace JANOARG.Client.Behaviors.Player
             var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hitObject.HitCoord.Position;
+            rt.localScale = new Vector3(1, 1); // Making sure it's not affected from effects that were used in hold ticks
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)
@@ -958,6 +963,7 @@ namespace JANOARG.Client.Behaviors.Player
             var primarySound = hitObject.Current.Type == HitObject.HitType.Normal 
                 ? NormalHitsound 
                 : CatchHitsound;
+            
             Hitsounds.PlayOneShot(primarySound, volume);
             
             // Play flick sound if applicable
@@ -1066,13 +1072,18 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float JudgmentOffset;
         public float VisualOffset;
+        public bool  NoFlawlessText;
+        public bool  NoEarlyLateText;
+
 
         public PlayerSettings()
         {
             Storage prefs = CommonSys.sMain != null ? CommonSys.sMain.Preferences : null;
 
             if (prefs == null) return;
-
+            NoFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:NoJudgementTextOnFlawless", false);
+            NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
+            
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });
 
