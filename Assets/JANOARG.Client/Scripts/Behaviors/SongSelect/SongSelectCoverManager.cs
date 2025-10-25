@@ -23,7 +23,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
             if (CoverInfos.ContainsKey(songID))
             {
                 CoverInfos[songID].Uses++;
-                if (CoverInfos[songID].Coroutine != null) yield return null;
+                if (CoverInfos[songID].Coroutine != null)
+                    yield return null;
             }
             else
             {
@@ -31,7 +32,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 {
                     string path = $"Songs/{songID}";
                     path = Path.Combine(path, song.Cover.IconTarget);
-                    if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                    if (Path.HasExtension(path)) 
+                        path = Path.ChangeExtension(path, "")[0..^1];
                     ResourceRequest req = Resources.LoadAsync<Texture2D>(path);
                     yield return new WaitUntil(() => req.isDone);
                     if (req.asset)
@@ -91,7 +93,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
         }
         public void UnregisterUse(RawImage rawImage)
         {
-            if (!rawImage.texture) return;
+            if (!rawImage.texture) 
+                return;
             string name = rawImage.texture.name;
             rawImage.texture = null;
             UnregisterUse(name);

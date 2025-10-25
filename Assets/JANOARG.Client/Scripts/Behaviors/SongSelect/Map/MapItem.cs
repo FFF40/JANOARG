@@ -9,12 +9,12 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         protected void OnEnable()
         {
-            MapManager.Items.Add(this);
+            MapManager.sItems.Add(this);
         }
 
         protected void OnDisable()
         {
-            MapManager.Items.Remove(this);
+            MapManager.sItems.Remove(this);
         }
 
         public virtual void UpdateStatus() { }
@@ -23,11 +23,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         public TItem MakeItemUI<TItem>() where TItem : MapItemUI
         {
-            return MapManager.main.MakeItemUI<TItem>();
+            return MapManager.sMain.MakeItemUI<TItem>();
         }
         public TItem MakeItemUI<TItem, TParent>() where TParent : MapItem where TItem : MapItemUI<TParent>
         {
-            return MapManager.main.MakeItemUI<TItem, TParent>((TParent)this);
+            return MapManager.sMain.MakeItemUI<TItem, TParent>((TParent)this);
         }
 
     

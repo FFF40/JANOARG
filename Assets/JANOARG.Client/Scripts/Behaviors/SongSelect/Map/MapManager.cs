@@ -6,6 +6,8 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItems;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs;
+using JANOARG.Client.Data.Playlist;
+using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,12 +17,16 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 {
     public class MapManager : MonoBehaviour
     {
-        public static MapManager main;
-        public static List<MapItem> Items = new();
-        public static List<MapItemUI> ItemUIs = new();
+        public static MapManager sMain;
+        public static List<MapItem> sItems = new();
+        public static List<MapItemUI> sItemUIs = new();
 
-        public static Dictionary<string, SongMapItem> SongMapItemsByID = new();
-        public static Dictionary<string, SongMapItemUI> SongMapItemUIsByID = new();
+        public static Stack<Playlist> sPlaylistStack = new();
+
+        public static Dictionary<string, SongMapItem> sSongMapItemsByID = new();
+        public static Dictionary<string, SongMapItemUI> sSongMapItemUIsByID = new();
+        public static Dictionary<string, PlaylistMapItem> sPlaylistMapItemsByID = new();
+        public static Dictionary<string, PlaylistMapItemUI> sPlaylistMapItemUIsByID = new();
 
 
         public Scene MapScene;
@@ -30,16 +36,16 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         [Space]
         public float DragScale = 20;
 
-        public bool IsReady { get; private set; }
-        public bool IsPointerDown { get; private set; }
-        public Vector2 ScrollVelocity { get; private set; }
+        public bool isReady { get; private set; }
+        public bool isPointerDown { get; private set; }
+        public Vector2 scrollVelocity { get; private set; }
 
-        private Vector2 lastTouchPos;
-        private MapItemUI closestItem;
-        private bool isPositionDirty;
+        private Vector2 _LastTouchPos;
+        private MapItemUI _ClosestItem;
+        private bool _IsPositionDirty;
 
-        Vector2 lastCameraPos;
-        Vector2 cameraPos
+        private Vector2 _LastCameraPos;
+        private Vector2 cameraPos
         {
             get
             {
@@ -49,44 +55,44 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             {
                 if (cameraPos == value) return;
                 CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(x: value.x, y: value.y);
-                isPositionDirty = true;
+                _IsPositionDirty = true;
             }
         }
 
         public void Awake()
         {
-            main = this;
+            sMain = this;
         }
     
         public void Update()
         {
-            if (IsReady && SongSelectScreen.sMain.IsMapView)
+            if (isReady && SongSelectScreen.sMain.IsMapView)
             {
-                if (IsPointerDown)
+                if (isPointerDown)
                 {
-                    if (IsPointerDown)
+                    if (isPointerDown)
                     {
-                        ScrollVelocity = (cameraPos - lastCameraPos) / Time.deltaTime;
-                        lastCameraPos = cameraPos;
+                        scrollVelocity = (cameraPos - _LastCameraPos) / Time.deltaTime;
+                        _LastCameraPos = cameraPos;
                     }
                 }
                 else if (!SongSelectScreen.sMain.IsAnimating)
                 {
-                    if (ScrollVelocity.sqrMagnitude > .1f)
+                    if (scrollVelocity.sqrMagnitude > .1f)
                     {
-                        cameraPos += ScrollVelocity * Time.deltaTime;
-                        ScrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
+                        cameraPos += scrollVelocity * Time.deltaTime;
+                        scrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
                     }
 
                     // Snap camera to the nearest map item
-                    if (closestItem)
+                    if (_ClosestItem)
                     {
-                        Vector2 closestItemPosition = ((RectTransform)closestItem.transform).anchoredPosition;
+                        Vector2 closestItemPosition = ((RectTransform)_ClosestItem.transform).anchoredPosition;
                         float closestItemDistance = closestItemPosition.magnitude;
-                        if (closestItemDistance >= closestItem.Parent.SafeCameraDistance)
+                        if (closestItemDistance >= _ClosestItem.parent.SafeCameraDistance)
                         {
-                            ScrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
-                            Vector2 moveOffset = closestItemPosition.normalized * (closestItemDistance - closestItem.Parent.SafeCameraDistance + 0.01f);
+                            scrollVelocity *= Mathf.Pow(0.1f, Time.deltaTime);
+                            Vector2 moveOffset = closestItemPosition.normalized * (closestItemDistance - _ClosestItem.parent.SafeCameraDistance + 0.01f);
                             cameraPos += moveOffset * ((1 - Mathf.Pow(1e-3f, Time.deltaTime)) / DragScale);
                         }
                     }
@@ -96,7 +102,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         public void LateUpdate()
         {
-            if (isPositionDirty)
+            if (_IsPositionDirty)
             {
                 UpdateAllPositions();
             }
@@ -109,7 +115,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         IEnumerator LoadMapRoutine()
         {
-            IsReady = false;
+            isReady = false;
 
             if (MapScene.IsValid())
             {
@@ -122,22 +128,92 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
             yield return null;
 
-            IsReady = true;
+            isReady = true;
         }
         public void UnloadMap()
         {
             StartCoroutine(UnloadMapRoutine());
         }
 
+        public void NavigateToMap(PlaylistReference playlist)
+        {
+            isReady = false;
+            StartCoroutine(NavigateToMapAnim(playlist));
+        }
+
+        public IEnumerator NavigateToMapAnim(PlaylistReference playlist)
+        {
+            var targetItem = sPlaylistMapItemsByID.Values.FirstOrDefault(p => p.Target == playlist);
+
+            StartCoroutine(Ease.Animate(0.3f, (t) => {
+                float lerp1 = 1 - Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
+                ProfileBar.sMain.SetVisibility(lerp1);
+                SongSelectScreen.sMain.LerpActions(lerp1);
+            }));
+            yield return SongSelectScreen.sMain.LeaveInAnim(targetItem.transform);
+            SongSelectScreen.sMain.MapCover.color 
+                = CommonSys.sMain.MainCamera.backgroundColor
+                = playlist.Playlist.BackgroundColor;
+
+            SongSelectScreen.sMain.ClearPlaylist();
+            yield return UnloadMapRoutine();
+
+            sPlaylistStack.Push(playlist.Playlist);
+            SongSelectScreen.sMain.Playlist = playlist.Playlist;
+            yield return new WaitForSeconds(0.2f);
+
+            yield return SongSelectScreen.sMain.InitPlaylist();
+            yield return new WaitForSeconds(0.7f);
+            SongSelectScreen.sMain.UpdateButtons();
+            StartCoroutine(Ease.Animate(0.3f, (t) => {
+                float lerp1 = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
+                ProfileBar.sMain.SetVisibility(lerp1);
+                SongSelectScreen.sMain.LerpActions(lerp1);
+            }));
+        }
+
+        public void NavigatePreviousMap()
+        {
+            isReady = false;
+            StartCoroutine(NavigatePreviousMapAnim());
+        }
+
+        public IEnumerator NavigatePreviousMapAnim()
+        {
+            StartCoroutine(Ease.Animate(0.3f, (t) => {
+                float lerp1 = 1 - Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
+                ProfileBar.sMain.SetVisibility(lerp1);
+                SongSelectScreen.sMain.LerpActions(lerp1);
+            }));
+            yield return SongSelectScreen.sMain.LeaveOutAnim();
+
+            SongSelectScreen.sMain.ClearPlaylist();
+            yield return UnloadMapRoutine();
+
+            var lastPlaylist = sPlaylistStack.Pop();
+            SongSelectScreen.sMain.Playlist = sPlaylistStack.Peek();
+            SongSelectScreen.sMoveBackFrom = () => sPlaylistMapItemsByID.Values.FirstOrDefault(x => x.Target.Playlist == lastPlaylist).transform;
+            yield return new WaitForSeconds(0.2f);
+
+            yield return SongSelectScreen.sMain.InitPlaylist();
+            yield return new WaitForSeconds(0.7f);
+            SongSelectScreen.sMain.UpdateButtons();
+            StartCoroutine(Ease.Animate(0.3f, (t) => {
+                float lerp1 = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
+                ProfileBar.sMain.SetVisibility(lerp1);
+                SongSelectScreen.sMain.LerpActions(lerp1);
+            }));
+        }
+
         public List<(SongMapItemUI, SongSelectListSongUI)> GetMapToListItems(List<SongSelectListSongUI> listItems)
         {
             var listDict = listItems.Where(x => x.Target != null).ToDictionary(x => x.Target.SongID, x => x);
-            var keys = listDict.Keys.Intersect(SongMapItemUIsByID.Keys);
+            var keys = listDict.Keys.Intersect(sSongMapItemUIsByID.Keys);
             List<(SongMapItemUI, SongSelectListSongUI)> result = new();
             foreach (string key in keys)
             {
-                if (!SongMapItemUIsByID[key].gameObject.activeSelf) continue;
-                result.Add((SongMapItemUIsByID[key], listDict[key]));
+                if (!sSongMapItemUIsByID[key].gameObject.activeSelf) continue;
+                result.Add((sSongMapItemUIsByID[key], listDict[key]));
             }
             return result;
         }
@@ -161,47 +237,47 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         public TItem MakeItemUI<TItem>() where TItem : MapItemUI
         {
             var item = Instantiate(GetItemUISample<TItem>(), ItemUIHolder);
-            ItemUIs.Add(item);
+            sItemUIs.Add(item);
             return item;
         }
         public TItem MakeItemUI<TItem, TParent>(TParent parent) where TParent : MapItem where TItem : MapItemUI<TParent>
         {
             var item = Instantiate(GetItemUISample<TItem, TParent>(), ItemUIHolder);
             item.SetParent(parent);
-            ItemUIs.Add(item);
+            sItemUIs.Add(item);
             return item;
         }
 
         public void UpdateAllPositions()
         {
             float closestItemDistance = float.PositiveInfinity;
-            foreach (var item in ItemUIs)
+            foreach (var item in sItemUIs)
             {
                 if (!item.gameObject.activeSelf) continue;
                 item.UpdatePosition();
                 float distance = ((RectTransform)item.transform).anchoredPosition.sqrMagnitude
-                    / (item.Parent.SafeCameraDistance * item.Parent.SafeCameraDistance);
+                    / (item.parent.SafeCameraDistance * item.parent.SafeCameraDistance);
                 if (distance < closestItemDistance)
                 {
                     closestItemDistance = distance;
-                    closestItem = item;
+                    _ClosestItem = item;
                 }
             }
-            isPositionDirty = false;
+            _IsPositionDirty = false;
         }
 
         public void UpdateAllStatuses()
         {
-            foreach (var item in SongMapItemsByID)
+            foreach (var item in sSongMapItemsByID)
             {
                 item.Value.UpdateStatus();
             }
-            isPositionDirty = false;
+            _IsPositionDirty = false;
         }
 
         IEnumerator UnloadMapRoutine()
         {
-            IsReady = false;
+            isReady = false;
             if (MapScene.IsValid())
             {
                 yield return SceneManager.UnloadSceneAsync(MapScene);
@@ -214,30 +290,30 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         public void OnMapPointerDown(BaseEventData data)
         {
             PointerEventData pointerData = (PointerEventData)data;
-            lastTouchPos = pointerData.position;
-            ScrollVelocity = Vector2.zero;
-            IsPointerDown = true;
+            _LastTouchPos = pointerData.position;
+            scrollVelocity = Vector2.zero;
+            isPointerDown = true;
         }
 
         public void OnMapDrag(BaseEventData data)
         {
-            if (!IsPointerDown) return;
+            if (!isPointerDown) return;
             PointerEventData pointerData = (PointerEventData)data;
-            Vector2 delta = (lastTouchPos - pointerData.position) / Screen.height * DragScale;
+            Vector2 delta = (_LastTouchPos - pointerData.position) / Screen.height * DragScale;
             cameraPos += delta;
-            lastTouchPos = pointerData.position;
+            _LastTouchPos = pointerData.position;
         }
 
         public void OnMapPointerUp(BaseEventData data)
         {
-            IsPointerDown = false;
+            isPointerDown = false;
         }
 
 
 
         public void SelectSong(SongMapItem item)
         {
-            IsPointerDown = false;
+            isPointerDown = false;
             if (SongSelectScreen.sMain.TargetSongAnim != null) StopCoroutine(SongSelectScreen.sMain.TargetSongAnim);
             SongSelectScreen.sMain.TargetSongAnim = StartCoroutine(SongSelectScreen.sMain.MapTargetSongShowAnim(item));
         }

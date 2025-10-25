@@ -21,12 +21,16 @@ using JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.List.ListItems;
 using JANOARG.Client.Utils;
+using UnityEngine.Assertions;
+using System.Linq;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
     public class SongSelectScreen : MonoBehaviour
     {
         public static SongSelectScreen sMain;
+
+        public static Func<Transform> sMoveBackFrom = null;
 
         public Playlist Playlist;
         public Dictionary<string, PlayableSong> PlayableSongByID { get; private set; } = new();
@@ -128,6 +132,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public void Start()
         {
             OnSettingDirty();
+            if (MapManager.sPlaylistStack.Count < 1) MapManager.sPlaylistStack.Push(Playlist);
+            else Playlist = MapManager.sPlaylistStack.Peek();
             CommonSys.sMain.Storage.OnSave.AddListener(OnSave);
             StartCoroutine(InitPlaylist());
         }
@@ -287,10 +293,16 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             ListView.UpdateSort();
 
-            yield return new WaitUntil(() => MapManager.IsReady);
+            yield return new WaitUntil(() => MapManager.isReady);
             IsInit = true;
-        
+
             if (!LoadingBar.sMain.gameObject.activeSelf) Intro();
+        }
+        
+        public void ClearPlaylist()
+        {
+            PlayableSongByID.Clear();
+            PlaylistSongByID.Clear();
         }
 
         public void UpdateListItems(bool cap = true)
@@ -305,7 +317,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         public void UpdateButtons()
         {
-            BackButton.gameObject.SetActive(IsMapView && TargetMapItem is SongMapItem);
+            BackButton.gameObject.SetActive(
+                (IsMapView && TargetMapItem is SongMapItem) 
+                || (MapManager.sPlaylistStack.Count > 1)
+            );
             ListViewButton.gameObject.SetActive(IsMapView && !TargetMapItem);
 
             MapViewButton.gameObject.SetActive(!IsMapView);
@@ -320,17 +335,17 @@ namespace JANOARG.Client.Behaviors.SongSelect
             TargetSongAnim = StartCoroutine(ToggleViewAnim());
         }
 
-        IEnumerator ToggleViewAnim()
+        private IEnumerator ToggleViewAnim()
         {
             IsAnimating = true;
             ListView.ItemGroup.blocksRaycasts = !IsMapView;
             if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
 
             // Animate map icons to list icons
-            var mapListItems = MapManager.main.GetMapToListItems(ListView.SongItems);
+            var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
             float lerpFrom = IsMapView ? 1 : 0;
             float lerpTo = 1 - lerpFrom;
-            IEnumerator MapCoroutine()
+            IEnumerator f_mapCoroutine()
             {
                 foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
                 {
@@ -355,7 +370,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     mapItem.transform.SetParent(MapManager.ItemUIHolder);
                 }
             }
-            Coroutine mapCoroutine = StartCoroutine(MapCoroutine());
+            Coroutine mapCoroutine = StartCoroutine(f_mapCoroutine());
         
             // Animate bottom buttons
             Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
@@ -365,7 +380,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             {
                 SongSelectListSongUI targetSong = ListView.SongItems.Find(item => ListView.TargetScrollOffset == item.Target?.Position);
                 if (targetSong == null) yield break;
-                if (!MapManager.SongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)) yield break;
+                if (!MapManager.sSongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)) yield break;
                 target.CoverImage.gameObject.SetActive(false);
                 TargetSongCoverHolder.gameObject.SetActive(true);
                 yield return Ease.Animate(lerpFrom == 0 ? 0.6f : 0.5f, (x) =>
@@ -842,7 +857,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public void Launch() 
         {
             if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
-            StartCoroutine(LaunchAnim());
+            StartCoroutine(SongLaunchAnim());
         }
         public void Return()
         {
@@ -851,9 +866,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
                 TargetSongAnim = StartCoroutine(MapTargetSongHideAnim());
             }
+            else if (MapManager.sPlaylistStack.Count > 1)
+            {
+                MapManager.sMain.NavigatePreviousMap();
+            }
         }
 
-        public IEnumerator LaunchAnim()
+        public IEnumerator SongLaunchAnim()
         {
             IsAnimating = true;
 
@@ -954,7 +973,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             if (!IsAnimating) StartCoroutine(IntroAnim());
         }
 
-        public IEnumerator IntroAnim() 
+        public IEnumerator IntroAnim()
         {
             IsAnimating = true;
 
@@ -963,34 +982,20 @@ namespace JANOARG.Client.Behaviors.SongSelect
             UpdateButtons();
 
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
-            cameraTransform.rotation = Quaternion.identity;
-            cameraTransform.position = Vector3.zero;
-            cameraTransform.position *= new Vector3Frag(z: -100);
+            cameraTransform.SetPositionAndRotation(new(0, 0, -100), Quaternion.identity);
 
-            yield return StartCoroutine(Ease.Animate(1, x =>
+            if (sMoveBackFrom == null)
             {
-                float lerp1 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-                cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
-                CommonSys.sMain.MainCamera.fieldOfView = 120 - 60 * lerp1;
-                MapCover.color *= new ColorFrag(a: 1 - lerp1);
+                StartCoroutine(EnterOutAnim());
+            }
+            else
+            {
+                StartCoroutine(EnterInAnim(sMoveBackFrom()));
+                sMoveBackFrom = null;
+            }
 
-                if (IsMapView)
-                {
-                    MapUIGroup.alpha = x * 1e10f;
-                    MapUIGroup.transform.localScale = Vector3.one * lerp1;
-                    MapManager.UpdateAllPositions();
-                }
-                else
-                {
-                    ListView.ItemGroup.alpha = x * 1e10f;
-                    float xPos = 120 + 60 * lerp1;
-                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(x * 3));
-                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
-                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
-                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
-                }
-
-
+            yield return Ease.Animate(1, x =>
+            {
                 ListView.ScrollOffset = Screen.height / 2 / CommonSys.sMain.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
                 UpdateListItems(false);
                 if (!IsReady && x > 0.6f)
@@ -999,9 +1004,138 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     if (IsMapView) StartCoroutine(IntroShowMapUIAnim());
                     else ListView.ItemGroup.interactable = ListView.ItemGroup.blocksRaycasts = ListView.IsTargetSongHidden = true;
                 }
-            }));
+            });
 
             IsAnimating = false;
+        }
+
+        /// <summary>
+        /// Plays when the camera zooms into the map
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator EnterOutAnim()
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            yield return Ease.Animate(1, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
+                cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
+                CommonSys.sMain.MainCamera.fieldOfView = 120 - 60 * lerp1;
+                MapCover.color *= new ColorFrag(a: 1 - lerp1);
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = t * 1e10f;
+                    MapUIGroup.transform.localScale = Vector3.one * lerp1;
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    ListView.ItemGroup.alpha = t * 1e10f;
+                    float xPos = 120 + 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(t * 3 - 1);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
+                }
+            });
+        }
+        
+        /// <summary>
+        /// Plays when the camera zooms into a playlist
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator LeaveInAnim(Transform target)
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            yield return Ease.Animate(0.6f, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
+                cameraTransform.position =
+                    Vector3.Lerp(cameraTransform.position, target.position, 1 - Mathf.Pow(1e-3f, Time.deltaTime)) 
+                    * new Vector3Frag(z: -10 * (1 - lerp1));
+                MapCover.color *= new ColorFrag(a: Mathf.Floor(t));
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = t * 1e10f;
+                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(lerp1, 2f));
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    // There's no cases where LeaveInAnim is called in list view yet
+                    throw new NotImplementedException();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Plays when the camera leaves a map
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator LeaveOutAnim()
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            yield return Ease.Animate(0.6f, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
+                cameraTransform.position *= new Vector3Frag(z: -10 - 90 * lerp1);
+                CommonSys.sMain.MainCamera.fieldOfView = 60 + 60 * lerp1;
+                MapCover.color *= new ColorFrag(a: lerp1);
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = Mathf.Ceil(1 - t);
+                    MapUIGroup.transform.localScale = Vector3.one * (1 - lerp1);
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    ListView.ItemGroup.alpha = Mathf.Ceil(1 - t);
+                    float xPos = 180 - 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(t * 3 - 1);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Plays when the camera leaves a playlist or a song
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator EnterInAnim(Transform target)
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+            cameraTransform.position = target.position;
+
+            yield return Ease.Animate(1, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
+                cameraTransform.position *= new Vector3Frag(z: -10 * lerp1);
+                MapCover.color *= new ColorFrag(a: Mathf.Floor(1 - t));
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = Mathf.Ceil(t);
+                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(1 - lerp1, 1.6f));
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    ListView.ItemGroup.alpha = Mathf.Ceil(t);
+                    float xPos = 120 + 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(t * 3 - 1);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
+                }
+            });
         }
 
         IEnumerator IntroShowMapUIAnim()

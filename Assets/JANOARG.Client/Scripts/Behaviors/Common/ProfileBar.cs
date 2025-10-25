@@ -243,6 +243,14 @@ namespace JANOARG.Client.Behaviors.Common
             AbilityRating /= 30;
         }
 
+        public void ReplenishBonusMult(int amount = 1)
+        {
+            BonusCount -= amount;
+            BonusCount = Mathf.Clamp(BonusCount, 0, BONUS_CAP);
+            CommonSys.sMain.Storage.Set("INFO:BonusCount", BonusCount);
+            UpdateBonusLabels();
+        }
+
         private IEnumerator SongGainRoutine(long baseOrbs, long baseCoins)
         {
             _SongGainSkipQueued = _SongGainSkipLock = false;

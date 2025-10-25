@@ -4310,6 +4310,7 @@ MonoBehaviour:
     m_Handle: 0
   ItemUISamples:
   - {fileID: 3686334420043380740, guid: b9dc680138eecc9049b3c3a0cb7bf768, type: 3}
+  - {fileID: 3039678423099458909, guid: af1efb22793ac56c2802767ed2f4b7b6, type: 3}
   ItemUIHolder: {fileID: 1221148511}
   DragScale: 17.5
 --- !u!4 &532315936
@@ -7124,7 +7125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -9371,8 +9372,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1114411600}
   - {fileID: 1221148511}
+  - {fileID: 1114411600}
   - {fileID: 162131310}
   - {fileID: 231156583}
   m_Father: {fileID: 0}

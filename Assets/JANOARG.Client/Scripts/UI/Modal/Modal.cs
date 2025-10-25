@@ -39,8 +39,10 @@ namespace JANOARG.Client.UI.Modal
 
         public void Close()
         {
-            if (_CurrentAnimation != null) StopCoroutine(_CurrentAnimation);
-            _CurrentAnimation = StartCoroutine(OutroAnim());
+            if (_CurrentAnimation != null && !IsAnimating)
+                StopCoroutine(_CurrentAnimation);
+            if (!IsAnimating)
+                _CurrentAnimation = StartCoroutine(OutroAnim());
         }
 
 
@@ -95,8 +97,11 @@ namespace JANOARG.Client.UI.Modal
                 SetButtonVisibility(1 - Ease.Get(t, EaseFunction.Cubic, EaseMode.Out));
             }));
 
+            
             yield return Ease.Animate(0.4f, (t) =>
             {
+                IsAnimating = true;
+                
                 // Background
                 DarkBackground.color *= new ColorFrag(a: (1 - Ease.Get(t * 1.5f, EaseFunction.Cubic, EaseMode.Out)) * 0.75f);
                 ColorBackground.color *= new ColorFrag(a: (1 - Ease.Get(t * 1.2f, EaseFunction.Cubic, EaseMode.Out)) * 0.75f);
@@ -118,5 +123,7 @@ namespace JANOARG.Client.UI.Modal
             _CurrentAnimation = null;
             Destroy(gameObject);
         }
+
+        public bool IsAnimating = false;
     }
 }

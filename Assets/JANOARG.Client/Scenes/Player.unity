@@ -12136,7 +12136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RunChart: {fileID: 5022602860645237092, guid: 5b108402815b5e96b871207ec0a95918, type: 3}
-  Chart: {fileID: 5022602860645237092, guid: 548e97d191bccb271b8e3a5b7a3e11a1, type: 3}
+  Chart: {fileID: 5022602860645237092, guid: deddc831ce741459481f3f68b2411df3, type: 3}
   Music: {fileID: 1395341278}
   Hitsounds: {fileID: 1395341278}
   Pseudocamera: {fileID: 939693537}
@@ -12222,7 +12222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 1551788791}
-  Autoplay: 1
+  Autoplay: 0
   UpdatePerSecond: NaN
   Delta: 21.332ms
   TouchClassesCount: 0

@@ -18,12 +18,12 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
         [NonSerialized]
         public SongMapItemUI ItemUI;
 
-        public bool IsUnlocked { get; private set; }
-        public bool IsRevealed { get; private set; }
+        public bool isUnlocked { get; private set; }
+        public bool isRevealed { get; private set; }
 
         public void Start()
         {
-            MapManager.SongMapItemsByID.Add(TargetID, this);
+            MapManager.sSongMapItemsByID.Add(TargetID, this);
             UpdateStatus();
         }
 
@@ -36,23 +36,24 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
             }
 
             // Update unlock status
-            IsRevealed = GameConditional.TestAll(Target.RevealConditions);
-            IsUnlocked = IsRevealed && GameConditional.TestAll(Target.UnlockConditions);
+            isRevealed = GameConditional.TestAll(Target.RevealConditions);
+            isUnlocked = isRevealed && GameConditional.TestAll(Target.UnlockConditions);
 
             // Update item UI
             if (ItemUI == null)
             {
                 ItemUI = MakeItemUI<SongMapItemUI, SongMapItem>();
-                MapManager.SongMapItemUIsByID.Add(TargetID, ItemUI);
+                MapManager.sSongMapItemUIsByID.Add(TargetID, ItemUI);
             }
         }
 
         public void OnDestroy()
         {
-            MapManager.ItemUIs.Remove(ItemUI);
-            MapManager.SongMapItemsByID.Remove(TargetID);
-            MapManager.SongMapItemUIsByID.Remove(TargetID);
-            Destroy(ItemUI);        
+            print("on destroy called");
+            MapManager.sItemUIs.Remove(ItemUI);
+            MapManager.sSongMapItemsByID.Remove(TargetID);
+            MapManager.sSongMapItemUIsByID.Remove(TargetID);
+            Destroy(ItemUI.gameObject);        
         }
     }
 }

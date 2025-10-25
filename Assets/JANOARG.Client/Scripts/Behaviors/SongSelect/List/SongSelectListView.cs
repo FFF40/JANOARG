@@ -9,7 +9,6 @@ using JANOARG.Client.Behaviors.SongSelect.Map;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Client.Data.Playlist;
-using UnityEditor.Search;
 using UnityEngine;
 
 using UnityEngine.EventSystems;
@@ -130,7 +129,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
             bool CanAddSong(string songID)
             {
-                return MapManager.SongMapItemsByID[songID].IsRevealed;
+                return MapManager.sSongMapItemsByID[songID].isRevealed;
             }
             void AddSong(string songID)
             {
