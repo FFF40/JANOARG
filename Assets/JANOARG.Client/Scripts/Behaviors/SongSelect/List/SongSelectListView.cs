@@ -238,12 +238,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                         foreach (var song in songs)
                         {
                             if (!CanAddSong(song.Key)) continue;
-                            if (lastDiff != song.Value)
+                            if (lastDiff != Mathf.Min(9000, song.Value))
                             {
-                                lastDiff = song.Value;
+                                lastDiff = Mathf.Min(9000, song.Value);
                                 AddHeader(song.Value > 9000 ? "??" : song.Value.ToString());
                             }
                             AddSong(song.Key);
+                            print($"{song.Key} {song.Value}");
                         }
                         break;
                     }
