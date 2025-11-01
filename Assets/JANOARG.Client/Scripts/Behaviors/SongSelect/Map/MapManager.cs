@@ -215,7 +215,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
                 if (!sSongMapItemUIsByID[key].gameObject.activeSelf) continue;
                 result.Add((sSongMapItemUIsByID[key], listDict[key]));
             }
-            return result;
+            return result; 
         }
 
         public TItem GetItemUISample<TItem>() where TItem : MapItemUI

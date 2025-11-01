@@ -358,13 +358,14 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                     headerIndex++;
                 }
             }
+            
             // Unload unused items
             foreach (string id in songItemsToUnload)
             {
                 var item = SongItemsByID[id];
                 SongItemsByID.Remove(id);
-                item.SetItem(null);
                 item.UnloadCoverImage();
+                item.SetItem(null);
                 item.gameObject.SetActive(false);
                 UnusedSongItems.Push(item);
             }

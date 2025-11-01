@@ -33,8 +33,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
             gameObject.SetActive(true);
         }
 
-
-
         public Coroutine CoverLoadRoutine = null;
         public void LoadCoverImage()
         {
@@ -44,8 +42,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
         }
         private IEnumerator LoadCoverImageRoutine()
         {
-            SongSelectCoverManager.sMain.UnregisterUse(CoverImage);
-            yield return SongSelectCoverManager.sMain.RegisterUse(CoverImage, parent.TargetID);
+            yield return SongSelectCoverManager.sMain.RegisterUseSong(CoverImage, parent.TargetID);
         }
 
         public void LerpToListItem(RectTransform cover, float t)

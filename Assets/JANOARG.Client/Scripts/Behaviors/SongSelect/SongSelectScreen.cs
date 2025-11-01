@@ -193,7 +193,6 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 StartCoroutine(ToggleBGM(false));
             }
 
-
             if (ListView) 
                 ListView.HandleUpdate();
 
@@ -211,40 +210,41 @@ namespace JANOARG.Client.Behaviors.SongSelect
             PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
             PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
 
-            if (!(PreviewVolume <= 0))
-                return;
-
-            if (CurrentPreviewClip != PreviewSource.clip)
+            if (PreviewVolume <= 0)
             {
-                StartCoroutine(ToggleBGM(true));
-                if (!PreviewSource.clip) 
+                if (CurrentPreviewClip != PreviewSource.clip)
                 {
-                    PreviewSource.clip = CurrentPreviewClip;
-                    PreviewSource.clip.LoadAudioData();
-                    PreviewSource.Play();
-                    PreviewSource.time = CurrentPreviewRange.x;
+                    StartCoroutine(ToggleBGM(true));
+                    if (!PreviewSource.clip) 
+                    {
+                        PreviewSource.clip = CurrentPreviewClip;
+                        PreviewSource.clip.LoadAudioData();
+                        PreviewSource.Play();
+                        PreviewSource.time = CurrentPreviewRange.x;
+                    }
+                    else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
+                    {
+                        PreviewSource.clip.UnloadAudioData();
+                        PreviewSource.clip = CurrentPreviewClip;
+                        PreviewSource.Play();
+                        PreviewSource.time = CurrentPreviewRange.x;
+                    }
                 }
-                else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
+                else if (PreviewSource.time > CurrentPreviewRange.y) 
                 {
-                    PreviewSource.clip.UnloadAudioData();
-                    PreviewSource.clip = CurrentPreviewClip;
-                    PreviewSource.Play();
-                    PreviewSource.time = CurrentPreviewRange.x;
+                    PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
                 }
-            }
-            else if (PreviewSource.time > CurrentPreviewRange.y) 
-            {
-                PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
             }
         }
 
         private IEnumerator ToggleBGM(bool pause)
         {
+            float targetVolume = CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
             if (pause)
             {
                 yield return Ease.Animate(0.5f, a =>
                 {
-                    BGMSource.volume = (1 - a) * CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+                    BGMSource.volume = (1 - a) * targetVolume;
                 });
 
                 BGMSource.Pause();
@@ -259,7 +259,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 BGMSource.volume = 0;
                 yield return Ease.Animate(0.5f, a =>
                 {
-                    BGMSource.volume = a * CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+                    BGMSource.volume = a * targetVolume;
                 });
             }
         }
@@ -345,10 +345,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
             var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
             float lerpFrom = IsMapView ? 1 : 0;
             float lerpTo = 1 - lerpFrom;
-            IEnumerator f_mapCoroutine()
+            IEnumerator MapCoroutine()
             {
                 foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
                 {
+                    mapItem.UpdatePosition();
                     listItem.CoverBorder.gameObject.SetActive(false);
                     mapItem.transform.SetParent(MapLerpItemHolder);
                 }
@@ -366,11 +367,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 });
                 foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
                 {
+                    mapItem.UpdatePosition();
                     listItem.CoverBorder.gameObject.SetActive(true);
                     mapItem.transform.SetParent(MapManager.ItemUIHolder);
                 }
             }
-            Coroutine mapCoroutine = StartCoroutine(f_mapCoroutine());
+            Coroutine mapCoroutine = StartCoroutine(MapCoroutine());
         
             // Animate bottom buttons
             Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());

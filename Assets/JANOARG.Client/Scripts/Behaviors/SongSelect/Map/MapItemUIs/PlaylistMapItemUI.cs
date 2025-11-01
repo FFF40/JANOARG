@@ -59,7 +59,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
         private IEnumerator LoadCoverImageRoutine()
         {
             SongSelectCoverManager.sMain.UnregisterUse(CoverImage);
-            yield return SongSelectCoverManager.sMain.RegisterUse(CoverImage, parent.TargetID);
+            yield return null; // SongSelectCoverManager.sMain.RegisterUseSong(CoverImage, parent.TargetID);
         }
 
         public void OnClick()

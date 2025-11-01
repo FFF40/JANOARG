@@ -50,10 +50,15 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
         public void OnDestroy()
         {
             print("on destroy called");
-            MapManager.sItemUIs.Remove(ItemUI);
             MapManager.sSongMapItemsByID.Remove(TargetID);
             MapManager.sSongMapItemUIsByID.Remove(TargetID);
-            Destroy(ItemUI.gameObject);        
+            if (ItemUI)
+            {
+                if (ItemUI.CoverImage.texture) SongSelectCoverManager.sMain.UnregisterUse(ItemUI.CoverImage);
+                else SongSelectCoverManager.sMain.UnregisterUseSong(TargetID);
+                MapManager.sItemUIs.Remove(ItemUI);
+                Destroy(ItemUI.gameObject);
+            }
         }
     }
 }

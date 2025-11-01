@@ -22,9 +22,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs
         public Image CoverBorder;
         public Image CoverStatusBorder;
 
+        [NonSerialized] public string TargetSongCover = null;
         [NonSerialized] public PlayableSong TargetSong;
 
-        public void SetItem(SongSelectListSong target) 
+        public void SetItem(SongSelectListSong target)
         {
             Target = target;
             if (target == null)
@@ -44,13 +45,27 @@ namespace JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs
             CoverStatusBorder.gameObject.SetActive(false);
 
             SetDifficulty(SongSelectScreen.sMain.GetNearestDifficulty(TargetSong.Charts));
-            LoadCoverImage();
+            if (TargetSongCover != target?.SongID)
+            {
+                LoadCoverImage();
+                TargetSongCover = target.SongID;
+            }
         }
 
-        public void SetDifficulty(ExternalChartMeta chart) 
+        public void SetDifficulty(ExternalChartMeta chart)
         {
             ChartDifficultyLabel.text = chart.DifficultyLevel;
             ChartDifficultyLabel.color = CommonSys.sMain.Constants.GetDifficultyColor(chart.DifficultyIndex);
+        }
+
+        public void UnloadCoverImage()
+        {
+            if (TargetSongCover != null)
+            {
+                CoverImage.texture = null;
+                SongSelectCoverManager.sMain.UnregisterUseSong(TargetSongCover);
+                TargetSongCover = null;
+            }
         }
 
         public Coroutine CoverLoadRoutine = null;
@@ -61,16 +76,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs
             if (CoverLoadRoutine != null) StopCoroutine(CoverLoadRoutine);
             CoverLoadRoutine = StartCoroutine(LoadCoverImageRoutine());
         }
-    
-        public void UnloadCoverImage()
-        {
-            Resources.UnloadAsset(CoverImage.texture);
-            CoverImage.texture = null;
-        }
 
         private IEnumerator LoadCoverImageRoutine()
         {
             yield return SongSelectCoverManager.sMain.RegisterUse(CoverImage, Target.SongID, TargetSong);
+            CoverLoadRoutine = null;
         }
 
         public void SetVisibility(float a)

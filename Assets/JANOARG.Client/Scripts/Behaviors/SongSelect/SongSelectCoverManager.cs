@@ -20,11 +20,14 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         public IEnumerator RegisterUse(string songID, PlayableSong song)
         {
-            if (CoverInfos.ContainsKey(songID))
+            string textureID = "SONG:" + songID;
+            if (CoverInfos.ContainsKey(textureID))
             {
-                CoverInfos[songID].Uses++;
-                if (CoverInfos[songID].Coroutine != null)
+                CoverInfos[textureID].Uses++;
+                if (CoverInfos[textureID].Coroutine != null)
                     yield return null;
+                else 
+                    yield return CoverInfos[textureID].Coroutine;
             }
             else
             {
@@ -39,17 +42,17 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     if (req.asset)
                     {
                         Texture2D tex = (Texture2D)req.asset;
-                        tex.name = songID;
-                        CoverInfos[songID].Icon = tex;
+                        tex.name = textureID;
+                        CoverInfos[textureID].Icon = tex;
                     }
-                    CoverInfos[songID].Coroutine = null;
+                    CoverInfos[textureID].Coroutine = null;
                 }
-                CoverInfos[songID] = new CoverInfo
+                CoverInfos[textureID] = new CoverInfo
                 {
                     Uses = 1,
                     Coroutine = StartCoroutine(f_load())
                 };
-                yield return CoverInfos[songID].Coroutine;
+                yield return CoverInfos[textureID].Coroutine;
             }
         }
         public IEnumerator RegisterUse(RawImage coverImage, string songID, PlayableSong song)
@@ -57,35 +60,35 @@ namespace JANOARG.Client.Behaviors.SongSelect
             UnregisterUse(coverImage);
             coverImage.color = song.Cover.BackgroundColor;
             yield return RegisterUse(songID, song);
-            if (CoverInfos.ContainsKey(songID))
+            string textureID = "SONG:" + songID;
+            if (CoverInfos.ContainsKey(textureID))
             {
-                CoverInfos[songID].BackgroundColor = coverImage.color;
-                coverImage.texture = CoverInfos[songID].Icon;
-                coverImage.color = coverImage.texture ? Color.white : CoverInfos[songID].BackgroundColor;
+                CoverInfos[textureID].BackgroundColor = coverImage.color;
+                coverImage.texture = CoverInfos[textureID].Icon;
+                coverImage.color = coverImage.texture ? Color.white : CoverInfos[textureID].BackgroundColor;
             }
         }
-        public IEnumerator RegisterUse(RawImage coverImage, string songID)
+        public IEnumerator RegisterUseSong(RawImage coverImage, string songID)
         {
-            yield return new WaitUntil(() => CoverInfos.ContainsKey(songID));
-            if (CoverInfos[songID].Coroutine != null) yield return new WaitUntil(() => CoverInfos[songID].Coroutine == null);
-            if (CoverInfos.ContainsKey(songID))
-            {
-                coverImage.texture = CoverInfos[songID].Icon;
-                coverImage.color = coverImage.texture ? Color.white : CoverInfos[songID].BackgroundColor;
-            }
+            yield return new WaitUntil(() => SongSelectScreen.sMain?.PlayableSongByID.ContainsKey(songID) == true);
+            yield return RegisterUse(coverImage, songID, SongSelectScreen.sMain.PlayableSongByID[songID]);
         }
 
-        public void UnregisterUse(string songID)
+        public void UnregisterUse(string textureID)
         {
-            if (CoverInfos.ContainsKey(songID))
+            if (CoverInfos.ContainsKey(textureID))
             {
-                CoverInfos[songID].Uses--;
-                if (CoverInfos[songID].Uses <= 0)
+                CoverInfos[textureID].Uses--;
+                if (CoverInfos[textureID].Uses <= 0)
                 {
-                    Destroy(CoverInfos[songID].Icon);
-                    CoverInfos.Remove(songID);
+                    Resources.UnloadAsset(CoverInfos[textureID].Icon);
+                    CoverInfos.Remove(textureID);
                 }
             }
+        }
+        public void UnregisterUseSong(string songID)
+        {
+            UnregisterUse("SONG:" + songID);
         }
         public void UnregisterUse(Texture2D texture)
         {
