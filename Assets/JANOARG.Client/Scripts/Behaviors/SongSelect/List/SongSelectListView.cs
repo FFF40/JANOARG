@@ -182,15 +182,15 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                         )).ToArray();
                         Array.Sort(songs, (x, y) => x.Value.CompareTo(y.Value) * sortDirection);
 
-                        string lastHeader = "";
+                        char lastHeader = (char)0;
                         foreach (var song in songs)
                         {
                             if (!CanAddSong(song.Key)) continue;
-                            string firstChar = char.ToUpper(song.Value[0]).ToString();
+                            char firstChar = GetRepresentativeChar(song.Value);
                             if (lastHeader != firstChar)
                             {
                                 lastHeader = firstChar;
-                                AddHeader(firstChar);
+                                AddHeader(firstChar.ToString());
                             }
                             AddSong(song.Key);
                         }
@@ -284,6 +284,22 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
             }
 
             UpdateListItems(SongSelectScreen.sMain);
+        }
+
+        private static char GetRepresentativeChar(string name)
+        {
+            char firstChar = name[0];
+            return char.GetUnicodeCategory(firstChar) switch
+            {
+                System.Globalization.UnicodeCategory.DecimalDigitNumber 
+                    => '#',
+                System.Globalization.UnicodeCategory.UppercaseLetter 
+                    => firstChar,
+                System.Globalization.UnicodeCategory.LowercaseLetter 
+                    => char.ToUpper(firstChar),
+                _ 
+                    => '#',
+            };
         }
 
         public void UpdateListItems(SongSelectScreen screen, bool cap = true)
