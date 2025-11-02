@@ -342,11 +342,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
             if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
 
             // Animate map icons to list icons
-            var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
             float lerpFrom = IsMapView ? 1 : 0;
             float lerpTo = 1 - lerpFrom;
             IEnumerator MapCoroutine()
             {
+                var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
+            
                 foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
                 {
                     mapItem.UpdatePosition();
@@ -372,7 +373,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     mapItem.transform.SetParent(MapManager.ItemUIHolder);
                 }
             }
-            Coroutine mapCoroutine = StartCoroutine(MapCoroutine());
+            Coroutine mapCoroutine = null;
         
             // Animate bottom buttons
             Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
@@ -403,6 +404,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
                 CurrentPreviewClip = null;
                 coverCoroutine = StartCoroutine(CoverCoroutine());
+                mapCoroutine = StartCoroutine(MapCoroutine());
 
                 // Animate
                 yield return Ease.Animate(0.3f, (x) =>
@@ -418,17 +420,41 @@ namespace JANOARG.Client.Behaviors.SongSelect
             {
                 // In list view 
 
-                // Update list item positions
-                SongSelectListSong targetSong = (SongSelectListSong)ListView.ItemList.Find(item => item is SongSelectListSong);
-                if (targetSong != null)
+                // Set current list item to the map item nearest to center of screen
+                var mapSongs = MapManager.sSongMapItemUIsByID.Values.ToList();
+                if (mapSongs.Count > 0)
                 {
-                    ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
-                    ListView.TargetSongID = targetSong.SongID;
+                    float getDistance(SongMapItemUI item) 
+                        => Vector2.SqrMagnitude(((RectTransform)item.transform).anchoredPosition);
+                    var closestMapSong = mapSongs[0];
+                    float closestMapDistance = getDistance(closestMapSong);
+                    for (int i = 1; i < mapSongs.Count; i++)
+                    {
+                        float distance = getDistance(mapSongs[i]);
+                        if (distance < closestMapDistance)
+                        {
+                            closestMapSong = mapSongs[i];
+                            closestMapDistance = distance;
+                        }
+                    }
 
-                    PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
-                    SetTargetSong(targetSong.SongID, playableSong);
-                    yield return SetCover(targetSong.SongID, playableSong);
-                    coverCoroutine = StartCoroutine(CoverCoroutine());
+                    Debug.Log(closestMapSong.parent.TargetID);
+                    
+                    SongSelectListSong targetSong = (SongSelectListSong)ListView.ItemList.Find(
+                        item => item is SongSelectListSong song && song.SongID == closestMapSong.parent.TargetID
+                    );
+                    if (targetSong != null)
+                    {
+                        ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
+                        ListView.TargetSongID = targetSong.SongID;
+                        ListView.IsDirty = true;
+                        ListView.HandleUpdate();
+
+                        PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
+                        SetTargetSong(targetSong.SongID, playableSong);
+                        yield return SetCover(targetSong.SongID, playableSong);
+                        coverCoroutine = StartCoroutine(CoverCoroutine());
+                    }
                 }
 
                 // Update list item positions
@@ -439,6 +465,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
                 }
                 ListView.UpdateListItems(this);
+
+                // Finally start map coroutine
+                mapCoroutine = StartCoroutine(MapCoroutine());
 
                 // Animate
                 yield return Ease.Animate(0.6f, (x) =>

@@ -208,12 +208,28 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         public List<(SongMapItemUI, SongSelectListSongUI)> GetMapToListItems(List<SongSelectListSongUI> listItems)
         {
             var listDict = listItems.Where(x => x.Target != null).ToDictionary(x => x.Target.SongID, x => x);
+
             var keys = listDict.Keys.Intersect(sSongMapItemUIsByID.Keys);
+
+            var rect = ItemUIHolder.rect;
+            rect.size += new Vector2(50, 50);
+            rect.center = Vector2.zero;
+
             List<(SongMapItemUI, SongSelectListSongUI)> result = new();
             foreach (string key in keys)
             {
-                if (!sSongMapItemUIsByID[key].gameObject.activeSelf) continue;
-                result.Add((sSongMapItemUIsByID[key], listDict[key]));
+                var songItem = sSongMapItemUIsByID[key];
+                var listItem = listDict[key];
+
+                // Do not add if the map item is disabled
+                if (!songItem.gameObject.activeSelf) continue;
+
+                // Do not add if the map item is outside the screen
+                if (!rect.Contains(((RectTransform)songItem.transform).anchoredPosition)) continue;
+                
+
+                // If all passes, add the item to the list
+                result.Add((songItem, listItem));
             }
             return result; 
         }
