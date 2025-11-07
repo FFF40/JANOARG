@@ -5,7 +5,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
 using UnityEngine;
 
-namespace JANOARG.Client.Editor.Debug
+namespace JANOARG.Client.Editor.Debugging
 {
     public class SongSelectTracker : EditorWindow
     {
@@ -22,7 +22,7 @@ namespace JANOARG.Client.Editor.Debug
         public void OnGUI()
         {
             Rect rect = new(10, 10, position.width - 20, position.height - 20);
-        
+
             // Tab display
             {
                 GUIStyle leftButtonStyle = GUI.skin.GetStyle("buttonLeft");
@@ -126,7 +126,7 @@ namespace JANOARG.Client.Editor.Debug
                 }
             }
         }
-        
+
         public void Update()
         {
             this.Repaint();

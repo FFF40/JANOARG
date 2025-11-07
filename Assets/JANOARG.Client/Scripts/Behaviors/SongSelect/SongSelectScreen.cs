@@ -176,7 +176,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             if (ReadyScreen.IsAnimating)
                 previewVolumeSpeed = -0.5f;
             else if (IsMapView && !CurrentPreviewClip)
-                previewVolumeSpeed = -1;
+                previewVolumeSpeed = -0.5f;
             else if (CurrentPreviewClip != PreviewSource.clip || !CurrentPreviewClip)
                 previewVolumeSpeed = -2;
             else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded || CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume)

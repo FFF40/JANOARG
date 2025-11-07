@@ -18,8 +18,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
     public class MapManager : MonoBehaviour
     {
         public static MapManager sMain;
-        public static List<MapItem> sItems = new();
-        public static List<MapItemUI> sItemUIs = new();
+        public static HashSet<MapItem> sItems = new();
+        public static HashSet<MapItemUI> sItemUIs = new();
+        public static HashSet<MapProp> sProps = new();
 
         public static Stack<Playlist> sPlaylistStack = new();
 
@@ -27,6 +28,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         public static Dictionary<string, SongMapItemUI> sSongMapItemUIsByID = new();
         public static Dictionary<string, PlaylistMapItem> sPlaylistMapItemsByID = new();
         public static Dictionary<string, PlaylistMapItemUI> sPlaylistMapItemUIsByID = new();
+        public static Dictionary<MapItem, HashSet<MapProp>> sPropsByDependency = new();
 
 
         public Scene MapScene;
@@ -289,6 +291,25 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
                 item.Value.UpdateStatus();
             }
             _IsPositionDirty = false;
+        }
+
+        public void UpdateAllProps()
+        {
+            foreach (var item in sProps)
+            {
+                item.IsDirty = true;
+            }
+        }
+
+        public void UpdateProps(MapItem depencency)
+        {
+            if (sPropsByDependency.ContainsKey(depencency))
+            {
+                foreach (var item in sPropsByDependency[depencency])
+                {
+                    item.IsDirty = true;
+                }
+            }
         }
 
         IEnumerator UnloadMapRoutine()

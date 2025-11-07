@@ -9,7 +9,7 @@ using JANOARG.Shared.Utils;
 using TMPro;
 using UnityEngine;
 
-namespace JANOARG.Client.Debugger
+namespace JANOARG.Client.Utils.Debugging
 {
     public class FPSCounter : MonoBehaviour
     {

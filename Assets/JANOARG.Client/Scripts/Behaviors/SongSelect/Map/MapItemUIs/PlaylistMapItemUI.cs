@@ -1,6 +1,7 @@
 
 using System.Collections;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItems;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
         public RawImage CoverImage;
         [Space]
         public RectTransform[] ParallaxLayers;
-
+        
         public override void SetParent(PlaylistMapItem parent)
         {
             base.SetParent(parent);

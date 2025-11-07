@@ -1,0 +1,94 @@
+
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
+using UnityEngine.PlayerLoop;
+using UnityEngine.Splines;
+using UnityEngine.Splines.ExtrusionShapes;
+
+namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
+{
+    [RequireComponent(typeof(SplineContainer))]
+    [ExecuteInEditMode]
+    public class MapItemConnection : MapProp
+    {
+        [SerializeField] private MapItem m_from;
+        [SerializeField] private MapItem m_to;
+        [SerializeField] private SplineExtrude splineExtrude;
+
+
+        private SplineContainer splineContainer;
+    
+        public MapItem From
+        {
+            get 
+            {
+                return m_from;
+            }
+            set 
+            {
+                m_from = value;
+                SetDirty();
+            }
+        }
+        public MapItem To
+        {
+            get
+            {
+                return m_to;
+            }
+            set
+            {
+                m_to = value;
+                SetDirty();
+            }
+        }
+
+        protected void EnsureSplineContainerExists()
+        {
+            if (!splineContainer) splineContainer = GetComponent<SplineContainer>();
+        }
+
+        protected override void OnDirtyUpdate()
+        {
+            base.OnDirtyUpdate();
+            EnsureSplineContainerExists();
+            var firstKnot = splineContainer.Spline[0];
+            var lastKnot = splineContainer.Spline[^1];
+            firstKnot.Position = From.transform.position;
+            lastKnot.Position = To.transform.position;
+            splineContainer.Spline.SetKnotNoNotify(0, firstKnot);
+            splineContainer.Spline[^1] = lastKnot;
+            gameObject.name = $"{From.gameObject.name} > {To.gameObject.name}";
+        }
+
+        public override IEnumerable<MapItem> GetDependencies()
+        {
+            yield return From;
+            yield return To;
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            EnsureSplineContainerExists();
+            Spline.Changed += OnSplineChange;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            Spline.Changed -= OnSplineChange;
+        }
+
+        private void OnSplineChange(Spline spline, int arg2, SplineModification modification)
+        {
+            if (spline == splineContainer.Spline)
+            {
+                SetDirty();
+            }
+        }
+    }
+}
