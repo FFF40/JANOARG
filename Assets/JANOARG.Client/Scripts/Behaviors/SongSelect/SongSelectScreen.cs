@@ -390,7 +390,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 yield return Ease.Animate(0.3f, (x) =>
                 {
                     float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                    MapUIGroup.alpha = ease1;
+                    LerpMapView(ease1);
                     ListView.LerpListView(1 - ease1);
                     LerpInfo(1 - ease1);
                     LerpDifficulty(1 - ease1);
@@ -453,7 +453,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 yield return Ease.Animate(0.6f, (x) =>
                 {
                     float ease1 = Ease.Get(x * 3, EaseFunction.Cubic, EaseMode.Out);
-                    MapUIGroup.alpha = 1 - ease1;
+                    LerpMapView(1 - ease1);
                     ListView.LerpListView(ease1);
 
                     float ease2 = Ease.Get(x * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
@@ -659,7 +659,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 MapUIGroup.transform.localScale = Vector3.one * (1 - lerp3 * 0.1f);
 
                 float lerp4 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-                MapUIGroup.alpha = 1 - lerp4;
+                LerpMapView(1 - lerp4);
             });
 
             yield return navCoroutine;
@@ -687,7 +687,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
                 float lerp3 = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
                 CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: lerp3 * 2 - 12);
-                MapUIGroup.alpha = lerp3;
+                LerpMapView(lerp3);
                 MapUIGroup.transform.localScale = Vector3.one * (1 - (1 - lerp3) * 0.1f);
             });
 
@@ -975,7 +975,19 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             DifficultyHolder.alpha = a * a;
             DifficultyHolder.blocksRaycasts = a == 1;
-            rt(DifficultyHolder).anchoredPosition = new (10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+            rt(DifficultyHolder).anchoredPosition = new(10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+        }
+        
+        public void LerpMapView(float a)
+        {
+            MapUIGroup.alpha = a;
+            foreach (var prop in MapManager.sProps)
+            {
+                if (prop is MapItemConnection connection)
+                {
+                    connection.Alpha = a;
+                }
+            }
         }
 
 

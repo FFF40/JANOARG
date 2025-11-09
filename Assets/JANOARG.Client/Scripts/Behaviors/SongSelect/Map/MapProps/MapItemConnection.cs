@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
@@ -11,15 +12,24 @@ using UnityEngine.Splines.ExtrusionShapes;
 namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
 {
     [RequireComponent(typeof(SplineContainer))]
+    [RequireComponent(typeof(SplineExtrude))]
+    [RequireComponent(typeof(MeshRenderer))]
     [ExecuteInEditMode]
     public class MapItemConnection : MapProp
     {
         [SerializeField] private MapItem m_from;
         [SerializeField] private MapItem m_to;
-        [SerializeField] private SplineExtrude splineExtrude;
+        [Space]
+        [Range(0, 1)]
+        [SerializeField] private float m_alpha = 1;
 
 
         private SplineContainer splineContainer;
+        private SplineExtrude splineExtrude;
+        private MeshRenderer meshRenderer;
+        private MaterialPropertyBlock rendererProps;
+
+        private bool isRendererDirty = false;
     
         public MapItem From
         {
@@ -45,10 +55,36 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
                 SetDirty();
             }
         }
+        public float Alpha
+        {
+            get
+            {
+                return m_alpha;
+            }
+            set
+            {
+                m_alpha = value;
+                SetRendererDirty();
+            }
+        }
 
         protected void EnsureSplineContainerExists()
         {
-            if (!splineContainer) splineContainer = GetComponent<SplineContainer>();
+            if (!splineContainer) 
+            {
+                splineContainer = GetComponent<SplineContainer>();
+                SetDirty();
+            }
+            if (!splineExtrude) 
+            {
+                splineExtrude = GetComponent<SplineExtrude>();
+                SetDirty();
+            }
+            if (!meshRenderer)
+            {
+                meshRenderer = GetComponent<MeshRenderer>();
+                SetRendererDirty();
+            }
         }
 
         protected override void OnDirtyUpdate()
@@ -62,6 +98,28 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
             splineContainer.Spline.SetKnotNoNotify(0, firstKnot);
             splineContainer.Spline[^1] = lastKnot;
             gameObject.name = $"{From.gameObject.name} > {To.gameObject.name}";
+        }
+
+        protected void SetRendererDirty()
+        {
+            if (!isRendererDirty)
+            {
+                IEnumerator ScheduleDirty()
+                {
+                    yield return null;
+                    OnRendererUpdate();   
+                }
+                StartCoroutine(ScheduleDirty());
+                isRendererDirty = true;
+            }
+        }
+
+        protected virtual void OnRendererUpdate()
+        {
+            rendererProps ??= new();
+            rendererProps.SetFloat("_Alpha", m_alpha);
+            meshRenderer.SetPropertyBlock(rendererProps);
+            isRendererDirty = false;
         }
 
         public override IEnumerable<MapItem> GetDependencies()
