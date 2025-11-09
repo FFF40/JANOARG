@@ -23,6 +23,7 @@ using JANOARG.Client.Behaviors.SongSelect.List.ListItems;
 using JANOARG.Client.Utils;
 using UnityEngine.Assertions;
 using System.Linq;
+using JANOARG.Client.Behaviors.SongSelect.Map.MapProps;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
@@ -1103,6 +1104,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
 
+            // If player's in map view, hide current song and force map view
+            bool isMapViewBeginning = IsMapView;
+            if (!IsMapView)
+            {
+                IsMapView = true;
+                CurrentPreviewClip = null;
+                ListView.ItemGroup.blocksRaycasts = false;
+            }
+
             yield return Ease.Animate(0.6f, (t) =>
             {
                 float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
@@ -1110,7 +1120,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 CommonSys.sMain.MainCamera.fieldOfView = 60 + 60 * lerp1;
                 MapCover.color *= new ColorFrag(a: lerp1);
 
-                if (IsMapView)
+                if (isMapViewBeginning)
                 {
                     MapUIGroup.alpha = Mathf.Ceil(1 - t);
                     MapUIGroup.transform.localScale = Vector3.one * (1 - lerp1);
@@ -1119,13 +1129,38 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 else
                 {
                     ListView.ItemGroup.alpha = Mathf.Ceil(1 - t);
-                    float xPos = 180 - 60 * lerp1;
-                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(t * 3));
-                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(t * 3 - 1);
-                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
-                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
+                    float xPos1 = 180 - 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(1 - t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(1 - t * 3);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos1, ListView.BackgroundHolder.anchoredPosition.y);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos1 - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+
+                    float lerp3 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
+                    float xPos2 = 180 - 60 * lerp3;
+                    ListView.ItemGroup.alpha = 1 - lerp3;
+                    ListView.ItemHolder.anchoredPosition = new(xPos2, ListView.ItemHolder.anchoredPosition.y);
+
+                    if (t < 0.67f)
+                    {
+                        float lerp2 = Ease.Get(t * 1.5f, EaseFunction.Exponential, EaseMode.Out);
+                        foreach (SongSelectListItem item in ListView.ItemList)
+                        {
+                            item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
+                        }
+                        ListView.UpdateListItems(this);
+                        LerpCoverList(1 - lerp2);
+                        LerpInfo(1 - lerp2);
+                        LerpDifficulty(1 - lerp2);
+                        TargetSongCoverHolder.anchoredPosition += Vector2.right * (xPos2 - 180);
+                    }
+                    else
+                    {
+                        TargetSongCoverHolder.gameObject.SetActive(false);
+                    }
+                        
                 }
             });
+            
         }
 
         /// <summary>
