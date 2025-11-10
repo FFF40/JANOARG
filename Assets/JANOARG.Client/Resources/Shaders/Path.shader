@@ -68,9 +68,13 @@ Shader "Unlit/Path"
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed laneX = abs(i.uv.x - 0.5) * 2;
-                fixed laneY = (1 + i.uv.y * _SeparatorDashLength - (_Time.x * 5 % 1)) % 1;
-                fixed4 col = laneX < _RoadThickness ? _RoadColor : _OutlineColor;
-                if (laneX < _SeparatorThickness && laneY < _SeparatorDashCycle) col = _SeparatorColor;
+                fixed laneY = (1 + i.uv.y * _SeparatorDashLength - (_Time.x * 3 % 1)) % 1;
+
+                fixed prog = laneY * 2 - 1;
+                prog = prog > 0 ? prog : 0;
+                fixed4 col = laneX < _RoadThickness ? _RoadColor + (_SeparatorColor - _RoadColor) * prog * prog :
+                    _OutlineColor;
+
                 col.a *= _Alpha;
 
                 UNITY_APPLY_FOG(i.fogCoord, col);
