@@ -67,32 +67,32 @@ Shader "UI/Striped"
 
             struct appdata_t
             {
-                float4 vertex : POSITION;
-                float4 color : COLOR;
-                float2 texcoord : TEXCOORD0;
+                fixed4 vertex : POSITION;
+                fixed4 color : COLOR;
+                fixed2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
-                float4 vertex : SV_POSITION;
+                fixed4 vertex : SV_POSITION;
                 fixed4 color : COLOR;
-                float2 texcoord : TEXCOORD0;
-                float4 worldPos : TEXCOORD1;
+                fixed2 texcoord : TEXCOORD0;
+                fixed4 worldPos : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
             sampler2D _MainTex;
             fixed4 _Color;
             fixed4 _TextureSampleAdd;
-            float4 _ClipRect;
-            float4 _MainTex_ST;
+            fixed4 _ClipRect;
+            fixed4 _MainTex_ST;
 
-            float _StripeVis;
-            float _StripeVisAlpha;
-            float _StripeSize;
-            float _StripeBalance;
-            float _StripeSpeed;
+            fixed _StripeVis;
+            fixed _StripeVisAlpha;
+            fixed _StripeSize;
+            fixed _StripeBalance;
+            fixed _StripeSpeed;
 
             v2f vert(appdata_t v)
             {
@@ -110,9 +110,9 @@ Shader "UI/Striped"
 
             fixed4 frag(v2f IN) : SV_Target
             {
-                half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
+                fixed4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
-                float val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * _StripeSpeed + 10000;
+                fixed val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * _StripeSpeed + 10000;
 
                 if (val % _StripeSize < _StripeSize * _StripeBalance)
                 {

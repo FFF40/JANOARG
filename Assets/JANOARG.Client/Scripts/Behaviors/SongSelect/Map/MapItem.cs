@@ -1,11 +1,15 @@
 using System.Data;
+using JANOARG.Client.Behaviors.SongSelect.Shared;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.SongSelect.Map
 {
-    public abstract class MapItem : MonoBehaviour
+    public abstract class MapItem : MonoBehaviour, IHasConditional
     {
         public float SafeCameraDistance = 100;
+
+        public bool isRevealed { get; protected set; }
+        public bool isUnlocked { get; protected set; }
 
         protected void OnEnable()
         {

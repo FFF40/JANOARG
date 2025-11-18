@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JANOARG.Client.Data.Playlist.Conditionals;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -19,17 +20,23 @@ namespace JANOARG.Client.Data.Playlist.Editor
                 {
                     EditorGUILayout.PropertyField(prop.FindPropertyRelative("SongID"));
                     EditorGUILayout.PropertyField(prop.FindPropertyRelative("Achievement"));
+                    if (item.Achievement < 0)
+                    {
+                        EditorGUILayout.PropertyField(prop.FindPropertyRelative("Threshold"), new GUIContent(""));
+                    }
                     EditorGUILayout.PropertyField(prop.FindPropertyRelative("Difficulty"));
                 },
                 GetNameFunc = (item) =>
                 {
                     return (item.Achievement switch
                     {
-                        ScoreStoreGameConditional.AchievementReq.Played => "Play ",
-                        ScoreStoreGameConditional.AchievementReq.Cleared => "Clear ",
-                        ScoreStoreGameConditional.AchievementReq.FullCombo => "Full Combo ",
-                        ScoreStoreGameConditional.AchievementReq.AllPerfect => "All Perfect ",
-                        _ => "",
+                        ScoreStoreGameConditional.AchievementReq.Played         => "Play ",
+                        ScoreStoreGameConditional.AchievementReq.Cleared        => "Clear ",
+                        ScoreStoreGameConditional.AchievementReq.FullCombo      => "Full Combo ",
+                        ScoreStoreGameConditional.AchievementReq.AllPerfect     => "All Perfect ",
+                        ScoreStoreGameConditional.AchievementReq.ScoreThreshold => $"Reach {item.AchievementThreshold} points on ",
+                        ScoreStoreGameConditional.AchievementReq.ComboThreshold => $"Reach {item.AchievementThreshold} combo on ",
+                        _                                                       => "",
                     }) + "\"" + item.SongID + "\"" + (item.Difficulty switch
                     {
                         ScoreStoreGameConditional.DifficultyReq.Any => " on any difficulty",

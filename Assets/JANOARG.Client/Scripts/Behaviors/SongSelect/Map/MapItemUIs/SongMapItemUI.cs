@@ -11,6 +11,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
     public class SongMapItemUI : MapItemUI<SongMapItem>
     {
         public RawImage CoverImage;
+        public GameObject LockedIndicator;
 
         public override void SetParent(SongMapItem parent)
         {
@@ -28,7 +29,16 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs
                 gameObject.SetActive(false);
                 return;
             }
+            if (!parent.isUnlocked)
+            {
+                if (CoverImage.texture) SongSelectCoverManager.sMain.UnregisterUse(CoverImage);
+                LockedIndicator.SetActive(true);
+                CoverImage.gameObject.SetActive(false);
+                return;
+            }
 
+            LockedIndicator.SetActive(false);
+            CoverImage.gameObject.SetActive(true);
             if (!CoverImage.texture && CoverLoadRoutine == null) LoadCoverImage();
             gameObject.SetActive(true);
         }

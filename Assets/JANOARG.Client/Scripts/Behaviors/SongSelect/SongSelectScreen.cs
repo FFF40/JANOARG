@@ -68,6 +68,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public CoverLayerImage CoverLayerSample;
         public RectTransform TargetSongCoverLayerHolder;
         public List<CoverLayerImage> TargetSongCoverLayers;
+        [Space]
+        public GameObject TargetSongLockedIndicator;
+        public CanvasGroup UnlockConditionGroup;
+        public RectTransform UnlockConditionHolder;
+        public TMP_Text UnlockConditionText;
 
         [Header("Difficulty Selection")]
         public CanvasGroup DifficultyHolder;
@@ -101,8 +106,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public AudioSource PreviewSource;
         public float PreviewVolume;
         public float PreviewVolumeMulti;
-        public AudioClip CurrentPreviewClip;
-        public Vector2 CurrentPreviewRange;
+        public AudioClip PreviewNoiseClip;
+        [NonSerialized] public AudioClip CurrentPreviewClip;
+        [NonSerialized] public Vector2 CurrentPreviewRange;
         [Space]
         public AudioSource SFXSource;
         public AudioClip SFXTickClip;
@@ -126,6 +132,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
         [NonSerialized] public PlayableSong TargetSong;
         [NonSerialized] public string TargetSongID;
         [NonSerialized] public Cover CurrentCover;
+
+        public bool IsTargetSongUnlocked { get; private set; }
         
         public void Awake()
         {
@@ -306,7 +314,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             MapViewButton.gameObject.SetActive(!IsMapView);
             SortButton.gameObject.SetActive(!IsMapView);
-            LaunchButton.gameObject.SetActive(!IsMapView || TargetMapItem is SongMapItem);
+            LaunchButton.gameObject.SetActive(
+                !IsMapView || (TargetMapItem is SongMapItem && IsTargetSongUnlocked)
+            );
+            LaunchButton.interactable = IsTargetSongUnlocked;
         }
 
         public void ToggleView()
@@ -362,7 +373,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             // Animate the cover
             IEnumerator CoverCoroutine()
             {
-                SongSelectListSongUI targetSong = ListView.SongItems.Find(item => ListView.TargetScrollOffset == item.Target?.Position);
+                SongSelectListSongUI targetSong = ListView.SongItems.FirstOrDefault(item => Mathf.Approximately(item.Target?.Position ?? 0, ListView.TargetScrollOffset));
                 if (targetSong == null) yield break;
                 if (!MapManager.sSongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)) yield break;
                 target.CoverImage.gameObject.SetActive(false);
@@ -393,8 +404,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                     LerpMapView(ease1);
                     ListView.LerpListView(1 - ease1);
-                    LerpInfo(1 - ease1);
-                    LerpDifficulty(1 - ease1);
+                    if (IsTargetSongUnlocked)
+                    {
+                        LerpInfo(1 - ease1);
+                        LerpDifficulty(1 - ease1);
+                    }
+                    else
+                    {
+                        LerpUnlockConditions(1 - ease1);
+                    }
                 });
             }
             else
@@ -407,10 +425,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 {
                     float getDistance(SongMapItemUI item) 
                         => Vector2.SqrMagnitude(((RectTransform)item.transform).anchoredPosition);
-                    var closestMapSong = mapSongs[0];
-                    float closestMapDistance = getDistance(closestMapSong);
-                    for (int i = 1; i < mapSongs.Count; i++)
+                    SongMapItemUI closestMapSong = null;
+                    float closestMapDistance = float.PositiveInfinity;
+                    for (int i = 0; i < mapSongs.Count; i++)
                     {
+                        if (!mapSongs[i].gameObject.activeSelf) continue;
                         float distance = getDistance(mapSongs[i]);
                         if (distance < closestMapDistance)
                         {
@@ -418,8 +437,6 @@ namespace JANOARG.Client.Behaviors.SongSelect
                             closestMapDistance = distance;
                         }
                     }
-
-                    Debug.Log(closestMapSong.parent.TargetID);
                     
                     SongSelectListSong targetSong = (SongSelectListSong)ListView.ItemList.Find(
                         item => item is SongSelectListSong song && song.SongID == closestMapSong.parent.TargetID
@@ -458,8 +475,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     ListView.LerpListView(ease1);
 
                     float ease2 = Ease.Get(x * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
-                    LerpDifficulty(ease2);
-                    LerpInfo(ease2);
+                    if (IsTargetSongUnlocked)
+                    {
+                        LerpDifficulty(ease2);
+                        LerpInfo(ease2);
+                    }
+                    else
+                    {
+                        LerpUnlockConditions(ease2);
+                    }
                 });
             }
 
@@ -475,27 +499,37 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             TargetSongID = songID;
             TargetSong = targetSong;
-            TargetSongInfoName.text = targetSong.SongName;
-            TargetSongInfoArtist.text = targetSong.SongArtist;
 
             float songLength = targetSong.Clip.length;
             TargetSongInfoInfo.text = Mathf.Floor(songLength / 60) + "m " + Mathf.Floor(songLength % 60) + "s";
 
-            float minBPM = float.PositiveInfinity, maxBPM = float.NegativeInfinity;
-            foreach (BPMStop stop in targetSong.Timing.Stops)
+            IsTargetSongUnlocked = GameConditional.TestAll(PlaylistSongByID[songID].UnlockConditions);
+            TargetSongLockedIndicator.SetActive(!IsTargetSongUnlocked);
+            if (IsTargetSongUnlocked)
             {
-                if (stop.Significant)
+                TargetSongInfoName.text = targetSong.SongName;
+                TargetSongInfoArtist.text = targetSong.SongArtist;
+
+                float minBPM = float.PositiveInfinity, maxBPM = float.NegativeInfinity;
+                foreach (BPMStop stop in targetSong.Timing.Stops)
                 {
-                    minBPM = Mathf.Min(minBPM, stop.BPM);
-                    maxBPM = Mathf.Max(maxBPM, stop.BPM);
+                    if (stop.Significant)
+                    {
+                        minBPM = Mathf.Min(minBPM, stop.BPM);
+                        maxBPM = Mathf.Max(maxBPM, stop.BPM);
+                    }
                 }
+                TargetSongInfoInfo.text += " - BPM " + (minBPM == maxBPM ? minBPM : minBPM + "~" + maxBPM);
+
+                TargetSongInfoInfo.text += " - " + targetSong.Genre.ToUpper();
             }
-            TargetSongInfoInfo.text += " - BPM " + (minBPM == maxBPM ? minBPM : minBPM + "~" + maxBPM);
+            else
+            {
+                UnlockConditionText.text = GameConditional.GetDisplayInstructionString(PlaylistSongByID[songID].UnlockConditions);
+            }
 
-            TargetSongInfoInfo.text += " - " + targetSong.Genre.ToUpper();
-
-            CurrentPreviewClip = targetSong.Clip;
-            CurrentPreviewRange = targetSong.PreviewRange;
+            CurrentPreviewClip = IsTargetSongUnlocked ? targetSong.Clip : PreviewNoiseClip;
+            CurrentPreviewRange = IsTargetSongUnlocked ? targetSong.PreviewRange : new(0, 10);
 
             string songPath = $"Songs/{songID}/{songID}";
             foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
@@ -528,12 +562,18 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 SetTargetSong(targetSong.Target.SongID, targetSong.TargetSong);
                 StartCoroutine(SongBurstAnim(targetSong.CoverImage.rectTransform));
                 yield return SetCover(targetSong.Target.SongID, targetSong.TargetSong);
+                UpdateButtons();
             }
+
+            LerpInfo(0);
+            LerpDifficulty(0);
+            LerpUnlockConditions(0);
 
             yield return Ease.Animate(.9f, a =>
             {
                 float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(lerp);
+                if (IsTargetSongUnlocked) LerpInfo(lerp);
+                else LerpUnlockConditions(lerp);
 
                 float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
                     * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
@@ -564,30 +604,37 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             TargetSongCoverBackground.color = targetSong.Cover.BackgroundColor;
             TargetSongCoverHolder.gameObject.SetActive(false);
-            if (CurrentCover != targetSong.Cover) 
+            if (CurrentCover != targetSong.Cover)
             {
                 CurrentCover = targetSong.Cover;
+
+                // Clear old cover
                 foreach (var layer in TargetSongCoverLayers) 
                 {
                     Resources.UnloadAsset(layer.Image.texture);
                     Destroy(layer.gameObject);
                 }
                 TargetSongCoverLayers.Clear();
-                foreach (CoverLayer layer in CurrentCover.Layers)
+
+                if (IsTargetSongUnlocked)
                 {
-                    string path = Path.Combine($"Songs/{songID}", layer.Target);
-                    if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
-                    var req = Resources.LoadAsync<Texture2D>(path);
-                    yield return req;
-                    if (req.asset)
+                    // Load new cover
+                    foreach (CoverLayer layer in CurrentCover.Layers)
                     {
-                        Texture2D tex = (Texture2D)req.asset;
-                        var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
-                        layerImage.Layer = layer;
-                        layerImage.Image.texture = tex;
-                        TargetSongCoverLayers.Add(layerImage);
+                        string path = Path.Combine($"Songs/{songID}", layer.Target);
+                        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                        var req = Resources.LoadAsync<Texture2D>(path);
+                        yield return req;
+                        if (req.asset)
+                        {
+                            Texture2D tex = (Texture2D)req.asset;
+                            var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
+                            layerImage.Layer = layer;
+                            layerImage.Image.texture = tex;
+                            TargetSongCoverLayers.Add(layerImage);
+                        }
                     }
-                }
+                }            
             }
             TargetSongCoverHolder.gameObject.SetActive(true);
         }
@@ -614,7 +661,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
             float lerpCoverStart = coverLerp;
             yield return Ease.Animate(.3f, a => {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(1 - lerp); 
+                if (IsTargetSongUnlocked) LerpInfo(1 - lerp);
+                else LerpUnlockConditions(1 - lerp);
                 LerpUI(1 - lerp);
 
                 float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
@@ -644,12 +692,18 @@ namespace JANOARG.Client.Behaviors.SongSelect
             yield return SetCover(target.TargetID, song);
             target.ItemUI.CoverImage.gameObject.SetActive(false);
 
-
             yield return Ease.Animate(.9f, a =>
             {
                 float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(lerp);
-                LerpDifficulty(lerp);
+                if (IsTargetSongUnlocked)
+                {
+                    LerpInfo(lerp);
+                    LerpDifficulty(lerp);
+                }
+                else
+                {
+                    LerpUnlockConditions(lerp);
+                }
 
                 float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
                     * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
@@ -680,8 +734,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
             yield return Ease.Animate(.6f, a =>
             {
                 float lerp = Ease.Get(a * 2, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(1 - lerp);
-                LerpDifficulty(1 - lerp);
+                if (IsTargetSongUnlocked)
+                {
+                    LerpInfo(1 - lerp);
+                    LerpDifficulty(1 - lerp);
+                }
+                else
+                {
+                    LerpUnlockConditions(1 - lerp);
+                }
 
                 float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
                 LerpCover(1 - lerp2, coverTarget);
@@ -960,7 +1021,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public void LerpUI(float a)
         {
             LerpActions(a);
-            LerpDifficulty(a);
+            if (IsTargetSongUnlocked) LerpDifficulty(a);
             if (!QuickMenu.sMain || !QuickMenu.sMain.gameObject.activeSelf) ProfileBar.sMain.SetVisibility(a);
         }
 
@@ -977,6 +1038,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
             DifficultyHolder.alpha = a * a;
             DifficultyHolder.blocksRaycasts = a == 1;
             rt(DifficultyHolder).anchoredPosition = new(10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+        }
+
+        public void LerpUnlockConditions(float a)
+        {
+            UnlockConditionGroup.alpha = a * a;
+            UnlockConditionHolder.sizeDelta *= new Vector2Frag(x: 400 + 100 * a);
         }
         
         public void LerpMapView(float a)
@@ -1149,8 +1216,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
                         }
                         ListView.UpdateListItems(this);
                         LerpCoverList(1 - lerp2);
-                        LerpInfo(1 - lerp2);
-                        LerpDifficulty(1 - lerp2);
+                        if (IsTargetSongUnlocked)
+                        {
+                            LerpDifficulty(1 - lerp2);
+                            LerpInfo(1 - lerp2);
+                        }
+                        else
+                        {
+                            LerpUnlockConditions(1 - lerp2);
+                        }
                         TargetSongCoverHolder.anchoredPosition += Vector2.right * (xPos2 - 180);
                     }
                     else

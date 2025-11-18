@@ -6,7 +6,7 @@ Shader "Unlit/Path"
         _RoadColor ("Road Color", Color) = (0,0,0,1)
         _SeparatorColor ("Separator Color", Color) = (1,1,1,1)
 
-        _Alpha ("Alpha", Range(0, 1)) = 1
+        [HideInInspector] _Alpha ("Alpha", Range(0, 1)) = 1
         _RoadThickness ("Road Thickness", Range(0, 1)) = 0.75
         _SeparatorThickness("Separator Thickness", Range(0, 1)) = 0.25
         _SeparatorDashLength("Seperator Dash Length", float) = 0.75

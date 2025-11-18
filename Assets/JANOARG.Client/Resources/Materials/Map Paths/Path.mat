@@ -73,9 +73,9 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RoadThickness: 0.75
+    - _RoadThickness: 0.6
     - _SeparatorDashCycle: 0.75
-    - _SeparatorDashLength: 0.75
+    - _SeparatorDashLength: 0.03
     - _SeparatorThickness: 0.125
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -86,6 +86,6 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
-    - _RoadColor: {r: 1, g: 1, b: 1, a: 0}
+    - _RoadColor: {r: 0, g: 0, b: 0, a: 0.25490198}
     - _SeparatorColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

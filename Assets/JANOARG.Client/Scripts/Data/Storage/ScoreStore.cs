@@ -52,8 +52,9 @@ namespace JANOARG.Client.Data.Storage
 
     public class ScoreStoreEntry
     {
-        [XmlAttribute("SongID")]  public string SongID;
-        [XmlAttribute("ChartID")] public string ChartID;
+        [XmlAttribute("SongID")]       public string SongID;
+        [XmlAttribute("ChartID")]      public string ChartID;
+        [XmlAttribute("Index")]        public int ChartIndex;
 
         [XmlAttribute("Score")]        public int Score;
         [XmlAttribute("PerfectCount")] public int PerfectCount;
@@ -61,6 +62,6 @@ namespace JANOARG.Client.Data.Storage
         [XmlAttribute("BadCount")]     public int BadCount;
         [XmlAttribute("MaxCombo")]     public int MaxCombo;
 
-        [XmlAttribute("Rating")] public float Rating;
+        [XmlAttribute("Rating")]       public float Rating;
     }
 }

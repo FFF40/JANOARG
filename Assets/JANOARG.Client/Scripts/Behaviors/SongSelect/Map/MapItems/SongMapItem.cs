@@ -18,9 +18,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
         [NonSerialized]
         public SongMapItemUI ItemUI;
 
-        public bool isUnlocked { get; private set; }
-        public bool isRevealed { get; private set; }
-
         public void Start()
         {
             MapManager.sSongMapItemsByID.Add(TargetID, this);

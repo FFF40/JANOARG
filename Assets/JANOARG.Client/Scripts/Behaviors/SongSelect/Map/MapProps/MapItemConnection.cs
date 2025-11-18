@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using JANOARG.Client.Behaviors.SongSelect.Shared;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Splines;
@@ -15,7 +16,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
     [RequireComponent(typeof(SplineExtrude))]
     [RequireComponent(typeof(MeshRenderer))]
     [ExecuteInEditMode]
-    public class MapItemConnection : MapProp
+    public class MapItemConnection : MapProp, IHasConditional
     {
         [SerializeField] private MapItem m_from;
         [SerializeField] private MapItem m_to;
@@ -23,6 +24,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
         [Range(0, 1)]
         [SerializeField] private float m_alpha = 1;
 
+        public bool isRevealed { get; private set; }
+        public bool isUnlocked { get; private set; }
 
         private SplineContainer splineContainer;
         private SplineExtrude splineExtrude;
@@ -91,12 +94,20 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
         {
             base.OnDirtyUpdate();
             EnsureSplineContainerExists();
+
+            // Update conditions
+            isRevealed = From.isRevealed && To.isRevealed;
+            isUnlocked = From.isUnlocked && To.isUnlocked;
+
+            // Update start and end points
             var firstKnot = splineContainer.Spline[0];
             var lastKnot = splineContainer.Spline[^1];
             firstKnot.Position = From.transform.position;
             lastKnot.Position = To.transform.position;
             splineContainer.Spline.SetKnotNoNotify(0, firstKnot);
             splineContainer.Spline[^1] = lastKnot;
+
+            // Update self's name
             gameObject.name = $"{From.gameObject.name} > {To.gameObject.name}";
         }
 
@@ -117,7 +128,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
         protected virtual void OnRendererUpdate()
         {
             rendererProps ??= new();
-            rendererProps.SetFloat("_Alpha", m_alpha);
+            rendererProps.SetFloat("_Alpha", m_alpha * (isRevealed ? (isUnlocked ? 1 : 0.5f) : 0));
             meshRenderer.SetPropertyBlock(rendererProps);
             isRendererDirty = false;
         }
