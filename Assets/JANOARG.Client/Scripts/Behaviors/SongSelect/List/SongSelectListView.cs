@@ -178,11 +178,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                     {
                         var songs = SongSelectScreen.sMain.PlayableSongByID.Select(song => (
                             Key: song.Key,
-                            Value: song.Value.SongName
+                            Value: GameConditional.TestAll(SongSelectScreen.sMain.PlaylistSongByID[song.Key].UnlockConditions) 
+                                ? song.Value.SongArtist
+                                : ""
                         )).ToArray();
                         Array.Sort(songs, (x, y) => x.Value.CompareTo(y.Value) * sortDirection);
 
-                        char lastHeader = (char)0;
+                        char lastHeader = (char)0xffff;
                         foreach (var song in songs)
                         {
                             if (!CanAddSong(song.Key)) continue;
@@ -190,7 +192,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                             if (lastHeader != firstChar)
                             {
                                 lastHeader = firstChar;
-                                AddHeader(firstChar.ToString());
+                                AddHeader(firstChar == (char)0 ? "?" : firstChar.ToString());
                             }
                             AddSong(song.Key);
                         }
@@ -202,18 +204,20 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                     {
                         var songs = SongSelectScreen.sMain.PlayableSongByID.Select(song => (
                             Key: song.Key,
-                            Value: song.Value.SongArtist
+                            Value: GameConditional.TestAll(SongSelectScreen.sMain.PlaylistSongByID[song.Key].UnlockConditions) 
+                                ? song.Value.SongArtist
+                                : ""
                         )).ToArray();
                         Array.Sort(songs, (x, y) => x.Value.CompareTo(y.Value) * sortDirection);
 
-                        string lastHeader = "";
+                        string lastHeader = null;
                         foreach (var song in songs)
                         {
                             if (!CanAddSong(song.Key)) continue;
                             if (lastHeader != song.Value)
                             {
                                 lastHeader = song.Value;
-                                AddHeader("<i>" + song.Value);
+                                AddHeader(string.IsNullOrEmpty(song.Value) ? "?????" : "<i>" + song.Value);
                             }
                             AddSong(song.Key);
                         }
@@ -229,19 +233,20 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                             var diff = screen.GetNearestDifficulty(screen.PlayableSongByID[songID].Charts);
                             return Mathf.RoundToInt(diff.ChartConstant + (diff.DifficultyIndex < 0 ? 10000 : 0));
                         }
-                        var songs = SongSelectScreen.sMain.PlayableSongByID.Select(song => (
+                        var songs = SongSelectScreen.sMain.PlaylistSongByID.Select(song => (
                             Key: song.Key,
-                            Value: GetDifficulty(song.Key)
+                            Value: GameConditional.TestAll(song.Value.UnlockConditions) ? GetDifficulty(song.Key) : -9999
                         )).ToArray();
                         Array.Sort(songs, (x, y) => x.Value.CompareTo(y.Value) * sortDirection);
                         int lastDiff = -10000;
                         foreach (var song in songs)
                         {
                             if (!CanAddSong(song.Key)) continue;
-                            if (lastDiff != Mathf.Min(9000, song.Value))
+                            int sortedDiff = Mathf.Min(9000, song.Value);
+                            if (lastDiff != sortedDiff)
                             {
-                                lastDiff = Mathf.Min(9000, song.Value);
-                                AddHeader(song.Value > 9000 ? "??" : song.Value.ToString());
+                                lastDiff = sortedDiff;
+                                AddHeader(song.Value > 9000 || song.Value <= 0 ? "??" : song.Value.ToString());
                             }
                             AddSong(song.Key);
                             print($"{song.Key} {song.Value}");
@@ -257,16 +262,18 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                             var diff = screen.GetNearestDifficulty(screen.PlayableSongByID[songID].Charts);
                             return StorageManager.sMain.Scores.Get(songID, diff.Target)?.Score;
                         }
-                        var songs = SongSelectScreen.sMain.PlayableSongByID.Select(song => (
+                        var songs = SongSelectScreen.sMain.PlaylistSongByID.Select(song => (
                             Key: song.Key,
-                            Value: GetScore(song.Key)
+                            Value: GameConditional.TestAll(song.Value.UnlockConditions) ? GetScore(song.Key) : -2
                         )).ToArray();
                         Array.Sort(songs, (x, y) => (x.Value ?? -1).CompareTo(y.Value ?? -1) * sortDirection);
                         string lastHeader = "";
                         foreach (var song in songs)
                         {
                             if (!CanAddSong(song.Key)) continue;
-                            string rank = song.Value != null ? "<b><i>" + Helper.GetRank(song.Value ?? 0) : "Unplayed";
+                            string rank = song.Value != null && song.Value >= 0 
+                                ? "<b><i>" + Helper.GetRank(song.Value ?? 0)
+                                : "Unplayed";
                             if (lastHeader != rank)
                             {
                                 lastHeader = rank;
@@ -288,6 +295,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
         private static char GetRepresentativeChar(string name)
         {
+            if (string.IsNullOrEmpty(name)) return (char)0;
             char firstChar = name[0];
             return char.GetUnicodeCategory(firstChar) switch
             {
