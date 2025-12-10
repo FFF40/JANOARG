@@ -179,7 +179,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                         var songs = SongSelectScreen.sMain.PlayableSongByID.Select(song => (
                             Key: song.Key,
                             Value: GameConditional.TestAll(SongSelectScreen.sMain.PlaylistSongByID[song.Key].UnlockConditions) 
-                                ? song.Value.SongArtist
+                                ? song.Value.SongName
                                 : ""
                         )).ToArray();
                         Array.Sort(songs, (x, y) => x.Value.CompareTo(y.Value) * sortDirection);
