@@ -231,7 +231,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                         int GetDifficulty(string songID)
                         {
                             var diff = screen.GetNearestDifficulty(screen.PlayableSongByID[songID].Charts);
-                            return Mathf.RoundToInt(diff.ChartConstant + (diff.DifficultyIndex < 0 ? 10000 : 0));
+                            return Mathf.FloorToInt(diff.ChartConstant + (diff.DifficultyIndex < 0 ? 10000 : 0));
                         }
                         var songs = SongSelectScreen.sMain.PlaylistSongByID.Select(song => (
                             Key: song.Key,
