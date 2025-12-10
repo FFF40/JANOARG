@@ -26,7 +26,6 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
         public RawImage Icon;
         public RawImage BackgroundCover;
 
-        public Graphic[] IndicatorGraphics;
         public GameObject FullStreakIndicator;
         public GameObject AllFlawlessIndicator;
 
@@ -54,6 +53,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             return song.Charts.Find(x => x.Target == difficulty);
         }
 
+        //Get ICON image for the song
         public IEnumerator GetCoverImage(string songID) {
             var item = GetSong(songID);
 
@@ -83,6 +83,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             BackgroundCover.color = item.Song.Cover.BackgroundColor;
         }
 
+        //Get Cover Layer image for the song
         public IEnumerator GetCoverLayer(ScoreStoreEntry entry)
         {
             var item = GetSong(entry.SongID);
@@ -90,7 +91,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             foreach (CoverLayer layer in item.Song.Cover.Layers)
             {
                 string path = Path.Combine(Path.GetDirectoryName(item.SongPath)!, layer.Target);
-
+                if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
                 ResourceRequest request = Resources.LoadAsync<Texture2D>(path);
 
                 yield return new WaitUntil(() => request.isDone);
@@ -102,13 +103,15 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
                 }
                 else
                 {
+                    Debug.Log("Cover Layer Not Found: " + path);
                     ScreenshotCanvas.sMain.SetBestSongCover(BackgroundCover.color);
                 }
                 break;
             }
             if (item.Song.Cover.Layers.Count == 0)
             {
-                ScreenshotCanvas.sMain.SetBestSongCover(BackgroundCover.color);    
+                ScreenshotCanvas.sMain.SetBestSongCover(BackgroundCover.color);   
+                Debug.Log("No Cover Layer Found"); 
             }
             
             yield return new WaitUntil(() => ScreenshotCanvas.sMain.IsCoverSet);

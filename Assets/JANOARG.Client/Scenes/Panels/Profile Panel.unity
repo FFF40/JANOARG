@@ -10034,7 +10034,7 @@ MonoBehaviour:
   LevelFillGraphic: {fileID: 1453021113}
   AbilityRatingLabel: {fileID: 1256289743}
   AbilityRatingText: {fileID: 427696781}
-  BestSongCover: {fileID: 0}
+  BestSongCover: {fileID: 1416787050}
   IsCoverSet: 0
 --- !u!114 &1416787050
 MonoBehaviour:
