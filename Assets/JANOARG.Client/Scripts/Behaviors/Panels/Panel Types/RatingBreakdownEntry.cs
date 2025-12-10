@@ -75,15 +75,41 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             }
         }
 
-        public void SetCoverLayerColor(string songID)
+        public IEnumerator SetCoverLayerColor(string songID)
         {
             var item = GetSong(songID);
     
             //Only solid color for now since cover is using Texture
             BackgroundCover.color = item.Song.Cover.BackgroundColor;
+
+        //    foreach (CoverLayer layer in item.Song.Cover.Layers)
+        //     {
+        //         string path = Path.Combine(Path.GetDirectoryName(item.SongPath)!, layer.Target);
+        //         if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+        //         ResourceRequest request = Resources.LoadAsync<Texture2D>(path);
+
+        //         yield return new WaitUntil(() => request.isDone);
+
+        //         if (request.asset)
+        //         {
+        //             Debug.Log("Cover Layer Found: " + path);
+        //             var texture = (Texture2D)request.asset;
+        //             BackgroundCover.texture = texture;
+                    
+        //         }
+        //         else
+        //         {
+        //             Debug.Log("Cover Layer Not Found: " + path);
+        //             BackgroundCover.color = item.Song.Cover.BackgroundColor;
+        //         }
+                
+        //     }
+
+            yield return null;
+
         }
 
-        //Get Cover Layer image for the song
+        //Get Cover Layer for the Best Score
         public IEnumerator GetCoverLayer(ScoreStoreEntry entry)
         {
             var item = GetSong(entry.SongID);
@@ -106,7 +132,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
                     Debug.Log("Cover Layer Not Found: " + path);
                     ScreenshotCanvas.sMain.SetBestSongCover(BackgroundCover.color);
                 }
-                break;
+                
             }
             if (item.Song.Cover.Layers.Count == 0)
             {
@@ -148,8 +174,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             ChartConstant.color = _Color;
 
             StartCoroutine(GetCoverImage(entry.SongID));
-            SetCoverLayerColor(entry.SongID);
-
+            StartCoroutine(SetCoverLayerColor(entry.SongID));
             SetIndicator(entry);
 
             yield return null;

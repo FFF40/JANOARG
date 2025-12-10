@@ -122,6 +122,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             return new[] { allFlawlessCount, fullStreakCount, clearedCount, unlockedCount };
         }
 
+        // Screenshot Functionality
         public Texture2D Screenshot(int width, int height)
         {
             RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);
@@ -141,7 +142,18 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             return tex2D;
         }
 
-        public void SetRatingBreakdown()
+        //Encoding of the image and saving it
+        public IEnumerator Share(Texture2D image)
+        {
+            Task task = File.WriteAllBytesAsync(
+                Application.persistentDataPath + "/screenshot.png",
+                image.EncodeToPNG());
+
+            yield return new WaitUntil(() => task.IsCompleted);
+        }
+
+        // Set Rating Breakdown Entries
+        public IEnumerator SetRatingBreakdown()
         {
             List<ScoreStoreEntry> bestEntries = StorageManager.sMain.Scores.GetBestEntries(33);
 
@@ -161,8 +173,11 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
                     RatingBreakdownEntries[i].SetEntry(null);
                 }
             }
+
+            yield return null;
         }
 
+        // Screenshot Rating Breakdown button function
         public void ScreenshotRatingBreakdown()
         {
             if (!isAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
@@ -172,7 +187,7 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
         {
             isAnimating = true;
 
-            SetRatingBreakdown();
+            StartCoroutine(SetRatingBreakdown());
             yield return null;
             
             Texture2D image = Screenshot(3072, 1280);
@@ -182,13 +197,6 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
             isAnimating = false;
         }
 
-        public IEnumerator Share(Texture2D image)
-        {
-            Task task = File.WriteAllBytesAsync(
-                Application.persistentDataPath + "/screenshot.png",
-                image.EncodeToPNG());
 
-            yield return new WaitUntil(() => task.IsCompleted);
-        }
     }
 }
