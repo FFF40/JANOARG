@@ -907,7 +907,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5596967829533951131}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4032f4bd5e5bb74b6837ad7e3684c7f0, type: 3}
+  m_Script: {fileID: 11500000, guid: 242fe95c549254b679441256c00c2122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Rating: {fileID: 5790711041402415916}
@@ -920,11 +920,8 @@ MonoBehaviour:
   IndicatorGraphics:
   - {fileID: 962117387610609298}
   - {fileID: 8288974562237351330}
-  - {fileID: 7491679565797688913}
-  - {fileID: 5596967828796867475}
   FullStreakIndicator: {fileID: 8959675981082309327}
   AllFlawlessIndicator: {fileID: 2654592947694407344}
-  RatingBreakdownGroup: {fileID: 0}
 --- !u!1 &5596967829852412850
 GameObject:
   m_ObjectHideFlags: 0
