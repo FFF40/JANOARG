@@ -136,11 +136,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
             CommonSys.sMain.Storage.OnSave.RemoveListener(OnSave);
         }
 
+        // Update volume settings on save
         public void OnSave()
         {
             OnSettingDirty();
         }
 
+        // Set volume settings from preferences
         public void OnSettingDirty()
         {
             PreviewVolumeMulti = CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
@@ -260,11 +262,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
             }
         }
 
+        // Initialize the playlist and load songs
         public IEnumerator InitPlaylist()
         {
             var index = 0;
             var pos = 0;
 
+            // Load all songs in the playlist
             foreach (string path in Playlist.ItemPaths)
             {
                 ResourceRequest request = Resources.LoadAsync<ExternalPlayableSong>(path);
@@ -281,11 +285,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 PlayableSong song = ((ExternalPlayableSong)request.asset).Data;
                 songList.Add(song);
 
+                // Create a new SongSelectItem for each song
                 SongSelectItem item = Instantiate(ItemSample, ItemHolder);
                 item.SetItem(path, song, index, pos);
                 itemList.Add(item);
                 index++;
-                pos += 48;
+                pos += 48; 
             }
 
             IsInit = true;
@@ -358,11 +363,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
             IsPointerDown = false;
         }
 
+        // Show the target song's information and cover art when selected
         public IEnumerator TargetSongShowAnim()
         {
             TargetSongOffset = TargetScrollOffset;
             SongSelectItem targetSong = itemList.Find(item => Mathf.Approximately(TargetScrollOffset, item.Position));
 
+            // Set target song information
             if (targetSong)
             {
                 TargetSongInfoName.text = targetSong.Song.SongName;
@@ -385,12 +392,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 TargetSongInfoInfo.text += " - " + targetSong.Song.Genre.ToUpper();
             }
 
+            // Set preview clip and range
             CurrentPreviewClip = targetSong.Song.Clip;
             CurrentPreviewRange = targetSong.Song.PreviewRange;
 
+            // Get the current song
             string songPath = Playlist.ItemPaths[songList.IndexOf(targetSong.Song)];
             string songID = Path.GetFileNameWithoutExtension(songPath);
 
+            // Clear existing difficulties
             foreach (SongSelectDifficulty diff in difficultyList)
                 Destroy(diff.gameObject);
 
@@ -398,6 +408,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             ExternalChartMeta target = GetNearestDifficulty(targetSong.Song.Charts);
 
+            // Loop through each chart and create a difficulty entry
             foreach (ExternalChartMeta chart in targetSong.Song.Charts)
             {
                 string chartID = Path.GetFileNameWithoutExtension(chart.Target);
@@ -586,6 +597,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             IsAnimating = false;
         }
 
+        // Get and set score info for the selected difficulty
         public void SetScoreInfo(SongSelectDifficulty target)
         {
             TargetDifficultyName.text = target.Chart.DifficultyName;
@@ -654,6 +666,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             }
         }
 
+        // Play the selected song
         public void Launch()
         {
             if (TargetSongAnim != null)
@@ -662,6 +675,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             StartCoroutine(LaunchAnim());
         }
 
+        // Launch animation coroutine to transition to the player screen
         public IEnumerator LaunchAnim()
         {
             IsAnimating = true;
@@ -762,6 +776,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 ProfileBar.sMain.SetVisibilty(a);
         }
 
+        // Start the intro animation after initialization of the playlist
         public void Intro()
         {
             if (!IsAnimating) StartCoroutine(IntroAnim());
