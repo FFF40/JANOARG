@@ -118,6 +118,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         [NonSerialized] public Cover CurrentCover;
 
+        //TODO: Add modals
+
         public void Awake()
         {
             sMain = this;
@@ -270,7 +272,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             // Load all songs in the playlist
             foreach (string path in Playlist.ItemPaths)
-            {
+            {   
+                //TODO: Change this to use persistentDataPath for imported songs
                 ResourceRequest request = Resources.LoadAsync<ExternalPlayableSong>(path);
 
                 yield return new WaitUntil(() => request.isDone);
