@@ -19,9 +19,9 @@ using Random = UnityEngine.Random;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
-    public class SongSelectScreen : MonoBehaviour
+    public class ExternalSongSelectScreen : MonoBehaviour
     {
-        public static SongSelectScreen sMain;
+        public static ExternalSongSelectScreen sMain;
 
         public Playlist Playlist;
         public List<PlayableSong> songList { get; private set; } = new();
@@ -117,6 +117,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public Coroutine TargetSongAnim;
 
         [NonSerialized] public Cover CurrentCover;
+
+        //TODO: Add modals
 
         public void Awake()
         {
@@ -270,7 +272,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             // Load all songs in the playlist
             foreach (string path in Playlist.ItemPaths)
-            {
+            {   
+                //TODO: Change this to use persistentDataPath for imported songs
                 ResourceRequest request = Resources.LoadAsync<ExternalPlayableSong>(path);
 
                 yield return new WaitUntil(() => request.isDone);
