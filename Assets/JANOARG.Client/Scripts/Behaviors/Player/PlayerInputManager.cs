@@ -5,6 +5,7 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Player;
 using JANOARG.Shared.Data.ChartInfo;
 using Unity.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
@@ -215,6 +216,7 @@ public class PlayerInputManager : MonoBehaviour
     /// <param name = "expected"> The expected flick direction from the hit object, in degrees. </param>
     /// <param name = "actual"> The actual flick direction done by the player, in degrees. </param>
     /// <returns> true if within a reasonable range, false otherwise. </returns>
+
     private bool ValidateFlickDirection(float expected, float actual)
     {
         float angularDifference = Mathf.DeltaAngle(expected, actual); // Signed difference (-180 to +180)
@@ -304,6 +306,17 @@ public class PlayerInputManager : MonoBehaviour
         DiscreteHitQueueCount = DiscreteHitQueue.Count;
         #endregion
 
+        #if UNITY_EDITOR
+        bool editorPref = EditorPrefs.GetBool("JANOARG/Enable Autoplay", false);
+
+        if (editorPref != Autoplay)
+        {
+            Debug.Log(editorPref ? "Autoplay enabled in Editor Preferences." : "Autoplay disabled in Editor Preferences.");
+
+            Autoplay = editorPref;
+        }
+        #endif
+        
         if (!Autoplay) // Player input
         {
             InitLogger("Autoplay: OFF");
