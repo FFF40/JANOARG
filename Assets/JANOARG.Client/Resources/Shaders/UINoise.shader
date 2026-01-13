@@ -62,18 +62,18 @@ Shader "UI/Noise"
 
             struct appdata_t
             {
-                fixed4 vertex : POSITION;
-                fixed4 color : COLOR;
-                fixed2 texcoord : TEXCOORD0;
+                float4 vertex : POSITION;
+                float4 color : COLOR;
+                float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
-                fixed4 vertex : SV_POSITION;
+                float4 vertex : SV_POSITION;
                 fixed4 color : COLOR;
-                fixed2 texcoord : TEXCOORD0;
-                fixed4 worldPosition : TEXCOORD1;
+                float2 texcoord : TEXCOORD0;
+                float4 worldPosition : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -81,8 +81,8 @@ Shader "UI/Noise"
             fixed _Intensity;
             fixed4 _Color;
             fixed4 _TextureSampleAdd;
-            fixed4 _ClipRect;
-            fixed4 _MainTex_ST;
+            float4 _ClipRect;
+            float4 _MainTex_ST;
 
             v2f vert(appdata_t v)
             {
