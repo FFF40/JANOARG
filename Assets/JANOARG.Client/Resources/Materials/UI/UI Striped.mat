@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UI Striped
-  m_Shader: {fileID: 4800000, guid: dbf4b515f3b098f4786421d9ef6c1415, type: 3}
+  m_Name: UI Noise
+  m_Shader: {fileID: 4800000, guid: e26e2dfe12c58c66f8b20315f78c7a30, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -69,6 +69,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _Intensity: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -81,11 +82,6 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
-    - _StripeBalance: 0.5
-    - _StripeSize: 100
-    - _StripeVis: 0.05
-    - _StripeVisAlpha: 1
-    - _StripeVisibility: 0.27
     - _UVSec: 0
     - _UseUIAlphaClip: 0
     - _ZWrite: 1

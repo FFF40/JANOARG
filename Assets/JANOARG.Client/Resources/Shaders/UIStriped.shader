@@ -88,11 +88,11 @@ Shader "UI/Striped"
             float4 _ClipRect;
             float4 _MainTex_ST;
 
-            fixed _StripeVis;
-            fixed _StripeVisAlpha;
-            fixed _StripeSize;
-            fixed _StripeBalance;
-            fixed _StripeSpeed;
+            float _StripeVis;
+            float _StripeVisAlpha;
+            float _StripeSize;
+            float _StripeBalance;
+            float _StripeSpeed;
 
             v2f vert(appdata_t v)
             {
@@ -110,9 +110,9 @@ Shader "UI/Striped"
 
             fixed4 frag(v2f IN) : SV_Target
             {
-                fixed4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
+                half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
-                fixed val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * _StripeSpeed + 10000;
+                float val = IN.worldPos.x - IN.worldPos.y * 0.26795 + _Time.y * _StripeSpeed + 10000;
 
                 if (val % _StripeSize < _StripeSize * _StripeBalance)
                 {
