@@ -517,13 +517,73 @@ namespace JANOARG.Client.Behaviors.Player
 
                     break;
                 }
+                else
+                {
+                    yield return SimulNoteChecker();
+                }
             }
 
             _LoadState[0] = true;
 
             yield return new WaitForEndOfFrame();
         }
+        
+        private struct EventNote
+        {
+            public float      time;
+            public bool       isPreEpsilon;
+            public HitObject  hitObject;
+            public LanePlayer lane;
 
+        }
+
+        private IEnumerator SimulNoteChecker()
+        {
+            Debug.Log("SimulNoteChecker started");
+            
+            float epsilon = 0.02f; // ~20ms window
+            
+            var events = new List<EventNote>();
+            
+            foreach (var lane in Lanes)
+            foreach (var hitObject in lane.Original.Objects)
+            {
+                float time = sTargetSong.Timing.ToSeconds(hitObject.Offset);
+                events.Add(new EventNote(){time = time - epsilon, isPreEpsilon = true, hitObject = hitObject, lane = lane});
+                events.Add(new EventNote(){time = time + epsilon, isPreEpsilon = false, hitObject = hitObject, lane = lane});
+                hitObject.IsSimultaneous = false;
+            }
+
+            events.Sort((a, b) => a.time.CompareTo(b.time));
+            
+            List<HitObject> activeNotes = new List<HitObject>();
+
+            foreach (EventNote e in events)
+            {
+                if (e.isPreEpsilon)
+                {
+                    Debug.Log(">" + e.time + "");
+                    activeNotes.Add(e.hitObject);
+                    
+                    // If more than one note is in the active window, mark all of them
+                    if (activeNotes.Count > 1)
+                    {
+                        foreach (var n in activeNotes)
+                        {
+                            n.IsSimultaneous = true;
+                        }
+                    }
+                }
+                else
+                {
+                    activeNotes.Remove(e.hitObject);
+                }
+            }
+
+
+            yield break; // Satisfies the IEnumerator return requirement
+        }
+    
         private IEnumerator LaneGroupLoader()
         {
             var loadedLaneGroups = 0;

@@ -61,8 +61,8 @@ namespace JANOARG.Client.Behaviors.Player
                 if (HoldRenderer)
                     HoldRenderer.sharedMaterial = style.HoldTailMaterial;
 
-                //DEBUG
-                IsSimultaneous = true;
+                IsSimultaneous = Original.IsSimultaneous;
+
                 SimultaneousHighlight.gameObject.SetActive(IsSimultaneous);
 
                 if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
