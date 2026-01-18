@@ -1,21 +1,29 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using JANOARG.Client.Behaviors.Common;
-using JANOARG.Client.Behaviors.Player;
-using JANOARG.Client.Data.Storage;
-using JANOARG.Client.UI;
-using JANOARG.Client.Utils;
-using JANOARG.Shared.Data.ChartInfo;
-using JANOARG.Shared.Utils;
-using TMPro;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
+using System.IO;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
+using System;
 using Random = UnityEngine.Random;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Client.Data.Playlist;
+using JANOARG.Client.Behaviors.SongSelect.List;
+using JANOARG.Client.UI;
+using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.SongSelect.Map.MapItems;
+using JANOARG.Client.Behaviors.Player;
+using JANOARG.Shared.Utils;
+using JANOARG.Client.Behaviors.SongSelect.Map;
+using JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs;
+using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
+using JANOARG.Client.Behaviors.SongSelect.List.ListItems;
+using JANOARG.Client.Utils;
+using UnityEngine.Assertions;
+using System.Linq;
+using JANOARG.Client.Behaviors.SongSelect.Map.MapProps;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
@@ -23,101 +31,110 @@ namespace JANOARG.Client.Behaviors.SongSelect
     {
         public static SongSelectScreen sMain;
 
+        public static Func<Transform> sMoveBackFrom = null;
+
         public Playlist Playlist;
-        public List<PlayableSong> songList { get; private set; } = new();
+        public Dictionary<string, PlayableSong> PlayableSongByID { get; private set; } = new();
+        public Dictionary<string, PlaylistSong> PlaylistSongByID { get; private set; } = new();
 
+        [Header("List View")]
+        public SongSelectListView ListView;
+
+        [Header("Map View")]
+        public MapManager MapManager;
+        public RectTransform MapLerpItemHolder;
         [Space]
-        public SongSelectItem ItemSample;
+        public CanvasGroup MapUIGroup;
+        public Image MapCover;
 
-        public RectTransform ItemHolder;
-        public CanvasGroup   ItemGroup;
-        public List<SongSelectItem> itemList { get; private set; } = new();
-        public Graphic ItemTrack;
-        public Graphic ItemCursor;
-
-        [Space]
-        public RectTransform BackgroundHolder;
-
-        public CanvasGroup   BackgroundGroup;
+        [Header("Effects")]
+        public CanvasGroup SongBurstGroup;
+        public Image SongBurstMainImage;
+        public Image SongBurstSubImage1;
+        public Image SongBurstSubImage2;
+    
+        [Header("Song Selection")]
         public RectTransform SafeAreaHolder;
-
         [Space]
         public CanvasGroup TargetSongInfoHolder;
-
         public TMP_Text TargetSongInfoName;
         public TMP_Text TargetSongInfoArtist;
         public TMP_Text TargetSongInfoInfo;
-
         [Space]
         public RectTransform TargetSongCoverHolder;
-
-        public Image                 TargetSongCoverBackground;
-        public Shadow                TargetSongCoverShadow;
-        public Image                 TargetSongCoverFlash;
-        public CoverLayerImage       CoverLayerSample;
-        public RectTransform         TargetSongCoverLayerHolder;
+        public Image TargetSongCoverBackground;
+        public Shadow TargetSongCoverShadow;
+        public Image TargetSongCoverFlash;
+        public CoverLayerImage CoverLayerSample;
+        public RectTransform TargetSongCoverLayerHolder;
         public List<CoverLayerImage> TargetSongCoverLayers;
-
         [Space]
+        public GameObject TargetSongLockedIndicator;
+        public CanvasGroup UnlockConditionGroup;
+        public RectTransform UnlockConditionHolder;
+        public TMP_Text UnlockConditionText;
+
+        [Header("Difficulty Selection")]
         public CanvasGroup DifficultyHolder;
-
-        public RectTransform        DifficultyListHolder;
+        public RectTransform DifficultyListHolder;
         public SongSelectDifficulty DifficultySample;
-        public List<SongSelectDifficulty> difficultyList { get; private set; } = new();
+        public List<SongSelectDifficulty> DifficultyList { get; private set; } = new();
 
-        public int                  SelectedDifficulty;
+        public int SelectedDifficulty;
         public SongSelectDifficulty TargetDifficulty;
-        public TMP_Text             TargetDifficultyName;
-        public TMP_Text             TargetDifficultyScore;
-        public GameObject           TargetDifficultyNewIndicator;
+        public TMP_Text TargetDifficultyName;
+        public TMP_Text TargetDifficultyScore;
+        public GameObject TargetDifficultyNewIndicator;
 
-        [Space]
+        [Header("Actions")]
         public CanvasGroup LeftActionsHolder;
-
-        public CanvasGroup RightActionsHolder;
-
+        public Button BackButton;
         [Space]
+        public CanvasGroup RightActionsHolder;
+        public Button MapViewButton;
+        public Button ListViewButton;
+        public Button SortButton;
+        public Button LaunchButton;
+
+        [Header("Launch")]
         public CanvasGroup LaunchTextHolder;
-
         public TMP_Text LaunchText;
-
         [Space]
         public SongSelectReadyScreen ReadyScreen;
 
-        [Space]
-        public float ScrollOffset;
-
-        public  float ScrollVelocity;
-        public  float TargetScrollOffset;
-        private float _LastScrollOffset;
-        public  bool  IsReady;
-        public  bool  IsDirty;
-        public  bool  IsPointerDown;
-        public  bool  IsTargetSongHidden;
-        public  bool  TargetSongHiddenTarget;
-        public  float TargetSongOffset;
-        public  bool  IsAnimating;
-        public  bool  IsInit;
-
-        [Space]
+        [Header("Audio")]
         public AudioSource PreviewSource;
+        public float PreviewVolume;
+        public float PreviewVolumeMulti;
+        public AudioClip PreviewNoiseClip;
+        [NonSerialized] public AudioClip CurrentPreviewClip;
+        [NonSerialized] public Vector2 CurrentPreviewRange;
+        [Space]
+        public AudioSource SFXSource;
+        public AudioClip SFXTickClip;
+        public float SFXVolume;
+        [Space]
+        public AudioSource BGMIntroSource;
+        public AudioSource BGMLoopSource;
+        public float BGMVolume;
+        public float BGMVolumeMulti;
 
-        public float     PreviewVolume;
-        public float     PreviewVolumeMulti;
-        public AudioClip CurrentPreviewClip;
-        public Vector2   CurrentPreviewRange;
 
-        [FormerlySerializedAs("SFXSource")] [Space]
-        public AudioSource SoundEffectSource;
-
-        [FormerlySerializedAs("SFXTickClip")]
-        public AudioClip SoundEffectTickClip;
-        public float     SoundEffectVolume;
-
+        [Header("Data")]
+        public bool IsReady;
+        public bool IsAnimating;
+        public bool IsInit;
+        public bool IsMapView = true;
         public Coroutine TargetSongAnim;
+        private bool IsBGMInit;
 
+        [NonSerialized] public MapItem TargetMapItem;
+        [NonSerialized] public PlayableSong TargetSong;
+        [NonSerialized] public string TargetSongID;
         [NonSerialized] public Cover CurrentCover;
 
+        public bool IsTargetSongUnlocked { get; private set; }
+        
         public void Awake()
         {
             sMain = this;
@@ -127,6 +144,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public void Start()
         {
             OnSettingDirty();
+            if (MapManager.sPlaylistStack.Count < 1) MapManager.sPlaylistStack.Push(Playlist);
+            else Playlist = MapManager.sPlaylistStack.Peek();
             CommonSys.sMain.Storage.OnSave.AddListener(OnSave);
             StartCoroutine(InitPlaylist());
         }
@@ -136,104 +155,54 @@ namespace JANOARG.Client.Behaviors.SongSelect
             CommonSys.sMain.Storage.OnSave.RemoveListener(OnSave);
         }
 
-        public void OnSave()
+        public void OnSave() 
         {
             OnSettingDirty();
         }
 
-        public void OnSettingDirty()
+        public void OnSettingDirty() 
         {
-            PreviewVolumeMulti = CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
-            SoundEffectVolume = CommonSys.sMain.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
+            BGMVolumeMulti = PreviewVolumeMulti = CommonSys.sMain.Preferences.Get("GENR:UIMusicVolume", 100f) / 100f;
+            SFXVolume = CommonSys.sMain.Preferences.Get("GENR:UISFXVolume", 100f) / 100f;
         }
 
         public void Update()
         {
-            if (!IsReady) return;
+            if (!IsReady)
+                return;
 
-            if (IsPointerDown)
+            if (!IsBGMInit)
             {
-                ScrollVelocity = (_LastScrollOffset - ScrollOffset) / Time.deltaTime;
-                _LastScrollOffset = ScrollOffset;
-            }
-            else
-            {
-                if (Mathf.Abs(ScrollVelocity) > 10)
-                {
-                    ScrollOffset -= ScrollVelocity * Time.deltaTime;
-                    ScrollVelocity *= Mathf.Pow(0.2f, Time.deltaTime);
-
-                    float minBound = itemList[0].Position - 20;
-                    float maxBound = itemList[^1].Position + 20;
-
-                    if (ScrollOffset < minBound)
-                    {
-                        ScrollOffset = minBound;
-                        ScrollVelocity = 0;
-                    }
-                    else if (ScrollOffset > maxBound)
-                    {
-                        ScrollOffset = maxBound;
-                        ScrollVelocity = 0;
-                    }
-
-                    UpdateTarget();
-                    IsDirty = true;
-                }
-                else
-                {
-                    if (Mathf.Abs(ScrollOffset - TargetScrollOffset) > .1f)
-                    {
-                        ScrollOffset = Mathf.Lerp(ScrollOffset, TargetScrollOffset, 1 - Mathf.Pow(.001f, Time.deltaTime));
-                        IsDirty = true;
-                    }
-
-                    TargetSongHiddenTarget = false;
-                }
+                StartCoroutine(InitBGM());
+                IsBGMInit = true;
             }
 
-            if (TargetSongHiddenTarget)
-                ItemCursor.color += new Color(0, 0, 0, (1 - ItemCursor.color.a) * Mathf.Pow(5e-3f, Time.deltaTime));
-            else
-                ItemCursor.color *= new Color(1, 1, 1, Mathf.Pow(.001f, Time.deltaTime));
+            if (ListView)
+                ListView.HandleUpdate();
 
-            if (!IsAnimating && TargetSongHiddenTarget != IsTargetSongHidden)
-            {
-                IsTargetSongHidden = TargetSongHiddenTarget;
-
-                if (TargetSongAnim != null)
-                    StopCoroutine(TargetSongAnim);
-
-                if (IsTargetSongHidden)
-                    TargetSongAnim = StartCoroutine(TargetSongHideAnim());
-                else
-                    TargetSongAnim = StartCoroutine(TargetSongShowAnim());
-            }
-
-            if (IsDirty)
-            {
-                UpdateItems();
-                IsDirty = false;
-            }
-
+            // Handle song preview
             float previewVolumeSpeed = 1;
-
             if (ReadyScreen.IsAnimating)
                 previewVolumeSpeed = -0.5f;
-            else if (CurrentPreviewClip != PreviewSource.clip)
+            else if (IsMapView && !CurrentPreviewClip)
+                previewVolumeSpeed = -0.5f;
+            else if (CurrentPreviewClip != PreviewSource.clip || !CurrentPreviewClip)
                 previewVolumeSpeed = -2;
-            else if (!CurrentPreviewClip)
-                previewVolumeSpeed = -2;
-            else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded)
+            else if (CurrentPreviewClip.loadState != AudioDataLoadState.Loaded || CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume)
                 previewVolumeSpeed = -1;
-            else if (CurrentPreviewRange.y - PreviewSource.time <= PreviewVolume)
-                previewVolumeSpeed = -1;
-            else if (IsTargetSongHidden)
+            else if (ListView != null && ListView.IsTargetSongHidden)
                 previewVolumeSpeed = -0.4f;
 
-
             PreviewVolume = Mathf.Clamp01(PreviewVolume + previewVolumeSpeed * Time.deltaTime);
-            PreviewSource.volume = PreviewVolume * PreviewVolumeMulti;
+            PreviewSource.volume = Mathf.Pow(PreviewVolume, 2) * PreviewVolumeMulti;
+
+            float bgmVolumeSpeed = 0.3f;
+            if (!IsMapView || CurrentPreviewClip)
+                bgmVolumeSpeed = -1;
+
+            BGMVolume = Mathf.Clamp(BGMVolume + bgmVolumeSpeed * Time.deltaTime, -0.5f, 1f);
+            if (BGMVolume < 0 && bgmVolumeSpeed < 0) BGMVolume = -0.5f;
+            BGMIntroSource.volume = BGMLoopSource.volume = Mathf.Pow(Mathf.Clamp01(BGMVolume), 2) * BGMVolumeMulti;
 
             if (PreviewVolume <= 0)
             {
@@ -242,6 +211,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     if (!PreviewSource.clip)
                     {
                         PreviewSource.clip = CurrentPreviewClip;
+                        PreviewSource.clip.LoadAudioData();
                         PreviewSource.Play();
                         PreviewSource.time = CurrentPreviewRange.x;
                     }
@@ -259,295 +229,574 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 }
             }
         }
+        
+        public IEnumerator InitBGM()
+        {
+            if (!Playlist.BackgroundMusicInit) yield break;
+            Playlist.BackgroundMusicInit.LoadAudioData();
+            yield return new WaitUntil(() => Playlist.BackgroundMusicInit.loadState == AudioDataLoadState.Loaded);
+
+            // Clear previous BGM schedules if any exists
+            BGMIntroSource.Stop();
+            BGMLoopSource.Stop();
+
+            // Prepare BGM audio sources
+            BGMIntroSource.clip = Playlist.BackgroundMusicInit;
+            BGMLoopSource.clip = Playlist.BackgroundMusicLoop;
+            BGMLoopSource.loop = true;
+
+            // Schedule BGM playback using PlayScheduled for the game to seamlessly stitch intro clip and loop clip
+            float bgmDelay = 3;
+            BGMIntroSource.PlayScheduled(AudioSettings.dspTime + bgmDelay);
+            BGMLoopSource.PlayScheduled(AudioSettings.dspTime + bgmDelay + Playlist.BackgroundMusicInit.length);
+        }
 
         public IEnumerator InitPlaylist()
         {
-            var index = 0;
-            var pos = 0;
+            // Before load
+            MapCover.color = CommonSys.sMain.MainCamera.backgroundColor * new ColorFrag(a: 1);
+            CommonSys.sMain.MainCamera.backgroundColor = RenderSettings.fogColor = Playlist.BackgroundColor;
 
-            foreach (string path in Playlist.ItemPaths)
+            int index = 0;
+            int pos = 0;
+            MapManager.LoadMap();
+            foreach (PlaylistSong songInfo in Playlist.Songs)
             {
-                ResourceRequest request = Resources.LoadAsync<ExternalPlayableSong>(path);
-
-                yield return new WaitUntil(() => request.isDone);
-
-                if (!request.asset)
+                string path = $"Songs/{songInfo.ID}/{songInfo.ID}";
+                ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
+                yield return new WaitUntil(() => req.isDone);
+                if (!req.asset)
                 {
                     Debug.LogWarning("Couldn't load Playable Song at " + path);
-
                     continue;
                 }
+                PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
+                PlayableSongByID.Add(songInfo.ID, song);
+                PlaylistSongByID.Add(songInfo.ID, songInfo);
 
-                PlayableSong song = ((ExternalPlayableSong)request.asset).Data;
-                songList.Add(song);
-
-                SongSelectItem item = Instantiate(ItemSample, ItemHolder);
-                item.SetItem(path, song, index, pos);
-                itemList.Add(item);
                 index++;
                 pos += 48;
             }
 
+            ListView.UpdateSort();
+
+            yield return new WaitUntil(() => MapManager.isReady);
             IsInit = true;
+            IsBGMInit = false;
+            BGMVolume = -0.5f;
 
             if (!LoadingBar.sMain.gameObject.activeSelf) Intro();
         }
-
-        public void UpdateItems(bool cap = true)
+        
+        public void ClearPlaylist()
         {
-            float scrollOfs = ScrollOffset;
-            if (cap) scrollOfs = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
-
-            foreach (SongSelectItem item in itemList)
-            {
-                var rt = (RectTransform)item.transform;
-                rt.anchoredPosition = new Vector2(-.26795f, -1) * (item.Position + item.PositionOffset - scrollOfs);
-            }
-
-            ItemCursor.rectTransform.anchoredPosition = new Vector2(ItemCursor.rectTransform.anchoredPosition.x, scrollOfs - TargetScrollOffset);
-
-            if (!IsAnimating && TargetSongAnim == null)
-            {
-                float offset = scrollOfs - TargetSongOffset;
-                TargetSongCoverHolder.anchoredPosition = new Vector2(0, offset / 2);
-            }
+            PlayableSongByID.Clear();
+            PlaylistSongByID.Clear();
         }
 
-        public void UpdateTarget()
+        public void UpdateListItems(bool cap = true)
         {
-            float lastTarget = TargetScrollOffset;
-            float tsDist = float.PositiveInfinity;
+            ListView.UpdateListItems(this, cap);
+        }
 
-            foreach (SongSelectItem item in itemList)
-                if (Mathf.Abs(item.Position - ScrollOffset) < tsDist)
+        public void UpdateListTarget() 
+        {
+            ListView.UpdateListTarget();
+        }
+
+        public void UpdateButtons()
+        {
+            BackButton.gameObject.SetActive(
+                (IsMapView && TargetMapItem is SongMapItem) 
+                || (MapManager.sPlaylistStack.Count > 1)
+            );
+            ListViewButton.gameObject.SetActive(IsMapView && !TargetMapItem);
+
+            MapViewButton.gameObject.SetActive(!IsMapView);
+            SortButton.gameObject.SetActive(!IsMapView);
+            LaunchButton.gameObject.SetActive(
+                !IsMapView || (TargetMapItem is SongMapItem && IsTargetSongUnlocked)
+            );
+            LaunchButton.interactable = IsTargetSongUnlocked;
+        }
+
+        public void ToggleView()
+        {
+            if (IsAnimating) return;
+            IsMapView = !IsMapView;
+            TargetSongAnim = StartCoroutine(ToggleViewAnim());
+        }
+
+        private IEnumerator ToggleViewAnim()
+        {
+            IsAnimating = true;
+            ListView.ItemGroup.blocksRaycasts = !IsMapView;
+            if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+
+            // Animate map icons to list icons
+            float lerpFrom = IsMapView ? 1 : 0;
+            float lerpTo = 1 - lerpFrom;
+            IEnumerator MapCoroutine()
+            {
+                var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
+            
+                foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
                 {
-                    TargetScrollOffset = item.Position;
-                    tsDist = Mathf.Abs(item.Position - ScrollOffset);
+                    mapItem.UpdatePosition();
+                    listItem.CoverBorder.gameObject.SetActive(false);
+                    mapItem.transform.SetParent(MapLerpItemHolder);
                 }
-                else
+                yield return Ease.Animate(0.5f, (x) =>
                 {
-                    break;
+                    float ease1 = Mathf.Lerp(lerpFrom, lerpTo, Ease.Get(x, EaseFunction.Quartic, EaseMode.Out));
+                    foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
+                    {
+                        mapItem.UpdatePosition();
+                        mapItem.transform.position = Vector3.Lerp(mapItem.transform.position, listItem.CoverImage.transform.position, ease1);
+                    }
+                
+                    float ease2 = Mathf.Lerp(lerpFrom, lerpTo, Ease.Get(x, EaseFunction.Quadratic, EaseMode.InOut));
+                    CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: -ease2 * 2 - 10);
+                });
+                foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
+                {
+                    mapItem.UpdatePosition();
+                    listItem.CoverBorder.gameObject.SetActive(true);
+                    mapItem.transform.SetParent(MapManager.ItemUIHolder);
+                }
+            }
+            Coroutine mapCoroutine = null;
+        
+            // Animate bottom buttons
+            Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
+        
+            // Animate the cover
+            IEnumerator CoverCoroutine()
+            {
+                SongSelectListSongUI targetSong = ListView.SongItems.FirstOrDefault(item => Mathf.Approximately(item.Target?.Position ?? 0, ListView.TargetScrollOffset));
+                if (targetSong == null) yield break;
+                if (!MapManager.sSongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)) yield break;
+                target.CoverImage.gameObject.SetActive(false);
+                TargetSongCoverHolder.gameObject.SetActive(true);
+                yield return Ease.Animate(lerpFrom == 0 ? 0.6f : 0.5f, (x) =>
+                {
+                    float ease1 = lerpFrom == 0
+                        ? Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.InOut)
+                        : 1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    LerpCover(ease1, target.CoverImage.transform as RectTransform);
+                });
+                TargetSongCoverHolder.gameObject.SetActive(lerpTo > 0);
+                target.CoverImage.gameObject.SetActive(true);
+            }
+            Coroutine coverCoroutine = null;
+
+            if (IsMapView)
+            {
+                // In map view 
+
+                CurrentPreviewClip = null;
+                coverCoroutine = StartCoroutine(CoverCoroutine());
+                mapCoroutine = StartCoroutine(MapCoroutine());
+
+                // Animate
+                yield return Ease.Animate(0.3f, (x) =>
+                {
+                    float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                    LerpMapView(ease1);
+                    ListView.LerpListView(1 - ease1);
+                    if (IsTargetSongUnlocked)
+                    {
+                        LerpInfo(1 - ease1);
+                        LerpDifficulty(1 - ease1);
+                    }
+                    else
+                    {
+                        LerpUnlockConditions(1 - ease1);
+                    }
+                });
+            }
+            else
+            {
+                // In list view 
+
+                // Set current list item to the map item nearest to center of screen
+                var mapSongs = MapManager.sSongMapItemUIsByID.Values.ToList();
+                if (mapSongs.Count > 0)
+                {
+                    float getDistance(SongMapItemUI item) 
+                        => Vector2.SqrMagnitude(((RectTransform)item.transform).anchoredPosition);
+                    SongMapItemUI closestMapSong = null;
+                    float closestMapDistance = float.PositiveInfinity;
+                    for (int i = 0; i < mapSongs.Count; i++)
+                    {
+                        if (!mapSongs[i].gameObject.activeSelf) continue;
+                        float distance = getDistance(mapSongs[i]);
+                        if (distance < closestMapDistance)
+                        {
+                            closestMapSong = mapSongs[i];
+                            closestMapDistance = distance;
+                        }
+                    }
+                    
+                    SongSelectListSong targetSong = (SongSelectListSong)ListView.ItemList.Find(
+                        item => item is SongSelectListSong song && song.SongID == closestMapSong.parent.TargetID
+                    );
+                    if (targetSong != null)
+                    {
+                        ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
+                        ListView.TargetSongID = targetSong.SongID;
+                        ListView.IsDirty = true;
+                        ListView.HandleUpdate();
+
+                        PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
+                        SetTargetSong(targetSong.SongID, playableSong);
+                        yield return SetCover(targetSong.SongID, playableSong);
+                        coverCoroutine = StartCoroutine(CoverCoroutine());
+                    }
                 }
 
-            if (!Mathf.Approximately(lastTarget, TargetScrollOffset))
-            {
-                TargetSongHiddenTarget = true;
-                SoundEffectSource.PlayOneShot(SoundEffectTickClip, SoundEffectVolume);
+                // Update list item positions
+                ListView.TargetSongHiddenTarget = ListView.IsTargetSongHidden = false;
+                coverLerp = 1;
+                foreach (SongSelectListItem item in ListView.ItemList)
+                {
+                    item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
+                }
+                ListView.UpdateListItems(this);
+
+                // Finally start map coroutine
+                mapCoroutine = StartCoroutine(MapCoroutine());
+
+                // Animate
+                yield return Ease.Animate(0.6f, (x) =>
+                {
+                    float ease1 = Ease.Get(x * 3, EaseFunction.Cubic, EaseMode.Out);
+                    LerpMapView(1 - ease1);
+                    ListView.LerpListView(ease1);
+
+                    float ease2 = Ease.Get(x * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
+                    if (IsTargetSongUnlocked)
+                    {
+                        LerpDifficulty(ease2);
+                        LerpInfo(ease2);
+                    }
+                    else
+                    {
+                        LerpUnlockConditions(ease2);
+                    }
+                });
             }
+
+            yield return mapCoroutine;
+            yield return navCoroutine;
+            yield return coverCoroutine;
+
+            IsAnimating = false;
+            TargetSongAnim = null;
         }
 
-        public void OnListPointerDown(BaseEventData data)
+        public void SetTargetSong(string songID, PlayableSong targetSong)
         {
-            _LastScrollOffset = ScrollOffset;
-            ScrollVelocity = 0;
-            IsPointerDown = true;
-        }
+            TargetSongID = songID;
+            TargetSong = targetSong;
 
-        public void OnListDrag(BaseEventData data)
-        {
-            ScrollOffset += ((PointerEventData)data).delta.y / transform.lossyScale.x;
-            UpdateTarget();
-            IsDirty = true;
-        }
+            float songLength = targetSong.Clip.length;
+            TargetSongInfoInfo.text = Mathf.Floor(songLength / 60) + "m " + Mathf.Floor(songLength % 60) + "s";
 
-        public void OnListPointerUp(BaseEventData data)
-        {
-            if (itemList.Count < 0) ScrollOffset = Mathf.Clamp(ScrollOffset, -20, 20);
-            else ScrollOffset = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
-
-            IsPointerDown = false;
-        }
-
-        public IEnumerator TargetSongShowAnim()
-        {
-            TargetSongOffset = TargetScrollOffset;
-            SongSelectItem targetSong = itemList.Find(item => Mathf.Approximately(TargetScrollOffset, item.Position));
-
-            if (targetSong)
+            IsTargetSongUnlocked = GameConditional.TestAll(PlaylistSongByID[songID].UnlockConditions);
+            TargetSongLockedIndicator.SetActive(!IsTargetSongUnlocked);
+            if (IsTargetSongUnlocked)
             {
-                TargetSongInfoName.text = targetSong.Song.SongName;
-                TargetSongInfoArtist.text = targetSong.Song.SongArtist;
-
-                float songLength = targetSong.Song.Clip.length;
-                TargetSongInfoInfo.text = Mathf.Floor(songLength / 60) + "m " + Mathf.Floor(songLength % 60) + "s";
+                TargetSongInfoName.text = targetSong.SongName;
+                TargetSongInfoArtist.text = targetSong.SongArtist;
 
                 float minBPM = float.PositiveInfinity, maxBPM = float.NegativeInfinity;
-
-                foreach (BPMStop stop in targetSong.Song.Timing.Stops)
+                foreach (BPMStop stop in targetSong.Timing.Stops)
+                {
                     if (stop.Significant)
                     {
                         minBPM = Mathf.Min(minBPM, stop.BPM);
                         maxBPM = Mathf.Max(maxBPM, stop.BPM);
                     }
+                }
+                TargetSongInfoInfo.text += " - BPM " + (minBPM == maxBPM ? minBPM : minBPM + "~" + maxBPM);
 
-                TargetSongInfoInfo.text += " - BPM " + (Mathf.Approximately(minBPM, maxBPM) ? minBPM : minBPM + "~" + maxBPM);
-
-                TargetSongInfoInfo.text += " - " + targetSong.Song.Genre.ToUpper();
+                TargetSongInfoInfo.text += " - " + targetSong.Genre.ToUpper();
+            }
+            else
+            {
+                UnlockConditionText.text = GameConditional.GetDisplayInstructionString(PlaylistSongByID[songID].UnlockConditions);
             }
 
-            CurrentPreviewClip = targetSong.Song.Clip;
-            CurrentPreviewRange = targetSong.Song.PreviewRange;
+            CurrentPreviewClip = IsTargetSongUnlocked ? targetSong.Clip : PreviewNoiseClip;
+            CurrentPreviewRange = IsTargetSongUnlocked ? targetSong.PreviewRange : new(0, 10);
 
-            string songPath = Playlist.ItemPaths[songList.IndexOf(targetSong.Song)];
-            string songID = Path.GetFileNameWithoutExtension(songPath);
-
-            foreach (SongSelectDifficulty diff in difficultyList)
-                Destroy(diff.gameObject);
-
-            difficultyList.Clear();
-
-            ExternalChartMeta target = GetNearestDifficulty(targetSong.Song.Charts);
-
-            foreach (ExternalChartMeta chart in targetSong.Song.Charts)
+            string songPath = $"Songs/{songID}/{songID}";
+            foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
+            DifficultyList.Clear();
+            var target = GetNearestDifficulty(targetSong.Charts);
+            foreach (ExternalChartMeta chart in targetSong.Charts)
             {
                 string chartID = Path.GetFileNameWithoutExtension(chart.Target);
-                ScoreStoreEntry record = StorageManager.sMain.Scores.Get(songID, chartID);
+                var record = StorageManager.sMain.Scores.Get(songID, chartID);
 
-                SongSelectDifficulty difficulty = Instantiate(DifficultySample, DifficultyListHolder);
-
-                difficulty.SetItem(chart, record, CommonSys.sMain.Constants.GetDifficultyColor(chart.DifficultyIndex));
-                difficulty.Button.onClick.AddListener(() => ChangeDiff(difficulty));
-
-                difficultyList.Add(difficulty);
-
-                if (chart == target)
-                    TargetDifficulty = difficulty;
+                SongSelectDifficulty diff = Instantiate(DifficultySample, DifficultyListHolder);
+                diff.SetItem(chart, record, CommonSys.sMain.Constants.GetDifficultyColor(chart.DifficultyIndex));
+                diff.Button.onClick.AddListener(() => ChangeDiff(diff));
+                DifficultyList.Add(diff);
+                if (chart == target) TargetDifficulty = diff;
             }
-
             TargetDifficulty.SetSelectability(1);
-
-            RT(TargetDifficulty.Holder)
-                .anchoredPosition = new Vector2(0, 5);
-
+            rt(TargetDifficulty.Holder).anchoredPosition = new(0, 5);
             SetScoreInfo(TargetDifficulty);
-            LayoutRebuilder.MarkLayoutForRebuild(RT(DifficultyHolder.transform));
+            LayoutRebuilder.MarkLayoutForRebuild(rt(DifficultyHolder.transform));
+        }
 
-            TargetSongCoverBackground.color = targetSong.Song.Cover.BackgroundColor;
-            TargetSongCoverHolder.gameObject.SetActive(false);
-
-            if (CurrentCover != targetSong.Song.Cover)
+        public IEnumerator ListTargetSongShowAnim()
+        {
+            ListView.TargetSongOffset = ListView.TargetScrollOffset;
+            SongSelectListSongUI targetSong = ListView.SongItems.Find(item => ListView.TargetScrollOffset == item.Target?.Position);
+            ListView.TargetSongID = targetSong.Target.SongID;
+            if (targetSong)
             {
-                CurrentCover = targetSong.Song.Cover;
-
-                foreach (CoverLayerImage layer in TargetSongCoverLayers)
-                {
-                    Resources.UnloadAsset(layer.Image.texture);
-                    Destroy(layer.gameObject);
-                }
-
-                TargetSongCoverLayers.Clear();
-
-                foreach (CoverLayer layer in CurrentCover.Layers)
-                {
-                    string path = Path.Combine(Path.GetDirectoryName(targetSong.SongPath)!, layer.Target);
-
-                    if (Path.HasExtension(path))
-                        path = Path.ChangeExtension(path, "")[0..^1];
-
-                    ResourceRequest request = Resources.LoadAsync<Texture2D>(path);
-
-                    yield return new WaitUntil(() => request.isDone);
-
-                    if (request.asset)
-                    {
-                        var texture = (Texture2D)request.asset;
-
-                        CoverLayerImage layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
-                        layerImage.Layer = layer;
-                        layerImage.Image.texture = texture;
-
-                        TargetSongCoverLayers.Add(layerImage);
-                    }
-                }
+                SetTargetSong(targetSong.Target.SongID, targetSong.TargetSong);
+                StartCoroutine(SongBurstAnim(targetSong.CoverImage.rectTransform));
+                yield return SetCover(targetSong.Target.SongID, targetSong.TargetSong);
+                UpdateButtons();
             }
 
-            TargetSongCoverHolder.gameObject.SetActive(true);
+            LerpInfo(0);
+            LerpDifficulty(0);
+            LerpUnlockConditions(0);
 
             yield return Ease.Animate(.9f, a =>
             {
                 float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(lerp);
+                if (IsTargetSongUnlocked) LerpInfo(lerp);
+                else LerpUnlockConditions(lerp);
 
                 float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
-                              * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
-
-                LerpCover(lerp2);
+                    * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+                LerpCoverList(lerp2);
 
                 float lerp3 = Ease.Get(a * 3, EaseFunction.Cubic, EaseMode.Out);
                 LerpUI(lerp3);
 
                 float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
-
-                foreach (SongSelectItem item in itemList)
-                    item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1)
-                                             * (lerp2 * .5f + lerp4 * .5f);
-
-                IsDirty = true;
+                foreach (SongSelectListItem item in ListView.ItemList)
+                {
+                    item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1)
+                         * (lerp2 * .5f + lerp4 * .5f);
+                }
+                ListView.IsDirty = true;
             });
 
-            if (!Mathf.Approximately(TargetSongOffset, TargetScrollOffset))
+            if (ListView.TargetSongOffset != ListView.TargetScrollOffset)
             {
-                IsTargetSongHidden = true;
-                StartCoroutine(TargetSongHideAnim());
+                ListView.IsTargetSongHidden = true;
+                StartCoroutine(ListTargetSongHideAnim());
             }
 
             TargetSongAnim = null;
         }
 
+        public IEnumerator SetCover(string songID, PlayableSong targetSong)
+        {
+            TargetSongCoverBackground.color = targetSong.Cover.BackgroundColor;
+            TargetSongCoverHolder.gameObject.SetActive(false);
+            if (CurrentCover != targetSong.Cover)
+            {
+                CurrentCover = targetSong.Cover;
+
+                // Clear old cover
+                foreach (var layer in TargetSongCoverLayers) 
+                {
+                    Resources.UnloadAsset(layer.Image.texture);
+                    Destroy(layer.gameObject);
+                }
+                TargetSongCoverLayers.Clear();
+
+                if (IsTargetSongUnlocked)
+                {
+                    // Load new cover
+                    foreach (CoverLayer layer in CurrentCover.Layers)
+                    {
+                        string path = Path.Combine($"Songs/{songID}", layer.Target);
+                        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                        var req = Resources.LoadAsync<Texture2D>(path);
+                        yield return req;
+                        if (req.asset)
+                        {
+                            Texture2D tex = (Texture2D)req.asset;
+                            var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
+                            layerImage.Layer = layer;
+                            layerImage.Image.texture = tex;
+                            TargetSongCoverLayers.Add(layerImage);
+                        }
+                    }
+                }            
+            }
+            TargetSongCoverHolder.gameObject.SetActive(true);
+        }
+
         public ExternalChartMeta GetNearestDifficulty(List<ExternalChartMeta> charts)
         {
-            var distance = int.MaxValue;
-
+            int dist = int.MaxValue;
             ExternalChartMeta target = null;
-
-            foreach (ExternalChartMeta chart in charts)
+            foreach (var chart in charts)
             {
                 int chartDiff = Mathf.Abs((chart.DifficultyIndex - SelectedDifficulty + 100) % 100);
-
-                if (distance > chartDiff)
+                if (dist > chartDiff)
                 {
-                    distance = chartDiff;
+                    dist = chartDiff;
                     target = chart;
                 }
-            }
 
+            }
             return target;
         }
 
-        public IEnumerator TargetSongHideAnim()
+        public IEnumerator ListTargetSongHideAnim()
         {
-            float lerpCoverStart = _CoverLerp;
-
-            yield return Ease.Animate(.3f, a =>
-            {
+            float lerpCoverStart = coverLerp;
+            yield return Ease.Animate(.3f, a => {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                LerpInfo(1 - lerp);
+                if (IsTargetSongUnlocked) LerpInfo(1 - lerp);
+                else LerpUnlockConditions(1 - lerp);
                 LerpUI(1 - lerp);
 
                 float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
-                LerpCover((1 - lerp2) * lerpCoverStart);
-
-                foreach (SongSelectItem item in itemList)
-                    item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
-
-                IsDirty = true;
+                LerpCoverList((1 - lerp2) * lerpCoverStart);
+                foreach (SongSelectListItem item in ListView.ItemList)
+                {
+                    item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
+                }
+                ListView.IsDirty = true;
             });
-
             TargetSongCoverHolder.gameObject.SetActive(false);
 
             TargetSongAnim = null;
         }
 
-        public void ChangeDiff(SongSelectDifficulty target)
+        public IEnumerator MapTargetSongShowAnim(SongMapItem target)
         {
-            if (IsAnimating || TargetDifficulty == target)
-                return;
+            TargetMapItem = target;
+            PlayableSong song = PlayableSongByID[target.TargetID];
+            SetTargetSong(target.TargetID, song);
+            LerpCover(0, target.ItemUI.CoverImage.rectTransform);
+            StartCoroutine(SongBurstAnim(target.ItemUI.CoverImage.rectTransform));
+            MapUIGroup.blocksRaycasts = MapUIGroup.interactable = false;    
 
-            SelectedDifficulty = target.Chart.DifficultyIndex;
+            Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
+        
+            yield return SetCover(target.TargetID, song);
+            target.ItemUI.CoverImage.gameObject.SetActive(false);
 
-            StartCoroutine(ChangeDiffAnim(target));
+            yield return Ease.Animate(.9f, a =>
+            {
+                float lerp = Ease.Get(a * 3 - 1, EaseFunction.Cubic, EaseMode.Out);
+                if (IsTargetSongUnlocked)
+                {
+                    LerpInfo(lerp);
+                    LerpDifficulty(lerp);
+                }
+                else
+                {
+                    LerpUnlockConditions(lerp);
+                }
+
+                float lerp2 = Ease.Get(a * 1.5f, EaseFunction.Exponential, EaseMode.InOut)
+                    * Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
+                LerpCover(lerp2, target.ItemUI.CoverImage.rectTransform);
+
+                float lerp3 = Ease.Get(a * 1.5f, EaseFunction.Cubic, EaseMode.Out);
+                CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: -lerp3 * 2 - 10);
+                MapUIGroup.transform.localScale = Vector3.one * (1 - lerp3 * 0.1f);
+
+                float lerp4 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
+                LerpMapView(1 - lerp4);
+            });
+
+            yield return navCoroutine;
+
+            TargetSongAnim = null;
         }
 
+        public IEnumerator MapTargetSongHideAnim()
+        {
+            SongMapItem target = (SongMapItem)TargetMapItem;
+            var coverTarget = target.ItemUI.CoverImage.rectTransform;
+            TargetMapItem = null;
+            CurrentPreviewClip = null;
+
+            Coroutine navCoroutine = StartCoroutine(NavUpdateAnim());
+
+            yield return Ease.Animate(.6f, a =>
+            {
+                float lerp = Ease.Get(a * 2, EaseFunction.Cubic, EaseMode.Out);
+                if (IsTargetSongUnlocked)
+                {
+                    LerpInfo(1 - lerp);
+                    LerpDifficulty(1 - lerp);
+                }
+                else
+                {
+                    LerpUnlockConditions(1 - lerp);
+                }
+
+                float lerp2 = Ease.Get(a, EaseFunction.Quintic, EaseMode.Out);
+                LerpCover(1 - lerp2, coverTarget);
+
+                float lerp3 = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
+                CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: lerp3 * 2 - 12);
+                LerpMapView(lerp3);
+                MapUIGroup.transform.localScale = Vector3.one * (1 - (1 - lerp3) * 0.1f);
+            });
+
+            yield return navCoroutine;
+
+            TargetSongCoverHolder.gameObject.SetActive(false);
+            target.ItemUI.CoverImage.gameObject.SetActive(true);
+            MapUIGroup.blocksRaycasts = MapUIGroup.interactable = true;
+
+            TargetSongAnim = null;
+        }
+
+        public IEnumerator SongBurstAnim(RectTransform center)
+        {
+            SongBurstMainImage.rectTransform.position = center.position;
+
+            // Set burst image colors
+            Color.RGBToHSV(TargetSong.BackgroundColor, out float colHue, out float colSat, out float colVal);
+
+            SongBurstMainImage.color = Color.HSVToRGB(colHue, colSat * .15f, 1);
+            SongBurstSubImage1.color = SongBurstSubImage2.color = Color.HSVToRGB(colHue, colSat * .5f, 1) * new ColorFrag( a: .4f );
+
+            yield return Ease.Animate(.3f, t =>
+            {
+                SongBurstMainImage.rectTransform.position = center.position;
+
+                float ease1 = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
+                SongBurstMainImage.rectTransform.sizeDelta = Vector2.one * (40 + 80 * ease1);
+                SongBurstSubImage1.rectTransform.sizeDelta
+                    = SongBurstSubImage2.rectTransform.sizeDelta = Vector2.one * (120 * ease1);
+
+                float ease2 = Ease.Get(t, EaseFunction.Quadratic, EaseMode.In);
+                SongBurstGroup.alpha = 1 - ease2;
+
+                float ease3 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
+                SongBurstSubImage1.rectTransform.localEulerAngles
+                    = -(SongBurstSubImage2.rectTransform.localEulerAngles = Vector3.forward * (10 * ease3));
+            });
+        }
+
+
+        public void ChangeDiff(SongSelectDifficulty target)
+        {
+            if (IsAnimating || TargetDifficulty == target) return;
+            SelectedDifficulty = target.Chart.DifficultyIndex;
+            StartCoroutine(ChangeDiffAnim(target));
+        }
         public IEnumerator ChangeDiffAnim(SongSelectDifficulty target)
         {
             IsAnimating = true;
@@ -555,75 +804,102 @@ namespace JANOARG.Client.Behaviors.SongSelect
             SongSelectDifficulty oldTarget = TargetDifficulty;
             TargetDifficulty = target;
 
-            foreach (SongSelectItem item in itemList)
-                item.SetDifficulty(GetNearestDifficulty(item.Song.Charts));
+            if (ListView.FilterPanel.CurrentSortCriteria is SongSortCriteria.Performance or SongSortCriteria.Difficulty)
+            {
+                ListView.DoSortAnim();
+                StartCoroutine(Ease.Animate(.05f, a => {
+                    if (a == 1) foreach (var item in ListView.SongItems)
+                    {
+                        if (item.Target == null) continue;
+                        item.SetDifficulty(GetNearestDifficulty(item.TargetSong.Charts));
+                    }
+                }));
+            }
+            else 
+            {
+                foreach (var item in ListView.SongItems)
+                {
+                    if (item.Target == null) continue;
+                    item.SetDifficulty(GetNearestDifficulty(item.TargetSong.Charts));
+                }
+            }
 
             SetScoreInfo(target);
 
-            StartCoroutine(Ease.Animate(.1f, a =>
-            {
+            StartCoroutine(Ease.Animate(.1f, a => {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-
                 oldTarget.SetSelectability(1 - lerp);
-
                 target.SetSelectability(lerp);
-
-                RT(oldTarget.Holder)
-                    .anchoredPosition = new Vector2(0, 5 * (1 - lerp));
+                rt(oldTarget.Holder).anchoredPosition = new(0, 5 * (1 - lerp));
             }));
-
-            yield return Ease.Animate(.15f, a =>
-            {
+            yield return Ease.Animate(.15f, a => {
                 float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-
-                RT(target.Holder)
-                    .anchoredPosition = new Vector2(0, 7 - 2 * lerp);
-
-                RT(target.Holder)
-                    .localEulerAngles = 10 * (1 - lerp) * Vector3.back;
+                rt(target.Holder).anchoredPosition = new(0, 7 - 2 * lerp);
+                rt(target.Holder).localEulerAngles = 10 * (1 - lerp) * Vector3.back;
             });
-
             IsAnimating = false;
+
+        }
+
+        IEnumerator NavUpdateAnim()
+        {
+            yield return Ease.Animate(0.2f, (x) =>
+            {
+                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                LerpActions(1 - ease1);
+            });
+            UpdateButtons();
+            yield return Ease.Animate(0.2f, (x) =>
+            {
+                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                LerpActions(ease1);
+            });
         }
 
         public void SetScoreInfo(SongSelectDifficulty target)
         {
             TargetDifficultyName.text = target.Chart.DifficultyName;
             TargetDifficultyNewIndicator.SetActive(target.Record == null);
-
             TargetDifficultyScore.text = Helper.PadScore((target.Record?.Score ?? 0).ToString("#0"))
-                                         + "<size=60%><b>ppm";
+                + "<size=60%><b>ppm";
         }
 
-        private float _CoverLerp;
-
-        public void LerpCover(float a)
+        float coverLerp = 0;
+        public void LerpCoverList(float a) 
         {
-            _CoverLerp = a;
-
-            float scrollOffset = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
-            float offset = scrollOffset - TargetSongOffset;
-
-            TargetSongCoverHolder.anchorMin = Vector2.Lerp(new Vector2(0, .5f), new Vector2(0, .5f), a);
-            TargetSongCoverHolder.anchorMax = Vector2.Lerp(new Vector2(0, .5f), new Vector2(1, .5f), a);
-            TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new Vector2(180 + .26795f * offset, offset), new Vector2(0, offset / 2), a);
-            TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new Vector2(36, 36), new Vector2(4 - SafeAreaHolder.sizeDelta.x, 128), a);
-
+            coverLerp = a;
+            float scrollOfs = Mathf.Clamp(ListView.ScrollOffset, ListView.ItemList[0].Position - 20, ListView.ItemList[^1].Position + 20);
+            float offset = scrollOfs - ListView.TargetSongOffset;
+            TargetSongCoverHolder.anchorMin = Vector2.Lerp(new(0, .5f), new(0, .5f), a);
+            TargetSongCoverHolder.anchorMax = Vector2.Lerp(new(0, .5f), new(1, .5f), a);
+            TargetSongCoverHolder.anchoredPosition = Vector2.Lerp(new(180 + .26795f * offset, offset), new(0, offset / 2), a);
+            TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4 - SafeAreaHolder.sizeDelta.x, 128), a);
             TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
-
-            TargetSongCoverLayerHolder.anchoredPosition = new Vector2(-4 * a, 0);
-
+            TargetSongCoverLayerHolder.anchoredPosition = new (-4 * a, 0);
             UpdateCover();
+        }
+    
+        public void LerpCover(float a, RectTransform icon) 
+        {
+            coverLerp = a;
+            TargetSongCoverHolder.anchorMin = Vector2.Lerp(new(0, .5f), new(0, .5f), a);
+            TargetSongCoverHolder.anchorMax = Vector2.Lerp(new(0, .5f), new(1, .5f), a);
+            TargetSongCoverHolder.anchoredPosition = Vector2.zero;
+            TargetSongCoverHolder.position = Vector2.Lerp(icon.position, TargetSongCoverHolder.position, a);
+            TargetSongCoverHolder.sizeDelta = Vector2.Lerp(new(36, 36), new(4 - SafeAreaHolder.sizeDelta.x, 128), a);
+            TargetSongCoverShadow.effectDistance = new Vector2(0, -2) * a;
+            TargetSongCoverLayerHolder.anchoredPosition = new (-4 * a, 0);
+            if (CurrentCover != null) UpdateCover();
         }
 
         public void UpdateCover()
         {
-            Vector2 parallaxOffset = CurrentCover.IconCenter * (1 - _CoverLerp);
+            Vector2 parallaxOffset = CurrentCover.IconCenter * (1 - coverLerp);
 
             float coverScale = TargetSongCoverLayerHolder.rect.width
-                               / Mathf.Lerp(CurrentCover.IconSize, 880, _CoverLerp);
+                / Mathf.Lerp(CurrentCover.IconSize, 880, coverLerp);
 
-            foreach (CoverLayerImage layer in TargetSongCoverLayers)
+            foreach (var layer in TargetSongCoverLayers)
             {
                 RawImage image = layer.Image;
 
@@ -633,11 +909,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 if (layer.Layer.Tiling)
                 {
                     Vector2 coverSize = TargetSongCoverLayerHolder.rect.size;
-
                     image.rectTransform.sizeDelta = coverSize;
                     image.rectTransform.anchoredPosition = Vector2.zero;
                     image.rectTransform.localScale = Vector3.one;
-
                     image.uvRect = new Rect(
                         ((size - coverSize / coverScale) / 2 - position) / size,
                         coverSize / coverScale / size
@@ -648,76 +922,82 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     image.rectTransform.sizeDelta = size;
                     image.rectTransform.anchoredPosition = position * coverScale;
                     image.rectTransform.localScale = Vector3.one * coverScale;
-
                     image.uvRect = new Rect(0, 0, 1, 1);
                 }
             }
         }
 
-        public void Launch()
+        public void Launch() 
         {
-            if (TargetSongAnim != null)
-                StopCoroutine(TargetSongAnim);
-
-            StartCoroutine(LaunchAnim());
+            if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+            StartCoroutine(SongLaunchAnim());
+        }
+        public void Return()
+        {
+            if (TargetMapItem is SongMapItem)
+            {
+                if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
+                TargetSongAnim = StartCoroutine(MapTargetSongHideAnim());
+            }
+            else if (MapManager.sPlaylistStack.Count > 1)
+            {
+                MapManager.sMain.NavigatePreviousMap();
+            }
         }
 
-        public IEnumerator LaunchAnim()
+        public IEnumerator SongLaunchAnim()
         {
             IsAnimating = true;
 
-            var launchTextList = new[]
-            {
+            string[] launchTextList = new[]{
                 "LET'S GO",
                 "LET'S DO THIS",
                 "HERE WE GO",
                 "NOW LAUNCHING",
                 "NOW APPROACHING",
-                "NEXT DESTINATION"
+                "NEXT DESTINATION",
             };
-
             LaunchText.text = launchTextList[Random.Range(0, launchTextList.Length)];
 
             LerpInfo(0);
 
-            SongSelectItem targetSong = itemList.Find(item => Mathf.Approximately(TargetScrollOffset, item.Position));
-
             TargetSongCoverLayerHolder.gameObject.SetActive(false);
-            TargetSongCoverBackground.color = targetSong.Song.BackgroundColor;
+            TargetSongCoverBackground.color = TargetSong.BackgroundColor;
+
+            float currentCameraZ = 0;
 
             yield return Ease.Animate(0.8f, a =>
             {
                 float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
                 LerpUI(1 - lerp);
-                foreach (SongSelectItem item in itemList) item.SetVisibilty(1 - lerp);
+                if (!IsMapView) ListView.LerpListView(1 - lerp);
 
                 float lerp2 = Mathf.Pow(Ease.Get(a, EaseFunction.Circle, EaseMode.In), 2);
-                float scrollOffset = Mathf.Clamp(ScrollOffset, itemList[0].Position - 20, itemList[^1].Position + 20);
-                float offset = scrollOffset - TargetSongOffset;
-
-                TargetSongCoverHolder.anchorMin = new Vector2(0, .5f * (1 - lerp2));
-                TargetSongCoverHolder.anchorMax = new Vector2(1, 1 - .5f * (1 - lerp2));
-                TargetSongCoverHolder.anchoredPosition = new Vector2(0, offset / 2 * (1 - lerp2));
-                TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: 128 * (1 - lerp2));
-
-                IsDirty = true;
+                float scrollOfs = Mathf.Clamp(ListView.ScrollOffset, ListView.ItemList[0].Position - 20, ListView.ItemList[^1].Position + 20);
+                float offset = scrollOfs - ListView.TargetSongOffset;
+                TargetSongCoverHolder.anchorMin = new(0, .5f * (1 - lerp2));
+                TargetSongCoverHolder.anchorMax = new(1, 1 - .5f * (1 - lerp2));
+                TargetSongCoverHolder.anchoredPosition = new(0, offset / 2 * (1 - lerp2));
+                TargetSongCoverHolder.sizeDelta *= new Vector2Frag(y: (128 - Mathf.Pow(40 * lerp2, 0.5f)) * (1 - lerp2));
+                CommonSys.sMain.MainCamera.fieldOfView = 60 + 120 * lerp2;
+                ListView.IsDirty = true;
 
                 float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
-
-                RT(LaunchTextHolder)
-                    .sizeDelta = new Vector2(LaunchText.preferredWidth * lerp3, RT(LaunchTextHolder)
-                    .sizeDelta.y);
-
+                rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp3, rt(LaunchTextHolder).sizeDelta.y);
                 LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
-                TargetSongCoverFlash.color = new Color(1, 1, 1, 1 - lerp3);
+                TargetSongCoverFlash.color = new(1, 1, 1, 1 - lerp3);
+            
+
+                float lerp4 = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                float targetCameraZ = lerp4 * 5 - Mathf.Pow(lerp2, 0.75f) * 30;
+                CommonSys.sMain.MainCamera.transform.Translate(Vector3.back * (targetCameraZ - currentCameraZ));
+                currentCameraZ = targetCameraZ;
             });
 
-            PlayerScreen.sTargetSongPath = Playlist.ItemPaths[songList.IndexOf(targetSong.Song)];
-            PlayerScreen.sTargetSong = targetSong.Song;
+            PlayerScreen.sTargetSongPath = $"Songs/{TargetSongID}/{TargetSongID}";
+            PlayerScreen.sTargetSong = TargetSong;
             PlayerScreen.sTargetChartMeta = TargetDifficulty.Chart;
-
-            CommonSys.sMain.MainCamera.backgroundColor = targetSong.Song.BackgroundColor;
-
+            CommonSys.sMain.MainCamera.backgroundColor = TargetSong.BackgroundColor;
             ReadyScreen.BeginLaunch();
 
             yield return new WaitForSeconds(2);
@@ -726,7 +1006,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             {
                 SongSelectReadyScreen.sMain.EndLaunch();
             }, false);
-
+            SceneManager.UnloadSceneAsync(MapManager.MapScene);
             SceneManager.UnloadSceneAsync("Song Select");
             Resources.UnloadUnusedAssets();
         }
@@ -734,33 +1014,50 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public void LerpInfo(float a)
         {
             TargetSongInfoHolder.alpha = a * a;
-            TargetSongInfoHolder.blocksRaycasts = Mathf.Approximately(a, 1);
-
-            RT(TargetSongInfoHolder)
-                .anchoredPosition = new Vector2(50 + 10 * a, RT(TargetSongInfoHolder)
-                .anchoredPosition.y);
+            TargetSongInfoHolder.blocksRaycasts = a == 1;
+            rt(TargetSongInfoHolder).anchoredPosition = new(50 + 10 * a, rt(TargetSongInfoHolder).anchoredPosition.y);
         }
 
         public void LerpUI(float a)
         {
-            LeftActionsHolder.alpha = RightActionsHolder.alpha = DifficultyHolder.alpha = a * a;
-            LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = DifficultyHolder.blocksRaycasts = Mathf.Approximately(a, 1);
-
-            RT(LeftActionsHolder)
-                .anchoredPosition = new Vector2(-10 * (1 - a), RT(LeftActionsHolder)
-                .anchoredPosition.y);
-
-            RT(RightActionsHolder)
-                .anchoredPosition = new Vector2(10 * (1 - a), RT(RightActionsHolder)
-                .anchoredPosition.y);
-
-            RT(DifficultyHolder)
-                .anchoredPosition = new Vector2(10 * (1 - a), RT(DifficultyHolder)
-                .anchoredPosition.y);
-
-            if (!QuickMenu.sMain || !QuickMenu.sMain.gameObject.activeSelf)
-                ProfileBar.sMain.SetVisibilty(a);
+            LerpActions(a);
+            if (IsTargetSongUnlocked) LerpDifficulty(a);
+            if (!QuickMenu.sMain || !QuickMenu.sMain.gameObject.activeSelf) ProfileBar.sMain.SetVisibility(a);
         }
+
+        public void LerpActions(float a)
+        {
+            LeftActionsHolder.alpha = RightActionsHolder.alpha = a * a;
+            LeftActionsHolder.blocksRaycasts = RightActionsHolder.blocksRaycasts = a == 1;
+            rt(LeftActionsHolder).anchoredPosition = new (-10 * (1 - a), rt(LeftActionsHolder).anchoredPosition.y);
+            rt(RightActionsHolder).anchoredPosition = new (10 * (1 - a), rt(RightActionsHolder).anchoredPosition.y);
+        }
+
+        public void LerpDifficulty(float a)
+        {
+            DifficultyHolder.alpha = a * a;
+            DifficultyHolder.blocksRaycasts = a == 1;
+            rt(DifficultyHolder).anchoredPosition = new(10 * (1 - a), rt(DifficultyHolder).anchoredPosition.y);
+        }
+
+        public void LerpUnlockConditions(float a)
+        {
+            UnlockConditionGroup.alpha = a * a;
+            UnlockConditionHolder.sizeDelta *= new Vector2Frag(x: 400 + 100 * a);
+        }
+        
+        public void LerpMapView(float a)
+        {
+            MapUIGroup.alpha = a;
+            foreach (var prop in MapManager.sProps)
+            {
+                if (prop is MapItemConnection connection)
+                {
+                    connection.Alpha = a;
+                }
+            }
+        }
+
 
         public void Intro()
         {
@@ -771,36 +1068,218 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             IsAnimating = true;
 
-            ScrollOffset = Screen.height / 2f / CommonSys.sMain.CommonCanvas.localScale.x;
-            UpdateItems(false);
+            ListView.ScrollOffset = Screen.height / 2 / CommonSys.sMain.CommonCanvas.localScale.x;
+            UpdateListItems(false);
+            UpdateButtons();
 
-            yield return StartCoroutine(Ease.Animate(1, x =>
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+            cameraTransform.SetPositionAndRotation(new(0, 0, -100), Quaternion.identity);
+
+            if (sMoveBackFrom == null)
             {
-                ItemGroup.alpha = x * 1e10f;
+                StartCoroutine(EnterOutAnim());
+            }
+            else
+            {
+                StartCoroutine(EnterInAnim(sMoveBackFrom()));
+                sMoveBackFrom = null;
+            }
 
-                float xPosition = 120 + 60 * Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-
-                ItemTrack.color = new Color(1, 1, 1, Mathf.Clamp01(x * 3));
-
-                BackgroundGroup.alpha = Mathf.Clamp01(x * 3 - 1);
-
-                ItemTrack.rectTransform.anchoredPosition = new Vector2(xPosition - 180, ItemTrack.rectTransform.anchoredPosition.y);
-
-                BackgroundHolder.anchoredPosition = new Vector2(xPosition, BackgroundHolder.anchoredPosition.y);
-
-                ScrollOffset = Screen.height / 2f / CommonSys.sMain.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
-
-                UpdateItems(false);
-
-                IsReady = x > 0.6f;
-            }));
+            yield return Ease.Animate(1, x =>
+            {
+                ListView.ScrollOffset = Screen.height / 2 / CommonSys.sMain.CommonCanvas.localScale.x * (Ease.Get(x, EaseFunction.Exponential, EaseMode.Out) - 1);
+                UpdateListItems(false);
+                if (!IsReady && x > 0.6f)
+                {
+                    IsReady = true;
+                    if (IsMapView) StartCoroutine(IntroShowMapUIAnim());
+                    else ListView.ItemGroup.interactable = ListView.ItemGroup.blocksRaycasts = ListView.IsTargetSongHidden = true;
+                }
+            });
 
             IsAnimating = false;
         }
 
-        private RectTransform RT(Component obj)
+        /// <summary>
+        /// Plays when the camera zooms into the map
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator EnterOutAnim()
         {
-            return obj.transform as RectTransform;
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            yield return Ease.Animate(1, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
+                cameraTransform.position *= new Vector3Frag(z: -100 + 90 * lerp1);
+                CommonSys.sMain.MainCamera.fieldOfView = 120 - 60 * lerp1;
+                MapCover.color *= new ColorFrag(a: 1 - lerp1);
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = t * 1e10f;
+                    MapUIGroup.transform.localScale = Vector3.one * lerp1;
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    ListView.ItemGroup.alpha = t * 1e10f;
+                    float xPos = 120 + 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(t * 3 - 1);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
+                }
+            });
         }
+        
+        /// <summary>
+        /// Plays when the camera zooms into a playlist
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator LeaveInAnim(Transform target)
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            yield return Ease.Animate(0.6f, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
+                cameraTransform.position =
+                    Vector3.Lerp(cameraTransform.position, target.position, 1 - Mathf.Pow(1e-3f, Time.deltaTime)) 
+                    * new Vector3Frag(z: -10 * (1 - lerp1));
+                MapCover.color *= new ColorFrag(a: Mathf.Floor(t));
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = t * 1e10f;
+                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(lerp1, 2f));
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    // There's no cases where LeaveInAnim is called in list view yet
+                    throw new NotImplementedException();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Plays when the camera leaves a map
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator LeaveOutAnim()
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            // If player's in map view, hide current song and force map view
+            bool isMapViewBeginning = IsMapView;
+            if (!IsMapView)
+            {
+                IsMapView = true;
+                CurrentPreviewClip = null;
+                ListView.ItemGroup.blocksRaycasts = false;
+            }
+
+            yield return Ease.Animate(0.6f, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
+                cameraTransform.position *= new Vector3Frag(z: -10 - 90 * lerp1);
+                CommonSys.sMain.MainCamera.fieldOfView = 60 + 60 * lerp1;
+                MapCover.color *= new ColorFrag(a: lerp1);
+
+                if (isMapViewBeginning)
+                {
+                    MapUIGroup.alpha = Mathf.Ceil(1 - t);
+                    MapUIGroup.transform.localScale = Vector3.one * (1 - lerp1);
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    ListView.ItemGroup.alpha = Mathf.Ceil(1 - t);
+                    float xPos1 = 180 - 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(1 - t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(1 - t * 3);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos1, ListView.BackgroundHolder.anchoredPosition.y);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos1 - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+
+                    float lerp3 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
+                    float xPos2 = 180 - 60 * lerp3;
+                    ListView.ItemGroup.alpha = 1 - lerp3;
+                    ListView.ItemHolder.anchoredPosition = new(xPos2, ListView.ItemHolder.anchoredPosition.y);
+
+                    if (t < 0.67f)
+                    {
+                        float lerp2 = Ease.Get(t * 1.5f, EaseFunction.Exponential, EaseMode.Out);
+                        foreach (SongSelectListItem item in ListView.ItemList)
+                        {
+                            item.PositionOffset = 45 * (1 - lerp2) * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1);
+                        }
+                        ListView.UpdateListItems(this);
+                        LerpCoverList(1 - lerp2);
+                        if (IsTargetSongUnlocked)
+                        {
+                            LerpDifficulty(1 - lerp2);
+                            LerpInfo(1 - lerp2);
+                        }
+                        else
+                        {
+                            LerpUnlockConditions(1 - lerp2);
+                        }
+                        TargetSongCoverHolder.anchoredPosition += Vector2.right * (xPos2 - 180);
+                    }
+                    else
+                    {
+                        TargetSongCoverHolder.gameObject.SetActive(false);
+                    }
+                        
+                }
+            });
+            
+        }
+
+        /// <summary>
+        /// Plays when the camera leaves a playlist or a song
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator EnterInAnim(Transform target)
+        {
+            Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+            cameraTransform.position = target.position;
+
+            yield return Ease.Animate(1, (t) =>
+            {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
+                cameraTransform.position *= new Vector3Frag(z: -10 * lerp1);
+                MapCover.color *= new ColorFrag(a: Mathf.Floor(1 - t));
+
+                if (IsMapView)
+                {
+                    MapUIGroup.alpha = Mathf.Ceil(t);
+                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(1 - lerp1, 1.6f));
+                    MapManager.UpdateAllPositions();
+                }
+                else
+                {
+                    ListView.ItemGroup.alpha = Mathf.Ceil(t);
+                    float xPos = 120 + 60 * lerp1;
+                    ListView.ItemTrack.color = new(1, 1, 1, Mathf.Clamp01(t * 3));
+                    ListView.BackgroundGroup.alpha = Mathf.Clamp01(t * 3 - 1);
+                    ListView.ItemTrack.rectTransform.anchoredPosition = new(xPos - 180, ListView.ItemTrack.rectTransform.anchoredPosition.y);
+                    ListView.BackgroundHolder.anchoredPosition = new(xPos, ListView.BackgroundHolder.anchoredPosition.y);
+                }
+            });
+        }
+
+        IEnumerator IntroShowMapUIAnim()
+        {
+            yield return Ease.Animate(.2f, (x) =>
+            {
+                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                LerpActions(ease1);
+                ProfileBar.sMain.SetVisibility(ease1);
+            });
+        }
+
+        RectTransform rt (Component obj) => obj.transform as RectTransform;
     }
 }

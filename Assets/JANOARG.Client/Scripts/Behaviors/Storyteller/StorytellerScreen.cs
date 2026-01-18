@@ -1,5 +1,5 @@
 using JANOARG.Client.Behaviors.Common;
-using JANOARG.Shared.Data.Story;
+using JANOARG.Client.Data.Story;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Storyteller

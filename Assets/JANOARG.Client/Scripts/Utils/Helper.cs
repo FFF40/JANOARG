@@ -7,6 +7,8 @@ namespace JANOARG.Client.Utils
 {
     public static class Helper
     {
+        public const int PASSING_SCORE = 800000;
+
         public static string GetRank(float score)
         {
             return score switch

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/JANOARG.Client/Resources/Prefabs/Song Select/List Items.meta
+guid: ea7847d18beb8d186a542ad5464bfbae
+========
 guid: f6504f4fe77c312dc8ce1bad0be48460
+>>>>>>>> master:Assets/JANOARG.Client/Resources/Meshes.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

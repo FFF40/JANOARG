@@ -74,8 +74,8 @@ Material:
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
     - _ScaleRatioA: 0.95238096
-    - _ScaleRatioB: 0.9166667
-    - _ScaleRatioC: 0.9166667
+    - _ScaleRatioB: 0.9285714
+    - _ScaleRatioC: 0.9285714
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -94,7 +94,7 @@ Material:
     - _UnderlaySoftness: 0
     - _VertexOffsetX: 0
     - _VertexOffsetY: 0
-    - _WeightBold: 0.15
+    - _WeightBold: 0.1
     - _WeightNormal: 0
     m_Colors:
     - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
@@ -2047,7 +2047,7 @@ MonoBehaviour:
   fontWeights: []
   normalStyle: 0
   normalSpacingOffset: 0
-  boldStyle: 0.15
+  boldStyle: 0.1
   boldSpacing: 0
   italicStyle: 25
   tabSize: 10

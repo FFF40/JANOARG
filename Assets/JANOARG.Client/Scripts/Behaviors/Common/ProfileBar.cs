@@ -129,7 +129,7 @@ namespace JANOARG.Client.Behaviors.Common
         {
             UpdateRatingInfo();
             UpdateLabels();
-            SetVisibilty(0);
+            SetVisibility(0);
             SetRewardLerp(0);
 
             ChangeHeader.gameObject.SetActive(false);
@@ -241,6 +241,14 @@ namespace JANOARG.Client.Behaviors.Common
             AbilityRating = 0;
             foreach (float rating in ratingEntries) AbilityRating += rating;
             AbilityRating /= 30;
+        }
+
+        public void ReplenishBonusMult(int amount = 1)
+        {
+            BonusCount -= amount;
+            BonusCount = Mathf.Clamp(BonusCount, 0, BONUS_CAP);
+            CommonSys.sMain.Storage.Set("INFO:BonusCount", BonusCount);
+            UpdateBonusLabels();
         }
 
         private IEnumerator SongGainRoutine(long baseOrbs, long baseCoins)
@@ -673,7 +681,7 @@ namespace JANOARG.Client.Behaviors.Common
             return particle;
         }
 
-        public void SetVisibilty(float a)
+        public void SetVisibility(float a)
         {
             LeftPane.alpha = RightPane.alpha = a * a;
             LeftPane.blocksRaycasts = RightPane.blocksRaycasts = Mathf.Approximately(a, 1);

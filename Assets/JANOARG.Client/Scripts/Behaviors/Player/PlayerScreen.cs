@@ -175,7 +175,6 @@ namespace JANOARG.Client.Behaviors.Player
         
         internal List<int> TransparentMeshLaneIndexes = new();
         private List<LanePlayer> _LanesToRender = new();
-
         public void Awake()
         {
             sMain = this;
@@ -201,10 +200,10 @@ namespace JANOARG.Client.Behaviors.Player
 
             _LoadedObjects += increments;
 
-            SongSelectReadyScreen.sMain.OverallProgress.text = $"{_LoadedObjects}/{_TotalObjects}";
-            SongSelectReadyScreen.sMain.CurrentProgress.text = currentProgress;
+            // SongSelectReadyScreen.sMain.OverallProgress.text = $"{_LoadedObjects}/{_TotalObjects}";
+            // SongSelectReadyScreen.sMain.CurrentProgress.text = currentProgress;
 
-            SongSelectReadyScreen.sMain.Bar.value = (float)_LoadedObjects / _TotalObjects;
+            // SongSelectReadyScreen.sMain.Bar.value = (float)_LoadedObjects / _TotalObjects;
         }
 
         private IEnumerator LoadChart()
@@ -230,9 +229,9 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (!sHeadlessInitialised)
                 {
-                    SongSelectReadyScreen.sMain.LoadingBarHolder.gameObject.SetActive(true);
-                    SongSelectReadyScreen.sMain.OverallProgress.text = "0/0";
-                    SongSelectReadyScreen.sMain.CurrentProgress.text = "Loading audio file...";
+                    // SongSelectReadyScreen.sMain.LoadingBarHolder.gameObject.SetActive(true);
+                    // SongSelectReadyScreen.sMain.OverallProgress.text = "0/0";
+                    // SongSelectReadyScreen.sMain.CurrentProgress.text = "Loading audio file...";
                 }
 
                 string path = Path.Combine(Path.GetDirectoryName(sTargetSongPath)!, sTargetChartMeta.Target);
@@ -244,7 +243,7 @@ namespace JANOARG.Client.Behaviors.Player
                 yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState != AudioDataLoadState.Loading);
 
                 if (!sHeadlessInitialised)
-                    SongSelectReadyScreen.sMain.CurrentProgress.text += "Done.";
+                    // SongSelectReadyScreen.sMain.CurrentProgress.text += "Done.";
 
                 sTargetChart = chartLoadRequest.asset as ExternalChart;
 
@@ -258,6 +257,8 @@ namespace JANOARG.Client.Behaviors.Player
         {
             sCurrentChart = sTargetChart.Data.DeepClone();
             HitObjectHistory = new List<HitObjectHistoryItem>();
+            
+            _Met = sTargetSong.Timing;
 
             // Player retry reinitialisation
             if (AlreadyInitialised)
@@ -285,13 +286,13 @@ namespace JANOARG.Client.Behaviors.Player
                         .Update(sCurrentChart.Palette.HitStyles[a]);
 
                 for (var a = 0; a < sTargetChart.Data.Groups.Count; a++)
-                        LaneGroups[a].Current = sCurrentChart.Groups.Find(x => x.Name == LaneGroups[a].name);
+                    LaneGroups[a].Current = sCurrentChart.Groups.Find(x => x.Name == LaneGroups[a].name);
 
                 foreach (LanePlayer lane in Lanes)
                 {
                     Destroy(lane.gameObject);
                 }
-                
+
 
                 Lanes.Clear();
             }
@@ -308,7 +309,7 @@ namespace JANOARG.Client.Behaviors.Player
                 for (var i = 0; i < sCurrentChart.Palette.LaneStyles.Count; i++)
                 {
                     LaneStyle laneStyle = sCurrentChart.Palette.LaneStyles[i];
-                    
+
                     // For mesh culling on invisible lanes
                     if (laneStyle.LaneColor.a == 0)
                         TransparentMeshLaneIndexes.Add(i);
@@ -351,6 +352,11 @@ namespace JANOARG.Client.Behaviors.Player
             IsReady = true;
             AlreadyInitialised = true;
             _LastDSPTime = AudioSettings.dspTime;
+
+            const float TARGET_ASPECT = 7 / 4f;
+            float targetHeight = Mathf.Min(Screen.height, Screen.width / TARGET_ASPECT);
+            float camRatio = targetHeight / Screen.height;
+            CommonSys.sMain.MainCamera.fieldOfView = Mathf.Atan2(Mathf.Tan(30 * Mathf.Deg2Rad), camRatio) * 2 * Mathf.Rad2Deg;
 
             yield return new WaitForEndOfFrame();
         }
@@ -448,7 +454,7 @@ namespace JANOARG.Client.Behaviors.Player
                             }
                         }
 
-                        var hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); // Get current HitObject?
+                        HitObject hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); // Get current HitObject?
                         Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
                         Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
 
@@ -639,7 +645,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool ResultExec = false;
 
-        private Metronome _Met = sTargetSong.Timing;
+        private Metronome _Met;
+        
         public void Update()
         {
             if (!IsPlaying)
@@ -670,8 +677,8 @@ namespace JANOARG.Client.Behaviors.Player
                     Music.time = CurrentTime;
                 }
             }
-            else if (Music.isPlaying) 
-                    Music.Pause();
+            else if (Music.isPlaying)
+                Music.Pause();
             StartCoroutine( // Check hit objects
                         CheckHitObjects());
 
@@ -690,11 +697,11 @@ namespace JANOARG.Client.Behaviors.Player
 
             // Update palette
             sCurrentChart.Palette.Advance(visualBeat);
-            
-            if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor) 
+
+            if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
                 SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
-            
-            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor) 
+
+            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
                 SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
             for (var a = 0; a < LaneStyles.Count; a++)
@@ -702,12 +709,12 @@ namespace JANOARG.Client.Behaviors.Player
                 sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
 
                 LaneStyles[a].Update(sCurrentChart.Palette.LaneStyles[a]);
-                
+
                 if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Remove(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Add(a);
-                    
+
             }
 
             for (var a = 0; a < HitStyles.Count; a++)
@@ -729,7 +736,7 @@ namespace JANOARG.Client.Behaviors.Player
                 group.UpdateSelf(visualTime, visualBeat);
 
             StartCoroutine(f_laneUpdater(visualTime, visualBeat));
-            
+
             // Show ending animation; the failsafe on bugs is on following:
             // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
             if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || CurrentTime / Music.clip.length >= 1) && !ResultExec)
@@ -748,7 +755,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                         if (lane.TimeStamps[0] - 5f > f)
                             continue;
-            
+
                         lane.UpdateSelf(f, visualBeat1);
 
                         if (lane.MarkedForRemoval || lane == null) // Fixed logic
@@ -815,16 +822,17 @@ namespace JANOARG.Client.Behaviors.Player
 
             ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
 
+            string flawlessText = Settings.ShowFlawlessText ? "FLAWLESS" : "✓";
             if (acc.HasValue)
-                JudgmentLabel.text = acc == 0
-                    ? "FLAWLESS" : acc < 0
-                        ? score > 0
-                            ? "EARLY" : "BAD"
-                        : score > 0
-                            ? "LATE" : "MISS";
+                JudgmentLabel.text = acc switch
+                {
+                    0 => flawlessText,
+                    < 0 => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" :"EARLY" : "BAD",
+                    _ => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" : "LATE" : "MISS"
+                };
             else
                 JudgmentLabel.text = score > 0
-                    ? "FLAWLESS" : "MISS";
+                    ? flawlessText : "MISS";
 
             if (_JudgeAnimation != null)
                 StopCoroutine(_JudgeAnimation);
@@ -867,6 +875,10 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
         {
+            // In case of race condition
+            if (!hitObject)
+                return;
+            
             var hitType = hitObject.Current.Type;
             bool isFlickable = hitObject.Current.Flickable;
             bool isCatchType = hitType == HitObject.HitType.Catch;
@@ -940,6 +952,7 @@ namespace JANOARG.Client.Behaviors.Player
             var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hitObject.HitCoord.Position;
+            rt.localScale = new Vector3(1, 1); // Making sure it's not affected from effects that were used in hold ticks
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)
@@ -950,6 +963,7 @@ namespace JANOARG.Client.Behaviors.Player
             var primarySound = hitObject.Current.Type == HitObject.HitType.Normal 
                 ? NormalHitsound 
                 : CatchHitsound;
+            
             Hitsounds.PlayOneShot(primarySound, volume);
             
             // Play flick sound if applicable
@@ -1058,13 +1072,18 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float JudgmentOffset;
         public float VisualOffset;
+        public bool  ShowFlawlessText;
+        public bool  NoEarlyLateText;
+
 
         public PlayerSettings()
         {
             Storage prefs = CommonSys.sMain != null ? CommonSys.sMain.Preferences : null;
 
             if (prefs == null) return;
-
+            ShowFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:JudgementTextOnFlawless", true);
+            NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
+            
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });
 

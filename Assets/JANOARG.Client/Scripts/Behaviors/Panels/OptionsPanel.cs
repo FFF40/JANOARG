@@ -198,6 +198,9 @@ namespace ANOARG.Client.Behaviors.Panels
                         x => storage.Set("INFO:Name", x)
                     );
 
+                    var note = Spawn<OptionText>("Online stuff coming soon(?)");
+                    note.TitleLabel.fontSize = 8;
+
                     Spawn<OptionCategoryTitle>("Audio");
                     var sample = GetOptionItemSample<FloatOptionInput>();
                     sample.Min = 0;
@@ -342,6 +345,21 @@ namespace ANOARG.Client.Behaviors.Panels
                             UpdatePlayerPreview();
                         }
                     );
+
+                    Spawn <OptionCategoryTitle>("Miscellaneous");
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show FLAWLESS judgments",
+                        () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
+                        x => preferences.Set("PLYR:JudgementTextOnFlawless", x)
+                    );
+                    
+                    Spawn<BooleanOptionInput, bool>(
+                        "Disable early/late indicator",
+                        () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
+                        x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
+                    );
+                        
                 }
 
                     break;
@@ -481,7 +499,8 @@ namespace ANOARG.Client.Behaviors.Panels
 
         public void ClearAll()
         {
-            foreach (OptionItem item in CurrentItems) Destroy(item.gameObject);
+            foreach (OptionItem item in CurrentItems)
+                Destroy(item.gameObject);
             CurrentItems.Clear();
         }
 

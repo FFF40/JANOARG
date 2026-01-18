@@ -52,7 +52,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 .2f, a =>
                 {
-                    ProfileBar.sMain.SetVisibilty(
+                    ProfileBar.sMain.SetVisibility(
                         1 -
                         Ease.Get(
                             a, EaseFunction.Cubic,
@@ -97,7 +97,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 .2f, a =>
                 {
-                    ProfileBar.sMain.SetVisibilty(
+                    ProfileBar.sMain.SetVisibility(
                         Ease.Get(
                             a, EaseFunction.Cubic,
                             EaseMode.Out));
@@ -123,7 +123,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 .2f, a =>
                 {
-                    ProfileBar.sMain.SetVisibilty(
+                    ProfileBar.sMain.SetVisibility(
                         Ease.Get(
                             a, EaseFunction.Cubic,
                             EaseMode.Out));

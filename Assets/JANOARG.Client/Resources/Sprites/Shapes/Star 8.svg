@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="80"
+   height="80"
+   viewBox="0 0 80 80"
+   version="1.1"
+   xml:space="preserve"
+   id="SVGRoot"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   sodipodi:docname="Star 8.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs2" />
+  <sodipodi:namedview
+   pagecolor="#a9a9a9"
+   bordercolor="#292929"
+   borderopacity="1"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#232323"
+   id="namedview1"
+   inkscape:zoom="5.6128565"
+   inkscape:cx="19.776027"
+   inkscape:cy="39.462972"
+   inkscape:window-width="1920"
+   inkscape:window-height="1080"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="SVGRoot" />
+ <style
+   type="text/css"
+   id="style1">
+g.prefab path {
+  vector-effect:non-scaling-stroke;
+  -inkscape-stroke:hairline;
+  fill: none;
+  fill-opacity: 1;
+  stroke-opacity: 1;
+  stroke: #00349c;
+}
+ </style>
+ 
+<rect
+   style="fill:#ffffff;stroke:none;stroke-width:1.99999;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+   id="rect2"
+   width="40"
+   height="40.000046"
+   x="20"
+   y="20" /><rect
+   style="fill:#ffffff;stroke:none;stroke-width:1.99999;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+   id="rect2-5"
+   width="40"
+   height="40.000046"
+   x="36.568542"
+   y="-20.000023"
+   transform="rotate(45)" /></svg>

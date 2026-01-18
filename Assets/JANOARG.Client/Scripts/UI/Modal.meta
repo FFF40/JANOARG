@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/JANOARG.Client/Scripts/Behaviors/Song Select/List.meta
+guid: 5b1321a52aa279242b3a47decbb36006
+========
 guid: a9814be55ab4d0fe2ba21d7a2b8508a0
+>>>>>>>> master:Assets/JANOARG.Client/Scripts/UI/Modal.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

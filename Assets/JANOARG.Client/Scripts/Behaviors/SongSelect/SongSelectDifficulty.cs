@@ -1,40 +1,38 @@
-using System;
-using JANOARG.Client.Data.Storage;
-using JANOARG.Shared.Data.ChartInfo;
-using TMPro;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
+using TMPro;
 using UnityEngine.UI;
+using System;
+using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Client.Data.Storage;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
     public class SongSelectDifficulty : MonoBehaviour
     {
-        public TMP_Text      ChartDifficultyLabel;
-        public Button        Button;
+        public TMP_Text ChartDifficultyLabel;
+        public Button Button;
         public RectTransform Holder;
 
         public Image CoverImage;
         public Image CoverBorder;
 
-        [FormerlySerializedAs("FCIndicator")]public GameObject FullStreakIndicator;
-        
-        [FormerlySerializedAs("APIndicator")]public GameObject AllFlawlessIndicator;
-        public Graphic[]  IndicatorGraphics;
+        public GameObject FCIndicator;
+        public GameObject APIndicator;
+        public Graphic[] IndicatorGraphics;
 
-        public Image[]   ScoreDials;
+        public Image[] ScoreDials;
         public Graphic[] ScoreGraphics;
-
+    
         [NonSerialized]
         public ExternalChartMeta Chart;
-
         [NonSerialized]
         public ScoreStoreEntry Record;
-
         [NonSerialized]
         public Color Color;
 
-        public void SetItem(ExternalChartMeta chart, ScoreStoreEntry record, Color color)
+        public void SetItem(ExternalChartMeta chart, ScoreStoreEntry record, Color color) 
         {
             ChartDifficultyLabel.text = chart.DifficultyLevel;
 
@@ -42,30 +40,20 @@ namespace JANOARG.Client.Behaviors.SongSelect
             Record = record;
             Color = color;
 
-            FullStreakIndicator.SetActive(false);
-            AllFlawlessIndicator.SetActive(false);
-
-            if (record == null || record.BadCount > 0)
-            {
-            }
-            else if (record.GoodCount > 0)
-            {
-                FullStreakIndicator.SetActive(true);
-            }
-            else
-            {
-                AllFlawlessIndicator.SetActive(true);
-            }
+            FCIndicator.SetActive(false);
+            APIndicator.SetActive(false);
+            if (record == null || record.BadCount > 0) {}
+            else if (record.GoodCount > 0) FCIndicator.SetActive(true);
+            else APIndicator.SetActive(true);
 
             float score = record?.Score ?? 0;
-
-            foreach (Image image in ScoreDials)
+            foreach (var image in ScoreDials)
             {
                 image.fillAmount = score / 1e6f;
-                score = score * 10 - 9e6f;
+                score = (score * 10) - 9e6f;
             }
 
-            foreach (Graphic graphic in IndicatorGraphics) graphic.color = color;
+            foreach (var grph in IndicatorGraphics) grph.color = color;
 
             SetSelectability(0);
         }
@@ -77,12 +65,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             CoverImage.color = col;
             ChartDifficultyLabel.color = colInv;
-            foreach (Graphic grph in ScoreGraphics) grph.color = colInv * new Color(1, 1, 1, grph.color.a);
+            foreach (var grph in ScoreGraphics) grph.color = colInv * new Color(1, 1, 1, grph.color.a);
         }
 
-        private RectTransform RT(Component obj)
-        {
-            return obj.transform as RectTransform;
-        }
+        RectTransform rt (Component obj) => obj.transform as RectTransform;
     }
 }
