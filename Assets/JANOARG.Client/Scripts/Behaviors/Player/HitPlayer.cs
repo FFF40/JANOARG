@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -32,6 +33,11 @@ namespace JANOARG.Client.Behaviors.Player
         public LanePlayer     Lane;
         public HitScreenCoord HitCoord;
 
+        public bool           IsSimultaneous;
+        public MeshRenderer   SimultaneousHighlight;
+        public SpriteRenderer SimultaneousGlow;
+        
+
         public bool InDiscreteHitQueue;
 
         public bool PendingHoldQueue;
@@ -54,6 +60,15 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (HoldRenderer)
                     HoldRenderer.sharedMaterial = style.HoldTailMaterial;
+
+                //DEBUG
+                IsSimultaneous = true;
+                SimultaneousHighlight.gameObject.SetActive(IsSimultaneous);
+
+                if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
+                {
+                    SimultaneousHighlight.material = style.HighlightMaterial;
+                }
 
                 if (Current.Flickable)
                 {
@@ -86,6 +101,28 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 UpdateMesh();
                 Current.IsDirty = false;
+            }
+            
+            if (SimultaneousHighlight.gameObject.activeSelf)
+            {
+                // Colour tweaking via HSV
+                Color baseColor = Center.sharedMaterial.color;
+                float h, s, v;
+                Color.RGBToHSV(baseColor, out h, out s, out v);
+
+                    
+                h = (h + 0.15f) % 1f; // Shift hue by 15%
+                s *= 0.8f; // Desaturate slightly
+
+                Color finalColor = Color.HSVToRGB(h, s, v);
+                finalColor.a = 0.84f; // Set alpha separately
+                
+                //Debug.Log($"Changed highlight colour to {finalColor} {(Center.sharedMaterial.color == finalColor ? "(Same as base!)" : "")}");
+
+                SimultaneousHighlight.material.SetColor("_Color", finalColor);
+
+                finalColor.a = 0.6f;
+                SimultaneousGlow.color = finalColor;
             }
 
             if (FlickMesh.gameObject.activeSelf)
@@ -130,7 +167,10 @@ namespace JANOARG.Client.Behaviors.Player
             if (Current.Type == HitObject.HitType.Catch)
             {
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[1];
-                Center.transform.localScale = new Vector3(width, .2f * scale, .2f * scale);
+                Center.transform.localScale = SimultaneousHighlight.transform.localScale = new Vector3(width, .2f * scale, .2f * scale);
+                SimultaneousHighlight.transform.localScale *= new Vector3Frag(y: Center.transform.localScale.y * 1.8f, z: Center.transform.localScale.z * .998f);
+                SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 12f);
+                
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2);
                 LeftPoint.transform.localPosition = -RightPoint.transform.localPosition;
@@ -138,7 +178,9 @@ namespace JANOARG.Client.Behaviors.Player
             else
             {
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[0];
-                Center.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
+                Center.transform.localScale = SimultaneousHighlight.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
+                SimultaneousHighlight.transform.localScale *= new Vector3Frag(y: Center.transform.localScale.y * 1.8f, z: Center.transform.localScale.z * .998f);
+                SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 4f);
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2 + .2f * scale);
                 LeftPoint.transform.localPosition = -RightPoint.transform.localPosition;
