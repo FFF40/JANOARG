@@ -138,7 +138,7 @@ namespace JANOARG.Client.Behaviors.Player
             
             float f_lerpUnclamped(float a, float b, float t) => a + (b - a) * t;
             float f_lerp(float a, float b, float t)          => (1 - t) * a + t * b;;
-            float f_signedAngle(Vector2 a, Vector2 b)        => Vector2.Angle(a, b) * Math.Sign((float) ((double) a.x * (double) b.y - (double) a.y * (double) b.x));
+            float f_signedAngle(Vector2 a, Vector2 b)        => Vector2.Angle(a, b) * Math.Sign((float) (a.x * (double) b.y - a.y * (double) b.x));
             
             Vector3 f_vec3Lerp(Vector3 a, Vector3 b, float t)
             {

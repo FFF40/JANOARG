@@ -8,12 +8,12 @@ namespace JANOARG.Client.Editor
     [InitializeOnLoad]
     public static class SceneStarter
     {
-        [MenuItem("JANOARG/Scene Starter/Set Target Scene")]
+        [MenuItem("JANOARG/Scene Starter/Set Target Scene", priority = 10000)]
         private static void SetTargetScene()
         {
             string targetScene = EditorUtility.OpenFilePanel("Set target scene", "Assets", "unity");
             PlayerPrefs.SetString("TargetScene", targetScene);
-            Debug.Log("Set target scene to " + targetScene);
+            UnityEngine.Debug.Log("Set target scene to " + targetScene);
         }
 
         static SceneStarter()
@@ -28,8 +28,8 @@ namespace JANOARG.Client.Editor
             if (!string.IsNullOrEmpty(targetScene))
                 if (state == PlayModeStateChange.EnteredPlayMode)
                 {
-                    Debug.ClearDeveloperConsole();
-                    Debug.Log("Loading scene " + targetScene);
+                    UnityEngine.Debug.ClearDeveloperConsole();
+                    UnityEngine.Debug.Log("Loading scene " + targetScene);
                     EditorSceneManager.LoadSceneInPlayMode(targetScene, new LoadSceneParameters(LoadSceneMode.Single));
                 }
         }

@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using JANOARG.Client.Behaviors.Common;
-using JANOARG.Client.Behaviors.Song_Select;
+using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Data.Storage;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -518,7 +519,7 @@ namespace JANOARG.Client.Behaviors.Player
                     BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
                         = LeftActionsHolder.alpha = RightActionsHolder.alpha = ease3;
 
-                    ProfileBar.sMain.SetVisibilty(ease3);
+                    ProfileBar.sMain.SetVisibility(ease3);
 
                     BestScoreTransform.anchoredPosition =
                         new Vector2(
@@ -658,7 +659,7 @@ namespace JANOARG.Client.Behaviors.Player
                 1, a =>
                 {
                     float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
-                    ProfileBar.sMain.SetVisibilty(1 - lerp);
+                    ProfileBar.sMain.SetVisibility(1 - lerp);
 
                     BestScoreHolder.alpha = SongInfoHolder.alpha = DetailsHolder.alpha
                         = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;
@@ -746,7 +747,7 @@ namespace JANOARG.Client.Behaviors.Player
                 1, a =>
                 {
                     float lerp = Ease.Get(a * 5, EaseFunction.Cubic, EaseMode.Out);
-                    ProfileBar.sMain.SetVisibilty(1 - lerp);
+                    ProfileBar.sMain.SetVisibility(1 - lerp);
 
                     SongInfoHolder.alpha = DetailsHolder.alpha
                         = LeftActionsHolder.alpha = RightActionsHolder.alpha = 1 - lerp;

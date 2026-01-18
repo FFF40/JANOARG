@@ -18,9 +18,7 @@ namespace JANOARG.Client.Behaviors.Common
 
             // Gameplay tips
             new(
-                "<i>Gameplay tip:</i>\n<b>Use wired headphones for the developer-intended ✨flawless✨rhythm✨game✨experience✨."),
-            new(
-                "<i>Gameplay tip:</i>\n<b>You can apply a few drops of water between the back of your device and the table to reduce device drifting. Make sure your device has a case first!"),
+                "<i>Gameplay tip:</i>\n<b>Use wired headphones for the developer-intended ✨quality✨rhythm✨game✨experience✨."),
             new(
                 "<i>Gameplay tip:</i>\n<b>Don't think about it, just feel it. And if you can't feel it, memorize it."),
             new(
@@ -30,9 +28,9 @@ namespace JANOARG.Client.Behaviors.Common
 
             // General game facts
             new(
-                "<i>Did you know:</i>\n<b>JANOARG's backronym is “Just Another Normal, Ordinary, Acceptable Rhythm Game”."),
+                "<i>Did you know:</i>\n<b>The name <i>JANOARG</i> stands for <i>Just Another Normal, Ordinary, Acceptable Rhythm Game</i>."),
             new(
-                "<i>Did you know:</i>\n<b>Some people consider JANOARG's mechanic so powerful that they call it every rhythm game ever made merged into one. Everythm, if you will."),
+                "<i>Did you know:</i>\n<b>."),
             new(
                 "<i>Did you know:</i>\n<b>Despite having “ARG” in the name, we JANOARG developers actually don't host any ARGs... yet, for now."),
 
@@ -45,9 +43,6 @@ namespace JANOARG.Client.Behaviors.Common
                 "<i>Did you know:</i>\n<b>Multiple overlapping Hold Tails can be hold with just one finger. Just remember to tap the Hit Objects beforehand."),
             new(
                 "<i>Did you know:</i>\n<b>Directional Flick Hit Objects have their hit detection zone extend infinitely along the back and forward directions of the flick!"),
-
-            // Meta facts
-            new("<i>Did you know:</i>\n<b>Most of the facts shown here are nonsense... or are they?"),
 
             /* ----- OTHER ----- */
 
@@ -111,7 +106,7 @@ namespace JANOARG.Client.Behaviors.Common
             StatusCompletedHolder.sizeDelta = new Vector2(0, 0);
 
             yield return Ease.Animate(
-                3f, a =>
+                2.5f, a =>
                 {
                     float lerp = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
 

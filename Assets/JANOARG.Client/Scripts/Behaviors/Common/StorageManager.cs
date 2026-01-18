@@ -8,6 +8,7 @@ namespace JANOARG.Client.Behaviors.Common
         public static StorageManager sMain;
 
         public ScoreStore Scores = new();
+        public FlagStore Flags = new();
 
         private void Awake()
         {

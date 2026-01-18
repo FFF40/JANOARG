@@ -19,11 +19,8 @@ namespace JANOARG.Client.Behaviors.Options.Input_Types
 
         public void OnToggle()
         {
-            if (Toggle.value != CurrentValue)
-            {
                 CurrentValue = Toggle.value;
                 Set(CurrentValue);
-            }
         }
     }
 }

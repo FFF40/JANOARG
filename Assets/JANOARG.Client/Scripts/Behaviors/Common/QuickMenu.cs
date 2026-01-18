@@ -2,6 +2,7 @@ using System.Collections;
 using JANOARG.Client.Behaviors.Panels;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
@@ -51,7 +52,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 .2f, a =>
                 {
-                    ProfileBar.sMain.SetVisibilty(
+                    ProfileBar.sMain.SetVisibility(
                         1 -
                         Ease.Get(
                             a, EaseFunction.Cubic,
@@ -96,7 +97,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 .2f, a =>
                 {
-                    ProfileBar.sMain.SetVisibilty(
+                    ProfileBar.sMain.SetVisibility(
                         Ease.Get(
                             a, EaseFunction.Cubic,
                             EaseMode.Out));
@@ -122,7 +123,7 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 .2f, a =>
                 {
-                    ProfileBar.sMain.SetVisibilty(
+                    ProfileBar.sMain.SetVisibility(
                         Ease.Get(
                             a, EaseFunction.Cubic,
                             EaseMode.Out));

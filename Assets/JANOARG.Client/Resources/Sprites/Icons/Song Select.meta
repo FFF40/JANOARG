@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/JANOARG.Client/Resources/Sprites/Icons/Song Select.meta
+guid: cdacdc50c185fafa0b7088d040f12f64
+========
+guid: 30b669f2d4566e0a5a881eed1e4fccf0
+>>>>>>>> master:Assets/JANOARG.Client/Resources/Songs.meta
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

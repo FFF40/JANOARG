@@ -6,25 +6,31 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/JANOARG/Scenes/Common.unity
+    path: Assets/JANOARG.Client/Scenes/Common.unity
     guid: e033a259a6a8d0644a0effa96c493801
   - enabled: 1
-    path: Assets/JANOARG/Scenes/Intro.unity
+    path: Assets/JANOARG.Client/Scenes/Intro.unity
     guid: da3e6fdd644ff944493afbf8c7fa3d3e
   - enabled: 1
-    path: Assets/JANOARG/Scenes/Song Select.unity
+    path: Assets/JANOARG.Client/Scenes/Song Select.unity
     guid: fabf93d875f1f284f966547651d685f0
   - enabled: 1
-    path: Assets/JANOARG/Scenes/HeadlessPlayerStarter.unity
+    path: Assets/JANOARG.Client/Scenes/HeadlessPlayerStarter.unity
     guid: df61cfdddab61dcf1ac44ddd7f9057ae
   - enabled: 1
-    path: Assets/JANOARG/Scenes/Player.unity
+    path: Assets/JANOARG.Client/Scenes/Player.unity
     guid: 103df8006e925d3469cb1e098bbae915
   - enabled: 1
-    path: Assets/JANOARG/Scenes/Panels/Profile Panel.unity
+    path: Assets/JANOARG.Client/Scenes/Panels/Profile Panel.unity
     guid: 9039251308c5c4d4681a8710e20adbd2
   - enabled: 1
-    path: Assets/JANOARG/Scenes/Panels/Options Panel.unity
+    path: Assets/JANOARG.Client/Scenes/Panels/Options Panel.unity
     guid: eebff18709156be4f9b4243e50d81e57
+  - enabled: 1
+    path: Assets/JANOARG.Assets/Resources/Playlists/Index/Index Map.unity
+    guid: c81ec446c91990de2985db4948fc57b0
+  - enabled: 1
+    path: Assets/JANOARG.Assets/Resources/Playlists/Test/Test Map.unity
+    guid: 9b21345aac4725032a0e1dff16314a56
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 7702718b59bb846418d2f5bbd32f4cf5, type: 2}
