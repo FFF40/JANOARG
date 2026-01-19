@@ -55,6 +55,13 @@ namespace ANOARG.Client.Behaviors.Panels
         public Transform  PreviewNormalLeft;
         public Transform  PreviewNormalRight;
         public MeshFilter PreviewNormalFlick;
+        
+        public Transform      PreviewNormalSimulCenter;
+        public Transform      PreviewNormalSimulLeft;
+        public Transform      PreviewNormalSimulRight;
+        public SpriteRenderer PreviewNormalSimulGlow;
+        public MeshRenderer     PreviewNormalSimulBold;
+
 
         public Transform  PreviewCatchCenter;
         public Transform  PreviewCatchLeft;
@@ -351,7 +358,11 @@ namespace ANOARG.Client.Behaviors.Panels
                     Spawn<BooleanOptionInput, bool>(
                         "Highlight simul. notes",
                         () => preferences.Get("PLYR:HighlightSimulNotes", true),
-                        x => preferences.Set("PLYR:HighlightSimulNotes", x));
+                        x =>
+                        {
+                            preferences.Set("PLYR:HighlightSimulNotes", x);
+                            UpdatePlayerPreview();
+                        });
                     
                     Spawn<BooleanOptionInput, bool>(
                         "Show FLAWLESS judgments",
@@ -483,6 +494,22 @@ namespace ANOARG.Client.Behaviors.Panels
                 PreviewNormalLeft.localScale = PreviewNormalRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 PreviewNormalRight.localPosition = Vector3.right * (width / 2 + .2f * scale);
                 PreviewNormalLeft.localPosition = -PreviewNormalRight.localPosition;
+            }
+
+            {   // For glowing (simultaneous) note
+                float scale = settings.HitObjectScale[0]; // Same as normal hit
+                PreviewNormalSimulCenter.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
+                PreviewNormalSimulLeft.localScale = PreviewNormalSimulRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
+                PreviewNormalSimulRight.localPosition = Vector3.right * (width / 2 + .2f * scale);
+                PreviewNormalSimulLeft.localPosition = -PreviewNormalRight.localPosition;
+                
+                PreviewNormalSimulBold.gameObject.SetActive(settings.HighlightSimulNotes);
+                PreviewNormalSimulBold.material = new Material(Shader.Find("JANOARG/Styles/Default - Hit"));
+                PreviewNormalSimulBold.material.color = new Color(1, 1, 1, 0.75f);
+                
+                PreviewNormalSimulBold.transform.localScale = PreviewNormalSimulCenter.localScale;
+                PreviewNormalSimulBold.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulCenter.localScale.y * 1.8f, z: PreviewNormalSimulCenter.localScale.z * .998f);
+                PreviewNormalSimulGlow.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulBold.transform.localScale.y * 6f);
             }
 
             PreviewCatchFlick.transform.localScale = PreviewNormalFlick.transform.localScale
