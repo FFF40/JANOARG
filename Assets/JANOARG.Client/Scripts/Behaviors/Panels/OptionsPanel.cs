@@ -349,6 +349,11 @@ namespace ANOARG.Client.Behaviors.Panels
                     Spawn <OptionCategoryTitle>("Miscellaneous");
 
                     Spawn<BooleanOptionInput, bool>(
+                        "Highlight simul. notes",
+                        () => preferences.Get("PLYR:HighlightSimulNotes", true),
+                        x => preferences.Set("PLYR:HighlightSimulNotes", x));
+                    
+                    Spawn<BooleanOptionInput, bool>(
                         "Show FLAWLESS judgments",
                         () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
                         x => preferences.Set("PLYR:JudgementTextOnFlawless", x)

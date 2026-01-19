@@ -517,7 +517,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                     break;
                 }
-                else
+                else if (Settings.HighlightSimulNotes)
                 {
                     yield return SimulNoteChecker();
                 }
@@ -1134,6 +1134,7 @@ namespace JANOARG.Client.Behaviors.Player
         public float VisualOffset;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
+        public bool  HighlightSimulNotes;
 
 
         public PlayerSettings()
@@ -1141,6 +1142,7 @@ namespace JANOARG.Client.Behaviors.Player
             Storage prefs = CommonSys.sMain != null ? CommonSys.sMain.Preferences : null;
 
             if (prefs == null) return;
+            HighlightSimulNotes = CommonSys.sMain.Preferences.Get("PLYR:HighlightSimulNotes", true);
             ShowFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:JudgementTextOnFlawless", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             
