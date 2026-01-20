@@ -858,7 +858,7 @@ namespace JANOARG.Client.Behaviors.Player
                 GoodCount = PlayerScreen.sMain.GoodCount,
                 BadCount = PlayerScreen.sMain.BadCount,
                 MaxCombo = PlayerScreen.sMain.MaxCombo,
-                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex < 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0
+                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex >= 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0
             };
 
             StorageManager.sMain.Scores.Register(entry);
