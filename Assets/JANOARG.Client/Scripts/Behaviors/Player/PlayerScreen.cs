@@ -530,8 +530,7 @@ namespace JANOARG.Client.Behaviors.Player
         
         private struct EventNote
         {
-            public float      time;
-            public bool       isPreEpsilon;
+            public float      beat;
             public HitObject  hitObject;
             public LanePlayer lane;
 
@@ -541,42 +540,39 @@ namespace JANOARG.Client.Behaviors.Player
         {
             Debug.Log("SimulNoteChecker started");
             
-            float epsilon = 0.02f; // ~20ms window
             
             var events = new List<EventNote>();
             
             foreach (var lane in Lanes)
             foreach (var hitObject in lane.Original.Objects)
             {
-                float time = sTargetSong.Timing.ToSeconds(hitObject.Offset);
-                events.Add(new EventNote(){time = time - epsilon, isPreEpsilon = true, hitObject = hitObject, lane = lane});
-                events.Add(new EventNote(){time = time + epsilon, isPreEpsilon = false, hitObject = hitObject, lane = lane});
+                events.Add(new EventNote(){beat = hitObject.Offset, hitObject = hitObject, lane = lane});
                 hitObject.IsSimultaneous = false;
             }
 
-            events.Sort((a, b) => a.time.CompareTo(b.time));
+            events.Sort((a, b) => a.beat.CompareTo(b.beat));
             
-            List<HitObject> activeNotes = new List<HitObject>();
-
-            foreach (EventNote e in events)
+            int i = 0;
+            while (i < events.Count)
             {
-                if (e.isPreEpsilon)
+                float currentBeat = events[i].beat;
+                List<HitObject> matches = new List<HitObject>();
+
+                // Collect all notes that share the EXACT same beat
+                while (i < events.Count && Mathf.Approximately(events[i].beat, currentBeat))
                 {
-                    Debug.Log(">" + e.time + "");
-                    activeNotes.Add(e.hitObject);
-                    
-                    // If more than one note is in the active window, mark all of them
-                    if (activeNotes.Count > 1)
-                    {
-                        foreach (var n in activeNotes)
-                        {
-                            n.IsSimultaneous = true;
-                        }
-                    }
+                    matches.Add(events[i].hitObject);
+                    i++;
                 }
-                else
+
+                // If more than one note exists at this exact microsecond/beat
+                if (matches.Count > 1)
                 {
-                    activeNotes.Remove(e.hitObject);
+                    Debug.Log($"> Simultaneous notes found at beat {currentBeat}: {matches.Count}");
+                    foreach (var n in matches)
+                    {
+                        n.IsSimultaneous = true;
+                    }
                 }
             }
 
