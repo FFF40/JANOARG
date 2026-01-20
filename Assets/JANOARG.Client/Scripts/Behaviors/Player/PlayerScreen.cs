@@ -552,29 +552,32 @@ namespace JANOARG.Client.Behaviors.Player
 
             events.Sort((a, b) => a.beat.CompareTo(b.beat));
             
-            int i = 0;
-            while (i < events.Count)
+            for (int i = 0; i < events.Count;)
             {
                 float currentBeat = events[i].beat;
-                List<HitObject> matches = new List<HitObject>();
+                int start = i;
 
-                // Collect all notes that share the EXACT same beat
+                // Move index i to the end of the group with the same beat
+                // Using Mathf.Approximately just in case of float precision jitter, 
+                // but for grid-based data, it works exactly like ==
                 while (i < events.Count && Mathf.Approximately(events[i].beat, currentBeat))
                 {
-                    matches.Add(events[i].hitObject);
                     i++;
                 }
 
-                // If more than one note exists at this exact microsecond/beat
-                if (matches.Count > 1)
+                int count = i - start;
+
+                // If more than one note exists at this exact beat
+                if (count > 1)
                 {
-                    Debug.Log($"> Simultaneous notes found at beat {currentBeat}: {matches.Count}");
-                    foreach (var n in matches)
+                    Debug.Log($"> Simultaneous notes found at beat {currentBeat}: {count}");
+                    for (int j = start; j < i; j++)
                     {
-                        n.IsSimultaneous = true;
+                        events[j].hitObject.IsSimultaneous = true;
                     }
                 }
             }
+// ... existing c
 
 
             yield break; // Satisfies the IEnumerator return requirement
