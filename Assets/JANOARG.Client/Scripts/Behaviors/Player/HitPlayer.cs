@@ -103,27 +103,13 @@ namespace JANOARG.Client.Behaviors.Player
                 UpdateMesh();
                 Current.IsDirty = false;
             }
-            
+
             if (SimultaneousHighlight.gameObject.activeSelf)
             {
-                // Colour tweaking via HSV
-                Color baseColor = Center.sharedMaterial.color;
-                float h, s, v;
-                Color.RGBToHSV(baseColor, out h, out s, out v);
-
-                    
-                h = (h + 0.15f) % 1f; // Shift hue by 15%
-                s *= 0.75f; // Desaturate slightly
-
-                Color finalColor = Color.HSVToRGB(h, s, v);
-                finalColor.a = 0.84f; // Set alpha separately
-                
-                //Debug.Log($"Changed highlight colour to {finalColor} {(Center.sharedMaterial.color == finalColor ? "(Same as base!)" : "")}");
-
-                SimultaneousHighlight.material.SetColor("_Color", finalColor);
-                
-                finalColor.a = 0.6f;
-                SimultaneousGlow.color = finalColor;
+                (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Center.sharedMaterial.color);
+                Debug.Log($"{highlight}, {glow}");
+                SimultaneousHighlight.material.SetColor("_Color", highlight);
+                SimultaneousGlow.color = glow;
             }
 
             if (FlickMesh.gameObject.activeSelf)
