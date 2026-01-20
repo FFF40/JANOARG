@@ -581,8 +581,8 @@ namespace JANOARG.Client.Behaviors.Player
                     baseCoins *= 1.05f;
                 }
             }
-
-            SaveScoreEntry(score);
+            
+            SaveScoreEntry(score);   
             ProfileBar.sMain.CompleteSong((long)baseOrbs, (long)baseCoins);
             StorageManager.sMain.Save();
         }
@@ -858,7 +858,7 @@ namespace JANOARG.Client.Behaviors.Player
                 GoodCount = PlayerScreen.sMain.GoodCount,
                 BadCount = PlayerScreen.sMain.BadCount,
                 MaxCombo = PlayerScreen.sMain.MaxCombo,
-                Rating = Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score)
+                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex >= 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0
             };
 
             StorageManager.sMain.Scores.Register(entry);
