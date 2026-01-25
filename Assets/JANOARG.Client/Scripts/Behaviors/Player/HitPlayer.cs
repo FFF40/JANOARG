@@ -108,8 +108,13 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Center.sharedMaterial.color);
                 Debug.Log($"{highlight}, {glow}");
-                SimultaneousHighlight.material.SetColor("_Color", highlight);
-                SimultaneousGlow.color = glow;
+
+                if (highlight != SimultaneousHighlight.material.color)
+                {
+                    SimultaneousHighlight.material.SetColor("_Color", highlight);
+                    SimultaneousGlow.material.SetColor("_Color", glow);
+                    SimultaneousGlow.color = glow;
+                }
             }
 
             if (FlickMesh.gameObject.activeSelf)
