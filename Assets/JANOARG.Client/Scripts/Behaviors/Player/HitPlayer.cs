@@ -68,7 +68,7 @@ namespace JANOARG.Client.Behaviors.Player
                 if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
                 {
                     SimultaneousHighlight.material = style.HighlightMaterial;
-                    SimultaneousGlow.material = SimultaneousHighlight.material;
+                    SimultaneousGlow.material = style.HighlightGlowMaterial;
                 }
 
                 if (Current.Flickable)
