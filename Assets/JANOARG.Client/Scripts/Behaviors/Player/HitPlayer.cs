@@ -67,8 +67,12 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
                 {
-                    SimultaneousHighlight.material = style.HighlightMaterial;
-                    SimultaneousGlow.material = style.HighlightGlowMaterial;
+                    SimultaneousHighlight.sharedMaterial = 
+                        Current.Type == HitObject.HitType.Catch 
+                            ? style.CatchHighlightMaterial : style.NormalHighlightMaterial;
+                    SimultaneousGlow.sharedMaterial = 
+                        Current.Type == HitObject.HitType.Catch 
+                            ? style.CatchHighlightGlowMaterial : style.NormalHighlightGlowMaterial;
                 }
 
                 if (Current.Flickable)
@@ -102,19 +106,6 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 UpdateMesh();
                 Current.IsDirty = false;
-            }
-
-            if (SimultaneousHighlight.gameObject.activeSelf)
-            {
-                (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Center.sharedMaterial.color);
-                Debug.Log($"{highlight}, {glow}");
-
-                if (highlight != SimultaneousHighlight.material.color)
-                {
-                    SimultaneousHighlight.material.SetColor("_Color", highlight);
-                    SimultaneousGlow.material.SetColor("_Color", glow);
-                    SimultaneousGlow.color = glow;
-                }
             }
 
             if (FlickMesh.gameObject.activeSelf)
@@ -159,9 +150,9 @@ namespace JANOARG.Client.Behaviors.Player
             if (Current.Type == HitObject.HitType.Catch)
             {
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[1];
-                Center.transform.localScale = SimultaneousHighlight.transform.localScale = new Vector3(width, .2f * scale, .2f * scale);
-                SimultaneousHighlight.transform.localScale *= new Vector3Frag(y: Center.transform.localScale.y * 1.8f, z: Center.transform.localScale.z * .998f);
-                SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 16f);
+                Center.transform.localScale = new Vector3(width, .2f * scale, .2f * scale);
+                SimultaneousHighlight.transform.localScale = new Vector3(width + .2f * scale, .3f * scale, .3f * scale);
+                SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 12f);
                 
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2);
@@ -170,8 +161,8 @@ namespace JANOARG.Client.Behaviors.Player
             else
             {
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[0];
-                Center.transform.localScale = SimultaneousHighlight.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
-                SimultaneousHighlight.transform.localScale *= new Vector3Frag(y: Center.transform.localScale.y * 1.8f, z: Center.transform.localScale.z * .998f);
+                Center.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
+                SimultaneousHighlight.transform.localScale = new Vector3(width + .2f * scale, .6f * scale, .6f * scale);
                 SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 6f);
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2 + .2f * scale);

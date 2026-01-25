@@ -1055,7 +1055,10 @@ namespace JANOARG.Client.Behaviors.Player
             if (!isHoldNote || isHoldComplete)
                 RemoveHitPlayer(hitObject);
             else
+            {
                 hitObject.IsProcessed = true;
+                hitObject.SimultaneousHighlight.gameObject.SetActive(false);
+            }
         }
 
         public void SetBackgroundColor(Color color)
