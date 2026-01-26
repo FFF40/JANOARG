@@ -517,13 +517,72 @@ namespace JANOARG.Client.Behaviors.Player
 
                     break;
                 }
+                else if (Settings.HighlightSimulNotes)
+                {
+                    yield return SimulNoteChecker();
+                }
             }
 
             _LoadState[0] = true;
 
             yield return new WaitForEndOfFrame();
         }
+        
+        private struct EventNote
+        {
+            public float      beat;
+            public HitObject  hitObject;
+            public LanePlayer lane;
 
+        }
+
+        private IEnumerator SimulNoteChecker()
+        {
+            Debug.Log("SimulNoteChecker started");
+            
+            
+            var events = new List<EventNote>();
+            
+            foreach (var lane in Lanes)
+            foreach (var hitObject in lane.Original.Objects)
+            {
+                events.Add(new EventNote(){beat = hitObject.Offset, hitObject = hitObject, lane = lane});
+                hitObject.IsSimultaneous = false;
+            }
+
+            events.Sort((a, b) => a.beat.CompareTo(b.beat));
+            
+            for (int i = 0; i < events.Count;)
+            {
+                float currentBeat = events[i].beat;
+                int start = i;
+
+                // Move index i to the end of the group with the same beat
+                // Using Mathf.Approximately just in case of float precision jitter, 
+                // but for grid-based data, it works exactly like ==
+                while (i < events.Count && Mathf.Approximately(events[i].beat, currentBeat))
+                {
+                    i++;
+                }
+
+                int count = i - start;
+
+                // If more than one note exists at this exact beat
+                if (count > 1)
+                {
+                    Debug.Log($"> Simultaneous notes found at beat {currentBeat}: {count}");
+                    for (int j = start; j < i; j++)
+                    {
+                        events[j].hitObject.IsSimultaneous = true;
+                    }
+                }
+            }
+// ... existing c
+
+
+            yield break; // Satisfies the IEnumerator return requirement
+        }
+    
         private IEnumerator LaneGroupLoader()
         {
             var loadedLaneGroups = 0;
@@ -996,7 +1055,10 @@ namespace JANOARG.Client.Behaviors.Player
             if (!isHoldNote || isHoldComplete)
                 RemoveHitPlayer(hitObject);
             else
+            {
                 hitObject.IsProcessed = true;
+                hitObject.SimultaneousHighlight.gameObject.SetActive(false);
+            }
         }
 
         public void SetBackgroundColor(Color color)
@@ -1074,6 +1136,7 @@ namespace JANOARG.Client.Behaviors.Player
         public float VisualOffset;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
+        public bool  HighlightSimulNotes;
 
 
         public PlayerSettings()
@@ -1081,6 +1144,7 @@ namespace JANOARG.Client.Behaviors.Player
             Storage prefs = CommonSys.sMain != null ? CommonSys.sMain.Preferences : null;
 
             if (prefs == null) return;
+            HighlightSimulNotes = CommonSys.sMain.Preferences.Get("PLYR:HighlightSimulNotes", true);
             ShowFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:JudgementTextOnFlawless", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             
