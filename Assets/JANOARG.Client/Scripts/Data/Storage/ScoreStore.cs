@@ -44,6 +44,7 @@ namespace JANOARG.Client.Data.Storage
             }
             else
             {
+                oldEntry.ChartIndex = entry.ChartIndex;
                 oldEntry.Rating = Mathf.Max(oldEntry.Rating, entry.Rating);
                 oldEntry.MaxCombo = Mathf.Max(oldEntry.MaxCombo, entry.MaxCombo);
             }
