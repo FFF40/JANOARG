@@ -22,9 +22,13 @@ namespace JANOARG.Client.Data.Playlist.Editor
                     EditorGUILayout.PropertyField(prop.FindPropertyRelative("Achievement"));
                     if (item.Achievement < 0)
                     {
-                        EditorGUILayout.PropertyField(prop.FindPropertyRelative("Threshold"), new GUIContent(""));
+                        EditorGUILayout.PropertyField(prop.FindPropertyRelative("AchievementThreshold"), new GUIContent(" "));
                     }
                     EditorGUILayout.PropertyField(prop.FindPropertyRelative("Difficulty"));
+                    if (item.Difficulty < 0)
+                    {
+                        EditorGUILayout.PropertyField(prop.FindPropertyRelative("DifficultyThreshold"), new GUIContent(" "));
+                    }
                 },
                 GetNameFunc = (item) =>
                 {
