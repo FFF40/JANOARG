@@ -852,6 +852,7 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 SongID = Path.GetFileNameWithoutExtension(PlayerScreen.sTargetSongPath),
                 ChartID = PlayerScreen.sTargetChartMeta.Target,
+                ChartIndex = PlayerScreen.sTargetChartMeta.DifficultyIndex,
 
                 Score = score,
                 PerfectCount = PlayerScreen.sMain.PerfectCount,
