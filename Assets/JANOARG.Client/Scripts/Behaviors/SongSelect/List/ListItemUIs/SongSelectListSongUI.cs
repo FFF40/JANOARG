@@ -14,7 +14,7 @@ using JANOARG.Client.Data.Playlist;
 
 namespace JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs
 {
-    public class SongSelectListSongUI : SongSelectItemUI<SongSelectListSong>, IHasConditional
+    public class SongSelectListSongUI : SongSelectItemUI<SongSelectListSong>, IHasGameConditional
     {
         public TMP_Text SongNameLabel;
         public TMP_Text SongArtistLabel;

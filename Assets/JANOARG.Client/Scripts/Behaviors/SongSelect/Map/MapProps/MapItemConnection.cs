@@ -16,7 +16,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
     [RequireComponent(typeof(SplineExtrude))]
     [RequireComponent(typeof(MeshRenderer))]
     [ExecuteInEditMode]
-    public class MapItemConnection : MapProp, IHasConditional
+    public class MapItemConnection : MapProp, IHasGameConditional
     {
         [SerializeField] private MapItem m_from;
         [SerializeField] private MapItem m_to;

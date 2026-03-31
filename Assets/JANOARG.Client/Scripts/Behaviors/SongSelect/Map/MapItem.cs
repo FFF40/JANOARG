@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.SongSelect.Map
 {
-    public abstract class MapItem : MonoBehaviour, IHasConditional
+    public abstract class MapItem : MonoBehaviour, IHasGameConditional
     {
         public float SafeCameraDistance = 100;
 
