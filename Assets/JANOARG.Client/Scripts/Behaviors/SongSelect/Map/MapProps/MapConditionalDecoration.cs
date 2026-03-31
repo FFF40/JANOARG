@@ -33,6 +33,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
 
         public bool isRevealed { get; private set; }
         public bool isUnlocked { get; private set; }
+
+        public void Start()
+        {
+            SetDirty();
+        }
     
         public MapItem[] Dependencies
         {
@@ -81,11 +86,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
                 _ => throw new ArgumentException($"Unknown reveal on type {RevealOn}")
             };
 
-            isRevealed = RevealConditional switch{
+            isRevealed = isUnlocked = RevealConditional switch{
                 RevealConditionalType.All => Dependencies.All(revealFunc),
                 RevealConditionalType.Any => Dependencies.Any(revealFunc),
                 _ => throw new ArgumentException($"Unknown reveal conditional type {RevealConditional}")
             };
+
+            Debug.Log(isRevealed);
 
             foreach (Transform child in transform)
             {
