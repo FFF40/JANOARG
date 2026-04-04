@@ -715,11 +715,11 @@ public class PlayerInputManager : MonoBehaviour
         LanePosition
             step = laneHoldNote.GetLanePosition(beat, beat, PlayerScreen.sTargetSong.Timing); // Get the lane position for the current beat
 
-        Vector3 startHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.StartPosition +
-                                    laneHoldNote.Position;
+        Vector3 startHoldPosition = laneHoldNote.Position +
+                                    Quaternion.Euler(laneHoldNote.Rotation) * step.StartPosition;
 
-        Vector3 endHoldPosition = Quaternion.Euler(laneHoldNote.Rotation) * step.EndPosition +
-                                  laneHoldNote.Position;
+        Vector3 endHoldPosition = laneHoldNote.Position +
+                                  Quaternion.Euler(laneHoldNote.Rotation) * step.EndPosition;
 
         LaneGroupPlayer currentHoldGroupPlayer = holdNoteEntry.HitObject.Lane.Group;
 
@@ -734,11 +734,11 @@ public class PlayerInputManager : MonoBehaviour
                     .GetStoryboardableObject(
                         beat); // Get the current lanegroup
 
-            startHoldPosition = Quaternion.Euler(currentLaneGroup.Rotation) * startHoldPosition +
-                                currentLaneGroup.Position; // Apply transform manually
+            startHoldPosition = currentLaneGroup.Position +
+                                Quaternion.Euler(currentLaneGroup.Rotation) * startHoldPosition; // Apply transform manually
 
-            endHoldPosition = Quaternion.Euler(currentLaneGroup.Rotation) * endHoldPosition +
-                              currentLaneGroup.Position;
+            endHoldPosition = currentLaneGroup.Position +
+                              Quaternion.Euler(currentLaneGroup.Rotation) * endHoldPosition;
 
             currentHoldGroupPlayer = currentHoldGroupPlayer.Parent; // Go to the parent LaneGroupPlayer
         }

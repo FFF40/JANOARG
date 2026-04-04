@@ -408,59 +408,57 @@ namespace JANOARG.Client.Behaviors.Player
                     instancedLane.Init();
                     Lanes.Add(instancedLane);
 
-                    float time = float.NaN;
-
-                    Vector3 startPos = Vector3.zero,
-                        endPos = Vector3.zero; // Declare 2 points of lane show in screen
-
                     foreach (HitObject laneHitobject in instancedLane.Original.Objects)
                     {
                         // Add ExScore by note type
-                        TotalExScore += laneHitobject.Type == HitObject.HitType.Normal 
+                        TotalExScore += laneHitobject.Type == HitObject.HitType.Normal
                             ? 3 : 1;
-                        
+
                         TotalExScore += Mathf.Ceil(laneHitobject.HoldLength / 0.5f);
 
                         if (laneHitobject.Flickable)
                         {
                             TotalExScore += 1;
-                            
+
                             if (!float.IsNaN(laneHitobject.FlickDirection))
                                 TotalExScore += 1;
                         }
 
-                        if (!Mathf.Approximately(time, laneHitobject.Offset))
+                        // Set camera to hitobject's beat position
+                        CameraController hitObjectCamera = (CameraController)sTargetChart.Data.Camera.GetStoryboardableObject(laneHitobject.Offset);
+                        Pseudocamera.transform.localPosition = hitObjectCamera.CameraPivot;
+                        Pseudocamera.transform.localEulerAngles = hitObjectCamera.CameraRotation;
+                        Pseudocamera.transform.Translate(Vector3.back * hitObjectCamera.PivotDistance);
+
+                        // Get lane state at hitobject's beat
+                        Lane lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
+                        LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, sTargetSong.Timing);
+
+                        Quaternion laneRot = Quaternion.Euler(lane.Rotation);
+                        Vector3 startLocal = laneRot * positionStep.StartPosition + lane.Position;
+                        Vector3 endLocal   = laneRot * positionStep.EndPosition   + lane.Position;
+
+                        var groupChain = new List<LaneGroupPlayer>();
+                        LaneGroupPlayer g = laneInGroup;
+                        while (g) { groupChain.Add(g); g = g.Parent; }
+                        groupChain.Reverse();
+
+                        foreach (var grp in groupChain)
                         {
-                            // Set camera distance and rotation to hit time of the note?
-                            CameraController hitObjectCamera = (CameraController)sTargetChart.Data.Camera.GetStoryboardableObject(laneHitobject.Offset);
-                            Pseudocamera.transform.localPosition = hitObjectCamera.CameraPivot;
-                            Pseudocamera.transform.localEulerAngles = hitObjectCamera.CameraRotation;
-                            Pseudocamera.transform.Translate(Vector3.back * hitObjectCamera.PivotDistance);
-
-                            // Set 2 points of lane?
-                            Lane lane = (Lane)instancedLane.Original.GetStoryboardableObject(laneHitobject.Offset);
-                            LanePosition positionStep = lane.GetLanePosition(laneHitobject.Offset, laneHitobject.Offset, sTargetSong.Timing);
-                            startPos = Quaternion.Euler(lane.Rotation) * positionStep.StartPosition + lane.Position;
-                            endPos = Quaternion.Euler(lane.Rotation) * positionStep.EndPosition + lane.Position;
-                            LaneGroupPlayer group = laneInGroup;
-
-                            // Loop to get localPosition of 2 points of lane?
-                            while (group)
-                            {
-                                LaneGroup laneGroup = (LaneGroup)group.Original.GetStoryboardableObject(laneHitobject.Offset);
-                                startPos = Quaternion.Euler(laneGroup.Rotation) * startPos + laneGroup.Position;
-                                endPos = Quaternion.Euler(laneGroup.Rotation) * endPos + laneGroup.Position;
-                                group = group.Parent;
-                            }
+                            LaneGroup sampled = (LaneGroup)grp.Original.GetStoryboardableObject(laneHitobject.Offset);
+                            grp.transform.localPosition    = sampled.Position;
+                            grp.transform.localEulerAngles = sampled.Rotation;
                         }
 
-                        HitObject hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset); // Get current HitObject?
+                        Vector3 startPos = laneInGroup != null ? laneInGroup.transform.TransformPoint(startLocal) : startLocal;
+                        Vector3 endPos   = laneInGroup != null ? laneInGroup.transform.TransformPoint(endLocal)   : endLocal;
+
+                        HitObject hitObject = (HitObject)laneHitobject.GetStoryboardableObject(laneHitobject.Offset);
                         Vector2 hitStart = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position));
-                        Vector2 hitEnd = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
+                        Vector2 hitEnd   = Pseudocamera.WorldToScreenPoint(Vector3.LerpUnclamped(startPos, endPos, hitObject.Position + laneHitobject.Length));
 
                         float radius = Vector2.Distance(hitStart, hitEnd) / 2 + ScaledExtraRadius;
 
-                        // Add hit coords
                         instancedLane.HitCoords.Add(new HitScreenCoord
                         {
                             Position = (hitStart + hitEnd) / 2,
@@ -614,6 +612,9 @@ namespace JANOARG.Client.Behaviors.Player
                         instancedLaneGroup.Original = sTargetChart.Data.Groups[i];
                         instancedLaneGroup.Current = sCurrentChart.Groups[i];
                         instancedLaneGroup.gameObject.name = instancedLaneGroup.Current.Name;
+                        instancedLaneGroup.Parent = hasNoParent
+                            ? null 
+                            : LaneGroups.Find(x => x.Current.Name == laneGroup.Group);
 
                         LaneGroups.Add(instancedLaneGroup);
                         isLoaded[i] = true;
