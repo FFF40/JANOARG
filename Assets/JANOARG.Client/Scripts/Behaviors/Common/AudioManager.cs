@@ -1,4 +1,3 @@
-using System.Collections;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -12,7 +11,7 @@ namespace JANOARG.Client.Behaviors.Common
 
         [Space] public AudioMixer AudioMixer;
 
-        private Coroutine _SceneLowPassCutoffRoutine;
+        private EaseEnumerator _SceneLowPassCutoffRoutine;
 
         public void Awake()
         {
@@ -21,17 +20,17 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void SetSceneLayerLowPassCutoff(float value, float duration)
         {
-            if (_SceneLowPassCutoffRoutine != null) StopCoroutine(_SceneLowPassCutoffRoutine);
+            _SceneLowPassCutoffRoutine?.Skip();
             _SceneLowPassCutoffRoutine = StartCoroutine(SetSceneLayerLowPassCutoffAnim(value, duration));
         }
 
-        private IEnumerator SetSceneLayerLowPassCutoffAnim(float value, float duration)
+        private EaseEnumerator SetSceneLayerLowPassCutoffAnim(float value, float duration)
         {
             AudioMixer.GetFloat("SceneLayerLowPassCutoff", out float fromLog);
             fromLog = Mathf.Log10(fromLog);
             float toLog = Mathf.Log10(value);
 
-            yield return Ease.Animate(
+            return Ease.EnumAnimate(
                 duration, a =>
                 {
                     float cutoffLog = Mathf.Lerp(fromLog, toLog, a);

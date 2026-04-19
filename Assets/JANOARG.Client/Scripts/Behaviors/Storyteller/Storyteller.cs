@@ -180,39 +180,29 @@ namespace JANOARG.Client.Behaviors.Storyteller
             StartCoroutine(f_registration());
         }
 
-        private float     _CurrentNextChunkIndicatorPosition = 0;
-        private Coroutine _CurrentNextChunkIndicatorRoutine  = null;
+        private float          _CurrentNextChunkIndicatorPosition = 0;
+        private EaseEnumerator _CurrentNextChunkIndicatorRoutine  = null;
 
         public void SetNextChunkIndicatorState(float target)
         {
-            if (_CurrentNextChunkIndicatorRoutine != null) StopCoroutine(_CurrentNextChunkIndicatorRoutine);
-            _CurrentNextChunkIndicatorRoutine = StartCoroutine(NextChunkIndicatorAnim(target));
-        }
-
-        private IEnumerator NextChunkIndicatorAnim(float target)
-        {
-            float from = _CurrentNextChunkIndicatorPosition;
-
-            yield return Ease.Animate(0.2f, (x) =>
+            _CurrentNextChunkIndicatorRoutine?.Skip();
+            _CurrentNextChunkIndicatorRoutine = Ease.EnumAnimate(0.2f, x =>
             {
-                x = Mathf.Lerp(from, target, x);
+                x = Mathf.Lerp(_CurrentNextChunkIndicatorPosition, target, x);
                 _CurrentNextChunkIndicatorPosition = x;
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 NextChunkIndicator.color = new Color(1, 1, 1, x);
                 NextChunkIndicator.rectTransform.anchoredPosition = 5 * (1 - ease) * Vector2.down;
             });
+            StartCoroutine(_CurrentNextChunkIndicatorRoutine);
         }
 
-        private Coroutine _CurrentNameFieldRoutine = null;
+        private EaseEnumerator _CurrentNameFieldRoutine = null;
 
         public void SetNameLabelText(string label)
         {
-            if (_CurrentNameFieldRoutine != null) StopCoroutine(_CurrentNameFieldRoutine);
-            _CurrentNameFieldRoutine = StartCoroutine(NameLabelAnim(label));
-        }
+            _CurrentNameFieldRoutine?.Skip();
 
-        private IEnumerator NameLabelAnim(string label)
-        {
             float fromAlpha = NameLabelGroup.alpha;
             float toAlpha = string.IsNullOrWhiteSpace(label) ? 0 : 1;
             float fromXPos = NameLabelHolder.anchorMin.x;
@@ -226,7 +216,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
             if (fromAlpha == 0) fromXPos = toXPos;
 
-            yield return Ease.Animate(0.2f, (x) =>
+            _CurrentNameFieldRoutine = Ease.EnumAnimate(0.2f, x =>
             {
                 float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
                 NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
@@ -234,6 +224,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new Vector2(xPos, 0.5f);
                 NameLabelHolder.anchoredPosition = new Vector2(0, (1 - NameLabelGroup.alpha) * -5);
             });
+            StartCoroutine(_CurrentNameFieldRoutine);
         }
     }
 }

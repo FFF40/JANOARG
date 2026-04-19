@@ -30,7 +30,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
         public bool IsShowing { get; private set; }
 
-        Coroutine CurrentAnim;
+        EaseEnumerator CurrentAnim;
 
         public void Start()
         {
@@ -47,8 +47,22 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
         {
             if (SongSelectScreen.sMain.TargetSongAnim != null) return;
             IsShowing = willShow;
-            if (CurrentAnim != null) StopCoroutine(CurrentAnim);
-            CurrentAnim = StartCoroutine(UpdateShowingAnim(willShow));
+            MainGroup.interactable = MainGroup.blocksRaycasts = willShow;
+
+            float startHolderPivotY = CriteriaHolder.pivot.y;
+            float endHolderPivotY = willShow ? 0 : 1;
+
+            CurrentAnim?.Skip();
+            CurrentAnim = Ease.EnumAnimate(.3f, (t) =>
+            {
+                float ease1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
+                CriteriaHolder.pivot *= new Vector2Frag(y: Mathf.Lerp(startHolderPivotY, endHolderPivotY, ease1));
+
+                float ease2 = Ease.Get(t * 1.5f, EaseFunction.Cubic, EaseMode.Out);
+                if (willShow) ease2 = 1 - ease2;
+                SongSelectScreen.sMain.LerpUI(ease2);
+            });
+            StartCoroutine(CurrentAnim);
         }
 
         public void UpdateSortCriteria()
@@ -80,27 +94,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
             ListView.DoSortAnim();
         }
 
-        // -------------------- Animations
-
-        public IEnumerator UpdateShowingAnim(bool willShow)
-        {
-            MainGroup.interactable = MainGroup.blocksRaycasts = willShow;
-
-            float startHolderPivotY = CriteriaHolder.pivot.y;
-            float endHolderPivotY = willShow ? 0 : 1;
-
-            yield return Ease.Animate(.3f, (t) =>
-            {
-                float ease1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
-                CriteriaHolder.pivot *= new Vector2Frag(y: Mathf.Lerp(startHolderPivotY, endHolderPivotY, ease1));
-
-                float ease2 = Ease.Get(t * 1.5f, EaseFunction.Cubic, EaseMode.Out);
-                if (willShow) ease2 = 1 - ease2;
-                SongSelectScreen.sMain.LerpUI(ease2);
-            });
-
-            CurrentAnim = null;
-        }
     }
 
     public enum SongSortCriteria

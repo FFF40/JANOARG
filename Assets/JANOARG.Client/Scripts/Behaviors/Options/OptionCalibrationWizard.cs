@@ -45,7 +45,7 @@ namespace JANOARG.Client.Behaviors.Options
         public  TMP_Text    VisualOffsetInstructionLabel;
         private float       _CumulativeOffset;
 
-        private Coroutine _CurrentAnim;
+        private EaseEnumerator _CurrentAnim;
 
         private bool _IsActive;
 
@@ -125,15 +125,13 @@ namespace JANOARG.Client.Behaviors.Options
                 VisualOffsetLeft.color = VisualOffsetRight.color = new Color(1, 1, 1, 0);
             }
 
-            if (_CurrentAnim != null)
-                StopCoroutine(_CurrentAnim);
-
+            _CurrentAnim?.Skip();
             _CurrentAnim = StartCoroutine(InitializeWizardAnim());
         }
 
         public IEnumerator InitializeWizardAnim()
         {
-            yield return Ease.Animate(
+            _CurrentAnim = Ease.EnumAnimate(
                 .45f, x =>
                 {
                     float ease = Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out);
@@ -148,6 +146,7 @@ namespace JANOARG.Client.Behaviors.Options
 
                     FaderGroup.alpha = ease2;
                 });
+            yield return _CurrentAnim;
 
             _IsActive = true;
             _LastDSPTime = AudioSettings.dspTime;
@@ -169,7 +168,7 @@ namespace JANOARG.Client.Behaviors.Options
             EnhancedTouchSupport.Disable();
             InputField.onEndEdit.RemoveAllListeners();
 
-            if (_CurrentAnim != null) StopCoroutine(_CurrentAnim);
+            _CurrentAnim?.Skip();
             _CurrentAnim = StartCoroutine(HideWizardAnim());
         }
 
@@ -177,7 +176,7 @@ namespace JANOARG.Client.Behaviors.Options
         {
             CalibrationLoopPlayer.Pause();
 
-            yield return Ease.Animate(
+            _CurrentAnim = Ease.EnumAnimate(
                 .3f, x =>
                 {
                     float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
@@ -190,6 +189,7 @@ namespace JANOARG.Client.Behaviors.Options
 
                     FaderGroup.alpha = 1 - ease;
                 });
+            yield return _CurrentAnim;
 
             _CurrentAnim = null;
             JudgmentOffsetHolder.SetActive(false);

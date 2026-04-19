@@ -53,7 +53,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
         public float TargetSongOffset;
         public string TargetSongID;
 
-        Coroutine currentAnim;
+        EaseEnumerator currentAnim;
 
         public void HandleUpdate()
         {
@@ -451,7 +451,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
         public IEnumerator SortAnim()
         {
-            yield return Ease.Animate(.05f, (t) =>
+            yield return Ease.EnumAnimate(.05f, (t) =>
             {
                 float ease1 = t;  // Ease.Get(t, EaseFunction.Linear, EaseMode.In);
                 float xPos = 180 - 10 * ease1;
@@ -461,20 +461,21 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
             UpdateSort();
 
-            yield return Ease.Animate(.3f, (t) =>
+            currentAnim = Ease.EnumAnimate(.3f, (t) =>
             {
                 float ease1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
                 float xPos = 170 + 10 * ease1;
                 ItemGroup.alpha = ease1;
                 ItemHolder.anchoredPosition = new(xPos, ItemHolder.anchoredPosition.y);
             });
+            yield return currentAnim;
 
             currentAnim = null;
         }
 
         public void DoSortAnim()
         {
-            if (currentAnim != null) StopCoroutine(currentAnim);
+            currentAnim?.Skip();
             currentAnim = StartCoroutine(SortAnim());
         }
     }
