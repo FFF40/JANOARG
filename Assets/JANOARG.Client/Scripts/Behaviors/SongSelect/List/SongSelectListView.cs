@@ -476,7 +476,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
         public void DoSortAnim()
         {
             currentAnim?.Skip();
-            currentAnim = StartCoroutine(SortAnim());
+            StartCoroutine(SortAnim());
         }
     }
 }

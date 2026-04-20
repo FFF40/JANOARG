@@ -374,7 +374,6 @@ namespace JANOARG.Client.Behaviors.Common
                                     });
                             StartCoroutine(coinAnim);
                         }));
-                        }));
             }
 
             // Orb particles

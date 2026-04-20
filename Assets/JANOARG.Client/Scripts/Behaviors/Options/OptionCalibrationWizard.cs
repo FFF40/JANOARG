@@ -126,7 +126,7 @@ namespace JANOARG.Client.Behaviors.Options
             }
 
             _CurrentAnim?.Skip();
-            _CurrentAnim = StartCoroutine(InitializeWizardAnim());
+            StartCoroutine(InitializeWizardAnim());
         }
 
         public IEnumerator InitializeWizardAnim()
@@ -169,7 +169,7 @@ namespace JANOARG.Client.Behaviors.Options
             InputField.onEndEdit.RemoveAllListeners();
 
             _CurrentAnim?.Skip();
-            _CurrentAnim = StartCoroutine(HideWizardAnim());
+            StartCoroutine(HideWizardAnim());
         }
 
         public IEnumerator HideWizardAnim()

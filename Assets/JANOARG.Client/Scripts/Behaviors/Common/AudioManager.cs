@@ -21,7 +21,8 @@ namespace JANOARG.Client.Behaviors.Common
         public void SetSceneLayerLowPassCutoff(float value, float duration)
         {
             _SceneLowPassCutoffRoutine?.Skip();
-            _SceneLowPassCutoffRoutine = StartCoroutine(SetSceneLayerLowPassCutoffAnim(value, duration));
+            _SceneLowPassCutoffRoutine = SetSceneLayerLowPassCutoffAnim(value, duration);
+            StartCoroutine(_SceneLowPassCutoffRoutine);
         }
 
         private EaseEnumerator SetSceneLayerLowPassCutoffAnim(float value, float duration)
