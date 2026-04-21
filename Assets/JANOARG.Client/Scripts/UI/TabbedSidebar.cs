@@ -93,8 +93,8 @@ namespace JANOARG.Client.UI
                 float ease = Ease.Get(value / .75f, EaseFunction.Cubic, EaseMode.Out);
                 float ease2 = Ease.Get((value - .25f) / .75f, EaseFunction.Cubic, EaseMode.Out);
 
-                float min = Mathf.Lerp(oldRT.anchoredPosition.y, newRT.anchoredPosition.y, oldIndex > index ? ease2 : ease);
-                float max = Mathf.Lerp(oldRT.anchoredPosition.y, newRT.anchoredPosition.y, oldIndex < index ? ease2 : ease);
+                float min = EaseUtils.LerpTo(oldRT.anchoredPosition.y, newRT.anchoredPosition.y, oldIndex > index ? ease2 : ease);
+                float max = EaseUtils.LerpTo(oldRT.anchoredPosition.y, newRT.anchoredPosition.y, oldIndex < index ? ease2 : ease);
 
                 TabButtonIndicator.anchoredPosition = Vector2.up * min;
                 TabButtonIndicator.sizeDelta = sizeDelta + Vector2.up * (max - min);
@@ -106,7 +106,7 @@ namespace JANOARG.Client.UI
 
                 TabGroup.alpha = value;
                 TabLabel.alpha = value / 2;
-                ScrollHolder.anchoredPosition = Vector3.left * 50 * (1 - ease);
+                ScrollHolder.anchoredPosition = Vector3.left * EaseUtils.ToZero(50, ease);
             }
 
             var isSet = false;

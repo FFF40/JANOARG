@@ -941,12 +941,11 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(.6f, (x) =>
             {
                 float val = Mathf.Pow(1 - x, 5);
-                float val2 = 1 - Ease.Get(x, EaseFunction.Quintic, EaseMode.In);
 
                 ComboGroup.alpha = Combo == 0 ? 0 : val + 1;
                 ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
                 JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
-                JudgmentGroup.alpha = val2;
+                JudgmentGroup.alpha = EaseUtils.ToZero(1, x, EaseFunction.Quintic, EaseMode.In);
             });
         }
 

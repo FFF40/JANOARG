@@ -56,7 +56,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
             CurrentAnim = Ease.EnumAnimate(.3f, (t) =>
             {
                 float ease1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
-                CriteriaHolder.pivot *= new Vector2Frag(y: Mathf.Lerp(startHolderPivotY, endHolderPivotY, ease1));
+                CriteriaHolder.pivot *= new Vector2Frag(y: EaseUtils.LerpTo(startHolderPivotY, endHolderPivotY, ease1));
 
                 float ease2 = Ease.Get(t * 1.5f, EaseFunction.Cubic, EaseMode.Out);
                 if (willShow) ease2 = 1 - ease2;

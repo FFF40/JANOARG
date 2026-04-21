@@ -546,7 +546,7 @@ namespace JANOARG.Client.Behaviors.Options
                 InputBackground.rectTransform.sizeDelta = new Vector2(InputBackground.rectTransform.sizeDelta.x, ease * 40);
 
                 float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                float offset = 30 * (1 - ease2);
+                float offset = EaseUtils.ToZero(30, ease2);
                 TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
                 RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
                 ListTransform.anchoredPosition = listPos + Vector2.right * offset;
@@ -591,10 +591,10 @@ namespace JANOARG.Client.Behaviors.Options
             yield return Ease.Animate(.3f, x =>
             {
                 float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                InputBackground.rectTransform.sizeDelta = new Vector2(InputBackground.rectTransform.sizeDelta.x, (1 - ease) * 40);
-                Background.color = new Color(0, 0, 0, .5f * (1 - ease));
+                InputBackground.rectTransform.sizeDelta = new Vector2(InputBackground.rectTransform.sizeDelta.x, EaseUtils.ToZero(40, ease));
+                Background.color = new Color(0, 0, 0, EaseUtils.ToZero(.5f, ease));
 
-                float offset = 10 * ease;
+                float offset = EaseUtils.FromZero(10, ease);
                 TitleText.rectTransform.anchoredPosition = titlePos + Vector2.left * offset;
                 RightTransform.anchoredPosition = rightPos + Vector2.right * offset;
                 ListTransform.anchoredPosition = listPos + Vector2.right * offset;
@@ -710,31 +710,28 @@ namespace JANOARG.Client.Behaviors.Options
             IsAnimating = true;
 
             if (active)
-                StartCoroutine(Ease.Animate(.4f, x =>
+                StartCoroutine(Ease.Animate(.4f, EaseFunction.Cubic, EaseMode.Out, ease =>
                 {
-                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                    AdvancedInputTransform.anchoredPosition = new Vector2(-200 - 500 * ease, AdvancedInputTransform.anchoredPosition.y);
+                    AdvancedInputTransform.anchoredPosition = new Vector2(-200 - EaseUtils.FromZero(500, ease), AdvancedInputTransform.anchoredPosition.y);
                 }));
             else
                 StartCoroutine(Ease.Animate(.5f, x =>
                 {
                     float ease2 = Ease.Get(Mathf.Clamp01(x * 1.2f - .2f), EaseFunction.Cubic, EaseMode.Out);
-                    AdvancedInputTransform.anchoredPosition = new Vector2(-700 + 500 * ease2, AdvancedInputTransform.anchoredPosition.y);
+                    AdvancedInputTransform.anchoredPosition = new Vector2(-700 + EaseUtils.FromZero(500, ease2), AdvancedInputTransform.anchoredPosition.y);
                 }));
 
-            yield return Ease.Animate(.2f, x =>
+            yield return Ease.Animate(.2f, EaseFunction.Cubic, EaseMode.Out, ease =>
             {
-                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                InputHolder.sizeDelta = new Vector2(InputHolder.sizeDelta.x, -30 * ease);
-                InputGroup.alpha = (1 - ease) * (1 - ease);
+                InputHolder.sizeDelta = new Vector2(InputHolder.sizeDelta.x, EaseUtils.FromZero(-30, ease));
+                InputGroup.alpha = EaseUtils.ToZero(1, ease) * EaseUtils.ToZero(1, ease);
             });
 
             SetAdvancedInput(type, active);
 
-            yield return Ease.Animate(.4f, x =>
+            yield return Ease.Animate(.4f, EaseFunction.Cubic, EaseMode.Out, ease =>
             {
-                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                InputHolder.sizeDelta = new Vector2(InputHolder.sizeDelta.x, -30 * (1 - ease));
+                InputHolder.sizeDelta = new Vector2(InputHolder.sizeDelta.x, EaseUtils.ToZero(-30, ease));
                 InputGroup.alpha = ease * ease;
             });
 

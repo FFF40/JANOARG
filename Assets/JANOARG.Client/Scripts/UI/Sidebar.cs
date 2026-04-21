@@ -23,21 +23,10 @@ namespace JANOARG.Client.UI
             isAnimating = true;
             var rt = GetComponent<RectTransform>();
 
-            void f_lerpContent(float value)
+            yield return Ease.Animate(.4f, EaseFunction.Quartic, EaseMode.Out, ease =>
             {
-                float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.Out);
-
                 rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * (1 - ease));
-            }
-
-            for (float a = 0; a < 1; a += Time.deltaTime / .4f)
-            {
-                f_lerpContent(a);
-
-                yield return null;
-            }
-
-            f_lerpContent(1);
+            });
 
             isAnimating = false;
         }
@@ -52,21 +41,10 @@ namespace JANOARG.Client.UI
             isAnimating = true;
             var rt = GetComponent<RectTransform>();
 
-            void f_lerpContent(float value)
+            yield return Ease.Animate(.3f, EaseFunction.Quartic, EaseMode.In, ease =>
             {
-                float ease = Ease.Get(value, EaseFunction.Quartic, EaseMode.In);
-
                 rt.anchoredPosition = Vector3.left * (2000 + (Width - SafeArea.sizeDelta.y / 2) * ease);
-            }
-
-            for (float a = 0; a < 1; a += Time.deltaTime / .3f)
-            {
-                f_lerpContent(a);
-
-                yield return null;
-            }
-
-            f_lerpContent(1);
+            });
 
             if (SetActiveOnHide) gameObject.SetActive(false);
 

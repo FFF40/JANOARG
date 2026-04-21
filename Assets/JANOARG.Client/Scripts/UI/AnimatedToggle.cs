@@ -49,7 +49,7 @@ namespace JANOARG.Client.UI
             _ProgressFrom = _Progress;
             _Routine = Ease.EnumAnimate(0.2f, EaseFunction.Cubic, EaseMode.Out, ease =>
             {
-                SetToggleEase(Mathf.Lerp(_ProgressFrom, _Value ? 1 : 0, ease));
+                SetToggleEase(EaseUtils.LerpTo(_ProgressFrom, _Value ? 1 : 0, ease));
             });
             StartCoroutine(_Routine);
             OnValueChanged.Invoke(_Value);

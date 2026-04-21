@@ -53,21 +53,17 @@ namespace JANOARG.Client.Behaviors.Common
                 .2f, a =>
                 {
                     ProfileBar.sMain.SetVisibility(
-                        1 -
-                        Ease.Get(
-                            a, EaseFunction.Cubic,
-                            EaseMode.Out));
-
+                        1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
                     Background.alpha = a;
                 });
 
             LeftPanel.gameObject.SetActive(true);
 
             yield return Ease.Animate(
-                .2f,
+                .2f, EaseFunction.Cubic, EaseMode.Out,
                 a =>
                 {
-                    SetLeftPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                    SetLeftPanelVisibility(a);
                 });
 
             IsAnimating = false;
@@ -86,10 +82,10 @@ namespace JANOARG.Client.Behaviors.Common
             AudioManager.sMain.SetSceneLayerLowPassCutoff(22050, 0.5f);
 
             yield return Ease.Animate(
-                .2f,
+                .2f, EaseFunction.Cubic, EaseMode.Out,
                 a =>
                 {
-                    SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                    SetLeftPanelVisibility(1 - a);
                 });
 
             LeftPanel.gameObject.SetActive(false);
@@ -154,10 +150,10 @@ namespace JANOARG.Client.Behaviors.Common
             AudioManager.sMain.SetSceneLayerLowPassCutoff(9, 2);
 
             yield return Ease.Animate(
-                .2f,
+                .2f, EaseFunction.Cubic, EaseMode.Out,
                 a =>
                 {
-                    SetLeftPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                    SetLeftPanelVisibility(1 - a);
                 });
 
             LeftPanel.gameObject.SetActive(false);

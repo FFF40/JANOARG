@@ -126,16 +126,14 @@ namespace JANOARG.Client.Behaviors.Panels
                 StartCoroutine(PreviewAnim(true));
 
             yield return Ease.Animate(
-                .2f, x =>
+                .2f, EaseFunction.Cubic, EaseMode.Out, ease =>
                 {
-                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-
                     TabButtons[CurrentTab]
                         .SetFill(1 - ease);
 
                     SubtitleLabel.alpha = 1 - ease;
-                    SubtitleLabel.rectTransform.anchoredPosition = Vector2.left * 10 * ease;
-                    ContentViewport.anchoredPosition = basePos + Vector2.left * 10 * ease;
+                    SubtitleLabel.rectTransform.anchoredPosition = Vector2.left * EaseUtils.FromZero(10, ease);
+                    ContentViewport.anchoredPosition = basePos + Vector2.left * EaseUtils.FromZero(10, ease);
                     ContentGroup.alpha = 1 - ease;
                 });
 
@@ -143,20 +141,18 @@ namespace JANOARG.Client.Behaviors.Panels
             CurrentTab = tab;
 
             yield return Ease.Animate(
-                .2f, x =>
+                .2f, EaseFunction.Cubic, EaseMode.Out, ease =>
                 {
-                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-
                     TabButtons[CurrentTab]
                         .SetFill(ease);
 
                     SubtitleLabel.alpha = ease;
 
                     SubtitleLabel.rectTransform.anchoredPosition =
-                        Vector2.left * 10 * (1 - ease);
+                        Vector2.left * EaseUtils.ToZero(10, ease);
 
                     ContentViewport.anchoredPosition =
-                        basePos + Vector2.left * 10 * (1 - ease);
+                        basePos + Vector2.left * EaseUtils.ToZero(10, ease);
 
                     ContentGroup.alpha = ease;
                 });

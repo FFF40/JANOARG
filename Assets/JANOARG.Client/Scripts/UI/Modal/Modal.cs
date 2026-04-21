@@ -60,9 +60,9 @@ namespace JANOARG.Client.UI.Modal
             ColorBackground.color = CommonSys.sMain.MainCamera.backgroundColor;
 
             // Button
-            var buttonRoutine = StartCoroutine(Ease.Animate(0.3f, (t) =>
+            var buttonRoutine = StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) =>
             {
-                SetButtonVisibility(Ease.Get(t, EaseFunction.Cubic, EaseMode.Out));
+                SetButtonVisibility(t);
             }));
 
             yield return Ease.Animate(0.8f, (t) =>
@@ -80,7 +80,7 @@ namespace JANOARG.Client.UI.Modal
                 InnerBodyBackground.anchorMin *= new Vector2Frag(y: .5f - .5f * ease2);
                 InnerBodyBackground.anchorMax *= new Vector2Frag(y: .5f + .5f * ease2);
                 float ease3 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
-                BodyHolder.anchoredPosition *= new Vector2Frag(x: 150 * (1 - ease3));
+                BodyHolder.anchoredPosition *= new Vector2Frag(x: EaseUtils.ToZero(150, ease3));
             });
 
             yield return buttonRoutine;
@@ -92,9 +92,9 @@ namespace JANOARG.Client.UI.Modal
         {
 
             // Button
-            var buttonRoutine = StartCoroutine(Ease.Animate(0.3f, (t) =>
+            var buttonRoutine = StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) =>
             {
-                SetButtonVisibility(1 - Ease.Get(t, EaseFunction.Cubic, EaseMode.Out));
+                SetButtonVisibility(1 - t);
             }));
 
             
@@ -115,7 +115,7 @@ namespace JANOARG.Client.UI.Modal
                 InnerBodyBackground.anchorMin *= new Vector2Frag(y: .5f * ease2);
                 InnerBodyBackground.anchorMax *= new Vector2Frag(y: 1 - .5f * ease2);
                 float ease3 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
-                BodyHolder.anchoredPosition *= new Vector2Frag(x: -1000 * ease3);
+                BodyHolder.anchoredPosition *= new Vector2Frag(x: EaseUtils.FromZero(-1000, ease3));
             });
 
             yield return buttonRoutine;

@@ -42,8 +42,8 @@ namespace JANOARG.Client.Behaviors.Panels
             HolderGroup.blocksRaycasts = true;
 
             yield return Ease.Animate(
-                .2f,
-                a => { SetPanelVisibility(Ease.Get(a, EaseFunction.Cubic, EaseMode.Out)); });
+                .2f, EaseFunction.Cubic, EaseMode.Out,
+                a => { SetPanelVisibility(a); });
 
             IsAnimating = false;
         }
@@ -62,10 +62,10 @@ namespace JANOARG.Client.Behaviors.Panels
             if (sPanels.Count <= 1) AudioManager.sMain.SetSceneLayerLowPassCutoff(5000, 1f);
 
             yield return Ease.Animate(
-                .2f,
+                .2f, EaseFunction.Cubic, EaseMode.Out,
                 a =>
                 {
-                    SetPanelVisibility(1 - Ease.Get(a, EaseFunction.Cubic, EaseMode.Out));
+                    SetPanelVisibility(1 - a);
                 });
 
             CommonSys.sMain.StartCoroutine(UnloadAnim());

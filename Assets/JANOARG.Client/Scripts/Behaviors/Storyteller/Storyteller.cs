@@ -219,8 +219,8 @@ namespace JANOARG.Client.Behaviors.Storyteller
             _CurrentNameFieldRoutine = Ease.EnumAnimate(0.2f, x =>
             {
                 float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
-                NameLabelGroup.alpha = Mathf.Lerp(fromAlpha, toAlpha, ease);
-                float xPos = Mathf.Lerp(fromXPos, toXPos, ease);
+                NameLabelGroup.alpha = EaseUtils.LerpTo(fromAlpha, toAlpha, ease);
+                float xPos = EaseUtils.LerpTo(fromXPos, toXPos, ease);
                 NameLabelHolder.anchorMin = NameLabelHolder.anchorMax = NameLabelHolder.pivot = new Vector2(xPos, 0.5f);
                 NameLabelHolder.anchoredPosition = new Vector2(0, (1 - NameLabelGroup.alpha) * -5);
             });
