@@ -581,11 +581,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 float lerp3 = Ease.Get(a * 3, EaseFunction.Cubic, EaseMode.Out);
                 LerpUI(lerp3);
 
-                float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
                 foreach (SongSelectListItem item in ListView.ItemList)
                 {
                     item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1)
-                         * (lerp2 * .5f + lerp4 * .5f);
+                         * (lerp2 * .5f + EaseUtils.FromZero(.5f, a * 1.5f, EaseFunction.Circle, EaseMode.Out));
                 }
                 ListView.IsDirty = true;
             });
@@ -712,8 +711,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: -lerp3 * 2 - 10);
                 MapUIGroup.transform.localScale = Vector3.one * (1 - lerp3 * 0.1f);
 
-                float lerp4 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-                LerpMapView(1 - lerp4);
+                LerpMapView(EaseUtils.ToZero(1, a * 3f, EaseFunction.Exponential, EaseMode.Out));
             });
 
             yield return navCoroutine;
@@ -982,8 +980,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 TargetSongCoverFlash.color = new(1, 1, 1, EaseUtils.ToZero(1, lerp3));
             
 
-                float lerp4 = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                float targetCameraZ = lerp4 * 5 - Mathf.Pow(lerp2, 0.75f) * 30;
+                float targetCameraZ = EaseUtils.FromZero(5, a, EaseFunction.Cubic, EaseMode.Out) - Mathf.Pow(lerp2, 0.75f) * 30;
                 CommonSys.sMain.MainCamera.transform.Translate(Vector3.back * (targetCameraZ - currentCameraZ));
                 currentCameraZ = targetCameraZ;
             });
@@ -1137,10 +1134,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             yield return Ease.Animate(0.6f, (t) =>
             {
-                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
                 cameraTransform.position =
                     Vector3.Lerp(cameraTransform.position, target.position, 1 - Mathf.Pow(1e-3f, Time.deltaTime)) 
-                    * new Vector3Frag(z: -10 * (1 - lerp1));
+                    * new Vector3Frag(z: -10 * EaseUtils.ToZero(1, t, EaseFunction.Exponential, EaseMode.In));
                 MapCover.color *= new ColorFrag(a: Mathf.Floor(t));
 
                 if (IsMapView)

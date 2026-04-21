@@ -105,10 +105,9 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(
                 1.5f, a =>
                 {
-                    float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
 
                     Background.color = CommonSys.sMain.MainCamera.backgroundColor *
-                                       new Color(1, 1, 1, (1 - ease) * 0.8f);
+                                       new Color(1, 1, 1, EaseUtils.ToZero(1, a, EaseFunction.Cubic, EaseMode.InOut) * 0.8f);
 
                     PlayerScreen.sMain.Music.volume = a * targetVolume;
                 });

@@ -258,11 +258,10 @@ namespace JANOARG.Client.Behaviors.Intro
                 TitleActionLabel.rectTransform.anchoredPosition =
                     new Vector2(TitleActionLabel.rectTransform.anchoredPosition.x, lerp2 * -36);
 
-                float lerp3 = Ease.Get(a * 1.2f - .2f, EaseFunction.Quintic, EaseMode.Out);
                 TitleFooter.alpha = (1 - Mathf.Pow(1 - Mathf.Clamp01(a * 1.2f - .2f), 2)) * .5f;
 
                 TitleFooter.rectTransform.anchoredPosition =
-                    new Vector2(TitleFooter.rectTransform.anchoredPosition.x, 80 - lerp3 * 30);
+                    new Vector2(TitleFooter.rectTransform.anchoredPosition.x, 80 - EaseUtils.FromZero(30, a * 1.2f - .2f, EaseFunction.Quintic, EaseMode.Out));
             }
 
             for (float a = 0; a < 1; a += Time.deltaTime / 2)

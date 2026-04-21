@@ -107,8 +107,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
                 DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
 
-                float ease2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.In);
-                DialogueLabel.rectTransform.anchoredPosition = dialoguePos + ease2 * 5 * Vector2.down;
+                DialogueLabel.rectTransform.anchoredPosition = dialoguePos + EaseUtils.FromZero(5, x, EaseFunction.Cubic, EaseMode.In) * Vector2.down;
             });
 
             DialogueLabel.text = "";
@@ -190,9 +189,8 @@ namespace JANOARG.Client.Behaviors.Storyteller
             {
                 x = Mathf.Lerp(_CurrentNextChunkIndicatorPosition, target, x);
                 _CurrentNextChunkIndicatorPosition = x;
-                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 NextChunkIndicator.color = new Color(1, 1, 1, x);
-                NextChunkIndicator.rectTransform.anchoredPosition = 5 * (1 - ease) * Vector2.down;
+                NextChunkIndicator.rectTransform.anchoredPosition = 5 * EaseUtils.ToZero(1, x, EaseFunction.Cubic, EaseMode.Out) * Vector2.down;
             });
             StartCoroutine(_CurrentNextChunkIndicatorRoutine);
         }

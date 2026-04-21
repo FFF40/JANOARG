@@ -568,8 +568,7 @@ namespace JANOARG.Client.Behaviors.Common
 
                     SetRewardLerp(1 - lerp);
 
-                    float lerp2 = Ease.Get(x * 3 - 2, EaseFunction.Quintic, EaseMode.Out);
-                    SetChangeLerp(1 - lerp2);
+                    SetChangeLerp(EaseUtils.ToZero(1, x * 3 - 2, EaseFunction.Quintic, EaseMode.Out));
                 });
         }
 
@@ -601,10 +600,9 @@ namespace JANOARG.Client.Behaviors.Common
                         EaseMode.Out);
 
                     LevelUpLevelGraphic.rectTransform.anchorMax = new Vector2(lerp, 1);
-                    float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
 
                     LevelUpLabelText.rectTransform.anchoredPosition =
-                        new Vector2(0, -50 * (1 - lerp2));
+                        new Vector2(0, -50 * EaseUtils.ToZero(1, x, EaseFunction.Exponential, EaseMode.Out));
                 });
 
             LevelText.text = level.ToString();

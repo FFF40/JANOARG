@@ -151,6 +151,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
                 ProfileBar.sMain.SetVisibility(1 - t);
                 SongSelectScreen.sMain.LerpActions(1 - t);
             }));
+            yield return SongSelectScreen.sMain.LeaveInAnim(targetItem.transform);
             SongSelectScreen.sMain.MapCover.color 
                 = CommonSys.sMain.MainCamera.backgroundColor
                 = playlist.Playlist.BackgroundColor;
@@ -169,6 +170,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
                 ProfileBar.sMain.SetVisibility(t);
                 SongSelectScreen.sMain.LerpActions(t);
             }));
+        }
+
+        public void NavigatePreviousMap()
         {
             isReady = false;
             StartCoroutine(NavigatePreviousMapAnim());
