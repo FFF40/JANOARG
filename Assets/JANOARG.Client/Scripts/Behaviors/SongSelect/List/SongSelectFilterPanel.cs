@@ -47,6 +47,12 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
         {
             if (SongSelectScreen.sMain.TargetSongAnim != null) return;
             IsShowing = willShow;
+
+            StartCoroutine(UpdateShowingAnim(willShow));
+        }
+
+        private IEnumerator UpdateShowingAnim(bool willShow)
+        {
             MainGroup.interactable = MainGroup.blocksRaycasts = willShow;
 
             float startHolderPivotY = CriteriaHolder.pivot.y;
@@ -62,7 +68,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                 if (willShow) ease2 = 1 - ease2;
                 SongSelectScreen.sMain.LerpUI(ease2);
             });
-            StartCoroutine(CurrentAnim);
+            yield return CurrentAnim;
         }
 
         public void UpdateSortCriteria()
