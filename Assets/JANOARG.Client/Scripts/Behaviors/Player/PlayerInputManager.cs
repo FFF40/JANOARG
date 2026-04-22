@@ -106,7 +106,7 @@ public class TouchClass
     /// <summary>
     ///     The time (in seconds) when the player flicked past the threshold.
     /// </summary>
-    public float FlickTime;
+    public double FlickTime;
 
     public bool Initial;
 
@@ -136,7 +136,7 @@ public class TouchClass
     /// <summary>
     ///     The time (in seconds) when the touch started.
     /// </summary>
-    public float StartTime;
+    public double StartTime;
 
     /// <summary>
     ///     The time (in seconds) when this touch last successfully cleared a flick note.
@@ -452,7 +452,7 @@ public class PlayerInputManager : MonoBehaviour
                         bool nearAnyFlickable = HitQueue.Any(hit =>
                             hit.Current.Flickable &&
                             !hit.IsProcessed &&
-                            Mathf.Abs(hit.Time - Player.CurrentTime) <=
+                            Math.Abs(hit.Time - Player.CurrentTime) <=
                             Player.PassWindow
                         );
 
@@ -470,7 +470,7 @@ public class PlayerInputManager : MonoBehaviour
                 touchClass.Initial = false;
             }
 
-            float judgementOffsetTime = Player.CurrentTime + Player.Settings.JudgmentOffset; // Judgement offset
+            double judgementOffsetTime = Player.CurrentTime + Player.Settings.JudgmentOffset; // Judgement offset
 
             InitLogger(
                 $"Judgement-offset time: {judgementOffsetTime} (Current time: {Player.CurrentTime}, Offset: {Player.Settings.JudgmentOffset})");
@@ -489,7 +489,7 @@ public class PlayerInputManager : MonoBehaviour
                     continue; // Go check the next hitobject
                 }
 
-                float hitobjectTimingDelta =
+                double hitobjectTimingDelta =
                     judgementOffsetTime - hitIteration.Time; // Hit time adjusted by judgement offset
 
                 bool isDiscreteHitObject =
@@ -583,7 +583,7 @@ public class PlayerInputManager : MonoBehaviour
                 //// Camera handling and other extra stuff is done here to calculate hold note hitboxes and positions on the fly
                 //// As it has dynamic attributes as it progresses, unlike normal hitobjects.
 
-                float beat = PlayerScreen.sTargetSong.Timing.ToBeat(judgementOffsetTime); // Get current BPM
+                float beat = PlayerScreen.sTargetSong.Timing.ToBeat((float)judgementOffsetTime); // Get current BPM
 
                 // Camera handling
                 var currentCamera =
@@ -613,7 +613,7 @@ public class PlayerInputManager : MonoBehaviour
             {
                 HitPlayer hitObject = DiscreteHitQueue[i];
 
-                float time = judgementOffsetTime - hitObject.Time;
+                double time = judgementOffsetTime - hitObject.Time;
 
                 if ((judgementOffsetTime >= hitObject.Time && hitObject.Current.Type == HitObject.HitType.Catch) ||
                     hitObject.Current.Flickable) // Immediate feedback on flicks
@@ -733,7 +733,7 @@ public class PlayerInputManager : MonoBehaviour
         }
     }
 
-    private void HoldQueue_Processor(HoldNoteClass holdNoteEntry, ref int queuePtr, float beat, float judgementOffsetTime)
+    private void HoldQueue_Processor(HoldNoteClass holdNoteEntry, ref int queuePtr, float beat, double judgementOffsetTime)
     {
         if (!holdNoteEntry.HitObject)
         {
@@ -904,7 +904,7 @@ public class PlayerInputManager : MonoBehaviour
         }
     }
 
-    private void HitobjectProcessor(HitPlayer hitIteration, float flickThreshold, float hitobjectTimingDelta,
+    private void HitobjectProcessor(HitPlayer hitIteration, float flickThreshold, double hitobjectTimingDelta,
         ref bool alreadyHit)
     {
         if (hitIteration.Current.Flickable) // Flick notes (catch/tap)

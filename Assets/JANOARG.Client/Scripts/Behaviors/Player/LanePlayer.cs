@@ -455,7 +455,7 @@ namespace JANOARG.Client.Behaviors.Player
         }
 
 
-        public float GetZPosition(float time)
+        public double GetZPosition(double time)
         {
             if (TimeStamps == null || TimeStamps.Count == 0 || PositionPoints == null || PositionPoints.Count == 0)
                 return 0f; // failsafe
@@ -488,7 +488,7 @@ namespace JANOARG.Client.Behaviors.Player
                    PlayerScreen.sMain.Speed;
         }
 
-        public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end)
+        public void GetStartEndPosition(double time, out Vector2 start, out Vector2 end)
         {
             int index = -1;
             for (int i = 0; i < TimeStamps.Count; i++){
@@ -511,7 +511,7 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 LaneStep currentStep = Current.LaneSteps[index];
                 LaneStep previousStep = Current.LaneSteps[index - 1];
-                float progress = Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
+                float progress = Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], (float)time);
 
                 if (currentStep.IsLinear)
                 {
@@ -564,7 +564,7 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
 
-            float time = Mathf.Max(PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
+            double time = Math.Max(PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
 
             int index = -1;
             for (int i = 0; i < TimeStamps.Count; i++)
@@ -579,7 +579,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             index = Mathf.Max(index, 1);
 
-            float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
+            float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], (float)time);
             Vector3 previousStepStartPointPosition, previousStepEndPointPosition, currentStepStartPointPosition, currentStepEndPointPosition;
 
             {

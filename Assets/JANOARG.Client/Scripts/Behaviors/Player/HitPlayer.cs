@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
@@ -16,7 +17,7 @@ namespace JANOARG.Client.Behaviors.Player
         public float       Time;
         public float       EndTime;
         public List<float> HoldTicks;
-        public float       CurrentPosition;
+        public double       CurrentPosition;
 
         public MeshRenderer Center;
         [FormerlySerializedAs("Left")]
@@ -126,8 +127,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void UpdateMesh()
         {
-            float time = Mathf.Max(Time, PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset);
-            float zPosition;
+            double time = Math.Max(Time, PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset);
+            double zPosition;
 
             try
             {
@@ -141,7 +142,7 @@ namespace JANOARG.Client.Behaviors.Player
             Lane.GetStartEndPosition(time, out Vector2 start, out Vector2 end);
 
             transform.localPosition = Vector3.LerpUnclamped(start, end, Current.Position + Current.Length / 2) +
-                                      Vector3.forward * zPosition;
+                                      Vector3.forward * (float)zPosition;
 
             transform.localEulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.right, end - start);
 

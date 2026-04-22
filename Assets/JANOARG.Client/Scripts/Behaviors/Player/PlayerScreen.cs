@@ -126,7 +126,8 @@ namespace JANOARG.Client.Behaviors.Player
         [FormerlySerializedAs("HasPlayedBefore")]
         public bool AlreadyInitialised;
 
-        public float CurrentTime = -5;
+        // Double precision to avoid float drift on long songs
+        public double CurrentTime = -5;
 
         [Space]
         public float TotalExScore = 0;
@@ -167,7 +168,9 @@ namespace JANOARG.Client.Behaviors.Player
         private double _MusicStartDSP;  // DSP time at which Music.PlayScheduled was called
         private const double SpikeThreshold = 0.1; // 100ms — above this, treat as a spike
 
-        private double _LastVisualDSPTime = double.NegativeInfinity; // reserved for future use
+        // Frame skipping: skip visual update when logic ran less than this ago
+        private const float FrameSkipThreshold = 1f / 15f; // skip visual if >15 fps worth of logic work done
+        private float _LastVisualTime = float.NegativeInfinity;
 
         // Visual lerp: smooth camera/lane group positions across frames
         private Vector3    _LerpedCameraPos;
@@ -365,6 +368,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsReady = true;
             AlreadyInitialised = true;
             _LastDSPTime = AudioSettings.dspTime;
+            _MusicStartDSP = 0; // Will be set when music is actually scheduled
 
             const float TARGET_ASPECT = 7 / 4f;
             float targetHeight = Mathf.Min(Screen.height, Screen.width / TARGET_ASPECT);
@@ -713,6 +717,11 @@ namespace JANOARG.Client.Behaviors.Player
                 digit.Speed = 9;
 
             IsPlaying = true;
+            // Schedule music precisely — 100ms lookahead gives the audio thread time to prepare
+            const double MusicLeadTime = 0.1;
+            _MusicStartDSP = AudioSettings.dspTime + MusicLeadTime + (CurrentTime < 0 ? -CurrentTime : 0);
+            Music.time = 0;
+            Music.PlayScheduled(_MusicStartDSP);
             _LastDSPTime = AudioSettings.dspTime;
         }
 
@@ -735,58 +744,49 @@ namespace JANOARG.Client.Behaviors.Player
             }
             #endif
 
-            double delta = Math.Min(AudioSettings.dspTime - _LastDSPTime, PerfectWindow);
-            if (delta <= 0) delta = Time.unscaledDeltaTime;
-            CurrentTime += (float)delta;
-            _LastDSPTime += delta;
+            double dspNow = AudioSettings.dspTime;
+            double rawDelta = dspNow - _LastDSPTime;
+            _LastDSPTime = dspNow;
 
-            // Audio sync
+            if (rawDelta > SpikeThreshold)
+            {
+                // Lag spike — resync clock to audio without rushing the chart
+                if (Music.isPlaying)
+                    CurrentTime = (double)Music.timeSamples / Music.clip.frequency;
+                // else: lead-in / post-song — just drop the frame, don't advance
+            }
+            else
+            {
+                if (Music.isPlaying && CurrentTime >= 0)
+                    // Audio is the source of truth during playback
+                    CurrentTime = (double)Music.timeSamples / Music.clip.frequency;
+                else
+                    CurrentTime += rawDelta > 0 ? rawDelta : Time.unscaledDeltaTime;
+            }
+
+            // Audio lifecycle — use PlayScheduled on restart to avoid buffer-boundary snap
             if (CurrentTime >= 0 && CurrentTime < Music.clip.length)
             {
-                if (Music.isPlaying)
+                if (!Music.isPlaying)
                 {
-                    if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
-                    {
-                        Music.time = CurrentTime;
-                    }
-                    else
-                    {
-                        // CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
-                    }
+                    const double RestartLeadTime = 0.05;
+                    _MusicStartDSP = dspNow + RestartLeadTime;
+                    Music.time = (float)CurrentTime;
+                    Music.PlayScheduled(_MusicStartDSP);
                 }
-                else
-                {
-                    Music.Play();
-                    Music.time = CurrentTime;
-                }
+                // No hard-seek sync corrector needed — audio IS the clock now
             }
             else if (Music.isPlaying)
                 Music.Pause();
-            StartCoroutine( // Check hit objects
-                        CheckHitObjects());
 
-            // Update song progress slider
-            SongProgress.value = CurrentTime / Music.clip.length;
+            // Process input directly — no coroutine, no +1 frame latency
+            foreach (LanePlayer lane in Lanes)
+                foreach (HitPlayer hit in lane.HitObjects)
+                    if (hit.HoldMesh)
+                        lane.UpdateHoldMesh(hit);
+            PlayerInputManager.sInstance.UpdateInput();
 
-            // Show ending animation; the failsafe on bugs is on following:
-            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
-            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || CurrentTime / Music.clip.length >= 1) && !ResultExec)
-            {
-                PlayerScreenResult.sMain.StartEndingAnim();
-                ResultExec = true;
-            }
-        }
-
-        public void LateUpdate()
-        {
-            if (!IsPlaying)
-                return;
-
-#if UNITY_EDITOR
-            if (EditorApplication.isPaused) return;
-#endif
-
-            // Update song progress slider
+            // Update song progress slider (always, even on skipped frames)
             SongProgress.value = (float)(CurrentTime / Music.clip.length);
 
             // Your code break things, great job :thumbs_up:
@@ -794,60 +794,82 @@ namespace JANOARG.Client.Behaviors.Player
             float visualTime = (float)CurrentTime + Settings.VisualOffset;
             float visualBeat = sTargetSong.Timing.ToBeat(visualTime);
 
-            // Update palette
-            sCurrentChart.Palette.Advance(visualBeat);
+            // Frame skipping: if visualTime hasn't advanced enough to justify a full render pass,
+            // skip the heavy storyboard/lane work. Input and scoring above are unaffected.
+            bool skipVisual = _LastVisualTime > float.NegativeInfinity
+                              && (visualTime - _LastVisualTime) < FrameSkipThreshold;
 
-            if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
-                SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
-
-            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
-                SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
-
-            for (var a = 0; a < LaneStyles.Count; a++)
+            if (!skipVisual)
             {
-                sCurrentChart.Palette.LaneStyles[a]
-                    .Advance(visualBeat);
+                _LastVisualTime = visualTime;
 
-                LaneStyles[a]
-                    .Update(sCurrentChart.Palette.LaneStyles[a]);
+                // Update palette
+                sCurrentChart.Palette.Advance(visualBeat);
 
-                if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
-                    TransparentMeshLaneIndexes.Remove(a);
-                else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
-                    TransparentMeshLaneIndexes.Add(a);
+                if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
+                    SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
+
+                if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
+                    SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+
+                for (var a = 0; a < LaneStyles.Count; a++)
+                {
+                    sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
+                    LaneStyles[a].Update(sCurrentChart.Palette.LaneStyles[a]);
+
+                    if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
+                        TransparentMeshLaneIndexes.Remove(a);
+                    else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
+                        TransparentMeshLaneIndexes.Add(a);
+                }
+
+                for (var a = 0; a < HitStyles.Count; a++)
+                {
+                    sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
+                    HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a]);
+                }
+
+                // Advance camera storyboard state
+                sCurrentChart.Camera.Advance(visualBeat);
+
+                // Visual lerp: exponential smoothing on camera transforms so movement is
+                // fluid regardless of frame rate. First frame snaps directly to avoid
+                // lerping from an uninitialised state.
+                const float CameraLerpSpeed = 25f;
+                Vector3    targetCamPos  = sCurrentChart.Camera.CameraPivot;
+                Quaternion targetCamRot  = Quaternion.Euler(sCurrentChart.Camera.CameraRotation);
+                float      targetCamDist = sCurrentChart.Camera.PivotDistance;
+
+                if (!_VisualLerpInitialised)
+                {
+                    _LerpedCameraPos  = targetCamPos;
+                    _LerpedCameraRot  = targetCamRot;
+                    _LerpedCameraDist = targetCamDist;
+                    _VisualLerpInitialised = true;
+                }
+                else
+                {
+                    float t = 1f - Mathf.Exp(-CameraLerpSpeed * Time.unscaledDeltaTime);
+                    _LerpedCameraPos  = Vector3.Lerp(_LerpedCameraPos, targetCamPos, t);
+                    _LerpedCameraRot  = Quaternion.Slerp(_LerpedCameraRot, targetCamRot, t);
+                    _LerpedCameraDist = Mathf.Lerp(_LerpedCameraDist, targetCamDist, t);
+                }
+
+                Camera pseudoCamera = CommonSys.sMain.MainCamera;
+                pseudoCamera.transform.position = _LerpedCameraPos;
+                pseudoCamera.transform.rotation = _LerpedCameraRot;
+                pseudoCamera.transform.Translate(Vector3.back * _LerpedCameraDist);
+
+                // Update scene
+                foreach (LaneGroupPlayer group in LaneGroups)
+                    group.UpdateSelf(visualTime, visualBeat);
+
+                StartCoroutine(f_laneUpdater(visualTime, visualBeat));
             }
 
-            for (var a = 0; a < HitStyles.Count; a++)
-            {
-                sCurrentChart.Palette.HitStyles[a]
-                    .Advance(visualBeat);
-
-                HitStyles[a]
-                    .Update(sCurrentChart.Palette.HitStyles[a]);
-            }
-
-            // Update camera
-            sCurrentChart.Camera.Advance(visualBeat);
-
-            // Visual lerp disabled — update camera directly each frame.
-            // Lerp fields kept for potential future re-enable.
-            // const float CameraLerpSpeed = 12f;
-            // float t = 1f - Mathf.Exp(-CameraLerpSpeed * Time.unscaledDeltaTime);
-            // _LerpedCameraPos  = Vector3.Lerp(_LerpedCameraPos, sCurrentChart.Camera.CameraPivot, t);
-            // _LerpedCameraRot  = Quaternion.Slerp(_LerpedCameraRot, Quaternion.Euler(sCurrentChart.Camera.CameraRotation), t);
-            // _LerpedCameraDist = Mathf.Lerp(_LerpedCameraDist, sCurrentChart.Camera.PivotDistance, t);
-
-            Camera pseudoCamera = CommonSys.sMain.MainCamera;
-            pseudoCamera.transform.position = sCurrentChart.Camera.CameraPivot;
-            pseudoCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
-            pseudoCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
-
-            // Update scene
-            foreach (LaneGroupPlayer group in LaneGroups)
-                group.UpdateSelf(visualTime, visualBeat);
-
-            // Lane update — direct loop, no coroutine needed here
-            for (int i = Lanes.Count - 1; i >= 0; i--)
+            // Show ending animation; the failsafe on bugs is on following:
+            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
+            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || (float)CurrentTime / Music.clip.length >= 1) && !ResultExec)
             {
                 try
                 {
@@ -860,6 +882,24 @@ namespace JANOARG.Client.Behaviors.Player
 
                     if (lane.MarkedForRemoval || lane == null)
                     {
+                        LanePlayer lane = Lanes[i];
+
+                        bool hasTrivialLocalLaneMotion = f_hasTrivialLocalLaneMotion(lane);
+
+                        if (!hasTrivialLocalLaneMotion && lane.TimeStamps[0] - 5f > (float)time)
+                            continue;
+
+                        lane.UpdateSelf(time, beat);
+
+                        if (lane.MarkedForRemoval || lane == null)
+                        {
+                            Lanes.RemoveAt(i); // More efficient than Remove()
+                            Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
+                        }
+                    }
+                    catch (MissingReferenceException)
+                    {
+                        Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
                         Lanes.RemoveAt(i);
                         Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
                     }
@@ -895,44 +935,14 @@ namespace JANOARG.Client.Behaviors.Player
         public void Resync()
         {
             _LastDSPTime = AudioSettings.dspTime;
-            // Only anchor from timeSamples when music is actively playing —
-            // if paused, timeSamples is stale and would overwrite a deliberate CurrentTime rollback
+            // Re-anchor CurrentTime to audio if it's playing, so pause/resume is seamless
             if (Music.isPlaying && CurrentTime >= 0)
                 CurrentTime = (double)Music.timeSamples / Music.clip.frequency;
         }
 
-        // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause
-        private bool _PausedByFocusLoss;
-
-        // Called by Unity when the application window gains or loses focus.
-        // In the editor this fires when switching between the Game window and any other window.
-        public void OnApplicationFocus(bool hasFocus)
-        {
-#if UNITY_EDITOR
-            if (!UnityEditor.EditorApplication.isPlaying) return;
-#endif
-            if (!hasFocus)
-            {
-                // Only auto-pause if the game isn't already manually paused (IsPlaying = false)
-                if (IsPlaying)
-                {
-                    _PausedByFocusLoss = true;
-                    IsPlaying = false;
-                    Music.Pause();
-                    _LastDSPTime = AudioSettings.dspTime;
-                    PlayerScreenPause.sMain.Show();
-                }
-            }
-            else
-            {
-                // Focus returned — only resume if we were the ones who paused it
-                if (_PausedByFocusLoss)
-                {
-                    _PausedByFocusLoss = false;
-                    PlayerScreenPause.sMain.Continue();
-                }
-            }
-        }
+        // Input and hold mesh updates are now handled directly in Update to avoid +1 frame latency.
+        // CheckHitObjects kept as a no-op stub in case external callers reference it.
+        public IEnumerator CheckHitObjects() { yield return null; }
 
         // OnApplicationPause covers mobile app backgrounding and complements OnApplicationFocus.
         public void OnApplicationPause(bool isPaused)
@@ -1037,7 +1047,7 @@ namespace JANOARG.Client.Behaviors.Player
             HitsRemaining--;
         }
 
-        public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
+        public void Hit(HitPlayer hitObject, double offset, bool spawnEffect = true)
         {
             // In case of race condition
             if (!hitObject)
@@ -1050,7 +1060,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Calculate base score once
             int baseScore = CalculateBaseScore(hitType, isFlickable, hitObject.Current.FlickDirection);
             
-            float offsetAbs = Mathf.Abs(offset);
+            double offsetAbs = Math.Abs(offset);
             float? accuracy = null;
             int finalScore;
 
@@ -1100,13 +1110,13 @@ namespace JANOARG.Client.Behaviors.Player
             return score;
         }
 
-        private float CalculateAccuracy(float offset, float offsetAbs)
+        private float CalculateAccuracy(double offset, double offsetAbs)
         {
             if (offsetAbs > GoodWindow)
-                return Mathf.Sign(offset);
+                return Math.Sign(offset);
             
             if (offsetAbs > PerfectWindow)
-                return Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
+                return Math.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, (float)offsetAbs);
             
             return 0f; // Perfect hit
         }
@@ -1237,6 +1247,7 @@ namespace JANOARG.Client.Behaviors.Player
         public float[] HitObjectScale;
         public float   FlickScale;
 
+        public float AudioOffset;
         public float JudgmentOffset;
         public float VisualOffset;
         public bool  ShowFlawlessText;
@@ -1266,6 +1277,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             FlickScale = prefs.Get("PLYR:FlickScale", 1f);
 
+            AudioOffset = prefs.Get("PLYR:AudioOffset", 0f);
             JudgmentOffset = prefs.Get("PLYR:JudgmentOffset", 0f) / 1000;
             VisualOffset = prefs.Get("PLYR:VisualOffset", 0f) / 1000;
         }
@@ -1275,9 +1287,9 @@ namespace JANOARG.Client.Behaviors.Player
     {
         public float                Time;
         public HitObjectHistoryType Type;
-        public float                Offset;
+        public double                Offset;
 
-        public HitObjectHistoryItem(HitPlayer hit, float offset)
+        public HitObjectHistoryItem(HitPlayer hit, double offset)
         {
             Time = hit.Time;
 

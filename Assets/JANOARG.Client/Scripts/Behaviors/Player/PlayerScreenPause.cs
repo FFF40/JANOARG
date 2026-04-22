@@ -23,7 +23,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public Image RetryFlash;
 
-        public float PauseTime = -10;
+        public double PauseTime = -10;
 
         [Space] public Coroutine CurrentAnimation;
 
