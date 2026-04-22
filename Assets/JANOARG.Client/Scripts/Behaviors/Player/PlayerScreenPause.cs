@@ -67,14 +67,12 @@ namespace JANOARG.Client.Behaviors.Player
             UIHolder.SetActive(true);
 
             yield return Ease.Animate(
-                0.2f, x =>
+                0.2f, EaseFunction.Cubic, EaseMode.Out, ease =>
                 {
-                    float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-
                     Background.color = CommonSys.sMain.MainCamera.backgroundColor *
                                        new Color(1, 1, 1, ease * 0.8f);
 
-                    OptionHolder.anchoredPosition = (1 - ease) * 20 * Vector2.left;
+                    OptionHolder.anchoredPosition = EaseUtils.ToZero(20, ease) * Vector2.left;
                     OptionGroup.alpha = ease;
                 });
 
@@ -92,10 +90,9 @@ namespace JANOARG.Client.Behaviors.Player
         {
             StartCoroutine(
                 Ease.Animate(
-                    0.2f, x =>
+                    0.2f, EaseFunction.Cubic, EaseMode.Out, ease =>
                     {
-                        float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                        OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
+                        OptionHolder.anchoredPosition = EaseUtils.FromZero(20, ease) * Vector2.left;
                         OptionGroup.alpha = 1 - ease;
                     }));
 
@@ -108,10 +105,9 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(
                 1.5f, a =>
                 {
-                    float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.InOut);
 
                     Background.color = CommonSys.sMain.MainCamera.backgroundColor *
-                                       new Color(1, 1, 1, (1 - ease) * 0.8f);
+                                       new Color(1, 1, 1, EaseUtils.ToZero(1, a, EaseFunction.Cubic, EaseMode.InOut) * 0.8f);
 
                     PlayerScreen.sMain.Music.volume = a * targetVolume;
                 });
@@ -133,10 +129,9 @@ namespace JANOARG.Client.Behaviors.Player
         {
             StartCoroutine(
                 Ease.Animate(
-                    0.2f, x =>
+                    0.2f, EaseFunction.Cubic, EaseMode.Out, ease =>
                     {
-                        float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                        OptionHolder.anchoredPosition = ease * 20 * Vector2.left;
+                        OptionHolder.anchoredPosition = EaseUtils.FromZero(20, ease) * Vector2.left;
                         OptionGroup.alpha = 1 - ease;
                     }));
 
@@ -159,12 +154,10 @@ namespace JANOARG.Client.Behaviors.Player
                     RetryBackground.rectTransform.sizeDelta =
                         new Vector2(0, 100 * (1 - lerp2));
 
-                    float lerp3 = Mathf.Pow(
+                    RetryFlash.color = new Color(1, 1, 1, EaseUtils.ToZero(1, Mathf.Pow(
                         Ease.Get(
                             a, EaseFunction.Exponential,
-                            EaseMode.Out), 0.5f);
-
-                    RetryFlash.color = new Color(1, 1, 1, 1 - lerp3);
+                            EaseMode.Out), 0.5f)));
                 });
 
             yield return new WaitForSeconds(1);

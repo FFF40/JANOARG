@@ -348,14 +348,14 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 }
                 yield return Ease.Animate(0.5f, (x) =>
                 {
-                    float ease1 = Mathf.Lerp(lerpFrom, lerpTo, Ease.Get(x, EaseFunction.Quartic, EaseMode.Out));
+                    float ease1 = EaseUtils.LerpTo(lerpFrom, lerpTo, x, EaseFunction.Quartic, EaseMode.Out);
                     foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
                     {
                         mapItem.UpdatePosition();
                         mapItem.transform.position = Vector3.Lerp(mapItem.transform.position, listItem.CoverImage.transform.position, ease1);
                     }
                 
-                    float ease2 = Mathf.Lerp(lerpFrom, lerpTo, Ease.Get(x, EaseFunction.Quadratic, EaseMode.InOut));
+                    float ease2 = EaseUtils.LerpTo(lerpFrom, lerpTo, x, EaseFunction.Quadratic, EaseMode.InOut);
                     CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: -ease2 * 2 - 10);
                 });
                 foreach ((SongMapItemUI mapItem, SongSelectListSongUI listItem) in mapListItems)
@@ -399,9 +399,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 mapCoroutine = StartCoroutine(MapCoroutine());
 
                 // Animate
-                yield return Ease.Animate(0.3f, (x) =>
+                yield return Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, ease1 =>
                 {
-                    float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                     LerpMapView(ease1);
                     ListView.LerpListView(1 - ease1);
                     if (IsTargetSongUnlocked)
@@ -582,11 +581,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 float lerp3 = Ease.Get(a * 3, EaseFunction.Cubic, EaseMode.Out);
                 LerpUI(lerp3);
 
-                float lerp4 = Ease.Get(a * 1.5f, EaseFunction.Circle, EaseMode.Out);
                 foreach (SongSelectListItem item in ListView.ItemList)
                 {
                     item.PositionOffset = 45 * Mathf.Clamp(item.Position - ListView.TargetSongOffset, -1, 1)
-                         * (lerp2 * .5f + lerp4 * .5f);
+                         * (lerp2 * .5f + EaseUtils.FromZero(.5f, a * 1.5f, EaseFunction.Circle, EaseMode.Out));
                 }
                 ListView.IsDirty = true;
             });
@@ -713,8 +711,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 CommonSys.sMain.MainCamera.transform.position *= new Vector3Frag(z: -lerp3 * 2 - 10);
                 MapUIGroup.transform.localScale = Vector3.one * (1 - lerp3 * 0.1f);
 
-                float lerp4 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
-                LerpMapView(1 - lerp4);
+                LerpMapView(EaseUtils.ToZero(1, a * 3f, EaseFunction.Exponential, EaseMode.Out));
             });
 
             yield return navCoroutine;
@@ -777,16 +774,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 SongBurstMainImage.rectTransform.position = center.position;
 
                 float ease1 = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
-                SongBurstMainImage.rectTransform.sizeDelta = Vector2.one * (40 + 80 * ease1);
+                SongBurstMainImage.rectTransform.sizeDelta = Vector2.one * (40 + EaseUtils.FromZero(80, ease1));
                 SongBurstSubImage1.rectTransform.sizeDelta
-                    = SongBurstSubImage2.rectTransform.sizeDelta = Vector2.one * (120 * ease1);
+                    = SongBurstSubImage2.rectTransform.sizeDelta = Vector2.one * EaseUtils.FromZero(120, ease1);
 
-                float ease2 = Ease.Get(t, EaseFunction.Quadratic, EaseMode.In);
-                SongBurstGroup.alpha = 1 - ease2;
+                SongBurstGroup.alpha = EaseUtils.ToZero(1, t, EaseFunction.Quadratic, EaseMode.In);
 
                 float ease3 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
                 SongBurstSubImage1.rectTransform.localEulerAngles
-                    = -(SongBurstSubImage2.rectTransform.localEulerAngles = Vector3.forward * (10 * ease3));
+                    = -(SongBurstSubImage2.rectTransform.localEulerAngles = Vector3.forward * EaseUtils.FromZero(10, ease3));
             });
         }
 
@@ -826,16 +822,14 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
             SetScoreInfo(target);
 
-            StartCoroutine(Ease.Animate(.1f, a => {
-                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+            StartCoroutine(Ease.Animate(.1f, EaseFunction.Cubic, EaseMode.Out, lerp => {
                 oldTarget.SetSelectability(1 - lerp);
                 target.SetSelectability(lerp);
-                rt(oldTarget.Holder).anchoredPosition = new(0, 5 * (1 - lerp));
+                rt(oldTarget.Holder).anchoredPosition = new(0, EaseUtils.ToZero(5, lerp));
             }));
-            yield return Ease.Animate(.15f, a => {
-                float lerp = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                rt(target.Holder).anchoredPosition = new(0, 7 - 2 * lerp);
-                rt(target.Holder).localEulerAngles = 10 * (1 - lerp) * Vector3.back;
+            yield return Ease.Animate(.15f, EaseFunction.Cubic, EaseMode.Out, lerp => {
+                rt(target.Holder).anchoredPosition = new(0, 7 - EaseUtils.FromZero(2, lerp));
+                rt(target.Holder).localEulerAngles = EaseUtils.ToZero(10, lerp) * Vector3.back;
             });
             IsAnimating = false;
 
@@ -843,15 +837,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         IEnumerator NavUpdateAnim()
         {
-            yield return Ease.Animate(0.2f, (x) =>
+            yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.Out, ease1 =>
             {
-                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 LerpActions(1 - ease1);
             });
             UpdateButtons();
-            yield return Ease.Animate(0.2f, (x) =>
+            yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.Out, ease1 =>
             {
-                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 LerpActions(ease1);
             });
         }
@@ -985,11 +977,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 float lerp3 = Mathf.Pow(Ease.Get(a, EaseFunction.Exponential, EaseMode.Out), 0.5f);
                 rt(LaunchTextHolder).sizeDelta = new(LaunchText.preferredWidth * lerp3, rt(LaunchTextHolder).sizeDelta.y);
                 LaunchTextHolder.alpha = Random.Range(1, 2f) - lerp2 * 2;
-                TargetSongCoverFlash.color = new(1, 1, 1, 1 - lerp3);
+                TargetSongCoverFlash.color = new(1, 1, 1, EaseUtils.ToZero(1, lerp3));
             
 
-                float lerp4 = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                float targetCameraZ = lerp4 * 5 - Mathf.Pow(lerp2, 0.75f) * 30;
+                float targetCameraZ = EaseUtils.FromZero(5, a, EaseFunction.Cubic, EaseMode.Out) - Mathf.Pow(lerp2, 0.75f) * 30;
                 CommonSys.sMain.MainCamera.transform.Translate(Vector3.back * (targetCameraZ - currentCameraZ));
                 currentCameraZ = targetCameraZ;
             });
@@ -1141,12 +1132,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
 
-            yield return Ease.Animate(0.6f, (t) =>
+            yield return Ease.Animate(0.6f, (Action<float>)((t) =>
             {
                 float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
                 cameraTransform.position =
                     Vector3.Lerp(cameraTransform.position, target.position, 1 - Mathf.Pow(1e-3f, Time.deltaTime)) 
-                    * new Vector3Frag(z: -10 * (1 - lerp1));
+                    * new Vector3Frag(z: -10 * EaseUtils.ToZero(1, t, EaseFunction.Exponential, EaseMode.In));
                 MapCover.color *= new ColorFrag(a: Mathf.Floor(t));
 
                 if (IsMapView)
@@ -1160,7 +1151,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     // There's no cases where LeaveInAnim is called in list view yet
                     throw new NotImplementedException();
                 }
-            });
+            }));
         }
 
         /// <summary>
@@ -1272,9 +1263,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         IEnumerator IntroShowMapUIAnim()
         {
-            yield return Ease.Animate(.2f, (x) =>
+            yield return Ease.Animate(.2f, EaseFunction.Cubic, EaseMode.Out, ease1 =>
             {
-                float ease1 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
                 LerpActions(ease1);
                 ProfileBar.sMain.SetVisibility(ease1);
             });

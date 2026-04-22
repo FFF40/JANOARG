@@ -1,4 +1,3 @@
-using System.Collections;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Events;
@@ -26,7 +25,7 @@ namespace JANOARG.Client.UI
             set
             {
                 _Value = value;
-                if (_Routine != null) StopCoroutine(_Routine);
+                _Routine?.Skip();
                 SetToggleEase(_Value ? 1 : 0);
             }
         }
@@ -46,26 +45,19 @@ namespace JANOARG.Client.UI
         public void Toggle()
         {
             _Value = !_Value;
-            if (_Routine != null) StopCoroutine(_Routine);
-            _Routine = StartCoroutine(ToggleAnim(_Value ? 1 : 0));
+            _Routine?.Skip();
+            _ProgressFrom = _Progress;
+            _Routine = Ease.EnumAnimate(0.2f, EaseFunction.Cubic, EaseMode.Out, ease =>
+            {
+                SetToggleEase(EaseUtils.LerpTo(_ProgressFrom, _Value ? 1 : 0, ease));
+            });
+            StartCoroutine(_Routine);
             OnValueChanged.Invoke(_Value);
         }
 
-        private float     _Progress;
-        private Coroutine _Routine;
-
-        public IEnumerator ToggleAnim(float to)
-        {
-            float from = _Progress;
-
-            yield return Ease.Animate(0.2f, x =>
-            {
-                float ease = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                SetToggleEase(Mathf.Lerp(from, to, ease));
-            });
-
-            _Routine = null;
-        }
+        private float          _Progress;
+        private float          _ProgressFrom;
+        private EaseEnumerator _Routine;
 
         public void SetToggleEase(float ease)
         {

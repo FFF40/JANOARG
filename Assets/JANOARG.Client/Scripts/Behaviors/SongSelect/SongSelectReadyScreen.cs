@@ -136,8 +136,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             {
                 var meshInfo = SongArtistText.textInfo.meshInfo[info.materialReferenceIndex];
                 int index = info.vertexIndex;
-                float ease = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
-                Vector3 offset = -400 * ease * new Vector3(-.26795f, -1);
+                Vector3 offset = -EaseUtils.FromZero(400, x, EaseFunction.Exponential, EaseMode.In) * new Vector3(-.26795f, -1);
                 meshInfo.vertices[index] += offset;
                 meshInfo.vertices[index + 1] += offset;
                 meshInfo.vertices[index + 2] += offset;
@@ -147,8 +146,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             {
                 var meshInfo = SongNameText.textInfo.meshInfo[info.materialReferenceIndex];
                 int index = info.vertexIndex;
-                float ease = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
-                Vector3 offset = -1000 * ease * Vector2.right;
+                Vector3 offset = -EaseUtils.FromZero(1000, x, EaseFunction.Exponential, EaseMode.In) * Vector2.right;
                 meshInfo.vertices[index] += offset;
                 meshInfo.vertices[index + 1] += offset;
                 meshInfo.vertices[index + 2] += offset;

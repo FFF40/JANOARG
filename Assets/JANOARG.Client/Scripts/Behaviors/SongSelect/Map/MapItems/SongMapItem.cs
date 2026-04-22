@@ -41,6 +41,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
             {
                 ItemUI = MakeItemUI<SongMapItemUI, SongMapItem>();
                 MapManager.sSongMapItemUIsByID.Add(TargetID, ItemUI);
+                this.gameObject.SetActive(isRevealed); // Helps hiding decorative items alongside it
             }
         }
 

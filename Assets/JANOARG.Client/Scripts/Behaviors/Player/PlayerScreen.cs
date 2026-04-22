@@ -21,6 +21,7 @@ namespace JANOARG.Client.Behaviors.Player
 
     public class PlayerScreen : MonoBehaviour
     {
+
         public static PlayerScreen sMain;
 
         public static string            sTargetSongPath;
@@ -175,6 +176,8 @@ namespace JANOARG.Client.Behaviors.Player
         
         internal List<int> TransparentMeshLaneIndexes = new();
         private List<LanePlayer> _LanesToRender = new();
+        
+
         public void Awake()
         {
             sMain = this;
@@ -711,6 +714,16 @@ namespace JANOARG.Client.Behaviors.Player
         {
             if (!IsPlaying)
                 return;
+            
+            #if UNITY_EDITOR
+            // Avoid stale and broken chart state when pausing in the editor, which can cause issues with testing and debugging
+                        if (EditorApplication.isPaused)
+                        {
+                            Music.Pause();
+                            _LastDSPTime = AudioSettings.dspTime;
+                            return;
+                        }
+            #endif
 
             double delta = Math.Min(AudioSettings.dspTime - _LastDSPTime, PerfectWindow);
             if (delta <= 0) delta = Time.unscaledDeltaTime;
@@ -805,7 +818,7 @@ namespace JANOARG.Client.Behaviors.Player
                 ResultExec = true;
             }
 
-            IEnumerator f_laneUpdater(float f, float visualBeat1)
+            IEnumerator f_laneUpdater(float time, float beat)
             {
                 for (int i = Lanes.Count - 1; i >= 0; i--) // Iterate backwards
                 {
@@ -813,12 +826,14 @@ namespace JANOARG.Client.Behaviors.Player
                     {
                         LanePlayer lane = Lanes[i];
 
-                        if (lane.TimeStamps[0] - 5f > f)
+                        bool hasTrivialLocalLaneMotion = f_hasTrivialLocalLaneMotion(lane);
+
+                        if (!hasTrivialLocalLaneMotion && lane.TimeStamps[0] - 5f > time)
                             continue;
 
-                        lane.UpdateSelf(f, visualBeat1);
+                        lane.UpdateSelf(time, beat);
 
-                        if (lane.MarkedForRemoval || lane == null) // Fixed logic
+                        if (lane.MarkedForRemoval || lane == null)
                         {
                             Lanes.RemoveAt(i); // More efficient than Remove()
                             Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
@@ -832,6 +847,25 @@ namespace JANOARG.Client.Behaviors.Player
                 }
 
                 yield return null;
+
+                static bool f_hasTrivialLocalLaneMotion(LanePlayer lane)
+                {
+                    
+                    if (lane.Current == null) return true; // not yet initialized, don't gate it
+                    
+                    const float TRIVIAL_LANE_SPAN_THRESHOLD     = 2f;
+                    
+                    IReadOnlyList<LaneStep> laneSteps = lane.Current.LaneSteps;
+                    if (laneSteps.Count <= 1) return true;
+
+                    float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
+                    bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
+                    // TODO: Check if this operation is expensive enough to require a cached flag on load time
+                    bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
+
+                    return hasShortSpan || isGeometryLane;
+                    
+                }
             }
         }
 
@@ -907,12 +941,11 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(.6f, (x) =>
             {
                 float val = Mathf.Pow(1 - x, 5);
-                float val2 = 1 - Ease.Get(x, EaseFunction.Quintic, EaseMode.In);
 
                 ComboGroup.alpha = Combo == 0 ? 0 : val + 1;
                 ComboLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
                 JudgmentLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -25 + 2 * val * val);
-                JudgmentGroup.alpha = val2;
+                JudgmentGroup.alpha = EaseUtils.ToZero(1, x, EaseFunction.Quintic, EaseMode.In);
             });
         }
 

@@ -108,10 +108,9 @@ namespace JANOARG.Client.Behaviors.Common
             yield return Ease.Animate(
                 2.5f, a =>
                 {
-                    float lerp = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
 
                     FlavorBackground.rectTransform.sizeDelta =
-                        new Vector2(FlavorBackground.rectTransform.sizeDelta.x, lerp * 100);
+                        new Vector2(FlavorBackground.rectTransform.sizeDelta.x, EaseUtils.FromZero(100, a * 3f, EaseFunction.Exponential, EaseMode.Out));
 
                     float lerp2 = Ease.Get(
                         a * 3f - 0.15f, EaseFunction.Exponential,
@@ -122,17 +121,15 @@ namespace JANOARG.Client.Behaviors.Common
                             FlavorBackground2.rectTransform.sizeDelta.x,
                             lerp2 * 100);
 
-                    float lerp3 = Ease.Get(a * 3f, EaseFunction.Exponential, EaseMode.Out);
 
                     StatusHolder.anchoredPosition = new Vector2(
                         1000 +
                         (StatusHolder.rect.width - 1000 + _Self.sizeDelta.x / -2) *
-                        (1 - lerp3), 0);
+                        EaseUtils.ToZero(1, a * 3f, EaseFunction.Exponential, EaseMode.Out), 0);
 
-                    float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.Out);
 
                     FlavorText.rectTransform.anchoredPosition =
-                        new Vector2(1200 - 100 * lerp4, 0);
+                        new Vector2(1200 - EaseUtils.FromZero(100, a, EaseFunction.Exponential, EaseMode.Out), 0);
                 });
 
             IsAnimating = false;

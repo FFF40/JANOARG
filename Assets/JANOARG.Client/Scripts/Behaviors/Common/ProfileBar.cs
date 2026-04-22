@@ -343,7 +343,7 @@ namespace JANOARG.Client.Behaviors.Common
             int pCount;
 
             // Coin particles
-            Coroutine coinAnim = null;
+            EaseEnumerator coinAnim = null;
             pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseCoins), 1, 15);
             List<CollectingParticle> coinParticles = new();
 
@@ -362,23 +362,22 @@ namespace JANOARG.Client.Behaviors.Common
                             CoinLabel.text = Helper.FormatCurrency(coinsOld);
                             SetRewardLerp(1);
 
-                            if (coinAnim != null)
-                                StopCoroutine(coinAnim);
+                            coinAnim?.Skip();
 
-                            coinAnim = StartCoroutine(
-                                Ease.Animate(
+                            coinAnim = Ease.EnumAnimate(
                                     .2f, x =>
                                     {
                                         CoinLabel.margin *=
                                             new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
 
                                         ParticleCoinFlash.color *= new ColorFrag(a: 1 - x);
-                                    }));
+                                    });
+                            StartCoroutine(coinAnim);
                         }));
             }
 
             // Orb particles
-            Coroutine orbAnim = null;
+            EaseEnumerator orbAnim = null;
             pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseOrbs), 1, 30);
 
             while (finalOrbs > 0)
@@ -425,22 +424,21 @@ namespace JANOARG.Client.Behaviors.Common
                         SetRewardLerp(1);
 
                         if (orbAnim != null)
-                            StopCoroutine(orbAnim);
+                            orbAnim.Skip();
 
-                        orbAnim =
-                            StartCoroutine(Ease.Animate(.2f, x =>
-                                    {
-                                        OrbLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+                        orbAnim = Ease.EnumAnimate(.2f, x =>
+                                {
+                                    OrbLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
 
-                                        ParticleOrbFlash.color *= new ColorFrag(a: 1 - x);
-                                    }
-                                )
+                                    ParticleOrbFlash.color *= new ColorFrag(a: 1 - x);
+                                }
                             );
+                        StartCoroutine(orbAnim);
                     });
             }
 
             // Essence particles
-            Coroutine essenceAnim = null;
+            EaseEnumerator essenceAnim = null;
             pCount = essenceOld == totalEssence ? 0 : (int)Mathf.Clamp(essenceChange * 10, 1, 50);
 
             for (var i = 0; i < pCount; i++)
@@ -451,13 +449,13 @@ namespace JANOARG.Client.Behaviors.Common
                     AbilityRatingText.text = arOld.ToString("F2", CultureInfo.InvariantCulture);
                     EssenceLabel.text = "+" + essenceOld.ToString("F1", CultureInfo.InvariantCulture) + "%";
 
-                    if (essenceAnim != null)
-                        StopCoroutine(essenceAnim);
+                    essenceAnim?.Skip();
 
-                    essenceAnim = StartCoroutine(Ease.Animate(.2f, x =>
+                    essenceAnim = Ease.EnumAnimate(.2f, x =>
                     {
                         ParticleEssenceFlash.color *= new ColorFrag(a: 1 - x);
-                    }));
+                    });
+                    StartCoroutine(essenceAnim);
                 });
 
             _SongGainSkipLock = true;
@@ -570,8 +568,7 @@ namespace JANOARG.Client.Behaviors.Common
 
                     SetRewardLerp(1 - lerp);
 
-                    float lerp2 = Ease.Get(x * 3 - 2, EaseFunction.Quintic, EaseMode.Out);
-                    SetChangeLerp(1 - lerp2);
+                    SetChangeLerp(EaseUtils.ToZero(1, x * 3 - 2, EaseFunction.Quintic, EaseMode.Out));
                 });
         }
 
@@ -603,10 +600,9 @@ namespace JANOARG.Client.Behaviors.Common
                         EaseMode.Out);
 
                     LevelUpLevelGraphic.rectTransform.anchorMax = new Vector2(lerp, 1);
-                    float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
 
                     LevelUpLabelText.rectTransform.anchoredPosition =
-                        new Vector2(0, -50 * (1 - lerp2));
+                        new Vector2(0, -50 * EaseUtils.ToZero(1, x, EaseFunction.Exponential, EaseMode.Out));
                 });
 
             LevelText.text = level.ToString();

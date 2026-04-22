@@ -147,10 +147,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         {
             var targetItem = sPlaylistMapItemsByID.Values.FirstOrDefault(p => p.Target == playlist);
 
-            StartCoroutine(Ease.Animate(0.3f, (t) => {
-                float lerp1 = 1 - Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
-                ProfileBar.sMain.SetVisibility(lerp1);
-                SongSelectScreen.sMain.LerpActions(lerp1);
+            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) => {
+                ProfileBar.sMain.SetVisibility(1 - t);
+                SongSelectScreen.sMain.LerpActions(1 - t);
             }));
             yield return SongSelectScreen.sMain.LeaveInAnim(targetItem.transform);
             SongSelectScreen.sMain.MapCover.color 
@@ -167,10 +166,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             yield return SongSelectScreen.sMain.InitPlaylist();
             yield return new WaitForSeconds(0.7f);
             SongSelectScreen.sMain.UpdateButtons();
-            StartCoroutine(Ease.Animate(0.3f, (t) => {
-                float lerp1 = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
-                ProfileBar.sMain.SetVisibility(lerp1);
-                SongSelectScreen.sMain.LerpActions(lerp1);
+            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) => {
+                ProfileBar.sMain.SetVisibility(t);
+                SongSelectScreen.sMain.LerpActions(t);
             }));
         }
 
@@ -182,10 +180,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         public IEnumerator NavigatePreviousMapAnim()
         {
-            StartCoroutine(Ease.Animate(0.3f, (t) => {
-                float lerp1 = 1 - Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
-                ProfileBar.sMain.SetVisibility(lerp1);
-                SongSelectScreen.sMain.LerpActions(lerp1);
+            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) => {
+                ProfileBar.sMain.SetVisibility(1 - t);
+                SongSelectScreen.sMain.LerpActions(1 - t);
             }));
             yield return SongSelectScreen.sMain.LeaveOutAnim();
 
@@ -200,10 +197,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             yield return SongSelectScreen.sMain.InitPlaylist();
             yield return new WaitForSeconds(0.7f);
             SongSelectScreen.sMain.UpdateButtons();
-            StartCoroutine(Ease.Animate(0.3f, (t) => {
-                float lerp1 = Ease.Get(t, EaseFunction.Cubic, EaseMode.Out);
-                ProfileBar.sMain.SetVisibility(lerp1);
-                SongSelectScreen.sMain.LerpActions(lerp1);
+            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) => {
+                ProfileBar.sMain.SetVisibility(t);
+                SongSelectScreen.sMain.LerpActions(t);
             }));
         }
 
