@@ -1132,8 +1132,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
 
-            yield return Ease.Animate(0.6f, (t) =>
+            yield return Ease.Animate(0.6f, (Action<float>)((t) =>
             {
+                float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.In);
                 cameraTransform.position =
                     Vector3.Lerp(cameraTransform.position, target.position, 1 - Mathf.Pow(1e-3f, Time.deltaTime)) 
                     * new Vector3Frag(z: -10 * EaseUtils.ToZero(1, t, EaseFunction.Exponential, EaseMode.In));
@@ -1150,7 +1151,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     // There's no cases where LeaveInAnim is called in list view yet
                     throw new NotImplementedException();
                 }
-            });
+            }));
         }
 
         /// <summary>
