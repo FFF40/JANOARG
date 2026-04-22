@@ -104,8 +104,7 @@ namespace JANOARG.Client.Behaviors.Options
 
                 float loopTime = audioTime % loopLength;
 
-                // Optional: keep debug, but DO NOT force resync every frame
-                if (Mathf.Abs(loopTime - audioTime) > SyncThreshold)
+                if (CurrentOptionInput is AudioOffsetOptionInput)
                 {
                     Debug.Log(loopTime + "\n" + audioTime);
                     // Intentionally no correction here
@@ -143,7 +142,7 @@ namespace JANOARG.Client.Behaviors.Options
             int gameeplayOffsetCounter = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0);
             InfoLabel.gameObject.SetActive(false);
 
-            switch (optionInput)
+            if (optionInput is AudioOffsetOptionInput)
             {
                 case AudioOffsetOptionInput:
                 {
@@ -236,7 +235,7 @@ namespace JANOARG.Client.Behaviors.Options
 
             _IsActive = true;
 
-            if (CurrentOptionInput is JudgmentOffsetOptionInput)
+            if (CurrentOptionInput is AudioOffsetOptionInput)
             {
                 CalibrationLoopPlayer.clip = CalibrationLoop;
 
@@ -301,7 +300,7 @@ namespace JANOARG.Client.Behaviors.Options
 
             float trialTime = (float)touch.startTime - Time.realtimeSinceStartup + CurrentTime;
 
-            if (CurrentOptionInput is JudgmentOffsetOptionInput)
+            if (CurrentOptionInput is AudioOffsetOptionInput)
                 trialTime += SyncOffset;
             else
                 trialTime -= CommonSys.sMain.Preferences.Get("PLYR:AudioOffset", 0f) / 1000;
@@ -341,7 +340,7 @@ namespace JANOARG.Client.Behaviors.Options
 
             InfoLabel.gameObject.SetActive(true);
 
-            TMP_Text targetLabel = CurrentOptionInput is JudgmentOffsetOptionInput
+            TMP_Text targetLabel = CurrentOptionInput is AudioOffsetOptionInput
                 ? JudgmentOffsetInstructionLabel
                 : VisualOffsetInstructionLabel;
 

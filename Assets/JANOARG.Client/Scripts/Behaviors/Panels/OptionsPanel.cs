@@ -281,8 +281,14 @@ namespace JANOARG.Client.Behaviors.Panels
                     sample.Max = 500;
                     sample.Step = 1;
                     sample.Unit = "ms";
+                    
+                    Spawn<AudioOffsetOptionInput, float>(
+                        "Audio Offset",
+                        () => preferences.Get("PLYR:AudioOffset", 0f),
+                        x => preferences.Set("PLYR:AudioOffset", x)
+                    );
 
-                    Spawn<JudgmentOffsetOptionInput, float>(
+                    Spawn<FloatOptionInput, float>(
                         "Judgment Offset",
                         () => preferences.Get("PLYR:JudgmentOffset", 0f),
                         x => preferences.Set("PLYR:JudgmentOffset", x)
