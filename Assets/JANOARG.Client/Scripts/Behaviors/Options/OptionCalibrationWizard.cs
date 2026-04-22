@@ -68,9 +68,11 @@ namespace JANOARG.Client.Behaviors.Options
 
         private bool _IsActive;
 
-        private double _LastDSPTime;
+        private double _SongStartDSP = 0.1f;
+        
         private int    _LastTrialIndex;
         private int    _Samples;
+        
 
         public void Start()
         {
@@ -83,41 +85,44 @@ namespace JANOARG.Client.Behaviors.Options
 
         public void Update()
         {
-            if (_IsActive)
+            if (!_IsActive)
+                return;
+
+            double dspNow = AudioSettings.dspTime;
+
+            // Absolute, drift-free timeline
+            CurrentTime = (float)(dspNow - _SongStartDSP);
+
+            if (CurrentOptionInput is AudioOffsetOptionInput)
             {
-                double delta = AudioSettings.dspTime - _LastDSPTime;
+                float loopLength = 60f / CalibrationLoopBPM * 32f;
 
-                if (delta <= 0)
-                    delta = Time.unscaledDeltaTime;
+                // Use AUDIO as truth, not your timeline
+                float audioTime =
+                    (float)CalibrationLoopPlayer.timeSamples /
+                    CalibrationLoopPlayer.clip.frequency;
 
-                CurrentTime += (float)delta;
-                _LastDSPTime += delta;
+                float loopTime = audioTime % loopLength;
 
-                if (CurrentOptionInput is JudgmentOffsetOptionInput)
+                // Optional: keep debug, but DO NOT force resync every frame
+                if (Mathf.Abs(loopTime - audioTime) > SyncThreshold)
                 {
-                    float loopTime = CurrentTime % (60 / CalibrationLoopBPM * 32);
-
-                    if (Mathf.Abs(
-                            loopTime -
-                            (float)CalibrationLoopPlayer.timeSamples / CalibrationLoopPlayer.clip.frequency) >
-                        SyncThreshold)
-                    {
-                        Debug.Log(loopTime + "\n" + CalibrationLoopPlayer.time);
-                        CalibrationLoopPlayer.time = loopTime;
-                    }
+                    Debug.Log(loopTime + "\n" + audioTime);
+                    // Intentionally no correction here
                 }
-                else if (CurrentOptionInput is VisualOffsetOptionInput)
-                {
-                    float trialDuration = 60 / CalibrationLoopBPM * 4;
-                    float time = CurrentTime / trialDuration % 1;
+            }
+            else if (CurrentOptionInput is VisualOffsetOptionInput)
+            {
+                float trialDuration = 60f / CalibrationLoopBPM * 4f;
 
-                    float pos = Ease.Get(time, EaseFunction.Quartic, EaseMode.InOut) * 400 - 200;
-                    VisualOffsetLeft.rectTransform.anchoredPosition = new Vector2(-pos, 0);
-                    VisualOffsetRight.rectTransform.anchoredPosition = new Vector2(pos, 0);
+                float time = (CurrentTime / trialDuration) % 1f;
 
-                    float opacity = 1 - Ease.Get(Mathf.Abs(time * 2 - 1), EaseFunction.Cubic, EaseMode.In);
-                    VisualOffsetLeft.color = VisualOffsetRight.color = new Color(1, 1, 1, opacity);
-                }
+                float pos = Ease.Get(time, EaseFunction.Quartic, EaseMode.InOut) * 400f - 200f;
+                VisualOffsetLeft.rectTransform.anchoredPosition = new Vector2(-pos, 0);
+                VisualOffsetRight.rectTransform.anchoredPosition = new Vector2(pos, 0);
+
+                float opacity = 1 - Ease.Get(Mathf.Abs(time * 2f - 1f), EaseFunction.Cubic, EaseMode.In);
+                VisualOffsetLeft.color = VisualOffsetRight.color = new Color(1, 1, 1, opacity);
             }
         }
 
@@ -220,16 +225,23 @@ namespace JANOARG.Client.Behaviors.Options
 
                     FaderGroup.alpha = AverageOffsetCanvasGroup.alpha = ease2;
                 });
+
             yield return _CurrentAnim;
 
+            // --- DSP anchor setup ---
+            double dspNow = AudioSettings.dspTime;
+            double leadTime = 0.1; // safe scheduling margin
+
+            _SongStartDSP = dspNow + leadTime;
+
             _IsActive = true;
-            _LastDSPTime = AudioSettings.dspTime;
 
             if (CurrentOptionInput is JudgmentOffsetOptionInput)
             {
                 CalibrationLoopPlayer.clip = CalibrationLoop;
-                CalibrationLoopPlayer.Play();
-                CalibrationLoopPlayer.time = 0;
+
+                // Schedule instead of immediate play
+                CalibrationLoopPlayer.PlayScheduled(_SongStartDSP);
             }
 
             _CurrentAnim = null;
