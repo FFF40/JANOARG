@@ -922,6 +922,7 @@ namespace JANOARG.Client.Behaviors.Player
                 : samples[mid];
 
             CommonSys.sMain.Preferences.Set("PLYR:GameplayMedianOffset", (float)(MedianTimingOffset * 1000));
+            CommonSys.sMain.Preferences.Set("PLYR:GameplayMedianOffsetCounter", CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0) + 1);
         }
 
         // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause

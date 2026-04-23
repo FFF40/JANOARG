@@ -127,6 +127,7 @@ namespace JANOARG.Client.Behaviors.Options
             MedianTimingOffset = 0;
             // Pull the last gameplay-derived median written by PlayerScreen on each hit
             GameplayMedianOffset = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffset", 0f) / 1000.0;
+            int gameeplayOffsetCounter = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0);
             InfoLabel.gameObject.SetActive(false);
 
             if (optionInput is JudgmentOffsetOptionInput)
