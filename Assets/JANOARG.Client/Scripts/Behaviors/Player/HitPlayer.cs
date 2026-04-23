@@ -46,6 +46,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Init()
         {
+            
             if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.HitStyles.Count)
             {
                 HitStyleManager style = PlayerScreen.sMain.HitStyles[Current.StyleIndex];
@@ -113,7 +114,7 @@ namespace JANOARG.Client.Behaviors.Player
                 Quaternion rotation = CommonSys.sMain.MainCamera.transform.rotation;
 
                 float angle = float.IsFinite(Current.FlickDirection)
-                    ? Current.FlickDirection
+                    ? -Current.FlickDirection
                     : Vector2.SignedAngle(
                         Vector2.right,
                         CommonSys.sMain.MainCamera.WorldToScreenPoint(LeftPoint.transform.position) -
