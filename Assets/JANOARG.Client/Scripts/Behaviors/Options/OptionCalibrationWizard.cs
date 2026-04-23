@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Options.Input_Types;
 using JANOARG.Shared.Data.ChartInfo;
@@ -44,6 +47,15 @@ namespace JANOARG.Client.Behaviors.Options
         public  TMP_Text    JudgmentOffsetInstructionLabel;
         public  TMP_Text    VisualOffsetInstructionLabel;
         private float       _CumulativeOffset;
+        private List<float> _TrialOffsets = new();
+
+        // Median of wizard taps — attach to settings scene to surface to the player.
+        // Median from wizard taps — attach to settings scene.
+        public double MedianTimingOffset;
+
+        // Last gameplay-derived median passed in from PlayerScreen via prefs.
+        // Separate from tap sampling — for display/comparison only, not directly applied.
+        public double GameplayMedianOffset;
 
         private EaseEnumerator _CurrentAnim;
 
@@ -111,6 +123,10 @@ namespace JANOARG.Client.Behaviors.Options
             CurrentTime = _CumulativeOffset = 0;
             _Samples = 0;
             _LastTrialIndex = -1;
+            _TrialOffsets.Clear();
+            MedianTimingOffset = 0;
+            // Pull the last gameplay-derived median written by PlayerScreen on each hit
+            GameplayMedianOffset = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffset", 0f) / 1000.0;
             InfoLabel.gameObject.SetActive(false);
 
             if (optionInput is JudgmentOffsetOptionInput)
@@ -217,7 +233,7 @@ namespace JANOARG.Client.Behaviors.Options
             if (CurrentOptionInput is JudgmentOffsetOptionInput)
                 trialTime += SyncOffset;
             else
-                trialTime -= CommonSys.sMain.Preferences.Get("PLYR:JudgmentOffset", 0f) / 1000;
+                trialTime -= CommonSys.sMain.Preferences.Get("PLYR:AudioOffset", 0f) / 1000;
 
             float trialDuration = 60 / CalibrationLoopBPM * 4;
             int trialIndex = Mathf.FloorToInt(trialTime / trialDuration);
@@ -230,7 +246,15 @@ namespace JANOARG.Client.Behaviors.Options
 
             float trialOffset = trialTime - (trialIndex + .5f) * trialDuration;
             _CumulativeOffset += trialOffset;
+            _TrialOffsets.Add(trialOffset);
             _Samples++;
+
+            // Compute median from sorted trial offsets
+            var sorted = _TrialOffsets.OrderBy(x => x).ToList();
+            int mid = sorted.Count / 2;
+            MedianTimingOffset = sorted.Count % 2 == 0
+                ? (sorted[mid - 1] + sorted[mid]) / 2.0
+                : sorted[mid];
 
             if (_Samples < TrialThreshold)
             {
@@ -238,10 +262,9 @@ namespace JANOARG.Client.Behaviors.Options
             }
             else
             {
-                float averageOffset = -_CumulativeOffset / _Samples;
-                averageOffset = Mathf.Round(averageOffset * 1000);
-                InfoLabel.text = $"Average offset: {averageOffset:0}ms";
-                InputField.text = averageOffset.ToString();
+                double medianMs = Math.Round(-MedianTimingOffset * 1000);
+                InfoLabel.text = $"Median offset: {medianMs:0}ms";
+                InputField.text = medianMs.ToString();
                 InputField.onEndEdit.Invoke(InputField.text);
             }
 
