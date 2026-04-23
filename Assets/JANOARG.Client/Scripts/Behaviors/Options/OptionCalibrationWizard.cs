@@ -27,23 +27,30 @@ namespace JANOARG.Client.Behaviors.Options
         public int   TrialThreshold = 4;
         public float SyncOffset;
 
-        [Space] public GameObject JudgmentOffsetHolder;
-
+        [Space] 
+        public GameObject JudgmentOffsetHolder;
+        public GameObject AverageOffsetHolder;
         public GameObject VisualOffsetHolder;
 
-        [Space] public Image VisualOffsetLeft;
-
+        [Space]
+        public Image VisualOffsetLeft;
         public Image VisualOffsetRight;
 
-        [Space] public GameObject InputHolder;
+        [Space]
+        public Button AverageOffsetApplyButton;
+        public TMP_Text AverageOffsetValueLabel;
 
+        [Space] 
+        public GameObject InputHolder;
         public TMP_InputField InputField;
         public TMP_Text       InputFieldUnit;
 
-        [Space] public Image Background;
-
+        [Space] 
+        public  Image Background;
         public  CanvasGroup FaderGroup;
+        public  CanvasGroup AverageOffsetCanvasGroup;
         public  TMP_Text    InfoLabel;
+        public  TMP_Text    AverageOffsetInstructionLabel;
         public  TMP_Text    JudgmentOffsetInstructionLabel;
         public  TMP_Text    VisualOffsetInstructionLabel;
         private float       _CumulativeOffset;
@@ -68,6 +75,7 @@ namespace JANOARG.Client.Behaviors.Options
         public void Start()
         {
             JudgmentOffsetHolder.SetActive(false);
+            AverageOffsetHolder.SetActive(false);
             VisualOffsetHolder.SetActive(false);
             InputHolder.SetActive(false);
             gameObject.SetActive(false);
@@ -130,20 +138,62 @@ namespace JANOARG.Client.Behaviors.Options
             int gameeplayOffsetCounter = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0);
             InfoLabel.gameObject.SetActive(false);
 
-            if (optionInput is JudgmentOffsetOptionInput)
+            switch (optionInput)
             {
-                JudgmentOffsetHolder.SetActive(true);
-                JudgmentOffsetInstructionLabel.gameObject.SetActive(true);
-            }
-            else if (optionInput is VisualOffsetOptionInput)
-            {
-                VisualOffsetHolder.SetActive(true);
-                VisualOffsetInstructionLabel.gameObject.SetActive(true);
-                VisualOffsetLeft.color = VisualOffsetRight.color = new Color(1, 1, 1, 0);
+                case AudioOffsetOptionInput:
+                {
+                    JudgmentOffsetHolder.SetActive(true);
+                    AverageOffsetHolder.SetActive(true);
+                    JudgmentOffsetInstructionLabel.gameObject.SetActive(true);
+                
+                    // Average offset initialisation
+                    if (gameeplayOffsetCounter > 3)
+                    {
+                        if (Math.Abs(GameplayMedianOffset - Convert.ToDouble(InputField.text)) < 0.001)
+                        {
+                            AverageOffsetApplyButton.interactable = false;
+                            AverageOffsetInstructionLabel.text = "Congratulations, your offset is already perfect!";
+                        }
+                        else
+                        {
+                            AverageOffsetValueLabel.text = (GameplayMedianOffset * 1000).ToString("0");
+                            AverageOffsetApplyButton.interactable = true;
+                            AverageOffsetInstructionLabel.text = $"Average offset from the last <b>{gameeplayOffsetCounter}</b> plays:";
+                        }
+                    }
+                    else
+                    {
+                        AverageOffsetValueLabel.text = "0";
+                        AverageOffsetApplyButton.interactable = false;
+                        AverageOffsetInstructionLabel.text = "Play more to get an average offset.";
+                    }
+
+                    break;
+                }
+                case VisualOffsetOptionInput:
+                    VisualOffsetHolder.SetActive(true);
+                    VisualOffsetInstructionLabel.gameObject.SetActive(true);
+                    VisualOffsetLeft.color = VisualOffsetRight.color = new Color(1, 1, 1, 0);
+
+                    break;
             }
 
             _CurrentAnim?.Skip();
             StartCoroutine(InitializeWizardAnim());
+        }
+
+        public void ApplyAverageOffset()
+        {
+            //Apply
+            InputField.text = AverageOffsetValueLabel.text;
+            InputField.onEndEdit.Invoke(InputField.text);
+            
+            // Reset
+            CommonSys.sMain.Preferences.Set("PLYR:GameplayMedianOffset", 0);
+            CommonSys.sMain.Preferences.Set("PLYR:GameplayMedianOffsetCounter", 0);
+            AverageOffsetValueLabel.text = "0";
+            AverageOffsetApplyButton.interactable = false;
+            AverageOffsetInstructionLabel.text = "Play more to get an average offset.";
         }
 
         public IEnumerator InitializeWizardAnim()
@@ -161,7 +211,7 @@ namespace JANOARG.Client.Behaviors.Options
                         x * 1.5f - .5f, EaseFunction.Cubic,
                         EaseMode.Out);
 
-                    FaderGroup.alpha = ease2;
+                    FaderGroup.alpha = AverageOffsetCanvasGroup.alpha = ease2;
                 });
             yield return _CurrentAnim;
 
@@ -204,12 +254,13 @@ namespace JANOARG.Client.Behaviors.Options
                             Background.rectTransform.sizeDelta.x,
                             100 * (1 - ease));
 
-                    FaderGroup.alpha = 1 - ease;
+                    FaderGroup.alpha = AverageOffsetCanvasGroup.alpha = 1 - ease;
                 });
             yield return _CurrentAnim;
 
             _CurrentAnim = null;
             JudgmentOffsetHolder.SetActive(false);
+            AverageOffsetHolder.SetActive(false);
             VisualOffsetHolder.SetActive(false);
             InputHolder.SetActive(false);
             gameObject.SetActive(false);
