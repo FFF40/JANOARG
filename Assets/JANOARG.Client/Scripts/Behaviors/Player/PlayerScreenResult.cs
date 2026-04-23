@@ -233,9 +233,9 @@ namespace JANOARG.Client.Behaviors.Player
             // CurrentTime is timeSamples-derived and may freeze slightly short of clip.length
             // due to buffer granularity when Music.Pause() is called — use a tolerance margin
             // rather than waiting for exact equality, which can hang indefinitely.
-            const float END_TOLERANCE = 0.1f;
+            const float EndTolerance = 0.1f;
             yield return new WaitWhile(() =>
-                PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length - END_TOLERANCE
+                PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length - EndTolerance
                 && PlayerScreen.sMain.Music.isPlaying);
 
             // Stop playback so the audio lifecycle in PlayerScreen.Update doesn't restart the song
