@@ -726,13 +726,13 @@ namespace JANOARG.Client.Behaviors.Player
                 return;
             
             #if UNITY_EDITOR
-            // Avoid stale and broken chart state when pausing in the editor, which can cause issues with testing and debugging
-                        if (EditorApplication.isPaused)
-                        {
-                            Music.Pause();
-                            _LastDSPTime = AudioSettings.dspTime;
-                            return;
-                        }
+            // Toolbar pause — freeze clock and audio, return early
+            if (EditorApplication.isPaused)
+            {
+                Music.Pause();
+                _LastDSPTime = AudioSettings.dspTime;
+                return;
+            }
             #endif
 
             double delta = Math.Min(AudioSettings.dspTime - _LastDSPTime, PerfectWindow);
@@ -895,10 +895,70 @@ namespace JANOARG.Client.Behaviors.Player
         public void Resync()
         {
             _LastDSPTime = AudioSettings.dspTime;
-
-            // Re-anchor CurrentTime to audio if it's playing, so pause/resume is seamless
+            // Only anchor from timeSamples when music is actively playing —
+            // if paused, timeSamples is stale and would overwrite a deliberate CurrentTime rollback
             if (Music.isPlaying && CurrentTime >= 0)
                 CurrentTime = (double)Music.timeSamples / Music.clip.frequency;
+        }
+
+        // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause
+        private bool _PausedByFocusLoss;
+
+        // Called by Unity when the application window gains or loses focus.
+        // In the editor this fires when switching between the Game window and any other window.
+        public void OnApplicationFocus(bool hasFocus)
+        {
+#if UNITY_EDITOR
+            if (!UnityEditor.EditorApplication.isPlaying) return;
+#endif
+            if (!hasFocus)
+            {
+                // Only auto-pause if the game isn't already manually paused (IsPlaying = false)
+                if (IsPlaying)
+                {
+                    _PausedByFocusLoss = true;
+                    IsPlaying = false;
+                    Music.Pause();
+                    _LastDSPTime = AudioSettings.dspTime;
+                    PlayerScreenPause.sMain.Show();
+                }
+            }
+            else
+            {
+                // Focus returned — only resume if we were the ones who paused it
+                if (_PausedByFocusLoss)
+                {
+                    _PausedByFocusLoss = false;
+                    PlayerScreenPause.sMain.Continue();
+                }
+            }
+        }
+
+        // OnApplicationPause covers mobile app backgrounding and complements OnApplicationFocus.
+        public void OnApplicationPause(bool isPaused)
+        {
+#if UNITY_EDITOR
+            if (!UnityEditor.EditorApplication.isPlaying) return;
+#endif
+            if (isPaused)
+            {
+                if (IsPlaying)
+                {
+                    _PausedByFocusLoss = true;
+                    IsPlaying = false;
+                    Music.Pause();
+                    _LastDSPTime = AudioSettings.dspTime;
+                    PlayerScreenPause.sMain.Show();
+                }
+            }
+            else
+            {
+                if (_PausedByFocusLoss)
+                {
+                    _PausedByFocusLoss = false;
+                    PlayerScreenPause.sMain.Continue();
+                }
+            }
         }
         private Coroutine _JudgeAnimation;
 
