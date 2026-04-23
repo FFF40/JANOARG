@@ -24,6 +24,7 @@ using JANOARG.Client.Utils;
 using UnityEngine.Assertions;
 using System.Linq;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapProps;
+using JANOARG.Shared.Data.Files;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
@@ -35,7 +36,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         public Playlist Playlist;
         public Dictionary<string, PlayableSong> PlayableSongByID { get; private set; } = new();
-        public Dictionary<string, PlaylistSong> PlaylistSongByID { get; private set; } = new();
+        public Dictionary<string, PlaylistSong> PlaylistSongByID { get; private set; } = new();  
 
         [Header("List View")]
         public SongSelectListView ListView;
@@ -96,6 +97,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public Button SortButton;
         public Button LaunchButton;
 
+        [Header("External Chart Support")]
+        public ExternalChartActions externalChartActions;
+        public ExternalSongImport externalSongImport;
+        public Button ImportChartButton;
+
         [Header("Launch")]
         public CanvasGroup LaunchTextHolder;
         public TMP_Text LaunchText;
@@ -134,6 +140,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         [NonSerialized] public Cover CurrentCover;
 
         public bool IsTargetSongUnlocked { get; private set; }
+        public bool IsPlaylistExternal => Playlist is ExternalPlaylist;
         
         public void Awake()
         {
@@ -262,22 +269,51 @@ namespace JANOARG.Client.Behaviors.SongSelect
             MapManager.LoadMap();
             foreach (PlaylistSong songInfo in Playlist.Songs)
             {
-                string path = $"Songs/{songInfo.ID}/{songInfo.ID}";
-                ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
-                yield return new WaitUntil(() => req.isDone);
-                if (!req.asset)
+                if (IsPlaylistExternal)
                 {
-                    Debug.LogWarning("Couldn't load Playable Song at " + path);
-                    continue;
-                }
-                PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
-                PlayableSongByID.Add(songInfo.ID, song);
-                PlaylistSongByID.Add(songInfo.ID, songInfo);
+                   
+                    //TODO: Implement loader for fanmade charts    
+                    string externalPath = $"{Application.persistentDataPath}/Charts/{songInfo.ID}";
+                    //Init Decoder
+                    string chartContent = File.ReadAllText(externalPath + $"/{songInfo.ID}.japs");
+                    PlayableSong song = JAPSDecoder.Decode(chartContent);
 
+                   
+
+                    PlayableSongByID.Add(songInfo.ID, song);
+                    PlaylistSongByID.Add(songInfo.ID, songInfo);
+
+                    Debug.Log($"[Map Management] Successfully loaded external song: {song.SongName} by {song.SongArtist}");
+                } 
+                else
+                {
+                    string path = $"Songs/{songInfo.ID}/{songInfo.ID}";
+
+                    ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
+                    yield return new WaitUntil(() => req.isDone);
+                    if (!req.asset)
+                    {
+                        Debug.LogWarning("Couldn't load Playable Song at " + path);
+                        continue;
+                    }
+
+                    PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
+                    PlayableSongByID.Add(songInfo.ID, song);
+                    PlaylistSongByID.Add(songInfo.ID, songInfo);
+
+                }
+                
+
+               
                 index++;
-                pos += 48;
+                pos += 48; 
             }
 
+            if (IsPlaylistExternal)
+            {
+            StartCoroutine(externalSongImport.UpdateScene());
+            yield return null;
+            }
             ListView.UpdateSort();
 
             yield return new WaitUntil(() => MapManager.isReady);
@@ -306,23 +342,30 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         public void UpdateButtons()
         {
+            // Back button is active when in map view with a song selected, or when there's a playlist to go back to
             BackButton.gameObject.SetActive(
                 (IsMapView && TargetMapItem is SongMapItem) 
                 || (MapManager.sPlaylistStack.Count > 1)
             );
-            ListViewButton.gameObject.SetActive(IsMapView && !TargetMapItem);
 
+            ListViewButton.gameObject.SetActive(IsMapView && !TargetMapItem);
+           
             MapViewButton.gameObject.SetActive(!IsMapView);
             SortButton.gameObject.SetActive(!IsMapView);
             LaunchButton.gameObject.SetActive(
                 !IsMapView || (TargetMapItem is SongMapItem && IsTargetSongUnlocked)
             );
             LaunchButton.interactable = IsTargetSongUnlocked;
+
+            ImportChartButton.gameObject.SetActive(IsPlaylistExternal);
         }
 
         public void ToggleView()
         {
             if (IsAnimating) return;
+            // Temporary solution for the case where the player tries to toggle view before the song items are loaded, 
+            // which causes null refs. This should be properly fixed later by disabling the map view button until the song items are loaded.
+            if (ListView.SongItems.Count == 0) return;
             IsMapView = !IsMapView;
             TargetSongAnim = StartCoroutine(ToggleViewAnim());
         }
@@ -848,6 +891,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             });
         }
 
+        // Get and set score info for the selected difficulty
         public void SetScoreInfo(SongSelectDifficulty target)
         {
             TargetDifficultyName.text = target.Chart.DifficultyName;
@@ -918,6 +962,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 }
             }
         }
+
+        public void ImportChart()
+        {
+            externalChartActions.PickZip();
+        }
+
 
         public void Launch() 
         {
@@ -1050,6 +1100,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         }
 
 
+        // Start the intro animation after initialization of the playlist
         public void Intro()
         {
             if (!IsAnimating) StartCoroutine(IntroAnim());

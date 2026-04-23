@@ -32,5 +32,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/JANOARG.Assets/Resources/Playlists/Test/Test Map.unity
     guid: 9b21345aac4725032a0e1dff16314a56
+  - enabled: 1
+    path: Assets/JANOARG.Assets/Resources/Playlists/Fanmade/Fanmade Map.unity
+    guid: 06b3ee6f4c71d6949b37b1f1069033cc
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 7702718b59bb846418d2f5bbd32f4cf5, type: 2}

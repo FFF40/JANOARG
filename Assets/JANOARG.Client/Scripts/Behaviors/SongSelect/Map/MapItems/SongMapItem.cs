@@ -24,6 +24,12 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
             UpdateStatus();
         }
 
+        public void Initialize(PlaylistSong target)
+        {
+            Target = target;
+            TargetID = target.ID;
+        }
+
         public override void UpdateStatus()
         {
             if (Target == null)

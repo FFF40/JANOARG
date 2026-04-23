@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItems;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs;
@@ -127,11 +128,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             string sceneName = SongSelectScreen.sMain.Playlist.MapName + " Map";
             yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
             MapScene = SceneManager.GetSceneByName(sceneName);
-
             yield return null;
 
             isReady = true;
         }
+
         public void UnloadMap()
         {
             StartCoroutine(UnloadMapRoutine());
