@@ -147,26 +147,33 @@ namespace JANOARG.Client.Behaviors.Options
                     JudgmentOffsetInstructionLabel.gameObject.SetActive(true);
                 
                     // Average offset initialisation
-                    if (gameeplayOffsetCounter > 3)
-                    {
-                        if (Math.Abs(GameplayMedianOffset - Convert.ToDouble(InputField.text)) < 0.001)
-                        {
-                            AverageOffsetApplyButton.interactable = false;
-                            AverageOffsetInstructionLabel.text = "Congratulations, your offset is already perfect!";
-                        }
-                        else
-                        {
-                            AverageOffsetValueLabel.text = (GameplayMedianOffset * 1000).ToString("0");
-                            AverageOffsetApplyButton.interactable = true;
-                            AverageOffsetInstructionLabel.text = $"Average offset from the last <b>{gameeplayOffsetCounter}</b> plays:";
-                        }
-                    }
-                    else
+                    if (gameeplayOffsetCounter <= 3)
                     {
                         AverageOffsetValueLabel.text = "0";
                         AverageOffsetApplyButton.interactable = false;
                         AverageOffsetInstructionLabel.text = "Play more to get an average offset.";
+                        break;
                     }
+
+                    var culture = System.Globalization.CultureInfo.InvariantCulture;
+                    
+                    bool parsed = double.TryParse(InputField.text,
+                        System.Globalization.NumberStyles.Float, culture, out double inputValue);
+
+                    if (!parsed)
+                    {
+                        AverageOffsetApplyButton.interactable = false;
+                        break;
+                    }
+
+                    bool isAlreadyPerfect = Math.Abs(GameplayMedianOffset - inputValue) < 0.001;
+                    AverageOffsetApplyButton.interactable = !isAlreadyPerfect;
+                    AverageOffsetInstructionLabel.text = isAlreadyPerfect
+                        ? "Congratulations, your offset is already perfect!"
+                        : $"Average offset from the last <b>{gameeplayOffsetCounter}</b> plays:";
+
+                    if (!isAlreadyPerfect)
+                        AverageOffsetValueLabel.text = (GameplayMedianOffset * 1000).ToString("0");
 
                     break;
                 }
