@@ -422,15 +422,18 @@ public class PlayerInputManager : MonoBehaviour
                         Player.CurrentTime - touchClass.LastFlickHitTime < Player.PerfectWindow;
                     float effectiveFlickThreshold = flickCooldownActive ? flickThreshold * 1.5f : flickThreshold;
 
-                    // Verifier — snapshot flickDirection here (at the commit point) rather than
-                    // rolling it from threshold/2, which produced unstable readings on arcing gestures.
-                    if (!touchClass.Flicked &&
-                        (Mathf.Approximately(flickDistance, effectiveFlickThreshold) || flickDistance > effectiveFlickThreshold))
-                    {
+                    // Track direction from threshold/2 onward for stable readings, but stop
+                    // updating once the flick is committed so post-threshold drift doesn't corrupt it.
+                    if (flickDistance >= flickThreshold / 2 && !touchClass.Flicked)
                         touchClass.flickDirection = Vector2.SignedAngle(
                             Vector2.up,
                             inputEntry.screenPosition - touchClass.FlickCenter
                         );
+
+                    // Verifier
+                    if (!touchClass.Flicked &&
+                        (Mathf.Approximately(flickDistance, effectiveFlickThreshold) || flickDistance > effectiveFlickThreshold))
+                    {
                         touchClass.Flicked = true;
                         touchClass.FlickTime = Player.CurrentTime;
 
