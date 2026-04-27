@@ -448,7 +448,7 @@ namespace JANOARG.Client.Behaviors.Player
                 hitObject.gameObject.SetActive(active || (hitObject.HoldMesh && GetZPosition(hitObject.EndTime) <= CurrentPosition + 200));
 
                 if (hitObject.HoldMesh)
-                    hitObject.HoldMesh.gameObject.SetActive(active);
+                    hitObject.HoldMesh.gameObject.SetActive(active || GetZPosition(hitObject.EndTime) <= CurrentPosition + 200);
             }
 
             LaneStepDirty = false;
