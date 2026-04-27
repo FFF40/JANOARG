@@ -923,8 +923,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
                 bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
-
-                // TODO: Check if this operation is expensive enough to require a cached flag on load time
+                
                 bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
 
                 return hasShortSpan || isGeometryLane;
