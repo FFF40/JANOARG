@@ -27,7 +27,7 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 //Debug.Log(acc);
                 Size = 120;
-                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 90;
+                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 30;
                 RingFill1.fillAmount = RingFill2.fillAmount = (1 - Mathf.Abs((float)acc)) / 2;
                 RingFill1.rectTransform.localEulerAngles = Vector3.back * Mathf.Max((float)acc * 180, 0);
                 RingFill2.rectTransform.localEulerAngles = Vector3.forward * (RingFill1.rectTransform.localEulerAngles.z + 180);
@@ -45,11 +45,14 @@ namespace JANOARG.Client.Behaviors.Player
         public IEnumerator Animate(bool isOneShot)
         {
             yield return Ease.Animate(0.4f, (x) => {
-                float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2);
+                float expEased = Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In);
+                float ease = 1 - expEased * expEased;
+
                 RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + (Size * ease) + (x * 10));
                 CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - (30 * ease));
 
-                Group.alpha = EaseUtils.ToZero(1, x, EaseFunction.Circle, EaseMode.In);
+                float circleEased = Ease.Get(x, EaseFunction.Circle, EaseMode.In);
+                Group.alpha = EaseUtils.ToZero(1, circleEased);
 
                 float ease3 = ease * .96f + x * .04f;
                 RingBackground.insideRadius = RingFill1.insideRadius = RingFill2.insideRadius = ease3;
