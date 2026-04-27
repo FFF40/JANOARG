@@ -445,7 +445,7 @@ namespace JANOARG.Client.Behaviors.Player
                 if (active && hitObject.CurrentPosition > CurrentPosition + 200)
                     active = false;
 
-                hitObject.gameObject.SetActive(active || (hitObject.HoldMesh && GetZPosition(hitObject.EndTime) <= CurrentPosition + 200));
+                hitObject.gameObject.SetActive(active || (hitObject.HoldMesh && GetZPosition(hitObject.EndTime) <= CurrentPosition + 200) || (hitObject.HoldMesh && hitObject.HoldMesh.gameObject.activeSelf));
 
                 if (hitObject.HoldMesh)
                     hitObject.HoldMesh.gameObject.SetActive(active || GetZPosition(hitObject.EndTime) <= CurrentPosition + 200);
