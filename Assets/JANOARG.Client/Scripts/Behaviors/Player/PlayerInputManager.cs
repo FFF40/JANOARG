@@ -425,7 +425,9 @@ public class PlayerInputManager : MonoBehaviour
                     // Track direction from threshold/2 onward for stable readings, but stop
                     // updating once the flick is committed so post-threshold drift doesn't corrupt it.
                     if (flickDistance >= flickThreshold / 2 && !touchClass.Flicked)
-                        touchClass.flickDirection = Vector2.SignedAngle(
+                        // Negate SignedAngle to convert from CCW-positive (Unity convention)
+                        // to CW-positive (HitObject.FlickDirection convention).
+                        touchClass.flickDirection = -Vector2.SignedAngle(
                             Vector2.up,
                             inputEntry.screenPosition - touchClass.FlickCenter
                         );
@@ -940,6 +942,7 @@ public class PlayerInputManager : MonoBehaviour
                 // The LastFlickHitTime bump in the detector enforces the re-arm distance,
                 // so resetting FlickCenter would allow an immediate continuous-swipe re-trigger.
                 touch.Flicked = false;
+                touch.flickDirection = 0; // Clear stale angle so it doesn't falsely validate the next note
                 touch.LastFlickHitTime = Player.CurrentTime;
 
 
@@ -1014,12 +1017,20 @@ public class PlayerInputManager : MonoBehaviour
                 //Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
                 if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional flick
                 {
+                    // Tap-flick: the corridor check already validated tap position implies direction.
+                    // Only check the angle if the player actually flicked, so a quick tap
+                    // on a rotated lane doesn't fail due to a stale/zero flickDirection.
+                    if (hitObject.Current.Type == HitObject.HitType.Normal && !touch.Flicked)
+                        return true;
+
                     float calculatedAngle = angle ?? touch.flickDirection;
 
                     return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
                 }
-                // Omnidirectional flick (doesn't give a fuck which direction you flick)
-                return true;
+
+                // Omnidirectional flick — tap-flicks pass on position alone (corridor already checked).
+                // Catch-flicks require an active gesture so a stationary finger in range doesn't auto-clear.
+                return hitObject.Current.Type == HitObject.HitType.Normal || touch.Flicked;
             }
             #endregion
 
