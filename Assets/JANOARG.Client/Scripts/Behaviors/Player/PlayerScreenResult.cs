@@ -31,7 +31,7 @@ namespace JANOARG.Client.Behaviors.Player
         public RectTransform       RankHolder;
         public TMP_Text            RankText;
         public List<Image>         ScoreRings;
-        public List<GraphicCircleGPU> ScoreExplosionRings;
+        public List<GraphicCircle> ScoreExplosionRings;
         public RectTransform       ScoreBarHolder;
         public RectTransform       ScoreBarFill;
         public List<RectTransform> ScoreBarMarks;
@@ -117,7 +117,7 @@ namespace JANOARG.Client.Behaviors.Player
             ResultTextBig.text = ResultText.text;
             ResultTextBig.alpha = 0;
 
-            foreach (GraphicCircleGPU ring in ScoreExplosionRings)
+            foreach (GraphicCircle ring in ScoreExplosionRings)
                 ring.rectTransform.localPosition = Vector2.zero;
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
