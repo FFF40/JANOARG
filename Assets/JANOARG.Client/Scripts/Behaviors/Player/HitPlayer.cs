@@ -124,9 +124,9 @@ namespace JANOARG.Client.Behaviors.Player
         }
 
         public void UpdateMesh()
-        {
-            float time = Mathf.Max(Time, PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset);
-            float zPosition;
+        {   
+            double time = Math.Max(Time, PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset);
+            double zPosition;
 
             try
             {
