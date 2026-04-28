@@ -8,10 +8,10 @@ namespace JANOARG.Client.Behaviors.Player
     public class JudgeScreenEffect : MonoBehaviour
     {
         public CanvasGroup   Group;
-        public GraphicCircle RingBackground;
-        public GraphicCircle RingFill1;
-        public GraphicCircle RingFill2;
-        public GraphicCircle CircleFill;
+        public GraphicCircleGPU RingBackground;
+        public GraphicCircleGPU RingFill1;
+        public GraphicCircleGPU RingFill2;
+        public GraphicCircleGPU CircleFill;
 
         public float Size = 120;
 
@@ -20,14 +20,14 @@ namespace JANOARG.Client.Behaviors.Player
             if (acc == null)
             {
                 RingFill1.fillAmount = RingFill2.fillAmount = 1;
-                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 4;
+                RingBackground.sides = RingFill1.sides = RingFill2.sides = 4;
                 Size = 60;
             }
             else
             {
                 //Debug.Log(acc);
                 Size = 120;
-                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 30;
+                RingBackground.sides = RingFill1.sides = RingFill2.sides = 0;
                 RingFill1.fillAmount = RingFill2.fillAmount = (1 - Mathf.Abs((float)acc)) / 2;
                 RingFill1.rectTransform.localEulerAngles = Vector3.back * Mathf.Max((float)acc * 180, 0);
                 RingFill2.rectTransform.localEulerAngles = Vector3.forward * (RingFill1.rectTransform.localEulerAngles.z + 180);
