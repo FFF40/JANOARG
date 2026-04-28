@@ -692,6 +692,7 @@ public class PlayerInputManager : MonoBehaviour
                         Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.4f);
                         var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
+                        rectTransform.eulerAngles = Vector3.zero; // Make sure no remnants from flicks
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                         rectTransform.localScale = new Vector3(0.6f, 0.6f);
                         
