@@ -9,20 +9,24 @@ namespace JANOARG.Client.UI
     /// Unlike <see cref="GraphicCircle"/>, this component renders the shape
     /// entirely in a fragment shader on a single quad (4 vertices, 2 triangles).
     /// This means:
-    ///   • No CPU tessellation — zero per-frame vertex allocation.
-    ///   • Perfectly smooth circles at any resolution.
-    ///   • Polygons are pixel-perfect (no staircase artefacts).
-    ///   • All parameters are driven via a MaterialPropertyBlock-style
+    ///   1. No CPU tessellation — zero per-frame vertex allocation.
+    ///   2. Perfectly smooth circles at any resolution.
+    ///   3. Polygons are pixel-perfect (no staircase artefacts).
+    ///   4. All parameters are driven via a MaterialPropertyBlock-style
     ///     Material instance so instances don't share state.
     ///
     /// Polygon mode: set <see cref="Sides"/> to 3 or higher.
+    ///   Sides = 0  → smooth circle (default)
     ///   Sides = 3  → triangle
     ///   Sides = 4  → square / diamond
     ///   Sides = 6  → hexagon
-    ///   Sides = 0  → smooth circle (default)
+    ///   And so forth...
     ///
     /// Fill / ring / rotation work identically to <see cref="GraphicCircle"/>.
     /// </summary>
+    /// <remarks>
+    /// This gives the advantage of performance, with the tradeoff being unable to apply custom material onto it
+    /// </remarks>
     [ExecuteAlways]
     [RequireComponent(typeof(CanvasRenderer))]
     public class GraphicCircleGPU : MaskableGraphic
@@ -75,13 +79,13 @@ namespace JANOARG.Client.UI
         // Private state
         // ------------------------------------------------------------------ //
 
-        private static readonly int PropFillAmount   = Shader.PropertyToID("_FillAmount");
-        private static readonly int PropInsideRadius = Shader.PropertyToID("_InsideRadius");
-        private static readonly int PropSides        = Shader.PropertyToID("_Sides");
-        private static readonly int PropRotation     = Shader.PropertyToID("_Rotation");
+        private static readonly int sr_PropFillAmount   = Shader.PropertyToID("_FillAmount");
+        private static readonly int sr_PropInsideRadius = Shader.PropertyToID("_InsideRadius");
+        private static readonly int sr_PropSides        = Shader.PropertyToID("_Sides");
+        private static readonly int sr_PropRotation     = Shader.PropertyToID("_Rotation");
 
-        private static Shader _circleShader;
-        private Material _sharedMat;   // owns the Material (we create it)
+        private static Shader s_circleShader;
+        private Material _SharedMat;   // owns the Material (we create it)
 
         // ------------------------------------------------------------------ //
         // Initialisation
@@ -102,20 +106,20 @@ namespace JANOARG.Client.UI
 
         private void EnsureMaterial()
         {
-            if (_circleShader == null)
-                _circleShader = Shader.Find("UI/Circle");
+            if (s_circleShader == null)
+                s_circleShader = Shader.Find("UI/Circle");
 
-            if (_circleShader == null)
+            if (s_circleShader == null)
             {
                 Debug.LogError("[GraphicCircleGPU] Could not find shader 'UI/Circle'. " +
                                "Make sure UICircle.shader is in a Resources/Shaders folder.");
                 return;
             }
 
-            if (_sharedMat == null)
+            if (_SharedMat == null)
             {
-                _sharedMat = new Material(_circleShader) { hideFlags = HideFlags.HideAndDontSave };
-                material = _sharedMat;
+                _SharedMat = new Material(s_circleShader) { hideFlags = HideFlags.HideAndDontSave };
+                material = _SharedMat;
             }
         }
 
@@ -150,13 +154,13 @@ namespace JANOARG.Client.UI
 
         private void UpdateMaterialProperties()
         {
-            if (_sharedMat == null) EnsureMaterial();
-            if (_sharedMat == null) return;
+            if (_SharedMat == null) EnsureMaterial();
+            if (_SharedMat == null) return;
 
-            _sharedMat.SetFloat(PropFillAmount,   FillAmount);
-            _sharedMat.SetFloat(PropInsideRadius, InsideRadius);
-            _sharedMat.SetFloat(PropSides,        Sides);
-            _sharedMat.SetFloat(PropRotation,     Rotation);
+            _SharedMat.SetFloat(sr_PropFillAmount,   FillAmount);
+            _SharedMat.SetFloat(sr_PropInsideRadius, InsideRadius);
+            _SharedMat.SetFloat(sr_PropSides,        Sides);
+            _SharedMat.SetFloat(sr_PropRotation,     Rotation);
         }
 
         // ------------------------------------------------------------------ //
@@ -184,14 +188,14 @@ namespace JANOARG.Client.UI
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            if (_sharedMat != null)
+            if (_SharedMat != null)
             {
 #if UNITY_EDITOR
-                DestroyImmediate(_sharedMat);
+                DestroyImmediate(_SharedMat);
 #else
                 Destroy(_sharedMat);
 #endif
-                _sharedMat = null;
+                _SharedMat = null;
             }
         }
     }
