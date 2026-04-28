@@ -37,8 +37,11 @@ namespace JANOARG.Client.Behaviors.Common
 
             Preferences = new Storage("prefs");
 
-            Application.targetFrameRate = _UNLIMITED_FPS 
-                ? 1000 : _MAX_FPS;
+            // vSyncCount must be 0 for targetFrameRate to take effect;
+            // if vsync is on Unity ignores targetFrameRate entirely.
+            // -1 = truly unlimited (vs the previous 1000 cap).
+            QualitySettings.vSyncCount  = 0;
+            Application.targetFrameRate = _UNLIMITED_FPS ? -1 : _MAX_FPS;
 
             CommonScene.LoadAlt("Intro");
         }
