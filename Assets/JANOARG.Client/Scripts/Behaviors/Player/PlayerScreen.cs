@@ -989,7 +989,7 @@ namespace JANOARG.Client.Behaviors.Player
         }
         private Coroutine _JudgeAnimation;
 
-        public void AddScore(float score, float? acc)
+        public void AddScore(float score, float? acc, double? offset = null)
         {
             CurrentExScore += score;
 
@@ -1014,17 +1014,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
 
-            string flawlessText = Settings.ShowFlawlessText ? "FLAWLESS" : "✓";
-            if (acc.HasValue)
-                JudgmentLabel.text = acc switch
-                {
-                    0 => flawlessText,
-                    < 0 => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" :"EARLY" : "BAD",
-                    _ => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" : "LATE" : "MISS"
-                };
-            else
-                JudgmentLabel.text = score > 0
-                    ? flawlessText : "MISS";
+            JudgmentLabel.text = FormatJudgmentLabel(acc, offset, score);
 
             if (_JudgeAnimation != null)
                 StopCoroutine(_JudgeAnimation);
@@ -1098,7 +1088,8 @@ namespace JANOARG.Client.Behaviors.Player
                 accuracy = CalculateAccuracy(offset, offsetAbs);
                 finalScore = Mathf.RoundToInt(baseScore * (1 - Mathf.Abs(accuracy.Value)));
                 
-                AddScore(finalScore, accuracy);
+                AddScore(finalScore, accuracy, offset);
+                
                 HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, offset));
             }
 
@@ -1193,6 +1184,30 @@ namespace JANOARG.Client.Behaviors.Player
             }
         }
 
+        private string FormatJudgmentLabel(float? acc, double? offset, float score)
+        {
+            string flawlessText = Settings.ShowFlawlessText ? "FLAWLESS" : "✓";
+
+            double offsetValue = offset.HasValue ? offset.Value * 1000 : double.NaN;
+            string text;
+
+            if (!acc.HasValue)
+                text = score > 0 ? flawlessText : "MISS";
+            else if (acc == 0)
+                text = flawlessText;
+            else if (acc < 0)
+                text = score > 0 ? (Settings.NoEarlyLateText ? "MISALIGNED" : "EARLY") : "BAD";
+            else if (score > 0)
+                text = Settings.NoEarlyLateText ? "MISALIGNED" : "LATE";
+            else
+                text = "MISS";
+
+            if (offset != null && Settings.ShowValueText >= (acc == 0 ? 3 : 2) && !double.IsInfinity(offset.Value) && Math.Abs(offset.Value) >= 0.005)                                                                                        
+                text += offset > 0 ? $"(+{offset.Value:0.##}ms)" : $"({offset.Value:0.##}ms)";                                                                                                                                                
+            
+            return text;
+        }
+
         public void SetBackgroundColor(Color color)
         {
             CommonSys.sMain.MainCamera.backgroundColor = color;
@@ -1266,6 +1281,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float JudgmentOffset;
         public float VisualOffset;
+        public short ShowValueText;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
         public bool  HighlightSimulNotes;
@@ -1279,6 +1295,7 @@ namespace JANOARG.Client.Behaviors.Player
             HighlightSimulNotes = CommonSys.sMain.Preferences.Get("PLYR:HighlightSimulNotes", true);
             ShowFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:JudgementTextOnFlawless", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
+            ShowValueText = short.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowOffset", "1"));
             
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });

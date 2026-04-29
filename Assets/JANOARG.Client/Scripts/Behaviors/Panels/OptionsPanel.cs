@@ -227,35 +227,35 @@ namespace JANOARG.Client.Behaviors.Panels
 
                     // Spawn<OptionCategoryTitle>("Localization");
                     // var lang = Spawn<ListOptionInput, string>("🌐 Language", 
-                    //     () => Storage.Get("MAIN:Language", "en"),
-                    //     x => Storage.Set("MAIN:Language", x)
+                    //     () => preferences.Get("MAIN:Language", "en"),
+                    //     x => preferences.Set("MAIN:Language", x)
                     // );
                     // lang.ValidValues.Add("en", "English");
                     // lang.ValidValues.Add("fr", "Français");
                     // lang.ValidValues.Add("zh_CN", "简体中文");
-                    // lang.ValidValues.Add("zh_TW", "繁體中文");
-                    // lang.ValidValues.Add("ja", "日本語");
+                    // lang.ValidValues.Add("zh_TW", "繁體中文");|
+
                     // lang.ValidValues.Add("ko", "한국어");
                     // lang.ValidValues.Add("tok", "toki pona");
                     // lang.ValidValues.Add("snale", "🐌 <alpha=#77>Snailian");
-
+                    // 
                     // var altNames = Spawn<ListOptionInput, string>("Alt. Song Titles", 
-                    //     () => Storage.Get("MAIN:AltNameRule", "auto"),
-                    //     x => Storage.Set("MAIN:AltNameRule", x)
+                    //     () => preferences.Get("MAIN:AltNameRule", "auto"),
+                    //     x => preferences.Set("MAIN:AltNameRule", x)
                     // );
                     // altNames.ValidValues.Add("auto", "Automatic (based on language)");
                     // altNames.ValidValues.Add("never", "Always use original song titles");
                     // altNames.ValidValues.Add("side", "Show original and alt. names side by side");
                     // altNames.ValidValues.Add("always", "Always use alternative song titles");
-
+                    // 
                     // var altArtist = Spawn<ListOptionInput, string>("Alt. Artist Names", 
-                    //     () => Storage.Get("MAIN:AltArtistRule", "auto"),
-                    //     x => Storage.Set("MAIN:AltArtistRule", x)
+                    //     () => preferences.Get("MAIN:AltArtistRule", "auto"),
+                    //     x => preferences.Set("MAIN:AltArtistRule", x)
                     // );
                     // altArtist.ValidValues.Add("auto", "Use \"Alt. Song Titles\" setting");
                     // altArtist.ValidValues.Add("never", "Always use original artist names");
-
-
+                    // 
+                    // 
                     // Spawn<OptionCategoryTitle>("🐌");
                     // Spawn<BooleanOptionInput, bool>("snail mode", 
                     //     () => false,
@@ -357,6 +357,17 @@ namespace JANOARG.Client.Behaviors.Panels
 
                     Spawn <OptionCategoryTitle>("Miscellaneous");
 
+                    // Supposed to be a short
+                    var showOffset = Spawn<ListOptionInput, string>("Show offset value", 
+                        () => preferences.Get("PLYR:ShowOffset", "1"),
+                        x => preferences.Set("PLYR:ShowOffset", x)
+                        );
+                    
+                    showOffset.ValidValues.Add("3", "All Judgement");
+                    showOffset.ValidValues.Add("2", "Non-Flawless Judgement");
+                    showOffset.ValidValues.Add("1", "None");
+                    
+                    
                     Spawn<BooleanOptionInput, bool>(
                         "Highlight simul. notes",
                         () => preferences.Get("PLYR:HighlightSimulNotes", true),
