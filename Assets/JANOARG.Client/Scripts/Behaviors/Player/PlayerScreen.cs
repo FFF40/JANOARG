@@ -736,24 +736,31 @@ namespace JANOARG.Client.Behaviors.Player
             CurrentTime += (float)delta;
             _LastDSPTime += delta;
 
-            // Audio sync
+            if (rawDelta > SpikeThreshold)
+            {
+                // Lag spike — resync clock to audio without rushing the chart
+                if (Music.isPlaying)
+                    CurrentTime = (double)Music.timeSamples / Music.clip.frequency + Settings.AudioOffset;
+                // else: lead-in / post-song — just drop the frame, don't advance
+            }
+            else
+            {
+                if (Music.isPlaying && CurrentTime >= 0)
+                    // Audio is the source of truth during playback
+                    CurrentTime = (double)Music.timeSamples / Music.clip.frequency + Settings.AudioOffset;
+                else
+                    CurrentTime += rawDelta > 0 ? rawDelta : Time.unscaledDeltaTime;
+            }
+
+            // Audio lifecycle — use PlayScheduled on restart to avoid buffer-boundary snap
             if (CurrentTime >= 0 && CurrentTime < Music.clip.length)
             {
                 if (Music.isPlaying)
                 {
-                    if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
-                    {
-                        Music.time = CurrentTime;
-                    }
-                    else
-                    {
-                        // CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
-                    }
-                }
-                else
-                {
-                    Music.Play();
-                    Music.time = CurrentTime;
+                    const double RestartLeadTime = 0.05;
+                    _MusicStartDSP = dspNow + RestartLeadTime;
+                    Music.time = (float)(CurrentTime - Settings.AudioOffset);
+                    Music.PlayScheduled(_MusicStartDSP);
                 }
             }
             else if (Music.isPlaying)
@@ -901,7 +908,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Resync()
         {
-            _LastDSPTime = AudioSettings.dspTime;   
+            _LastDSPTime = AudioSettings.dspTime;
+            // Only anchor from timeSamples when music is actively playing —
+            // if paused, timeSamples is stale and would overwrite a deliberate CurrentTime rollback
+            if (Music.isPlaying && CurrentTime >= 0)
+                CurrentTime = (double)Music.timeSamples / Music.clip.frequency + Settings.AudioOffset;
         }
 
         // Call on pause or result entry — deferred so per-hit cost is just a list append.
@@ -1282,6 +1293,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             FlickScale = prefs.Get("PLYR:FlickScale", 1f);
 
+            AudioOffset = prefs.Get("PLYR:AudioOffset", 0f) / 1000;
             JudgmentOffset = prefs.Get("PLYR:JudgmentOffset", 0f) / 1000;
             VisualOffset = prefs.Get("PLYR:VisualOffset", 0f) / 1000;
         }
