@@ -44,6 +44,7 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 PlayerScreen.sMain.IsPlaying = false;
                 PlayerScreen.sMain.Music.Pause();
+                PlayerScreen.sMain.ComputeAndSaveMedianOffset();
 
                 // PlayerInputManager.main.Fingers.Clear();
                 PlayerInputManager.sInstance.TouchClasses.Clear();

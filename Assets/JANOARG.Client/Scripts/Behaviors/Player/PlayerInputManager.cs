@@ -658,7 +658,7 @@ public class PlayerInputManager : MonoBehaviour
                         var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
-                        rectTransform.localScale = new Vector3(0.6f, 0.6f);
+                        rectTransform.localScale = Vector2.one * 0.6f;
                         
                         currentHit.HoldTicks.RemoveAt(0);
                     }
