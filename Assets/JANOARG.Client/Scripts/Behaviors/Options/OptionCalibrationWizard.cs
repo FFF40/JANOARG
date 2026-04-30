@@ -142,8 +142,7 @@ namespace JANOARG.Client.Behaviors.Options
             int gameeplayOffsetCounter = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0);
             InfoLabel.gameObject.SetActive(false);
 
-            if (optionInput is AudioOffsetOptionInput)
-            {
+            switch (optionInput){
                 case AudioOffsetOptionInput:
                 {
                     JudgmentOffsetHolder.SetActive(true);
