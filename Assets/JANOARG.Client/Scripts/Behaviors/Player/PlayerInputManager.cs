@@ -1029,9 +1029,9 @@ public class PlayerInputManager : MonoBehaviour
                     return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
                 }
 
-                // Omnidirectional flick — tap-flicks pass on position alone (corridor already checked).
-                // Catch-flicks require an active gesture so a stationary finger in range doesn't auto-clear.
-                return hitObject.Current.Type == HitObject.HitType.Normal || touch.Flicked;
+                // Omnidirectional flicks are validated by the in-range checks above.
+                // Keep catch omni-flicks as lenient as tap omni-flicks.
+                return true;
             }
             #endregion
 
