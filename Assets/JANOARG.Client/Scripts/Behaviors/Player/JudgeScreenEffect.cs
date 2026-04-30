@@ -1,17 +1,21 @@
-using System.Collections;
 using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Player
 {
+    /// <summary>
+    /// Visual effect shown on each note hit.
+    /// Animation is driven externally by <see cref="JudgeScreenManager.Update"/> — no coroutines,
+    /// no per-hit heap allocation.
+    /// </summary>
     public class JudgeScreenEffect : MonoBehaviour
     {
-        public CanvasGroup   Group;
-        public GraphicCircle RingBackground;
-        public GraphicCircle RingFill1;
-        public GraphicCircle RingFill2;
-        public GraphicCircle CircleFill;
+        public CanvasGroup      Group;
+        public GraphicCircleGPU RingBackground;
+        public GraphicCircleGPU RingFill1;
+        public GraphicCircleGPU RingFill2;
+        public GraphicCircleGPU CircleFill;
 
         public float Size = 120;
 
@@ -20,14 +24,13 @@ namespace JANOARG.Client.Behaviors.Player
             if (acc == null)
             {
                 RingFill1.fillAmount = RingFill2.fillAmount = 1;
-                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 4;
+                RingBackground.sides = RingFill1.sides = RingFill2.sides = 4;
                 Size = 60;
             }
             else
             {
-                //Debug.Log(acc);
                 Size = 120;
-                RingBackground.resolution = RingFill1.resolution = RingFill2.resolution = 90;
+                RingBackground.sides = RingFill1.sides = RingFill2.sides = 0;
                 RingFill1.fillAmount = RingFill2.fillAmount = (1 - Mathf.Abs((float)acc)) / 2;
                 RingFill1.rectTransform.localEulerAngles = Vector3.back * Mathf.Max((float)acc * 180, 0);
                 RingFill2.rectTransform.localEulerAngles = Vector3.forward * (RingFill1.rectTransform.localEulerAngles.z + 180);
@@ -40,23 +43,23 @@ namespace JANOARG.Client.Behaviors.Player
             CircleFill.color = RingBackground.color = color * new Color(1, 1, 1, .3f);
         }
 
-        public void Play() => StartCoroutine(Animate(false));
-        public void PlayOneShot() => StartCoroutine(Animate(true));
-        public IEnumerator Animate(bool isOneShot)
+        /// <summary>
+        /// Advance the animation by one frame. Called by <see cref="JudgeScreenManager"/> each Update.
+        /// <paramref name="x"/> is linear progress in [0, 1].
+        /// </summary>
+        public void Tick(float x)
         {
-            yield return Ease.Animate(0.4f, (x) => {
-                float ease = 1 - Mathf.Pow(Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In), 2);
-                RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + (Size * ease) + (x * 10));
-                CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - (30 * ease));
+            float expEased = Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In);
+            float ease = 1 - expEased * expEased;
 
-                Group.alpha = EaseUtils.ToZero(1, x, EaseFunction.Circle, EaseMode.In);
+            RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + (Size * ease) + (x * 10));
+            CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - (30 * ease));
 
-                float ease3 = ease * .96f + x * .04f;
-                RingBackground.insideRadius = RingFill1.insideRadius = RingFill2.insideRadius = ease3;
-            });
+            float circleEased = Ease.Get(x, EaseFunction.Circle, EaseMode.In);
+            Group.alpha = EaseUtils.ToZero(1, circleEased);
 
-            if (isOneShot) Destroy(gameObject);
-            else PlayerScreen.sMain.JudgeScreenManager.ReturnEffect(this);
+            float ease3 = ease * .96f + x * .04f;
+            RingBackground.insideRadius = RingFill1.insideRadius = RingFill2.insideRadius = ease3;
         }
     }
 }

@@ -855,7 +855,7 @@ public class PlayerInputManager : MonoBehaviour
                 var rt = (RectTransform)effect.transform;
 
                 rt.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
-                rt.localScale = new Vector3(0.74f, 0.74f);
+                rt.localScale = (Vector3)Vector2.one * 0.74f;
             }
 
             // Missed hold tick, no effect

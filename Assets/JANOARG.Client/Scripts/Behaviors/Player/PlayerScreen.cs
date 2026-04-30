@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.UI;
@@ -15,6 +16,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace JANOARG.Client.Behaviors.Player
 {
@@ -1159,8 +1163,11 @@ namespace JANOARG.Client.Behaviors.Player
         {
             var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
+            // Square if Catch, Diamond if flicks
+            rt.eulerAngles = hitObject.Current.Flickable ? 
+                Vector3.forward * 45 : Vector3.zero; // Make sure it is reset (due to pooling)
             rt.position = hitObject.HitCoord.Position;
-            rt.localScale = new Vector3(1, 1); // Making sure it's not affected from effects that were used in hold ticks
+            rt.localScale = (Vector3) Vector2.one; // Making sure it's not affected from effects that were used in hold ticks
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)
