@@ -23,7 +23,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public Image RetryFlash;
 
-        public float PauseTime = -10;
+        public double PauseTime = -10;
 
         [Space] public Coroutine CurrentAnimation;
 
@@ -97,7 +97,14 @@ namespace JANOARG.Client.Behaviors.Player
                         OptionGroup.alpha = 1 - ease;
                     }));
 
+            // Roll back slightly so the player re-enters with a short cue of where they left off.
+            // Deliberately destructive: hit objects in the rollback window won't re-spawn,
+            // and some lane transform data is lost — but 1.5s is short enough that this is
+            // an acceptable tradeoff for the UX of hearing the song context before resuming.
+            // Resync is called after so the DSP anchor reflects the rolled-back position,
+            // not the stale timeSamples from while music was paused.
             PlayerScreen.sMain.CurrentTime -= 1.5f;
+            // Re-anchor DSP clock to now so rawDelta starts clean on the next Update
             PlayerScreen.sMain.Resync();
             PlayerScreen.sMain.IsPlaying = true;
 
@@ -106,7 +113,6 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(
                 1.5f, a =>
                 {
-
                     Background.color = CommonSys.sMain.MainCamera.backgroundColor *
                                        new Color(1, 1, 1, EaseUtils.ToZero(1, a, EaseFunction.Cubic, EaseMode.InOut) * 0.8f);
 

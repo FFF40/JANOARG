@@ -106,7 +106,7 @@ public class TouchClass
     /// <summary>
     ///     The time (in seconds) when the player flicked past the threshold.
     /// </summary>
-    public float FlickTime;
+    public double FlickTime;
 
     public bool Initial;
 
@@ -136,7 +136,14 @@ public class TouchClass
     /// <summary>
     ///     The time (in seconds) when the touch started.
     /// </summary>
-    public float StartTime;
+    public double StartTime;
+
+    /// <summary>
+    ///     The time (in seconds) when this touch last successfully cleared a flick note.
+    ///     Used to temporarily raise the effective flick threshold so a continuous swipe
+    ///     gesture cannot immediately re-trigger on the next note.
+    /// </summary>
+    public double LastFlickHitTime = float.NegativeInfinity;
 
     /// <summary>
     ///     Indicates whether the touch is considered a tap (true at the moment the finger touches the screen).
@@ -161,8 +168,9 @@ public class TouchClass
 
         set
         {
-            if (!float.IsFinite(value)) // Finite check
-                throw new ArgumentOutOfRangeException(nameof(value), "FlickDirection must be a finite number.");
+            // Only store finite values; NaN can arise from a degenerate SignedAngle call (zero-length delta)
+            // and should be silently ignored rather than crashing the input update.
+            if (!float.IsFinite(value)) return;
 
             _FlickDirection = value;
         }
@@ -340,6 +348,24 @@ public class PlayerInputManager : MonoBehaviour
                 // Handle touch end/cancel
                 if (inputEntry is { isInProgress: false, phase: TouchPhase.Ended or TouchPhase.Canceled })
                 {
+                    // Flush any queued tap hit before removing the touch — a very fast tap can
+                    // begin and end within a single UpdateInput call, so the normal queued-hit
+                    // resolver at the bottom of the frame would never see it.
+                    TouchClass endingTouch = TouchClasses.Find(t => t.Touch.finger.index == fingerIndex);
+                    if (endingTouch?.QueuedHit != null &&
+                        !endingTouch.QueuedHit.IsProcessed &&
+                        endingTouch.QueuedHit.Current.Type == HitObject.HitType.Normal &&
+                        !endingTouch.QueuedHit.Current.Flickable)
+                    {
+                        Player.Hit(
+                            endingTouch.QueuedHit,
+                            endingTouch.StartTime + Player.Settings.JudgmentOffset - endingTouch.QueuedHit.Time
+                        );
+                        endingTouch.QueuedHit.IsProcessed = true;
+                        EnqueueHoldNote(endingTouch);
+                        endingTouch.QueuedHit = null;
+                    }
+
                     TouchClasses.RemoveAll(input => input.Touch.finger.index == fingerIndex);
 
                     continue;
@@ -390,17 +416,25 @@ public class PlayerInputManager : MonoBehaviour
 
                     float flickDistance = Vector2.Distance(inputEntry.screenPosition, touchClass.FlickCenter);
 
-                    // Direction calculation; runs twice more often than the threshold checker
-                    if (flickDistance >= flickThreshold / 2)
-                        touchClass.flickDirection = Vector2.SignedAngle(
+                    // After clearing a flick note, temporarily require 1.5× the normal distance
+                    // so a continuous swipe can't immediately re-trigger on the next note.
+                    bool flickCooldownActive =
+                        Player.CurrentTime - touchClass.LastFlickHitTime < Player.PerfectWindow;
+                    float effectiveFlickThreshold = flickCooldownActive ? flickThreshold * 1.5f : flickThreshold;
+
+                    // Track direction from threshold/2 onward for stable readings, but stop
+                    // updating once the flick is committed so post-threshold drift doesn't corrupt it.
+                    if (flickDistance >= flickThreshold / 2 && !touchClass.Flicked)
+                        // Negate SignedAngle to convert from CCW-positive (Unity convention)
+                        // to CW-positive (HitObject.FlickDirection convention).
+                        touchClass.flickDirection = -Vector2.SignedAngle(
                             Vector2.up,
-                            inputEntry.screenPosition -
-                            touchClass.FlickCenter
+                            inputEntry.screenPosition - touchClass.FlickCenter
                         );
 
                     // Verifier
                     if (!touchClass.Flicked &&
-                        (Mathf.Approximately(flickDistance, flickThreshold) || flickDistance > flickThreshold))
+                        (Mathf.Approximately(flickDistance, effectiveFlickThreshold) || flickDistance > effectiveFlickThreshold))
                     {
                         touchClass.Flicked = true;
                         touchClass.FlickTime = Player.CurrentTime;
@@ -418,7 +452,7 @@ public class PlayerInputManager : MonoBehaviour
                         bool nearAnyFlickable = HitQueue.Any(hit =>
                             hit.Current.Flickable &&
                             !hit.IsProcessed &&
-                            Mathf.Abs(hit.Time - Player.CurrentTime) <=
+                            Math.Abs(hit.Time - Player.CurrentTime) <=
                             Player.PassWindow
                         );
 
@@ -436,7 +470,7 @@ public class PlayerInputManager : MonoBehaviour
                 touchClass.Initial = false;
             }
 
-            float judgementOffsetTime = Player.CurrentTime + Player.Settings.JudgmentOffset; // Judgement offset
+            double judgementOffsetTime = Player.CurrentTime + Player.Settings.JudgmentOffset; // Judgement offset
 
             InitLogger(
                 $"Judgement-offset time: {judgementOffsetTime} (Current time: {Player.CurrentTime}, Offset: {Player.Settings.JudgmentOffset})");
@@ -455,7 +489,7 @@ public class PlayerInputManager : MonoBehaviour
                     continue; // Go check the next hitobject
                 }
 
-                float hitobjectTimingDelta =
+                double hitobjectTimingDelta =
                     judgementOffsetTime - hitIteration.Time; // Hit time adjusted by judgement offset
 
                 bool isDiscreteHitObject =
@@ -515,6 +549,7 @@ public class PlayerInputManager : MonoBehaviour
 
                         // Remove from the main queue
                         HitQueue.Remove(hitIteration);
+                        a--; // Compensate for the removed element so the next entry isn't skipped
                     }
 
                     if (!alreadyHit &&
@@ -548,7 +583,7 @@ public class PlayerInputManager : MonoBehaviour
                 //// Camera handling and other extra stuff is done here to calculate hold note hitboxes and positions on the fly
                 //// As it has dynamic attributes as it progresses, unlike normal hitobjects.
 
-                float beat = PlayerScreen.sTargetSong.Timing.ToBeat(judgementOffsetTime); // Get current BPM
+                float beat = PlayerScreen.sTargetSong.Timing.ToBeat((float)judgementOffsetTime); // Get current BPM
 
                 // Camera handling
                 var currentCamera =
@@ -578,7 +613,7 @@ public class PlayerInputManager : MonoBehaviour
             {
                 HitPlayer hitObject = DiscreteHitQueue[i];
 
-                float time = judgementOffsetTime - hitObject.Time;
+                double time = judgementOffsetTime - hitObject.Time;
 
                 if ((judgementOffsetTime >= hitObject.Time && hitObject.Current.Type == HitObject.HitType.Catch) ||
                     hitObject.Current.Flickable) // Immediate feedback on flicks
@@ -657,6 +692,7 @@ public class PlayerInputManager : MonoBehaviour
                         Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.4f);
                         var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
+                        rectTransform.eulerAngles = Vector3.zero; // Make sure no remnants from flicks
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                         rectTransform.localScale = Vector2.one * 0.6f;
                         
@@ -698,7 +734,7 @@ public class PlayerInputManager : MonoBehaviour
         }
     }
 
-    private void HoldQueue_Processor(HoldNoteClass holdNoteEntry, ref int queuePtr, float beat, float judgementOffsetTime)
+    private void HoldQueue_Processor(HoldNoteClass holdNoteEntry, ref int queuePtr, float beat, double judgementOffsetTime)
     {
         if (!holdNoteEntry.HitObject)
         {
@@ -869,7 +905,7 @@ public class PlayerInputManager : MonoBehaviour
         }
     }
 
-    private void HitobjectProcessor(HitPlayer hitIteration, float flickThreshold, float hitobjectTimingDelta,
+    private void HitobjectProcessor(HitPlayer hitIteration, float flickThreshold, double hitobjectTimingDelta,
         ref bool alreadyHit)
     {
         if (hitIteration.Current.Flickable) // Flick notes (catch/tap)
@@ -903,9 +939,12 @@ public class PlayerInputManager : MonoBehaviour
 
                 hitIteration.InDiscreteHitQueue = true;
                                 
-                // Reset flick state
+                // Reset flick state — do NOT reset FlickCenter to current position here.
+                // The LastFlickHitTime bump in the detector enforces the re-arm distance,
+                // so resetting FlickCenter would allow an immediate continuous-swipe re-trigger.
                 touch.Flicked = false;
-                touch.FlickCenter = touch.Touch.screenPosition;
+                touch.flickDirection = 0; // Clear stale angle so it doesn't falsely validate the next note
+                touch.LastFlickHitTime = Player.CurrentTime;
 
 
                 if (hitIteration.Current.Type == HitObject.HitType.Normal)
@@ -954,7 +993,7 @@ public class PlayerInputManager : MonoBehaviour
                     //Debug.Log(
                     //    $"Touched {touch.Touch.finger.index} is a tap flick. Passing to main flick verifier with flick direction {touch.flickDirection}.");
 
-                    return f_flickVerifier(hitObject, touch, hitObject.Current.FlickDirection);
+                    return f_flickVerifier(hitObject, touch, touch.flickDirection);
                 }
 
                 return false;
@@ -977,16 +1016,22 @@ public class PlayerInputManager : MonoBehaviour
                 if (hitObject.Current.Type == HitObject.HitType.Normal){} // Verbosity (to tell that tap flick doesnt have to do anything)
 
                 //Debug.Log($"Touch {touch.Touch.finger.index} is in range on FLICKABLE hitobject at {hitIteration.Time}. Adding to discrete hit queue.");
-                if (float.IsFinite(hitObject.Current.FlickDirection)) // Directional flick
+                if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional flick
                 {
+                    // Tap-flick: the corridor check already validated tap position implies direction.
+                    // Only check the angle if the player actually flicked, so a quick tap
+                    // on a rotated lane doesn't fail due to a stale/zero flickDirection.
+                    if (hitObject.Current.Type == HitObject.HitType.Normal && !touch.Flicked)
+                        return true;
+
                     float calculatedAngle = angle ?? touch.flickDirection;
 
                     return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
                 }
-                // Omnidirectional flick (doesn't give a fuck which direction you flick)
-                return true;
 
-                return false;
+                // Omnidirectional flicks are validated by the in-range checks above.
+                // Keep catch omni-flicks as lenient as tap omni-flicks.
+                return true;
             }
             #endregion
 
