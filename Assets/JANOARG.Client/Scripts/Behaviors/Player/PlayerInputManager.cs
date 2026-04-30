@@ -146,6 +146,26 @@ public class TouchClass
     public double LastFlickHitTime = float.NegativeInfinity;
 
     /// <summary>
+    ///     When true, the naive FlickCenter reset clock is paused because a flickable note
+    ///     has entered the hit queue. FlickCenter will be snapped the moment the finger
+    ///     enters the note's hitbox radius, then this flag is cleared unless another
+    ///     flickable is still queued.
+    /// </summary>
+    public bool FlickCenterResetPending;
+
+    /// <summary>
+    ///     Accumulator for the naive FlickCenter reset clock (in seconds).
+    ///     When it exceeds the reset interval, FlickCenter snaps to the current finger position.
+    /// </summary>
+    public double FlickCenterResetClock;
+
+    /// <summary>
+    ///     The flickable note that last triggered a FlickCenter snap on hitbox entry.
+    ///     Used to prevent the snap from firing every frame while the finger remains inside the hitbox.
+    /// </summary>
+    public HitPlayer FlickCenterSnappedNote;
+
+    /// <summary>
     ///     Indicates whether the touch is considered a tap (true at the moment the finger touches the screen).
     /// </summary>
     public bool Tapped = true;
@@ -392,35 +412,58 @@ public class PlayerInputManager : MonoBehaviour
 
                     // Flick detector
 
-                    // Pre-check for proximity to a flickable note
-                    if (!touchClass.Flicked && inputEntry.phase == TouchPhase.Moved)
-                    {
-                        bool nearFlickable = HitQueue.Any(hit =>
-                            hit.Current.Flickable &&
-                            !hit.IsProcessed &&
-                            Vector2.Distance(
-                                inputEntry.screenPosition,
-                                hit.HitCoord.Position) <
-                            hit.HitCoord.Radius * 1.5f
-                        );
+                    // Check if any flickable note is currently in the hit queue
+                    bool flickableInQueue = HitQueue.Any(hit =>
+                        hit.Current.Flickable &&
+                        !hit.IsProcessed
+                    );
 
-                        if (!touchClass.Flicked &&
-                            inputEntry.phase == TouchPhase.Moved &&
-                            touchClass.Initial &&
-                            nearFlickable) // or use a bool flag like touchClass.FlickCenterWasSet
+                    if (!touchClass.Flicked)
+                    {
+                        if (flickableInQueue)
                         {
-                            touchClass.FlickCenter = inputEntry.screenPosition;
-                            //Debug.Log($"[FlickCenter Reset] Initial set to {inputEntry.screenPosition}");
+                            // A flickable note is queued — pause the naive reset clock and arm pending.
+                            touchClass.FlickCenterResetPending = true;
+                            touchClass.FlickCenterResetClock = 0;
+
+                            // If pending and finger just entered a flickable note's hitbox, snap FlickCenter.
+                            HitPlayer enteredNote = HitQueue.Find(hit =>
+                                hit.Current.Flickable &&
+                                !hit.IsProcessed &&
+                                Vector2.Distance(inputEntry.screenPosition, hit.HitCoord.Position) <=
+                                hit.HitCoord.Radius
+                            );
+
+                            if (enteredNote != null && touchClass.FlickCenterSnappedNote != enteredNote)
+                            {
+                                touchClass.FlickCenter = inputEntry.screenPosition;
+                                touchClass.FlickCenterSnappedNote = enteredNote;
+                                //Debug.Log($"[FlickCenter Reset] Snapped to {inputEntry.screenPosition} on hitbox entry.");
+
+                                // Keep pending armed only if another flickable is still queued after this one.
+                                touchClass.FlickCenterResetPending = HitQueue.Any(hit =>
+                                    hit.Current.Flickable &&
+                                    !hit.IsProcessed &&
+                                    hit != enteredNote
+                                );
+                            }
+                        }
+                        else
+                        {
+                            // No flickable in queue — resume naive reset clock.
+                            touchClass.FlickCenterResetPending = false;
+                            touchClass.FlickCenterResetClock += s_DeltaTime / 1000.0;
+
+                            if (touchClass.FlickCenterResetClock >= 0.08) // ~80ms snap interval
+                            {
+                                touchClass.FlickCenter = inputEntry.screenPosition;
+                                touchClass.FlickCenterResetClock = 0;
+                                //Debug.Log($"[FlickCenter Reset] Naive snap to {inputEntry.screenPosition}.");
+                            }
                         }
                     }
 
                     float flickDistance = Vector2.Distance(inputEntry.screenPosition, touchClass.FlickCenter);
-
-                    // After clearing a flick note, temporarily require 1.5× the normal distance
-                    // so a continuous swipe can't immediately re-trigger on the next note.
-                    bool flickCooldownActive =
-                        Player.CurrentTime - touchClass.LastFlickHitTime < Player.PerfectWindow;
-                    float effectiveFlickThreshold = flickCooldownActive ? flickThreshold * 1.5f : flickThreshold;
 
                     // Track direction from threshold/2 onward for stable readings, but stop
                     // updating once the flick is committed so post-threshold drift doesn't corrupt it.
@@ -434,13 +477,10 @@ public class PlayerInputManager : MonoBehaviour
 
                     // Verifier
                     if (!touchClass.Flicked &&
-                        (Mathf.Approximately(flickDistance, effectiveFlickThreshold) || flickDistance > effectiveFlickThreshold))
+                        (Mathf.Approximately(flickDistance, flickThreshold) || flickDistance > flickThreshold))
                     {
                         touchClass.Flicked = true;
                         touchClass.FlickTime = Player.CurrentTime;
-
-                        //Debug.Log(
-                        //    $"[FlickDirection] From {touchClass.FlickCenter} to {inputEntry.screenPosition} => {touchClass.flickDirection}°");
                     }
 
                     // Invalidator
@@ -1029,9 +1069,10 @@ public class PlayerInputManager : MonoBehaviour
                     return ValidateFlickDirection(hitObject.Current.FlickDirection, calculatedAngle);
                 }
 
-                // Omnidirectional flick — tap-flicks pass on position alone (corridor already checked).
-                // Catch-flicks require an active gesture so a stationary finger in range doesn't auto-clear.
-                return hitObject.Current.Type == HitObject.HitType.Normal || touch.Flicked;
+                // Omnidirectional flick — both tap and catch require an active flick gesture.
+                // FlickCenter is now kept fresh by the dynamic reset system, so the threshold
+                // is always measured from a fair baseline regardless of note type.
+                return touch.Flicked;
             }
             #endregion
 
