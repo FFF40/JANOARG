@@ -193,7 +193,7 @@ namespace JANOARG.Client.UI
 #if UNITY_EDITOR
                 DestroyImmediate(_SharedMat);
 #else
-                Destroy(_sharedMat);
+                Destroy(_SharedMat);
 #endif
                 _SharedMat = null;
             }
