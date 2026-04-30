@@ -43,7 +43,13 @@ namespace JANOARG.Client.Behaviors.Player
             if (PlayerScreen.sMain.CurrentTime - PauseTime < 2)
             {
                 PlayerScreen.sMain.IsPlaying = false;
-                PlayerScreen.sMain.Music.Pause();
+                // If the song hasn't started yet, PlayScheduled is still pending —
+                // Pause() won't cancel it, so use Stop() to kill the scheduled play.
+                // Once CurrentTime >= 0 the audio is already running and Pause() is correct.
+                if (PlayerScreen.sMain.CurrentTime < 0)
+                    PlayerScreen.sMain.Music.Stop();
+                else
+                    PlayerScreen.sMain.Music.Pause();
                 PlayerScreen.sMain.ComputeAndSaveMedianOffset();
 
                 // PlayerInputManager.main.Fingers.Clear();
