@@ -617,7 +617,8 @@ namespace JANOARG.Client.Behaviors.Player
             for (; index < Mathf.Min(PositionPoints.Count, TimeStamps.Count); index++)
             {
                 float endStepProgress = InverseLerpUnclamped(TimeStamps[index - 1], TimeStamps[index], hit.EndTime);
-                float endStepPosition = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], endStepProgress);
+                float segmentEndProgress = Mathf.Clamp01(endStepProgress);
+                float endStepPosition = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], segmentEndProgress);
                 LaneStep currentStep = Current.LaneSteps[index];
 
                 currentStepStartPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position);
@@ -626,29 +627,32 @@ namespace JANOARG.Client.Behaviors.Player
                 if (currentStep.IsLinear)
                 {
                     f_addLine(
-                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, endStepProgress) + Vector3.forward * endStepPosition,
-                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, endStepProgress) + Vector3.forward * endStepPosition
+                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, segmentEndProgress) + Vector3.forward * endStepPosition,
+                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, segmentEndProgress) + Vector3.forward * endStepPosition
                     );
                 }
                 else
                 {
                     LaneStep previousStep = Current.LaneSteps[index - 1];
 
-                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;; x = Mathf.Min(endStepProgress, Mathf.Floor(x * 16 + 1.01f) / 16))
+                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;;)
                     {
+                        float sampledProgress = Mathf.Min(segmentEndProgress, x);
                         f_addLine(
                             new Vector3(
-                                Mathf.LerpUnclamped(previousStepStartPointPosition.x, currentStepStartPointPosition.x, currentStep.StartEaseX.Get(x)),
-                                Mathf.LerpUnclamped(previousStepStartPointPosition.y, currentStepStartPointPosition.y, currentStep.StartEaseY.Get(x)),
-                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x)),
+                                Mathf.LerpUnclamped(previousStepStartPointPosition.x, currentStepStartPointPosition.x, currentStep.StartEaseX.Get(sampledProgress)),
+                                Mathf.LerpUnclamped(previousStepStartPointPosition.y, currentStepStartPointPosition.y, currentStep.StartEaseY.Get(sampledProgress)),
+                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], sampledProgress)),
                             new Vector3(
-                                Mathf.LerpUnclamped(previousStepEndPointPosition.x, currentStepEndPointPosition.x, currentStep.EndEaseX.Get(x)),
-                                Mathf.LerpUnclamped(previousStepEndPointPosition.y, currentStepEndPointPosition.y, currentStep.EndEaseY.Get(x)),
-                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x))
+                                Mathf.LerpUnclamped(previousStepEndPointPosition.x, currentStepEndPointPosition.x, currentStep.EndEaseX.Get(sampledProgress)),
+                                Mathf.LerpUnclamped(previousStepEndPointPosition.y, currentStepEndPointPosition.y, currentStep.EndEaseY.Get(sampledProgress)),
+                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], sampledProgress))
                         );
 
-                        if (x >= Mathf.Min(endStepProgress, 1))
+                        if (sampledProgress >= segmentEndProgress)
                             break;
+
+                        x = Mathf.Floor(sampledProgress * 16 + 1.01f) / 16;
                     }
                 }
 
