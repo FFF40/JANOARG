@@ -31,7 +31,6 @@ namespace JANOARG.Client.Behaviors.Player
 
         public static Chart sCurrentChart;
 
-        [Header("Headless Initialisation")]
         public ExternalPlayableSong RunChart;
 
         public ExternalChart Chart;
