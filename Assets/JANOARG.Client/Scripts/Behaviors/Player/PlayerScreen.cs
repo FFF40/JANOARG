@@ -806,10 +806,16 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 if (!Music.isPlaying)
                 {
-                    const double RestartLeadTime = 0.05;
-                    _MusicStartDSP = dspNow + RestartLeadTime;
-                    Music.time = (float)(CurrentTime - Settings.AudioOffset);
-                    Music.PlayScheduled(_MusicStartDSP);
+                    // Skip if a PlayScheduled is already pending — rescheduling would cancel it
+                    // and cause a brief stutter at t=0, which is jarring when hitobjects start there.
+                    bool scheduledPlayPending = dspNow < _MusicStartDSP;
+                    if (!scheduledPlayPending)
+                    {
+                        const double RestartLeadTime = 0.05;
+                        _MusicStartDSP = dspNow + RestartLeadTime;
+                        Music.time = (float)(CurrentTime - Settings.AudioOffset);
+                        Music.PlayScheduled(_MusicStartDSP);
+                    }
                 }
                 // No hard-seek sync corrector needed — audio IS the clock now
             }
