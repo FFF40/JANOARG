@@ -57,7 +57,8 @@ namespace JANOARG.Client.Behaviors.Common
         {
             yield return SceneManager.LoadSceneAsync(target, LoadSceneMode.Additive);
             yield return Resources.UnloadUnusedAssets();
-            yield return new WaitUntil(completed);
+            if (completed != null)
+                yield return new WaitUntil(completed);
 
             if (onComplete != null) onComplete();
         }
