@@ -12462,8 +12462,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6a77452eee572143885d7f2de9a957c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RunChart: {fileID: 5022602860645237092, guid: 5b108402815b5e96b871207ec0a95918, type: 3}
-  Chart: {fileID: 5022602860645237092, guid: deddc831ce741459481f3f68b2411df3, type: 3}
+  RunChart: {fileID: 0}
+  Chart: {fileID: 0}
   Music: {fileID: 1395341278}
   Hitsounds: {fileID: 1395341278}
   Pseudocamera: {fileID: 939693537}

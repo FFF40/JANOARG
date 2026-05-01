@@ -269,7 +269,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (sHeadlessInitialised && sTargetChart != null)
                 {
-                    yield return new WaitUntil(() => sTargetSong.Clip.loadState != AudioDataLoadState.Loading);
+                    yield return new WaitUntil(() => sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
                 }
                 else
                 {
@@ -277,7 +277,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Debug.Log(path);
                     ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState != AudioDataLoadState.Loading);
+                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
 
                     sTargetChart = chartLoadRequest.asset as ExternalChart;
 
@@ -752,7 +752,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsPlaying = true;
             // Schedule music precisely — 100ms lookahead gives the audio thread time to prepare
             const double MUSIC_LEAD_TIME = 0.1;
-            _MusicStartDSP = AudioSettings.dspTime + MUSIC_LEAD_TIME + (CurrentTime < 0 ? -CurrentTime : 0);
+            _MusicStartDSP = AudioSettings.dspTime + MUSIC_LEAD_TIME - (CurrentTime < 0 ? -CurrentTime : 0);
             Music.time = 0;
             Music.PlayScheduled(_MusicStartDSP);
             _LastDSPTime = AudioSettings.dspTime;
@@ -802,16 +802,10 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 if (!Music.isPlaying)
                 {
-                    // Skip if a PlayScheduled is already pending — rescheduling would cancel it
-                    // and cause a brief stutter at t=0, which is jarring when hitobjects start there.
-                    bool scheduledPlayPending = dspNow < _MusicStartDSP;
-                    if (!scheduledPlayPending)
-                    {
-                        const double RESTART_LEAD_TIME = 0.05;
-                        _MusicStartDSP = dspNow + RESTART_LEAD_TIME;
-                        Music.time = (float)(CurrentTime - Settings.AudioOffset);
-                        Music.PlayScheduled(_MusicStartDSP);
-                    }
+                    const double RESTART_LEAD_TIME = 0.05;
+                    _MusicStartDSP = dspNow + RESTART_LEAD_TIME;
+                    Music.time = (float)(CurrentTime - Settings.AudioOffset);
+                    Music.PlayScheduled(_MusicStartDSP);
                 }
                 // No hard-seek sync corrector needed — audio IS the clock now
             }
@@ -998,26 +992,27 @@ namespace JANOARG.Client.Behaviors.Player
         // OnApplicationPause covers mobile app backgrounding and complements OnApplicationFocus.
         public void OnApplicationPause(bool isPaused)
         {
-#if UNITY_EDITOR
-            if (!UnityEditor.EditorApplication.isPlaying) return;
-#endif
-            if (isPaused)
-            {
-                if (IsPlaying)
+            #if UNITY_EDITOR
+                return;
+            #else
+                if (isPaused)
                 {
-                    _PausedByFocusLoss = true;
-                    IsPlaying = false;
-                    Music.Pause();
-                    _LastDSPTime = AudioSettings.dspTime;
-                    ComputeAndSaveMedianOffset();
-                    PlayerScreenPause.sMain.Show();
+                    if (IsPlaying)
+                    {
+                        _PausedByFocusLoss = true;
+                        IsPlaying = false;
+                        Music.Pause();
+                        _LastDSPTime = AudioSettings.dspTime;
+                        ComputeAndSaveMedianOffset();
+                        PlayerScreenPause.sMain.Show();
+                    }
                 }
-            }
-            else if (_PausedByFocusLoss)
-            {
-                _PausedByFocusLoss = false;
-                PlayerScreenPause.sMain.Continue();
-            }
+                else if (_PausedByFocusLoss)
+                {
+                    _PausedByFocusLoss = false;
+                    PlayerScreenPause.sMain.Continue();
+                }
+            #endif
         }
 
         private Coroutine _JudgeAnimation;
