@@ -750,9 +750,10 @@ namespace JANOARG.Client.Behaviors.Player
                 digit.Speed = 9;
 
             IsPlaying = true;
-            // Schedule music precisely — 100ms lookahead gives the audio thread time to prepare
-            const double MUSIC_LEAD_TIME = 0.1;
-            _MusicStartDSP = AudioSettings.dspTime + MUSIC_LEAD_TIME - (CurrentTime < 0 ? -CurrentTime : 0);
+
+            // Idk why but songs are starting 3/4 of a second later than they's supposed to be 
+            // so this will be here as a temporary hack before I figure out what is going on
+            _MusicStartDSP = AudioSettings.dspTime + Math.Max(CurrentTime - 0.75, 0);
             Music.time = 0;
             Music.PlayScheduled(_MusicStartDSP);
             _LastDSPTime = AudioSettings.dspTime;
