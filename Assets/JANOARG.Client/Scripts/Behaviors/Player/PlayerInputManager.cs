@@ -840,7 +840,7 @@ public class PlayerInputManager : MonoBehaviour
                         Player.AddScore(1, null);
 
                         Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.4f);
-                        var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
+                        var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(currentHit, null, interfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
                         
@@ -1035,7 +1035,7 @@ public class PlayerInputManager : MonoBehaviour
             if (holdNoteEntry.IsScoring)
             {
                 Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.32f);
-                var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
+                var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(holdNoteEntry.HitObject,null, interfaceColor);
                 var rt = (RectTransform)effect.transform;
 
                 rt.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);

@@ -1101,7 +1101,7 @@ namespace JANOARG.Client.Behaviors.Player
             int baseScore = CalculateBaseScore(hitType, isFlickable, hitObject.Current.FlickDirection);
             
             double offsetAbs = Math.Abs(offset);
-            float? accuracy = null;
+            float? accuracy = isCatchType ? 0 : null;
             float finalScore;
 
             // Handle different hit evaluation types
@@ -1163,7 +1163,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void SpawnHitEffect(HitPlayer hitObject, float? accuracy)
         {
-            var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
+            var effect = sMain.JudgeScreenManager.BorrowEffect(hitObject, accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hitObject.HitCoord.Position;
         }

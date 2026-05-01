@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using JANOARG.Client.UI;
+using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Player
@@ -82,10 +83,10 @@ namespace JANOARG.Client.Behaviors.Player
         /// Borrow an effect from the pool, configure it, and start its animation.
         /// Returns null only if the pool is exhausted and overflow instantiation also fails.
         /// </summary>
-        public JudgeScreenEffect BorrowEffect(float? accuracy, Color color)
+        public JudgeScreenEffect BorrowEffect(HitPlayer hitobject, float? accuracy, Color color)
         {
             if (_totalInstances > _totalMaxInstances)
-                return CreateEffect(accuracy, color);
+                return CreateEffect(hitobject, accuracy, color);
 
             JudgeScreenEffect effect;
             try
@@ -99,14 +100,55 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
+            DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
             effect.gameObject.SetActive(true);
-            effect.SetAccuracy(accuracy);
             effect.SetColor(color);
             effect.Tick(0); // initialise visual state before first Update
 
             _active.Add(new ActiveEffect { Effect = effect, Elapsed = 0f, IsOneShot = false });
             _totalInstances++;
             return effect;
+        }
+        
+        void DefineJudgeScreenEffect(HitPlayer hitobject, ref JudgeScreenEffect effect, float? accuracy)
+        {
+            var rt = (RectTransform)effect.transform;
+            var hold = hitobject.Current.Length > 0;
+
+            
+            if (accuracy == null && hold) // Hold tick special
+            {
+                rt.localScale = Vector2.one * 0.6f;
+                rt.eulerAngles = Vector3.forward * 45;
+                effect.SetShapeAccuracy(false);
+                
+                return;
+            }
+            
+            if (hitobject.Current.Flickable)
+            {
+                rt.localScale = Vector2.one;
+                rt.eulerAngles = Vector3.zero;
+                effect.SetShapeAccuracy(false);
+
+                return;
+            }
+
+            if (hitobject.Current.Type == HitObject.HitType.Catch)
+            {
+                rt.localScale = Vector2.one;
+                rt.eulerAngles = Vector3.forward * 45;
+                effect.SetShapeAccuracy(false);
+                
+                return;
+            }
+
+            if (hitobject.Current.Type == HitObject.HitType.Normal)
+            {
+                effect.SetShapeAccuracy(true, accuracy);
+                return;
+            }
+
         }
 
         /// <summary>
@@ -123,11 +165,11 @@ namespace JANOARG.Client.Behaviors.Player
         // -----------------------------------------------------------------
         // Overflow — pool exhausted
         // -----------------------------------------------------------------
-        private JudgeScreenEffect CreateEffect(float? accuracy, Color color)
+        private JudgeScreenEffect CreateEffect(HitPlayer hitobject, float? accuracy, Color color)
         {
             Debug.LogWarning("JudgeScreenManager pool exhausted, creating new instance.");
             var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
-            newEffect.SetAccuracy(accuracy);
+            DefineJudgeScreenEffect(hitobject, ref newEffect, accuracy);
             newEffect.SetColor(color);
             newEffect.Tick(0);
             _active.Add(new ActiveEffect { Effect = newEffect, Elapsed = 0f, IsOneShot = true });

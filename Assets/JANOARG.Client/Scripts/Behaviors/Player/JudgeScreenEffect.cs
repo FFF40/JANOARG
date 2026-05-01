@@ -19,21 +19,21 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float Size = 120;
 
-        public void SetAccuracy(float? acc)
+        public void SetShapeAccuracy(bool circle, float? acc = null)
         {
-            if (acc == null)
-            {
-                RingFill1.fillAmount = RingFill2.fillAmount = 1;
-                RingBackground.sides = RingFill1.sides = RingFill2.sides = 4;
-                Size = 60;
-            }
-            else
+            if (circle && acc.HasValue) // Normal hitobject
             {
                 Size = 120;
                 RingBackground.sides = RingFill1.sides = RingFill2.sides = 0;
                 RingFill1.fillAmount = RingFill2.fillAmount = (1 - Mathf.Abs((float)acc)) / 2;
                 RingFill1.rectTransform.localEulerAngles = Vector3.back * Mathf.Max((float)acc * 180, 0);
                 RingFill2.rectTransform.localEulerAngles = Vector3.forward * (RingFill1.rectTransform.localEulerAngles.z + 180);
+            }
+            else
+            {
+                RingFill1.fillAmount = RingFill2.fillAmount = 1;
+                RingBackground.sides = RingFill1.sides = RingFill2.sides = 4;
+                Size = 60;
             }
         }
 
