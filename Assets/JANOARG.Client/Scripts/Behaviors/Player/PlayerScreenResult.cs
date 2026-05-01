@@ -444,7 +444,7 @@ namespace JANOARG.Client.Behaviors.Player
             else
                 AverageOffsetText.text =
                     (avgOffset >= 0 ? "+" : "−") + Mathf.Abs(avgOffset).ToString("F2") +
-                    "<size=75%> ms";
+                    "<size=60%> ms";
             
             ScoreStoreEntry record = GetBestScore();
             int recordScore = record?.Score ?? 0;
