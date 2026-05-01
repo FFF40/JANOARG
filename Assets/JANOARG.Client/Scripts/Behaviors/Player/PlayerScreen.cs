@@ -1165,11 +1165,7 @@ namespace JANOARG.Client.Behaviors.Player
         {
             var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
-            // Square if Catch, Diamond if flicks
-            rt.eulerAngles = hitObject.Current.Flickable ? 
-                Vector3.forward * 45 : Vector3.zero; // Make sure it is reset (due to pooling)
             rt.position = hitObject.HitCoord.Position;
-            rt.localScale = (Vector3) Vector2.one; // Making sure it's not affected from effects that were used in hold ticks
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)

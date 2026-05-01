@@ -172,14 +172,17 @@ Shader "UI/Circle"
                 float2 p = float2(IN.localUV.x * aspect, IN.localUV.y);
 
                 // --- Rotation ----------------------------------------------
-                float rotRad = (_Rotation) * UNITY_PI / 180.0;
+                int   sides = max((int)round(_Sides), 1);
+
+                float rotRad = _Rotation * UNITY_PI / 180.0;
+                // Add half of side angle to mimic pointy top angle of CPU GraphicCircle
+                rotRad += UNITY_TWO_PI * 0.5 / sides;
                 float sinR = sin(rotRad), cosR = cos(rotRad);
                 p = float2(p.x * cosR - p.y * sinR,
                            p.x * sinR + p.y * cosR);
 
                 // --- Radial distance / polygon distance --------------------
                 float dist; // signed distance to outer shape edge (negative = inside)
-                int   sides = (int)round(_Sides);
 
                 if (sides >= 3)
                     dist = sdPolygon(p, sides, 1.0);

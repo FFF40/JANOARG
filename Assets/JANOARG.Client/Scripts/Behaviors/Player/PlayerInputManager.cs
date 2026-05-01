@@ -842,9 +842,7 @@ public class PlayerInputManager : MonoBehaviour
                         Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.4f);
                         var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(null, interfaceColor);
                         var rectTransform = (RectTransform)effect.transform;
-                        rectTransform.eulerAngles = Vector3.zero; // Make sure no remnants from flicks
                         rectTransform.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(currentHit.transform.position);
-                        rectTransform.localScale = Vector2.one * 0.6f;
                         
                         currentHit.HoldTicks.RemoveAt(0);
                     }
@@ -1041,7 +1039,6 @@ public class PlayerInputManager : MonoBehaviour
                 var rt = (RectTransform)effect.transform;
 
                 rt.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
-                rt.localScale = (Vector3)Vector2.one * 0.74f;
             }
 
             // Missed hold tick, no effect
