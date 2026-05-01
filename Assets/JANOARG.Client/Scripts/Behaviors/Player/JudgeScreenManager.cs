@@ -114,16 +114,7 @@ namespace JANOARG.Client.Behaviors.Player
         {
             var rt = (RectTransform)effect.transform;
             var hold = hitobject.Current.Length > 0;
-
             
-            if (accuracy == null && hold) // Hold tick special
-            {
-                rt.localScale = Vector2.one * 0.6f;
-                rt.eulerAngles = Vector3.forward * 45;
-                effect.SetShapeAccuracy(false);
-                
-                return;
-            }
             
             if (hitobject.Current.Flickable)
             {
@@ -133,10 +124,19 @@ namespace JANOARG.Client.Behaviors.Player
 
                 return;
             }
+            
+            if (accuracy == null && hold) // Hold tick special
+            {
+                rt.localScale = Vector2.one * 0.6f;
+                rt.eulerAngles = Vector3.forward * 45;
+                effect.SetShapeAccuracy(false);
+                
+                return;
+            }
 
             if (hitobject.Current.Type == HitObject.HitType.Catch)
             {
-                rt.localScale = Vector2.one;
+                rt.localScale = Vector2.one * 1.15f;
                 rt.eulerAngles = Vector3.forward * 45;
                 effect.SetShapeAccuracy(false);
                 
@@ -145,6 +145,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (hitobject.Current.Type == HitObject.HitType.Normal)
             {
+                rt.localScale = Vector2.one;
                 effect.SetShapeAccuracy(true, accuracy);
                 return;
             }
