@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.UI;
@@ -16,9 +15,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-using Quaternion = UnityEngine.Quaternion;
-using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
 
 namespace JANOARG.Client.Behaviors.Player
 {
@@ -954,9 +950,14 @@ namespace JANOARG.Client.Behaviors.Player
                 ? (samples[mid - 1] + samples[mid]) / 2.0
                 : samples[mid];
 
-            CommonSys.sMain.Preferences.Set("PLYR:GameplayMedianOffset", (float)(MedianTimingOffset * 1000));
-            CommonSys.sMain.Preferences.Set("PLYR:GameplayMedianOffsetCounter",
-                CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0) + 1);
+            CommonSys.sMain.Preferences.Set(
+                "PLYR:GameplayMedianOffset", 
+                (float)(MedianTimingOffset * 1000)
+            );
+            CommonSys.sMain.Preferences.Set(
+                "PLYR:GameplayMedianOffsetCounter",
+                CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0) + 1
+            );
         }
 
         // Input and hold mesh updates are now handled directly in Update to avoid +1 frame latency.
