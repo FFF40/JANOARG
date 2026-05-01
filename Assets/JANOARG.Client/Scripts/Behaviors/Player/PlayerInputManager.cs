@@ -82,17 +82,17 @@ public class HoldNoteClass
 /// </summary>
 public class VelocityTracker
 {
-    private const int RecordMax = 10;
-    private readonly Queue<(float time, Vector2 position)> _movements = new(RecordMax);
+    private const int _RECORD_MAX = 10;
+    private readonly Queue<(float time, Vector2 position)> _Movements = new(_RECORD_MAX);
 
     public void Push(float time, Vector2 position)
     {
-        if (_movements.Count == RecordMax)
-            _movements.Dequeue();
-        _movements.Enqueue((time, position));
+        if (_Movements.Count == _RECORD_MAX)
+            _Movements.Dequeue();
+        _Movements.Enqueue((time, position));
     }
 
-    public void Reset() => _movements.Clear();
+    public void Reset() => _Movements.Clear();
 
     /// <summary>
     ///     Returns the instantaneous velocity vector (px/s) via quadratic regression
@@ -100,39 +100,55 @@ public class VelocityTracker
     /// </summary>
     public Vector2 Speed()
     {
-        if (_movements.Count < 2) return Vector2.zero;
+        if (_Movements.Count < 2) return Vector2.zero;
 
-        float n = _movements.Count;
-        float lst = _movements.Last().time;
+        float samples = _Movements.Count;
+        float list = _Movements.Last().time;
 
         float sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
         Vector2 sumY = Vector2.zero, sumXY = Vector2.zero, sumX2Y = Vector2.zero;
 
-        foreach (var (t, pt) in _movements)
+        foreach (var (time, point) in _Movements)
         {
-            float x = t - lst;
-            sumY   += pt;
+            float x = time - list;
+            sumY   += point;
             sumX   += x;
-            sumXY  += x * pt;
+            sumXY  += x * point;
+            
             float x2 = x * x;
             sumX2  += x2;
-            sumX2Y += x2 * pt;
+            sumX2Y += x2 * point;
+            
             float x3 = x2 * x;
             sumX3  += x3;
             sumX4  += x3 * x;
         }
 
-        float sXX   = sumX2  - sumX  * sumX  / n;
-        float sXX2  = sumX3  - sumX  * sumX2 / n;
-        float sX2X2 = sumX4  - sumX2 * sumX2 / n;
-        float denom = sXX * sX2X2 - sXX2 * sXX2;
+        // Corrected Sums of Squares
+        
+        // Corrected SS for x
+        float correctedX   = sumX2  - sumX  * sumX  / samples;
+        // Corrected cross-product of x and x^2
+        float correctedCrossProduct  = sumX3  - sumX  * sumX2 / samples;
+        // Corrected cross-product of x and y
+        float correctedXSquared = sumX4  - sumX2 * sumX2 / samples;
+        // Determinant of the 2*2 system
+        // if near zero, the fit is degenerate (e.g., all points at the same time)
+        float determinant = correctedX * correctedXSquared - correctedCrossProduct * correctedCrossProduct;
 
-        if (Mathf.Approximately(denom, 0f)) return Vector2.zero;
+        if (Mathf.Approximately(determinant, 0f)) 
+            return Vector2.zero;
 
-        Vector2 sXYv  = sumXY  - sumY * (sumX  / n);
-        Vector2 sX2Yv = sumX2Y - sumY * (sumX2 / n);
-        Vector2 b = (sXYv * sX2X2 - sX2Yv * sXX2) / denom;
-        return b;
+        
+        // Corrected cross-product of x and y
+        Vector2 correctedCrossXY  = sumXY  - sumY * (sumX  / samples);
+        // Corrected cross-product of x^2 and y
+        Vector2 correctedCrossX2Y = sumX2Y - sumY * (sumX2 / samples);
+        
+        // The linear coefficient of the fitted quadratic 
+        // Giving instant final velocity value at x=0
+        Vector2 linearCoefficient = (correctedCrossXY * correctedXSquared - correctedCrossX2Y * correctedCrossProduct) / determinant;
+        return linearCoefficient;
     }
 }
 

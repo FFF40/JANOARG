@@ -173,10 +173,10 @@ namespace JANOARG.Client.Behaviors.Player
 
         private double _LastDSPTime;
         private double _MusicStartDSP;  // DSP time at which Music.PlayScheduled was called
-        private const double SpikeThreshold = 0.1; // 100ms — above this, treat as a spike
+        private const double _SPIKE_THRESHOLD = 0.1; // 100ms — above this, treat as a spike
 
         // Frame skipping: skip visual update when logic ran less than this ago
-        private const float FrameSkipThreshold = 1f / 15f; // skip visual if >15 fps worth of logic work done
+        private const float _FRAME_SKIP_THRESHOLD = 1f / 15f; // skip visual if >15 fps worth of logic work done
         private float _LastVisualTime = float.NegativeInfinity;
 
         // Visual lerp: smooth camera/lane group positions across frames
@@ -292,11 +292,11 @@ namespace JANOARG.Client.Behaviors.Player
                 if (!sHeadlessInitialised)
                     // SongSelectReadyScreen.sMain.CurrentProgress.text += "Done.";
 
-                if (sHeadlessInitialised)
-                {
-                    yield return null;
-                    yield return new WaitForEndOfFrame();
-                }
+                    if (sHeadlessInitialised)
+                    {
+                        yield return null;
+                        yield return new WaitForEndOfFrame();
+                    }
 
                 yield return InitChart();
             }
@@ -582,9 +582,9 @@ namespace JANOARG.Client.Behaviors.Player
         
         private struct EventNote
         {
-            public float      beat;
-            public HitObject  hitObject;
-            public LanePlayer lane;
+            public float      Beat;
+            public HitObject  HitObject;
+            public LanePlayer Lane;
 
         }
 
@@ -598,21 +598,21 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (var lane in Lanes)
             foreach (var hitObject in lane.Original.Objects)
             {
-                events.Add(new EventNote(){beat = hitObject.Offset, hitObject = hitObject, lane = lane});
+                events.Add(new EventNote(){Beat = hitObject.Offset, HitObject = hitObject, Lane = lane});
                 hitObject.IsSimultaneous = false;
             }
 
-            events.Sort((a, b) => a.beat.CompareTo(b.beat));
+            events.Sort((a, b) => a.Beat.CompareTo(b.Beat));
             
             for (int i = 0; i < events.Count;)
             {
-                float currentBeat = events[i].beat;
+                float currentBeat = events[i].Beat;
                 int start = i;
 
                 // Move index i to the end of the group with the same beat
                 // Using Mathf.Approximately just in case of float precision jitter, 
                 // but for grid-based data, it works exactly like ==
-                while (i < events.Count && Mathf.Approximately(events[i].beat, currentBeat))
+                while (i < events.Count && Mathf.Approximately(events[i].Beat, currentBeat))
                 {
                     i++;
                 }
@@ -625,7 +625,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Debug.Log($"> Simultaneous notes found at beat {currentBeat}: {count}");
                     for (int j = start; j < i; j++)
                     {
-                        events[j].hitObject.IsSimultaneous = true;
+                        events[j].HitObject.IsSimultaneous = true;
                     }
                 }
             }
@@ -755,8 +755,8 @@ namespace JANOARG.Client.Behaviors.Player
 
             IsPlaying = true;
             // Schedule music precisely — 100ms lookahead gives the audio thread time to prepare
-            const double MusicLeadTime = 0.1;
-            _MusicStartDSP = AudioSettings.dspTime + MusicLeadTime + (CurrentTime < 0 ? -CurrentTime : 0);
+            const double MUSIC_LEAD_TIME = 0.1;
+            _MusicStartDSP = AudioSettings.dspTime + MUSIC_LEAD_TIME + (CurrentTime < 0 ? -CurrentTime : 0);
             Music.time = 0;
             Music.PlayScheduled(_MusicStartDSP);
             _LastDSPTime = AudioSettings.dspTime;
@@ -785,7 +785,7 @@ namespace JANOARG.Client.Behaviors.Player
             double rawDelta = dspNow - _LastDSPTime;
             _LastDSPTime = dspNow;
 
-            if (rawDelta > SpikeThreshold)
+            if (rawDelta > _SPIKE_THRESHOLD)
             {
                 // Lag spike — resync clock to audio without rushing the chart
                 if (Music.isPlaying)
@@ -811,8 +811,8 @@ namespace JANOARG.Client.Behaviors.Player
                     bool scheduledPlayPending = dspNow < _MusicStartDSP;
                     if (!scheduledPlayPending)
                     {
-                        const double RestartLeadTime = 0.05;
-                        _MusicStartDSP = dspNow + RestartLeadTime;
+                        const double RESTART_LEAD_TIME = 0.05;
+                        _MusicStartDSP = dspNow + RESTART_LEAD_TIME;
                         Music.time = (float)(CurrentTime - Settings.AudioOffset);
                         Music.PlayScheduled(_MusicStartDSP);
                     }
@@ -917,13 +917,13 @@ namespace JANOARG.Client.Behaviors.Player
         {
             if (lane.Current == null) return true;
 
-            const float TrivialLaneSpanThreshold = 2f;
+            const float TRIVIAL_LANE_SPAN_THRESHOLD = 2f;
             IReadOnlyList<LaneStep> laneSteps = lane.Current.LaneSteps;
 
             if (laneSteps.Count <= 1) return true;
 
             float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
-            bool hasShortSpan = span < TrivialLaneSpanThreshold;
+            bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
             bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
 
             return hasShortSpan || isGeometryLane;

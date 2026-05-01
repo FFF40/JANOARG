@@ -190,9 +190,9 @@ namespace JANOARG.Client.Behaviors.Player
             // CurrentTime is timeSamples-derived and may freeze slightly short of clip.length
             // due to buffer granularity when Music.Pause() is called — use a tolerance margin
             // rather than waiting for exact equality, which can hang indefinitely.
-            const float EndTolerance = 0.1f;
+            const float END_TOLERANCE = 0.1f;
             yield return new WaitWhile(() =>
-                PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length - EndTolerance
+                PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length - END_TOLERANCE
                 && PlayerScreen.sMain.Music.isPlaying);
 
             // Stop playback so the audio lifecycle in PlayerScreen.Update doesn't restart the song
@@ -578,7 +578,7 @@ namespace JANOARG.Client.Behaviors.Player
         private IEnumerator LoadCoverImageRoutine()
         {
             string path = Path.Combine(
-                Path.GetDirectoryName(PlayerScreen.sTargetSongPath),
+                Path.GetDirectoryName(PlayerScreen.sTargetSongPath)!,
                 PlayerScreen.sTargetSong.Cover.IconTarget);
 
             if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[..^1];
