@@ -190,8 +190,9 @@ namespace JANOARG.Client.Behaviors.Player
         [NonSerialized]
         public float ScaledMinimumRadius;
         
-        internal List<int> TransparentMeshLaneIndexes = new();
-        private List<LanePlayer> _LanesToRender = new();
+        internal List<int>        TransparentMeshLaneIndexes  = new();
+        internal List<int>        TransparentMeshJudgeIndexes = new();
+        private  List<LanePlayer> _LanesToRender              = new();
         
 
         public void Awake()
@@ -861,6 +862,11 @@ namespace JANOARG.Client.Behaviors.Player
                     TransparentMeshLaneIndexes.Remove(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Add(a);
+                
+                if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a == 0 && !TransparentMeshJudgeIndexes.Contains(a))
+                    TransparentMeshJudgeIndexes.Add(a);
+                else if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a != 0 && TransparentMeshJudgeIndexes.Contains(a))
+                    TransparentMeshJudgeIndexes.Remove(a);
             }
 
             for (var a = 0; a < HitStyles.Count; a++)

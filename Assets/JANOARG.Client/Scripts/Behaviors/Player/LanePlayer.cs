@@ -112,7 +112,8 @@ namespace JANOARG.Client.Behaviors.Player
         {
             // No Mesh instantiation
 
-            bool isInvisibleMesh = PlayerScreen.sMain.TransparentMeshLaneIndexes.Any(style => style == Current.StyleIndex);
+            bool isInvisibleLaneMesh = PlayerScreen.sMain.TransparentMeshLaneIndexes.Any(style => style == Current.StyleIndex) || Current.StyleIndex == -1;
+            bool isInvisibleJudgeMesh = PlayerScreen.sMain.TransparentMeshJudgeIndexes.Any(style => style == Current.StyleIndex) || Current.StyleIndex == -1;
             
             _Verts.Clear();
             _Tris.Clear();
@@ -276,7 +277,7 @@ namespace JANOARG.Client.Behaviors.Player
                 JudgeLine.enabled =
                     JudgePointLeft.enabled =
                         JudgePointRight.enabled =
-                            TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
+                            !isInvisibleJudgeMesh && TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
                 
                 // If the judgment line is enabled, update its current position
                 Transform judgeLineTransform = JudgeLine.transform;
@@ -377,7 +378,7 @@ namespace JANOARG.Client.Behaviors.Player
             sr_MeshLaneStepLooper.End();
                             
             // Skip rendering for invisible lanes
-            if (isInvisibleMesh && HitObjects.Count == 0)
+            if (isInvisibleLaneMesh && HitObjects.Count == 0)
                 return;
             
             sr_MeshUpdater.Begin();
