@@ -976,7 +976,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (!hasFocus)
             {
-                if (IsPlaying)
+                if (IsPlaying && !ResultExec)
                 {
                     _PausedByFocusLoss = true;
                     IsPlaying = false;
