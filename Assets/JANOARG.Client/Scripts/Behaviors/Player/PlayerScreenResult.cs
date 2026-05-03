@@ -263,11 +263,11 @@ namespace JANOARG.Client.Behaviors.Player
                     Details.Container.rectTransform.localScale =
                         new Vector3(1, .5f * ease2, 1);
 
-                    ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * (200 / (1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.In)));
+                    ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * EaseUtils.BlastOut(200, x, EaseFunction.Exponential, EaseMode.In);
 
                     ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 + 360 * Ease.Get(x, EaseFunction.Cubic, EaseMode.In));
 
-                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (500 / (1 - Ease.Get(x, EaseFunction.Circle, EaseMode.In)));
+                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * EaseUtils.BlastOut(500, x, EaseFunction.Circle, EaseMode.In);
                 });
 
             ResultText.gameObject.SetActive(false);
@@ -341,7 +341,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreExplosionRings[0].insideRadius = 1 - ease4 - x * .01f;
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
-                        Vector2.one * (600 / ease1 * (1 - ease4) + 100);
+                        Vector2.one * (EaseUtils.BlastIn(600, ease1) * (1 - ease4) + 100);
 
                     ScoreExplosionRings[0].rectTransform.position =
                         ScoreRings[0].rectTransform.position;
@@ -358,7 +358,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreExplosionRings[1].insideRadius = 1 - ease5 - x * .01f;
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta =
-                        Vector2.one * (900 / ease1 * (1 - ease4) + 100);
+                        Vector2.one * (EaseUtils.BlastIn(900, ease1) * (1 - ease4) + 100);
 
                     ScoreExplosionRings[1].rectTransform.position =
                         ScoreRings[0].rectTransform.position;
