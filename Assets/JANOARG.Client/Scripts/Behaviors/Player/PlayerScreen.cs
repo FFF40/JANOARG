@@ -125,7 +125,8 @@ namespace JANOARG.Client.Behaviors.Player
         [FormerlySerializedAs("HasPlayedBefore")]
         public bool AlreadyInitialised;
 
-        public float CurrentTime = -5;
+        // Double precision to avoid float drift on long songs
+        public double CurrentTime = -5;
 
         [Space]
         public float TotalExScore = 0;
@@ -147,6 +148,10 @@ namespace JANOARG.Client.Behaviors.Player
         [Space]
         public List<HitObjectHistoryItem> HitObjectHistory;
 
+        // Median of non-zero, non-infinity Timing offsets — attach to result screen in scene.
+        // Updated after every qualifying hit so it's always current.
+        public double MedianTimingOffset;
+
         [Space]
         public int HitsRemaining = 0;
 
@@ -163,6 +168,18 @@ namespace JANOARG.Client.Behaviors.Player
         public List<LanePlayer> Lanes = new();
 
         private double _LastDSPTime;
+        private double _MusicStartDSP;  // DSP time at which Music.PlayScheduled was called
+        private const double _SPIKE_THRESHOLD = 0.1; // 100ms — above this, treat as a spike
+
+        // Frame skipping: skip visual update when logic ran less than this ago
+        private const float _FRAME_SKIP_THRESHOLD = 1f / 15f; // skip visual if >15 fps worth of logic work done
+        private float _LastVisualTime = float.NegativeInfinity;
+
+        // Visual lerp: smooth camera/lane group positions across frames
+        private Vector3    _LerpedCameraPos;
+        private Quaternion _LerpedCameraRot;
+        private float      _LerpedCameraDist;
+        private bool       _VisualLerpInitialised;
 
         [NonSerialized]
         public PlayerSettings Settings = new();
@@ -173,8 +190,9 @@ namespace JANOARG.Client.Behaviors.Player
         [NonSerialized]
         public float ScaledMinimumRadius;
         
-        internal List<int> TransparentMeshLaneIndexes = new();
-        private List<LanePlayer> _LanesToRender = new();
+        internal List<int>        TransparentMeshLaneIndexes  = new();
+        internal List<int>        TransparentMeshJudgeIndexes = new();
+        private  List<LanePlayer> _LanesToRender              = new();
         
 
         public void Awake()
@@ -252,7 +270,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (sHeadlessInitialised && sTargetChart != null)
                 {
-                    yield return new WaitUntil(() => sTargetSong.Clip.loadState != AudioDataLoadState.Loading);
+                    yield return new WaitUntil(() => sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
                 }
                 else
                 {
@@ -260,7 +278,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Debug.Log(path);
                     ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState != AudioDataLoadState.Loading);
+                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
 
                     sTargetChart = chartLoadRequest.asset as ExternalChart;
 
@@ -271,11 +289,11 @@ namespace JANOARG.Client.Behaviors.Player
                 if (!sHeadlessInitialised)
                     // SongSelectReadyScreen.sMain.CurrentProgress.text += "Done.";
 
-                if (sHeadlessInitialised)
-                {
-                    yield return null;
-                    yield return new WaitForEndOfFrame();
-                }
+                    if (sHeadlessInitialised)
+                    {
+                        yield return null;
+                        yield return new WaitForEndOfFrame();
+                    }
 
                 yield return InitChart();
             }
@@ -303,6 +321,8 @@ namespace JANOARG.Client.Behaviors.Player
                                 MaxCombo =
                                     TotalCombo =
                                         HitsRemaining = 0;
+
+                MedianTimingOffset = 0;
 
                 ScoreCounter.SetNumber(0);
                 SongProgress.value = 0;
@@ -382,6 +402,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsReady = true;
             AlreadyInitialised = true;
             _LastDSPTime = AudioSettings.dspTime;
+            _MusicStartDSP = 0; // Will be set when music is actually scheduled
 
             const float TARGET_ASPECT = 7 / 4f;
             float targetHeight = Mathf.Min(Screen.height, Screen.width / TARGET_ASPECT);
@@ -558,9 +579,9 @@ namespace JANOARG.Client.Behaviors.Player
         
         private struct EventNote
         {
-            public float      beat;
-            public HitObject  hitObject;
-            public LanePlayer lane;
+            public float      Beat;
+            public HitObject  HitObject;
+            public LanePlayer Lane;
 
         }
 
@@ -574,21 +595,21 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (var lane in Lanes)
             foreach (var hitObject in lane.Original.Objects)
             {
-                events.Add(new EventNote(){beat = hitObject.Offset, hitObject = hitObject, lane = lane});
+                events.Add(new EventNote(){Beat = hitObject.Offset, HitObject = hitObject, Lane = lane});
                 hitObject.IsSimultaneous = false;
             }
 
-            events.Sort((a, b) => a.beat.CompareTo(b.beat));
+            events.Sort((a, b) => a.Beat.CompareTo(b.Beat));
             
             for (int i = 0; i < events.Count;)
             {
-                float currentBeat = events[i].beat;
+                float currentBeat = events[i].Beat;
                 int start = i;
 
                 // Move index i to the end of the group with the same beat
                 // Using Mathf.Approximately just in case of float precision jitter, 
                 // but for grid-based data, it works exactly like ==
-                while (i < events.Count && Mathf.Approximately(events[i].beat, currentBeat))
+                while (i < events.Count && Mathf.Approximately(events[i].Beat, currentBeat))
                 {
                     i++;
                 }
@@ -601,7 +622,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Debug.Log($"> Simultaneous notes found at beat {currentBeat}: {count}");
                     for (int j = start; j < i; j++)
                     {
-                        events[j].hitObject.IsSimultaneous = true;
+                        events[j].HitObject.IsSimultaneous = true;
                     }
                 }
             }
@@ -730,6 +751,12 @@ namespace JANOARG.Client.Behaviors.Player
                 digit.Speed = 9;
 
             IsPlaying = true;
+
+            // Idk why but songs are starting 3/4 of a second later than they's supposed to be 
+            // so this will be here as a temporary hack before I figure out what is going on
+            _MusicStartDSP = AudioSettings.dspTime + Math.Max(CurrentTime - 0.75, 0);
+            Music.time = 0;
+            Music.PlayScheduled(_MusicStartDSP);
             _LastDSPTime = AudioSettings.dspTime;
         }
 
@@ -743,59 +770,81 @@ namespace JANOARG.Client.Behaviors.Player
                 return;
             
             #if UNITY_EDITOR
-            // Avoid stale and broken chart state when pausing in the editor, which can cause issues with testing and debugging
-                        if (EditorApplication.isPaused)
-                        {
-                            Music.Pause();
-                            _LastDSPTime = AudioSettings.dspTime;
-                            return;
-                        }
+            // Toolbar pause — freeze clock and audio, return early
+            if (EditorApplication.isPaused)
+            {
+                Music.Pause();
+                _LastDSPTime = AudioSettings.dspTime;
+                return;
+            }
             #endif
 
-            double delta = Math.Min(AudioSettings.dspTime - _LastDSPTime, PerfectWindow);
-            if (delta <= 0) delta = Time.unscaledDeltaTime;
-            CurrentTime += (float)delta;
-            _LastDSPTime += delta;
+            double dspNow = AudioSettings.dspTime;
+            double rawDelta = dspNow - _LastDSPTime;
+            _LastDSPTime = dspNow;
 
-            // Audio sync
+            if (rawDelta > _SPIKE_THRESHOLD)
+            {
+                // Lag spike — resync clock to audio without rushing the chart
+                if (Music.isPlaying)
+                    CurrentTime = (double)Music.timeSamples / Music.clip.frequency + Settings.AudioOffset;
+                // else: lead-in / post-song — just drop the frame, don't advance
+            }
+            else
+            {
+                if (Music.isPlaying && CurrentTime >= 0)
+                    // Audio is the source of truth during playback
+                    CurrentTime = (double)Music.timeSamples / Music.clip.frequency + Settings.AudioOffset;
+                else
+                    CurrentTime += rawDelta > 0 ? rawDelta : Time.unscaledDeltaTime;
+            }
+
+            // Audio lifecycle — use PlayScheduled on restart to avoid buffer-boundary snap
             if (CurrentTime >= 0 && CurrentTime < Music.clip.length)
             {
-                if (Music.isPlaying)
+                if (!Music.isPlaying)
                 {
-                    if (Mathf.Abs(CurrentTime - (float)Music.timeSamples / Music.clip.frequency) > SyncThreshold)
-                    {
-                        Music.time = CurrentTime;
-                    }
-                    else
-                    {
-                        // CurrentTime = (float)Music.timeSamples / Music.clip.frequency;
-                    }
+                    const double RESTART_LEAD_TIME = 0.05;
+                    _MusicStartDSP = dspNow + RESTART_LEAD_TIME;
+                    Music.time = (float)(CurrentTime - Settings.AudioOffset);
+                    Music.PlayScheduled(_MusicStartDSP);
                 }
-                else
-                {
-                    Music.Play();
-                    Music.time = CurrentTime;
-                }
+                // No hard-seek sync corrector needed — audio IS the clock now
             }
             else if (Music.isPlaying)
                 Music.Pause();
-            StartCoroutine( // Check hit objects
-                        CheckHitObjects());
 
-            // Update song progress slider
-            SongProgress.value = CurrentTime / Music.clip.length;
+            // Process input directly — no coroutine, no +1 frame latency
+            foreach (LanePlayer lane in Lanes)
+                foreach (HitPlayer hit in lane.HitObjects)
+                    if (hit.HoldMesh)
+                        lane.UpdateHoldMesh(hit);
+            PlayerInputManager.sInstance.UpdateInput();
 
+            // Show ending animation; the failsafe on bugs is on following:
+            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
+            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || (float)CurrentTime / Music.clip.length >= 1) && !ResultExec)
+            {
+                ComputeAndSaveMedianOffset();
+                PlayerScreenResult.sMain.StartEndingAnim();
+                ResultExec = true;
+            }
+        }
 
-            // Prevents from going to negative values, which might break things
-            // float ChartUpdateTime(float time) => time < 0 ? 0 : time ;
+        public void LateUpdate()
+        {
+            if (!IsPlaying)
+                return;
 
-            // Your code break things, great job :thumbs_up:
+#if UNITY_EDITOR
+            if (EditorApplication.isPaused) return;
+#endif
 
-            float visualTime = CurrentTime + Settings.VisualOffset;
+            SongProgress.value = (float)(CurrentTime / Music.clip.length);
+
+            float visualTime = (float)CurrentTime + Settings.VisualOffset;
             float visualBeat = sTargetSong.Timing.ToBeat(visualTime);
 
-
-            // Update palette
             sCurrentChart.Palette.Advance(visualBeat);
 
             if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
@@ -807,118 +856,175 @@ namespace JANOARG.Client.Behaviors.Player
             for (var a = 0; a < LaneStyles.Count; a++)
             {
                 sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
-
                 LaneStyles[a].Update(sCurrentChart.Palette.LaneStyles[a]);
 
                 if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Remove(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Add(a);
-
+                
+                if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a == 0 && !TransparentMeshJudgeIndexes.Contains(a))
+                    TransparentMeshJudgeIndexes.Add(a);
+                else if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a != 0 && TransparentMeshJudgeIndexes.Contains(a))
+                    TransparentMeshJudgeIndexes.Remove(a);
             }
 
             for (var a = 0; a < HitStyles.Count; a++)
             {
                 sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
-
                 HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a]);
             }
 
-            // Update camera
             sCurrentChart.Camera.Advance(visualBeat);
+
             Camera pseudoCamera = CommonSys.sMain.MainCamera;
             pseudoCamera.transform.position = sCurrentChart.Camera.CameraPivot;
             pseudoCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
             pseudoCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
 
-            // Update scene
             foreach (LaneGroupPlayer group in LaneGroups)
                 group.UpdateSelf(visualTime, visualBeat);
 
-            StartCoroutine(f_laneUpdater(visualTime, visualBeat));
-
-            // Show ending animation; the failsafe on bugs is on following:
-            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
-            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || CurrentTime / Music.clip.length >= 1) && !ResultExec)
+            for (int i = Lanes.Count - 1; i >= 0; i--)
             {
-                PlayerScreenResult.sMain.StartEndingAnim();
-                ResultExec = true;
-            }
-
-            IEnumerator f_laneUpdater(float time, float beat)
-            {
-                for (int i = Lanes.Count - 1; i >= 0; i--) // Iterate backwards
+                try
                 {
-                    try
+                    LanePlayer lane = Lanes[i];
+
+                    if (!HasTrivialLocalLaneMotion(lane) && lane.TimeStamps[0] - 5f > visualTime)
+                        continue;
+
+                    lane.UpdateSelf(visualTime, visualBeat);
+
+                    if (lane == null || lane.MarkedForRemoval)
                     {
-                        LanePlayer lane = Lanes[i];
-
-                        bool hasTrivialLocalLaneMotion = f_hasTrivialLocalLaneMotion(lane);
-
-                        if (!hasTrivialLocalLaneMotion && lane.TimeStamps[0] - 5f > time)
-                            continue;
-
-                        lane.UpdateSelf(time, beat);
-
-                        if (lane.MarkedForRemoval || lane == null)
-                        {
-                            Lanes.RemoveAt(i); // More efficient than Remove()
-                            Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
-                        }
-                    }
-                    catch (MissingReferenceException)
-                    {
-                        Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
                         Lanes.RemoveAt(i);
+                        Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
                     }
                 }
-
-                yield return null;
-
-                static bool f_hasTrivialLocalLaneMotion(LanePlayer lane)
+                catch (MissingReferenceException)
                 {
-                    
-                    if (lane.Current == null) return true; // not yet initialized, don't gate it
-                    
-                    const float TRIVIAL_LANE_SPAN_THRESHOLD     = 2f;
-                    
-                    IReadOnlyList<LaneStep> laneSteps = lane.Current.LaneSteps;
-                    if (laneSteps.Count <= 1) return true;
-
-                    float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
-                    bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
-                    // TODO: Check if this operation is expensive enough to require a cached flag on load time
-                    bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
-
-                    return hasShortSpan || isGeometryLane;
-                    
+                    Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
+                    Lanes.RemoveAt(i);
                 }
             }
+        }
+
+        private static bool HasTrivialLocalLaneMotion(LanePlayer lane)
+        {
+            if (lane.Current == null) return true;
+
+            const float TRIVIAL_LANE_SPAN_THRESHOLD = 2f;
+            IReadOnlyList<LaneStep> laneSteps = lane.Current.LaneSteps;
+
+            if (laneSteps.Count <= 1) return true;
+
+            float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
+            bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
+            bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
+
+            return hasShortSpan || isGeometryLane;
         }
 
         public void Resync()
         {
-            _LastDSPTime = AudioSettings.dspTime;   
+            _LastDSPTime = AudioSettings.dspTime;
+
+            // Only anchor from timeSamples when music is actively playing.
+            if (Music.isPlaying && CurrentTime >= 0)
+                CurrentTime = (double)Music.timeSamples / Music.clip.frequency + Settings.AudioOffset;
         }
 
-        public IEnumerator CheckHitObjects()
+        // Call on pause or result entry — deferred so per-hit cost is just a list append.
+        public void ComputeAndSaveMedianOffset()
         {
-            foreach (LanePlayer lane in Lanes)
-                foreach (HitPlayer hit in lane.HitObjects)
+            var samples = HitObjectHistory
+                .Where(h => h.Type == HitObjectHistoryType.Timing && !double.IsInfinity(h.Offset))
+                .Select(h => h.Offset)
+                .OrderBy(x => x)
+                .ToList();
+
+            if (samples.Count == 0) return;
+
+            int mid = samples.Count / 2;
+            MedianTimingOffset = samples.Count % 2 == 0
+                ? (samples[mid - 1] + samples[mid]) / 2.0
+                : samples[mid];
+
+            CommonSys.sMain.Preferences.Set(
+                "PLYR:GameplayMedianOffset", 
+                (float)(MedianTimingOffset * 1000)
+            );
+            CommonSys.sMain.Preferences.Set(
+                "PLYR:GameplayMedianOffsetCounter",
+                CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffsetCounter", 0) + 1
+            );
+        }
+
+        // Input and hold mesh updates are now handled directly in Update to avoid +1 frame latency.
+        // CheckHitObjects kept as a no-op stub in case external callers reference it.
+        public IEnumerator CheckHitObjects() { yield return null; }
+
+        // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause.
+        private bool _PausedByFocusLoss;
+
+        public void OnApplicationFocus(bool hasFocus)
+        {
+#if UNITY_EDITOR
+            if (!UnityEditor.EditorApplication.isPlaying) return;
+#endif
+
+            if (!hasFocus)
+            {
+                if (IsPlaying && !ResultExec)
                 {
-                    if (hit.HoldMesh) 
-                        lane.UpdateHoldMesh(hit);
+                    _PausedByFocusLoss = true;
+                    IsPlaying = false;
+                    Music.Pause();
+                    _LastDSPTime = AudioSettings.dspTime;
+                    ComputeAndSaveMedianOffset();
+                    PlayerScreenPause.sMain.Show();
                 }
 
-            // PlayerInputManager.main.UpdateTouches();
-            PlayerInputManager.sInstance.UpdateInput();
-            
-            yield return null;
+                return;
+            }
+
+            if (_PausedByFocusLoss)
+            {
+                _PausedByFocusLoss = false;
+                PlayerScreenPause.sMain.Continue();
+            }
+        }
+
+        // OnApplicationPause covers mobile app backgrounding and complements OnApplicationFocus.
+        public void OnApplicationPause(bool isPaused)
+        {
+            #if UNITY_EDITOR
+                return;
+            #else
+                if (isPaused)
+                {
+                    if (IsPlaying)
+                    {
+                        _PausedByFocusLoss = true;
+                        IsPlaying = false;
+                        Music.Pause();
+                        _LastDSPTime = AudioSettings.dspTime;
+                        ComputeAndSaveMedianOffset();
+                        PlayerScreenPause.sMain.Show();
+                    }
+                }
+                else if (_PausedByFocusLoss)
+                {
+                    _PausedByFocusLoss = false;
+                    PlayerScreenPause.sMain.Continue();
+                }
+            #endif
         }
 
         private Coroutine _JudgeAnimation;
 
-        public void AddScore(float score, float? acc)
+        public void AddScore(float score, float? acc, double? offset = null)
         {
             CurrentExScore += score;
 
@@ -943,17 +1049,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
 
-            string flawlessText = Settings.ShowFlawlessText ? "FLAWLESS" : "✓";
-            if (acc.HasValue)
-                JudgmentLabel.text = acc switch
-                {
-                    0 => flawlessText,
-                    < 0 => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" :"EARLY" : "BAD",
-                    _ => score > 0 ? Settings.NoEarlyLateText ? "MISALIGNED" : "LATE" : "MISS"
-                };
-            else
-                JudgmentLabel.text = score > 0
-                    ? flawlessText : "MISS";
+            JudgmentLabel.text = FormatJudgmentLabel(acc, offset, score);
 
             if (_JudgeAnimation != null)
                 StopCoroutine(_JudgeAnimation);
@@ -993,7 +1089,7 @@ namespace JANOARG.Client.Behaviors.Player
             HitsRemaining--;
         }
 
-        public void Hit(HitPlayer hitObject, float offset, bool spawnEffect = true)
+        public void Hit(HitPlayer hitObject, double offset, bool spawnEffect = true)
         {
             // In case of race condition
             if (!hitObject)
@@ -1006,9 +1102,9 @@ namespace JANOARG.Client.Behaviors.Player
             // Calculate base score once
             int baseScore = CalculateBaseScore(hitType, isFlickable, hitObject.Current.FlickDirection);
             
-            float offsetAbs = Mathf.Abs(offset);
-            float? accuracy = null;
-            int finalScore;
+            double offsetAbs = Math.Abs(offset);
+            float? accuracy = isCatchType ? 0 : null;
+            float finalScore;
 
             // Handle different hit evaluation types
             if (isFlickable || isCatchType)
@@ -1023,11 +1119,11 @@ namespace JANOARG.Client.Behaviors.Player
             }
             else
             {
-                // Gradual accuracy evaluation
                 accuracy = CalculateAccuracy(offset, offsetAbs);
-                finalScore = Mathf.RoundToInt(baseScore * (1 - Mathf.Abs(accuracy.Value)));
+                finalScore = baseScore * (1 - Mathf.Abs(accuracy.Value));
                 
                 AddScore(finalScore, accuracy);
+                
                 HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, offset));
             }
 
@@ -1056,23 +1152,22 @@ namespace JANOARG.Client.Behaviors.Player
             return score;
         }
 
-        private float CalculateAccuracy(float offset, float offsetAbs)
+        private float CalculateAccuracy(double offset, double offsetAbs)
         {
             if (offsetAbs > GoodWindow)
-                return Mathf.Sign(offset);
+                return Math.Sign(offset);
             
             if (offsetAbs > PerfectWindow)
-                return Mathf.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, offsetAbs);
+                return Math.Sign(offset) * Mathf.InverseLerp(PerfectWindow, GoodWindow, (float)offsetAbs);
             
             return 0f; // Perfect hit
         }
 
         private void SpawnHitEffect(HitPlayer hitObject, float? accuracy)
         {
-            var effect = sMain.JudgeScreenManager.BorrowEffect(accuracy, sCurrentChart.Palette.InterfaceColor);
+            var effect = sMain.JudgeScreenManager.BorrowEffect(hitObject, accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hitObject.HitCoord.Position;
-            rt.localScale = new Vector3(1, 1); // Making sure it's not affected from effects that were used in hold ticks
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)
@@ -1120,6 +1215,30 @@ namespace JANOARG.Client.Behaviors.Player
                 hitObject.IsProcessed = true;
                 hitObject.SimultaneousHighlight.gameObject.SetActive(false);
             }
+        }
+
+        private string FormatJudgmentLabel(float? acc, double? offset, float score)
+        {
+            string flawlessText = Settings.ShowFlawlessText ? "FLAWLESS" : "✓";
+
+            double offsetValue = offset.HasValue ? offset.Value * 1000 : double.NaN;
+            string text;
+
+            if (!acc.HasValue)
+                text = score > 0 ? flawlessText : "MISS";
+            else if (acc == 0)
+                text = flawlessText;
+            else if (acc < 0)
+                text = score > 0 ? (Settings.NoEarlyLateText ? "MISALIGNED" : "EARLY") : "BAD";
+            else if (score > 0)
+                text = Settings.NoEarlyLateText ? "MISALIGNED" : "LATE";
+            else
+                text = "MISS";
+
+            if (offset != null && Settings.ShowValueText >= (acc == 0 ? 3 : 2) && !double.IsInfinity(offset.Value) && Math.Abs(offset.Value) >= 0.005)                                                                                        
+                text += offset > 0 ? $"(+{offset.Value:0.##}ms)" : $"({offset.Value:0.##}ms)";                                                                                                                                                
+            
+            return text;
         }
 
         public void SetBackgroundColor(Color color)
@@ -1193,8 +1312,10 @@ namespace JANOARG.Client.Behaviors.Player
         public float[] HitObjectScale;
         public float   FlickScale;
 
+        public float AudioOffset;
         public float JudgmentOffset;
         public float VisualOffset;
+        public short ShowValueText;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
         public bool  HighlightSimulNotes;
@@ -1208,6 +1329,7 @@ namespace JANOARG.Client.Behaviors.Player
             HighlightSimulNotes = CommonSys.sMain.Preferences.Get("PLYR:HighlightSimulNotes", true);
             ShowFlawlessText= CommonSys.sMain.Preferences.Get("PLYR:JudgementTextOnFlawless", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
+            ShowValueText = short.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowOffset", "1"));
             
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });
@@ -1222,6 +1344,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             FlickScale = prefs.Get("PLYR:FlickScale", 1f);
 
+            AudioOffset = prefs.Get("PLYR:AudioOffset", 0f) / 1000;
             JudgmentOffset = prefs.Get("PLYR:JudgmentOffset", 0f) / 1000;
             VisualOffset = prefs.Get("PLYR:VisualOffset", 0f) / 1000;
         }
@@ -1231,9 +1354,9 @@ namespace JANOARG.Client.Behaviors.Player
     {
         public float                Time;
         public HitObjectHistoryType Type;
-        public float                Offset;
+        public double                Offset;
 
-        public HitObjectHistoryItem(HitPlayer hit, float offset)
+        public HitObjectHistoryItem(HitPlayer hit, double offset)
         {
             Time = hit.Time;
 

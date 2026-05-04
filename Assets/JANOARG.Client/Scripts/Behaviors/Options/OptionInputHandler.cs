@@ -126,7 +126,7 @@ namespace JANOARG.Client.Behaviors.Options
                     break;
                 }
 
-                case JudgmentOffsetOptionInput:
+                case AudioOffsetOptionInput:
                 case VisualOffsetOptionInput:
                 {
                     var visualOffsetItem = (FloatOptionInput)item;
@@ -412,7 +412,7 @@ namespace JANOARG.Client.Behaviors.Options
 
                     break;
                 }
-                case JudgmentOffsetOptionInput:
+                case AudioOffsetOptionInput:
                 case VisualOffsetOptionInput:
                 {
                     var input = (FloatOptionInput)item;
@@ -494,7 +494,7 @@ namespace JANOARG.Client.Behaviors.Options
         {
             switch (item)
             {
-                case JudgmentOffsetOptionInput:
+                case AudioOffsetOptionInput:
                 case VisualOffsetOptionInput:
                 {
                     onFinish = () =>

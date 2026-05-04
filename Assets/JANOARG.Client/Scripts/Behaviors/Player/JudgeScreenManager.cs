@@ -1,26 +1,44 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
+using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Player
 {
     /// <summary>
-    /// Use concept of object pooling
-    /// There will be no more allocation for every judge screen effect
+    /// Manages the pool of <see cref="JudgeScreenEffect"/> instances and drives their animation
+    /// from a single Update loop — no per-hit coroutine or closure allocation.
     /// </summary>
     public class JudgeScreenManager : MonoBehaviour
     {
-        public Stack<JudgeScreenEffect> judgeScreenEffects;
-        private int _totalMaxInstances = 32;
-        private int _totalInstances = 0;
+        // -----------------------------------------------------------------
+        // Animation state — plain struct, lives on the stack / in the list.
+        // No heap allocation per hit.
+        // -----------------------------------------------------------------
+        private struct ActiveEffect
+        {
+            public JudgeScreenEffect Effect;
+            public float             Elapsed;
+            public bool              IsOneShot; // if true, Destroy instead of Return on finish
+            public const float       Duration = 0.4f;
+        }
 
+        // -----------------------------------------------------------------
+        // Pool
+        // -----------------------------------------------------------------
+        public  Stack<JudgeScreenEffect> judgeScreenEffects;
+        private int                      _totalMaxInstances = 32;
+        private int                      _totalInstances    = 0;
+
+        // Active animations driven this Update
+        private readonly List<ActiveEffect> _active = new();
+
+        // -----------------------------------------------------------------
+        // Lifecycle
+        // -----------------------------------------------------------------
         private void Start()
         {
-            // Initialize judge screen effects
             if (judgeScreenEffects == null || judgeScreenEffects.Count == 0)
             {
                 judgeScreenEffects = new Stack<JudgeScreenEffect>(_totalMaxInstances);
@@ -33,53 +51,127 @@ namespace JANOARG.Client.Behaviors.Player
             }
         }
 
-        private JudgeScreenEffect CreateEffect(float? accuracy, Color color)
+        private void Update()
         {
-            var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
-            newEffect.SetAccuracy(accuracy);
-            newEffect.SetColor(color);
-            newEffect.PlayOneShot();
-            Debug.LogWarning("JudgeScreenManager pool exhausted, creating new instance.");
-            
-            return newEffect;
-        }
-        
-        // Use effects in the pool
-        public JudgeScreenEffect BorrowEffect(float? accuracy, Color color)
-        {
-            // Debug.Log($"Borrowing JudgeScreenEffect: Accuracy={accuracy}, Color={color}, TotalInstances={totalInstances}");
-            if (_totalInstances > _totalMaxInstances)
-            {
-                return CreateEffect(accuracy, color);
-            }
+            float dt = Time.deltaTime;
 
-            // In case player calls Borrow too fast (when fast-forwarding in editor) it didn't have time to keep track
+            for (int i = _active.Count - 1; i >= 0; i--)
+            {
+                ActiveEffect entry = _active[i];
+                entry.Elapsed += dt;
+
+                float x = Mathf.Clamp01(entry.Elapsed / ActiveEffect.Duration);
+                entry.Effect.Tick(x);
+                _active[i] = entry;
+
+                if (x >= 1f)
+                {
+                    _active.RemoveAt(i);
+                    if (entry.IsOneShot)
+                        Destroy(entry.Effect.gameObject);
+                    else
+                        ReturnEffect(entry.Effect);
+                }
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // Pool API
+        // -----------------------------------------------------------------
+
+        /// <summary>
+        /// Borrow an effect from the pool, configure it, and start its animation.
+        /// Returns null only if the pool is exhausted and overflow instantiation also fails.
+        /// </summary>
+        public JudgeScreenEffect BorrowEffect(HitPlayer hitobject, float? accuracy, Color color)
+        {
+            if (_totalInstances > _totalMaxInstances)
+                return CreateEffect(hitobject, accuracy, color);
+
+            JudgeScreenEffect effect;
             try
             {
-                JudgeScreenEffect effect = judgeScreenEffects.Pop();
-                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
-                effect.gameObject.SetActive(true);
-                effect.SetAccuracy(accuracy);
-                effect.SetColor(color);
-                effect.Play();
-                _totalInstances++;
-                return effect;
+                effect = judgeScreenEffects.Pop();
             }
             catch (InvalidOperationException e)
             {
-                Debug.LogWarning(e.Message + "Skipping effect.");
-
+                Debug.LogWarning(e.Message + " Skipping effect.");
                 return null;
             }
+
+            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
+            DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
+            effect.gameObject.SetActive(true);
+            effect.SetColor(color);
+            effect.Tick(0); // initialise visual state before first Update
+
+            _active.Add(new ActiveEffect { Effect = effect, Elapsed = 0f, IsOneShot = false });
+            _totalInstances++;
+            return effect;
+        }
+        
+        void DefineJudgeScreenEffect(HitPlayer hitobject, ref JudgeScreenEffect effect, float? accuracy)
+        {
+            var rt = (RectTransform)effect.transform;
+            var hold = hitobject.Current.Length > 0;
+            
+            
+            if (hitobject.Current.Flickable)
+            {
+                effect.SetShapeAccuracy(false);
+                effect.Size = 150;
+
+                return;
+            }
+            
+            if (accuracy == null && hold) 
+            {
+                effect.SetShapeAccuracy(false);
+                effect.Size = 40;
+                
+                return;
+            }
+
+            if (hitobject.Current.Type == HitObject.HitType.Catch)
+            {
+                effect.SetShapeAccuracy(false);
+                effect.Size = 70;
+                
+                return;
+            }
+
+            if (hitobject.Current.Type == HitObject.HitType.Normal)
+            {
+                effect.SetShapeAccuracy(true, accuracy);
+                effect.Size = 120;
+                return;
+            }
+
         }
 
-        // Return when finish
+        /// <summary>
+        /// Return a pooled effect to the stack. Called by the Update loop on completion.
+        /// </summary>
         public void ReturnEffect(JudgeScreenEffect effect)
         {
             effect.gameObject.SetActive(false);
             effect.transform.SetParent(PlayerScreen.sMain.JudgeScreenHolder);
             judgeScreenEffects.Push(effect);
             _totalInstances--;
+        }
+
+        // -----------------------------------------------------------------
+        // Overflow — pool exhausted
+        // -----------------------------------------------------------------
+        private JudgeScreenEffect CreateEffect(HitPlayer hitobject, float? accuracy, Color color)
+        {
+            Debug.LogWarning("JudgeScreenManager pool exhausted, creating new instance.");
+            var newEffect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
+            DefineJudgeScreenEffect(hitobject, ref newEffect, accuracy);
+            newEffect.SetColor(color);
+            newEffect.Tick(0);
+            _active.Add(new ActiveEffect { Effect = newEffect, Elapsed = 0f, IsOneShot = true });
+            return newEffect;
         }
     }
 }

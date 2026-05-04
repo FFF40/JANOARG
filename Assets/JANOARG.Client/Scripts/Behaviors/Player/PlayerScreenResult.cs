@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +13,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace JANOARG.Client.Behaviors.Player
 {
@@ -61,6 +63,7 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text      GoodCountText;
         public TMP_Text      BadCountText;
         public TMP_Text      MaxComboText;
+        public TMP_Text      AverageOffsetText;
 
         [Space] public CanvasGroup LeftActionsHolder;
 
@@ -162,72 +165,39 @@ namespace JANOARG.Client.Behaviors.Player
                             EaseMode.InOut) * .2f + .2f
                     );
 
-                    ResultTextBig.alpha = 1 -
-                                          Random.Range(
-                                              Ease.Get(
-                                                  Mathf.Clamp01(x * 4),
-                                                  EaseFunction.Circle,
-                                                  EaseMode.Out),
-                                              Ease.Get(
-                                                  Mathf.Clamp01(x * 2),
-                                                  EaseFunction.Exponential,
-                                                  EaseMode.Out)
-                                          );
+                    ResultTextBig.alpha = 1 - Random.Range(
+                                              Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 
+                                              Ease.Get(Mathf.Clamp01(x * 2), EaseFunction.Exponential, EaseMode.Out)
+                                              );
 
-                    float ease = Mathf.Pow(
-                        Ease.Get(x, EaseFunction.Circle, EaseMode.Out),
-                        2);
+                    float ease = Mathf.Pow(Ease.Get(x, EaseFunction.Circle, EaseMode.Out), 2);
 
                     ResultText.characterSpacing = 15 / ease;
                     ResultTextBig.characterSpacing = 25 * ease - 40;
 
                     ResultBackground.rectTransform.sizeDelta = new Vector2(
-                        ResultBackground
-                            .rectTransform
-                            .sizeDelta.y,
-                        Mathf.Pow(
-                            Ease.Get(
-                                Mathf
-                                    .Clamp01(
-                                        x *
-                                        4),
-                                EaseFunction
-                                    .Circle,
-                                EaseMode
-                                    .Out),
-                            2) *
-                        50 +
-                        50
-                    );
+                        ResultBackground.rectTransform.sizeDelta.y,
+                        Mathf.Pow(Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 2) * 50 + 50
+                        );
 
-                    ScoreExplosionRings[1].insideRadius = 0.95f *
-                                                          Ease.Get(
-                                                              x * 2f,
-                                                              EaseFunction.Quintic,
-                                                              EaseMode.Out);
+                    ScoreExplosionRings[1].insideRadius = 0.95f * Ease.Get(x * 2f, EaseFunction.Quintic, EaseMode.Out);
 
-                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one *
-                                                                     (500 *
-                                                                      Ease.Get(
-                                                                          x * 2f,
-                                                                          EaseFunction
-                                                                              .Circle,
-                                                                          EaseMode
-                                                                              .Out));
+                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * (500 * Ease.Get(x * 2f, EaseFunction.Circle, EaseMode.Out));
 
-                    ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward *
-                                                                            (-90 +
-                                                                             360 *
-                                                                             Ease.Get(
-                                                                                 x *
-                                                                                 1.5f,
-                                                                                 EaseFunction
-                                                                                     .Cubic,
-                                                                                 EaseMode
-                                                                                     .Out));
+                    ScoreExplosionRings[1].rectTransform.localEulerAngles = Vector3.forward * (-90 + 360 * Ease.Get(x * 1.5f, EaseFunction.Cubic, EaseMode.Out));
                 });
 
-            yield return new WaitWhile(() => PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length);
+            // CurrentTime is timeSamples-derived and may freeze slightly short of clip.length
+            // due to buffer granularity when Music.Pause() is called — use a tolerance margin
+            // rather than waiting for exact equality, which can hang indefinitely.
+            const float END_TOLERANCE = 0.1f;
+            yield return new WaitWhile(() =>
+                PlayerScreen.sMain.CurrentTime < PlayerScreen.sMain.Music.clip.length - END_TOLERANCE
+                && PlayerScreen.sMain.Music.isPlaying);
+
+            // Stop playback so the audio lifecycle in PlayerScreen.Update doesn't restart the song
+            PlayerScreen.sMain.IsPlaying = false;
+            PlayerScreen.sMain.Music.Pause();
 
             StartResultAnim();
         }
@@ -293,35 +263,11 @@ namespace JANOARG.Client.Behaviors.Player
                     Details.Container.rectTransform.localScale =
                         new Vector3(1, .5f * ease2, 1);
 
-                    ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one *
-                                                                     (200 /
-                                                                      (1 -
-                                                                       Ease.Get(
-                                                                           x,
-                                                                           EaseFunction
-                                                                               .Exponential,
-                                                                           EaseMode
-                                                                               .In)));
+                    ScoreExplosionRings[0].rectTransform.sizeDelta = Vector2.one * EaseUtils.BlastOut(200, x, EaseFunction.Exponential, EaseMode.In);
 
-                    ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward *
-                                                                            (55 +
-                                                                             360 *
-                                                                             Ease.Get(
-                                                                                 x,
-                                                                                 EaseFunction
-                                                                                     .Cubic,
-                                                                                 EaseMode
-                                                                                     .In));
+                    ScoreExplosionRings[0].rectTransform.localEulerAngles = Vector3.forward * (55 + 360 * Ease.Get(x, EaseFunction.Cubic, EaseMode.In));
 
-                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one *
-                                                                     (500 /
-                                                                      (1 -
-                                                                       Ease.Get(
-                                                                           x,
-                                                                           EaseFunction
-                                                                               .Circle,
-                                                                           EaseMode
-                                                                               .In)));
+                    ScoreExplosionRings[1].rectTransform.sizeDelta = Vector2.one * EaseUtils.BlastOut(500, x, EaseFunction.Circle, EaseMode.In);
                 });
 
             ResultText.gameObject.SetActive(false);
@@ -347,12 +293,7 @@ namespace JANOARG.Client.Behaviors.Player
                 2.5f, x =>
                 {
                     float ease1 = 1 -
-                                  Mathf.Pow(
-                                      1 -
-                                      Ease.Get(
-                                          Mathf.Clamp01(x * 1.5f),
-                                          EaseFunction.Circle, EaseMode.Out),
-                                      2);
+                                  Mathf.Pow(1 - Ease.Get(Mathf.Clamp01(x * 1.5f), EaseFunction.Circle, EaseMode.Out), 2);
 
                     float ease2 = Ease.Get(
                         Mathf.Clamp01(x * 1.5f),
@@ -400,7 +341,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreExplosionRings[0].insideRadius = 1 - ease4 - x * .01f;
 
                     ScoreExplosionRings[0].rectTransform.sizeDelta =
-                        Vector2.one * (600 / ease1 * (1 - ease4) + 100);
+                        Vector2.one * (EaseUtils.BlastIn(600, ease1) * (1 - ease4) + 100);
 
                     ScoreExplosionRings[0].rectTransform.position =
                         ScoreRings[0].rectTransform.position;
@@ -417,7 +358,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ScoreExplosionRings[1].insideRadius = 1 - ease5 - x * .01f;
 
                     ScoreExplosionRings[1].rectTransform.sizeDelta =
-                        Vector2.one * (900 / ease1 * (1 - ease4) + 100);
+                        Vector2.one * (EaseUtils.BlastIn(900, ease1) * (1 - ease4) + 100);
 
                     ScoreExplosionRings[1].rectTransform.position =
                         ScoreRings[0].rectTransform.position;
@@ -494,7 +435,17 @@ namespace JANOARG.Client.Behaviors.Player
             MaxComboText.text = PlayerScreen.sMain.MaxCombo.ToString("N0") +
                                 " <size=60%><b>/ " +
                                 PlayerScreen.sMain.TotalCombo.ToString("N0");
+            
+            // Taken after median is computed from PlayerScreen with ComputeAndSaveMedianOffset
+            float avgOffset = CommonSys.sMain.Preferences.Get("PLYR:GameplayMedianOffset", float.NaN);
 
+            if (float.IsNaN(avgOffset))
+                AverageOffsetText.text = "N/A";
+            else
+                AverageOffsetText.text =
+                    (avgOffset >= 0 ? "+" : "−") + Mathf.Abs(avgOffset).ToString("F2") +
+                    "<size=60%> ms";
+            
             ScoreStoreEntry record = GetBestScore();
             int recordScore = record?.Score ?? 0;
             int recordDiff = score - recordScore;
@@ -626,7 +577,7 @@ namespace JANOARG.Client.Behaviors.Player
         private IEnumerator LoadCoverImageRoutine()
         {
             string path = Path.Combine(
-                Path.GetDirectoryName(PlayerScreen.sTargetSongPath),
+                Path.GetDirectoryName(PlayerScreen.sTargetSongPath)!,
                 PlayerScreen.sTargetSong.Cover.IconTarget);
 
             if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[..^1];
@@ -736,11 +687,8 @@ namespace JANOARG.Client.Behaviors.Player
                     Ease.Animate(
                         0.4f, x =>
                         {
-                            float ease1 = Ease.Get(
-                                Mathf.Pow(x, .4f),
-                                EaseFunction.Exponential, EaseMode.Out);
-
-                            Details.LerpDetailed(ease1);
+                            float ease1 = Ease.Get(Mathf.Pow(x, .4f), EaseFunction.Exponential, EaseMode.Out);
+                            Details.LerpDetailed(ease1); 
                         }));
 
             yield return Ease.Animate(
