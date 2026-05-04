@@ -398,25 +398,38 @@ namespace JANOARG.Client.Behaviors.Panels
                     SubtitleLabel.text = " > About";
                     SetScrollerWidth(600);
 
+
+                    const string NEWLINE_SEPARATOR = "\n• \n"; // Looks more aligned due to skewed scroller
                     AboutPane.SetActive(true);
                     OptionAboutEntry entry;
                     entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
                     entry.BodyLabel.text = "duducat / ducdat0507";
 
+                    entry = Spawn<OptionAboutEntry>("PROGRAMMER / MAINTAINER");
+                    entry.BodyLabel.text = "BashhScriptKid • M3galodon";
+                    
+                    //entry = Spawn<OptionAboutEntry>("iOS BUILD PROVIDER");
+                    //entry.BodyLabel.text = "kiko/kevernn";
+                    
+                    entry = Spawn<OptionAboutEntry>("GITHUB CONTRIBUTORS");
+                    entry.BodyLabel.text = "FujiForm2023 • RKevo";
+
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
-                    entry.BodyLabel.text = "Insert name of a famous artist here";
+                    entry.BodyLabel.text = "Kuttate • Rose Quartz • R3ality";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                    entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality";
+                    entry.BodyLabel.text = "Sound Souler • mrcool909090 • R3ality  • Scutoid • Ariz Kayaba" 
+                                           + NEWLINE_SEPARATOR +
+                                           "zqr • NOMOREKAWAII • CuboonoP • Rose Quartz • Pa_lette";
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
-                    entry.BodyLabel.text = "duducat";
+                    entry.BodyLabel.text = "duducat • Pa_lette";
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = ":blobcat:  •  R3ality";
+                    entry.BodyLabel.text = "BashhScriptKid • M3galodon • Akanari • leko_uname • BEN789FA • Gyukatsu • kiemo";
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat  •  M3galodon";
+                    entry.BodyLabel.text = "duducat • M3galodon • leko_uname • Pa_lette • AARL • BEN789FA";
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
