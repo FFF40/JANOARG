@@ -566,9 +566,12 @@ namespace JANOARG.Client.Behaviors.Panels
         {
             string url = target switch
             {
+                "github"  => "https://github.com/FFF40",
                 "discord" => "https://discord.gg/vXJTPFQBHm",
-                "reddit" => "https://reddit.com/r/fff40",
-                _ => ""
+                "reddit"  => "https://reddit.com/r/fff40",
+                "twitter" => "https://twitter.com/FFF40_Studios",
+                "bsky"    => "https://bsky.app/profile/fff40.studio",
+                _         => ""
             };
 
             if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
