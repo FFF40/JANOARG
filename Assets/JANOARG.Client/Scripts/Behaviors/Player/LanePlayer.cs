@@ -165,7 +165,7 @@ namespace JANOARG.Client.Behaviors.Player
             }
             
             // Attempt to cull finished lane
-            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time) 
+            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time && HitObjects.Count == 0) 
             {
                 if (TimeStamps[^1] < time)
                 {
