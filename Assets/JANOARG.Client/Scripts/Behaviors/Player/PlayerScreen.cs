@@ -802,7 +802,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Audio lifecycle — use PlayScheduled on restart to avoid buffer-boundary snap
             if (CurrentTime >= 0 && CurrentTime < Music.clip.length)
             {
-                if (!Music.isPlaying)
+                if (!Music.isPlaying && !ResultExec)
                 {
                     const double RESTART_LEAD_TIME = 0.05;
                     _MusicStartDSP = dspNow + RESTART_LEAD_TIME;
