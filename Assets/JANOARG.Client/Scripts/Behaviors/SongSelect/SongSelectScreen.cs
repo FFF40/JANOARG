@@ -277,6 +277,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 index++;
                 pos += 48;
             }
+            
+            // Update Playlist's BGM accordingly
+            BGMIntroSource.clip = Playlist.BackgroundMusicInit;
+            BGMLoopSource.clip = Playlist.BackgroundMusicLoop;
 
             ListView.UpdateSort();
 
@@ -336,7 +340,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             // Animate map icons to list icons
             float lerpFrom = IsMapView ? 1 : 0;
             float lerpTo = 1 - lerpFrom;
-            IEnumerator MapCoroutine()
+            IEnumerator f_mapCoroutine()
             {
                 var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
             
@@ -396,7 +400,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
                 CurrentPreviewClip = null;
                 coverCoroutine = StartCoroutine(CoverCoroutine());
-                mapCoroutine = StartCoroutine(MapCoroutine());
+                mapCoroutine = StartCoroutine(f_mapCoroutine());
 
                 // Animate
                 yield return Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, ease1 =>
@@ -464,7 +468,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 ListView.UpdateListItems(this);
 
                 // Finally start map coroutine
-                mapCoroutine = StartCoroutine(MapCoroutine());
+                mapCoroutine = StartCoroutine(f_mapCoroutine());
 
                 // Animate
                 yield return Ease.Animate(0.6f, (x) =>
