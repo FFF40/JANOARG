@@ -2,6 +2,7 @@ using System.Collections;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;

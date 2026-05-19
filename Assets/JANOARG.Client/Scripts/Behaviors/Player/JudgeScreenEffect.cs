@@ -1,5 +1,6 @@
 using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Player

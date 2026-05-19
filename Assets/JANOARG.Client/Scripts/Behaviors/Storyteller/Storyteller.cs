@@ -5,6 +5,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Client.Data.Story;
 using JANOARG.Client.Data.Story.Instructions;
 using JANOARG.Client.Data.Story.TypeEffects;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

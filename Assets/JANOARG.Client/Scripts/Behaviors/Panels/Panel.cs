@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

@@ -5,6 +5,7 @@ using System.Linq;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Options.Input_Types;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
