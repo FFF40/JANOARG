@@ -84,7 +84,8 @@ namespace JANOARG.Client.Behaviors.Player
                     FlickMesh.sharedMesh = float.IsFinite(Current.FlickDirection)
                         ? PlayerScreen.sMain.ArrowFlickIndicator : PlayerScreen.sMain.FreeFlickIndicator;
 
-                    FlickRenderer.sharedMaterial = Center.sharedMaterial;
+                    // Follow normal material (matches Chartmaker)
+                    FlickRenderer.sharedMaterial = style.NormalMaterial;
                 }
             }
             else
