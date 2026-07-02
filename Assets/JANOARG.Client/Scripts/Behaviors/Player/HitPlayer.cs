@@ -47,10 +47,20 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void Init()
         {
-            
+            // Reset per-note lifecycle flags unconditionally so a reused (pooled) instance
+            // never inherits state from whatever note previously occupied it.
+            InDiscreteHitQueue = false;
+            PendingHoldQueue = false;
+            IsProcessed = false;
+            IsTapped = false;
+
             if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.HitStyles.Count)
             {
                 HitStyleManager style = PlayerScreen.sMain.HitStyles[Current.StyleIndex];
+
+                Center.enabled =
+                    LeftPoint.enabled =
+                        RightPoint.enabled = true;
 
                 LeftPoint.sharedMaterial =
                     RightPoint.sharedMaterial =
@@ -69,11 +79,11 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
                 {
-                    SimultaneousHighlight.sharedMaterial = 
-                        Current.Type == HitObject.HitType.Catch 
+                    SimultaneousHighlight.sharedMaterial =
+                        Current.Type == HitObject.HitType.Catch
                             ? style.CatchHighlightMaterial : style.NormalHighlightMaterial;
-                    SimultaneousGlow.sharedMaterial = 
-                        Current.Type == HitObject.HitType.Catch 
+                    SimultaneousGlow.sharedMaterial =
+                        Current.Type == HitObject.HitType.Catch
                             ? style.CatchHighlightGlowMaterial : style.NormalHighlightGlowMaterial;
                 }
 
@@ -87,13 +97,24 @@ namespace JANOARG.Client.Behaviors.Player
                     // Follow normal material (matches Chartmaker)
                     FlickRenderer.sharedMaterial = style.NormalMaterial;
                 }
+                else
+                {
+                    FlickMesh.gameObject.SetActive(false);
+                }
             }
             else
             {
                 Center.enabled =
                     LeftPoint.enabled =
                         RightPoint.enabled = false;
+
+                FlickMesh.gameObject.SetActive(false);
             }
+
+            // HoldMesh is a permanent (pooled) child once created — make sure a reused
+            // instance doesn't keep showing a hold tail for a note that isn't a hold.
+            if (HoldMesh != null && Current.HoldLength <= 0)
+                HoldMesh.gameObject.SetActive(false);
 
             UpdateMesh();
         }

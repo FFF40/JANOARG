@@ -77,6 +77,12 @@ namespace JANOARG.Client.Behaviors.Player
         [Space]
         public JudgeScreenManager JudgeScreenManager;
         [Space]
+        // Persistent parent for pooled HitPlayer instances awaiting reuse.
+        // Must NOT be a child of any LanePlayer's Holder, since lanes get
+        // wholesale-destroyed on retry (see LoadChart) and would take pooled
+        // instances down with them.
+        public Transform HitPlayerPoolHolder;
+        [Space]
         public TMP_Text PauseLabel;
 
         [Space]
@@ -213,8 +219,52 @@ namespace JANOARG.Client.Behaviors.Player
             InitFlickMeshes();
             SetInterfaceColor(Color.clear);
             SongProgress.value = 0;
+            PrewarmHitPlayerPool();
 
             StartCoroutine(LoadChart());
+        }
+
+        // -----------------------------------------------------------------
+        // HitPlayer pool — avoids an Instantiate/Destroy pair per note.
+        // Pre-warmed to a size that covers typical dense charts; grows on
+        // demand (no hard cap) since note density varies a lot per chart.
+        // -----------------------------------------------------------------
+        private const int HitPlayerPoolPrewarm = 64;
+        private readonly Stack<HitPlayer> _HitPlayerPool = new();
+
+        private void PrewarmHitPlayerPool()
+        {
+            for (int i = 0; i < HitPlayerPoolPrewarm; i++)
+            {
+                HitPlayer player = Instantiate(HitSample, HitPlayerPoolHolder);
+                player.gameObject.SetActive(false);
+                _HitPlayerPool.Push(player);
+            }
+        }
+
+        public HitPlayer BorrowHitPlayer(Transform parent)
+        {
+            HitPlayer player = _HitPlayerPool.Count > 0
+                ? _HitPlayerPool.Pop()
+                : Instantiate(HitSample, HitPlayerPoolHolder);
+
+            player.transform.SetParent(parent);
+            player.gameObject.SetActive(true);
+            return player;
+        }
+
+        public void ReturnHitPlayer(HitPlayer player)
+        {
+            if (player.HoldMesh != null)
+            {
+                if (player.HoldMesh.mesh != null)
+                    player.HoldMesh.mesh.Clear();
+                player.HoldMesh.gameObject.SetActive(false);
+            }
+
+            player.gameObject.SetActive(false);
+            player.transform.SetParent(HitPlayerPoolHolder);
+            _HitPlayerPool.Push(player);
         }
 
         private         int  _TotalObjects;
@@ -818,7 +868,9 @@ namespace JANOARG.Client.Behaviors.Player
             // Process input directly — no coroutine, no +1 frame latency
             foreach (LanePlayer lane in Lanes)
                 foreach (HitPlayer hit in lane.HitObjects)
-                    if (hit.HoldMesh)
+                    // HoldMesh is now a permanent (pooled) child, so its existence no longer
+                    // implies this note is a hold — check the actual note data instead.
+                    if (hit.Current.HoldLength > 0)
                         lane.UpdateHoldMesh(hit);
             PlayerInputManager.sInstance.UpdateInput();
 
@@ -922,9 +974,19 @@ namespace JANOARG.Client.Behaviors.Player
 
             float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
             bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
-            bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
+            if (hasShortSpan) return true;
 
-            return hasShortSpan || isGeometryLane;
+            bool isGeometryLane = true;
+            for (int i = 0; i < laneSteps.Count; i++)
+            {
+                if (laneSteps[i].Speed != 0)
+                {
+                    isGeometryLane = false;
+                    break;
+                }
+            }
+
+            return isGeometryLane;
         }
 
         public void Resync()
@@ -1076,18 +1138,10 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void RemoveHitPlayer(HitPlayer hitObject)
         {
-            if (hitObject.HoldMesh != null)
-            {
-                Destroy(hitObject.HoldMesh.mesh);
-                Destroy(hitObject.HoldMesh.gameObject);
-            }
-
-            if (hitObject.gameObject != null)
-                Destroy(hitObject.gameObject);
-
             hitObject.Lane.HitObjects.Remove(hitObject);
-
             HitsRemaining--;
+
+            ReturnHitPlayer(hitObject);
         }
 
         public void Hit(HitPlayer hitObject, double offset, bool spawnEffect = true)

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using JANOARG.Shared.Data.ChartInfo;
 using Unity.Profiling;
 using UnityEngine;
@@ -112,8 +111,8 @@ namespace JANOARG.Client.Behaviors.Player
         {
             // No Mesh instantiation
 
-            bool isInvisibleLaneMesh = PlayerScreen.sMain.TransparentMeshLaneIndexes.Any(style => style == Current.StyleIndex) || Current.StyleIndex == -1;
-            bool isInvisibleJudgeMesh = PlayerScreen.sMain.TransparentMeshJudgeIndexes.Any(style => style == Current.StyleIndex) || Current.StyleIndex == -1;
+            bool isInvisibleLaneMesh = PlayerScreen.sMain.TransparentMeshLaneIndexes.Contains(Current.StyleIndex) || Current.StyleIndex == -1;
+            bool isInvisibleJudgeMesh = PlayerScreen.sMain.TransparentMeshJudgeIndexes.Contains(Current.StyleIndex) || Current.StyleIndex == -1;
             
             _Verts.Clear();
             _Tris.Clear();
@@ -401,7 +400,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (GetZPosition(_HitObjectTime) <= CurrentPosition + maxDistance)
                 {
-                    HitPlayer player = Instantiate(PlayerScreen.sMain.HitSample, Holder);
+                    HitPlayer player = PlayerScreen.sMain.BorrowHitPlayer(Holder);
 
                     player.Original = Original.Objects[_HitObjectOffset];
                     player.Current = Current.Objects[0];
@@ -411,6 +410,8 @@ namespace JANOARG.Client.Behaviors.Player
                         ? PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : _HitObjectTime;
                     player.HitCoord = HitCoords[0];
 
+                    // Always clear first: a reused (pooled) instance may carry ticks from its previous note.
+                    player.HoldTicks.Clear();
                     if (player.Current.HoldLength > 0)
                     {
                         for (var a = 0.5f; a < player.Current.HoldLength; a += 0.5f) player.HoldTicks.Add(PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + a));
@@ -446,9 +447,13 @@ namespace JANOARG.Client.Behaviors.Player
                 if (active && hitObject.CurrentPosition > CurrentPosition + 200)
                     active = false;
 
-                hitObject.gameObject.SetActive(active || (hitObject.HoldMesh && GetZPosition(hitObject.EndTime) <= CurrentPosition + 200) || (hitObject.HoldMesh && hitObject.HoldMesh.gameObject.activeSelf));
+                // HoldMesh is now a permanent (pooled) child, so its existence no longer
+                // implies this note is a hold — gate on the actual note data instead.
+                bool isHold = hitObject.Current.HoldLength > 0 && hitObject.HoldMesh != null;
 
-                if (hitObject.HoldMesh)
+                hitObject.gameObject.SetActive(active || (isHold && GetZPosition(hitObject.EndTime) <= CurrentPosition + 200) || (isHold && hitObject.HoldMesh.gameObject.activeSelf));
+
+                if (isHold)
                     hitObject.HoldMesh.gameObject.SetActive(active || GetZPosition(hitObject.EndTime) <= CurrentPosition + 200);
             }
 
