@@ -255,6 +255,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void ReturnHitPlayer(HitPlayer player)
         {
+            player.IsReturned = true;
+
             if (player.HoldMesh != null)
             {
                 if (player.HoldMesh.mesh != null)
@@ -1141,13 +1143,19 @@ namespace JANOARG.Client.Behaviors.Player
             hitObject.Lane.HitObjects.Remove(hitObject);
             HitsRemaining--;
 
+            // Scrub every queue/cache reference before returning to the pool — a pooled
+            // instance can be re-borrowed as soon as this same frame's LateUpdate, and any
+            // stale reference left behind would silently alias whatever note reuses it.
+            PlayerInputManager.sInstance.PurgeHitPlayer(hitObject);
+
             ReturnHitPlayer(hitObject);
         }
 
         public void Hit(HitPlayer hitObject, double offset, bool spawnEffect = true)
         {
-            // In case of race condition
-            if (!hitObject)
+            // In case of race condition (also guards against a pooled instance already
+            // returned by another code path this same frame)
+            if (!hitObject || hitObject.IsReturned)
                 return;
             
             var hitType = hitObject.Current.Type;

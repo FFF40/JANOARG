@@ -379,6 +379,27 @@ public class PlayerInputManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unconditionally scrubs every reference to <paramref name="hit"/> from every queue/cache
+    /// this manager holds. Called right before a HitPlayer is returned to PlayerScreen's pool,
+    /// since a pooled instance can be handed out to a brand-new note as soon as the same frame
+    /// it's returned — any stale reference left behind would silently start aliasing that new
+    /// note (same underlying object, so flag-based "is this finished" checks stop working the
+    /// instant it's reused).
+    /// </summary>
+    public void PurgeHitPlayer(HitPlayer hit)
+    {
+        HitQueue.RemoveAll(x => x == hit);
+        DiscreteHitQueue.RemoveAll(x => x == hit);
+        HoldQueue.RemoveAll(x => x.HitObject == hit);
+
+        foreach (TouchClass touch in TouchClasses)
+        {
+            if (touch.QueuedHit == hit) touch.QueuedHit = null;
+            if (touch.NearestDiscreteHitobject == hit) touch.NearestDiscreteHitobject = null;
+        }
+    }
+
     private void EnqueueHoldNote(TouchClass touch, bool missed = false)
     {
         if (touch.QueuedHit.PendingHoldQueue)
@@ -624,7 +645,7 @@ public class PlayerInputManager : MonoBehaviour
             {
                 HitPlayer hitIteration = HitQueue[a];
 
-                if (!hitIteration) // If the hitobject has already been destroyed in runtime
+                if (!hitIteration || hitIteration.IsReturned) // Already finished (destroyed, or returned to the pool)
                 {
                     // Debug.Log($"Removing destroyed HitPlayer {a} from queue.");
                     HitQueue.RemoveAt(a);
@@ -785,8 +806,8 @@ public class PlayerInputManager : MonoBehaviour
 
                     EnqueueHoldNote(hitObject: hitObject);
 
-                    if (!hitObject)
-                        continue; // If the hitobject has already been destroyed in runtime
+                    if (!hitObject || hitObject.IsReturned)
+                        continue; // Already finished (destroyed, or returned to the pool)
                     DiscreteHitQueue.Remove(hitObject);
                 }
             }
@@ -827,7 +848,7 @@ public class PlayerInputManager : MonoBehaviour
             {
                 HitPlayer currentHit = HitQueue[i];
 
-                if (!currentHit) // If the hitobject has already been destroyed in runtime
+                if (!currentHit || currentHit.IsReturned) // Already finished (destroyed, or returned to the pool)
                 {
                     HitQueue.RemoveAt(i);
                     i--;
@@ -849,8 +870,10 @@ public class PlayerInputManager : MonoBehaviour
 
                     if (currentHit.HoldTicks.Count == 0)
                     {
+                        // RemoveHitPlayer already purges this entry from HitQueue (see
+                        // PlayerInputManager.PurgeHitPlayer) — an explicit RemoveAt(i) here would
+                        // now delete whatever shifted into index i instead, dropping an unrelated note.
                         Player.RemoveHitPlayer(currentHit);
-                        HitQueue.RemoveAt(i);
                         i--;
                     }
                 }
@@ -884,7 +907,7 @@ public class PlayerInputManager : MonoBehaviour
 
     private void HoldQueue_Processor(HoldNoteClass holdNoteEntry, ref int queuePtr, float beat, double judgementOffsetTime)
     {
-        if (!holdNoteEntry.HitObject)
+        if (!holdNoteEntry.HitObject || holdNoteEntry.HitObject.IsReturned)
         {
             HoldQueue.RemoveAt(queuePtr);
             queuePtr--; // Pointer rollback
@@ -1046,8 +1069,10 @@ public class PlayerInputManager : MonoBehaviour
 
         if (holdNoteEntry.HitObject.HoldTicks.Count <= 0) // No hold ticks left
         {
+            // RemoveHitPlayer already purges this entry from HoldQueue (see
+            // PlayerInputManager.PurgeHitPlayer) — an explicit RemoveAt(queuePtr) here would
+            // now delete whatever shifted into that index instead, dropping an unrelated hold note.
             Player.RemoveHitPlayer(holdNoteEntry.HitObject);
-            HoldQueue.RemoveAt(queuePtr);
             queuePtr--; // Pointer rollback
         }
     }

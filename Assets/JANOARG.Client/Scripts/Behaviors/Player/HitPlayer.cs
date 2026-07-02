@@ -45,6 +45,12 @@ namespace JANOARG.Client.Behaviors.Player
         public bool IsProcessed;
         public bool IsTapped;
 
+        // Set when this instance is handed back to the PlayerScreen pool. Since pooled
+        // instances are deactivated rather than Destroyed, code that used to rely on
+        // Unity's "fake null" check (Destroy having run) to detect a finished note must
+        // check this instead.
+        public bool IsReturned;
+
         public void Init()
         {
             // Reset per-note lifecycle flags unconditionally so a reused (pooled) instance
@@ -53,6 +59,7 @@ namespace JANOARG.Client.Behaviors.Player
             PendingHoldQueue = false;
             IsProcessed = false;
             IsTapped = false;
+            IsReturned = false;
 
             if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.HitStyles.Count)
             {

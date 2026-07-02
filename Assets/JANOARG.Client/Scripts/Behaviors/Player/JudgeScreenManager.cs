@@ -85,7 +85,7 @@ namespace JANOARG.Client.Behaviors.Player
         /// </summary>
         public JudgeScreenEffect BorrowEffect(HitPlayer hitobject, float? accuracy, Color color)
         {
-            if (_totalInstances > _totalMaxInstances)
+            if (_totalInstances >= _totalMaxInstances)
                 return CreateEffect(hitobject, accuracy, color);
 
             JudgeScreenEffect effect;

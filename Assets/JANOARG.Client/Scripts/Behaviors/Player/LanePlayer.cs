@@ -544,6 +544,17 @@ namespace JANOARG.Client.Behaviors.Player
                 hit.HoldRenderer = Instantiate(PlayerScreen.sMain.HoldSample, Holder);
                 hit.HoldMesh = hit.HoldRenderer.GetComponent<MeshFilter>();
             }
+            else if (hit.HoldRenderer.transform.parent != Holder)
+            {
+                // A pooled HitPlayer's HoldRenderer is a sibling under the lane's Holder, not a
+                // child of the HitPlayer itself, so it isn't reparented when the HitPlayer is
+                // borrowed for a different lane. Only do this when the lane actually changed —
+                // this runs every frame for every active hold, and SetParent's default
+                // worldPositionStays:true fights the scroll (Holder's own position drives the
+                // scroll every frame), so re-parenting unconditionally here would freeze/desync
+                // the mesh's position instead of leaving it to move naturally with Holder.
+                hit.HoldRenderer.transform.SetParent(Holder, false);
+            }
 
             if (hit.HoldMesh.mesh == null) 
                 hit.HoldMesh.mesh = new Mesh();
