@@ -5,6 +5,7 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Player;
 using JANOARG.Shared.Data.ChartInfo;
 using Unity.Collections;
+using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -288,6 +289,13 @@ public class TouchClass
 
 public class PlayerInputManager : MonoBehaviour
 {
+    static readonly ProfilerMarker sr_TouchInputLoop = new("UpdateInput: Touch Input Loop");
+    static readonly ProfilerMarker sr_HitQueueLoop = new("UpdateInput: HitQueue Processor Loop");
+    static readonly ProfilerMarker sr_HoldQueueBlock = new("UpdateInput: HoldQueue Processor Block");
+    static readonly ProfilerMarker sr_DiscreteHitQueueLoop = new("UpdateInput: DiscreteHitQueue Processor Loop");
+    static readonly ProfilerMarker sr_HitobjectProcessor = new("HitobjectProcessor");
+    static readonly ProfilerMarker sr_HoldQueueProcessor = new("HoldQueue_Processor");
+
     public static  PlayerInputManager sInstance;
     private static double             s_DeltaTime;
     public         PlayerScreen       Player;
@@ -470,6 +478,7 @@ public class PlayerInputManager : MonoBehaviour
             InitLogger($"Set flick threshold to {flickThreshold}px (DPI: {screenDpi})");
 
             // Main touch iterator
+            sr_TouchInputLoop.Begin();
             for (var a = 0; a < inputCount; a++)
             {
                 Touch inputEntry = Touch.activeTouches[a];
@@ -634,6 +643,7 @@ public class PlayerInputManager : MonoBehaviour
 
                 touchClass.Initial = false;
             }
+            sr_TouchInputLoop.End();
 
             double judgementOffsetTime = Player.CurrentTime + Player.Settings.JudgmentOffset; // Judgement offset
 
@@ -641,6 +651,7 @@ public class PlayerInputManager : MonoBehaviour
                 $"Judgement-offset time: {judgementOffsetTime} (Current time: {Player.CurrentTime}, Offset: {Player.Settings.JudgmentOffset})");
 
 
+            sr_HitQueueLoop.Begin();
             for (var a = 0; a < HitQueue.Count; a++) // Chart HitObject queue processor
             {
                 HitPlayer hitIteration = HitQueue[a];
@@ -691,7 +702,9 @@ public class PlayerInputManager : MonoBehaviour
 
                 if (hitobjectTimingDelta >= -window && !hitIteration.IsProcessed)
                 {
+                    sr_HitobjectProcessor.Begin();
                     HitobjectProcessor(hitIteration, flickThreshold, hitobjectTimingDelta, ref alreadyHit);
+                    sr_HitobjectProcessor.End();
 
                     // For additional inputs
                     foreach (TouchClass touch in TouchClasses)
@@ -742,7 +755,9 @@ public class PlayerInputManager : MonoBehaviour
                 // Skip checks if none of the hitobjects are even near window range
                 if (hitobjectTimingDelta < -Math.Max(Player.PassWindow, Player.GoodWindow)) break;
             }
+            sr_HitQueueLoop.End();
 
+            sr_HoldQueueBlock.Begin();
             if (HoldQueue.Count != 0) // Hold note processor
             {
                 //// Camera handling and other extra stuff is done here to calculate hold note hitboxes and positions on the fly
@@ -770,10 +785,14 @@ public class PlayerInputManager : MonoBehaviour
                     //Debug.Log($"Processing hold note entry {a} at time {holdNoteEntry.HitObject.Time}.");
 
                     // If the hold note doesn't exist (it's already completed)
+                    sr_HoldQueueProcessor.Begin();
                     HoldQueue_Processor(holdNoteEntry, ref a, beat, judgementOffsetTime);
+                    sr_HoldQueueProcessor.End();
                 }
             }
+            sr_HoldQueueBlock.End();
 
+            sr_DiscreteHitQueueLoop.Begin();
             for (var i = 0; i < DiscreteHitQueue.Count; i++)
             {
                 HitPlayer hitObject = DiscreteHitQueue[i];
@@ -811,6 +830,7 @@ public class PlayerInputManager : MonoBehaviour
                     DiscreteHitQueue.Remove(hitObject);
                 }
             }
+            sr_DiscreteHitQueueLoop.End();
 
             foreach (TouchClass touch in TouchClasses)
             {

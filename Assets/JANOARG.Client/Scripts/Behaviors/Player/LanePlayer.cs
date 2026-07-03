@@ -35,8 +35,14 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool LaneStepDirty = false;
         private Mesh          _Mesh;
-        
-        public bool MarkedForRemoval = false; 
+
+        // Lets UpdateMesh skip the full recompute for lanes whose two nearest LaneSteps
+        // both have zero scroll speed (position provably can't have changed) — see the
+        // early-return in UpdateMesh for the full correctness reasoning.
+        private bool     _HasBuiltMeshOnce;
+        private LaneStep _LastCheckedLaneStep0;
+
+        public bool MarkedForRemoval = false;
 
         // WARNING :
         // THIS IS NOT THREAD SAFE
@@ -48,6 +54,12 @@ namespace JANOARG.Client.Behaviors.Player
         static readonly ProfilerMarker sr_MeshLerper = new("Lane UpdateMesh: Lerper");
         static readonly ProfilerMarker sr_MeshLaneStepLooper = new("Lane UpdateMesh: Lane Step Looper");
         static readonly ProfilerMarker sr_MeshUpdater = new("Lane UpdateMesh: Mesh Updater");
+        static readonly ProfilerMarker sr_HitObjectSpawn = new("Lane UpdateHitObjects: Spawn Loop");
+        static readonly ProfilerMarker sr_HitObjectUpdate = new("Lane UpdateHitObjects: Active Update Loop");
+        static readonly ProfilerMarker sr_HitPlayerUpdateSelf = new("HitPlayer.UpdateSelf");
+        static readonly ProfilerMarker sr_HoldMeshUpdate = new("Lane UpdateHoldMesh");
+        static readonly ProfilerMarker sr_LaneUpdateSelf = new("LanePlayer.UpdateSelf (Total)");
+        static readonly ProfilerMarker sr_LaneUpdateSelfTail = new("LanePlayer.UpdateSelf: Transform + Activation");
 
         private Metronome _Metronome;
         
@@ -87,6 +99,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void UpdateSelf(float time, float beat)
         {
+            sr_LaneUpdateSelf.Begin();
+
             if (Current != null)
                 Current.Advance(beat);
             else
@@ -94,17 +108,22 @@ namespace JANOARG.Client.Behaviors.Player
 
             UpdateMesh(time, beat);
 
+            sr_LaneUpdateSelfTail.Begin();
             transform.localPosition = Current.Position;
             transform.localEulerAngles = Current.Rotation;
             Holder.localPosition = Vector3.back * CurrentPosition;
+            bool inRange = CurrentPosition - PositionPoints[0] > -200;
+            sr_LaneUpdateSelfTail.End();
 
-            if (CurrentPosition - PositionPoints[0] > -200)
+            if (inRange)
             {
                 if (!transform.gameObject.activeSelf)
                     transform.gameObject.SetActive(true);
-                
+
                 UpdateHitObjects(time, beat);
             }
+
+            sr_LaneUpdateSelf.End();
         }
 
         private void UpdateMesh(float time, float beat, float maxDistance = 200)
@@ -162,32 +181,71 @@ namespace JANOARG.Client.Behaviors.Player
                 PositionPoints.RemoveAt(0);
                 Current.LaneSteps.RemoveAt(0);
             }
-            
+            sr_TimestampRemove.End();
+
             // Attempt to cull finished lane
-            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time && HitObjects.Count == 0) 
+            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time && HitObjects.Count == 0)
             {
                 if (TimeStamps[^1] < time)
                 {
                     if (_Mesh != null)
                         Destroy(_Mesh);
-                    
+
                     if (gameObject != null)
                         Destroy(gameObject);
-                    
+
                     MarkedForRemoval = true;
                 }
                 return;
             }
-            
-            sr_TimestampRemove.End();
 
             sr_MeshCalc.Begin();
-            // Advance the two nearest lane steps 
+            // Advance the two nearest lane steps
             // (both should either be one just before and one just after current time
             // or two after current time)
             Current.LaneSteps[0].Advance(beat);
-            if (Current.LaneSteps.Count > 1)
+            bool hasSecondLaneStep = Current.LaneSteps.Count > 1;
+            if (hasSecondLaneStep)
                 Current.LaneSteps[1].Advance(beat);
+
+            // Consume dirty flags from storyboard changes as soon as we know about them
+            // (previously done further below, after the mesh was already rebuilt).
+            bool laneStepDirtyThisFrame = false;
+            if (Current.LaneSteps[0].IsDirty)
+            {
+                laneStepDirtyThisFrame = true;
+                Current.LaneSteps[0].IsDirty = false;
+            }
+            if (hasSecondLaneStep && Current.LaneSteps[1].IsDirty)
+            {
+                laneStepDirtyThisFrame = true;
+                Current.LaneSteps[1].IsDirty = false;
+            }
+            if (laneStepDirtyThisFrame)
+                LaneStepDirty = true;
+
+            // If both nearest lane steps have zero scroll speed, CurrentPosition and the
+            // mesh geometry provably cannot have changed since the last full recompute —
+            // unless a storyboard property changed (laneStepDirtyThisFrame) or we've
+            // crossed into a new lane-step pair (sameStepWindow catches that transition,
+            // since the trim above may have just shifted LaneSteps[0] to a new object).
+            // Requiring more than 2 timestamps guarantees there's a future step boundary
+            // left to cross, so that transition (and the JudgeLine enable/disable state
+            // that depends on it) is always caught by the trim invalidating sameStepWindow
+            // — right at the final 2-timestamp segment we always fully recompute instead.
+            bool nearStepsStatic = TimeStamps.Count > 2 &&
+                                    Current.LaneSteps[0].Speed == 0f &&
+                                    (!hasSecondLaneStep || Current.LaneSteps[1].Speed == 0f);
+            bool sameStepWindow = ReferenceEquals(Current.LaneSteps[0], _LastCheckedLaneStep0);
+
+            if (nearStepsStatic && _HasBuiltMeshOnce && !laneStepDirtyThisFrame && sameStepWindow)
+            {
+                sr_MeshCalc.End();
+                return;
+            }
+
+            _LastCheckedLaneStep0 = Current.LaneSteps[0];
+            _HasBuiltMeshOnce = true;
 
             // Cache last position point (prevent ArgumentOutOfRangeException)
             float lastPositionPoints = PositionPoints.Count > 0 ? PositionPoints[^1] : 0;
@@ -288,20 +346,9 @@ namespace JANOARG.Client.Behaviors.Player
                 JudgePointRight.transform.localPosition = endPoint;
             }
             sr_MeshLerper.End();
-            
-            
-            // If our two lane step nearest from current time has dirty values because of storyboard,
-            // we mark our lane as dirty for update on the next frame and reset their dirty flags
-            if (Current.LaneSteps[0].IsDirty)
-            {
-                LaneStepDirty = true;
-                Current.LaneSteps[0].IsDirty = false;
-            }
-            if (Current.LaneSteps[1].IsDirty)
-            {
-                LaneStepDirty = true;
-                Current.LaneSteps[1].IsDirty = false;
-            }
+
+            // (Dirty-flag handling for LaneSteps[0]/[1] now happens earlier, before the
+            // static-lane skip check, so it's available before deciding to recompute.)
 
             sr_MeshLaneStepLooper.Begin();
             // Loop through our lane step list
@@ -393,6 +440,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void UpdateHitObjects(float time, float beat, float maxDistance = 200)
         {
+            sr_HitObjectSpawn.Begin();
             while (Current.Objects.Count > 0)
             {
                 HitObject hit = Current.Objects[0];
@@ -436,13 +484,19 @@ namespace JANOARG.Client.Behaviors.Player
                     break;
                 }
             }
+            sr_HitObjectSpawn.End();
 
             var active = true;
 
+            sr_HitObjectUpdate.Begin();
             foreach (HitPlayer hitObject in HitObjects)
             {
                 if (active)
+                {
+                    sr_HitPlayerUpdateSelf.Begin();
                     hitObject.UpdateSelf(time, beat, LaneStepDirty);
+                    sr_HitPlayerUpdateSelf.End();
+                }
 
                 if (active && hitObject.CurrentPosition > CurrentPosition + 200)
                     active = false;
@@ -456,6 +510,7 @@ namespace JANOARG.Client.Behaviors.Player
                 if (isHold)
                     hitObject.HoldMesh.gameObject.SetActive(active || GetZPosition(hitObject.EndTime) <= CurrentPosition + 200);
             }
+            sr_HitObjectUpdate.End();
 
             LaneStepDirty = false;
         }
@@ -538,6 +593,19 @@ namespace JANOARG.Client.Behaviors.Player
         }
 
         public void UpdateHoldMesh(HitPlayer hit)
+        {
+            sr_HoldMeshUpdate.Begin();
+            try
+            {
+                UpdateHoldMeshInternal(hit);
+            }
+            finally
+            {
+                sr_HoldMeshUpdate.End();
+            }
+        }
+
+        private void UpdateHoldMeshInternal(HitPlayer hit)
         {
             if (hit.HoldRenderer == null)
             {

@@ -11,6 +11,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
+using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -22,6 +23,14 @@ namespace JANOARG.Client.Behaviors.Player
 
     public class PlayerScreen : MonoBehaviour
     {
+        static readonly ProfilerMarker sr_LaneStylesUpdate = new("PlayerScreen.LateUpdate: LaneStyles Loop");
+        static readonly ProfilerMarker sr_HitStylesUpdate = new("PlayerScreen.LateUpdate: HitStyles Loop");
+        static readonly ProfilerMarker sr_CameraAdvance = new("PlayerScreen.LateUpdate: Camera Advance");
+        static readonly ProfilerMarker sr_SpawnHitEffect = new("PlayerScreen.SpawnHitEffect");
+        static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputManager.UpdateInput");
+        static readonly ProfilerMarker sr_HoldMeshLoop = new("PlayerScreen.Update: Hold Mesh Loop");
+        static readonly ProfilerMarker sr_LanesLoop = new("PlayerScreen.LateUpdate: Lanes Loop (Total)");
+        static readonly ProfilerMarker sr_TrivialLaneMotionCheck = new("PlayerScreen.LateUpdate: HasTrivialLocalLaneMotion");
 
         public static PlayerScreen sMain;
 
@@ -868,13 +877,18 @@ namespace JANOARG.Client.Behaviors.Player
                 Music.Pause();
 
             // Process input directly — no coroutine, no +1 frame latency
+            sr_HoldMeshLoop.Begin();
             foreach (LanePlayer lane in Lanes)
                 foreach (HitPlayer hit in lane.HitObjects)
                     // HoldMesh is now a permanent (pooled) child, so its existence no longer
                     // implies this note is a hold — check the actual note data instead.
                     if (hit.Current.HoldLength > 0)
                         lane.UpdateHoldMesh(hit);
+            sr_HoldMeshLoop.End();
+
+            sr_UpdateInputCall.Begin();
             PlayerInputManager.sInstance.UpdateInput();
+            sr_UpdateInputCall.End();
 
             // Show ending animation; the failsafe on bugs is on following:
             // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
@@ -908,6 +922,7 @@ namespace JANOARG.Client.Behaviors.Player
             if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
                 SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
+            sr_LaneStylesUpdate.Begin();
             for (var a = 0; a < LaneStyles.Count; a++)
             {
                 sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
@@ -917,36 +932,46 @@ namespace JANOARG.Client.Behaviors.Player
                     TransparentMeshLaneIndexes.Remove(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Add(a);
-                
+
                 if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a == 0 && !TransparentMeshJudgeIndexes.Contains(a))
                     TransparentMeshJudgeIndexes.Add(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a != 0 && TransparentMeshJudgeIndexes.Contains(a))
                     TransparentMeshJudgeIndexes.Remove(a);
             }
+            sr_LaneStylesUpdate.End();
 
+            sr_HitStylesUpdate.Begin();
             for (var a = 0; a < HitStyles.Count; a++)
             {
                 sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
                 HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a]);
             }
+            sr_HitStylesUpdate.End();
 
+            sr_CameraAdvance.Begin();
             sCurrentChart.Camera.Advance(visualBeat);
 
             Camera pseudoCamera = CommonSys.sMain.MainCamera;
             pseudoCamera.transform.position = sCurrentChart.Camera.CameraPivot;
             pseudoCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
             pseudoCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
+            sr_CameraAdvance.End();
 
             foreach (LaneGroupPlayer group in LaneGroups)
                 group.UpdateSelf(visualTime, visualBeat);
 
+            sr_LanesLoop.Begin();
             for (int i = Lanes.Count - 1; i >= 0; i--)
             {
                 try
                 {
                     LanePlayer lane = Lanes[i];
 
-                    if (!HasTrivialLocalLaneMotion(lane) && lane.TimeStamps[0] - 5f > visualTime)
+                    sr_TrivialLaneMotionCheck.Begin();
+                    bool skip = !HasTrivialLocalLaneMotion(lane) && lane.TimeStamps[0] - 5f > visualTime;
+                    sr_TrivialLaneMotionCheck.End();
+
+                    if (skip)
                         continue;
 
                     lane.UpdateSelf(visualTime, visualBeat);
@@ -963,6 +988,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Lanes.RemoveAt(i);
                 }
             }
+            sr_LanesLoop.End();
         }
 
         private static bool HasTrivialLocalLaneMotion(LanePlayer lane)
@@ -1228,9 +1254,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void SpawnHitEffect(HitPlayer hitObject, float? accuracy)
         {
+            sr_SpawnHitEffect.Begin();
             var effect = sMain.JudgeScreenManager.BorrowEffect(hitObject, accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hitObject.HitCoord.Position;
+            sr_SpawnHitEffect.End();
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)

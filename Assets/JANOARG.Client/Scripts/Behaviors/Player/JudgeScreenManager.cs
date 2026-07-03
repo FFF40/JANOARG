@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Player
@@ -12,6 +13,8 @@ namespace JANOARG.Client.Behaviors.Player
     /// </summary>
     public class JudgeScreenManager : MonoBehaviour
     {
+        static readonly ProfilerMarker sr_BorrowEffect = new("JudgeScreenManager.BorrowEffect");
+        static readonly ProfilerMarker sr_SetColor = new("JudgeScreenManager.BorrowEffect: SetColor");
         // -----------------------------------------------------------------
         // Animation state — plain struct, lives on the stack / in the list.
         // No heap allocation per hit.
@@ -85,29 +88,41 @@ namespace JANOARG.Client.Behaviors.Player
         /// </summary>
         public JudgeScreenEffect BorrowEffect(HitPlayer hitobject, float? accuracy, Color color)
         {
-            if (_totalInstances >= _totalMaxInstances)
-                return CreateEffect(hitobject, accuracy, color);
-
-            JudgeScreenEffect effect;
+            sr_BorrowEffect.Begin();
             try
             {
-                effect = judgeScreenEffects.Pop();
+                if (_totalInstances >= _totalMaxInstances)
+                    return CreateEffect(hitobject, accuracy, color);
+
+                JudgeScreenEffect effect;
+                try
+                {
+                    effect = judgeScreenEffects.Pop();
+                }
+                catch (InvalidOperationException e)
+                {
+                    Debug.LogWarning(e.Message + " Skipping effect.");
+                    return null;
+                }
+
+                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
+                DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
+                effect.gameObject.SetActive(true);
+
+                sr_SetColor.Begin();
+                effect.SetColor(color);
+                sr_SetColor.End();
+
+                effect.Tick(0); // initialise visual state before first Update
+
+                _active.Add(new ActiveEffect { Effect = effect, Elapsed = 0f, IsOneShot = false });
+                _totalInstances++;
+                return effect;
             }
-            catch (InvalidOperationException e)
+            finally
             {
-                Debug.LogWarning(e.Message + " Skipping effect.");
-                return null;
+                sr_BorrowEffect.End();
             }
-
-            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
-            DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
-            effect.gameObject.SetActive(true);
-            effect.SetColor(color);
-            effect.Tick(0); // initialise visual state before first Update
-
-            _active.Add(new ActiveEffect { Effect = effect, Elapsed = 0f, IsOneShot = false });
-            _totalInstances++;
-            return effect;
         }
         
         void DefineJudgeScreenEffect(HitPlayer hitobject, ref JudgeScreenEffect effect, float? accuracy)
