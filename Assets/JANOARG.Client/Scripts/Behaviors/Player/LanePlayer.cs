@@ -196,6 +196,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                     MarkedForRemoval = true;
                 }
+
                 return;
             }
 
@@ -244,8 +245,11 @@ namespace JANOARG.Client.Behaviors.Player
                 return;
             }
 
-            _LastCheckedLaneStep0 = Current.LaneSteps[0];
-            _HasBuiltMeshOnce = true;
+            // NOTE: _LastCheckedLaneStep0/_HasBuiltMeshOnce are set later, only once the
+            // mesh is actually assigned — not here — so a lane that's currently invisible
+            // (e.g. isInvisibleLaneMesh true because its style hasn't faded in yet) keeps
+            // being fully recomputed every frame instead of getting permanently frozen as
+            // invisible the instant this branch is reached once.
 
             // Cache last position point (prevent ArgumentOutOfRangeException)
             float lastPositionPoints = PositionPoints.Count > 0 ? PositionPoints[^1] : 0;
@@ -275,7 +279,7 @@ namespace JANOARG.Client.Behaviors.Player
             // we can safely skip lane mesh generation
             if (TimeStamps.Count <= 1)
                 return;
-            
+
             sr_MeshCalc.Begin();
             // Calculate the Z position of the lane step at index 1
             if (PositionPoints.Count <= 2)
@@ -283,7 +287,7 @@ namespace JANOARG.Client.Behaviors.Player
             else
                 PositionPoints[1] = PositionPoints[0] + (TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed;
             sr_MeshCalc.End();
-            
+
             if (!(CurrentPosition - PositionPoints[0] > -200))
             {
                 // If the current Z position is further than our distance threshold,
@@ -422,11 +426,17 @@ namespace JANOARG.Client.Behaviors.Player
                 progress = 0;
             }
             sr_MeshLaneStepLooper.End();
-                            
+
             // Skip rendering for invisible lanes
             if (isInvisibleLaneMesh && HitObjects.Count == 0)
                 return;
-            
+
+            // Only now — once we know the mesh is actually about to be assigned — do we
+            // record that this lane has a real built mesh, so the static-lane skip above
+            // can never freeze a lane that's never actually been rendered.
+            _LastCheckedLaneStep0 = Current.LaneSteps[0];
+            _HasBuiltMeshOnce = true;
+
             sr_MeshUpdater.Begin();
             // Actually update mesh data
             _Mesh.Clear(false);
