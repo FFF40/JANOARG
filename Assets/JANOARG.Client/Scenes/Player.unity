@@ -2521,7 +2521,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 1
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -6819,7 +6819,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 1
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -12501,6 +12501,7 @@ MonoBehaviour:
   JudgeScreenHolder: {fileID: 324592700}
   JudgeScreen: {fileID: 830500997}
   JudgeScreenManager: {fileID: 1551788793}
+  HitPlayerPoolHolder: {fileID: 1984835390}
   PauseLabel: {fileID: 664049825}
   LaneGroupSample: {fileID: 7932530262983194933, guid: 9f163d8f499bace4694fcbbda4c1d6b3, type: 3}
   LaneSample: {fileID: 2572600698700152797, guid: 21d1e5daa792aad4599081b3d9a9aa5a, type: 3}
