@@ -30,7 +30,6 @@ namespace JANOARG.Client.Behaviors.Player
         static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputManager.UpdateInput");
         static readonly ProfilerMarker sr_HoldMeshLoop = new("PlayerScreen.Update: Hold Mesh Loop");
         static readonly ProfilerMarker sr_LanesLoop = new("PlayerScreen.LateUpdate: Lanes Loop (Total)");
-        static readonly ProfilerMarker sr_TrivialLaneMotionCheck = new("PlayerScreen.LateUpdate: HasTrivialLocalLaneMotion");
 
         public static PlayerScreen sMain;
 
@@ -182,6 +181,13 @@ namespace JANOARG.Client.Behaviors.Player
 
         [HideInInspector]
         public List<LanePlayer> Lanes = new();
+
+        // Lanes not yet relevant enough to be updated every frame, sorted ascending by
+        // CueTime. _PendingLaneCursor only ever moves forward — each lane is examined
+        // exactly once, right when it becomes due, instead of re-scanning the whole
+        // (potentially 1000+ lane) list every frame to find who's newly relevant.
+        private readonly List<(float CueTime, LanePlayer Lane)> _PendingLanes = new();
+        private int _PendingLaneCursor;
 
         private double _LastDSPTime;
         private double _MusicStartDSP;  // DSP time at which Music.PlayScheduled was called
@@ -405,8 +411,15 @@ namespace JANOARG.Client.Behaviors.Player
                     Destroy(lane.gameObject);
                 }
 
+                foreach ((float _, LanePlayer lane) in _PendingLanes)
+                {
+                    if (lane != null)
+                        Destroy(lane.gameObject);
+                }
 
                 Lanes.Clear();
+                _PendingLanes.Clear();
+                _PendingLaneCursor = 0;
             }
             else
             {
@@ -519,7 +532,16 @@ namespace JANOARG.Client.Behaviors.Player
                     instancedLane.Current = sCurrentChart.Lanes[a];
 
                     instancedLane.Init();
-                    Lanes.Add(instancedLane);
+
+                    // Defer this lane until it's actually about to be relevant instead of
+                    // updating it every frame from the moment it's loaded — see CueTime.
+                    const float VISIBILITY_DISTANCE = 200f;
+                    const float GRACE_TIME = 5f;
+                    float laneSpeed = Math.Abs(instancedLane.Current.LaneSteps[0].Speed) * Speed;
+                    float cueTime = laneSpeed > 0.0001f
+                        ? instancedLane.TimeStamps[0] - VISIBILITY_DISTANCE / laneSpeed - GRACE_TIME
+                        : float.NegativeInfinity;
+                    _PendingLanes.Add((cueTime, instancedLane));
 
                     foreach (HitObject laneHitobject in instancedLane.Original.Objects)
                     {
@@ -603,7 +625,11 @@ namespace JANOARG.Client.Behaviors.Player
                         if (!instantiatedLane[i])
                         {
                             err++;
-                            errDetails.Add($"Lane {(string.IsNullOrEmpty(Lanes[i].Current.Name) ? i : Lanes[i].Current.Name)} depends on {Lanes[i].Current.Group}");
+                            // Use the source chart data here, not Lanes[i] — a lane that
+                            // failed to instantiate was never added to Lanes, so Lanes[i]
+                            // would refer to an unrelated (or out-of-range) lane.
+                            Lane failedLane = sTargetChart.Data.Lanes[i];
+                            errDetails.Add($"Lane {(string.IsNullOrEmpty(failedLane.Name) ? i.ToString() : failedLane.Name)} depends on {failedLane.Group}");
                         }
 
                     string f_printDepDetails()
@@ -634,11 +660,15 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
 
+            // One-time sort by CueTime so LateUpdate's promotion cursor can just walk
+            // forward from index 0 instead of scanning for the next-due lane every frame.
+            _PendingLanes.Sort((a, b) => a.CueTime.CompareTo(b.CueTime));
+
             _LoadState[0] = true;
 
             yield return new WaitForEndOfFrame();
         }
-        
+
         private struct EventNote
         {
             public float      Beat;
@@ -960,19 +990,22 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (LaneGroupPlayer group in LaneGroups)
                 group.UpdateSelf(visualTime, visualBeat);
 
+            // Promote pending lanes into the active set once they're due — each lane is
+            // examined exactly once here, right as it becomes relevant, instead of every
+            // lane being rechecked every frame regardless of how far away it still is.
+            while (_PendingLaneCursor < _PendingLanes.Count &&
+                   _PendingLanes[_PendingLaneCursor].CueTime <= visualTime)
+            {
+                Lanes.Add(_PendingLanes[_PendingLaneCursor].Lane);
+                _PendingLaneCursor++;
+            }
+
             sr_LanesLoop.Begin();
             for (int i = Lanes.Count - 1; i >= 0; i--)
             {
                 try
                 {
                     LanePlayer lane = Lanes[i];
-
-                    sr_TrivialLaneMotionCheck.Begin();
-                    bool skip = !HasTrivialLocalLaneMotion(lane) && lane.TimeStamps[0] - 5f > visualTime;
-                    sr_TrivialLaneMotionCheck.End();
-
-                    if (skip)
-                        continue;
 
                     lane.UpdateSelf(visualTime, visualBeat);
 
@@ -989,32 +1022,6 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
             sr_LanesLoop.End();
-        }
-
-        private static bool HasTrivialLocalLaneMotion(LanePlayer lane)
-        {
-            if (lane.Current == null) return true;
-
-            const float TRIVIAL_LANE_SPAN_THRESHOLD = 2f;
-            IReadOnlyList<LaneStep> laneSteps = lane.Current.LaneSteps;
-
-            if (laneSteps.Count <= 1) return true;
-
-            float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
-            bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
-            if (hasShortSpan) return true;
-
-            bool isGeometryLane = true;
-            for (int i = 0; i < laneSteps.Count; i++)
-            {
-                if (laneSteps[i].Speed != 0)
-                {
-                    isGeometryLane = false;
-                    break;
-                }
-            }
-
-            return isGeometryLane;
         }
 
         public void Resync()
