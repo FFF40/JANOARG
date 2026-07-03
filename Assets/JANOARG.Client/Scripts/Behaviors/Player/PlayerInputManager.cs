@@ -71,6 +71,140 @@ public class HoldNoteClass
             _HoldPassDrainValue = value;
         }
     }
+
+    // -----------------------------------------------------------------
+    // Dedicated hold-tick judge-effect pool.
+    //
+    // Hold ticks fire every 0.5 *beats*, not 0.5 seconds — at high BPM (e.g. 414)
+    // that's well under the 0.4s effect animation duration, so borrowing/returning
+    // a fresh JudgeScreenManager effect on every tick both churns the shared pool
+    // and (via each borrow's SetVerticesDirty) forces a full Canvas rebatch every
+    // single tick. Instead, borrow a small dedicated set once per hold, sized to
+    // roughly how many ticks' worth of animation can be in flight at once, and
+    // just restart whichever instance is free (or closest to finishing) per tick.
+    // -----------------------------------------------------------------
+    private const float DedicatedEffectDuration = 0.4f; // matches JudgeScreenManager.ActiveEffect.Duration
+    private const int   DedicatedEffectMaxPoolSize = 8;
+
+    private JudgeScreenEffect[] _DedicatedEffects;
+    private bool[]              _DedicatedIsOverflow;
+    private float[]             _DedicatedElapsed;
+    private bool[]              _DedicatedAnimating;
+
+    /// <summary>
+    /// Lazily borrows a small dedicated pool of effects for this hold, sized from the
+    /// BPM at its start time. No-op if already created.
+    /// </summary>
+    public void EnsureDedicatedEffects(Color color)
+    {
+        if (_DedicatedEffects != null) return;
+
+        float bpm = GetBpmAt(HitObject.Time);
+        float secondsPerTick = 30f / Mathf.Max(bpm, 1f); // 0.5 beats at this BPM
+        int poolSize = Mathf.Clamp(
+            Mathf.CeilToInt(DedicatedEffectDuration / secondsPerTick),
+            1, DedicatedEffectMaxPoolSize);
+
+        _DedicatedEffects = new JudgeScreenEffect[poolSize];
+        _DedicatedIsOverflow = new bool[poolSize];
+        _DedicatedElapsed = new float[poolSize];
+        _DedicatedAnimating = new bool[poolSize];
+
+        for (int i = 0; i < poolSize; i++)
+            _DedicatedEffects[i] = PlayerScreen.sMain.JudgeScreenManager.BorrowDedicated(
+                HitObject, null, color, out _DedicatedIsOverflow[i]);
+    }
+
+    private static float GetBpmAt(float timeSeconds)
+    {
+        List<BPMStop> stops = PlayerScreen.sTargetSong.Timing.Stops;
+        float bpm = stops.Count > 0 ? stops[0].BPM : 60f;
+
+        for (var i = 0; i < stops.Count; i++)
+        {
+            if (stops[i].Offset > timeSeconds)
+                break;
+            bpm = stops[i].BPM;
+        }
+
+        return bpm;
+    }
+
+    /// <summary>
+    /// Restarts whichever dedicated slot is free (or, failing that, closest to
+    /// finishing) to visually represent one hold tick. Returns the restarted
+    /// effect so the caller can (re)position it, or null if none are available.
+    /// </summary>
+    public JudgeScreenEffect PulseDedicatedEffect()
+    {
+        if (_DedicatedEffects == null) return null;
+
+        int target = -1;
+        float highestElapsed = -1f;
+
+        for (var i = 0; i < _DedicatedEffects.Length; i++)
+        {
+            if (!_DedicatedAnimating[i])
+            {
+                target = i;
+                break;
+            }
+
+            if (_DedicatedElapsed[i] > highestElapsed)
+            {
+                highestElapsed = _DedicatedElapsed[i];
+                target = i;
+            }
+        }
+
+        if (target < 0 || _DedicatedEffects[target] == null) return null;
+
+        _DedicatedElapsed[target] = 0f;
+        _DedicatedAnimating[target] = true;
+        _DedicatedEffects[target].Tick(0);
+        return _DedicatedEffects[target];
+    }
+
+    /// <summary>
+    /// Advances any currently-animating dedicated slots. Idle (finished) slots are
+    /// left alone entirely — no Tick() call — so they stop dirtying the canvas once
+    /// their animation completes, instead of continuing to redraw a frozen frame.
+    /// </summary>
+    public void UpdateDedicatedEffects(float deltaTime)
+    {
+        if (_DedicatedEffects == null) return;
+
+        for (var i = 0; i < _DedicatedEffects.Length; i++)
+        {
+            if (!_DedicatedAnimating[i] || _DedicatedEffects[i] == null)
+                continue;
+
+            _DedicatedElapsed[i] += deltaTime;
+            float x = Mathf.Clamp01(_DedicatedElapsed[i] / DedicatedEffectDuration);
+            _DedicatedEffects[i].Tick(x);
+
+            if (x >= 1f)
+                _DedicatedAnimating[i] = false;
+        }
+    }
+
+    /// <summary>
+    /// Returns all dedicated effects to the shared pool. Must be called when this
+    /// hold note is removed from the queue, or the instances leak permanently.
+    /// </summary>
+    public void ReturnDedicatedEffects()
+    {
+        if (_DedicatedEffects == null) return;
+
+        for (var i = 0; i < _DedicatedEffects.Length; i++)
+            if (_DedicatedEffects[i] != null)
+                PlayerScreen.sMain.JudgeScreenManager.ReturnDedicated(_DedicatedEffects[i], _DedicatedIsOverflow[i]);
+
+        _DedicatedEffects = null;
+        _DedicatedIsOverflow = null;
+        _DedicatedElapsed = null;
+        _DedicatedAnimating = null;
+    }
 }
 
 /// <summary>
@@ -399,7 +533,14 @@ public class PlayerInputManager : MonoBehaviour
     {
         HitQueue.RemoveAll(x => x == hit);
         DiscreteHitQueue.RemoveAll(x => x == hit);
-        HoldQueue.RemoveAll(x => x.HitObject == hit);
+
+        for (int i = HoldQueue.Count - 1; i >= 0; i--)
+        {
+            if (HoldQueue[i].HitObject != hit) continue;
+
+            HoldQueue[i].ReturnDedicatedEffects();
+            HoldQueue.RemoveAt(i);
+        }
 
         foreach (TouchClass touch in TouchClasses)
         {
@@ -929,11 +1070,14 @@ public class PlayerInputManager : MonoBehaviour
     {
         if (!holdNoteEntry.HitObject || holdNoteEntry.HitObject.IsReturned)
         {
+            holdNoteEntry.ReturnDedicatedEffects();
             HoldQueue.RemoveAt(queuePtr);
             queuePtr--; // Pointer rollback
 
             return;
         }
+
+        holdNoteEntry.UpdateDedicatedEffects(Time.deltaTime);
 
         // Note position
         var laneHoldNote =
@@ -1074,14 +1218,21 @@ public class PlayerInputManager : MonoBehaviour
             // Remove the first hold tick (and pretty much shift the next tick in)
             holdNoteEntry.HitObject.HoldTicks.RemoveAt(0);
 
-            // Handle hold tick just like how HitPlayer does
+            // Handle hold tick just like how HitPlayer does — reuses a small dedicated
+            // pool of effects instead of borrowing/returning one per tick (see
+            // HoldNoteClass.EnsureDedicatedEffects for why: at high BPM, ticks fire
+            // far more often than a single effect's animation takes to finish).
             if (holdNoteEntry.IsScoring)
             {
                 Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.32f);
-                var effect = PlayerScreen.sMain.JudgeScreenManager.BorrowEffect(holdNoteEntry.HitObject,null, interfaceColor);
-                var rt = (RectTransform)effect.transform;
+                holdNoteEntry.EnsureDedicatedEffects(interfaceColor);
+                JudgeScreenEffect effect = holdNoteEntry.PulseDedicatedEffect();
 
-                rt.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
+                if (effect != null)
+                {
+                    var rt = (RectTransform)effect.transform;
+                    rt.position = CommonSys.sMain.MainCamera.WorldToScreenPoint(holdNoteEntry.HitObject.transform.position);
+                }
             }
 
             // Missed hold tick, no effect

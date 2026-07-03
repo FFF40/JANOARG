@@ -176,6 +176,66 @@ namespace JANOARG.Client.Behaviors.Player
         }
 
         // -----------------------------------------------------------------
+        // Dedicated (caller-driven) instances — for callers that need to hold onto
+        // and restart an effect's animation themselves (e.g. hold-tick pulsing)
+        // instead of a single fire-and-forget animation. Not added to _active, so
+        // JudgeScreenManager.Update() never touches these; the caller is responsible
+        // for calling Tick() itself and for calling ReturnDedicated() when done.
+        // -----------------------------------------------------------------
+
+        /// <summary>
+        /// Borrow an effect for caller-managed (repeated/restartable) animation.
+        /// Returns null only if the pool is exhausted and overflow instantiation also fails.
+        /// </summary>
+        public JudgeScreenEffect BorrowDedicated(HitPlayer hitobject, float? accuracy, Color color, out bool isOverflow)
+        {
+            isOverflow = _totalInstances >= _totalMaxInstances;
+
+            JudgeScreenEffect effect;
+            if (isOverflow)
+            {
+                Debug.LogWarning("JudgeScreenManager pool exhausted, creating new dedicated instance.");
+                effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
+            }
+            else
+            {
+                try
+                {
+                    effect = judgeScreenEffects.Pop();
+                }
+                catch (InvalidOperationException e)
+                {
+                    Debug.LogWarning(e.Message + " Skipping effect.");
+                    return null;
+                }
+
+                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
+                _totalInstances++;
+            }
+
+            DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
+            effect.gameObject.SetActive(true);
+            effect.SetColor(color);
+            effect.Tick(0);
+            return effect;
+        }
+
+        /// <summary>
+        /// Return an effect borrowed via BorrowDedicated. Overflow instances (created
+        /// when the pool was exhausted) are destroyed instead of pushed back.
+        /// </summary>
+        public void ReturnDedicated(JudgeScreenEffect effect, bool isOverflow)
+        {
+            if (isOverflow)
+            {
+                Destroy(effect.gameObject);
+                return;
+            }
+
+            ReturnEffect(effect);
+        }
+
+        // -----------------------------------------------------------------
         // Overflow — pool exhausted
         // -----------------------------------------------------------------
         private JudgeScreenEffect CreateEffect(HitPlayer hitobject, float? accuracy, Color color)
