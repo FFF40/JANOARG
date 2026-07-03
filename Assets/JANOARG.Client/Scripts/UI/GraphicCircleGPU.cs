@@ -12,8 +12,9 @@ namespace JANOARG.Client.UI
     ///   1. No CPU tessellation — zero per-frame vertex allocation.
     ///   2. Perfectly smooth circles at any resolution.
     ///   3. Polygons are pixel-perfect (no staircase artefacts).
-    ///   4. All parameters are driven via a MaterialPropertyBlock-style
-    ///     Material instance so instances don't share state.
+    ///   4. All instances share one Material — per-instance parameters are
+    ///      packed into vertex uv1 instead of material uniforms, so the UI
+    ///      batcher can merge multiple circles into a single draw call.
     ///
     /// Polygon mode: set <see cref="Sides"/> to 3 or higher.
     ///   Sides = 0  → smooth circle (default)
@@ -25,7 +26,8 @@ namespace JANOARG.Client.UI
     /// Fill / ring / rotation work identically to <see cref="GraphicCircle"/>.
     /// </summary>
     /// <remarks>
-    /// This gives the advantage of performance, with the tradeoff being unable to apply custom material onto it
+    /// Requires the owning Canvas to have "Additional Shader Channels" include
+    /// TexCoord1, otherwise the per-instance uv1 data won't reach the shader.
     /// </remarks>
     [ExecuteAlways]
     [RequireComponent(typeof(CanvasRenderer))]
@@ -54,38 +56,33 @@ namespace JANOARG.Client.UI
         public int sides
         {
             get => Sides;
-            set { Sides = Mathf.Max(0, value); UpdateMaterialProperties(); }
+            set { Sides = Mathf.Max(0, value); SetVerticesDirty(); }
         }
 
         public float fillAmount
         {
             get => FillAmount;
-            set { FillAmount = Mathf.Clamp01(value); UpdateMaterialProperties(); }
+            set { FillAmount = Mathf.Clamp01(value); SetVerticesDirty(); }
         }
 
         public float insideRadius
         {
             get => InsideRadius;
-            set { InsideRadius = Mathf.Clamp01(value); UpdateMaterialProperties(); }
+            set { InsideRadius = Mathf.Clamp01(value); SetVerticesDirty(); }
         }
 
         public float rotation
         {
             get => Rotation;
-            set { Rotation = value % 360f; UpdateMaterialProperties(); }
+            set { Rotation = value % 360f; SetVerticesDirty(); }
         }
 
         // ------------------------------------------------------------------ //
         // Private state
         // ------------------------------------------------------------------ //
 
-        private static readonly int sr_PropFillAmount   = Shader.PropertyToID("_FillAmount");
-        private static readonly int sr_PropInsideRadius = Shader.PropertyToID("_InsideRadius");
-        private static readonly int sr_PropSides        = Shader.PropertyToID("_Sides");
-        private static readonly int sr_PropRotation     = Shader.PropertyToID("_Rotation");
-
-        private static Shader s_circleShader;
-        private Material _SharedMat;   // owns the Material (we create it)
+        private static Shader   s_circleShader;
+        private static Material s_SharedMat; // one Material shared by every instance — enables UI batching
 
         // ------------------------------------------------------------------ //
         // Initialisation
@@ -101,7 +98,6 @@ namespace JANOARG.Client.UI
         {
             base.OnEnable();
             EnsureMaterial();
-            UpdateMaterialProperties();
         }
 
         private void EnsureMaterial()
@@ -116,11 +112,11 @@ namespace JANOARG.Client.UI
                 return;
             }
 
-            if (_SharedMat == null)
-            {
-                _SharedMat = new Material(s_circleShader) { hideFlags = HideFlags.HideAndDontSave };
-                material = _SharedMat;
-            }
+            if (s_SharedMat == null)
+                s_SharedMat = new Material(s_circleShader) { hideFlags = HideFlags.HideAndDontSave };
+
+            if (material != s_SharedMat)
+                material = s_SharedMat;
         }
 
         // ------------------------------------------------------------------ //
@@ -134,33 +130,19 @@ namespace JANOARG.Client.UI
             var rect   = rectTransform.rect;
             var color32 = color;
 
+            // Per-instance circle params packed into uv1 (x=FillAmount, y=InsideRadius,
+            // z=Sides, w=Rotation) — identical on all 4 verts, read by the shader instead
+            // of a material uniform, so every GraphicCircleGPU can share one Material.
+            Vector4 circleParams = new(FillAmount, InsideRadius, Sides, Rotation);
+
             // Four corners, UVs in [0,1]
-            vh.AddVert(new Vector3(rect.xMin, rect.yMin), color32, new Vector2(0, 0));
-            vh.AddVert(new Vector3(rect.xMin, rect.yMax), color32, new Vector2(0, 1));
-            vh.AddVert(new Vector3(rect.xMax, rect.yMax), color32, new Vector2(1, 1));
-            vh.AddVert(new Vector3(rect.xMax, rect.yMin), color32, new Vector2(1, 0));
+            vh.AddVert(new Vector3(rect.xMin, rect.yMin), color32, new Vector2(0, 0), circleParams, Vector3.zero, Vector4.zero);
+            vh.AddVert(new Vector3(rect.xMin, rect.yMax), color32, new Vector2(0, 1), circleParams, Vector3.zero, Vector4.zero);
+            vh.AddVert(new Vector3(rect.xMax, rect.yMax), color32, new Vector2(1, 1), circleParams, Vector3.zero, Vector4.zero);
+            vh.AddVert(new Vector3(rect.xMax, rect.yMin), color32, new Vector2(1, 0), circleParams, Vector3.zero, Vector4.zero);
 
             vh.AddTriangle(0, 1, 2);
             vh.AddTriangle(2, 3, 0);
-
-            // Sync shader params whenever the mesh is rebuilt (covers initial
-            // population as well as inspector-driven dirty-marks).
-            UpdateMaterialProperties();
-        }
-
-        // ------------------------------------------------------------------ //
-        // Shader parameter sync
-        // ------------------------------------------------------------------ //
-
-        private void UpdateMaterialProperties()
-        {
-            if (_SharedMat == null) EnsureMaterial();
-            if (_SharedMat == null) return;
-
-            _SharedMat.SetFloat(sr_PropFillAmount,   FillAmount);
-            _SharedMat.SetFloat(sr_PropInsideRadius, InsideRadius);
-            _SharedMat.SetFloat(sr_PropSides,        Sides);
-            _SharedMat.SetFloat(sr_PropRotation,     Rotation);
         }
 
         // ------------------------------------------------------------------ //
@@ -176,27 +158,8 @@ namespace JANOARG.Client.UI
             InsideRadius = Mathf.Clamp01(InsideRadius);
             Rotation     = Rotation % 360f;
             EnsureMaterial();
-            UpdateMaterialProperties();
             SetVerticesDirty();
         }
 #endif
-
-        // ------------------------------------------------------------------ //
-        // Cleanup
-        // ------------------------------------------------------------------ //
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            if (_SharedMat != null)
-            {
-#if UNITY_EDITOR
-                DestroyImmediate(_SharedMat);
-#else
-                Destroy(_SharedMat);
-#endif
-                _SharedMat = null;
-            }
-        }
     }
 }
