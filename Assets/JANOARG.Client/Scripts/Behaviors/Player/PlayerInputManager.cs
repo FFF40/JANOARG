@@ -449,6 +449,24 @@ public class PlayerInputManager : MonoBehaviour
 
     public readonly List<TouchClass> TouchClasses = new();
 
+    /// <summary>
+    /// Fully clears input state for a chart retry/reload. Must be called before the
+    /// player's lanes/HitPlayers are destroyed — a HoldNoteClass whose HitPlayer gets
+    /// destroyed out from under it (e.g. by Destroy(lane.gameObject) on retry) never
+    /// goes through PurgeHitPlayer, so its dedicated judge-effect pool would otherwise
+    /// leak permanently instead of being returned.
+    /// </summary>
+    public void ResetForRetry()
+    {
+        foreach (HoldNoteClass holdNoteEntry in HoldQueue)
+            holdNoteEntry.ReturnDedicatedEffects();
+
+        HoldQueue.Clear();
+        HitQueue.Clear();
+        DiscreteHitQueue.Clear();
+        TouchClasses.Clear();
+    }
+
     private bool
         _InitLog = true; // log only once on PlayerScreen initialization (we don't want this to spam every millisecond,
 

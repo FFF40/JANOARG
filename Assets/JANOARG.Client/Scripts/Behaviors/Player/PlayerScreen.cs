@@ -541,6 +541,17 @@ namespace JANOARG.Client.Behaviors.Player
                     float cueTime = laneSpeed > 0.0001f
                         ? instancedLane.TimeStamps[0] - VISIBILITY_DISTANCE / laneSpeed - GRACE_TIME
                         : float.NegativeInfinity;
+
+                    // A lane's own Position/Rotation storyboard (e.g. a decorative
+                    // Group-driven "flight") can start well before its LaneSteps do — make
+                    // sure it's promoted early enough to actually play that animation
+                    // instead of being activated after it's already finished.
+                    if (instancedLane.Current.Storyboard.Timestamps.Count > 0)
+                    {
+                        float earliestStoryboardTime = sTargetSong.Timing.ToSeconds(instancedLane.Current.Storyboard.Timestamps[0].Offset);
+                        cueTime = Mathf.Min(cueTime, earliestStoryboardTime - GRACE_TIME);
+                    }
+
                     _PendingLanes.Add((cueTime, instancedLane));
 
                     foreach (HitObject laneHitobject in instancedLane.Original.Objects)

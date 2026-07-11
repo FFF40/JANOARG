@@ -183,8 +183,22 @@ namespace JANOARG.Client.Behaviors.Player
             }
             sr_TimestampRemove.End();
 
-            // Attempt to cull finished lane
-            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time && HitObjects.Count == 0)
+            // Attempt to cull finished lane. LaneSteps timing alone isn't a reliable "safe to
+            // remove" signal for decorative Group-driven lanes (e.g. meteors): their LaneSteps
+            // are just a timing trick, while what's actually keeping them visually relevant is
+            // their own Position/Rotation storyboard. Also require that storyboard to have
+            // fully finished advancing before culling.
+            bool storyboardFinished = true;
+            foreach (Timestamp ts in Current.Storyboard.Timestamps)
+            {
+                if (beat < ts.Offset + ts.Duration)
+                {
+                    storyboardFinished = false;
+                    break;
+                }
+            }
+
+            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time && HitObjects.Count == 0 && storyboardFinished)
             {
                 if (TimeStamps[^1] < time)
                 {
@@ -209,8 +223,8 @@ namespace JANOARG.Client.Behaviors.Player
             if (hasSecondLaneStep)
                 Current.LaneSteps[1].Advance(beat);
 
-            // Consume dirty flags from storyboard changes as soon as we know about them
-            // (previously done further below, after the mesh was already rebuilt).
+            // Consume dirty flags from storyboard changes as soon as we know about them, so
+            // they're available before deciding whether to skip recompute below.
             bool laneStepDirtyThisFrame = false;
             if (Current.LaneSteps[0].IsDirty)
             {
@@ -251,27 +265,38 @@ namespace JANOARG.Client.Behaviors.Player
             // being fully recomputed every frame instead of getting permanently frozen as
             // invisible the instant this branch is reached once.
 
+            // Z position a lane step's own speed would put us at by point x (seconds).
+            float f_scrollZ(float x) => x * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed;
+
             // Cache last position point (prevent ArgumentOutOfRangeException)
             float lastPositionPoints = PositionPoints.Count > 0 ? PositionPoints[^1] : 0;
-            
-            // Calculate the current Z position
+
+            // Calculate the current Z position — clamp to the last remaining timestamp so a
+            // lane kept alive past its LaneSteps (e.g. one still finishing its own storyboard)
+            // freezes there instead of extrapolating its last step's speed forever.
+            float scrollTime = Mathf.Min(time, TimeStamps[^1]);
             if (TimeStamps.Count <= 1 || TimeStamps[0] > time)
-                CurrentPosition = time * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed;
+                CurrentPosition = f_scrollZ(time);
             else
                 if (PositionPoints.Count != 0)
-                    CurrentPosition = (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0];
+                    CurrentPosition = (scrollTime - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0];
                 else
-                    CurrentPosition = (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + lastPositionPoints;
+                    CurrentPosition = (scrollTime - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + lastPositionPoints;
 
             // Calculate the current progress between our two nearest lane step time
             float progress = TimeStamps.Count <= 1
                 ? 0
                 : Mathf.InverseLerp(TimeStamps[0], TimeStamps[1], time);
 
-            // Since the game calculate the current distance scrolled by interpolating two position points
-            // this ensures we have at least 2 position points
-            if (PositionPoints.Count <= 1)
-                PositionPoints.Add(TimeStamps[0] * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed);
+            // Seed the first position point (the Z position of LaneSteps[0]) and, until the
+            // lane actually reaches that step, keep it synced to the step's *current*
+            // storyboarded speed — a lane whose Speed storyboard changes before arrival (e.g.
+            // scroll speed dropping to 0 right as a separate Position storyboard takes over)
+            // would otherwise sit far behind a stale anchor and fail the in-range check.
+            if (PositionPoints.Count == 0)
+                PositionPoints.Add(f_scrollZ(TimeStamps[0]));
+            else if (TimeStamps[0] > time)
+                PositionPoints[0] = f_scrollZ(TimeStamps[0]);
             
             sr_MeshCalc.End();
 
