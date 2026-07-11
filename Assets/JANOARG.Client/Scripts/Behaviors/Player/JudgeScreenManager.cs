@@ -47,9 +47,13 @@ namespace JANOARG.Client.Behaviors.Player
                 judgeScreenEffects = new Stack<JudgeScreenEffect>(_totalMaxInstances);
                 for (int i = 0; i < _totalMaxInstances; i++)
                 {
-                    var effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreenHolder);
+                    // Stay parented under JudgeScreen permanently — pooled instances are
+                    // hidden via CanvasGroup.alpha instead of SetActive/SetParent, since
+                    // both of those force a full UGUI canvas rebatch (Canvas.BuildBatch)
+                    // on every borrow/return, which spikes under heavy hit density.
+                    var effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
                     judgeScreenEffects.Push(effect);
-                    effect.gameObject.SetActive(false);
+                    HideEffect(effect);
                 }
             }
         }
@@ -105,9 +109,8 @@ namespace JANOARG.Client.Behaviors.Player
                     return null;
                 }
 
-                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
                 DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
-                effect.gameObject.SetActive(true);
+                ShowEffect(effect);
 
                 sr_SetColor.Begin();
                 effect.SetColor(color);
@@ -169,10 +172,23 @@ namespace JANOARG.Client.Behaviors.Player
         /// </summary>
         public void ReturnEffect(JudgeScreenEffect effect)
         {
-            effect.gameObject.SetActive(false);
-            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreenHolder);
+            HideEffect(effect);
             judgeScreenEffects.Push(effect);
             _totalInstances--;
+        }
+
+        // Visibility toggle via CanvasGroup instead of SetActive/SetParent — both of
+        // those dirty the whole canvas's batched geometry; alpha/raycast changes don't.
+        private static void ShowEffect(JudgeScreenEffect effect)
+        {
+            effect.Group.alpha = 1;
+            effect.Group.blocksRaycasts = true;
+        }
+
+        private static void HideEffect(JudgeScreenEffect effect)
+        {
+            effect.Group.alpha = 0;
+            effect.Group.blocksRaycasts = false;
         }
 
         // -----------------------------------------------------------------
@@ -209,12 +225,11 @@ namespace JANOARG.Client.Behaviors.Player
                     return null;
                 }
 
-                effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
                 _totalInstances++;
             }
 
             DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
-            effect.gameObject.SetActive(true);
+            ShowEffect(effect);
             effect.SetColor(color);
             effect.Tick(0);
             return effect;
