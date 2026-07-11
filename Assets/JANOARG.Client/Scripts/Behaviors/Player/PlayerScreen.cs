@@ -535,11 +535,17 @@ namespace JANOARG.Client.Behaviors.Player
 
                     // Defer this lane until it's actually about to be relevant instead of
                     // updating it every frame from the moment it's loaded — see CueTime.
+                    // VISIBILITY_DISTANCE/laneSpeed converts the mesh's 200-unit visible
+                    // window into a lead time, but for very slow lanes that lead time blows
+                    // up to minutes — cap it so slow lanes still get promoted close to their
+                    // actual cue instead of at song start (where CurrentPosition's own
+                    // time-since-zero formula hasn't caught up yet, misplacing the mesh).
                     const float VISIBILITY_DISTANCE = 200f;
                     const float GRACE_TIME = 5f;
+                    const float MAX_LEAD_TIME = 5f;
                     float laneSpeed = Math.Abs(instancedLane.Current.LaneSteps[0].Speed) * Speed;
                     float cueTime = laneSpeed > 0.0001f
-                        ? instancedLane.TimeStamps[0] - VISIBILITY_DISTANCE / laneSpeed - GRACE_TIME
+                        ? instancedLane.TimeStamps[0] - Mathf.Min(VISIBILITY_DISTANCE / laneSpeed, MAX_LEAD_TIME) - GRACE_TIME
                         : float.NegativeInfinity;
 
                     // A lane's own Position/Rotation storyboard (e.g. a decorative
@@ -682,23 +688,24 @@ namespace JANOARG.Client.Behaviors.Player
 
         private struct EventNote
         {
-            public float      Beat;
-            public HitObject  HitObject;
-            public LanePlayer Lane;
-
+            public float     Beat;
+            public HitObject HitObject;
         }
 
         private IEnumerator SimulNoteChecker()
         {
             Debug.Log("SimulNoteChecker started");
-            
-            
+
+
             var events = new List<EventNote>();
-            
-            foreach (var lane in Lanes)
-            foreach (var hitObject in lane.Original.Objects)
+
+            // Use the chart's full lane data, not the runtime `Lanes` list — lanes are only
+            // promoted into `Lanes` near their CueTime during gameplay (see _PendingLanes),
+            // so at load time (when this runs) `Lanes` is still empty.
+            foreach (var lane in sTargetChart.Data.Lanes)
+            foreach (var hitObject in lane.Objects)
             {
-                events.Add(new EventNote(){Beat = hitObject.Offset, HitObject = hitObject, Lane = lane});
+                events.Add(new EventNote(){Beat = hitObject.Offset, HitObject = hitObject});
                 hitObject.IsSimultaneous = false;
             }
 

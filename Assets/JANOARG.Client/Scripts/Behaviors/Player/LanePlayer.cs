@@ -122,6 +122,14 @@ namespace JANOARG.Client.Behaviors.Player
 
                 UpdateHitObjects(time, beat);
             }
+            else if (transform.gameObject.activeSelf)
+            {
+                // Fail safe: a lane promoted too early (e.g. a very slow lane whose
+                // distance-based cueTime lead time undershoots) should stay hidden
+                // instead of rendering its mesh at whatever position CurrentPosition
+                // happens to be before it has a meaningful trajectory to follow.
+                transform.gameObject.SetActive(false);
+            }
 
             sr_LaneUpdateSelf.End();
         }
