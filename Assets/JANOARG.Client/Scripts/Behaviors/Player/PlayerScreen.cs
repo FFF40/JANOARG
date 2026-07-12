@@ -938,9 +938,10 @@ namespace JANOARG.Client.Behaviors.Player
             PlayerInputManager.sInstance.UpdateInput();
             sr_UpdateInputCall.End();
 
-            // Show ending animation; the failsafe on bugs is on following:
-            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
-            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || (float)CurrentTime / Music.clip.length >= 1) && !ResultExec)
+            bool clauseHitsExhausted = HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0;
+            bool clauseSongOver = (float)CurrentTime / Music.clip.length >= 1;
+
+            if ((clauseHitsExhausted || clauseNoLanes || clauseSongOver) && !ResultExec)
             {
                 ComputeAndSaveMedianOffset();
                 PlayerScreenResult.sMain.StartEndingAnim();
