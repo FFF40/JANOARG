@@ -655,11 +655,19 @@ public class PlayerInputManager : MonoBehaviour
                         endingTouch.QueuedHit.Current.Type == HitObject.HitType.Normal &&
                         !endingTouch.QueuedHit.Current.Flickable)
                     {
+                        HitPlayer queuedHit = endingTouch.QueuedHit;
+
                         Player.Hit(
-                            endingTouch.QueuedHit,
-                            endingTouch.StartTime + Player.Settings.JudgmentOffset - endingTouch.QueuedHit.Time
+                            queuedHit,
+                            endingTouch.StartTime + Player.Settings.JudgmentOffset - queuedHit.Time
                         );
-                        endingTouch.QueuedHit.IsProcessed = true;
+
+                        // Player.Hit() can reenter PurgeHitPlayer (via RemoveHitPlayer, for any
+                        // non-hold note) and null out endingTouch.QueuedHit out from under us —
+                        // restore it so EnqueueHoldNote(endingTouch)'s own read still sees it.
+                        endingTouch.QueuedHit = queuedHit;
+
+                        queuedHit.IsProcessed = true;
                         EnqueueHoldNote(endingTouch);
                         endingTouch.QueuedHit = null;
                     }
@@ -1003,20 +1011,32 @@ public class PlayerInputManager : MonoBehaviour
                     !touch.QueuedHit.Current.Flickable
                 )
                 {
+                    HitPlayer queuedHit = touch.QueuedHit;
+
                     Player.Hit(
-                        touch.QueuedHit,
-                        touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time
+                        queuedHit,
+                        touch.StartTime + Player.Settings.JudgmentOffset - queuedHit.Time
                     );
 
                     //Debug.Log(
-                    //    $"Hit queued hitobject at {touch.StartTime + Player.Settings.JudgmentOffset - touch.QueuedHit.Time} for touch {touch.Touch.finger.index}.");
+                    //    $"Hit queued hitobject at {touch.StartTime + Player.Settings.JudgmentOffset - queuedHit.Time} for touch {touch.Touch.finger.index}.");
 
-                    touch.QueuedHit.IsProcessed = true; // Mark as hit
+                    // Player.Hit() can reenter PurgeHitPlayer (via RemoveHitPlayer, for any
+                    // non-hold note) and null out touch.QueuedHit out from under us — restore
+                    // it so the rest of this block, and EnqueueHoldNote(touch)'s own read of
+                    // touch.QueuedHit, still see the note that was actually just hit.
+                    touch.QueuedHit = queuedHit;
+
+                    queuedHit.IsProcessed = true; // Mark as hit
 
                     EnqueueHoldNote(touch);
-
-                    touch.QueuedHit = null; // Clear the queued hit
                 }
+
+                // QueuedHit only needs to live for the frame it was set in — whether it was resolved
+                // above, or left set as an occupancy marker by a flick-hit earlier this frame (see
+                // HitobjectProcessor's flick branch). Clearing it here, once per frame, frees the touch
+                // up for the next frame without ever leaving it claimable twice within this one.
+                touch.QueuedHit = null;
 
                 touch.Tapped = false; // Tap only lasts for a single frame
             }
@@ -1311,7 +1331,11 @@ public class PlayerInputManager : MonoBehaviour
                 touch.flickDirection = 0; // Clear stale angle so it doesn't falsely validate the next note
                 touch.LastFlickHitTime = Player.CurrentTime;
 
-                touch.QueuedHit = null;
+                // Mark the touch as occupied by this hitobject for the rest of the frame instead of
+                // freeing it — otherwise a second close-in-time/position note processed later in this
+                // same HitQueue pass would pass the "touch.QueuedHit != null" guard above and get
+                // hit by the same physical touch. Cleared once per frame alongside Tapped, below.
+                touch.QueuedHit = hitIteration;
                 touch.DiscreteHitobjectIsInRange = false;
 
                 if (hitIteration.Current.Type == HitObject.HitType.Normal)
@@ -1496,8 +1520,8 @@ public class PlayerInputManager : MonoBehaviour
                     if (distance < hitIteration.HitCoord.Radius)
                     {
                         bool shouldAssign =
-                            !hitIteration
-                                .InDiscreteHitQueue; // Slow down on the assigning, due to the nature of catch notes
+                            !hitIteration.InDiscreteHitQueue && // Slow down on the assigning, due to the nature of catch notes
+                            touch.QueuedHit == null; // This touch is already occupied by another hitobject this frame
 
                         // being able to be spammed at lightspeed
 
@@ -1515,6 +1539,7 @@ public class PlayerInputManager : MonoBehaviour
                             hitIteration.InDiscreteHitQueue = true;
                             touch.DiscreteHitobjectDistance = distance;
                             touch.DiscreteHitobjectIsInRange = true;
+                            touch.QueuedHit = hitIteration; // Occupy this touch for the rest of the frame
                             alreadyHit = true;
                         }
                     }
