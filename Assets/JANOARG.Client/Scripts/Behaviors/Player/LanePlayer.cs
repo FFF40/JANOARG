@@ -702,10 +702,19 @@ namespace JANOARG.Client.Behaviors.Player
                     break;
                 }
             }
-            if (index <= 0 || PositionPoints.Count <= index)
+            // index == 0 means the hold head precedes the lane's first LaneStep (legal chart
+            // data — e.g. a hold offset a tick before its lane's own first step). Clamp to
+            // the first segment like Chartmaker's GetPartOfLane does instead of bailing;
+            // Mathf.InverseLerp below clamps progress to 0 for us. index < 0 (time past the
+            // lane's last step) still bails — clamping that case to the last segment
+            // resurrects finished holds as stray geometry at lane ends.
+            if (index < 0)
                 return;
 
             index = Mathf.Max(index, 1);
+
+            if (PositionPoints.Count <= index)
+                return;
 
             float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], (float)time);
             Vector3 previousStepStartPointPosition, previousStepEndPointPosition, currentStepStartPointPosition, currentStepEndPointPosition;
