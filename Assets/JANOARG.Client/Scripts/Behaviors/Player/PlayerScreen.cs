@@ -925,22 +925,14 @@ namespace JANOARG.Client.Behaviors.Player
                 Music.Pause();
 
             // Process input directly — no coroutine, no +1 frame latency
-            sr_HoldMeshLoop.Begin();
-            foreach (LanePlayer lane in Lanes)
-                foreach (HitPlayer hit in lane.HitObjects)
-                    // HoldMesh is now a permanent (pooled) child, so its existence no longer
-                    // implies this note is a hold — check the actual note data instead.
-                    if (hit.Current.HoldLength > 0)
-                        lane.UpdateHoldMesh(hit);
-            sr_HoldMeshLoop.End();
-
             sr_UpdateInputCall.Begin();
             PlayerInputManager.sInstance.UpdateInput();
             sr_UpdateInputCall.End();
 
-            // Show ending animation; the failsafe on bugs is on following:
-            // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
-            if (((HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0) || Lanes.Count == 0 || (float)CurrentTime / Music.clip.length >= 1) && !ResultExec)
+            bool clauseHitsExhausted = HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0;
+            bool clauseSongOver = (float)CurrentTime / Music.clip.length >= 1;
+
+            if ((clauseHitsExhausted || clauseNoLanes || clauseSongOver) && !ResultExec)
             {
                 ComputeAndSaveMedianOffset();
                 PlayerScreenResult.sMain.StartEndingAnim();
@@ -1040,6 +1032,21 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
             sr_LanesLoop.End();
+
+            // Rebuilds hold tail meshes. Must run after the lanes loop above (which advances
+            // each lane's storyboarded Speed/PositionPoints for this frame via UpdateSelf) —
+            // this used to run in Update(), one Unity phase earlier, so it read last frame's
+            // Speed/PositionPoints while the note head (positioned during this same lanes
+            // loop) read this frame's — invisible normally, but visibly desynced whenever
+            // Speed is storyboard-ramping (e.g. a fast scroll-speed transition).
+            sr_HoldMeshLoop.Begin();
+            foreach (LanePlayer lane in Lanes)
+                foreach (HitPlayer hit in lane.HitObjects)
+                    // HoldMesh is now a permanent (pooled) child, so its existence no longer
+                    // implies this note is a hold — check the actual note data instead.
+                    if (hit.Current.HoldLength > 0)
+                        lane.UpdateHoldMesh(hit);
+            sr_HoldMeshLoop.End();
         }
 
         public void Resync()

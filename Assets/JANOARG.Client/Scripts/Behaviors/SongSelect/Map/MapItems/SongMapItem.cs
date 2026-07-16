@@ -11,6 +11,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
     {
 
         [Space]
+        [JAPSPicker]
         public string TargetID;
 
         [NonSerialized]
