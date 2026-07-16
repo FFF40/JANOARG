@@ -1242,6 +1242,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
             cameraTransform.position = target.position;
 
+            CommonSys.sMain.MainCamera.fieldOfView = 60;
+
             yield return Ease.Animate(1, (t) =>
             {
                 float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
@@ -1251,7 +1253,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 if (IsMapView)
                 {
                     MapUIGroup.alpha = Mathf.Ceil(t);
-                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(1 - lerp1, 1.6f));
+                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(1 - lerp1, 2f));
                     MapManager.UpdateAllPositions();
                 }
                 else
