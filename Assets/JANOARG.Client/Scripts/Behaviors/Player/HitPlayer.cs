@@ -45,12 +45,29 @@ namespace JANOARG.Client.Behaviors.Player
         public bool IsProcessed;
         public bool IsTapped;
 
+        // Set when this instance is handed back to the PlayerScreen pool. Since pooled
+        // instances are deactivated rather than Destroyed, code that used to rely on
+        // Unity's "fake null" check (Destroy having run) to detect a finished note must
+        // check this instead.
+        public bool IsReturned;
+
         public void Init()
         {
-            
+            // Reset per-note lifecycle flags unconditionally so a reused (pooled) instance
+            // never inherits state from whatever note previously occupied it.
+            InDiscreteHitQueue = false;
+            PendingHoldQueue = false;
+            IsProcessed = false;
+            IsTapped = false;
+            IsReturned = false;
+
             if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.HitStyles.Count)
             {
                 HitStyleManager style = PlayerScreen.sMain.HitStyles[Current.StyleIndex];
+
+                Center.enabled =
+                    LeftPoint.enabled =
+                        RightPoint.enabled = true;
 
                 LeftPoint.sharedMaterial =
                     RightPoint.sharedMaterial =
@@ -69,11 +86,11 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
                 {
-                    SimultaneousHighlight.sharedMaterial = 
-                        Current.Type == HitObject.HitType.Catch 
+                    SimultaneousHighlight.sharedMaterial =
+                        Current.Type == HitObject.HitType.Catch
                             ? style.CatchHighlightMaterial : style.NormalHighlightMaterial;
-                    SimultaneousGlow.sharedMaterial = 
-                        Current.Type == HitObject.HitType.Catch 
+                    SimultaneousGlow.sharedMaterial =
+                        Current.Type == HitObject.HitType.Catch
                             ? style.CatchHighlightGlowMaterial : style.NormalHighlightGlowMaterial;
                 }
 
@@ -84,7 +101,12 @@ namespace JANOARG.Client.Behaviors.Player
                     FlickMesh.sharedMesh = float.IsFinite(Current.FlickDirection)
                         ? PlayerScreen.sMain.ArrowFlickIndicator : PlayerScreen.sMain.FreeFlickIndicator;
 
-                    FlickRenderer.sharedMaterial = Center.sharedMaterial;
+                    // Follow normal material (matches Chartmaker)
+                    FlickRenderer.sharedMaterial = style.NormalMaterial;
+                }
+                else
+                {
+                    FlickMesh.gameObject.SetActive(false);
                 }
             }
             else
@@ -92,7 +114,14 @@ namespace JANOARG.Client.Behaviors.Player
                 Center.enabled =
                     LeftPoint.enabled =
                         RightPoint.enabled = false;
+
+                FlickMesh.gameObject.SetActive(false);
             }
+
+            // HoldMesh is a permanent (pooled) child once created — make sure a reused
+            // instance doesn't keep showing a hold tail for a note that isn't a hold.
+            if (HoldMesh != null && Current.HoldLength <= 0)
+                HoldMesh.gameObject.SetActive(false);
 
             UpdateMesh();
         }

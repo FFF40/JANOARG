@@ -9,6 +9,7 @@ using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;

@@ -8,6 +8,7 @@ using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.Map;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using JANOARG.Client.Data.Playlist;
 using UnityEngine;
 

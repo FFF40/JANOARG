@@ -9,7 +9,9 @@ using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
+using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,6 +23,13 @@ namespace JANOARG.Client.Behaviors.Player
 
     public class PlayerScreen : MonoBehaviour
     {
+        static readonly ProfilerMarker sr_LaneStylesUpdate = new("PlayerScreen.LateUpdate: LaneStyles Loop");
+        static readonly ProfilerMarker sr_HitStylesUpdate = new("PlayerScreen.LateUpdate: HitStyles Loop");
+        static readonly ProfilerMarker sr_CameraAdvance = new("PlayerScreen.LateUpdate: Camera Advance");
+        static readonly ProfilerMarker sr_SpawnHitEffect = new("PlayerScreen.SpawnHitEffect");
+        static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputManager.UpdateInput");
+        static readonly ProfilerMarker sr_HoldMeshLoop = new("PlayerScreen.Update: Hold Mesh Loop");
+        static readonly ProfilerMarker sr_LanesLoop = new("PlayerScreen.LateUpdate: Lanes Loop (Total)");
 
         public static PlayerScreen sMain;
 
@@ -75,6 +84,12 @@ namespace JANOARG.Client.Behaviors.Player
         public RectTransform JudgeScreen;
         [Space]
         public JudgeScreenManager JudgeScreenManager;
+        [Space]
+        // Persistent parent for pooled HitPlayer instances awaiting reuse.
+        // Must NOT be a child of any LanePlayer's Holder, since lanes get
+        // wholesale-destroyed on retry (see LoadChart) and would take pooled
+        // instances down with them.
+        public Transform HitPlayerPoolHolder;
         [Space]
         public TMP_Text PauseLabel;
 
@@ -167,6 +182,13 @@ namespace JANOARG.Client.Behaviors.Player
         [HideInInspector]
         public List<LanePlayer> Lanes = new();
 
+        // Lanes not yet relevant enough to be updated every frame, sorted ascending by
+        // CueTime. _PendingLaneCursor only ever moves forward — each lane is examined
+        // exactly once, right when it becomes due, instead of re-scanning the whole
+        // (potentially 1000+ lane) list every frame to find who's newly relevant.
+        private readonly List<(float CueTime, LanePlayer Lane)> _PendingLanes = new();
+        private int _PendingLaneCursor;
+
         private double _LastDSPTime;
         private double _MusicStartDSP;  // DSP time at which Music.PlayScheduled was called
         private const double _SPIKE_THRESHOLD = 0.1; // 100ms — above this, treat as a spike
@@ -212,8 +234,54 @@ namespace JANOARG.Client.Behaviors.Player
             InitFlickMeshes();
             SetInterfaceColor(Color.clear);
             SongProgress.value = 0;
+            PrewarmHitPlayerPool();
 
             StartCoroutine(LoadChart());
+        }
+
+        // -----------------------------------------------------------------
+        // HitPlayer pool — avoids an Instantiate/Destroy pair per note.
+        // Pre-warmed to a size that covers typical dense charts; grows on
+        // demand (no hard cap) since note density varies a lot per chart.
+        // -----------------------------------------------------------------
+        private const int HitPlayerPoolPrewarm = 64;
+        private readonly Stack<HitPlayer> _HitPlayerPool = new();
+
+        private void PrewarmHitPlayerPool()
+        {
+            for (int i = 0; i < HitPlayerPoolPrewarm; i++)
+            {
+                HitPlayer player = Instantiate(HitSample, HitPlayerPoolHolder);
+                player.gameObject.SetActive(false);
+                _HitPlayerPool.Push(player);
+            }
+        }
+
+        public HitPlayer BorrowHitPlayer(Transform parent)
+        {
+            HitPlayer player = _HitPlayerPool.Count > 0
+                ? _HitPlayerPool.Pop()
+                : Instantiate(HitSample, HitPlayerPoolHolder);
+
+            player.transform.SetParent(parent);
+            player.gameObject.SetActive(true);
+            return player;
+        }
+
+        public void ReturnHitPlayer(HitPlayer player)
+        {
+            player.IsReturned = true;
+
+            if (player.HoldMesh != null)
+            {
+                if (player.HoldMesh.mesh != null)
+                    player.HoldMesh.mesh.Clear();
+                player.HoldMesh.gameObject.SetActive(false);
+            }
+
+            player.gameObject.SetActive(false);
+            player.transform.SetParent(HitPlayerPoolHolder);
+            _HitPlayerPool.Push(player);
         }
 
         private         int  _TotalObjects;
@@ -343,8 +411,15 @@ namespace JANOARG.Client.Behaviors.Player
                     Destroy(lane.gameObject);
                 }
 
+                foreach ((float _, LanePlayer lane) in _PendingLanes)
+                {
+                    if (lane != null)
+                        Destroy(lane.gameObject);
+                }
 
                 Lanes.Clear();
+                _PendingLanes.Clear();
+                _PendingLaneCursor = 0;
             }
             else
             {
@@ -457,7 +532,33 @@ namespace JANOARG.Client.Behaviors.Player
                     instancedLane.Current = sCurrentChart.Lanes[a];
 
                     instancedLane.Init();
-                    Lanes.Add(instancedLane);
+
+                    // Defer this lane until it's actually about to be relevant instead of
+                    // updating it every frame from the moment it's loaded — see CueTime.
+                    // VISIBILITY_DISTANCE/laneSpeed converts the mesh's 200-unit visible
+                    // window into a lead time, but for very slow lanes that lead time blows
+                    // up to minutes — cap it so slow lanes still get promoted close to their
+                    // actual cue instead of at song start (where CurrentPosition's own
+                    // time-since-zero formula hasn't caught up yet, misplacing the mesh).
+                    const float VISIBILITY_DISTANCE = 200f;
+                    const float GRACE_TIME = 5f;
+                    const float MAX_LEAD_TIME = 5f;
+                    float laneSpeed = Math.Abs(instancedLane.Current.LaneSteps[0].Speed) * Speed;
+                    float cueTime = laneSpeed > 0.0001f
+                        ? instancedLane.TimeStamps[0] - Mathf.Min(VISIBILITY_DISTANCE / laneSpeed, MAX_LEAD_TIME) - GRACE_TIME
+                        : float.NegativeInfinity;
+
+                    // A lane's own Position/Rotation storyboard (e.g. a decorative
+                    // Group-driven "flight") can start well before its LaneSteps do — make
+                    // sure it's promoted early enough to actually play that animation
+                    // instead of being activated after it's already finished.
+                    if (instancedLane.Current.Storyboard.Timestamps.Count > 0)
+                    {
+                        float earliestStoryboardTime = sTargetSong.Timing.ToSeconds(instancedLane.Current.Storyboard.Timestamps[0].Offset);
+                        cueTime = Mathf.Min(cueTime, earliestStoryboardTime - GRACE_TIME);
+                    }
+
+                    _PendingLanes.Add((cueTime, instancedLane));
 
                     foreach (HitObject laneHitobject in instancedLane.Original.Objects)
                     {
@@ -541,7 +642,11 @@ namespace JANOARG.Client.Behaviors.Player
                         if (!instantiatedLane[i])
                         {
                             err++;
-                            errDetails.Add($"Lane {(string.IsNullOrEmpty(Lanes[i].Current.Name) ? i : Lanes[i].Current.Name)} depends on {Lanes[i].Current.Group}");
+                            // Use the source chart data here, not Lanes[i] — a lane that
+                            // failed to instantiate was never added to Lanes, so Lanes[i]
+                            // would refer to an unrelated (or out-of-range) lane.
+                            Lane failedLane = sTargetChart.Data.Lanes[i];
+                            errDetails.Add($"Lane {(string.IsNullOrEmpty(failedLane.Name) ? i.ToString() : failedLane.Name)} depends on {failedLane.Group}");
                         }
 
                     string f_printDepDetails()
@@ -572,30 +677,35 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
 
+            // One-time sort by CueTime so LateUpdate's promotion cursor can just walk
+            // forward from index 0 instead of scanning for the next-due lane every frame.
+            _PendingLanes.Sort((a, b) => a.CueTime.CompareTo(b.CueTime));
+
             _LoadState[0] = true;
 
             yield return new WaitForEndOfFrame();
         }
-        
+
         private struct EventNote
         {
-            public float      Beat;
-            public HitObject  HitObject;
-            public LanePlayer Lane;
-
+            public float     Beat;
+            public HitObject HitObject;
         }
 
         private IEnumerator SimulNoteChecker()
         {
             Debug.Log("SimulNoteChecker started");
-            
-            
+
+
             var events = new List<EventNote>();
-            
-            foreach (var lane in Lanes)
-            foreach (var hitObject in lane.Original.Objects)
+
+            // Use the chart's full lane data, not the runtime `Lanes` list — lanes are only
+            // promoted into `Lanes` near their CueTime during gameplay (see _PendingLanes),
+            // so at load time (when this runs) `Lanes` is still empty.
+            foreach (var lane in sTargetChart.Data.Lanes)
+            foreach (var hitObject in lane.Objects)
             {
-                events.Add(new EventNote(){Beat = hitObject.Offset, HitObject = hitObject, Lane = lane});
+                events.Add(new EventNote(){Beat = hitObject.Offset, HitObject = hitObject});
                 hitObject.IsSimultaneous = false;
             }
 
@@ -815,11 +925,18 @@ namespace JANOARG.Client.Behaviors.Player
                 Music.Pause();
 
             // Process input directly — no coroutine, no +1 frame latency
+            sr_HoldMeshLoop.Begin();
             foreach (LanePlayer lane in Lanes)
                 foreach (HitPlayer hit in lane.HitObjects)
-                    if (hit.HoldMesh)
+                    // HoldMesh is now a permanent (pooled) child, so its existence no longer
+                    // implies this note is a hold — check the actual note data instead.
+                    if (hit.Current.HoldLength > 0)
                         lane.UpdateHoldMesh(hit);
+            sr_HoldMeshLoop.End();
+
+            sr_UpdateInputCall.Begin();
             PlayerInputManager.sInstance.UpdateInput();
+            sr_UpdateInputCall.End();
 
             // Show ending animation; the failsafe on bugs is on following:
             // Remaining total hitobject AND Current input's hold -> Remaining lane count -> End of song
@@ -853,6 +970,7 @@ namespace JANOARG.Client.Behaviors.Player
             if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
                 SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
+            sr_LaneStylesUpdate.Begin();
             for (var a = 0; a < LaneStyles.Count; a++)
             {
                 sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
@@ -862,37 +980,50 @@ namespace JANOARG.Client.Behaviors.Player
                     TransparentMeshLaneIndexes.Remove(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a == 0 && !TransparentMeshLaneIndexes.Contains(a))
                     TransparentMeshLaneIndexes.Add(a);
-                
+
                 if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a == 0 && !TransparentMeshJudgeIndexes.Contains(a))
                     TransparentMeshJudgeIndexes.Add(a);
                 else if (sCurrentChart.Palette.LaneStyles[a].JudgeColor.a != 0 && TransparentMeshJudgeIndexes.Contains(a))
                     TransparentMeshJudgeIndexes.Remove(a);
             }
+            sr_LaneStylesUpdate.End();
 
+            sr_HitStylesUpdate.Begin();
             for (var a = 0; a < HitStyles.Count; a++)
             {
                 sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
                 HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a]);
             }
+            sr_HitStylesUpdate.End();
 
+            sr_CameraAdvance.Begin();
             sCurrentChart.Camera.Advance(visualBeat);
 
             Camera pseudoCamera = CommonSys.sMain.MainCamera;
             pseudoCamera.transform.position = sCurrentChart.Camera.CameraPivot;
             pseudoCamera.transform.eulerAngles = sCurrentChart.Camera.CameraRotation;
             pseudoCamera.transform.Translate(Vector3.back * sCurrentChart.Camera.PivotDistance);
+            sr_CameraAdvance.End();
 
             foreach (LaneGroupPlayer group in LaneGroups)
                 group.UpdateSelf(visualTime, visualBeat);
 
+            // Promote pending lanes into the active set once they're due — each lane is
+            // examined exactly once here, right as it becomes relevant, instead of every
+            // lane being rechecked every frame regardless of how far away it still is.
+            while (_PendingLaneCursor < _PendingLanes.Count &&
+                   _PendingLanes[_PendingLaneCursor].CueTime <= visualTime)
+            {
+                Lanes.Add(_PendingLanes[_PendingLaneCursor].Lane);
+                _PendingLaneCursor++;
+            }
+
+            sr_LanesLoop.Begin();
             for (int i = Lanes.Count - 1; i >= 0; i--)
             {
                 try
                 {
                     LanePlayer lane = Lanes[i];
-
-                    if (!HasTrivialLocalLaneMotion(lane) && lane.TimeStamps[0] - 5f > visualTime)
-                        continue;
 
                     lane.UpdateSelf(visualTime, visualBeat);
 
@@ -908,22 +1039,7 @@ namespace JANOARG.Client.Behaviors.Player
                     Lanes.RemoveAt(i);
                 }
             }
-        }
-
-        private static bool HasTrivialLocalLaneMotion(LanePlayer lane)
-        {
-            if (lane.Current == null) return true;
-
-            const float TRIVIAL_LANE_SPAN_THRESHOLD = 2f;
-            IReadOnlyList<LaneStep> laneSteps = lane.Current.LaneSteps;
-
-            if (laneSteps.Count <= 1) return true;
-
-            float span = Math.Abs(laneSteps[^1].Offset - laneSteps[0].Offset);
-            bool hasShortSpan = span < TRIVIAL_LANE_SPAN_THRESHOLD;
-            bool isGeometryLane = laneSteps.All(s => s.Speed == 0);
-
-            return hasShortSpan || isGeometryLane;
+            sr_LanesLoop.End();
         }
 
         public void Resync()
@@ -1075,24 +1191,22 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void RemoveHitPlayer(HitPlayer hitObject)
         {
-            if (hitObject.HoldMesh != null)
-            {
-                Destroy(hitObject.HoldMesh.mesh);
-                Destroy(hitObject.HoldMesh.gameObject);
-            }
-
-            if (hitObject.gameObject != null)
-                Destroy(hitObject.gameObject);
-
             hitObject.Lane.HitObjects.Remove(hitObject);
-
             HitsRemaining--;
+
+            // Scrub every queue/cache reference before returning to the pool — a pooled
+            // instance can be re-borrowed as soon as this same frame's LateUpdate, and any
+            // stale reference left behind would silently alias whatever note reuses it.
+            PlayerInputManager.sInstance.PurgeHitPlayer(hitObject);
+
+            ReturnHitPlayer(hitObject);
         }
 
         public void Hit(HitPlayer hitObject, double offset, bool spawnEffect = true)
         {
-            // In case of race condition
-            if (!hitObject)
+            // In case of race condition (also guards against a pooled instance already
+            // returned by another code path this same frame)
+            if (!hitObject || hitObject.IsReturned)
                 return;
             
             var hitType = hitObject.Current.Type;
@@ -1165,9 +1279,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void SpawnHitEffect(HitPlayer hitObject, float? accuracy)
         {
+            sr_SpawnHitEffect.Begin();
             var effect = sMain.JudgeScreenManager.BorrowEffect(hitObject, accuracy, sCurrentChart.Palette.InterfaceColor);
             var rt = (RectTransform)effect.transform;
             rt.position = hitObject.HitCoord.Position;
+            sr_SpawnHitEffect.End();
         }
 
         private void PlayHitSounds(HitPlayer hitObject, float? accuracy)

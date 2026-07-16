@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.Player
@@ -12,6 +13,8 @@ namespace JANOARG.Client.Behaviors.Player
     /// </summary>
     public class JudgeScreenManager : MonoBehaviour
     {
+        static readonly ProfilerMarker sr_BorrowEffect = new("JudgeScreenManager.BorrowEffect");
+        static readonly ProfilerMarker sr_SetColor = new("JudgeScreenManager.BorrowEffect: SetColor");
         // -----------------------------------------------------------------
         // Animation state — plain struct, lives on the stack / in the list.
         // No heap allocation per hit.
@@ -44,9 +47,13 @@ namespace JANOARG.Client.Behaviors.Player
                 judgeScreenEffects = new Stack<JudgeScreenEffect>(_totalMaxInstances);
                 for (int i = 0; i < _totalMaxInstances; i++)
                 {
-                    var effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreenHolder);
+                    // Stay parented under JudgeScreen permanently — pooled instances are
+                    // hidden via CanvasGroup.alpha instead of SetActive/SetParent, since
+                    // both of those force a full UGUI canvas rebatch (Canvas.BuildBatch)
+                    // on every borrow/return, which spikes under heavy hit density.
+                    var effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
                     judgeScreenEffects.Push(effect);
-                    effect.gameObject.SetActive(false);
+                    HideEffect(effect);
                 }
             }
         }
@@ -85,29 +92,40 @@ namespace JANOARG.Client.Behaviors.Player
         /// </summary>
         public JudgeScreenEffect BorrowEffect(HitPlayer hitobject, float? accuracy, Color color)
         {
-            if (_totalInstances > _totalMaxInstances)
-                return CreateEffect(hitobject, accuracy, color);
-
-            JudgeScreenEffect effect;
+            sr_BorrowEffect.Begin();
             try
             {
-                effect = judgeScreenEffects.Pop();
+                if (_totalInstances >= _totalMaxInstances)
+                    return CreateEffect(hitobject, accuracy, color);
+
+                JudgeScreenEffect effect;
+                try
+                {
+                    effect = judgeScreenEffects.Pop();
+                }
+                catch (InvalidOperationException e)
+                {
+                    Debug.LogWarning(e.Message + " Skipping effect.");
+                    return null;
+                }
+
+                DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
+                ShowEffect(effect);
+
+                sr_SetColor.Begin();
+                effect.SetColor(color);
+                sr_SetColor.End();
+
+                effect.Tick(0); // initialise visual state before first Update
+
+                _active.Add(new ActiveEffect { Effect = effect, Elapsed = 0f, IsOneShot = false });
+                _totalInstances++;
+                return effect;
             }
-            catch (InvalidOperationException e)
+            finally
             {
-                Debug.LogWarning(e.Message + " Skipping effect.");
-                return null;
+                sr_BorrowEffect.End();
             }
-
-            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreen);
-            DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
-            effect.gameObject.SetActive(true);
-            effect.SetColor(color);
-            effect.Tick(0); // initialise visual state before first Update
-
-            _active.Add(new ActiveEffect { Effect = effect, Elapsed = 0f, IsOneShot = false });
-            _totalInstances++;
-            return effect;
         }
         
         void DefineJudgeScreenEffect(HitPlayer hitobject, ref JudgeScreenEffect effect, float? accuracy)
@@ -154,10 +172,82 @@ namespace JANOARG.Client.Behaviors.Player
         /// </summary>
         public void ReturnEffect(JudgeScreenEffect effect)
         {
-            effect.gameObject.SetActive(false);
-            effect.transform.SetParent(PlayerScreen.sMain.JudgeScreenHolder);
+            HideEffect(effect);
             judgeScreenEffects.Push(effect);
             _totalInstances--;
+        }
+
+        // Visibility toggle via CanvasGroup instead of SetActive/SetParent — both of
+        // those dirty the whole canvas's batched geometry; alpha/raycast changes don't.
+        private static void ShowEffect(JudgeScreenEffect effect)
+        {
+            effect.Group.alpha = 1;
+            effect.Group.blocksRaycasts = true;
+        }
+
+        private static void HideEffect(JudgeScreenEffect effect)
+        {
+            effect.Group.alpha = 0;
+            effect.Group.blocksRaycasts = false;
+        }
+
+        // -----------------------------------------------------------------
+        // Dedicated (caller-driven) instances — for callers that need to hold onto
+        // and restart an effect's animation themselves (e.g. hold-tick pulsing)
+        // instead of a single fire-and-forget animation. Not added to _active, so
+        // JudgeScreenManager.Update() never touches these; the caller is responsible
+        // for calling Tick() itself and for calling ReturnDedicated() when done.
+        // -----------------------------------------------------------------
+
+        /// <summary>
+        /// Borrow an effect for caller-managed (repeated/restartable) animation.
+        /// Returns null only if the pool is exhausted and overflow instantiation also fails.
+        /// </summary>
+        public JudgeScreenEffect BorrowDedicated(HitPlayer hitobject, float? accuracy, Color color, out bool isOverflow)
+        {
+            isOverflow = _totalInstances >= _totalMaxInstances;
+
+            JudgeScreenEffect effect;
+            if (isOverflow)
+            {
+                Debug.LogWarning("JudgeScreenManager pool exhausted, creating new dedicated instance.");
+                effect = Instantiate(PlayerScreen.sMain.JudgeScreenSample, PlayerScreen.sMain.JudgeScreen);
+            }
+            else
+            {
+                try
+                {
+                    effect = judgeScreenEffects.Pop();
+                }
+                catch (InvalidOperationException e)
+                {
+                    Debug.LogWarning(e.Message + " Skipping effect.");
+                    return null;
+                }
+
+                _totalInstances++;
+            }
+
+            DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
+            ShowEffect(effect);
+            effect.SetColor(color);
+            effect.Tick(0);
+            return effect;
+        }
+
+        /// <summary>
+        /// Return an effect borrowed via BorrowDedicated. Overflow instances (created
+        /// when the pool was exhausted) are destroyed instead of pushed back.
+        /// </summary>
+        public void ReturnDedicated(JudgeScreenEffect effect, bool isOverflow)
+        {
+            if (isOverflow)
+            {
+                Destroy(effect.gameObject);
+                return;
+            }
+
+            ReturnEffect(effect);
         }
 
         // -----------------------------------------------------------------

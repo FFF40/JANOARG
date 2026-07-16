@@ -5,15 +5,6 @@ Shader "UI/Circle"
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
 
-        // Circle / polygon parameters — driven by GraphicCircleGPU via MaterialPropertyBlock
-        _FillAmount   ("Fill Amount",    Range(0,1)) = 1.0
-        _InsideRadius ("Inside Radius",  Range(0,1)) = 0.0
-        // Number of polygon sides. 0 = smooth circle (SDF).
-        // 3..N = polygon with N sides (exact, no aliasing).
-        _Sides        ("Sides (0=circle)", Float) = 0
-        // Rotation offset in degrees (0 = top / 12-o'clock)
-        _Rotation     ("Rotation (deg)", Float) = 0
-
         // --- Standard Unity UI boilerplate ---
         _StencilComp      ("Stencil Comparison", Float) = 8
         _Stencil          ("Stencil ID",          Float) = 0
@@ -70,9 +61,12 @@ Shader "UI/Circle"
             // ---------------------------------------------------------------
             struct appdata_t
             {
-                float4 vertex   : POSITION;
-                float4 color    : COLOR;
-                float2 texcoord : TEXCOORD0;
+                float4 vertex    : POSITION;
+                float4 color     : COLOR;
+                float2 texcoord  : TEXCOORD0;
+                // Per-instance circle params, packed by GraphicCircleGPU:
+                // x = FillAmount, y = InsideRadius, z = Sides, w = Rotation (deg)
+                float4 texcoord1 : TEXCOORD1;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -86,6 +80,8 @@ Shader "UI/Circle"
                 float2 localUV       : TEXCOORD2;
                 // Aspect ratio (width / height) — used in fragment
                 float  aspect        : TEXCOORD3;
+                // Per-instance circle params, see appdata_t.texcoord1
+                float4 circleParams  : TEXCOORD4;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -97,11 +93,6 @@ Shader "UI/Circle"
             fixed4    _TextureSampleAdd;
             float4    _ClipRect;
             float4    _MainTex_ST;
-
-            float _FillAmount;
-            float _InsideRadius;
-            float _Sides;
-            float _Rotation;
 
             // ---------------------------------------------------------------
             // Helpers
@@ -144,6 +135,7 @@ Shader "UI/Circle"
                 // Store the raw [-1,1] UV and handle aspect in fragment.
                 OUT.localUV = uv;
                 OUT.aspect  = 1.0; // placeholder; corrected in fragment via ddx/ddy
+                OUT.circleParams = v.texcoord1;
                 return OUT;
             }
 
@@ -171,10 +163,17 @@ Shader "UI/Circle"
                 // This matches GraphicCircle which uses separate radius.x/y.
                 float2 p = float2(IN.localUV.x * aspect, IN.localUV.y);
 
-                // --- Rotation ----------------------------------------------
-                int   sides = max((int)round(_Sides), 1);
+                // Per-instance params, packed into the vertex stream so all
+                // GraphicCircleGPU instances can share one Material and batch.
+                float fillAmount   = IN.circleParams.x;
+                float insideRadius = IN.circleParams.y;
+                float sidesParam   = IN.circleParams.z;
+                float rotation     = IN.circleParams.w;
 
-                float rotRad = _Rotation * UNITY_PI / 180.0;
+                // --- Rotation ----------------------------------------------
+                int   sides = max((int)round(sidesParam), 1);
+
+                float rotRad = rotation * UNITY_PI / 180.0;
                 // Add half of side angle to mimic pointy top angle of CPU GraphicCircle
                 rotRad += UNITY_TWO_PI * 0.5 / sides;
                 float sinR = sin(rotRad), cosR = cos(rotRad);
@@ -197,13 +196,13 @@ Shader "UI/Circle"
 
                 // --- Inner (hole) mask ------------------------------------
                 float innerAlpha = 1.0;
-                if (_InsideRadius > 0.001)
+                if (insideRadius > 0.001)
                 {
                     float innerDist;
                     if (sides >= 3)
-                        innerDist = sdPolygon(p, sides, _InsideRadius);
+                        innerDist = sdPolygon(p, sides, insideRadius);
                     else
-                        innerDist = length(p) - _InsideRadius;
+                        innerDist = length(p) - insideRadius;
 
                     innerAlpha = smoothstep(-aa, aa, innerDist);
                 }
@@ -211,14 +210,14 @@ Shader "UI/Circle"
                 // --- Fill amount (arc / partial fill) ---------------------
                 // FillAmount = 1 → full shape. < 1 → cut clockwise from top.
                 float fillAlpha = 1.0;
-                if (_FillAmount < 0.9999)
+                if (fillAmount < 0.9999)
                 {
                     // Angle from top, [0, 2π)
                     // Note: atan2(x,y) = angle from +Y axis
                     float angle = atan2(IN.localUV.x, IN.localUV.y); // [-π, π]
                     if (angle < 0.0) angle += UNITY_TWO_PI;           // [0, 2π)
 
-                    float cutAngle = _FillAmount * UNITY_TWO_PI;
+                    float cutAngle = fillAmount * UNITY_TWO_PI;
                     // Soft edge at the fill boundary (half a pixel wide)
                     fillAlpha = 1.0 - smoothstep(cutAngle - aa * 0.5, cutAngle + aa * 0.5, angle);
                 }

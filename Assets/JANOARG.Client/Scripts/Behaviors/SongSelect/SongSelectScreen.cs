@@ -24,6 +24,7 @@ using JANOARG.Client.Utils;
 using UnityEngine.Assertions;
 using System.Linq;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapProps;
+using JANOARG.Shared.Utils.Animation;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
