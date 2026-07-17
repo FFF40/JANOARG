@@ -931,8 +931,9 @@ namespace JANOARG.Client.Behaviors.Player
 
             bool clauseHitsExhausted = HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0;
             bool clauseSongOver = (float)CurrentTime / Music.clip.length >= 1;
+            bool grace = (float)CurrentTime > 1; // 1s grace period in case of race condition
 
-            if ((clauseHitsExhausted || clauseSongOver) && !ResultExec)
+            if ((clauseHitsExhausted || clauseSongOver) && grace && !ResultExec)
             {
                 ComputeAndSaveMedianOffset();
                 PlayerScreenResult.sMain.StartEndingAnim();
