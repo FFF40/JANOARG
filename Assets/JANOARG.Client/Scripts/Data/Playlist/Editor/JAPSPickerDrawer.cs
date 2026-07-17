@@ -18,6 +18,7 @@ namespace JANOARG.Client.Data.Playlist.Editor
 
             EditorGUI.BeginProperty(position, label, property);
 
+            // TODO Would this operation too expensive to run every GUI update?
             ExternalPlayableSong current = FindSongAsset(property.stringValue);
 
             EditorGUI.BeginChangeCheck();

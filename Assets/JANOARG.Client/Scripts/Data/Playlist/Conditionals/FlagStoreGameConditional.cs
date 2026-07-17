@@ -18,8 +18,7 @@ namespace JANOARG.Client.Data.Playlist.Conditionals
 
         public override string GetDisplayInstructionString()
         {
-            // TODO handle display instructions for flag store conditionals
-            return "?????";
+            return $"Player save contains flag \"{Flag}\"";
         }
     }
 }
