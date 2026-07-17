@@ -929,11 +929,10 @@ namespace JANOARG.Client.Behaviors.Player
             PlayerInputManager.sInstance.UpdateInput();
             sr_UpdateInputCall.End();
 
-            bool clauseHitsExhausted = HitsRemaining <= 0;
-            bool clauseNoLanes = PlayerInputManager.sInstance.HoldQueue.Count == 0;
+            bool clauseHitsExhausted = HitsRemaining <= 0 && PlayerInputManager.sInstance.HoldQueue.Count == 0;
             bool clauseSongOver = (float)CurrentTime / Music.clip.length >= 1;
 
-            if ((clauseHitsExhausted || clauseNoLanes || clauseSongOver) && !ResultExec)
+            if ((clauseHitsExhausted || clauseSongOver) && !ResultExec)
             {
                 ComputeAndSaveMedianOffset();
                 PlayerScreenResult.sMain.StartEndingAnim();
