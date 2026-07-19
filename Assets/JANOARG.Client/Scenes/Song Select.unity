@@ -6965,6 +6965,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 962397528}
   m_CullTransparentMesh: 1
+--- !u!1 &981699265
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 981699266}
+  m_Layer: 5
+  m_Name: Backup Cover Target
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &981699266
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981699265}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1562277642}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: -100, y: 0}
+  m_SizeDelta: {x: 40, y: 40}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &983132569
 GameObject:
   m_ObjectHideFlags: 0
@@ -10310,6 +10345,7 @@ RectTransform:
   m_Children:
   - {fileID: 1221148511}
   - {fileID: 1114411600}
+  - {fileID: 981699266}
   - {fileID: 162131310}
   - {fileID: 231156583}
   m_Father: {fileID: 0}
@@ -10353,6 +10389,7 @@ MonoBehaviour:
   CoverLayerSample: {fileID: 1355669827289181228, guid: 92c95bc4b8c61b5eb855170fa6ee979b, type: 3}
   TargetSongCoverLayerHolder: {fileID: 1666769696}
   TargetSongCoverLayers: []
+  TargetSongCoverBackupTarget: {fileID: 981699266}
   TargetSongLockedIndicator: {fileID: 985813779}
   UnlockConditionGroup: {fileID: 1134661252}
   UnlockConditionHolder: {fileID: 1134661249}
@@ -10370,6 +10407,7 @@ MonoBehaviour:
   RightActionsHolder: {fileID: 2001269597}
   MapViewButton: {fileID: 681920643}
   ListViewButton: {fileID: 256673773}
+  ListViewLabel: {fileID: 13990871}
   SortButton: {fileID: 1849820841}
   LaunchButton: {fileID: 140450918}
   LaunchTextHolder: {fileID: 392552628}
