@@ -130,7 +130,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
             bool CanAddSong(string songID)
             {
-                return MapManager.sSongMapItemsByID[songID].isRevealed;
+                return MapManager.sSongMapItemsByID.GetValueOrDefault(songID, null)?.isRevealed
+                    ?? GameConditional.TestAll(SongSelectScreen.sMain.PlaylistSongByID[songID].RevealConditions);
             }
             void AddSong(string songID)
             {
@@ -158,7 +159,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                 case SongSortCriteria.Appearance:
                     {
                         SongSelectScreen screen = SongSelectScreen.sMain;
-                        IEnumerable<PlaylistSong> songs = screen.Playlist.Songs;
+                        IEnumerable<PlaylistSong> songs = screen.LoadedSongs;
                         if (FilterPanel.SortReversed) songs = songs.Reverse();
                         string lastHeader = "";
                         foreach (PlaylistSong song in songs)
