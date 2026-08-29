@@ -535,7 +535,7 @@ namespace JANOARG.Client.Behaviors.Panels
                 PreviewNormalSimulBold.material.color = new Color(1, 1, 1, 0.75f);
                 
                 PreviewNormalSimulBold.transform.localScale = PreviewNormalSimulCenter.localScale;
-                PreviewNormalSimulBold.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulCenter.localScale.y * 1.8f, z: PreviewNormalSimulCenter.localScale.z * .998f);
+                PreviewNormalSimulBold.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulCenter.localScale.y * 1.5f, z: PreviewNormalSimulCenter.localScale.z * .998f);
                 PreviewNormalSimulGlow.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulBold.transform.localScale.y * 6f);
             }
 
