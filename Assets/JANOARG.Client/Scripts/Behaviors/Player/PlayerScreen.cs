@@ -426,7 +426,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 for (var a = 0; a < HitStyles.Count; a++)
                     HitStyles[a]
-                        .Update(sCurrentChart.Palette.HitStyles[a]);
+                        .Update(sCurrentChart.Palette.HitStyles[a], sCurrentChart.Palette.BackgroundColor);
 
                 for (var a = 0; a < sTargetChart.Data.Groups.Count; a++)
                     LaneGroups[a].Current = sCurrentChart.Groups.Find(x => x.Name == LaneGroups[a].name);
@@ -1047,7 +1047,7 @@ namespace JANOARG.Client.Behaviors.Player
             for (var a = 0; a < HitStyles.Count; a++)
             {
                 sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
-                HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a]);
+                HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a], sCurrentChart.Palette.BackgroundColor);
             }
             sr_HitStylesUpdate.End();
 
