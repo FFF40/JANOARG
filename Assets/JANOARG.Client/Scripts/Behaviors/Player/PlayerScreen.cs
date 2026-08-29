@@ -469,7 +469,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 foreach (HitStyle style in sCurrentChart.Palette.HitStyles)
                 {
-                    HitStyles.Add(new HitStyleManager(style));
+                    HitStyles.Add(new HitStyleManager(style, sCurrentChart.Palette.BackgroundColor));
                     Update_LoadingBarHolder(1, $"Loading hitstyle {style.Name}...({HitStyles.Count} of {sCurrentChart.Palette.HitStyles.Count})");
                 }
 
