@@ -159,9 +159,13 @@ namespace JANOARG.Client.Behaviors.Player
         // itself. Sizes under the combined border width crush it, hence the floor.
         const float GlowBorderFloor = 0.5f;
 
-        // The prefab's authored height ratio. Sizing through SpriteRenderer.size replaces
-        // the prefab's m_Size rather than multiplying with it, so it has to be reapplied
-        // here or the glow comes out roughly twice as tall as authored.
+        // The prefab's authored ratios. Sizing through SpriteRenderer.size replaces the
+        // prefab's m_Size rather than multiplying with it, so they have to be reapplied
+        // here. Both are in the glow's local space, and the glow is a CHILD of
+        // SimultaneousHighlight, whose localScale already carries the note's width - so
+        // the width ratio yields 1.5x the hit object, and must not be multiplied by the
+        // note width again here.
+        const float GlowWidthRatio  = 1.5f;
         const float GlowHeightRatio = 0.48f;
 
         // Counteract a little of the perspective shrink so the cue stays readable as the
@@ -169,14 +173,14 @@ namespace JANOARG.Client.Behaviors.Player
         const float GlowDistanceCompensation = 0.002f;
         const float GlowMaxDistanceBoost     = 1.5f;
 
-        void UpdateGlowSize(float width, float height, double zPosition)
+        void UpdateGlowSize(float height, double zPosition)
         {
             float boost = Mathf.Clamp(
                 1 + (float)Math.Max(zPosition, 0) * GlowDistanceCompensation,
                 1, GlowMaxDistanceBoost);
 
             SimultaneousGlow.size = new Vector2(
-                Mathf.Max(width, GlowBorderFloor),
+                GlowWidthRatio,
                 Mathf.Max(height * GlowHeightRatio * boost, GlowBorderFloor));
         }
 
@@ -209,7 +213,7 @@ namespace JANOARG.Client.Behaviors.Player
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[1];
                 Center.transform.localScale = new Vector3(width, .2f * scale, .2f * scale);
                 SimultaneousHighlight.transform.localScale = new Vector3(width + .2f * scale, .3f * scale, .3f * scale);
-                UpdateGlowSize(width + .2f * scale, .3f * scale * 12f, zPosition);
+                UpdateGlowSize(.3f * scale * 12f, zPosition);
                 
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2);
@@ -220,7 +224,7 @@ namespace JANOARG.Client.Behaviors.Player
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[0];
                 Center.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
                 SimultaneousHighlight.transform.localScale = new Vector3(width + .2f * scale, .6f * scale, .6f * scale);
-                UpdateGlowSize(width + .2f * scale, .6f * scale * 6f, zPosition);
+                UpdateGlowSize(.6f * scale * 6f, zPosition);
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2 + .2f * scale);
                 LeftPoint.transform.localPosition = -RightPoint.transform.localPosition;
