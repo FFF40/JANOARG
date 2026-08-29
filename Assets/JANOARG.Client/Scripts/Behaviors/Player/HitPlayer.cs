@@ -159,11 +159,15 @@ namespace JANOARG.Client.Behaviors.Player
         // itself. Sizes under the combined border width crush it, hence the floor.
         const float GlowBorderFloor = 0.5f;
 
-        // The highlight is a communicator, so it has to stay legible as the note recedes.
-        // Counteract part of the perspective shrink - partial on purpose, since full
-        // compensation would flatten the lane's depth cue.
-        const float GlowDistanceCompensation = 0.004f;
-        const float GlowMaxDistanceBoost     = 2.5f;
+        // The prefab's authored height ratio. Sizing through SpriteRenderer.size replaces
+        // the prefab's m_Size rather than multiplying with it, so it has to be reapplied
+        // here or the glow comes out roughly twice as tall as authored.
+        const float GlowHeightRatio = 0.48f;
+
+        // Counteract a little of the perspective shrink so the cue stays readable as the
+        // note recedes. Deliberately slight - this is a communicator, not a spotlight.
+        const float GlowDistanceCompensation = 0.002f;
+        const float GlowMaxDistanceBoost     = 1.5f;
 
         void UpdateGlowSize(float width, float height, double zPosition)
         {
@@ -173,7 +177,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             SimultaneousGlow.size = new Vector2(
                 Mathf.Max(width, GlowBorderFloor),
-                Mathf.Max(height * boost, GlowBorderFloor));
+                Mathf.Max(height * GlowHeightRatio * boost, GlowBorderFloor));
         }
 
         public void UpdateMesh()
