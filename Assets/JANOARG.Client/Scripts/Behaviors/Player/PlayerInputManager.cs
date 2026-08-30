@@ -212,11 +212,6 @@ public class HoldNoteClass
 /// </summary>
 public class TouchClass
 {
-    /// <summary>
-    ///     Backing field for the <see cref = "flickDirection"/> property.
-    /// </summary>
-    private float _FlickDirection;
-
     public float DiscreteHitobjectDistance;
 
     /// <summary>
@@ -283,27 +278,6 @@ public class TouchClass
     ///     The Unity <see cref = "Touch"/> structure representing the current touch event.
     /// </summary>
     public Touch Touch;
-
-    /// <summary>
-    ///     The direction of the flick gesture in degrees, if applicable.
-    /// </summary>
-    /// <remarks>
-    ///     This property can only be set if <see cref = "Flicked"/> is true.
-    /// </remarks>
-    public float flickDirection
-    {
-        get =>
-            _FlickDirection;
-
-        set
-        {
-            // Only store finite values; NaN can arise from a degenerate SignedAngle call (zero-length delta)
-            // and should be silently ignored rather than crashing the input update.
-            if (!float.IsFinite(value)) return;
-
-            _FlickDirection = value;
-        }
-    }
 }
 
 public class PlayerInputManager : MonoBehaviour
@@ -603,7 +577,6 @@ public class PlayerInputManager : MonoBehaviour
                     {
                         touchClass.Flicked = true;
                         touchClass.FlickTime = Player.CurrentTime;
-                        touchClass.flickDirection = touchClass.FlickTracker.FlickAngle;
                     }
 
                     // Invalidator (policy unchanged): a flick left unclaimed for longer than the
@@ -1177,7 +1150,6 @@ public class PlayerInputManager : MonoBehaviour
 
         touch.Flicked = false;
         touch.FlickTracker.ConsumeFlick();
-        touch.flickDirection = 0;
         touch.QueuedHit = null; // claim discharged
 
         return true;
@@ -1258,7 +1230,6 @@ public class PlayerInputManager : MonoBehaviour
 
                 touch.Flicked = false;
                 touch.FlickTracker.ConsumeFlick();
-                touch.flickDirection = 0; // Clear stale angle so it doesn't falsely validate the next note
 
                 // Mark the touch as occupied by this hitobject for the rest of the frame instead of
                 // freeing it — otherwise a second close-in-time/position note processed later in
@@ -1276,17 +1247,35 @@ public class PlayerInputManager : MonoBehaviour
             #region CATCH-FLICK LOCAL FUNCTION
             bool f_flickVerifier(HitPlayer hitObject, TouchClass touch)
             {
-                if (!touch.Flicked &&
-                    (distance = Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position)
-                    ) > hitObject.HitCoord.Radius &&
-                    Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position)
-                    > hitObject.HitCoord.Radius)
+                // Containment, and unconditionally. This was gated on !touch.Flicked while a hit
+                // required touch.Flicked, so the two were mutually exclusive and the check could
+                // never affect the outcome — a flick anywhere on screen cleared the note. Either
+                // end of the finger's travel counts, so a note swept through mid-flick still
+                // registers.
+                float startDistance =
+                    Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position);
+
+                float currentDistance =
+                    Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position);
+
+                distance = Mathf.Min(startDistance, currentDistance);
+
+                if (startDistance > hitObject.HitCoord.Radius &&
+                    currentDistance > hitObject.HitCoord.Radius)
                     return false;
 
-                if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional flick
-                    return ValidateFlickDirection(hitObject.Current.FlickDirection, touch.flickDirection);
+                // With no tap frame to anchor to, the gesture is the entire confirmation.
+                if (!touch.Flicked) return false;
 
-                return touch.Flicked;
+                // Angle comes off the stroke that actually fired rather than a cached mirror. The
+                // old field defaulted to 0, which is a valid direction meaning "up", so a note
+                // pointing upward passed its angle check with no flick having happened at all.
+                if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional flick
+                    return ValidateFlickDirection(
+                        hitObject.Current.FlickDirection,
+                        touch.FlickTracker.FlickAngle);
+
+                return true;
             }
             #endregion
 
