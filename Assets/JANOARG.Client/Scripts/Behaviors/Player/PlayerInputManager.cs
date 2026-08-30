@@ -635,7 +635,16 @@ public class PlayerInputManager : MonoBehaviour
                 bool isDiscreteHitObject =
                     hitIteration.Current.Type == HitObject.HitType.Catch || hitIteration.Current.Flickable;
 
-                float window = isDiscreteHitObject // Timing window per hitobject type
+                // A tap-flick is claimed by a tap and resolved by a flick on a later frame, so the
+                // note has to stay interactable long enough for both. The tap gets GoodWindow to
+                // land in; the flick it is actually judged on still has to fall inside PassWindow
+                // (see TryResolveTapFlick). Catch-flicks keep PassWindow — their single gesture is
+                // retryable across the whole window already, so they need no extra room.
+                bool isTapFlick =
+                    hitIteration.Current.Flickable &&
+                    hitIteration.Current.Type == HitObject.HitType.Normal;
+
+                float window = isDiscreteHitObject && !isTapFlick // Timing window per hitobject type
                     ? Player.PassWindow // You either hit it or miss it
                     : Player.GoodWindow; // Only hit as far as the MISALIGNED timing window
 
@@ -1113,6 +1122,14 @@ public class PlayerInputManager : MonoBehaviour
 
         if (!touch.FlickTracker.IsFlicked) return false;
 
+        // The tap only claims the note; the flick is the rhythmic action and is what gets judged,
+        // so it has to land inside PassWindow. Outside it the claim is left standing rather than
+        // consumed, so an early or late flick costs nothing and can simply be repeated until the
+        // claim expires at GoodWindow.
+        double flickTimingDelta = Player.CurrentTime + Player.Settings.JudgmentOffset - note.Time;
+
+        if (Math.Abs(flickTimingDelta) > Player.PassWindow) return false;
+
         Vector2 current = touch.Touch.screenPosition;
 
         if (Vector2.Distance(current, touch.Touch.startScreenPosition) < flickDistanceThreshold)
@@ -1138,9 +1155,9 @@ public class PlayerInputManager : MonoBehaviour
             return false;
         }
 
-        // Graded off the tap rather than the flick: the tap is the rhythmic action and the flick
-        // only confirms it, so an on-time tap isn't punished for a fractionally late confirmation.
-        Player.Hit(note, touch.StartTime + Player.Settings.JudgmentOffset - note.Time);
+        // Graded off the flick, not the tap: the tap is only a claim, and it deliberately gets a
+        // wider window than the note is scored on.
+        Player.Hit(note, flickTimingDelta);
 
         // Player.Hit() can reenter PurgeHitPlayer (via RemoveHitPlayer) and null QueuedHit out from
         // under us — restore it so EnqueueHoldNote's own read still sees the note just hit.
