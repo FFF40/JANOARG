@@ -210,83 +210,6 @@ public class HoldNoteClass
 /// <summary>
 ///     Represents a touch event and its associated state and metadata for player input handling.
 /// </summary>
-/// <summary>
-///     Tracks recent touch positions over time and computes instantaneous velocity
-///     via quadratic regression, mirroring the approach used in prpr (Mivik/prpr).
-///     Used as a pre-gate for flick gesture detection.
-/// </summary>
-public class VelocityTracker
-{
-    private const int _RECORD_MAX = 10;
-    private readonly Queue<(float time, Vector2 position)> _Movements = new(_RECORD_MAX);
-
-    public void Push(float time, Vector2 position)
-    {
-        if (_Movements.Count == _RECORD_MAX)
-            _Movements.Dequeue();
-        _Movements.Enqueue((time, position));
-    }
-
-    public void Reset() => _Movements.Clear();
-
-    /// <summary>
-    ///     Returns the instantaneous velocity vector (px/s) via quadratic regression
-    ///     over the recorded movement window.
-    /// </summary>
-    public Vector2 Speed()
-    {
-        if (_Movements.Count < 2) return Vector2.zero;
-
-        float samples = _Movements.Count;
-        float list = _Movements.Last().time;
-
-        float sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
-        Vector2 sumY = Vector2.zero, sumXY = Vector2.zero, sumX2Y = Vector2.zero;
-
-        foreach (var (time, point) in _Movements)
-        {
-            float x = time - list;
-            sumY   += point;
-            sumX   += x;
-            sumXY  += x * point;
-            
-            float x2 = x * x;
-            sumX2  += x2;
-            sumX2Y += x2 * point;
-            
-            float x3 = x2 * x;
-            sumX3  += x3;
-            sumX4  += x3 * x;
-        }
-
-        // Corrected Sums of Squares
-        
-        // Corrected SS for x
-        float correctedX   = sumX2  - sumX  * sumX  / samples;
-        // Corrected cross-product of x and x^2
-        float correctedCrossProduct  = sumX3  - sumX  * sumX2 / samples;
-        // Corrected cross-product of x and y
-        float correctedXSquared = sumX4  - sumX2 * sumX2 / samples;
-        // Determinant of the 2*2 system
-        // if near zero, the fit is degenerate (e.g., all points at the same time)
-        float determinant = correctedX * correctedXSquared - correctedCrossProduct * correctedCrossProduct;
-
-        if (Mathf.Approximately(determinant, 0f)) 
-            return Vector2.zero;
-
-        
-        // Corrected cross-product of x and y
-        Vector2 correctedCrossXY  = sumXY  - sumY * (sumX  / samples);
-        // Corrected cross-product of x^2 and y
-        Vector2 correctedCrossX2Y = sumX2Y - sumY * (sumX2 / samples);
-        
-        // The linear coefficient of the fitted quadratic 
-        // Giving instant final velocity value at x=0
-        Vector2 linearCoefficient = (correctedCrossXY * correctedXSquared - correctedCrossX2Y * correctedCrossProduct) / determinant;
-        return linearCoefficient;
-    }
-}
-
 public class TouchClass
 {
     /// <summary>
@@ -304,11 +227,6 @@ public class TouchClass
     ///     early judgement.
     /// </remarks>
     public bool DiscreteHitobjectIsInRange;
-
-    /// <summary>
-    ///     The initial position of the flick gesture.
-    /// </summary>
-    public Vector2 FlickCenter;
 
     /// <summary>
     ///     Indicates whether the touch has been recognized as a flick gesture.
@@ -351,43 +269,10 @@ public class TouchClass
     public double StartTime;
 
     /// <summary>
-    ///     Velocity tracker for flick gesture pre-gating.
-    ///     Populated each frame with current time and screen position.
+    ///     Flick gesture recognizer for this touch. Owns detection only; every judgement
+    ///     decision that follows from it stays in <see cref = "PlayerInputManager"/>.
     /// </summary>
-    public VelocityTracker VelocityTracker = new();
-
-    /// <summary>
-    ///     True when the velocity tracker has detected an active swipe gesture above
-    ///     the speed threshold. Acts as the pre-gate before the distance commit check.
-    /// </summary>
-    public bool IsGesturing;
-
-    /// <summary>
-    ///     The time (in seconds) when this touch last successfully cleared a flick note.
-    ///     Used to temporarily raise the effective flick threshold so a continuous swipe
-    ///     gesture cannot immediately re-trigger on the next note.
-    /// </summary>
-    public double LastFlickHitTime = float.NegativeInfinity;
-
-    /// <summary>
-    ///     When true, the naive FlickCenter reset clock is paused because a flickable note
-    ///     has entered the hit queue. FlickCenter will be snapped the moment the finger
-    ///     enters the note's hitbox radius, then this flag is cleared unless another
-    ///     flickable is still queued.
-    /// </summary>
-    public bool FlickCenterResetPending;
-
-    /// <summary>
-    ///     Accumulator for the naive FlickCenter reset clock (in seconds).
-    ///     When it exceeds the reset interval, FlickCenter snaps to the current finger position.
-    /// </summary>
-    public double FlickCenterResetClock;
-
-    /// <summary>
-    ///     The flickable note that last triggered a FlickCenter snap on hitbox entry.
-    ///     Used to prevent the snap from firing every frame while the finger remains inside the hitbox.
-    /// </summary>
-    public HitPlayer FlickCenterSnappedNote;
+    public FlickTracker FlickTracker = FlickTracker.Create();
 
     /// <summary>
     ///     Indicates whether the touch is considered a tap (true at the moment the finger touches the screen).
@@ -673,7 +558,7 @@ public class PlayerInputManager : MonoBehaviour
                     }
 
                     TouchClass endedTouch = TouchClasses.Find(t => t.Touch.finger.index == fingerIndex);
-                    endedTouch?.VelocityTracker.Reset();
+                    endedTouch?.FlickTracker.Reset();
                     TouchClasses.RemoveAll(input => input.Touch.finger.index == fingerIndex);
 
                     continue;
@@ -688,103 +573,32 @@ public class PlayerInputManager : MonoBehaviour
                     {
                         Touch = inputEntry,
                         StartTime = Player.CurrentTime,
-                        FlickCenter = inputEntry.startScreenPosition,
                         Initial = true
                     };
 
-                    touchClass.VelocityTracker.Push((float)Player.CurrentTime, inputEntry.startScreenPosition);
+                    touchClass.FlickTracker.Push(Time.unscaledTime, inputEntry.startScreenPosition);
                     TouchClasses.Add(touchClass);
                 }
                 else // Existing touch
                 {
                     touchClass.Touch = inputEntry;
 
-                    // Flick detector
+                    // Flick detector — FlickTracker owns gesture recognition entirely; this
+                    // only relays its verdict. Pushed on the wall clock rather than
+                    // Player.CurrentTime, whose audio-callback granularity can repeat a
+                    // timestamp across frames and make a stationary finger look infinitely fast.
+                    touchClass.FlickTracker.Push(Time.unscaledTime, inputEntry.screenPosition);
 
-                    // Check if any flickable note is currently in the hit queue
-                    bool flickableInQueue = HitQueue.Any(hit =>
-                        hit.Current.Flickable &&
-                        !hit.IsProcessed
-                    );
-
-                    if (!touchClass.Flicked)
-                    {
-                        if (flickableInQueue)
-                        {
-                            // A flickable note is queued — pause the naive reset clock and arm pending.
-                            touchClass.FlickCenterResetPending = true;
-                            touchClass.FlickCenterResetClock = 0;
-
-                            // If pending and finger just entered a flickable note's hitbox, snap FlickCenter.
-                            HitPlayer enteredNote = HitQueue.Find(hit =>
-                                hit.Current.Flickable &&
-                                !hit.IsProcessed &&
-                                Vector2.Distance(inputEntry.screenPosition, hit.HitCoord.Position) <=
-                                hit.HitCoord.Radius
-                            );
-
-                            if (enteredNote != null && touchClass.FlickCenterSnappedNote != enteredNote)
-                            {
-                                touchClass.FlickCenter = inputEntry.screenPosition;
-                                touchClass.FlickCenterSnappedNote = enteredNote;
-                                //Debug.Log($"[FlickCenter Reset] Snapped to {inputEntry.screenPosition} on hitbox entry.");
-
-                                // Keep pending armed only if another flickable is still queued after this one.
-                                touchClass.FlickCenterResetPending = HitQueue.Any(hit =>
-                                    hit.Current.Flickable &&
-                                    !hit.IsProcessed &&
-                                    hit != enteredNote
-                                );
-                            }
-                        }
-                        else
-                        {
-                            // No flickable in queue — resume naive reset clock.
-                            touchClass.FlickCenterResetPending = false;
-                            touchClass.FlickCenterResetClock += s_DeltaTime / 1000.0;
-
-                            if (touchClass.FlickCenterResetClock >= 0.08) // ~80ms snap interval
-                            {
-                                touchClass.FlickCenter = inputEntry.screenPosition;
-                                touchClass.FlickCenterResetClock = 0;
-                                //Debug.Log($"[FlickCenter Reset] Naive snap to {inputEntry.screenPosition}.");
-                            }
-                        }
-                    }
-
-                    float flickDistance = Vector2.Distance(inputEntry.screenPosition, touchClass.FlickCenter);
-
-                    // Track direction from threshold/2 onward for stable readings, but stop
-                    // updating once the flick is committed so post-threshold drift doesn't corrupt it.
-                    if (flickDistance >= flickThreshold / 2 && !touchClass.Flicked)
-                        // Negate SignedAngle to convert from CCW-positive (Unity convention)
-                        // to CW-positive (HitObject.FlickDirection convention).
-                        touchClass.flickDirection = -Vector2.SignedAngle(
-                            Vector2.up,
-                            inputEntry.screenPosition - touchClass.FlickCenter
-                        );
-
-                    // Velocity pre-gate: update tracker and check if actively gesturing.
-                    touchClass.VelocityTracker.Push((float)Player.CurrentTime, inputEntry.screenPosition);
-                    float velocityMagnitude = touchClass.VelocityTracker.Speed().magnitude;
-                    float screenDpiNorm = screenDpi / 275f;
-                    // Threshold matches prpr: 1.8 units/s normalized to 275 DPI.
-                    // Expressed in px/s: 1.8 * dpi/275 * dpi = 1.8 * dpi^2 / 275
-                    // But since our positions are in screen pixels and time in seconds,
-                    // we normalize by dpi so the threshold is dpi-independent: 1.8 * dpi / 275.
-                    float velocityThreshold = 1.8f * screenDpiNorm * screenDpi;
-                    touchClass.IsGesturing = velocityMagnitude >= velocityThreshold;
-
-                    // Verifier: velocity pre-gate must pass AND distance commit threshold must be met.
-                    if (!touchClass.Flicked &&
-                        touchClass.IsGesturing &&
-                        (Mathf.Approximately(flickDistance, flickThreshold) || flickDistance > flickThreshold))
+                    if (touchClass.FlickTracker.IsFlicked && !touchClass.Flicked)
                     {
                         touchClass.Flicked = true;
                         touchClass.FlickTime = Player.CurrentTime;
+                        touchClass.flickDirection = touchClass.FlickTracker.FlickAngle;
                     }
 
-                    // Invalidator
+                    // Invalidator (policy unchanged): a flick left unclaimed for longer than the
+                    // perfect window is dropped once a flickable is actually in range, so a stale
+                    // gesture cannot clear the next note for free.
                     if (touchClass.Flicked)
                     {
                         bool flickTimedOut = Math.Abs(Player.CurrentTime - touchClass.FlickTime) >
@@ -800,7 +614,7 @@ public class PlayerInputManager : MonoBehaviour
                         if (flickTimedOut && nearAnyFlickable)
                         {
                             touchClass.Flicked = false;
-                            touchClass.FlickCenter = inputEntry.screenPosition;
+                            touchClass.FlickTracker.ConsumeFlick();
                         }
                     }
 
@@ -1328,8 +1142,8 @@ public class PlayerInputManager : MonoBehaviour
 
                 // Reset flick state.
                 touch.Flicked = false;
+                touch.FlickTracker.ConsumeFlick();
                 touch.flickDirection = 0; // Clear stale angle so it doesn't falsely validate the next note
-                touch.LastFlickHitTime = Player.CurrentTime;
 
                 // Mark the touch as occupied by this hitobject for the rest of the frame instead of
                 // freeing it — otherwise a second close-in-time/position note processed later in this
@@ -1426,9 +1240,9 @@ public class PlayerInputManager : MonoBehaviour
                 // Omnidirectional flick:
                 // - Tap-flick: position + Tapped already implies intent (velocity tracker hasn't
                 //   had enough samples on the first frame to be reliable), so Normal gets a free pass.
-                // - Catch-flick: velocity pre-gate (IsGesturing) is the confirmation since there's
-                //   no tap frame to anchor to.
-                return hitObject.Current.Type == HitObject.HitType.Normal || touch.IsGesturing;
+                // - Catch-flick: the flick gesture itself (touch.Flicked) is the confirmation,
+                //   since there's no tap frame to anchor to.
+                return hitObject.Current.Type == HitObject.HitType.Normal || touch.Flicked;
             }
             #endregion
 
