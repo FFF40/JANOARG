@@ -15,8 +15,11 @@ using UnityEngine;
 ///         clears on hit — no windowed fit, no dpi term.
 ///     </para>
 ///     <para>
-///         One deliberate deviation from the reference, documented at its site below: we refuse to
-///         divide by a non-positive <c>dt</c>.
+///         Two deliberate deviations from the reference, documented at their sites below: we refuse
+///         to divide by a non-positive <c>dt</c>, and a consumed flick must be re-armed before it
+///         can fire again. The latter is prpr's hysteresis, which phira dropped along with the
+///         regression; without it one sustained swipe re-fires on every sample and clears a whole
+///         chain of notes for the effort of a single gesture.
 ///     </para>
 /// </remarks>
 public class FlickTracker
@@ -36,6 +39,13 @@ public class FlickTracker
     public const float FireMultiplier = 2f;
 
     /// <summary>
+    ///     How far a gesture must turn before a consumed flick re-arms, as a dot product between the
+    ///     consumed direction and the current one. prpr writes the same test as
+    ///     <c>|dot - 1| &gt; 0.4</c>, which for unit vectors is exactly this — about 53 degrees.
+    /// </summary>
+    public const float ReArmDotTolerance = 0.6f;
+
+    /// <summary>
     ///     <see cref = "SpeedThreshold"/> converted into this device's pixels per second.
     /// </summary>
     /// <remarks>
@@ -50,6 +60,17 @@ public class FlickTracker
     private Vector2 _LastPoint;
     private float   _LastTime;
     private bool    _HasSample;
+
+    /// <summary>
+    ///     Set when a flick is consumed; blocks further firing until the gesture ends or turns.
+    ///     This is prpr's <c>wait</c>.
+    /// </summary>
+    private bool _Wait;
+
+    /// <summary>
+    ///     Direction of the flick that was consumed, to compare a later one against.
+    /// </summary>
+    private Vector2 _LastDirection;
 
     /// <summary>
     ///     True once this touch has flicked, and stays true until the engine calls
@@ -132,7 +153,18 @@ public class FlickTracker
         // that trips the threshold on a stationary finger, so refuse the sample outright.
         if (dt <= 0f) return;
 
-        if (IsFlicked || delta.magnitude / dt < _Threshold * FireMultiplier)
+        float speed = delta.magnitude / dt;
+
+        // Re-arm a consumed flick only once the gesture genuinely ends or turns: the finger slows to
+        // half the firing speed, or changes direction by more than ~53 degrees. prpr re-arms at two
+        // thirds of its firing speed rather than half, so this is a little stricter; the wider band
+        // is what stops one sustained swipe clearing a chain of notes without further effort.
+        if (_Wait &&
+            (speed < _Threshold ||
+             Vector2.Dot(_LastDirection, delta.normalized) < ReArmDotTolerance))
+            _Wait = false;
+
+        if (_Wait || IsFlicked || speed < _Threshold * FireMultiplier)
             return;
 
         IsFlicked = true;
@@ -144,6 +176,11 @@ public class FlickTracker
     /// </summary>
     public void ConsumeFlick()
     {
+        // Record which way the consumed flick went before clearing it — the re-arm check needs
+        // something to compare a later direction against.
+        _LastDirection = FlickStroke.normalized;
+        _Wait = true;
+
         IsFlicked = false;
         FlickStroke = Vector2.zero;
     }
@@ -156,7 +193,8 @@ public class FlickTracker
         IsFlicked = false;
         FlickStroke = Vector2.zero;
         _HasSample = false;
+        _Wait = false;
         _LastTime = 0f;
-        _LastPoint = Vector2.zero;
+        _LastPoint = _LastDirection = Vector2.zero;
     }
 }
