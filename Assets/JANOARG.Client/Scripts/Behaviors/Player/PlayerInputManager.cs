@@ -772,14 +772,6 @@ public class PlayerInputManager : MonoBehaviour
 
                 double time = judgementOffsetTime - hitObject.Time;
 
-                // Flickables are now hit immediately in HitobjectProcessor — skip them here.
-                if (hitObject.Current.Flickable)
-                {
-                    hitObject.InDiscreteHitQueue = false;
-                    DiscreteHitQueue.Remove(hitObject);
-                    continue;
-                }
-
                 if (judgementOffsetTime >= hitObject.Time && hitObject.Current.Type == HitObject.HitType.Catch)
                 {
                     if (!hitObject.IsProcessed)
@@ -1238,12 +1230,8 @@ public class PlayerInputManager : MonoBehaviour
 
                 if (!f_flickVerifier(hitIteration, touch)) continue;
 
-                if (!hitIteration.IsProcessed)
-                {
-                    Player.Hit(hitIteration, hitobjectTimingDelta);
-                    hitIteration.IsProcessed = true;
-                    EnqueueHoldNote(hitIteration);
-                }
+                // Per feedback request, catch flicks are queued rather than hit on the spot
+                hitIteration.InDiscreteHitQueue = true;
 
                 touch.Flicked = false;
                 touch.FlickTracker.ConsumeFlick();
