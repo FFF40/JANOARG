@@ -61,6 +61,11 @@ namespace JANOARG.Client.Behaviors.Player
             IsTapped = false;
             IsReturned = false;
 
+            // UpdateMesh below bails if GetZPosition throws, which would leave a pooled
+            // instance wearing the previous note's baked Z and transform.
+            CurrentPosition = double.PositiveInfinity;
+            transform.localPosition = Vector3.zero;
+
             if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.HitStyles.Count)
             {
                 HitStyleManager style = PlayerScreen.sMain.HitStyles[Current.StyleIndex];
