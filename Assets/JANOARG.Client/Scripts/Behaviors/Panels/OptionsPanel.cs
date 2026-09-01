@@ -519,7 +519,7 @@ namespace JANOARG.Client.Behaviors.Panels
             Material baseMaterial = InternalChartTool.LoadStyleMaterial("Highlight", "Default");
             if (!baseMaterial) return;
 
-            (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Color.white);
+            (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Color.white, Color.black);
 
             PreviewHighlightMaterial = new Material(baseMaterial);
             PreviewHighlightMaterial.SetColor("_Color", highlight);
