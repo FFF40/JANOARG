@@ -529,20 +529,17 @@ namespace JANOARG.Client.Behaviors.Player
             }
             sr_HitObjectSpawn.End();
 
-            var active = true;
-
             sr_HitObjectUpdate.Begin();
             foreach (HitPlayer hitObject in HitObjects)
             {
-                if (active)
-                {
-                    sr_HitPlayerUpdateSelf.Begin();
-                    hitObject.UpdateSelf(time, beat, LaneStepDirty);
-                    sr_HitPlayerUpdateSelf.End();
-                }
+                sr_HitPlayerUpdateSelf.Begin();
+                hitObject.UpdateSelf(time, beat, LaneStepDirty);
+                sr_HitPlayerUpdateSelf.End();
 
-                if (active && hitObject.CurrentPosition > CurrentPosition + 200)
-                    active = false;
+                // A note is hidden by its own distance only, never by another note's. Only
+                // reachable on backward-scrolling lanes: the spawn loop above creates notes
+                // already inside this window, and a forward lane only moves toward them.
+                bool active = hitObject.CurrentPosition <= CurrentPosition + 200;
 
                 // HoldMesh is now a permanent (pooled) child, so its existence no longer
                 // implies this note is a hold — gate on the actual note data instead.
