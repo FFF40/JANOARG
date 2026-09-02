@@ -488,6 +488,18 @@ public class TouchClass
     public Vector2 DiscreteHitobjectAnchor;
 
     /// <summary>
+    ///     The furthest this touch has been from <see cref = "DiscreteHitobjectAnchor"/> during the
+    ///     current engagement — the apex of the gesture so far.
+    /// </summary>
+    /// <remarks>
+    ///     Travel is net displacement, which resists a wiggle accumulating distance without going
+    ///     anywhere, but collapses when the finger u-turns to correct a mis-aimed flick. The point
+    ///     of maximum displacement is exactly the turning point, so measuring the return leg from
+    ///     here recovers that case without any turn detection.
+    /// </remarks>
+    public Vector2 DiscreteHitobjectPeak;
+
+    /// <summary>
     ///     Indicates whether the touch has been recognized as a flick gesture.
     /// </summary>
     public bool Flicked;
@@ -979,7 +991,11 @@ public class PlayerInputManager : MonoBehaviour
                             // so the clear at resolution never fires and the flag stays set.
                             if (!touch.DiscreteHitobjectIsInRange ||
                                 touch.NearestDiscreteHitobject != hitIteration)
-                                touch.DiscreteHitobjectAnchor = touch.Touch.screenPosition;
+                                touch.DiscreteHitobjectAnchor =
+                                    touch.DiscreteHitobjectPeak = touch.Touch.screenPosition;
+                            else if (Vector2.Distance(touch.Touch.screenPosition, touch.DiscreteHitobjectAnchor) >
+                                     Vector2.Distance(touch.DiscreteHitobjectPeak, touch.DiscreteHitobjectAnchor))
+                                touch.DiscreteHitobjectPeak = touch.Touch.screenPosition;
 
                             touch.DiscreteHitobjectIsInRange = true;
                             touch.NearestDiscreteHitobject = hitIteration;
@@ -1396,6 +1412,32 @@ public class PlayerInputManager : MonoBehaviour
     }
 
     /// <summary>
+    ///     How far this touch has travelled for the purpose of qualifying a flick on
+    ///     <paramref name = "note"/>.
+    /// </summary>
+    /// <remarks>
+    ///     The larger of the displacement from where the finger engaged the note and the
+    ///     displacement from the gesture's apex. The first is the normal case; the second recovers
+    ///     a u-turn, where returning toward the anchor shrinks net displacement even though the
+    ///     finger is moving decisively. Taking the larger means a correcting stroke is measured
+    ///     from the turning point, while a wiggle still fails — its apex never gets far enough for
+    ///     either term to clear the threshold.
+    /// </remarks>
+    private static float FlickTravel(TouchClass touch, HitPlayer note)
+    {
+        Vector2 current = touch.Touch.screenPosition;
+
+        // A touch that never engaged the note has no anchor of its own; where it landed is all
+        // there is to measure from.
+        if (touch.NearestDiscreteHitobject != note)
+            return Vector2.Distance(current, touch.Touch.startScreenPosition);
+
+        return Mathf.Max(
+            Vector2.Distance(current, touch.DiscreteHitobjectAnchor),
+            Vector2.Distance(current, touch.DiscreteHitobjectPeak));
+    }
+
+    /// <summary>
     ///     Second stage of a tap-flick: the tap has already claimed <paramref name = "note"/> into
     ///     this touch's queue, and this decides whether the flick that followed satisfies it.
     /// </summary>
@@ -1428,7 +1470,7 @@ public class PlayerInputManager : MonoBehaviour
 
         Vector2 current = touch.Touch.screenPosition;
 
-        if (Vector2.Distance(current, touch.Touch.startScreenPosition) < flickDistanceThreshold)
+        if (FlickTravel(touch, note) < flickDistanceThreshold)
             return false;
 
         Vector2 offset = current - note.HitCoord.Position;
@@ -1587,11 +1629,7 @@ public class PlayerInputManager : MonoBehaviour
                 // cheaper the faster the device rendered. Measured from where the finger engaged
                 // this note, so each note in a stream demands its own movement rather than
                 // inheriting a sweep's accumulated distance.
-                Vector2 anchor = touch.NearestDiscreteHitobject == hitObject
-                    ? touch.DiscreteHitobjectAnchor
-                    : touch.Touch.startScreenPosition; // never engaged it; the landing point is all there is
-
-                if (Vector2.Distance(touch.Touch.screenPosition, anchor) < flickDistanceThreshold)
+                if (FlickTravel(touch, hitObject) < flickDistanceThreshold)
                     return false;
 
                 // Angle comes off the stroke that actually fired rather than a cached mirror. The
