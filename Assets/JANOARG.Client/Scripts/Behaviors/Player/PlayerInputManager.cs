@@ -493,6 +493,26 @@ public class PlayerInputManager : MonoBehaviour
 
     [Space] public bool Autoplay;
 
+    /// <summary>
+    ///     How far a flick's containment circle grows once the finger is established on the note,
+    ///     as a multiple of the note's hit radius.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Modelled on osu!'s slider follow circle: the region expands once you are inside it,
+    ///         so it is hard to leave by accident. On the tap-flick path it also resolves a real
+    ///         conflict — omnidirectional containment is a circle measured at the finger's current
+    ///         position while the flick must travel at least flickDistanceThreshold, so without
+    ///         expansion the two requirements pull against each other and a tap placed dead centre
+    ///         is the hardest case rather than the easiest.
+    ///     </para>
+    ///     <para>
+    ///         Directional tap-flicks need none of it: their containment is a beam, unbounded along
+    ///         the flick axis, so travelling never threatens it.
+    ///     </para>
+    /// </remarks>
+    [Space] public float FlickFollowScale = 2.4f;
+
     [Space] [ReadOnly] public float UpdatePerSecond = float.NaN;
 
     [ReadOnly]        public string              Delta = s_DeltaTime.ToString("F3") + "ms";
@@ -1340,7 +1360,7 @@ public class PlayerInputManager : MonoBehaviour
             if (!ValidateFlickDirection(note.Current.FlickDirection, touch.FlickTracker.FlickAngle))
                 return false;
         }
-        else if (offset.magnitude >= radius) // Omnidirectional: plain radius, no beam
+        else if (offset.magnitude >= radius * FlickFollowScale) // Omnidirectional: expanded circle
         {
             return false;
         }
@@ -1463,8 +1483,17 @@ public class PlayerInputManager : MonoBehaviour
 
                 distance = Mathf.Min(startDistance, currentDistance);
 
-                if (startDistance > hitObject.HitCoord.Radius &&
-                    currentDistance > hitObject.HitCoord.Radius)
+                // Follow expansion. Once the discrete-hitobject bookkeeping already believes this
+                // finger belongs to this note, widen the circle so the flick's own travel cannot
+                // shake it off. That bookkeeping is set after HitobjectProcessor runs, so a note
+                // can only expand from the second frame a finger is on it — in range first, then
+                // it grows, which is the order we want anyway.
+                float containment = hitObject.HitCoord.Radius;
+
+                if (touch.DiscreteHitobjectIsInRange && touch.NearestDiscreteHitobject == hitObject)
+                    containment *= FlickFollowScale;
+
+                if (startDistance > containment && currentDistance > containment)
                     return false;
 
                 // With no tap frame to anchor to, the gesture is the entire confirmation.
