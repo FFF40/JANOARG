@@ -96,6 +96,8 @@ namespace JANOARG.Client.Behaviors.Panels
             Destroy(PreviewTexture);
             Destroy(freeFlickIndicator);
             Destroy(arrowFlickIndicator);
+            Destroy(PreviewHighlightMaterial);
+            Destroy(PreviewHighlightGlowMaterial);
         }
 
         public void Close()
@@ -502,6 +504,36 @@ namespace JANOARG.Client.Behaviors.Panels
             }
         }
 
+        Material PreviewHighlightMaterial;
+        Material PreviewHighlightGlowMaterial;
+
+        // The options preview has no chart loaded, so there is no HitStyleManager to pull the
+        // simultaneous-note materials from. The preview is a fixed context though -- a pure white
+        // note on a pitch black background -- so the colors are derived straight from white rather
+        // than from a style. On black, alpha blending and additive blending give the same result,
+        // so the glow reads correctly even though the hit shader ignores the sprite renderer tint.
+        void InitPreviewHighlightMaterials()
+        {
+            if (PreviewHighlightMaterial && PreviewHighlightGlowMaterial) return;
+
+            Material baseMaterial = InternalChartTool.LoadStyleMaterial("Highlight", "Default");
+            if (!baseMaterial) return;
+
+            (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Color.white, Color.black);
+
+            PreviewHighlightMaterial = new Material(baseMaterial);
+            PreviewHighlightMaterial.SetColor("_Color", highlight);
+
+            // The glow is a SpriteRenderer, so it takes the sprite-pipeline material rather than
+            // the mesh one the bold bar uses, matching what HitStyleManager hands real notes.
+            Material glowBaseMaterial = InternalChartTool.LoadStyleMaterial("HighlightGlow", "Default");
+
+            PreviewHighlightGlowMaterial = new Material(glowBaseMaterial ? glowBaseMaterial : baseMaterial);
+            PreviewHighlightGlowMaterial.SetColor("_Color", glow);
+
+            PreviewNormalSimulGlow.sharedMaterial = PreviewHighlightGlowMaterial;
+        }
+
         public void UpdatePlayerPreview()
         {
             float width = 5;
@@ -528,15 +560,23 @@ namespace JANOARG.Client.Behaviors.Panels
                 PreviewNormalSimulCenter.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
                 PreviewNormalSimulLeft.localScale = PreviewNormalSimulRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 PreviewNormalSimulRight.localPosition = Vector3.right * (width / 2 + .2f * scale);
-                PreviewNormalSimulLeft.localPosition = -PreviewNormalRight.localPosition;
-                
-                PreviewNormalSimulBold.gameObject.SetActive(settings.HighlightSimulNotes);
-                PreviewNormalSimulBold.material = new Material(Shader.Find("JANOARG/Styles/Default - Hit"));
-                PreviewNormalSimulBold.material.color = new Color(1, 1, 1, 0.75f);
-                
-                PreviewNormalSimulBold.transform.localScale = PreviewNormalSimulCenter.localScale;
-                PreviewNormalSimulBold.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulCenter.localScale.y * 1.8f, z: PreviewNormalSimulCenter.localScale.z * .998f);
-                PreviewNormalSimulGlow.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulBold.transform.localScale.y * 6f);
+                PreviewNormalSimulLeft.localPosition = -PreviewNormalSimulRight.localPosition;
+
+                bool highlight = settings.HighlightSimulNotes;
+                PreviewNormalSimulBold.gameObject.SetActive(highlight);
+                PreviewNormalSimulGlow.gameObject.SetActive(highlight);
+
+                if (highlight)
+                {
+                    InitPreviewHighlightMaterials();
+
+                    if (PreviewHighlightMaterial) PreviewNormalSimulBold.sharedMaterial = PreviewHighlightMaterial;
+                    if (PreviewHighlightGlowMaterial) PreviewNormalSimulGlow.sharedMaterial = PreviewHighlightGlowMaterial;
+
+                    // Keep in sync with the normal-note branch of HitPlayer.UpdateMesh.
+                    PreviewNormalSimulBold.transform.localScale = new Vector3(width + .2f * scale, .6f * scale, .6f * scale);
+                    PreviewNormalSimulGlow.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulBold.transform.localScale.y * 6f);
+                }
             }
 
             PreviewCatchFlick.transform.localScale = PreviewNormalFlick.transform.localScale
