@@ -231,13 +231,19 @@ public class HoldNoteClass
 public class FlickTracker
 {
     /// <summary>
-    ///     phira's <c>FLICK_SPEED_THRESHOLD</c> (0.8), scaled by the reference DPI ratio it
-    ///     hardcodes. Note that phira's <c>FlickTracker::new</c> accepts the device DPI and then
-    ///     ignores it in favour of a flat 275 — <c>Screen.dpi</c> is not dependable enough to gate
-    ///     gameplay on, and this port keeps that decision. Expressed in screen units per second,
-    ///     where the reference screen extent spans 2 units (phira's NDC range of [-1, 1]).
+    ///     Base flick speed, as the fraction of a note radius the finger crosses in one perfect
+    ///     window. A flick fires at <see cref = "FireMultiplier"/> times this and re-arms below it,
+    ///     so the gesture that fires covers about 14% of a note radius per perfect window.
     /// </summary>
-    public const float SpeedThreshold = 0.8f * 275f / 386f; // ~0.5699 units/s
+    /// <remarks>
+    ///     Deliberately diverges from phira, which uses <c>0.8 * 275 / 386</c> — its own empirical
+    ///     constant plus two generations of vestigial DPI arithmetic, left behind when the
+    ///     regression they belonged to was replaced. Measuring against this project's own note
+    ///     scale and timing window instead drops the dependence on <c>Screen.dpi</c>, makes flick
+    ///     difficulty follow MinimumRadius and ScreenUnit automatically, and states something
+    ///     arguable rather than inherited. Calibrated to reproduce the previous pixel values.
+    /// </remarks>
+    public const float SpeedThreshold = 0.07f; // radii per perfect window; fires at 0.14
 
     /// <summary>
     ///     phira fires the flick at twice the base threshold. Kept verbatim.
@@ -255,11 +261,10 @@ public class FlickTracker
     ///     <see cref = "SpeedThreshold"/> converted into this device's pixels per second.
     /// </summary>
     /// <remarks>
-    ///     phira normalizes x by screen width and y by screen height, which makes its threshold
-    ///     anisotropic — the same physical swipe registers differently depending on its direction.
-    ///     We normalize both axes by a single reference extent instead, so the gesture reads the
-    ///     same in every direction. That also keeps <see cref = "FlickStroke"/> angle-preserving,
-    ///     which matters because the caller measures a flick angle off it.
+    ///     Isotropic: both axes share one scale, so a gesture reads the same in every direction and
+    ///     <see cref = "FlickStroke"/> stays angle-preserving, which matters because the caller
+    ///     measures a flick angle off it. (phira normalizes x by width and y by height, so the same
+    ///     physical swipe registers differently depending on which way it points.)
     /// </remarks>
     private readonly float _Threshold;
 
@@ -302,20 +307,33 @@ public class FlickTracker
     public float FlickAngle =>
         AngleOf(FlickStroke);
 
-    /// <param name = "screenReferenceExtent">
-    ///     Screen extent, in pixels, that spans phira's 2-unit normalized range. Both axes are
-    ///     normalized by this, so the threshold stays direction-independent.
-    /// </param>
-    public FlickTracker(float screenReferenceExtent)
+    /// <param name = "noteScale"> Note radius in pixels; the spatial scale a flick is measured against. </param>
+    /// <param name = "timingWindow"> Judgement window in seconds; the temporal scale it is measured against. </param>
+    public FlickTracker(float noteScale, float timingWindow)
     {
-        _Threshold = SpeedThreshold * (screenReferenceExtent / 2f);
+        _Threshold = SpeedThreshold * (noteScale / timingWindow);
     }
 
     /// <summary>
-    ///     Builds a tracker referenced against the current screen height.
+    ///     Builds a tracker scaled to the player's own note size and timing, so flick difficulty
+    ///     tracks the game's tuning rather than a raw screen measurement.
     /// </summary>
-    public static FlickTracker Create() =>
-        new(Screen.height);
+    public static FlickTracker Create()
+    {
+        PlayerScreen player = PlayerScreen.sMain;
+
+        // Fallbacks cover construction before PlayerScreen has finished loading. 0.2 * height is
+        // what ScaledMinimumRadius works out to on any screen wider than ScreenUnit's 1.75:1.
+        float noteScale = player && player.ScaledMinimumRadius > 0f
+            ? player.ScaledMinimumRadius
+            : 0.2f * Screen.height;
+
+        float timingWindow = player && player.PerfectWindow > 0f
+            ? player.PerfectWindow
+            : 0.05f;
+
+        return new FlickTracker(noteScale, timingWindow);
+    }
 
     /// <summary>
     ///     Converts a screen-space delta into the chart's flick angle convention:
@@ -513,6 +531,17 @@ public class PlayerInputManager : MonoBehaviour
     /// </remarks>
     [Space] public float FlickFollowScale = 2.4f;
 
+    /// <summary>
+    ///     How far a finger must travel for the motion to count as a flick, as a fraction of a note
+    ///     radius. The speed half of detection lives in <see cref = "FlickTracker"/>; both must pass.
+    /// </summary>
+    /// <remarks>
+    ///     Was <c>Screen.dpi * 0.2f</c> (about 5mm). Screen.dpi reports 0 on some devices, and the
+    ///     fallback of 100 collapsed this gate to 20px — effectively no gate at all. Measuring
+    ///     against the note instead removes the last dependence on it.
+    /// </remarks>
+    public float FlickTravelRatio = 0.375f;
+
     [Space] [ReadOnly] public float UpdatePerSecond = float.NaN;
 
     [ReadOnly]        public string              Delta = s_DeltaTime.ToString("F3") + "ms";
@@ -705,15 +734,12 @@ public class PlayerInputManager : MonoBehaviour
 
             int inputCount = Touch.activeTouches.Count;
 
-            float screenDpi =
-                Screen.dpi > 0
-                    ? Screen.dpi
-                    : 100; // Minimum DPI
-
             // Distance half of flick detection: how far a finger must travel before the motion
             // counts as a flick at all. The speed half lives in FlickTracker; both must pass.
-            float flickDistanceThreshold = screenDpi * 0.2f; // 20% of screen dpi (about 0.5cm)
-            InitLogger($"Set flick distance threshold to {flickDistanceThreshold}px (DPI: {screenDpi})");
+            float flickDistanceThreshold = FlickTravelRatio * Player.ScaledMinimumRadius;
+            InitLogger(
+                $"Set flick distance threshold to {flickDistanceThreshold}px " +
+                $"(note scale: {Player.ScaledMinimumRadius}px)");
 
             // Main touch iterator
             sr_TouchInputLoop.Begin();
