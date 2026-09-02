@@ -959,6 +959,12 @@ namespace JANOARG.Client.Behaviors.Player
         public void ScheduleMusic(double dspStart, double seekPosition)
         {
             _MusicStartDSP = dspStart;
+
+            // PlayScheduled does not honour its schedule on a *paused* source — it resumes more or less
+            // immediately. Retrying from a mid-song pause arrives here with the source in exactly that
+            // state, which started the song while the chart was still counting down. Stop() first so
+            // every caller schedules from one known state, whatever the source was doing before.
+            Music.Stop();
             Music.time = (float)seekPosition;
             Music.PlayScheduled(dspStart);
             _SongEndDSP = dspStart + (Music.clip.length - seekPosition);
