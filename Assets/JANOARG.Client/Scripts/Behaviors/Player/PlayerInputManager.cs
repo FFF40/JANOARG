@@ -633,27 +633,19 @@ public class PlayerInputManager : MonoBehaviour
     }
 
     /// <summary>
-    ///     Determines whether the absolute angular difference between the expected and actual flick directions
-    ///     is within a reasonable range (±25 degrees) to be considered a valid flick gesture.
+    ///     How far the player's flick may deviate from a note's FlickDirection, in degrees.
+    /// </summary>
+    private const float FlickAngleTolerance = 30f;
+
+    /// <summary>
+    ///     Whether the angle between a note's expected flick direction and the player's actual one
+    ///     is inside <see cref = "FlickAngleTolerance"/>.
     /// </summary>
     /// <param name = "expected"> The expected flick direction from the hit object, in degrees. </param>
     /// <param name = "actual"> The actual flick direction done by the player, in degrees. </param>
-    /// <returns> true if within a reasonable range, false otherwise. </returns>
-
-    private bool ValidateFlickDirection(float expected, float actual)
-    {
-        float angularDifference = Mathf.DeltaAngle(expected, actual); // Signed difference (-180 to +180)
-        float absDiff = Mathf.Abs(angularDifference);
-        bool comparison = absDiff <= 25f;
-
-        // More leniency
-        bool closeEnough = absDiff <= 27.5f || Mathf.Approximately(absDiff, 25f);
-
-        //Debug.Log(
-        //    $"ValidatingFlickPass: Expected {expected}°, got {actual}°, Difference ~25/27.5 < ({angularDifference})° ({comparison || closeEnough})");
-
-        return comparison || closeEnough; // ±25 degrees
-    }
+    /// <returns> true if within tolerance, false otherwise. </returns>
+    private bool ValidateFlickDirection(float expected, float actual) =>
+        Mathf.Abs(Mathf.DeltaAngle(expected, actual)) <= FlickAngleTolerance;
 
     /// <summary>
     ///     Logs a message only once when the PlayerScreen is initialized.
