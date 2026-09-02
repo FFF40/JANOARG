@@ -1016,7 +1016,17 @@ public class PlayerInputManager : MonoBehaviour
 
                 double time = judgementOffsetTime - hitObject.Time;
 
-                if (judgementOffsetTime >= hitObject.Time && hitObject.Current.Type == HitObject.HitType.Catch)
+                // Flickables are released a perfect window early, so feedback lands at
+                // max(flick time, note time - PerfectWindow): a well-timed flick fires on the frame
+                // it happens and still feels immediate, while an early one waits instead of
+                // replying before the note reaches the line. Catch notes keep resolving at their
+                // own time — they are caught as the note passes, not flicked at.
+                double releaseTime = hitObject.Current.Flickable
+                    ? hitObject.Time - Player.PerfectWindow
+                    : hitObject.Time;
+
+                if (judgementOffsetTime >= releaseTime &&
+                    (hitObject.Current.Type == HitObject.HitType.Catch || hitObject.Current.Flickable))
                 {
                     if (!hitObject.IsProcessed)
                         Player.Hit(hitObject, time);
@@ -1391,15 +1401,11 @@ public class PlayerInputManager : MonoBehaviour
             return false;
         }
 
-        // Graded off the flick, not the tap: the tap is only a claim, and it deliberately gets a
-        // wider window than the note is scored on.
-        Player.Hit(note, flickTimingDelta);
-
-        // Player.Hit() can reenter PurgeHitPlayer (via RemoveHitPlayer) and null QueuedHit out from
-        // under us — restore it so EnqueueHoldNote's own read still sees the note just hit.
-        touch.QueuedHit = note;
-        note.IsProcessed = true;
-        EnqueueHoldNote(note);
+        // Committed, not judged. The DiscreteHitQueue pass scores it once the note is within a
+        // perfect window of its own time, and that pass runs later in this same frame — so a flick
+        // landing inside the window resolves immediately, while an earlier one is held rather than
+        // replying before the note reaches the line. Same path catch-flicks already take.
+        note.InDiscreteHitQueue = true;
 
         touch.Flicked = false;
         touch.FlickTracker.ConsumeFlick();
