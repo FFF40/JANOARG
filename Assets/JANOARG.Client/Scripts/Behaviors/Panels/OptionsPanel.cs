@@ -524,8 +524,14 @@ namespace JANOARG.Client.Behaviors.Panels
             PreviewHighlightMaterial = new Material(baseMaterial);
             PreviewHighlightMaterial.SetColor("_Color", highlight);
 
-            PreviewHighlightGlowMaterial = new Material(baseMaterial);
+            // The glow is a SpriteRenderer, so it takes the sprite-pipeline material rather than
+            // the mesh one the bold bar uses, matching what HitStyleManager hands real notes.
+            Material glowBaseMaterial = InternalChartTool.LoadStyleMaterial("HighlightGlow", "Default");
+
+            PreviewHighlightGlowMaterial = new Material(glowBaseMaterial ? glowBaseMaterial : baseMaterial);
             PreviewHighlightGlowMaterial.SetColor("_Color", glow);
+
+            PreviewNormalSimulGlow.sharedMaterial = PreviewHighlightGlowMaterial;
         }
 
         public void UpdatePlayerPreview()
