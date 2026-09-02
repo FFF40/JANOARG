@@ -258,11 +258,16 @@ public class FlickTracker
     public const float ReArmDotTolerance = 0.6f;
 
     /// <summary>
-    ///     Speed below which a consumed flick re-arms, as a fraction of the firing speed. prpr
-    ///     writes the same test as <c>threshold * (1.2 / 1.8)</c> against a threshold that is
-    ///     itself its firing speed, so this is that ratio kept verbatim.
+    ///     Speed below which a consumed flick re-arms, as a fraction of the firing speed.
     /// </summary>
-    public const float ReArmSpeedRatio = 1.2f / 1.8f; // ~0.667 of firing speed
+    /// <remarks>
+    ///     prpr uses <c>1.2 / 1.8</c>, about 0.667. Nudged up here because same-direction flick
+    ///     runs can only re-arm on this term — they have no direction change to offer — and
+    ///     testers found them harder than intended. Raising it eases those without reopening
+    ///     chaining: a genuinely sustained swipe never dips below firing speed at all, so it still
+    ///     clears exactly one note however high this goes.
+    /// </remarks>
+    public const float ReArmSpeedRatio = 0.8f; // of firing speed
 
     /// <summary>
     ///     <see cref = "SpeedThreshold"/> converted into this device's pixels per second.
@@ -387,10 +392,9 @@ public class FlickTracker
         float speed = delta.magnitude / dt;
 
         // Re-arm a consumed flick only once the gesture genuinely ends or turns: the finger slows
-        // to two thirds of the firing speed, or changes direction by more than ~53 degrees. Both
-        // figures are prpr's. An earlier revision re-armed at half the firing speed instead, which
-        // demanded a deeper slowdown than the reference and made same-direction flick runs harder
-        // than they needed to be.
+        // to ReArmSpeedRatio of the firing speed, or changes direction by more than ~53 degrees.
+        // The turn tolerance is prpr's; the speed ratio is looser than prpr's, because that term is
+        // the only one a same-direction run can satisfy.
         if (_Wait &&
             (speed < _Threshold * FireMultiplier * ReArmSpeedRatio ||
              Vector2.Dot(_LastDirection, delta.normalized) < ReArmDotTolerance))
