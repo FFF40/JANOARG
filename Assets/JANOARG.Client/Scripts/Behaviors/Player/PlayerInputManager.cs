@@ -385,6 +385,7 @@ public class FlickTracker
         if (dt <= 0f) return;
 
         float speed = delta.magnitude / dt;
+        Vector2 direction = delta.normalized;
 
         // Re-arm a consumed flick only once the gesture genuinely ends or turns: the finger slows
         // to two thirds of the firing speed, or changes direction by more than ~53 degrees. Both
@@ -393,10 +394,17 @@ public class FlickTracker
         // than they needed to be.
         if (_Wait &&
             (speed < _Threshold * FireMultiplier * ReArmSpeedRatio ||
-             Vector2.Dot(_LastDirection, delta.normalized) < ReArmDotTolerance))
+             Vector2.Dot(_LastDirection, direction) < ReArmDotTolerance))
             _Wait = false;
 
-        if (_Wait || IsFlicked || speed < _Threshold * FireMultiplier)
+        // A latched flick still updates if the gesture genuinely turns. Without this the stroke is
+        // frozen at whatever fired it, so a player who flicks the wrong way and corrects without
+        // lifting keeps being judged on the original direction until the engine's invalidator
+        // clears the latch a perfect window later. Same turn test the re-arm uses.
+        bool turned = IsFlicked &&
+                      Vector2.Dot(FlickStroke.normalized, direction) < ReArmDotTolerance;
+
+        if (_Wait || (IsFlicked && !turned) || speed < _Threshold * FireMultiplier)
             return;
 
         IsFlicked = true;
