@@ -218,6 +218,11 @@ namespace JANOARG.Client.Behaviors.Player
         // can re-arm the restart path afterwards.
         private bool _SongEnded;
 
+        // Bumped whenever the run in progress is superseded — by a pause, or by a re-initialisation for
+        // a retry. ReadyAnim captures it before its animation and bails afterwards if it moved, so a
+        // countdown that was interrupted mid-flight cannot start the song behind the pause menu.
+        private int _RunGeneration;
+
         // Draw clock. Chart time smoothed across the audio clock's update granularity — see
         // PlayerClockDecision.VisualTime. NaN means "no history, snap on the next frame", which is the
         // correct state at startup and after any seek or resync.
@@ -415,6 +420,9 @@ namespace JANOARG.Client.Behaviors.Player
 
         public IEnumerator InitChart()
         {
+            // Supersede any ready animation still in flight from the run being replaced.
+            _RunGeneration++;
+
             sCurrentChart = sTargetChart.Data.DeepClone();
             HitObjectHistory = new List<HitObjectHistoryItem>();
             
@@ -887,6 +895,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public IEnumerator ReadyAnim()
         {
+            int generation = _RunGeneration;
+
             for (var a = 0; a < ScoreCounter.Digits.Count; a++)
             {
                 ScoreCounter.Digits[a]
@@ -911,6 +921,12 @@ namespace JANOARG.Client.Behaviors.Player
             foreach (ScrollingCounterDigit digit in ScoreCounter.Digits)
                 digit.Speed = 9;
 
+            // Everything below hands control to the clock and the audio source. The animation above
+            // yields for over a second with IsPlaying still false, and the run can be paused or retried
+            // in that window — in which case this coroutine is stale and must not start anything.
+            if (generation != _RunGeneration)
+                yield break;
+
             IsPlaying = true;
 
             // Idk why but songs are starting 3/4 of a second later than they's supposed to be
@@ -931,6 +947,7 @@ namespace JANOARG.Client.Behaviors.Player
         public void SuspendMusicSchedule()
         {
             _SongEndDSP = double.NaN;
+            _RunGeneration++;
         }
 
         /// <summary>
