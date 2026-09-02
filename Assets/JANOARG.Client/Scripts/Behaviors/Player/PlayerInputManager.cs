@@ -468,6 +468,18 @@ public class TouchClass
     public bool DiscreteHitobjectIsInRange;
 
     /// <summary>
+    ///     Where this touch was when it first engaged its <see cref = "NearestDiscreteHitobject"/>,
+    ///     used as the origin for that note's flick travel measurement.
+    /// </summary>
+    /// <remarks>
+    ///     A catch-flick has no tap to measure travel from — the finger was already down, having
+    ///     landed somewhere unrelated, possibly seconds earlier. This is the equivalent anchor:
+    ///     the tap-flick path gets one free from Unity as <c>Touch.startScreenPosition</c>, and
+    ///     this is the same idea for a gesture that does not begin with a touch-down.
+    /// </remarks>
+    public Vector2 DiscreteHitobjectAnchor;
+
+    /// <summary>
     ///     Indicates whether the touch has been recognized as a flick gesture.
     /// </summary>
     public bool Flicked;
@@ -959,6 +971,16 @@ public class PlayerInputManager : MonoBehaviour
                             hitIteration.HitCoord.Radius
                         )
                         {
+                            // Edge only. This block re-runs every frame the finger is in range, so
+                            // assigning unconditionally would reset the anchor each frame and leave
+                            // the travel gate measuring a single frame of movement. The first term
+                            // catches entering range at all; the second covers an early flick, whose
+                            // note is held in DiscreteHitQueue past the frame that nulls QueuedHit,
+                            // so the clear at resolution never fires and the flag stays set.
+                            if (!touch.DiscreteHitobjectIsInRange ||
+                                touch.NearestDiscreteHitobject != hitIteration)
+                                touch.DiscreteHitobjectAnchor = touch.Touch.screenPosition;
+
                             touch.DiscreteHitobjectIsInRange = true;
                             touch.NearestDiscreteHitobject = hitIteration;
                         }
@@ -1558,6 +1580,19 @@ public class PlayerInputManager : MonoBehaviour
 
                 // With no tap frame to anchor to, the gesture is the entire confirmation.
                 if (!touch.Flicked) return false;
+
+                // Travel — the gate the tap path has always had and this one never did. Gated on
+                // speed alone, a catch-flick only ever implied fireSpeed * dt of movement: about
+                // 10px at 60fps, 2.5px at 240fps. A short sharp jab cleared the note, and it got
+                // cheaper the faster the device rendered. Measured from where the finger engaged
+                // this note, so each note in a stream demands its own movement rather than
+                // inheriting a sweep's accumulated distance.
+                Vector2 anchor = touch.NearestDiscreteHitobject == hitObject
+                    ? touch.DiscreteHitobjectAnchor
+                    : touch.Touch.startScreenPosition; // never engaged it; the landing point is all there is
+
+                if (Vector2.Distance(touch.Touch.screenPosition, anchor) < flickDistanceThreshold)
+                    return false;
 
                 // Angle comes off the stroke that actually fired rather than a cached mirror. The
                 // old field defaulted to 0, which is a valid direction meaning "up", so a note
