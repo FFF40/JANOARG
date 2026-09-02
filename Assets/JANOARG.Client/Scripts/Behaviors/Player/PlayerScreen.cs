@@ -929,6 +929,17 @@ namespace JANOARG.Client.Behaviors.Player
 
             IsPlaying = true;
 
+            ScheduleLeadIn();
+        }
+
+        /// <summary>
+        ///     Anchors chart time zero and hands the audio source the matching schedule. Every entry into
+        ///     a lead-in comes through here — the ready animation, and resuming from a pause taken before
+        ///     the song started — so the countdown, the chart clock and the audio can never end up
+        ///     anchored to different moments.
+        /// </summary>
+        public void ScheduleLeadIn()
+        {
             // Idk why but songs are starting 3/4 of a second later than they's supposed to be
             // so this will be here as a temporary hack before I figure out what is going on
             // Lead-in runs for as long as the origin says, less the 0.75 fudge that is currently load
@@ -940,13 +951,15 @@ namespace JANOARG.Client.Behaviors.Player
         }
 
         /// <summary>
-        ///     Drops the scheduled end. DSP time keeps running while the game is paused, so a stale
-        ///     schedule would read as "the song already finished" on resume and block the restart that
-        ///     resuming depends on.
+        ///     Drops the scheduled playback. DSP time keeps running while the game is paused, so both
+        ///     anchors go stale the moment we stop: a stale end would read as "the song already finished"
+        ///     and block the restart that resuming depends on, and a stale start would silently eat the
+        ///     pause out of the remaining lead-in. Resuming re-anchors whichever one it needs.
         /// </summary>
         public void SuspendMusicSchedule()
         {
-            _SongEndDSP = double.NaN;
+            _SongEndDSP   = double.NaN;
+            _SongStartDSP = double.NaN;
             _RunGeneration++;
         }
 

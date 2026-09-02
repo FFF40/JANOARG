@@ -114,6 +114,13 @@ namespace JANOARG.Client.Behaviors.Player
             PlayerScreen.sMain.CurrentTime -= 1.5f;
             // Re-anchor DSP clock to now so rawDelta starts clean on the next Update
             PlayerScreen.sMain.Resync();
+
+            // Pausing before the song started killed the pending PlayScheduled, and nothing else will
+            // reissue it: the clock's restart path only fires once chart time is non-negative, so the
+            // whole lead-in would otherwise run silently. Mid-song resumes still go through that path.
+            if (PlayerScreen.sMain.CurrentTime < 0)
+                PlayerScreen.sMain.ScheduleLeadIn();
+
             PlayerScreen.sMain.IsPlaying = true;
 
             float targetVolume = PlayerScreen.sMain.Music.volume;
