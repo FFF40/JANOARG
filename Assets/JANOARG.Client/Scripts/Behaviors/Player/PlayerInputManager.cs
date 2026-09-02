@@ -258,6 +258,13 @@ public class FlickTracker
     public const float ReArmDotTolerance = 0.6f;
 
     /// <summary>
+    ///     Speed below which a consumed flick re-arms, as a fraction of the firing speed. prpr
+    ///     writes the same test as <c>threshold * (1.2 / 1.8)</c> against a threshold that is
+    ///     itself its firing speed, so this is that ratio kept verbatim.
+    /// </summary>
+    public const float ReArmSpeedRatio = 1.2f / 1.8f; // ~0.667 of firing speed
+
+    /// <summary>
     ///     <see cref = "SpeedThreshold"/> converted into this device's pixels per second.
     /// </summary>
     /// <remarks>
@@ -379,12 +386,13 @@ public class FlickTracker
 
         float speed = delta.magnitude / dt;
 
-        // Re-arm a consumed flick only once the gesture genuinely ends or turns: the finger slows to
-        // half the firing speed, or changes direction by more than ~53 degrees. prpr re-arms at two
-        // thirds of its firing speed rather than half, so this is a little stricter; the wider band
-        // is what stops one sustained swipe clearing a chain of notes without further effort.
+        // Re-arm a consumed flick only once the gesture genuinely ends or turns: the finger slows
+        // to two thirds of the firing speed, or changes direction by more than ~53 degrees. Both
+        // figures are prpr's. An earlier revision re-armed at half the firing speed instead, which
+        // demanded a deeper slowdown than the reference and made same-direction flick runs harder
+        // than they needed to be.
         if (_Wait &&
-            (speed < _Threshold ||
+            (speed < _Threshold * FireMultiplier * ReArmSpeedRatio ||
              Vector2.Dot(_LastDirection, delta.normalized) < ReArmDotTolerance))
             _Wait = false;
 
@@ -398,6 +406,11 @@ public class FlickTracker
     /// <summary>
     ///     Clears the latch once the engine has acted on it.
     /// </summary>
+    /// <remarks>
+    ///     For a flick that actually landed on a note. A flick that expired unused must go through
+    ///     <see cref = "ClearFlick"/> instead — prpr calls <c>consume_flick</c> only inside the
+    ///     branch where a note is hit, and nothing there arms the wait on expiry.
+    /// </remarks>
     public void ConsumeFlick()
     {
         // Record which way the consumed flick went before clearing it — the re-arm check needs
@@ -405,6 +418,21 @@ public class FlickTracker
         _LastDirection = FlickStroke.normalized;
         _Wait = true;
 
+        ClearFlick();
+    }
+
+    /// <summary>
+    ///     Drops a latched flick without arming the re-arm wait, for one that was never acted on.
+    /// </summary>
+    /// <remarks>
+    ///     The latch still has to go, or the engine's own flag is re-set from it on the next frame
+    ///     and a stale flick resurrects itself. But penalising a flick that missed with the same
+    ///     re-arm requirement as one that landed blocks the retry at precisely the moment the
+    ///     player is trying again. Chaining stays blocked regardless, since that is gated by the
+    ///     hit path rather than this one.
+    /// </remarks>
+    public void ClearFlick()
+    {
         IsFlicked = false;
         FlickStroke = Vector2.zero;
     }
@@ -841,7 +869,7 @@ public class PlayerInputManager : MonoBehaviour
                         if (flickTimedOut && nearAnyFlickable)
                         {
                             touchClass.Flicked = false;
-                            touchClass.FlickTracker.ConsumeFlick();
+                            touchClass.FlickTracker.ClearFlick(); // expired, not spent — see ClearFlick
                         }
                     }
 
