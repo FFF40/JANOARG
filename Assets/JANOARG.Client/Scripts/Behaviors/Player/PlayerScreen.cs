@@ -1393,7 +1393,7 @@ namespace JANOARG.Client.Behaviors.Player
                 accuracy = CalculateAccuracy(offset, offsetAbs);
                 finalScore = baseScore * (1 - Mathf.Abs(accuracy.Value));
                 
-                AddScore(finalScore, accuracy);
+                AddScore(finalScore, accuracy, offset);
                 
                 HitObjectHistory.Add(new HitObjectHistoryItem(hitObject, offset));
             }
@@ -1511,7 +1511,7 @@ namespace JANOARG.Client.Behaviors.Player
                 text = "MISS";
 
             if (offset != null && Settings.ShowValueText >= (acc == 0 ? 3 : 2) && !double.IsInfinity(offset.Value) && Math.Abs(offset.Value) >= 0.005)                                                                                        
-                text += offset > 0 ? $"(+{offset.Value:0.##}ms)" : $"({offset.Value:0.##}ms)";                                                                                                                                                
+                text += offsetValue > 0 ? $"(+{offsetValue:0.##}ms)" : $"({offsetValue:0.##}ms)"; 
             
             return text;
         }
