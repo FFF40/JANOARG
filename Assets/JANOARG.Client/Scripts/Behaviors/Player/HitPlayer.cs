@@ -41,6 +41,13 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool InDiscreteHitQueue;
 
+        // True while this note is claimed for scoring but not yet finalised: either handed to
+        // DiscreteHitQueue by input, or simply an autoplay note awaiting its chart time. Scoring
+        // runs on the audio clock but drawing runs on the leading visual clock, so the draw pass
+        // hides such a note the moment it reaches the line instead of rendering it past it. Reset
+        // per-note in Init().
+        public bool IsPendingJudgement;
+
         public bool PendingHoldQueue;
         public bool IsProcessed;
         public bool IsTapped;
@@ -60,6 +67,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsProcessed = false;
             IsTapped = false;
             IsReturned = false;
+            IsPendingJudgement = false;
 
             // UpdateMesh below bails if GetZPosition throws, which would leave a pooled
             // instance wearing the previous note's baked Z and transform.

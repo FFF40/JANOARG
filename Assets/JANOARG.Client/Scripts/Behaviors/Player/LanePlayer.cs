@@ -513,9 +513,10 @@ namespace JANOARG.Client.Behaviors.Player
                     player.Lane = this;
                     HitObjects.Add(player);
 
-                    // PlayerInputManager.main.AddToQueue(player);
-                    PlayerInputManager.sInstance.AddToQueue(player);
+                    // Init first: AddToQueue marks the note pending for autoplay, and Init is what
+                    // resets that flag for a reused pooled instance.
                     player.Init();
+                    PlayerInputManager.sInstance.AddToQueue(player);
 
                     Current.Objects.RemoveAt(0);
                     HitCoords.RemoveAt(0);
@@ -535,6 +536,18 @@ namespace JANOARG.Client.Behaviors.Player
                 sr_HitPlayerUpdateSelf.Begin();
                 hitObject.UpdateSelf(time, beat, LaneStepDirty);
                 sr_HitPlayerUpdateSelf.End();
+
+                // A claimed tap/catch/flick is finalised at its chart time, always on the audio
+                // clock, but it is drawn on the leading visual clock (`time` already includes
+                // VisualOffset). Hide it the moment the draw clock reaches that point so it can
+                // never be rendered past the judgement line. Holds are handled by their tail mesh
+                // instead (see UpdateHoldMesh), and a note claimed at/after the line is finalised
+                // later in the same input frame so it disappears immediately regardless.
+                if (hitObject.IsPendingJudgement && hitObject.Current.HoldLength <= 0 && time >= hitObject.Time)
+                {
+                    hitObject.gameObject.SetActive(false);
+                    continue;
+                }
 
                 // A note is hidden by its own distance only, never by another note's. Only
                 // reachable on backward-scrolling lanes: the spawn loop above creates notes
@@ -647,6 +660,24 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void UpdateHoldMeshInternal(HitPlayer hit)
         {
+            // Draw-clock time, matching what positions the head and tail. Hoisted so the tail check
+            // below is O(1): GetZPosition(EndTime) <= CurrentPosition is equivalent to
+            // EndTime <= this time (the same monotonic mapping), without the TimeStamps scan.
+            double time = Math.Max(PlayerScreen.sMain.VisualTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
+
+            // A held hold is finalised when its tail reaches the judgement line. Once it has, hide
+            // the head and the tail mesh so the tail can't be drawn past the line. A missed hold is
+            // never flagged and is left to linger as the miss cue.
+            if (hit.IsPendingJudgement && time >= hit.EndTime)
+            {
+                hit.gameObject.SetActive(false);
+
+                if (hit.HoldRenderer != null)
+                    hit.HoldRenderer.gameObject.SetActive(false);
+
+                return;
+            }
+
             if (hit.HoldRenderer == null)
             {
                 hit.HoldRenderer = Instantiate(PlayerScreen.sMain.HoldSample, Holder);
@@ -688,8 +719,6 @@ namespace JANOARG.Client.Behaviors.Player
                     _Tris.Add(_Verts.Count - 3);
                 }
             }
-
-            double time = Math.Max(PlayerScreen.sMain.VisualTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
 
             int index = -1;
             for (int i = 0; i < TimeStamps.Count; i++)
