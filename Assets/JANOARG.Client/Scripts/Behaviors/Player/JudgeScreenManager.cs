@@ -229,9 +229,13 @@ namespace JANOARG.Client.Behaviors.Player
             }
 
             DefineJudgeScreenEffect(hitobject, ref effect, accuracy);
-            ShowEffect(effect);
             effect.SetColor(color);
-            effect.Tick(0);
+            effect.Tick(0); // Tick(0) sets alpha to 1, so hide *after* it
+            // Leave hidden until the caller starts an animation (its first Tick call
+            // reveals it again). Callers like HoldNoteClass borrow a whole pool ahead
+            // of time but only start one at a time; showing them here would leave the
+            // rest frozen and visible at their stale position.
+            HideEffect(effect);
             return effect;
         }
 
