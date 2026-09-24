@@ -612,7 +612,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
             DifficultyList.Clear();
             var target = GetNearestDifficulty(targetSong.Charts);
-            foreach (ExternalChartMeta chart in targetSong.Charts)
+            foreach (ExternalChartMeta chart in targetSong.Charts.OrderBy(c => c.DifficultyIndex))
             {
                 string chartID = Path.GetFileNameWithoutExtension(chart.Target);
                 var record = StorageManager.sMain.Scores.Get(songID, chartID);
