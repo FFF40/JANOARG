@@ -53,6 +53,10 @@ namespace JANOARG.Client.Behaviors.Player
         // two vertices and six fixed indices per line, so the triangle list is a pure function of
         // _Verts.Count — the indices only need re-uploading when that count changes.
         private int _UploadedIndexCount = -1;
+
+        // Read-only views for JanoargProfilerSampler (custom Profiler counters).
+        internal int MeshVertexCount => _Mesh != null ? _Mesh.vertexCount           : 0;
+        internal int MeshIndexCount  => _Mesh != null ? (int)_Mesh.GetIndexCount(0) : 0;
         
         static readonly ProfilerMarker sr_TimestampRemove = new("Lane UpdateMesh: Remove Timestamps");
         static readonly ProfilerMarker sr_MeshCalc = new("Lane UpdateMesh: Calculate advance");

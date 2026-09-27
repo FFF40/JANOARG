@@ -37,6 +37,10 @@ namespace JANOARG.Client.Behaviors.Player
         // Active animations driven this Update
         private readonly List<ActiveEffect> _active = new();
 
+        // Read-only views for JanoargProfilerSampler (custom Profiler counters).
+        internal int JudgeScreenEffectsPoolCount => judgeScreenEffects?.Count ?? 0;
+        internal int TotalInstances              => _totalInstances;
+
         // -----------------------------------------------------------------
         // Lifecycle
         // -----------------------------------------------------------------

@@ -301,12 +301,80 @@ namespace JANOARG.Client.Behaviors.Player
         // -----------------------------------------------------------------
         private const int HitPlayerPoolPrewarm = 64;
         private readonly Stack<HitPlayer> _HitPlayerPool = new();
+        private int _HitPlayersCreated;
+
+        // Read-only views for JanoargProfilerSampler (custom Profiler counters).
+        internal int PendingLaneCount      => _PendingLanes.Count - _PendingLaneCursor;
+        internal int HitPlayerPoolCount    => _HitPlayerPool.Count;
+        internal int HitPlayersInUseCount  => _HitPlayersCreated - _HitPlayerPool.Count;
+
+        internal int ActiveHitObjectCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Lanes.Count; i++)
+                    count += Lanes[i].HitObjects.Count;
+                return count;
+            }
+        }
+
+        internal int ActiveLaneRendererCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Lanes.Count; i++)
+                    if (Lanes[i].gameObject.activeSelf)
+                        count++;
+                return count;
+            }
+        }
+
+        internal int LaneVertexCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Lanes.Count; i++)
+                    count += Lanes[i].MeshVertexCount;
+                return count;
+            }
+        }
+
+        internal int LaneTriangleCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Lanes.Count; i++)
+                    count += Lanes[i].MeshIndexCount / 3;
+                return count;
+            }
+        }
+
+        internal int ActiveHoldMeshCount
+        {
+            get
+            {
+                int count = 0;
+                for (int i = 0; i < Lanes.Count; i++)
+                {
+                    List<HitPlayer> hits = Lanes[i].HitObjects;
+                    for (int j = 0; j < hits.Count; j++)
+                        if (hits[j].HoldMesh != null && hits[j].HoldMesh.gameObject.activeSelf)
+                            count++;
+                }
+                return count;
+            }
+        }
 
         private void PrewarmHitPlayerPool()
         {
             for (int i = 0; i < HitPlayerPoolPrewarm; i++)
             {
                 HitPlayer player = Instantiate(HitSample, HitPlayerPoolHolder);
+                _HitPlayersCreated++;
                 player.gameObject.SetActive(false);
                 PrewarmHoldMesh(player);
                 _HitPlayerPool.Push(player);
@@ -343,9 +411,16 @@ namespace JANOARG.Client.Behaviors.Player
 
         public HitPlayer BorrowHitPlayer(Transform parent)
         {
-            HitPlayer player = _HitPlayerPool.Count > 0
-                ? _HitPlayerPool.Pop()
-                : Instantiate(HitSample, HitPlayerPoolHolder);
+            HitPlayer player;
+            if (_HitPlayerPool.Count > 0)
+            {
+                player = _HitPlayerPool.Pop();
+            }
+            else
+            {
+                player = Instantiate(HitSample, HitPlayerPoolHolder);
+                _HitPlayersCreated++;
+            }
 
             player.transform.SetParent(parent);
             player.gameObject.SetActive(true);
