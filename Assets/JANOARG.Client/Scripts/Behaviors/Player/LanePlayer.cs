@@ -48,6 +48,11 @@ namespace JANOARG.Client.Behaviors.Player
         // THIS IS NOT THREAD SAFE
         private readonly List<Vector3> _Verts = new(2048);
         private readonly List<int>     _Tris  = new(1024);
+
+        // Vertex count of the index buffer currently uploaded to _Mesh. f_addLine emits exactly
+        // two vertices and six fixed indices per line, so the triangle list is a pure function of
+        // _Verts.Count — the indices only need re-uploading when that count changes.
+        private int _UploadedIndexCount = -1;
         
         static readonly ProfilerMarker sr_TimestampRemove = new("Lane UpdateMesh: Remove Timestamps");
         static readonly ProfilerMarker sr_MeshCalc = new("Lane UpdateMesh: Calculate advance");
@@ -471,10 +476,30 @@ namespace JANOARG.Client.Behaviors.Player
             _HasBuiltMeshOnce = true;
 
             sr_MeshUpdater.Begin();
-            // Actually update mesh data
-            _Mesh.Clear(false);
+            // Actually update mesh data.
+            // Clear() is omitted: the setters overwrite from index 0, avoiding its per-frame
+            // reallocation. SetVertices validates the mesh's *current* index buffer against the new
+            // vertex array, so when the topology shrinks the stale indices (which reference vertices
+            // that no longer exist) have to be dropped first or Unity throws.
+            if (_Verts.Count < _UploadedIndexCount)
+                _Mesh.SetTriangles(Array.Empty<int>(), 0, false, 0);
+
             _Mesh.SetVertices(_Verts);
-            _Mesh.SetTriangles(_Tris, 0, true);
+
+            if (_Verts.Count != _UploadedIndexCount)
+            {
+                // Topology changed, so re-upload indices. Assigning triangles also recalculates
+                // the bounds from the current vertices, so no separate bounds pass is needed here.
+                _Mesh.SetTriangles(_Tris, 0, true, 0);
+                _UploadedIndexCount = _Verts.Count;
+            }
+            else
+            {
+                // Topology unchanged: the indices already on the mesh are still correct, but
+                // SetVertices does not recalculate bounds and the vertices have moved, so refresh
+                // them without paying for another index copy/validation.
+                _Mesh.RecalculateBounds();
+            }
             sr_MeshUpdater.End();
         }
 
@@ -830,9 +855,26 @@ namespace JANOARG.Client.Behaviors.Player
                 previousStepEndPointPosition = currentStepEndPointPosition;
             }
 
-            mesh.Clear();
+            // Same upload discipline as the lane body: Clear is unnecessary because both setters
+            // resize and overwrite from index 0, and the hold-tail index list is a pure function of
+            // the vertex count, so it is only re-uploaded when that count changed since this mesh's
+            // last upload. SetVertices does not recalculate bounds, so on the (common) unchanged
+            // frames the bounds are refreshed directly instead of via a full triangle assignment.
+            // Stale, now-too-large indices must be dropped before SetVertices or it throws.
+            if (_Verts.Count < hit.UploadedHoldIndexCount)
+                mesh.SetTriangles(Array.Empty<int>(), 0, false, 0);
+
             mesh.SetVertices(_Verts);
-            mesh.SetTriangles(_Tris, 0);
+
+            if (_Verts.Count != hit.UploadedHoldIndexCount)
+            {
+                mesh.SetTriangles(_Tris, 0, true, 0);
+                hit.UploadedHoldIndexCount = _Verts.Count;
+            }
+            else
+            {
+                mesh.RecalculateBounds();
+            }
             // hit.HoldMesh.mesh = mesh;
         }
 

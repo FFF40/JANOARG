@@ -92,8 +92,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapProps
                 _ => throw new ArgumentException($"Unknown reveal conditional type {RevealConditional}")
             };
 
-            Debug.Log(isRevealed);
-
             foreach (Transform child in transform)
             {
                 child.gameObject.SetActive(isRevealed);

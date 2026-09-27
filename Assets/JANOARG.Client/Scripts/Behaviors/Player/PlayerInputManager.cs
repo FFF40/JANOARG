@@ -676,6 +676,32 @@ public class PlayerInputManager : MonoBehaviour
         if (_InitLog) Debug.Log(msg);
     }
 
+    // Allocation-free replacements for List<T>.Find/RemoveAll with lambdas. Those capture locals
+    // (fingerIndex, holdNoteEntry), so each call allocated a closure plus a delegate — several per
+    // frame while touches are active. These are plain loops over the same fields.
+    private TouchClass FindTouchByFinger(int fingerIndex)
+    {
+        for (var i = 0; i < TouchClasses.Count; i++)
+            if (TouchClasses[i].Touch.finger.index == fingerIndex)
+                return TouchClasses[i];
+
+        return null;
+    }
+
+    private void RemoveTouchesByFinger(int fingerIndex)
+    {
+        for (var i = TouchClasses.Count - 1; i >= 0; i--)
+            if (TouchClasses[i].Touch.finger.index == fingerIndex)
+                TouchClasses.RemoveAt(i);
+    }
+
+    private static void RemoveAllFromQueue(List<HitPlayer> queue, HitPlayer hit)
+    {
+        for (var i = queue.Count - 1; i >= 0; i--)
+            if (queue[i] == hit)
+                queue.RemoveAt(i);
+    }
+
     /// <summary>
     ///     Adds the given <see cref = "HitPlayer"/> object to the player's hit queue, sorted by time.
     /// </summary>
@@ -713,8 +739,8 @@ public class PlayerInputManager : MonoBehaviour
     /// </summary>
     public void PurgeHitPlayer(HitPlayer hit)
     {
-        HitQueue.RemoveAll(x => x == hit);
-        DiscreteHitQueue.RemoveAll(x => x == hit);
+        RemoveAllFromQueue(HitQueue, hit);
+        RemoveAllFromQueue(DiscreteHitQueue, hit);
 
         for (int i = HoldQueue.Count - 1; i >= 0; i--)
         {
@@ -802,9 +828,12 @@ public class PlayerInputManager : MonoBehaviour
             // Distance half of flick detection: how far a finger must travel before the motion
             // counts as a flick at all. The speed half lives in FlickTracker; both must pass.
             float flickDistanceThreshold = FlickTravelRatio * Player.ScaledMinimumRadius;
-            InitLogger(
-                $"Set flick distance threshold to {flickDistanceThreshold}px " +
-                $"(note scale: {Player.ScaledMinimumRadius}px)");
+            // Guard the interpolated argument on _InitLog: it would otherwise be built (and
+            // allocated) every frame even though InitLogger drops it after the first call.
+            if (_InitLog)
+                InitLogger(
+                    $"Set flick distance threshold to {flickDistanceThreshold}px " +
+                    $"(note scale: {Player.ScaledMinimumRadius}px)");
 
             // Main touch iterator
             sr_TouchInputLoop.Begin();
@@ -819,7 +848,7 @@ public class PlayerInputManager : MonoBehaviour
                     // Flush any queued tap hit before removing the touch — a very fast tap can
                     // begin and end within a single UpdateInput call, so the normal queued-hit
                     // resolver at the bottom of the frame would never see it.
-                    TouchClass endingTouch = TouchClasses.Find(t => t.Touch.finger.index == fingerIndex);
+                    TouchClass endingTouch = FindTouchByFinger(fingerIndex);
 
                     // A tap-flick is often completed by the same motion that lifts the finger, so
                     // give a pending claim the same last chance the tap path gets.
@@ -850,15 +879,15 @@ public class PlayerInputManager : MonoBehaviour
                         endingTouch.QueuedHit = null;
                     }
 
-                    TouchClass endedTouch = TouchClasses.Find(t => t.Touch.finger.index == fingerIndex);
+                    TouchClass endedTouch = FindTouchByFinger(fingerIndex);
                     endedTouch?.FlickTracker.Reset();
-                    TouchClasses.RemoveAll(input => input.Touch.finger.index == fingerIndex);
+                    RemoveTouchesByFinger(fingerIndex);
 
                     continue;
                 }
 
                 // Find existing touch or create new one
-                TouchClass touchClass = TouchClasses.Find(t => t.Touch.finger.index == fingerIndex);
+                TouchClass touchClass = FindTouchByFinger(fingerIndex);
 
                 if (touchClass == null) // New touch
                 {
@@ -920,8 +949,9 @@ public class PlayerInputManager : MonoBehaviour
 
             double judgementOffsetTime = Player.CurrentTime + Player.Settings.JudgmentOffset; // Judgement offset
 
-            InitLogger(
-                $"Judgement-offset time: {judgementOffsetTime} (Current time: {Player.CurrentTime}, Offset: {Player.Settings.JudgmentOffset})");
+            if (_InitLog)
+                InitLogger(
+                    $"Judgement-offset time: {judgementOffsetTime} (Current time: {Player.CurrentTime}, Offset: {Player.Settings.JudgmentOffset})");
 
 
             sr_HitQueueLoop.Begin();

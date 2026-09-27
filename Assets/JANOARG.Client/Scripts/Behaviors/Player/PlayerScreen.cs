@@ -201,6 +201,12 @@ namespace JANOARG.Client.Behaviors.Player
         private readonly List<(float CueTime, LanePlayer Lane)> _PendingLanes = new();
         private int _PendingLaneCursor;
 
+        // Diagnostic lane-removal logging. Debug.Log allocates the message plus a captured stack
+        // trace, and this fires once per lane culled — a burst at section boundaries shows up as a
+        // GC spike. Kept behind a const so builds compile the calls (and their string interpolation)
+        // out entirely until explicitly needed.
+        private const bool LogLaneRemoval = false;
+
         private double _LastDSPTime;
         private double _MusicStartDSP;  // DSP time at which Music.PlayScheduled was called
 
@@ -302,8 +308,37 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 HitPlayer player = Instantiate(HitSample, HitPlayerPoolHolder);
                 player.gameObject.SetActive(false);
+                PrewarmHoldMesh(player);
                 _HitPlayerPool.Push(player);
             }
+        }
+
+        /// <summary>
+        ///     Creates a pooled player's hold-tail renderer and Mesh up front, so the native mesh /
+        ///     renderer allocation happens here during loading rather than the first time the note is
+        ///     used for a hold mid-song (a Mesh.CreateMesh hitch).
+        /// </summary>
+        private void PrewarmHoldMesh(HitPlayer player)
+        {
+            if (player.HoldRenderer != null)
+                return;
+
+            MeshRenderer holdRenderer = Instantiate(HoldSample, HitPlayerPoolHolder);
+            MeshFilter   filter       = holdRenderer.GetComponent<MeshFilter>();
+
+            if (filter == null)
+            {
+                // Malformed sample; fall back to the lazy path in UpdateHoldMesh.
+                Destroy(holdRenderer.gameObject);
+                return;
+            }
+
+            filter.mesh = new Mesh();
+            filter.mesh.MarkDynamic();
+
+            holdRenderer.gameObject.SetActive(false);
+            player.HoldRenderer = holdRenderer;
+            player.HoldMesh     = filter;
         }
 
         public HitPlayer BorrowHitPlayer(Transform parent)
@@ -326,6 +361,18 @@ namespace JANOARG.Client.Behaviors.Player
                 if (player.HoldMesh.mesh != null)
                     player.HoldMesh.mesh.Clear();
                 player.HoldMesh.gameObject.SetActive(false);
+
+                // The hold mesh was cleared, so its baked index buffer is gone too; force the
+                // next UpdateHoldMesh to re-upload indices for whatever geometry it rebuilds.
+                player.UploadedHoldIndexCount = -1;
+
+                // Keep the hold renderer with the pooled player. It is created under the lane's
+                // Holder on use, and lanes are destroyed when culled — without reparenting it would
+                // go down with the lane and a fresh Mesh would be created on the next hold, which
+                // is the mid-song Mesh.CreateMesh spike. Anchoring it to the pool makes the renderer
+                // and its Mesh live for the life of the pool and be reused.
+                if (player.HoldRenderer != null)
+                    player.HoldRenderer.transform.SetParent(HitPlayerPoolHolder, false);
             }
 
             player.gameObject.SetActive(false);
@@ -1157,12 +1204,16 @@ namespace JANOARG.Client.Behaviors.Player
                     if (lane == null || lane.MarkedForRemoval)
                     {
                         Lanes.RemoveAt(i);
-                        Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
+
+                        if (LogLaneRemoval)
+                            Debug.Log($"[LaneRemove] Removed lane {i} from scene.");
                     }
                 }
                 catch (MissingReferenceException)
                 {
-                    Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
+                    if (LogLaneRemoval)
+                        Debug.LogWarning($"[LaneRemove] Lane {i} is null.");
+
                     Lanes.RemoveAt(i);
                 }
             }

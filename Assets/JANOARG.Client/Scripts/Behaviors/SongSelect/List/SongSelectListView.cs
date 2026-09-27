@@ -251,7 +251,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                                 AddHeader(song.Value > 9000 || song.Value <= 0 ? "??" : song.Value.ToString());
                             }
                             AddSong(song.Key);
-                            print($"{song.Key} {song.Value}");
                         }
                         break;
                     }

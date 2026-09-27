@@ -48,7 +48,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
 
         public void OnDestroy()
         {
-            print("on destroy called");
             MapManager.sSongMapItemsByID.Remove(TargetID);
             MapManager.sSongMapItemUIsByID.Remove(TargetID);
             if (ItemUI)

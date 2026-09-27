@@ -28,6 +28,12 @@ namespace JANOARG.Client.Behaviors.Player
         public MeshFilter   HoldMesh;
         public MeshRenderer HoldRenderer;
 
+        // Vertex count of the index buffer currently uploaded to HoldMesh's Mesh, or -1 if the
+        // mesh has none. The hold-tail triangle list is a pure function of the vertex count (each
+        // generated line adds two vertices and six fixed indices), so the indices only need
+        // re-uploading when that count changes. Reset whenever the mesh is cleared or pooled.
+        public int UploadedHoldIndexCount = -1;
+
         public MeshFilter   FlickMesh;
         public MeshRenderer FlickRenderer;
 
@@ -68,6 +74,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsTapped = false;
             IsReturned = false;
             IsPendingJudgement = false;
+            UploadedHoldIndexCount = -1;
 
             // UpdateMesh below bails if GetZPosition throws, which would leave a pooled
             // instance wearing the previous note's baked Z and transform.
