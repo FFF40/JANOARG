@@ -276,7 +276,7 @@ public class FlickTracker
     private readonly float _Threshold;
 
     private Vector2 _LastPoint;
-    private float   _LastTime;
+    private double  _LastTime;
     private bool    _HasSample;
 
     /// <summary>
@@ -296,6 +296,13 @@ public class FlickTracker
     ///     engine passes must not be lost, and only the engine knows what consuming it means.
     /// </summary>
     public bool IsFlicked { get; private set; }
+
+    /// <summary>
+    ///     True on the one <see cref = "Push"/> where an already-latched flick was refreshed to a
+    ///     genuinely different direction (a correction), false otherwise. The caller uses it to keep
+    ///     the engine's expiry timer from reaping a flick the player just re-aimed.
+    /// </summary>
+    public bool ReLatched { get; private set; }
 
     /// <summary>
     ///     The screen-space movement that tripped <see cref = "IsFlicked"/>, in pixels.
@@ -360,10 +367,13 @@ public class FlickTracker
 
     /// <summary>
     ///     Feeds one position sample. <paramref name = "time"/> must be strictly increasing across
-    ///     calls; samples that are not are dropped rather than trusted.
+    ///     calls; samples that are not are dropped rather than trusted. Callers pass the touch event's
+    ///     own timestamp rather than the frame time, so one frame may contribute several samples.
     /// </summary>
-    public void Push(float time, Vector2 position)
+    public void Push(double time, Vector2 position)
     {
+        ReLatched = false;
+
         if (!_HasSample)
         {
             _LastPoint = position;
@@ -373,7 +383,7 @@ public class FlickTracker
             return;
         }
 
-        float dt = time - _LastTime;
+        double dt = time - _LastTime;
         Vector2 delta = position - _LastPoint;
 
         _LastPoint = position;
@@ -382,9 +392,9 @@ public class FlickTracker
         // phira divides by dt unguarded, which is safe there only because it synthesizes strictly
         // increasing timestamps. A repeated or non-monotonic clock yields an infinite or NaN speed
         // that trips the threshold on a stationary finger, so refuse the sample outright.
-        if (dt <= 0f) return;
+        if (dt <= 0d) return;
 
-        float speed = delta.magnitude / dt;
+        float speed = (float)(delta.magnitude / dt);
         Vector2 direction = delta.normalized;
 
         // Re-arm a consumed flick only once the gesture genuinely ends or turns: the finger slows
@@ -407,6 +417,7 @@ public class FlickTracker
         if (_Wait || (IsFlicked && !turned) || speed < _Threshold * FireMultiplier)
             return;
 
+        ReLatched = IsFlicked;
         IsFlicked = true;
         FlickStroke = delta;
     }
@@ -454,7 +465,7 @@ public class FlickTracker
         FlickStroke = Vector2.zero;
         _HasSample = false;
         _Wait = false;
-        _LastTime = 0f;
+        _LastTime = 0d;
         _LastPoint = _LastDirection = Vector2.zero;
     }
 }
@@ -554,6 +565,20 @@ public class TouchClass
     ///     The Unity <see cref = "Touch"/> structure representing the current touch event.
     /// </summary>
     public Touch Touch;
+
+    /// <summary>
+    ///     Timestamp of the most recent touch event already fed to <see cref = "FlickTracker"/>.
+    ///     A frame can carry several events per finger; this is what keeps each of them fed exactly
+    ///     once and in order.
+    /// </summary>
+    public double LastFlickSampleTime = double.NegativeInfinity;
+
+    /// <summary>
+    ///     Set when the finger lifts. The class is kept until the end of the input frame so the
+    ///     release sample can still be judged (a catch-flick can complete on the very motion that
+    ///     lifts the finger), then swept.
+    /// </summary>
+    public bool PendingRemoval;
 }
 
 public class PlayerInputManager : MonoBehaviour
@@ -616,6 +641,24 @@ public class PlayerInputManager : MonoBehaviour
     public readonly List<TouchClass> TouchClasses = new();
 
     /// <summary>
+    ///     One recorded touch event: enough to feed <see cref = "FlickTracker"/>.
+    /// </summary>
+    private struct TouchSample
+    {
+        public int        FingerIndex;
+        public double     Time;
+        public Vector2    Position;
+        public TouchPhase Phase;
+    }
+
+    /// <summary>
+    ///     Touch events recorded since the last input frame. The touch panel reports several events per
+    ///     finger between two rendered frames, each with its own timestamp; feeding them all ties flick
+    ///     detection to the panel's report rate instead of the render frame rate.
+    /// </summary>
+    private readonly List<TouchSample> _PendingSamples = new();
+
+    /// <summary>
     /// Fully clears input state for a chart retry/reload. Must be called before the
     /// player's lanes/HitPlayers are destroyed — a HoldNoteClass whose HitPlayer gets
     /// destroyed out from under it (e.g. by Destroy(lane.gameObject) on retry) never
@@ -631,6 +674,7 @@ public class PlayerInputManager : MonoBehaviour
         HitQueue.Clear();
         DiscreteHitQueue.Clear();
         TouchClasses.Clear();
+        _PendingSamples.Clear();
     }
 
     private bool
@@ -643,13 +687,90 @@ public class PlayerInputManager : MonoBehaviour
     public void Awake() // Unity's version of constructor
     {
         EnhancedTouchSupport.Enable();
+        Touch.onFingerDown += RecordSample;
+        Touch.onFingerMove += RecordSample;
+        Touch.onFingerUp   += RecordSample;
         sInstance = this;
     }
 
 
     public void OnDestroy() // Deconstructor
     {
+        Touch.onFingerDown -= RecordSample;
+        Touch.onFingerMove -= RecordSample;
+        Touch.onFingerUp   -= RecordSample;
         EnhancedTouchSupport.Disable();
+    }
+
+    /// <summary>
+    ///     Records one touch event for the next input frame. Multiple events can arrive per finger
+    ///     between two frames, so each is buffered with its own timestamp rather than collapsed into
+    ///     whichever position happened to be current when the frame ran.
+    /// </summary>
+    private void RecordSample(Finger finger)
+    {
+        // Input is only judged while a chart is running. Dropping events outside it also keeps the
+        // buffer from accumulating a pause's worth of stale samples.
+        if (!PlayerScreen.sMain || !PlayerScreen.sMain.IsPlaying) return;
+
+        Touch touch = finger.lastTouch;
+
+        if (!touch.valid) return;
+
+        _PendingSamples.Add(new TouchSample
+        {
+            FingerIndex = finger.index,
+            Time        = touch.time,
+            Position    = touch.screenPosition,
+            Phase       = touch.phase,
+        });
+    }
+
+    /// <summary>
+    ///     Whether a touch-down arrived for this finger since the last input frame. Used to tell a
+    ///     gesture that fitted entirely between two frames (which must be reconstructed and judged)
+    ///     from one whose down happened while input was not being tracked (which must be ignored).
+    /// </summary>
+    private bool HasPendingDown(int fingerIndex)
+    {
+        for (var i = 0; i < _PendingSamples.Count; i++)
+            if (_PendingSamples[i].FingerIndex == fingerIndex &&
+                _PendingSamples[i].Phase == TouchPhase.Began)
+                return true;
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Feeds every recorded event for this finger into its tracker, in order.
+    /// </summary>
+    /// <remarks>
+    ///     One sample per rendered frame averaged the whole frame's motion into a single speed figure:
+    ///     a short, sharp flick was flattened below the fire threshold, and the same gesture read
+    ///     differently at 30 fps than at 120. Per-event samples measure the movement at the touch
+    ///     panel's own resolution, with the event's real timestamp as <c>dt</c>.
+    /// </remarks>
+    private void DrainFlickSamples(TouchClass touch, int fingerIndex)
+    {
+        for (var i = 0; i < _PendingSamples.Count; i++)
+        {
+            TouchSample sample = _PendingSamples[i];
+
+            if (sample.FingerIndex != fingerIndex || sample.Time <= touch.LastFlickSampleTime)
+                continue;
+
+            touch.LastFlickSampleTime = sample.Time;
+            touch.FlickTracker.Push(sample.Time, sample.Position);
+
+            // Set the first latch, and refresh it on a re-aim: otherwise the invalidator can reap a
+            // flick the player has just corrected back onto the note.
+            if (touch.FlickTracker.IsFlicked &&
+                (!touch.Flicked || touch.FlickTracker.ReLatched))
+            {
+                touch.Flicked = true;
+                touch.FlickTime = Player.CurrentTime;
+            }
+        }
     }
 
     /// <summary>
@@ -686,13 +807,6 @@ public class PlayerInputManager : MonoBehaviour
                 return TouchClasses[i];
 
         return null;
-    }
-
-    private void RemoveTouchesByFinger(int fingerIndex)
-    {
-        for (var i = TouchClasses.Count - 1; i >= 0; i--)
-            if (TouchClasses[i].Touch.finger.index == fingerIndex)
-                TouchClasses.RemoveAt(i);
     }
 
     private static void RemoveAllFromQueue(List<HitPlayer> queue, HitPlayer hit)
@@ -845,43 +959,69 @@ public class PlayerInputManager : MonoBehaviour
                 // Handle touch end/cancel
                 if (inputEntry is { isInProgress: false, phase: TouchPhase.Ended or TouchPhase.Canceled })
                 {
-                    // Flush any queued tap hit before removing the touch — a very fast tap can
-                    // begin and end within a single UpdateInput call, so the normal queued-hit
-                    // resolver at the bottom of the frame would never see it.
                     TouchClass endingTouch = FindTouchByFinger(fingerIndex);
 
-                    // A tap-flick is often completed by the same motion that lifts the finger, so
-                    // give a pending claim the same last chance the tap path gets.
-                    if (endingTouch?.QueuedHit != null &&
-                        endingTouch.QueuedHit.Current.Flickable &&
-                        endingTouch.QueuedHit.Current.Type == HitObject.HitType.Normal)
-                        TryResolveTapFlick(endingTouch, endingTouch.QueuedHit, flickDistanceThreshold);
-
-                    if (endingTouch?.QueuedHit != null &&
-                        !endingTouch.QueuedHit.IsProcessed &&
-                        endingTouch.QueuedHit.Current.Type == HitObject.HitType.Normal &&
-                        !endingTouch.QueuedHit.Current.Flickable)
+                    if (endingTouch == null && HasPendingDown(fingerIndex))
                     {
-                        HitPlayer queuedHit = endingTouch.QueuedHit;
+                        // The whole gesture fitted between two frames, so no class was ever made for
+                        // it. The buffered samples still hold it, and the ended Touch carries its
+                        // start position/time, so reconstruct one and let it be judged like any other
+                        // tap. StartTime is wound back by the gesture's own duration so a sub-frame
+                        // tap is not recorded as happening at the lift frame.
+                        endingTouch = new TouchClass
+                        {
+                            Touch     = inputEntry,
+                            StartTime = Player.CurrentTime - (inputEntry.time - inputEntry.startTime),
+                            Initial   = true,
+                        };
 
-                        Player.Hit(
-                            queuedHit,
-                            endingTouch.StartTime + Player.Settings.JudgmentOffset - queuedHit.Time
-                        );
-
-                        // Player.Hit() can reenter PurgeHitPlayer (via RemoveHitPlayer, for any
-                        // non-hold note) and null out endingTouch.QueuedHit out from under us —
-                        // restore it so EnqueueHoldNote(endingTouch)'s own read still sees it.
-                        endingTouch.QueuedHit = queuedHit;
-
-                        queuedHit.IsProcessed = true;
-                        EnqueueHoldNote(endingTouch);
-                        endingTouch.QueuedHit = null;
+                        TouchClasses.Add(endingTouch);
                     }
 
-                    TouchClass endedTouch = FindTouchByFinger(fingerIndex);
-                    endedTouch?.FlickTracker.Reset();
-                    RemoveTouchesByFinger(fingerIndex);
+                    if (endingTouch != null)
+                    {
+                        // Refresh with the lift state and feed the release event (and anything since
+                        // the last frame) before judging. The old code resolved tap-flicks against
+                        // the previous frame's position and reset the tracker without ever seeing
+                        // the lift, so the final stroke of the gesture could not count.
+                        endingTouch.Touch = inputEntry;
+                        DrainFlickSamples(endingTouch, fingerIndex);
+
+                        // A tap-flick is often completed by the same motion that lifts the finger, so
+                        // give a pending claim the same last chance the tap path gets.
+                        if (endingTouch.QueuedHit != null &&
+                            endingTouch.QueuedHit.Current.Flickable &&
+                            endingTouch.QueuedHit.Current.Type == HitObject.HitType.Normal)
+                            TryResolveTapFlick(endingTouch, endingTouch.QueuedHit, flickDistanceThreshold);
+
+                        if (endingTouch.QueuedHit != null &&
+                            !endingTouch.QueuedHit.IsProcessed &&
+                            endingTouch.QueuedHit.Current.Type == HitObject.HitType.Normal &&
+                            !endingTouch.QueuedHit.Current.Flickable)
+                        {
+                            HitPlayer queuedHit = endingTouch.QueuedHit;
+
+                            Player.Hit(
+                                queuedHit,
+                                endingTouch.StartTime + Player.Settings.JudgmentOffset - queuedHit.Time
+                            );
+
+                            // Player.Hit() can reenter PurgeHitPlayer (via RemoveHitPlayer, for any
+                            // non-hold note) and null out endingTouch.QueuedHit out from under us —
+                            // restore it so EnqueueHoldNote(endingTouch)'s own read still sees it.
+                            endingTouch.QueuedHit = queuedHit;
+
+                            queuedHit.IsProcessed = true;
+                            EnqueueHoldNote(endingTouch);
+                            endingTouch.QueuedHit = null;
+                        }
+
+                        // Keep the class through this frame's judgement passes — a catch-flick that
+                        // completes on the lift (or entirely within one frame) is only visible while
+                        // the touch still exists. The sweep at the end of UpdateInput resets and
+                        // removes it.
+                        endingTouch.PendingRemoval = true;
+                    }
 
                     continue;
                 }
@@ -898,49 +1038,44 @@ public class PlayerInputManager : MonoBehaviour
                         Initial = true
                     };
 
-                    touchClass.FlickTracker.Push(Time.unscaledTime, inputEntry.startScreenPosition);
                     TouchClasses.Add(touchClass);
                 }
                 else // Existing touch
                 {
                     touchClass.Touch = inputEntry;
 
-                    // Flick detector — FlickTracker owns gesture recognition entirely; this
-                    // only relays its verdict. Pushed on the wall clock rather than
-                    // Player.CurrentTime, whose audio-callback granularity can repeat a
-                    // timestamp across frames and make a stationary finger look infinitely fast.
-                    touchClass.FlickTracker.Push(Time.unscaledTime, inputEntry.screenPosition);
-
-                    if (touchClass.FlickTracker.IsFlicked && !touchClass.Flicked)
-                    {
-                        touchClass.Flicked = true;
-                        touchClass.FlickTime = Player.CurrentTime;
-                    }
-
-                    // Invalidator (policy unchanged): a flick left unclaimed for longer than the
-                    // perfect window is dropped once a flickable is actually in range, so a stale
-                    // gesture cannot clear the next note for free.
-                    if (touchClass.Flicked)
-                    {
-                        bool flickTimedOut = Math.Abs(Player.CurrentTime - touchClass.FlickTime) >
-                                             Player.PerfectWindow;
-
-                        bool nearAnyFlickable = HitQueue.Any(hit =>
-                            hit.Current.Flickable &&
-                            !hit.IsProcessed &&
-                            Math.Abs(hit.Time - Player.CurrentTime) <=
-                            Player.PassWindow
-                        );
-
-                        if (flickTimedOut && nearAnyFlickable)
-                        {
-                            touchClass.Flicked = false;
-                            touchClass.FlickTracker.ClearFlick(); // expired, not spent — see ClearFlick
-                        }
-                    }
-
                     // Already handling the same touch on the second pass, consider it holding
                     touchClass.IsHolding = true;
+                }
+
+                // Flick detector — FlickTracker owns gesture recognition entirely; this only relays
+                // its verdict. Every event recorded since the last frame is fed, with the event's own
+                // timestamp as dt (not Player.CurrentTime, whose audio-callback granularity can repeat
+                // across events, nor the frame time, which coarse-grained the speed and made the same
+                // gesture read differently at different frame rates). For a brand-new touch the buffer
+                // necessarily carries the touch-down sample itself.
+                DrainFlickSamples(touchClass, fingerIndex);
+
+                // Invalidator (policy unchanged): a flick left unclaimed for longer than the
+                // perfect window is dropped once a flickable is actually in range, so a stale
+                // gesture cannot clear the next note for free.
+                if (touchClass.Flicked)
+                {
+                    bool flickTimedOut = Math.Abs(Player.CurrentTime - touchClass.FlickTime) >
+                                         Player.PerfectWindow;
+
+                    bool nearAnyFlickable = HitQueue.Any(hit =>
+                        hit.Current.Flickable &&
+                        !hit.IsProcessed &&
+                        Math.Abs(hit.Time - Player.CurrentTime) <=
+                        Player.PassWindow
+                    );
+
+                    if (flickTimedOut && nearAnyFlickable)
+                    {
+                        touchClass.Flicked = false;
+                        touchClass.FlickTracker.ClearFlick(); // expired, not spent — see ClearFlick
+                    }
                 }
 
                 touchClass.Initial = false;
@@ -1209,6 +1344,16 @@ public class PlayerInputManager : MonoBehaviour
 
                 touch.Tapped = false; // Tap only lasts for a single frame
             }
+
+            // Touches whose finger lifted this frame stayed around for the judgement passes above so
+            // a flick completed on the lift could resolve. Drop them now, once this frame is done.
+            for (var i = TouchClasses.Count - 1; i >= 0; i--)
+            {
+                if (!TouchClasses[i].PendingRemoval) continue;
+
+                TouchClasses[i].FlickTracker.Reset();
+                TouchClasses.RemoveAt(i);
+            }
         }
         else // Autoplay, From old input manager since it works as is (for now)
         {
@@ -1255,6 +1400,10 @@ public class PlayerInputManager : MonoBehaviour
                 }
             }
         }
+
+        // Every touch that could be matched this frame has now been drained; anything left (a finger
+        // that vanished without a class, or autoplay's) is stale and must not leak into next frame.
+        _PendingSamples.Clear();
 
         _InitLog = false; // Disable logging after the first initialization
 
@@ -1482,6 +1631,53 @@ public class PlayerInputManager : MonoBehaviour
     }
 
     /// <summary>
+    ///     Whether a note's flick is directional rather than omnidirectional. The sentinel for
+    ///     omnidirectional is <c>NaN</c>, but a malformed chart can also carry an infinity; both are
+    ///     treated as omnidirectional here so every judgement site agrees.
+    /// </summary>
+    private static bool IsDirectionalFlick(float flickDirection) =>
+        float.IsFinite(flickDirection);
+
+    /// <summary>
+    ///     Perpendicular distance from <paramref name = "offset"/> to the beam through the note along
+    ///     <paramref name = "flickDirection"/>.
+    /// </summary>
+    /// <remarks>
+    ///     Rotating the offset by +FlickDirection maps the flick axis onto +Y, so <c>.x</c> is the
+    ///     perpendicular component. <c>.y</c> is deliberately unused — the beam runs indefinitely
+    ///     both ways, and which way the finger went is the angle check's job.
+    /// </remarks>
+    private static float FlickPerpendicular(float flickDirection, Vector2 offset) =>
+        Mathf.Abs((Quaternion.Euler(0, 0, flickDirection) * offset).x);
+
+    /// <summary>
+    ///     The displacement vector a flick on <paramref name = "note"/> should be judged on.
+    /// </summary>
+    /// <remarks>
+    ///     Taken over the same long baseline as <see cref = "FlickTravel"/> — where the finger engaged
+    ///     the note (or where it landed, for a touch that never engaged) to where it is now — rather
+    ///     than the single inter-sample delta that tripped the tracker. That delta is only a few
+    ///     pixels once samples are per event, so its angle is dominated by touch jitter and by
+    ///     whichever way the finger first flinched; the full stroke is what the player meant.
+    /// </remarks>
+    private static Vector2 FlickStrokeVector(TouchClass touch, HitPlayer note)
+    {
+        Vector2 current = touch.Touch.screenPosition;
+
+        // A touch that never engaged the note has no anchor of its own; where it landed is all
+        // there is to measure from.
+        if (touch.NearestDiscreteHitobject != note)
+            return current - touch.Touch.startScreenPosition;
+
+        // Match FlickTravel's own choice of leg: the larger of the net displacement from the anchor
+        // and the return from the apex, so a u-turn is judged on the leg that actually moved.
+        Vector2 fromAnchor = current - touch.DiscreteHitobjectAnchor;
+        Vector2 fromPeak   = current - touch.DiscreteHitobjectPeak;
+
+        return fromAnchor.sqrMagnitude >= fromPeak.sqrMagnitude ? fromAnchor : fromPeak;
+    }
+
+    /// <summary>
     ///     Second stage of a tap-flick: the tap has already claimed <paramref name = "note"/> into
     ///     this touch's queue, and this decides whether the flick that followed satisfies it.
     /// </summary>
@@ -1520,16 +1716,15 @@ public class PlayerInputManager : MonoBehaviour
         Vector2 offset = current - note.HitCoord.Position;
         float radius = note.HitCoord.Radius;
 
-        if (float.IsFinite(note.Current.FlickDirection)) // Directional
+        if (IsDirectionalFlick(note.Current.FlickDirection)) // Directional
         {
-            // Rotating the offset by +FlickDirection maps the flick axis onto +Y, so .x is the
-            // perpendicular distance from the beam. .y is deliberately unused — the beam runs
-            // indefinitely both ways, and which way the finger went is the angle check's job.
-            float perpendicular = (Quaternion.Euler(0, 0, note.Current.FlickDirection) * offset).x;
+            // The beam runs indefinitely both ways, so containment only asks whether the finger is
+            // still near the flick axis; which way it went is the angle check's job.
+            if (FlickPerpendicular(note.Current.FlickDirection, offset) >= radius) return false;
 
-            if (Mathf.Abs(perpendicular) >= radius) return false;
-
-            if (!ValidateFlickDirection(note.Current.FlickDirection, touch.FlickTracker.FlickAngle))
+            if (!ValidateFlickDirection(
+                    note.Current.FlickDirection,
+                    FlickTracker.AngleOf(FlickStrokeVector(touch, note))))
                 return false;
         }
         else if (offset.magnitude >= radius * FlickFollowScale) // Omnidirectional: expanded circle
@@ -1556,10 +1751,10 @@ public class PlayerInputManager : MonoBehaviour
         if (hitIteration.Current.Flickable) // Flick notes (catch/tap)
         {
             // Tap-flicks are a two-stage gesture: the tap claims the note into the finger's
-            // QueuedHit slot, and a flick on some LATER frame resolves that claim. It has to span
-            // frames — Tapped is true only on the frame the finger lands, and FlickTracker needs at
-            // least two samples before IsFlicked can be true, so the two can never both hold in a
-            // single pass and the direction could never actually be judged from one.
+            // QueuedHit slot, and a flick resolves that claim. With per-event samples the flick can
+            // already be latched on the same frame the tap is made, so stage 2 is attempted right
+            // after a fresh claim below as well as on later frames — otherwise a flick that began and
+            // ended inside one frame would be claimed and then swept unjudged.
             if (hitIteration.Current.Type == HitObject.HitType.Normal)
             {
                 foreach (TouchClass touch in TouchClasses)
@@ -1596,6 +1791,11 @@ public class PlayerInputManager : MonoBehaviour
                     touch.QueuedHitDistance = tapDistance;
                     hitIteration.IsTapped = true;
                     alreadyHit = true;
+
+                    // A flick that is already latched (the whole gesture fitted in this one frame)
+                    // can be resolved now rather than waiting for a frame that will never come.
+                    if (TryResolveTapFlick(touch, hitIteration, flickDistanceThreshold))
+                        alreadyHit = true;
 
                     break;
                 }
@@ -1643,26 +1843,46 @@ public class PlayerInputManager : MonoBehaviour
                 // never affect the outcome — a flick anywhere on screen cleared the note. Either
                 // end of the finger's travel counts, so a note swept through mid-flick still
                 // registers.
+                Vector2 center = hitObject.HitCoord.Position;
+                float   radius = hitObject.HitCoord.Radius;
+
                 float startDistance =
-                    Vector2.Distance(touch.Touch.startScreenPosition, hitObject.HitCoord.Position);
+                    Vector2.Distance(touch.Touch.startScreenPosition, center);
 
                 float currentDistance =
-                    Vector2.Distance(touch.Touch.screenPosition, hitObject.HitCoord.Position);
+                    Vector2.Distance(touch.Touch.screenPosition, center);
 
                 distance = Mathf.Min(startDistance, currentDistance);
 
-                // Follow expansion. Once the discrete-hitobject bookkeeping already believes this
-                // finger belongs to this note, widen the circle so the flick's own travel cannot
-                // shake it off. That bookkeeping is set after HitobjectProcessor runs, so a note
-                // can only expand from the second frame a finger is on it — in range first, then
-                // it grows, which is the order we want anyway.
-                float containment = hitObject.HitCoord.Radius;
+                if (IsDirectionalFlick(hitObject.Current.FlickDirection))
+                {
+                    // Directional containment is the same beam the tap path uses, not a circle:
+                    // either end of the stroke may sit on the note, but the finger has to stay near
+                    // the flick axis.
+                    float perpendicularStart = FlickPerpendicular(
+                        hitObject.Current.FlickDirection, touch.Touch.startScreenPosition - center);
 
-                if (touch.DiscreteHitobjectIsInRange && touch.NearestDiscreteHitobject == hitObject)
-                    containment *= FlickFollowScale;
+                    float perpendicularCurrent = FlickPerpendicular(
+                        hitObject.Current.FlickDirection, touch.Touch.screenPosition - center);
 
-                if (startDistance > containment && currentDistance > containment)
-                    return false;
+                    if (perpendicularStart >= radius && perpendicularCurrent >= radius)
+                        return false;
+                }
+                else
+                {
+                    // Follow expansion. Once the discrete-hitobject bookkeeping already believes this
+                    // finger belongs to this note, widen the circle so the flick's own travel cannot
+                    // shake it off. That bookkeeping is set after HitobjectProcessor runs, so a note
+                    // can only expand from the second frame a finger is on it — in range first, then
+                    // it grows, which is the order we want anyway.
+                    float containment = radius;
+
+                    if (touch.DiscreteHitobjectIsInRange && touch.NearestDiscreteHitobject == hitObject)
+                        containment *= FlickFollowScale;
+
+                    if (startDistance > containment && currentDistance > containment)
+                        return false;
+                }
 
                 // With no tap frame to anchor to, the gesture is the entire confirmation.
                 if (!touch.Flicked) return false;
@@ -1676,13 +1896,13 @@ public class PlayerInputManager : MonoBehaviour
                 if (FlickTravel(touch, hitObject) < flickDistanceThreshold)
                     return false;
 
-                // Angle comes off the stroke that actually fired rather than a cached mirror. The
-                // old field defaulted to 0, which is a valid direction meaning "up", so a note
-                // pointing upward passed its angle check with no flick having happened at all.
-                if (!float.IsNaN(hitObject.Current.FlickDirection)) // Directional flick
+                // Judge direction from the whole stroke (see FlickStrokeVector), not from the frozen
+                // inter-sample delta that fired the tracker — that is a few pixels and its angle is
+                // mostly touch jitter.
+                if (IsDirectionalFlick(hitObject.Current.FlickDirection))
                     return ValidateFlickDirection(
                         hitObject.Current.FlickDirection,
-                        touch.FlickTracker.FlickAngle);
+                        FlickTracker.AngleOf(FlickStrokeVector(touch, hitObject)));
 
                 return true;
             }
@@ -1698,47 +1918,36 @@ public class PlayerInputManager : MonoBehaviour
                 {
                     float distance;
 
-                    var discreteTapProtectionPassed = false;
+                    // A discrete (catch) note under the finger blocks a nearby normal from being
+                    // triggered prematurely — the touch is there for the catch, not this note. This is
+                    // intentionally unconditional with respect to order, proximity and timing windows:
+                    // if any catch owns the touch, normals wait their turn.
+                    bool onCatch =
+                        touch.DiscreteHitobjectIsInRange &&
+                        touch.NearestDiscreteHitobject != null &&
+                        touch.NearestDiscreteHitobject.Current.Type == HitObject.HitType.Catch;
+
+                    // The one escape is a tap that is genuinely on the normal — flawless, or coincident
+                    // with the catch, or one the original hitbox heuristic recognises. That is not a
+                    // premature trigger, so it is allowed even while a catch owns the touch.
+                    bool legitimateHit =
+                        onCatch &&
+                        (Math.Abs(hitobjectTimingDelta) <= Player.PerfectWindow ||
+                         Mathf.Approximately(hitIteration.Time, touch.NearestDiscreteHitobject.Time) ||
+                         Mathf.Approximately(
+                             Vector3.Distance(
+                                 hitIteration.HitCoord.Position,
+                                 touch.NearestDiscreteHitobject.HitCoord.Position),
+                             hitIteration.HitCoord.Radius / 2));
+
+                    bool discreteTapProtectionPassed = !onCatch || legitimateHit;
 
                     if (
                         touch.Tapped &&
                         (
                             distance = Vector2.Distance(touch.Touch.screenPosition, hitIteration.HitCoord.Position)
                         ) < hitIteration.HitCoord.Radius &&
-                        (
-                            discreteTapProtectionPassed =
-                                !( // Safeguard to prevent false 'early' taps while the player intends to catch notes
-
-                                        // Status check
-                                        touch.DiscreteHitobjectIsInRange &&
-                                        touch.NearestDiscreteHitobject != null &&
-                                        touch.NearestDiscreteHitobject.Current.Type == HitObject.HitType.Catch &&
-
-                                        // Only suppress if the catch note is EARLIER and likely to be triggered by this
-                                        // input
-                                        touch.NearestDiscreteHitobject.Time < hitIteration.Time &&
-                                        hitIteration.Time >= -Player.GoodWindow &&
-
-                                        // Spatial distance comparison
-                                        Vector2.Distance(
-                                            touch.Touch.screenPosition,
-                                            touch.NearestDiscreteHitobject.HitCoord.Position) <
-                                        distance &&
-                                        hitIteration.Time - touch.NearestDiscreteHitobject.Time <= Player.GoodWindow * 2
-                                    ) || // Exception clause
-                                (touch.DiscreteHitobjectIsInRange &&
-                                 touch.NearestDiscreteHitobject != null &&
-                                 ( // Ways that won't break the player's expectation
-                                     Math.Abs(hitobjectTimingDelta) <= Player.PerfectWindow ||
-                                     Mathf.Approximately(hitIteration.Time, touch.NearestDiscreteHitobject.Time) ||
-                                     Mathf.Approximately(
-                                         Vector3.Distance(
-                                             hitIteration.HitCoord.Position,
-                                             touch.NearestDiscreteHitobject.HitCoord
-                                                 .Position),
-                                         hitIteration.HitCoord.Radius / 2)
-                                 ))
-                        ) &&
+                        discreteTapProtectionPassed &&
                         (
                             !touch.QueuedHit ||
                             hitIteration.Time < touch.QueuedHit.Time ||
@@ -1747,22 +1956,9 @@ public class PlayerInputManager : MonoBehaviour
                         )
                     )
                     {
-                        //Debug.Log(
-                        //    $"Touch {touch.Touch.finger.index} tapped on hitobject at {hitIteration.Time}. Adding to queue.");
-
                         touch.QueuedHit = hitIteration;
                         touch.QueuedHitDistance = distance;
                         alreadyHit = true;
-                    }
-                    else if (!discreteTapProtectionPassed && touch.NearestDiscreteHitobject != null)
-                    {
-                        //Debug.Log(
-                        //    $"Tap suppressed for hitobject at {hitIteration.Time}. \n" +
-                        //    $"At touch.NearestDiscreteHitobject.Time: {touch.NearestDiscreteHitobject.Time} < hitIteration.Time: {hitIteration.Time}. \n" +
-                        //    $"At touch.NearestDiscreteHitobject.Type: {touch.NearestDiscreteHitobject.Current.Type} \n" +
-                        //    $"At touch.NearestDiscreteHitobject.HitCoord.Position: {touch.NearestDiscreteHitobject.HitCoord.Position} < hitIteration.HitCoord.Position: {hitIteration.HitCoord.Position}.\n" +
-                        //    $"At Hit Delta {hitobjectTimingDelta} >= -{Player.GoodWindow}. \n" +
-                        //    $"At comparison of Discrete-Tap delta {hitIteration.Time - touch.NearestDiscreteHitobject.Time} < {Player.GoodWindow * 2}");
                     }
                 }
 
@@ -1796,6 +1992,7 @@ public class PlayerInputManager : MonoBehaviour
                             touch.DiscreteHitobjectDistance = distance;
                             touch.DiscreteHitobjectIsInRange = true;
                             touch.QueuedHit = hitIteration; // Occupy this touch for the rest of the frame
+                            touch.QueuedHitDistance = distance; // Keep the tie-break distance in sync with the occupancy
                             alreadyHit = true;
                         }
                     }

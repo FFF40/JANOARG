@@ -753,7 +753,7 @@ namespace JANOARG.Client.Behaviors.Player
                         {
                             TotalExScore += 1;
 
-                            if (!float.IsNaN(laneHitobject.FlickDirection))
+                            if (float.IsFinite(laneHitobject.FlickDirection))
                                 TotalExScore += 1;
                         }
 
@@ -1542,7 +1542,7 @@ namespace JANOARG.Client.Behaviors.Player
             if (isFlickable)
             {
                 score += 1;
-                if (!float.IsNaN(flickDirection)) // Directional flick bonus
+                if (float.IsFinite(flickDirection)) // Directional flick bonus
                     score += 1;
             }
             
