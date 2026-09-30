@@ -159,25 +159,16 @@ namespace JANOARG.Client.Behaviors.Options
                         break;
                     }
 
-                    var culture = System.Globalization.CultureInfo.InvariantCulture;
-                    
-                    bool parsed = double.TryParse(InputField.text,
-                        System.Globalization.NumberStyles.Float, culture, out double inputValue);
+                    // InputField is populated by OptionInputHandler.Edit only after this method
+                    // returns, so compare against the option's actual value instead of its text.
+                    double medianMs = Math.Round(GameplayMedianOffset * 1000);
+                    bool isAlreadyPerfect = Math.Abs(medianMs - optionInput.CurrentValue) < 0.5;
 
-                    if (!parsed)
-                    {
-                        AverageOffsetApplyButton.interactable = false;
-                        break;
-                    }
-
-                    bool isAlreadyPerfect = Math.Abs(GameplayMedianOffset - inputValue) < 0.001;
+                    AverageOffsetValueLabel.text = medianMs.ToString("0");
                     AverageOffsetApplyButton.interactable = !isAlreadyPerfect;
                     AverageOffsetInstructionLabel.text = isAlreadyPerfect
                         ? "Congratulations, your offset is already perfect!"
                         : $"Average offset from the last <b>{gameeplayOffsetCounter}</b> plays:";
-
-                    if (!isAlreadyPerfect)
-                        AverageOffsetValueLabel.text = (GameplayMedianOffset * 1000).ToString("0");
 
                     break;
                 }
