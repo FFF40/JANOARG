@@ -286,6 +286,70 @@ namespace JANOARG.Client.UI
                 : text;
         }
 
+        void ApplyCoverCrops()
+        {
+            int count = Mathf.Min(ScoreStoreEntries.Count, ScreenshotEntries.Count);
+
+            for (int i = 0; i < count; i++)
+            {
+                ScoreStoreEntry scoreEntry = ScoreStoreEntries[i];
+
+                if (scoreEntry == null || SongDict == null)
+                    continue;
+
+                if (SongDict.TryGetValue(scoreEntry.SongID, out PlayableSong song))
+                    ApplyCoverCrop(ScreenshotEntries[i], song);
+            }
+        }
+
+        void ApplyCoverCrop(RatingBreakdownEntry entry, PlayableSong song)
+        {
+            if (entry == null || entry.BackgroundCover == null || song == null || song.Cover == null)
+                return;
+
+            Texture texture = entry.BackgroundCover.texture;
+
+            if (texture == null)
+                return;
+
+            Rect rect = entry.BackgroundCover.rectTransform.rect;
+
+            if (rect.width <= 0 || rect.height <= 0)
+                return;
+
+            float textureAspect = (float)texture.width / texture.height;
+            float rectAspect = rect.width / rect.height;
+
+            float width = 1;
+            float height = 1;
+
+            if (textureAspect > rectAspect)
+                width = rectAspect / textureAspect;
+            else
+                height = textureAspect / rectAspect;
+
+            Vector2 uvCenter = new(0.5f, 0.5f);
+
+            if (song.Cover.Layers.Count > 0)
+            {
+                CoverLayer layer = song.Cover.Layers[0];
+
+                if (Mathf.Abs(layer.Scale) > 0.0001f)
+                {
+                    Vector2 position = layer.Position + song.Cover.IconCenter * layer.ParallaxFactor;
+                    Vector2 size = 880 * layer.Scale * new Vector2(1, (float)texture.height / texture.width);
+
+                    if (Mathf.Abs(size.x) > 0.0001f) uvCenter.x = 0.5f - position.x / size.x;
+                    if (Mathf.Abs(size.y) > 0.0001f) uvCenter.y = 0.5f - position.y / size.y;
+                }
+            }
+
+            float x = Mathf.Clamp(uvCenter.x - width * 0.5f, 0, 1 - width);
+            float y = Mathf.Clamp(uvCenter.y - height * 0.5f, 0, 1 - height);
+
+            entry.BackgroundCover.uvRect = new Rect(x, y, width, height);
+        }
+
         public Texture2D Screenshot(int width, int height)
         {
             RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);
@@ -315,6 +379,8 @@ namespace JANOARG.Client.UI
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             IsAnimating = true;
+
+            ApplyCoverCrops();
 
             Vector2Int size = CommonSys.GetShareSize(3072f / 1280f);
             Texture2D  image = Screenshot(size.x, size.y);
