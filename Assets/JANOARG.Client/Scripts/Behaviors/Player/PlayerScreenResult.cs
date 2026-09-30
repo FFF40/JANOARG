@@ -180,6 +180,11 @@ namespace JANOARG.Client.Behaviors.Player
             bool leftActionsActive  = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
             bool rightActionsActive = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
 
+            const float CONTENT_SCALE = 0.8f;
+
+            Vector3 originalScale     = transform.localScale;
+            Vector3 originalCardScale = ResultBackground.rectTransform.localScale;
+
             RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
             Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
 
@@ -205,6 +210,9 @@ namespace JANOARG.Client.Behaviors.Player
                 if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(false);
                 if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(false);
 
+                transform.localScale = originalScale * CONTENT_SCALE;
+                ResultBackground.rectTransform.localScale = originalCardScale * CONTENT_SCALE;
+
                 rTex.Create();
 
                 screenshotCamera.targetTexture = rTex;
@@ -225,6 +233,9 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(leftActionsActive);
                 if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(rightActionsActive);
+
+                transform.localScale = originalScale;
+                ResultBackground.rectTransform.localScale = originalCardScale;
 
                 for (int i = 0; i < subtree.Length; i++)
                     subtree[i].gameObject.layer = layers[i];
