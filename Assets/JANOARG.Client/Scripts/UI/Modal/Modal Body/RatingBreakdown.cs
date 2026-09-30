@@ -33,6 +33,15 @@ namespace JANOARG.Client.UI
 
         List<RatingBreakdownEntry> ScreenshotEntries;
 
+        const float MAX_BLOOM_INTENSITY = 2.4f;
+        const float MAX_BLOOM_RANGE = 0.32f;
+        const float SHARE_ASPECT = 3072f / 1280f;
+
+        RectTransform _BloomHolder;
+        Material _HaloMaterial;
+        Texture2D _HaloTexture;
+        List<RawImage> _Halos;
+
         //This Playlist will be the main/root playlist so we can use the PlayableSong's metachart and cover
         public Playlist MainPlaylist;
         public Dictionary<string, PlayableSong> SongDict;
@@ -350,6 +359,278 @@ namespace JANOARG.Client.UI
             entry.BackgroundCover.uvRect = new Rect(x, y, width, height);
         }
 
+        void GenerateBloom()
+        {
+            if (ScreenshotCanvas == null || ScoreStoreEntries == null || ScreenshotEntries == null)
+                return;
+
+            RectTransform canvasRect = (RectTransform)ScreenshotCanvas.transform;
+            int layer = ScreenshotCanvas.gameObject.layer;
+
+            if (_BloomHolder == null)
+            {
+                GameObject holder = new("Bloom", typeof(RectTransform));
+                holder.layer = layer;
+
+                _BloomHolder = (RectTransform)holder.transform;
+                _BloomHolder.SetParent(canvasRect, false);
+                _BloomHolder.anchorMin = Vector2.zero;
+                _BloomHolder.anchorMax = Vector2.one;
+                _BloomHolder.offsetMin = Vector2.zero;
+                _BloomHolder.offsetMax = Vector2.zero;
+                _BloomHolder.SetAsFirstSibling();
+
+                GameObject background = new("Background", typeof(RawImage));
+                background.layer = layer;
+
+                RawImage backgroundImage = background.GetComponent<RawImage>();
+                backgroundImage.color = Color.black;
+                backgroundImage.raycastTarget = false;
+
+                RectTransform backgroundRect = (RectTransform)background.transform;
+                backgroundRect.SetParent(_BloomHolder, false);
+                backgroundRect.anchorMin = Vector2.zero;
+                backgroundRect.anchorMax = Vector2.one;
+                backgroundRect.offsetMin = Vector2.zero;
+                backgroundRect.offsetMax = Vector2.zero;
+            }
+
+            if (_HaloMaterial == null)
+            {
+                Shader haloShader = Shader.Find("UI/Halo");
+
+                if (haloShader == null)
+                    return;
+
+                _HaloTexture = BuildHaloTexture(128);
+                _HaloMaterial = new Material(haloShader);
+            }
+
+            int count = Mathf.Min(ScoreStoreEntries.Count, ScreenshotEntries.Count);
+
+            List<Color> colors = new();
+            List<float> intensities = new();
+            List<float> ranges = new();
+
+            for (int i = 0; i < count; i++)
+            {
+                ScoreStoreEntry scoreEntry = ScoreStoreEntries[i];
+                RatingBreakdownEntry entry = ScreenshotEntries[i];
+
+                if (scoreEntry == null || entry == null || entry.BackgroundCover == null)
+                    continue;
+
+                Color color = SampleCoverColor(entry.BackgroundCover.texture);
+
+                if (color.a <= 0)
+                    continue;
+
+                int judged = scoreEntry.PerfectCount + scoreEntry.GoodCount + scoreEntry.BadCount;
+                float comboNorm = judged > 0 ? Mathf.Clamp01((float)scoreEntry.MaxCombo / judged) : 0;
+                float scoreNorm = Mathf.Clamp01(scoreEntry.Score / 1000000f);
+
+                colors.Add(color);
+                intensities.Add(MAX_BLOOM_INTENSITY * comboNorm);
+                ranges.Add(MAX_BLOOM_RANGE * scoreNorm);
+            }
+
+            List<Vector2> positions = ScatterPositions(ranges);
+
+            _Halos ??= new List<RawImage>();
+
+            while (_Halos.Count < colors.Count)
+            {
+                GameObject haloObject = new("Halo", typeof(RawImage));
+                haloObject.layer = layer;
+
+                RawImage halo = haloObject.GetComponent<RawImage>();
+                halo.texture = _HaloTexture;
+                halo.material = _HaloMaterial;
+                halo.raycastTarget = false;
+                ((RectTransform)haloObject.transform).SetParent(_BloomHolder, false);
+
+                _Halos.Add(halo);
+            }
+
+            for (int i = colors.Count; i < _Halos.Count; i++)
+                _Halos[i].gameObject.SetActive(false);
+
+            int[] order = new int[colors.Count];
+
+            for (int i = 0; i < order.Length; i++)
+                order[i] = i;
+
+            System.Array.Sort(order, (a, b) => {
+                int compare = intensities[b].CompareTo(intensities[a]);
+                return compare != 0 ? compare : ranges[b].CompareTo(ranges[a]);
+            });
+
+            // Rank the halos by their config, then hand out the sampled colours
+            // (first sampled first) so both ranks correlate.
+            for (int rank = 0; rank < order.Length; rank++)
+            {
+                int index = order[rank];
+                Color color = colors[rank];
+                float intensity = intensities[index];
+                RawImage halo = _Halos[rank];
+
+                RectTransform haloRect = halo.rectTransform;
+                Vector2 position = positions[index];
+                float halfHeight = ranges[index];
+                float halfWidth = halfHeight / SHARE_ASPECT;
+
+                halo.color = new Color(color.r * intensity, color.g * intensity, color.b * intensity, 1);
+                haloRect.anchorMin = new Vector2(position.x - halfWidth, position.y - halfHeight);
+                haloRect.anchorMax = new Vector2(position.x + halfWidth, position.y + halfHeight);
+                haloRect.anchoredPosition = Vector2.zero;
+                haloRect.sizeDelta = Vector2.zero;
+                halo.transform.SetSiblingIndex(rank + 1);
+                halo.gameObject.SetActive(true);
+            }
+        }
+
+        List<Vector2> ScatterPositions(List<float> ranges)
+        {
+            List<Vector2> positions = new();
+
+            const float EDGE_INSET = 0.5f;
+            const float BASE_INSET = 0.03f;
+            const float CLUMP_FACTOR = 0.35f;
+            const int MAX_ATTEMPTS = 24;
+
+            foreach (float range in ranges)
+            {
+                float insetX = EDGE_INSET * range / SHARE_ASPECT + BASE_INSET;
+                float insetY = EDGE_INSET * range + BASE_INSET;
+
+                float minX = insetX;
+                float maxX = 1 - insetX;
+                float minY = insetY;
+                float maxY = 1 - insetY;
+
+                if (minX > maxX)
+                    minX = maxX = 0.5f;
+
+                if (minY > maxY)
+                    minY = maxY = 0.5f;
+
+                Vector2 position = new(Random.Range(minX, maxX), Random.Range(minY, maxY));
+
+                for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++)
+                {
+                    Vector2 candidate = new(Random.Range(minX, maxX), Random.Range(minY, maxY));
+                    bool clear = true;
+
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        float wanted = (range + ranges[i]) * CLUMP_FACTOR;
+                        Vector2 delta = new(
+                            (candidate.x - positions[i].x) * SHARE_ASPECT,
+                            candidate.y - positions[i].y
+                        );
+
+                        if (delta.magnitude < wanted)
+                        {
+                            clear = false;
+                            break;
+                        }
+                    }
+
+                    if (clear)
+                    {
+                        position = candidate;
+                        break;
+                    }
+                }
+
+                positions.Add(position);
+            }
+
+            return positions;
+        }
+
+        Texture2D BuildHaloTexture(int size)
+        {
+            Texture2D texture = new(size, size, TextureFormat.RGBA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+
+            float half = size * 0.5f;
+
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(half, half)) / half;
+                float falloff = Mathf.Clamp01(1 - distance);
+                falloff *= falloff;
+
+                texture.SetPixel(x, y, new Color(1, 1, 1, falloff));
+            }
+
+            texture.Apply();
+
+            return texture;
+        }
+
+        Color SampleCoverColor(Texture cover)
+        {
+            if (cover == null)
+                return Color.clear;
+
+            RenderTexture renderTexture = RenderTexture.GetTemporary(64, 64, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            Graphics.Blit(cover, renderTexture);
+
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = renderTexture;
+
+            Texture2D readable = new(64, 64, TextureFormat.RGBA32, false);
+            readable.ReadPixels(new Rect(0, 0, 64, 64), 0, 0);
+            readable.Apply();
+
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(renderTexture);
+
+            Color pick = Color.clear;
+            Color whitePick = Color.clear;
+            int candidates = 0;
+            int whiteCandidates = 0;
+
+            for (int y = 0; y < 64; y++)
+            for (int x = 0; x < 64; x++)
+            {
+                Color color = readable.GetPixel(x, y);
+
+                if (color.a < 0.9f)
+                    continue;
+
+                float max = Mathf.Max(color.r, Mathf.Max(color.g, color.b));
+                float min = Mathf.Min(color.r, Mathf.Min(color.g, color.b));
+
+                if (max < 0.08f)
+                    continue;
+
+                float saturation = max > 0.0001f ? (max - min) / max : 0;
+
+                if (max > 0.85f && saturation < 0.15f)
+                {
+                    whiteCandidates++;
+
+                    if (Random.Range(0, whiteCandidates) == 0)
+                        whitePick = color;
+                }
+                else
+                {
+                    candidates++;
+
+                    if (Random.Range(0, candidates) == 0)
+                        pick = color;
+                }
+            }
+
+            Destroy(readable);
+
+            return candidates > 0 ? pick : whitePick;
+        }
+        
         public Texture2D Screenshot(int width, int height)
         {
             RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);
@@ -381,6 +662,7 @@ namespace JANOARG.Client.UI
             IsAnimating = true;
 
             ApplyCoverCrops();
+            GenerateBloom();
 
             Vector2Int size = CommonSys.GetShareSize(3072f / 1280f);
             Texture2D  image = Screenshot(size.x, size.y);
