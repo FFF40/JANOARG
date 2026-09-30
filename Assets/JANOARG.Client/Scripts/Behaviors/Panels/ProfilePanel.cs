@@ -147,7 +147,9 @@ namespace ANOARG.Client.Behaviors.Panels
         public IEnumerator ScreenshotRatingBreakdownAnim()
         {
             isAnimating = true;
-            Texture2D image = Screenshot(3072, 1280);
+
+            Vector2Int size = CommonSys.GetShareSize(3072f / 1280f);
+            Texture2D  image = Screenshot(size.x, size.y);
 
             yield return Share(image);
 
@@ -156,11 +158,12 @@ namespace ANOARG.Client.Behaviors.Panels
 
         public IEnumerator Share(Texture2D image)
         {
-            Task task = File.WriteAllBytesAsync(
-                Application.persistentDataPath + "/screenshot.png",
-                image.EncodeToPNG());
+            string path = Application.persistentDataPath + "/screenshot.png";
+            Task task = File.WriteAllBytesAsync(path, image.EncodeToPNG());
 
             yield return new WaitUntil(() => task.IsCompleted);
+
+            CommonSys.ShareFile(path);
         }
     }
 }

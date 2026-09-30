@@ -296,6 +296,53 @@ namespace JANOARG.Client.Behaviors.Common
 
 #endif
 
+        public static void ShareFile(string path)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (var file = new AndroidJavaObject("java.io.File", path))
+                using (var provider = new AndroidJavaClass("androidx.core.content.FileProvider"))
+                using (var uri = provider.CallStatic<AndroidJavaObject>(
+                    "getUriForFile", activity, Application.identifier + ".fileprovider", file))
+                using (var intent = new AndroidJavaObject("android.content.Intent"))
+                {
+                    intent.Call<AndroidJavaObject>("setAction", intent.GetStatic<string>("ACTION_SEND"));
+                    intent.Call<AndroidJavaObject>("setType", "image/png");
+                    intent.Call<AndroidJavaObject>("putExtra", intent.GetStatic<string>("EXTRA_STREAM"), uri);
+                    intent.Call<AndroidJavaObject>("addFlags", intent.GetStatic<int>("FLAG_GRANT_READ_URI_PERMISSION"));
+
+                    using (var chooser = intent.CallStatic<AndroidJavaObject>(
+                        "createChooser", intent, "Share screenshot"))
+                        activity.Call("startActivity", chooser);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[CommonSys] Failed to open share sheet: {e.Message}");
+            }
+#endif
+        }
+
+        public static Vector2Int GetShareSize(float aspect)
+        {
+            const int TARGET_HEIGHT = 2160;
+
+            int limit  = Mathf.Min(SystemInfo.maxTextureSize, 8192);
+            int height = Mathf.Min(TARGET_HEIGHT, limit);
+            int width  = Mathf.RoundToInt(height * aspect);
+
+            if (width > limit)
+            {
+                width  = limit;
+                height = Mathf.RoundToInt(width / aspect);
+            }
+
+            return new Vector2Int(width, height);
+        }
+
         public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
             sMain.StartCoroutine(sMain.LoadAnim(target, completed, onComplete, showBar));
