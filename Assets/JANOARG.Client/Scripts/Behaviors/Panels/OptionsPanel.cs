@@ -472,21 +472,23 @@ namespace JANOARG.Client.Behaviors.Panels
                     entry.BodyLabel.text = "FujiForm2023 • RKevo";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
-                    entry.BodyLabel.text = "Kuttate • Rose Quartz • R3ality";
+                    entry.BodyLabel.text = "Kuttate • Rose Quartz • R3ality • potatofission";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
                     entry.BodyLabel.text = "Sound Souler • mrcool909090 • R3ality  • Scutoid • Ariz Kayaba" 
                                            + NEWLINE_SEPARATOR +
-                                           "zqr • NOMOREKAWAII • CuboonoP • Rose Quartz • Pa_lette";
+                                           "zqr • NOMOREKAWAII • CuboonoP • Rose Quartz • Pa_lette • amaristia";
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
                     entry.BodyLabel.text = "duducat • Pa_lette";
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = "BashhScriptKid • M3galodon • Akanari • leko_uname • BEN789FA • Gyukatsu • kiemo";
+                    entry.BodyLabel.text = "BashhScriptKid • M3galodon • Akanari • leko_uname • BEN789FA"
+                                           + NEWLINE_SEPARATOR +
+                                           "Gyukatsu • kiemo • Samu • VICA • SARYN";
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat • M3galodon • leko_uname • Pa_lette • AARL • BEN789FA";
+                    entry.BodyLabel.text = "duducat • M3galodon • leko_uname • Pa_lette • AARL • BEN789FA • KouNeko";
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
