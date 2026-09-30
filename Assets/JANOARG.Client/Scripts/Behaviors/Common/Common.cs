@@ -326,6 +326,23 @@ namespace JANOARG.Client.Behaviors.Common
 #endif
         }
 
+        public static Vector2Int GetShareSize(float aspect)
+        {
+            const int TARGET_HEIGHT = 2160;
+
+            int limit  = Mathf.Min(SystemInfo.maxTextureSize, 8192);
+            int height = Mathf.Min(TARGET_HEIGHT, limit);
+            int width  = Mathf.RoundToInt(height * aspect);
+
+            if (width > limit)
+            {
+                width  = limit;
+                height = Mathf.RoundToInt(width / aspect);
+            }
+
+            return new Vector2Int(width, height);
+        }
+
         public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)
         {
             sMain.StartCoroutine(sMain.LoadAnim(target, completed, onComplete, showBar));

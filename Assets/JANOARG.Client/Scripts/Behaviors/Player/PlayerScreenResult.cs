@@ -111,7 +111,8 @@ namespace JANOARG.Client.Behaviors.Player
 
             try
             {
-                image = ScreenshotResult(3072, Mathf.RoundToInt(3072f * Screen.height / Screen.width));
+                Vector2Int size = CommonSys.GetShareSize((float)Screen.width / Screen.height);
+                image = ScreenshotResult(size.x, size.y);
             }
             catch (Exception e)
             {
