@@ -291,9 +291,9 @@ namespace JANOARG.Client.UI
             RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);
             rTex.Create();
 
+            ScreenshotCamera.targetTexture = rTex;
             Canvas.ForceUpdateCanvases();
 
-            ScreenshotCamera.targetTexture = rTex;
             ScreenshotCamera.Render();
 
             Texture2D tex2D = new(width, height, TextureFormat.ARGB32, false);
