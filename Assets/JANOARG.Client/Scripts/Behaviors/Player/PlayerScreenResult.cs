@@ -135,6 +135,7 @@ namespace JANOARG.Client.Behaviors.Player
         {
             GameObject cameraObject = new("Result Screenshot Camera", typeof(Camera));
             Camera screenshotCamera = cameraObject.GetComponent<Camera>();
+            screenshotCamera.orthographic = true;
             screenshotCamera.clearFlags = CameraClearFlags.SolidColor;
             screenshotCamera.backgroundColor = PlayerScreen.sTargetSong.BackgroundColor;
             screenshotCamera.cullingMask = 1 << 6;
