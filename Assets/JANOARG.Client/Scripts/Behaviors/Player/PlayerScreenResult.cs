@@ -160,9 +160,20 @@ namespace JANOARG.Client.Behaviors.Player
                 scaler.matchWidthOrHeight = sourceScaler.matchWidthOrHeight;
             }
 
-            Transform   originalParent = transform.parent;
-            Transform[] subtree        = transform.GetComponentsInChildren<Transform>(true);
-            int[]       layers         = new int[subtree.Length];
+            Transform originalParent = transform.parent;
+            int       originalIndex  = transform.GetSiblingIndex();
+
+            Transform flashTransform = Flash.transform;
+            Transform flashParent    = flashTransform.parent;
+            int       flashIndex     = flashTransform.GetSiblingIndex();
+
+            Transform[] resultSubtree = transform.GetComponentsInChildren<Transform>(true);
+            Transform[] flashSubtree  = flashTransform.GetComponentsInChildren<Transform>(true);
+            Transform[] subtree       = new Transform[resultSubtree.Length + flashSubtree.Length];
+            int[]       layers        = new int[subtree.Length];
+
+            resultSubtree.CopyTo(subtree, 0);
+            flashSubtree.CopyTo(subtree, resultSubtree.Length);
 
             bool leftActionsActive  = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
             bool rightActionsActive = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
@@ -172,7 +183,16 @@ namespace JANOARG.Client.Behaviors.Player
 
             try
             {
-                transform.SetParent(canvasObject.transform, false);
+                if (flashIndex < originalIndex)
+                {
+                    flashTransform.SetParent(canvasObject.transform, false);
+                    transform.SetParent(canvasObject.transform, false);
+                }
+                else
+                {
+                    transform.SetParent(canvasObject.transform, false);
+                    flashTransform.SetParent(canvasObject.transform, false);
+                }
 
                 for (int i = 0; i < subtree.Length; i++)
                 {
@@ -208,6 +228,10 @@ namespace JANOARG.Client.Behaviors.Player
                     subtree[i].gameObject.layer = layers[i];
 
                 transform.SetParent(originalParent, false);
+                flashTransform.SetParent(flashParent, false);
+
+                transform.SetSiblingIndex(originalIndex);
+                flashTransform.SetSiblingIndex(flashIndex);
 
                 Destroy(canvasObject);
                 Destroy(cameraObject);
