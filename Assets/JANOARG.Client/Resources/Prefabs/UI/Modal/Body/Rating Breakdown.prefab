@@ -2829,6 +2829,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ScrollRect: {fileID: 3042246646214366321}
   ScreenshotCamera: {fileID: 1911853673031743006}
+  ScreenshotCanvas: {fileID: 9188133485472949349}
+  PlayerName: {fileID: 8052453686088850046}
+  PlayerTitle: {fileID: 4853419931887797421}
+  LevelValue: {fileID: 7937852962334243881}
+  AbilityRatingValue: {fileID: 5690814706338577777}
   RatingBreakdownEntries:
   - {fileID: 3798352567796723909}
   - {fileID: 9192981997738255929}
