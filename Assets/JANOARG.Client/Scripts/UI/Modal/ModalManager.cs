@@ -18,13 +18,13 @@ namespace JANOARG.Client.UI.Modal
             sInstance = this;
         }
 
-        public void Spawn(string title, string body, ModalAction[] leftActions = null, ModalAction[] rightActions = null)
+        public Modal Spawn(string title, string body, ModalAction[] leftActions = null, ModalAction[] rightActions = null)
         {
             LabelBody.text = body;
-            Spawn(title, LabelBody.gameObject, leftActions, rightActions);
+            return Spawn(title, LabelBody.gameObject, leftActions, rightActions);
         }
 
-        public void Spawn(string title, GameObject body, ModalAction[] leftActions = null, ModalAction[] rightActions = null, bool cloneBody = true)
+        public Modal Spawn(string title, GameObject body, ModalAction[] leftActions = null, ModalAction[] rightActions = null, bool cloneBody = true)
         {
             Modal modal = Instantiate(ModalSample, ModalHolder);
 
@@ -44,6 +44,8 @@ namespace JANOARG.Client.UI.Modal
                 if (modal.RightActionsHolder.childCount <= 1) button.ContentLayoutGroup.padding.right += 1000;
                 SetupModalAction(modal, action, button);
             }
+
+            return modal;
         }
 
         private static void SetupModalAction(Modal modal, ModalAction action, ModalActionButton button)

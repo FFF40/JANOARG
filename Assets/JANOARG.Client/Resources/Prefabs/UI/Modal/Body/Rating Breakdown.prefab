@@ -2828,6 +2828,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ScrollRect: {fileID: 3042246646214366321}
+  ScreenshotCamera: {fileID: 1911853673031743006}
   RatingBreakdownEntries:
   - {fileID: 3798352567796723909}
   - {fileID: 9192981997738255929}

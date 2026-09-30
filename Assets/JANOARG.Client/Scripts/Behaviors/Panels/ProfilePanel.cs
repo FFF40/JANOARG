@@ -1,16 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.Panels;
 using JANOARG.Client.Data.Storage;
+using JANOARG.Client.UI;
 using JANOARG.Client.UI.Modal;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace ANOARG.Client.Behaviors.Panels
 {
@@ -30,8 +27,6 @@ namespace ANOARG.Client.Behaviors.Panels
         public GameObject RatingBreakdownModalBody;
         public Sprite CameraIcon;
         public Panel Panel;
-
-        public bool isAnimating { get; private set; }
 
         public void Awake()
         {
@@ -126,7 +121,9 @@ namespace ANOARG.Client.Behaviors.Panels
 
         public void OpenRatingBreakdownModal()
         {
-            ModalManager.sInstance.Spawn(
+            RatingBreakdownModalBody breakdown = null;
+
+            Modal modal = ModalManager.sInstance.Spawn(
                 "Rating Breakdown",
                 RatingBreakdownModalBody,
                 new ModalAction[] {
@@ -134,19 +131,20 @@ namespace ANOARG.Client.Behaviors.Panels
                         Name = "Close",
                         Icon = ProfileBar.sMain.ArrowLeftIcon,
                     }
+                },
+                new ModalAction[] {
+                    new () {
+                        Name = "Share",
+                        Icon = CameraIcon,
+                        Action = () => breakdown.ScreenshotRatingBreakdown(),
+                        ClosesModal = false,
+                    }
                 }
-                // Sharing is not yet implement
-                // new ModalAction[] {
-                //     new () {
-                //         Name = "Share",
-                //         Icon = CameraIcon,
-                //         // function
-                //     }
-                // }
             );
 
+            breakdown = modal.BodyHolder.GetComponentInChildren<RatingBreakdownModalBody>();
+
             Panel.Close();
-        
         }
     }
 }
