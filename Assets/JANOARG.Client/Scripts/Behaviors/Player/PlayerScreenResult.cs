@@ -67,6 +67,8 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text      MaxComboText;
         public TMP_Text      AverageOffsetText;
 
+        [Space] public TMP_Text ShareMetadata;
+
         [Space] public CanvasGroup LeftActionsHolder;
 
         public RectTransform LeftActionsTransform;
@@ -444,6 +446,10 @@ namespace JANOARG.Client.Behaviors.Player
             ResultText.rectTransform.localScale = Vector3.one;
             int score = Mathf.RoundToInt(PlayerScreen.sMain.CurrentExScore / PlayerScreen.sMain.TotalExScore * 1e6f);
             string rank = Helper.GetRank(score);
+
+            ShareMetadata.text =
+                $"Score recorded at <u>{DateTime.Now:M/d/yyyy, hh.mmtt}</u>\n" +
+                $"Played in <u>{Application.version}</u>";
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
                 PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
