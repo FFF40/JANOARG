@@ -130,6 +130,12 @@ namespace JANOARG.Client.UI
 
         public IEnumerator GetCoverImage(PlayableSong song, string id, System.Action<Texture2D> onDone)
         {
+            if (song == null || song.Cover == null || song.Cover.Layers == null || song.Cover.Layers.Count == 0)
+            {
+                onDone?.Invoke(null);
+                yield break;
+            }
+
             string imagePath = song.Cover.Layers[0].Target;
             string path = $"Songs/{id}/{imagePath}";
 
@@ -195,6 +201,14 @@ namespace JANOARG.Client.UI
 
             int count = Mathf.Min(ScoreStoreEntries.Count, RatingBreakdownEntries.Count);
 
+            // Columns start hidden and are only revealed once populated, so a
+            // failed entry can never leave a placeholder on the card.
+            for (int i = 0; i < ScreenshotEntries.Count; i++)
+            {
+                if (ScreenshotEntries[i] != null)
+                    ScreenshotEntries[i].gameObject.SetActive(false);
+            }
+
             yield return StartCoroutine(BuildSongList());
          
             Dictionary<string, PlayableSong> songLookup = new Dictionary<string, PlayableSong>();
@@ -216,9 +230,13 @@ namespace JANOARG.Client.UI
 
                 if (SongDict != null && SongDict.TryGetValue(scoreEntry.SongID, out var song))
                 {
-                    string songName = Truncate(song.SongName, 30);
-                    string songArtist = Truncate(song.SongArtist, 30);
-                    string chartConstant = song.Charts.Find(x => x.Target == scoreEntry.ChartID).DifficultyLevel.ToString();
+                    ExternalChartMeta chart = song.Charts != null
+                        ? song.Charts.Find(x => x.Target == scoreEntry.ChartID)
+                        : null;
+
+                    string songName = Truncate(song.SongName ?? "", 30);
+                    string songArtist = Truncate(song.SongArtist ?? "", 30);
+                    string chartConstant = chart != null ? chart.DifficultyLevel.ToString() : "--";
                     Color chartColor = CommonSys.sMain.Constants.GetDifficultyColor(scoreEntry.ChartIndex);
 
                     SetSongInfo(displayEntry, songName, songArtist, chartConstant, chartColor);
@@ -235,10 +253,15 @@ namespace JANOARG.Client.UI
 
                     if (iconTex != null)
                     {
-                        displayEntry.Icon.texture = iconTex;
+                        if (displayEntry.Icon != null)
+                        {
+                            displayEntry.Icon.texture = iconTex;
+                        }
 
-                        if (screenshotEntry != null)
+                        if (screenshotEntry != null && screenshotEntry.Icon != null)
+                        {
                             screenshotEntry.Icon.texture = iconTex;
+                        }
                     } 
 
                     Texture2D coverTex = null;
@@ -252,10 +275,13 @@ namespace JANOARG.Client.UI
 
                     if (coverTex != null)
                     {
-                        displayEntry.BackgroundCover.texture = coverTex;
-                        displayEntry.BackgroundCover.color = Color.white;
+                        if (displayEntry.BackgroundCover != null)
+                        {
+                            displayEntry.BackgroundCover.texture = coverTex;
+                            displayEntry.BackgroundCover.color = Color.white;
+                        }
 
-                        if (screenshotEntry != null)
+                        if (screenshotEntry != null && screenshotEntry.BackgroundCover != null)
                         {
                             screenshotEntry.BackgroundCover.texture = coverTex;
                             screenshotEntry.BackgroundCover.color = Color.white;
@@ -264,16 +290,14 @@ namespace JANOARG.Client.UI
                     {
                         Debug.LogWarning($"Cover not found: {scoreEntry.SongID}");
                     }
+
+                    if (screenshotEntry != null)
+                        screenshotEntry.gameObject.SetActive(true);
                 }
                 else
                 {
                     Debug.LogWarning($"Song not found: {scoreEntry.SongID}");
                 }
-            }
-
-            for (int i = count; i < ScreenshotEntries.Count; i++)
-            {
-                ScreenshotEntries[i].gameObject.SetActive(false);
             }
         }
 
@@ -282,17 +306,17 @@ namespace JANOARG.Client.UI
             if (entry == null)
                 return;
 
-            entry.SongName.text = songName;
-            entry.SongArtist.text = songArtist;
-            entry.ChartConstant.text = chartConstant;
-            entry.ChartConstant.color = chartColor;
-        }
-        
-        string Truncate(string text, int maxLength)
-        {
-            return text.Length > maxLength
-                ? text.Substring(0, maxLength) + "..."
-                : text;
+            if (entry.SongName != null)
+                entry.SongName.text = songName;
+
+            if (entry.SongArtist != null)
+                entry.SongArtist.text = songArtist;
+
+            if (entry.ChartConstant != null)
+            {
+                entry.ChartConstant.text = chartConstant;
+                entry.ChartConstant.color = chartColor;
+            }
         }
 
         void ApplyCoverCrops()
@@ -631,6 +655,13 @@ namespace JANOARG.Client.UI
             return candidates > 0 ? pick : whitePick;
         }
         
+        string Truncate(string text, int maxLength)
+        {
+            return text.Length > maxLength
+                ? text.Substring(0, maxLength) + "..."
+                : text;
+        }
+
         public Texture2D Screenshot(int width, int height)
         {
             RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);

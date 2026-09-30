@@ -37,19 +37,22 @@ namespace JANOARG.Client.Behaviors.Panels.Profile
 
         public void SetData(ScoreStoreEntry entry)
         {
-            string ratingText = entry.Rating.ToString("F2");
-            string[] parts = ratingText.Split('.');
-            Rating.text = $"<b>{parts[0]}.</b><size=50%>{parts[1]}</size>";;
-            BestScore.text = Helper.PadScore(entry.Score.ToString()) + "<size=50%><b>ppm";
+            if (Rating != null)
+            {
+                string ratingText = entry.Rating.ToString("F2");
+                string[] parts = ratingText.Split('.');
+                Rating.text = $"<b>{parts[0]}.</b><size=50%>{parts[1]}</size>";
+            }
 
-            
+            if (BestScore != null)
+                BestScore.text = Helper.PadScore(entry.Score.ToString()) + "<size=50%><b>ppm";
 
             if (entry.PerfectCount == entry.MaxCombo)
             {
-                AllFlawlessIndicator.SetActive(true);
+                if (AllFlawlessIndicator != null) AllFlawlessIndicator.SetActive(true);
             } else if (entry.BadCount == 0)
             {
-                FullStreakIndicator.SetActive(true);
+                if (FullStreakIndicator != null) FullStreakIndicator.SetActive(true);
             }
             
             if (BrokenCount != null)
