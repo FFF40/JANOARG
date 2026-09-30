@@ -485,6 +485,8 @@ namespace JANOARG.Client.Behaviors.Player
             ShareMetadata.text =
                 $"Score recorded at <u>{DateTime.Now:M/d/yyyy, hh.mmtt}</u>\n" +
                 $"Played in <u>{Application.version}</u>";
+            ShareMetadata.color =
+                (Color.white - CommonSys.sMain.MainCamera.backgroundColor) * new ColorFrag(a: 1);
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
                 PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
