@@ -15,6 +15,9 @@ namespace JANOARG.Client.Behaviors.Panels
         public RectTransform Holder;
         public CanvasGroup   HolderGroup;
 
+        [Space] public CanvasGroup   BackgroundGroup;
+        public RectTransform BackgroundHolder;
+
         [Space] public string SceneName;
 
         [Space] public bool IsAnimating;
@@ -24,6 +27,8 @@ namespace JANOARG.Client.Behaviors.Panels
             sPanels.Add(this);
             HolderGroup.alpha = 0;
             HolderGroup.blocksRaycasts = false;
+
+            if (BackgroundGroup) BackgroundGroup.alpha = 0;
         }
 
         public void OnDisable()
@@ -88,6 +93,9 @@ namespace JANOARG.Client.Behaviors.Panels
         {
             HolderGroup.alpha = a * a;
             Holder.anchoredPosition = new Vector2(-10 * (1 - a), Holder.anchoredPosition.y);
+
+            if (BackgroundGroup) BackgroundGroup.alpha = a * a;
+            if (BackgroundHolder) BackgroundHolder.anchoredPosition = new Vector2(-10 * (1 - a), BackgroundHolder.anchoredPosition.y);
         }
     }
 }

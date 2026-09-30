@@ -15,6 +15,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace JANOARG.Client.Behaviors.Panels
 {
@@ -51,6 +52,14 @@ namespace JANOARG.Client.Behaviors.Panels
         public RawImage PreviewTextureTarget;
 
         [Space]
+        public GameObject    ArtifactHolder;
+        public CanvasGroup   ArtifactHolderGroup;
+        public RawImage      ArtifactTarget;
+        public RectTransform ArtifactGradient;
+
+        private Texture2D artifactTexture;
+
+        [Space]
         public Transform PreviewNormalCenter;
 
         public Transform  PreviewNormalLeft;
@@ -84,16 +93,36 @@ namespace JANOARG.Client.Behaviors.Panels
             MakeTab(CurrentTab);
 
             PreviewTexture = new RenderTexture(Screen.width, Screen.height, 32, DefaultFormat.LDR);
+            PreviewTexture.Create();
             PreviewTextureTarget.texture = PreviewCamera.targetTexture = PreviewTexture;
             PreviewCamera.fieldOfView = Camera.HorizontalToVerticalFieldOfView(110, PreviewCamera.aspect);
 
+            RenderTexture previousActive = RenderTexture.active;
+
+            RenderTexture.active = PreviewTexture;
+            GL.Clear(true, true, PreviewCamera.backgroundColor);
+            RenderTexture.active = previousActive;
+
             InitFlickMeshes();
             UpdatePlayerPreview();
+            UpdateArtifactedBackground();
+
+            if (CurrentPanel)
+            {
+                CurrentPanel.BackgroundGroup  = ArtifactHolderGroup;
+                CurrentPanel.BackgroundHolder = (RectTransform)ArtifactHolder.transform;
+            }
+
+            ArtifactHolderGroup.alpha = 0;
+
+            if (ArtifactGradient)
+                ArtifactGradient.anchoredPosition = new Vector2(ArtifactGradient.sizeDelta.x, ArtifactGradient.anchoredPosition.y);
         }
 
         public void OnDestroy()
         {
             Destroy(PreviewTexture);
+            Destroy(artifactTexture);
             Destroy(freeFlickIndicator);
             Destroy(arrowFlickIndicator);
             Destroy(PreviewHighlightMaterial);
@@ -224,6 +253,18 @@ namespace JANOARG.Client.Behaviors.Panels
                         "UI SFX Volume",
                         () => preferences.Get("GENR:UISFXVolume", 100f),
                         x => preferences.Set("GENR:UISFXVolume", x)
+                    );
+
+                    Spawn<OptionCategoryTitle>("Interface");
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show artifacted backgrounds",
+                        () => preferences.Get("GENR:ArtifactedBackgrounds", false),
+                        x =>
+                        {
+                            preferences.Set("GENR:ArtifactedBackgrounds", x);
+                            UpdateArtifactedBackground();
+                        }
                     );
 
                     // TODO: Localisation?
@@ -631,6 +672,127 @@ namespace JANOARG.Client.Behaviors.Panels
             if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
         }
 
+        public void UpdateArtifactedBackground()
+        {
+            bool enabled = CommonSys.sMain.Preferences.Get("GENR:ArtifactedBackgrounds", false);
+
+            if (enabled)
+            {
+                if (!artifactTexture)
+                    artifactTexture = CreateArtifactedTexture();
+
+                ArtifactTarget.texture = artifactTexture;
+            }
+            else if (artifactTexture)
+            {
+                Destroy(artifactTexture);
+                artifactTexture = null;
+            }
+
+            if (ArtifactHolder) ArtifactHolder.SetActive(enabled);
+        }
+
+        private Texture2D CreateArtifactedTexture()
+        {
+            int width  = Mathf.Max(1, Screen.width / 4);
+            int height = Mathf.Max(1, Screen.height / 4);
+
+            RenderTexture source = new RenderTexture(width, height, 32, DefaultFormat.LDR);
+            source.Create();
+
+            RenderTexture previousActive = RenderTexture.active;
+
+            RenderTexture.active = source;
+
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+
+            RenderTexture.active = previousActive;
+
+            source.Release();
+            Destroy(source);
+
+            Color32[] pixels = texture.GetPixels32();
+
+            if (IsBlank(pixels))
+            {
+                GenerateArtifactedPixels(pixels, width, height);
+                texture.SetPixels32(pixels);
+            }
+
+            texture.filterMode = FilterMode.Point;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.Apply();
+
+            return texture;
+        }
+
+        private static bool IsBlank(Color32[] pixels)
+        {
+            foreach (Color32 pixel in pixels)
+                if (pixel.a > 0 && (pixel.r > 0 || pixel.g > 0 || pixel.b > 0))
+                    return false;
+
+            return true;
+        }
+
+        private static void GenerateArtifactedPixels(Color32[] pixels, int width, int height)
+        {
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                float roll = Random.value;
+                Color32 pixel;
+
+                if (roll < .55f)
+                {
+                    byte value = (byte)Random.Range(0, 28);
+                    pixel = new Color32(
+                        (byte)(value + Random.Range(0, 6)),
+                        (byte)(value + Random.Range(0, 6)),
+                        (byte)(value + Random.Range(0, 6)),
+                        255);
+                }
+                else if (roll < .8f)
+                {
+                    byte value = (byte)Random.Range(0, 72);
+                    pixel = new Color32(value, value, value, 255);
+                }
+                else if (roll < .95f)
+                {
+                    pixel = new Color32(
+                        (byte)Random.Range(0, 256),
+                        (byte)Random.Range(0, 256),
+                        (byte)Random.Range(0, 256),
+                        255);
+                }
+                else
+                {
+                    byte value = (byte)Random.Range(160, 256);
+                    pixel = new Color32(value, value, (byte)Random.Range(128, 256), 255);
+                }
+
+                if (Random.value < .03f)
+                    pixel.a = 0;
+
+                pixels[i] = pixel;
+            }
+
+            for (int bandCount = Random.Range(2, 6); bandCount > 0; bandCount--)
+            {
+                int start = Random.Range(0, height);
+                int end   = Mathf.Min(height, start + Random.Range(1, Mathf.Max(2, height / 12)));
+                Color32 color = new(
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(96, 256));
+
+                for (int y = start; y < end; y++)
+                    for (int x = 0; x < width; x++)
+                        pixels[y * width + x] = color;
+            }
+        }
+
         private IEnumerator PreviewAnim(bool shown)
         {
             if (shown)
@@ -648,6 +810,15 @@ namespace JANOARG.Client.Behaviors.Panels
 
                     PreviewCamera.transform.localEulerAngles =
                         new Vector3(0, (shown ? 180 : 0) - 180 * ease1, 0);
+
+                    if (ArtifactGradient)
+                    {
+                        float width = ArtifactGradient.sizeDelta.x;
+
+                        ArtifactGradient.anchoredPosition = new Vector2(
+                            shown ? Mathf.Lerp(width, 0, ease1) : Mathf.Lerp(0, width, ease1),
+                            ArtifactGradient.anchoredPosition.y);
+                    }
                 });
 
             if (!shown)
