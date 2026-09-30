@@ -178,7 +178,7 @@ namespace JANOARG.Client.Behaviors.Player
             bool leftActionsActive  = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
             bool rightActionsActive = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
 
-            RenderTexture rTex  = new(width, height, 16, RenderTextureFormat.ARGB32);
+            RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
             Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
 
             try
