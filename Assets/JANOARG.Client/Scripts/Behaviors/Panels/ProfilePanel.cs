@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -156,11 +157,44 @@ namespace ANOARG.Client.Behaviors.Panels
 
         public IEnumerator Share(Texture2D image)
         {
-            Task task = File.WriteAllBytesAsync(
-                Application.persistentDataPath + "/screenshot.png",
-                image.EncodeToPNG());
+            string path = Application.persistentDataPath + "/screenshot.png";
+            Task task = File.WriteAllBytesAsync(path, image.EncodeToPNG());
 
             yield return new WaitUntil(() => task.IsCompleted);
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+            ShowShareSheet(path);
+#endif
         }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private static void ShowShareSheet(string path)
+        {
+            try
+            {
+                using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = player.GetStatic<AndroidJavaObject>("currentActivity"))
+                using (var file = new AndroidJavaObject("java.io.File", path))
+                using (var provider = new AndroidJavaClass("androidx.core.content.FileProvider"))
+                using (var uri = provider.CallStatic<AndroidJavaObject>(
+                    "getUriForFile", activity, Application.identifier + ".fileprovider", file))
+                using (var intent = new AndroidJavaObject("android.content.Intent"))
+                {
+                    intent.Call<AndroidJavaObject>("setAction", intent.GetStatic<string>("ACTION_SEND"));
+                    intent.Call<AndroidJavaObject>("setType", "image/png");
+                    intent.Call<AndroidJavaObject>("putExtra", intent.GetStatic<string>("EXTRA_STREAM"), uri);
+                    intent.Call<AndroidJavaObject>("addFlags", intent.GetStatic<int>("FLAG_GRANT_READ_URI_PERMISSION"));
+
+                    using (var chooser = intent.CallStatic<AndroidJavaObject>(
+                        "createChooser", intent, "Share screenshot"))
+                        activity.Call("startActivity", chooser);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[ProfilePanel] Failed to open share sheet: {e.Message}");
+            }
+        }
+#endif
     }
 }
