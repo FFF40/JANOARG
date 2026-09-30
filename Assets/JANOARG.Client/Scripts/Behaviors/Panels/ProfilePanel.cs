@@ -9,7 +9,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
 
-namespace ANOARG.Client.Behaviors.Panels
+namespace JANOARG.Client.Behaviors.Panels
 {
     public class ProfilePanel : MonoBehaviour
     {
@@ -34,8 +34,8 @@ namespace ANOARG.Client.Behaviors.Panels
             Storage storage = CommonSys.sMain.Storage;
 
             PlayerName.text = storage.Get("INFO:Name", "JANOARG");
-            PlayerTitle.text = storage.Get("INFO:Title", "Perfectly Generic Player");
-
+            PlayerTitle.text = storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
+            
             // TODO: Leveling Stuff
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
             LevelContent.text = level.ToString();

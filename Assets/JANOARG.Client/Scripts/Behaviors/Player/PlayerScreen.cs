@@ -1660,6 +1660,7 @@ namespace JANOARG.Client.Behaviors.Player
             SongProgressBody.color = color * new Color(1, 1, 1, .5f);
         }
 
+        // TODO: Move this to a editor script before removing this method
         private void InitFlickMeshes()
         {
             return; // Asset already assigned

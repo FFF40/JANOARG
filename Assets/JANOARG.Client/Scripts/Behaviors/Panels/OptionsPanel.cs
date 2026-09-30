@@ -233,6 +233,26 @@ namespace JANOARG.Client.Behaviors.Panels
                         x => storage.Set("INFO:Name", x)
                     );
 
+                    //TODO: Make like ListOptionInput with locked options
+                    var playerTitle = Spawn<ListOptionInput, string>("Player Title", 
+                        () => storage.Get("INFO:PlayerTitle", "Perfectly Generic Player"),
+                        x => storage.Set("INFO:PlayerTitle", x)
+                        );
+                    
+                    // Temporary titles
+                    playerTitle.ValidValues.Add("Perfectly Generic Player", "Perfectly Generic Player");
+                    playerTitle.ValidValues.Add("..............🐌", "..............🐌");
+
+
+                    // TODO: Add icons based on song unlocks
+                    var icon = Spawn<ListOptionInput, string>("Player Icon", 
+                        () => storage.Get("INFO:PlayerIcon", "none"),
+                        x => storage.Set("INFO:PlayerIcon", x)
+                        );
+                    
+                    // Temporary icons
+                    icon.ValidValues.Add("none", "No icon");
+
                     var note = Spawn<OptionText>("Online stuff coming soon(?)");
                     note.TitleLabel.fontSize = 8;
 

@@ -170,8 +170,9 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void UpdateLabels()
         {
-            // Name
+            // Profile
             NameLabel.text = CommonSys.sMain.Storage.Get("INFO:Name", "JANOARG");
+            TitleLabel.text = CommonSys.sMain.Storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
 
             // Levels
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
