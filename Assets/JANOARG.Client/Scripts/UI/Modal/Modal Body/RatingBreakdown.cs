@@ -256,11 +256,13 @@ namespace JANOARG.Client.UI
                         if (displayEntry.Icon != null)
                         {
                             displayEntry.Icon.texture = iconTex;
+                            displayEntry.Icon.color = Color.white;
                         }
 
                         if (screenshotEntry != null && screenshotEntry.Icon != null)
                         {
                             screenshotEntry.Icon.texture = iconTex;
+                            screenshotEntry.Icon.color = Color.white;
                         }
                     } 
 
