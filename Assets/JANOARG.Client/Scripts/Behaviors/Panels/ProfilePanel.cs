@@ -1,9 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Panels;
 using JANOARG.Client.Data.Storage;
+using JANOARG.Client.UI;
+using JANOARG.Client.UI.Modal;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
@@ -13,9 +13,6 @@ namespace ANOARG.Client.Behaviors.Panels
 {
     public class ProfilePanel : MonoBehaviour
     {
-        public Camera ScreenshotCamera;
-
-        [Space]
         public TMP_Text PlayerName;
 
         public TMP_Text PlayerTitle;
@@ -27,7 +24,9 @@ namespace ANOARG.Client.Behaviors.Panels
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
 
-        public bool isAnimating { get; private set; }
+        public GameObject RatingBreakdownModalBody;
+        public Sprite CameraIcon;
+        public Panel Panel;
 
         public void Awake()
         {
@@ -120,50 +119,32 @@ namespace ANOARG.Client.Behaviors.Panels
             return new[] { allFlawlessCount, fullStreakCount, clearedCount, unlockedCount };
         }
 
-        public Texture2D Screenshot(int width, int height)
+        public void OpenRatingBreakdownModal()
         {
-            RenderTexture rTex = new(width, height, 16, RenderTextureFormat.ARGB32);
-            rTex.Create();
+            RatingBreakdownModalBody breakdown = null;
 
-            ScreenshotCamera.targetTexture = rTex;
-            ScreenshotCamera.Render();
+            Modal modal = ModalManager.sInstance.Spawn(
+                "Rating Breakdown",
+                RatingBreakdownModalBody,
+                new ModalAction[] {
+                    new () {
+                        Name = "Close",
+                        Icon = ProfileBar.sMain.ArrowLeftIcon,
+                    }
+                },
+                new ModalAction[] {
+                    new () {
+                        Name = "Share",
+                        Icon = CameraIcon,
+                        Action = () => breakdown.ScreenshotRatingBreakdown(),
+                        ClosesModal = false,
+                    }
+                }
+            );
 
-            Texture2D tex2D = new(width, height, TextureFormat.ARGB32, false);
-            RenderTexture.active = rTex;
-            tex2D.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-            tex2D.Apply();
+            breakdown = modal.BodyHolder.GetComponentInChildren<RatingBreakdownModalBody>();
 
-            ScreenshotCamera.targetTexture = null;
-            rTex.Release();
-
-            return tex2D;
-        }
-
-        public void ScreenshotRatingBreakdown()
-        {
-            if (!isAnimating) StartCoroutine(ScreenshotRatingBreakdownAnim());
-        }
-
-        public IEnumerator ScreenshotRatingBreakdownAnim()
-        {
-            isAnimating = true;
-
-            Vector2Int size = CommonSys.GetShareSize(3072f / 1280f);
-            Texture2D  image = Screenshot(size.x, size.y);
-
-            yield return Share(image);
-
-            isAnimating = false;
-        }
-
-        public IEnumerator Share(Texture2D image)
-        {
-            string path = Application.persistentDataPath + "/screenshot.png";
-            Task task = File.WriteAllBytesAsync(path, image.EncodeToPNG());
-
-            yield return new WaitUntil(() => task.IsCompleted);
-
-            CommonSys.ShareFile(path);
+            Panel.Close();
         }
     }
 }
