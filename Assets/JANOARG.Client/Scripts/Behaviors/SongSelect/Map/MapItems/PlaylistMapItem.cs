@@ -50,7 +50,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
             MapManager.sItemUIs.Remove(ItemUI);
             MapManager.sPlaylistMapItemsByID.Remove(TargetID);
             MapManager.sPlaylistMapItemUIsByID.Remove(TargetID);
-            Destroy(ItemUI.gameObject);        
+            if (ItemUI) Destroy(ItemUI.gameObject);        
         }
     }
 }

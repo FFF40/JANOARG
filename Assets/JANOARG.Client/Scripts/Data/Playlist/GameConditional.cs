@@ -15,6 +15,8 @@ namespace JANOARG.Client.Data.Playlist
         public abstract bool Test();
         public abstract string GetDisplayInstructionString();
 
+        public virtual GameConditional Clone() => (GameConditional)MemberwiseClone();
+
         public static bool TestAll(IEnumerable<GameConditional> conditionals)
         {
             return conditionals.All(x => x.Test());

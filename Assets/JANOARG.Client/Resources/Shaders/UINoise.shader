@@ -62,18 +62,18 @@ Shader "UI/Noise"
 
             struct appdata_t
             {
-                fixed4 vertex : POSITION;
-                fixed4 color : COLOR;
-                fixed2 texcoord : TEXCOORD0;
+                float4 vertex : POSITION;
+                float4 color : COLOR;
+                float2 texcoord : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
-                fixed4 vertex : SV_POSITION;
+                float4 vertex : SV_POSITION;
                 fixed4 color : COLOR;
-                fixed2 texcoord : TEXCOORD0;
-                fixed4 worldPosition : TEXCOORD1;
+                float2 texcoord : TEXCOORD0;
+                float4 worldPosition : TEXCOORD1;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -81,8 +81,8 @@ Shader "UI/Noise"
             fixed _Intensity;
             fixed4 _Color;
             fixed4 _TextureSampleAdd;
-            fixed4 _ClipRect;
-            fixed4 _MainTex_ST;
+            float4 _ClipRect;
+            float4 _MainTex_ST;
 
             v2f vert(appdata_t v)
             {
@@ -98,9 +98,9 @@ Shader "UI/Noise"
                 return OUT;
             }
 
-            fixed rand(fixed2 a, fixed2 b) 
+            float rand(float2 a, float2 b) 
             {
-                fixed ans = frac(tan(distance(a * 1.6180339887, a) * b) * a.x);
+                float ans = frac(tan(distance(a * 1.6180339887, a) * b) * a.x);
                 if (ans != ans) ans = 0;
                 return ans;
             }
@@ -109,10 +109,10 @@ Shader "UI/Noise"
             {
                 fixed4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
                 
-                fixed2 roundedPos = floor(IN.worldPosition.xy * 0.5) * 2;
-                fixed factor = rand(roundedPos + _Time.xy + _ScreenParams.xy, fixed2(215.769, 134.867));
+                float2 roundedPos = floor(IN.worldPosition.xy * 0.5) * 2;
+                float factor = rand(roundedPos + _Time.xy + _ScreenParams.xy, float2(215.769, 134.867));
                 roundedPos = floor(roundedPos / 16) * 16;
-                fixed sinfactor = rand(roundedPos + _ScreenParams.xy, fixed2(134.867, 215.769));
+                float sinfactor = rand(roundedPos + _ScreenParams.xy, float2(134.867, 215.769));
                 factor *= factor;
                 factor = sin(sinfactor * 1000 + _Time.z * sinfactor) * 0.3 + factor * 0.4 + 0.3;
                 color.rgb *= 1 - factor * _Intensity;

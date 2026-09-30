@@ -10,10 +10,12 @@ using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace JANOARG.Client.Behaviors.Panels
 {
@@ -50,6 +52,14 @@ namespace JANOARG.Client.Behaviors.Panels
         public RawImage PreviewTextureTarget;
 
         [Space]
+        public GameObject    ArtifactHolder;
+        public CanvasGroup   ArtifactHolderGroup;
+        public RawImage      ArtifactTarget;
+        public RectTransform ArtifactGradient;
+
+        private Texture2D artifactTexture;
+
+        [Space]
         public Transform PreviewNormalCenter;
 
         public Transform  PreviewNormalLeft;
@@ -83,18 +93,40 @@ namespace JANOARG.Client.Behaviors.Panels
             MakeTab(CurrentTab);
 
             PreviewTexture = new RenderTexture(Screen.width, Screen.height, 32, DefaultFormat.LDR);
+            PreviewTexture.Create();
             PreviewTextureTarget.texture = PreviewCamera.targetTexture = PreviewTexture;
             PreviewCamera.fieldOfView = Camera.HorizontalToVerticalFieldOfView(110, PreviewCamera.aspect);
 
+            RenderTexture previousActive = RenderTexture.active;
+
+            RenderTexture.active = PreviewTexture;
+            GL.Clear(true, true, PreviewCamera.backgroundColor);
+            RenderTexture.active = previousActive;
+
             InitFlickMeshes();
             UpdatePlayerPreview();
+            UpdateArtifactedBackground();
+
+            if (CurrentPanel)
+            {
+                CurrentPanel.BackgroundGroup  = ArtifactHolderGroup;
+                CurrentPanel.BackgroundHolder = (RectTransform)ArtifactHolder.transform;
+            }
+
+            ArtifactHolderGroup.alpha = 0;
+
+            if (ArtifactGradient)
+                ArtifactGradient.anchoredPosition = new Vector2(ArtifactGradient.sizeDelta.x, ArtifactGradient.anchoredPosition.y);
         }
 
         public void OnDestroy()
         {
             Destroy(PreviewTexture);
+            Destroy(artifactTexture);
             Destroy(freeFlickIndicator);
             Destroy(arrowFlickIndicator);
+            Destroy(PreviewHighlightMaterial);
+            Destroy(PreviewHighlightGlowMaterial);
         }
 
         public void Close()
@@ -223,39 +255,51 @@ namespace JANOARG.Client.Behaviors.Panels
                         x => preferences.Set("GENR:UISFXVolume", x)
                     );
 
+                    Spawn<OptionCategoryTitle>("Interface");
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show artifacted backgrounds",
+                        () => preferences.Get("GENR:ArtifactedBackgrounds", false),
+                        x =>
+                        {
+                            preferences.Set("GENR:ArtifactedBackgrounds", x);
+                            UpdateArtifactedBackground();
+                        }
+                    );
+
                     // TODO: Localisation?
 
                     // Spawn<OptionCategoryTitle>("Localization");
                     // var lang = Spawn<ListOptionInput, string>("🌐 Language", 
-                    //     () => Storage.Get("MAIN:Language", "en"),
-                    //     x => Storage.Set("MAIN:Language", x)
+                    //     () => preferences.Get("MAIN:Language", "en"),
+                    //     x => preferences.Set("MAIN:Language", x)
                     // );
                     // lang.ValidValues.Add("en", "English");
                     // lang.ValidValues.Add("fr", "Français");
                     // lang.ValidValues.Add("zh_CN", "简体中文");
-                    // lang.ValidValues.Add("zh_TW", "繁體中文");
-                    // lang.ValidValues.Add("ja", "日本語");
+                    // lang.ValidValues.Add("zh_TW", "繁體中文");|
+
                     // lang.ValidValues.Add("ko", "한국어");
                     // lang.ValidValues.Add("tok", "toki pona");
                     // lang.ValidValues.Add("snale", "🐌 <alpha=#77>Snailian");
-
+                    // 
                     // var altNames = Spawn<ListOptionInput, string>("Alt. Song Titles", 
-                    //     () => Storage.Get("MAIN:AltNameRule", "auto"),
-                    //     x => Storage.Set("MAIN:AltNameRule", x)
+                    //     () => preferences.Get("MAIN:AltNameRule", "auto"),
+                    //     x => preferences.Set("MAIN:AltNameRule", x)
                     // );
                     // altNames.ValidValues.Add("auto", "Automatic (based on language)");
                     // altNames.ValidValues.Add("never", "Always use original song titles");
                     // altNames.ValidValues.Add("side", "Show original and alt. names side by side");
                     // altNames.ValidValues.Add("always", "Always use alternative song titles");
-
+                    // 
                     // var altArtist = Spawn<ListOptionInput, string>("Alt. Artist Names", 
-                    //     () => Storage.Get("MAIN:AltArtistRule", "auto"),
-                    //     x => Storage.Set("MAIN:AltArtistRule", x)
+                    //     () => preferences.Get("MAIN:AltArtistRule", "auto"),
+                    //     x => preferences.Set("MAIN:AltArtistRule", x)
                     // );
                     // altArtist.ValidValues.Add("auto", "Use \"Alt. Song Titles\" setting");
                     // altArtist.ValidValues.Add("never", "Always use original artist names");
-
-
+                    // 
+                    // 
                     // Spawn<OptionCategoryTitle>("🐌");
                     // Spawn<BooleanOptionInput, bool>("snail mode", 
                     //     () => false,
@@ -274,6 +318,7 @@ namespace JANOARG.Client.Behaviors.Panels
                     SubtitleLabel.text = " > Gameplay";
                     SetScrollerWidth(360);
 
+                    #region Syncronization
                     Spawn<OptionCategoryTitle>("Syncronization");
 
                     var sample = GetOptionItemSample<FloatOptionInput>();
@@ -281,8 +326,14 @@ namespace JANOARG.Client.Behaviors.Panels
                     sample.Max = 500;
                     sample.Step = 1;
                     sample.Unit = "ms";
+                    
+                    Spawn<AudioOffsetOptionInput, float>(
+                        "Audio Offset",
+                        () => preferences.Get("PLYR:AudioOffset", 0f),
+                        x => preferences.Set("PLYR:AudioOffset", x)
+                    );
 
-                    Spawn<JudgmentOffsetOptionInput, float>(
+                    Spawn<FloatOptionInput, float>(
                         "Judgment Offset",
                         () => preferences.Get("PLYR:JudgmentOffset", 0f),
                         x => preferences.Set("PLYR:JudgmentOffset", x)
@@ -293,7 +344,9 @@ namespace JANOARG.Client.Behaviors.Panels
                         () => preferences.Get("PLYR:VisualOffset", 0f),
                         x => preferences.Set("PLYR:VisualOffset", x)
                     );
+                    #endregion
 
+                    #region Audio
                     Spawn<OptionCategoryTitle>("Audio");
 
                     sample.Min = 0;
@@ -320,7 +373,9 @@ namespace JANOARG.Client.Behaviors.Panels
                             "PLYR:HitsoundVolume", new[] { 60f }),
                         x => preferences.Set("PLYR:HitsoundVolume", x)
                     );
+                    #endregion
 
+                    #region  Visual
                     Spawn<OptionCategoryTitle>("Visual");
 
                     sample.Min = msample.Min = .2f;
@@ -348,9 +403,22 @@ namespace JANOARG.Client.Behaviors.Panels
                             UpdatePlayerPreview();
                         }
                     );
+                    #endregion
 
+                    #region  Miscellaneous
                     Spawn <OptionCategoryTitle>("Miscellaneous");
 
+                    // Supposed to be a short
+                    var showOffset = Spawn<ListOptionInput, string>("Show offset value", 
+                        () => preferences.Get("PLYR:ShowOffset", "1"),
+                        x => preferences.Set("PLYR:ShowOffset", x)
+                        );
+                    
+                    showOffset.ValidValues.Add("3", "All Judgement");
+                    showOffset.ValidValues.Add("2", "Non-Flawless Judgement");
+                    showOffset.ValidValues.Add("1", "None");
+                    
+                    
                     Spawn<BooleanOptionInput, bool>(
                         "Highlight simul. notes",
                         () => preferences.Get("PLYR:HighlightSimulNotes", true),
@@ -371,7 +439,13 @@ namespace JANOARG.Client.Behaviors.Panels
                         () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
                         x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
                     );
-                        
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Always show Hit VFX",
+                        () => preferences.Get("PLYR:AlwaysShowHitVFX", true),
+                        x => preferences.Set("PLYR:AlwaysShowHitVFX", x)
+                    );
+                    #endregion
                 }
 
                     break;
@@ -381,25 +455,38 @@ namespace JANOARG.Client.Behaviors.Panels
                     SubtitleLabel.text = " > About";
                     SetScrollerWidth(600);
 
+
+                    const string NEWLINE_SEPARATOR = "\n• \n"; // Looks more aligned due to skewed scroller
                     AboutPane.SetActive(true);
                     OptionAboutEntry entry;
                     entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
                     entry.BodyLabel.text = "duducat / ducdat0507";
 
+                    entry = Spawn<OptionAboutEntry>("PROGRAMMER / MAINTAINER");
+                    entry.BodyLabel.text = "BashhScriptKid • M3galodon";
+                    
+                    //entry = Spawn<OptionAboutEntry>("iOS BUILD PROVIDER");
+                    //entry.BodyLabel.text = "kiko/kevernn";
+                    
+                    entry = Spawn<OptionAboutEntry>("GITHUB CONTRIBUTORS");
+                    entry.BodyLabel.text = "FujiForm2023 • RKevo";
+
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
-                    entry.BodyLabel.text = "Insert name of a famous artist here";
+                    entry.BodyLabel.text = "Kuttate • Rose Quartz • R3ality";
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                    entry.BodyLabel.text = "Sound Souler  •  mrcool909090  •  R3ality";
+                    entry.BodyLabel.text = "Sound Souler • mrcool909090 • R3ality  • Scutoid • Ariz Kayaba" 
+                                           + NEWLINE_SEPARATOR +
+                                           "zqr • NOMOREKAWAII • CuboonoP • Rose Quartz • Pa_lette";
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
-                    entry.BodyLabel.text = "duducat";
+                    entry.BodyLabel.text = "duducat • Pa_lette";
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = ":blobcat:  •  R3ality";
+                    entry.BodyLabel.text = "BashhScriptKid • M3galodon • Akanari • leko_uname • BEN789FA • Gyukatsu • kiemo";
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat  •  M3galodon";
+                    entry.BodyLabel.text = "duducat • M3galodon • leko_uname • Pa_lette • AARL • BEN789FA";
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
@@ -471,6 +558,36 @@ namespace JANOARG.Client.Behaviors.Panels
             }
         }
 
+        Material PreviewHighlightMaterial;
+        Material PreviewHighlightGlowMaterial;
+
+        // The options preview has no chart loaded, so there is no HitStyleManager to pull the
+        // simultaneous-note materials from. The preview is a fixed context though -- a pure white
+        // note on a pitch black background -- so the colors are derived straight from white rather
+        // than from a style. On black, alpha blending and additive blending give the same result,
+        // so the glow reads correctly even though the hit shader ignores the sprite renderer tint.
+        void InitPreviewHighlightMaterials()
+        {
+            if (PreviewHighlightMaterial && PreviewHighlightGlowMaterial) return;
+
+            Material baseMaterial = InternalChartTool.LoadStyleMaterial("Highlight", "Default");
+            if (!baseMaterial) return;
+
+            (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Color.white, Color.black);
+
+            PreviewHighlightMaterial = new Material(baseMaterial);
+            PreviewHighlightMaterial.SetColor("_Color", highlight);
+
+            // The glow is a SpriteRenderer, so it takes the sprite-pipeline material rather than
+            // the mesh one the bold bar uses, matching what HitStyleManager hands real notes.
+            Material glowBaseMaterial = InternalChartTool.LoadStyleMaterial("HighlightGlow", "Default");
+
+            PreviewHighlightGlowMaterial = new Material(glowBaseMaterial ? glowBaseMaterial : baseMaterial);
+            PreviewHighlightGlowMaterial.SetColor("_Color", glow);
+
+            PreviewNormalSimulGlow.sharedMaterial = PreviewHighlightGlowMaterial;
+        }
+
         public void UpdatePlayerPreview()
         {
             float width = 5;
@@ -497,15 +614,23 @@ namespace JANOARG.Client.Behaviors.Panels
                 PreviewNormalSimulCenter.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
                 PreviewNormalSimulLeft.localScale = PreviewNormalSimulRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 PreviewNormalSimulRight.localPosition = Vector3.right * (width / 2 + .2f * scale);
-                PreviewNormalSimulLeft.localPosition = -PreviewNormalRight.localPosition;
-                
-                PreviewNormalSimulBold.gameObject.SetActive(settings.HighlightSimulNotes);
-                PreviewNormalSimulBold.material = new Material(Shader.Find("JANOARG/Styles/Default - Hit"));
-                PreviewNormalSimulBold.material.color = new Color(1, 1, 1, 0.75f);
-                
-                PreviewNormalSimulBold.transform.localScale = PreviewNormalSimulCenter.localScale;
-                PreviewNormalSimulBold.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulCenter.localScale.y * 1.8f, z: PreviewNormalSimulCenter.localScale.z * .998f);
-                PreviewNormalSimulGlow.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulBold.transform.localScale.y * 6f);
+                PreviewNormalSimulLeft.localPosition = -PreviewNormalSimulRight.localPosition;
+
+                bool highlight = settings.HighlightSimulNotes;
+                PreviewNormalSimulBold.gameObject.SetActive(highlight);
+                PreviewNormalSimulGlow.gameObject.SetActive(highlight);
+
+                if (highlight)
+                {
+                    InitPreviewHighlightMaterials();
+
+                    if (PreviewHighlightMaterial) PreviewNormalSimulBold.sharedMaterial = PreviewHighlightMaterial;
+                    if (PreviewHighlightGlowMaterial) PreviewNormalSimulGlow.sharedMaterial = PreviewHighlightGlowMaterial;
+
+                    // Keep in sync with the normal-note branch of HitPlayer.UpdateMesh.
+                    PreviewNormalSimulBold.transform.localScale = new Vector3(width + .2f * scale, .6f * scale, .6f * scale);
+                    PreviewNormalSimulGlow.transform.localScale *= new Vector3Frag(y: PreviewNormalSimulBold.transform.localScale.y * 6f);
+                }
             }
 
             PreviewCatchFlick.transform.localScale = PreviewNormalFlick.transform.localScale
@@ -536,12 +661,136 @@ namespace JANOARG.Client.Behaviors.Panels
         {
             string url = target switch
             {
+                "github"  => "https://github.com/FFF40",
                 "discord" => "https://discord.gg/vXJTPFQBHm",
-                "reddit" => "https://reddit.com/r/fff40",
-                _ => ""
+                "reddit"  => "https://reddit.com/r/fff40",
+                "twitter" => "https://twitter.com/FFF40_Studios",
+                "bsky"    => "https://bsky.app/profile/fff40.studio",
+                _         => ""
             };
 
             if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
+        }
+
+        public void UpdateArtifactedBackground()
+        {
+            bool enabled = CommonSys.sMain.Preferences.Get("GENR:ArtifactedBackgrounds", false);
+
+            if (enabled)
+            {
+                if (!artifactTexture)
+                    artifactTexture = CreateArtifactedTexture();
+
+                ArtifactTarget.texture = artifactTexture;
+            }
+            else if (artifactTexture)
+            {
+                Destroy(artifactTexture);
+                artifactTexture = null;
+            }
+
+            if (ArtifactHolder) ArtifactHolder.SetActive(enabled);
+        }
+
+        private Texture2D CreateArtifactedTexture()
+        {
+            int width  = Mathf.Max(1, Screen.width / 4);
+            int height = Mathf.Max(1, Screen.height / 4);
+
+            RenderTexture source = new RenderTexture(width, height, 32, DefaultFormat.LDR);
+            source.Create();
+
+            RenderTexture previousActive = RenderTexture.active;
+
+            RenderTexture.active = source;
+
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+
+            RenderTexture.active = previousActive;
+
+            source.Release();
+            Destroy(source);
+
+            Color32[] pixels = texture.GetPixels32();
+
+            if (IsBlank(pixels))
+            {
+                GenerateArtifactedPixels(pixels, width, height);
+                texture.SetPixels32(pixels);
+            }
+
+            texture.filterMode = FilterMode.Point;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.Apply();
+
+            return texture;
+        }
+
+        private static bool IsBlank(Color32[] pixels)
+        {
+            foreach (Color32 pixel in pixels)
+                if (pixel.a > 0 && (pixel.r > 0 || pixel.g > 0 || pixel.b > 0))
+                    return false;
+
+            return true;
+        }
+
+        private static void GenerateArtifactedPixels(Color32[] pixels, int width, int height)
+        {
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                float roll = Random.value;
+                Color32 pixel;
+
+                if (roll < .55f)
+                {
+                    byte value = (byte)Random.Range(0, 28);
+                    pixel = new Color32(
+                        (byte)(value + Random.Range(0, 6)),
+                        (byte)(value + Random.Range(0, 6)),
+                        (byte)(value + Random.Range(0, 6)),
+                        255);
+                }
+                else if (roll < .8f)
+                {
+                    byte value = (byte)Random.Range(0, 72);
+                    pixel = new Color32(value, value, value, 255);
+                }
+                else if (roll < .95f)
+                {
+                    pixel = new Color32(
+                        (byte)Random.Range(0, 256),
+                        (byte)Random.Range(0, 256),
+                        (byte)Random.Range(0, 256),
+                        255);
+                }
+                else
+                {
+                    byte value = (byte)Random.Range(160, 256);
+                    pixel = new Color32(value, value, (byte)Random.Range(128, 256), 255);
+                }
+
+                if (Random.value < .03f)
+                    pixel.a = 0;
+
+                pixels[i] = pixel;
+            }
+
+            for (int bandCount = Random.Range(2, 6); bandCount > 0; bandCount--)
+            {
+                int start = Random.Range(0, height);
+                int end   = Mathf.Min(height, start + Random.Range(1, Mathf.Max(2, height / 12)));
+                Color32 color = new(
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(0, 256),
+                    (byte)Random.Range(96, 256));
+
+                for (int y = start; y < end; y++)
+                    for (int x = 0; x < width; x++)
+                        pixels[y * width + x] = color;
+            }
         }
 
         private IEnumerator PreviewAnim(bool shown)
@@ -561,6 +810,15 @@ namespace JANOARG.Client.Behaviors.Panels
 
                     PreviewCamera.transform.localEulerAngles =
                         new Vector3(0, (shown ? 180 : 0) - 180 * ease1, 0);
+
+                    if (ArtifactGradient)
+                    {
+                        float width = ArtifactGradient.sizeDelta.x;
+
+                        ArtifactGradient.anchoredPosition = new Vector2(
+                            shown ? Mathf.Lerp(width, 0, ease1) : Mathf.Lerp(0, width, ease1),
+                            ArtifactGradient.anchoredPosition.y);
+                    }
                 });
 
             if (!shown)

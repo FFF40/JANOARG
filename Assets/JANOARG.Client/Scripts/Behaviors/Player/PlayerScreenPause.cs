@@ -2,6 +2,7 @@ using System.Collections;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public Image RetryFlash;
 
-        public float PauseTime = -10;
+        public double PauseTime = -10;
 
         [Space] public Coroutine CurrentAnimation;
 
@@ -43,7 +44,15 @@ namespace JANOARG.Client.Behaviors.Player
             if (PlayerScreen.sMain.CurrentTime - PauseTime < 2)
             {
                 PlayerScreen.sMain.IsPlaying = false;
-                PlayerScreen.sMain.Music.Pause();
+                // If the song hasn't started yet, PlayScheduled is still pending —
+                // Pause() won't cancel it, so use Stop() to kill the scheduled play.
+                // Once CurrentTime >= 0 the audio is already running and Pause() is correct.
+                if (PlayerScreen.sMain.CurrentTime < 0)
+                    PlayerScreen.sMain.Music.Stop();
+                else
+                    PlayerScreen.sMain.Music.Pause();
+                PlayerScreen.sMain.SuspendMusicSchedule();
+                PlayerScreen.sMain.ComputeAndSaveMedianOffset();
 
                 // PlayerInputManager.main.Fingers.Clear();
                 PlayerInputManager.sInstance.TouchClasses.Clear();
@@ -96,8 +105,22 @@ namespace JANOARG.Client.Behaviors.Player
                         OptionGroup.alpha = 1 - ease;
                     }));
 
+            // Roll back slightly so the player re-enters with a short cue of where they left off.
+            // Deliberately destructive: hit objects in the rollback window won't re-spawn,
+            // and some lane transform data is lost — but 1.5s is short enough that this is
+            // an acceptable tradeoff for the UX of hearing the song context before resuming.
+            // Resync is called after so the DSP anchor reflects the rolled-back position,
+            // not the stale timeSamples from while music was paused.
             PlayerScreen.sMain.CurrentTime -= 1.5f;
+            // Re-anchor DSP clock to now so rawDelta starts clean on the next Update
             PlayerScreen.sMain.Resync();
+
+            // Pausing before the song started killed the pending PlayScheduled, and nothing else will
+            // reissue it: the clock's restart path only fires once chart time is non-negative, so the
+            // whole lead-in would otherwise run silently. Mid-song resumes still go through that path.
+            if (PlayerScreen.sMain.CurrentTime < 0)
+                PlayerScreen.sMain.ScheduleLeadIn();
+
             PlayerScreen.sMain.IsPlaying = true;
 
             float targetVolume = PlayerScreen.sMain.Music.volume;
@@ -105,7 +128,6 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(
                 1.5f, a =>
                 {
-
                     Background.color = CommonSys.sMain.MainCamera.backgroundColor *
                                        new Color(1, 1, 1, EaseUtils.ToZero(1, a, EaseFunction.Cubic, EaseMode.InOut) * 0.8f);
 

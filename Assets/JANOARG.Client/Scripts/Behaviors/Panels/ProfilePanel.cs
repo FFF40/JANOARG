@@ -148,6 +148,5 @@ namespace ANOARG.Client.Behaviors.Panels
             Panel.Close();
         
         }
-
     }
 }

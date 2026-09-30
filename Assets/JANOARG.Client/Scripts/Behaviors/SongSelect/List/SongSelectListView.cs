@@ -8,6 +8,7 @@ using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.Map;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using JANOARG.Client.Data.Playlist;
 using UnityEngine;
 
@@ -129,7 +130,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
 
             bool CanAddSong(string songID)
             {
-                return MapManager.sSongMapItemsByID[songID].isRevealed;
+                return MapManager.sSongMapItemsByID.GetValueOrDefault(songID, null)?.isRevealed
+                    ?? GameConditional.TestAll(SongSelectScreen.sMain.PlaylistSongByID[songID].RevealConditions);
             }
             void AddSong(string songID)
             {
@@ -157,7 +159,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                 case SongSortCriteria.Appearance:
                     {
                         SongSelectScreen screen = SongSelectScreen.sMain;
-                        IEnumerable<PlaylistSong> songs = screen.Playlist.Songs;
+                        IEnumerable<PlaylistSong> songs = screen.LoadedSongs;
                         if (FilterPanel.SortReversed) songs = songs.Reverse();
                         string lastHeader = "";
                         foreach (PlaylistSong song in songs)
@@ -249,7 +251,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                                 AddHeader(song.Value > 9000 || song.Value <= 0 ? "??" : song.Value.ToString());
                             }
                             AddSong(song.Key);
-                            print($"{song.Key} {song.Value}");
                         }
                         break;
                     }

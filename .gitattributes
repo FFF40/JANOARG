@@ -1,0 +1,5 @@
+# Chart formats are plain text parsed line-by-line; CRLF breaks section detection.
+* text=auto eol=lf
+*.cs text eol=lf
+*.jac text eol=lf
+*.japs text eol=lf

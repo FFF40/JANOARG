@@ -24,6 +24,8 @@ using JANOARG.Client.Utils;
 using UnityEngine.Assertions;
 using System.Linq;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapProps;
+using JANOARG.Shared.Utils.Animation;
+using JetBrains.Annotations;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
@@ -34,6 +36,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public static Func<Transform> sMoveBackFrom = null;
 
         public Playlist Playlist;
+        public List<PlaylistSong> LoadedSongs { get; private set; } = new();
         public Dictionary<string, PlayableSong> PlayableSongByID { get; private set; } = new();
         public Dictionary<string, PlaylistSong> PlaylistSongByID { get; private set; } = new();
 
@@ -68,6 +71,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public CoverLayerImage CoverLayerSample;
         public RectTransform TargetSongCoverLayerHolder;
         public List<CoverLayerImage> TargetSongCoverLayers;
+        public RectTransform TargetSongCoverBackupTarget;
         [Space]
         public GameObject TargetSongLockedIndicator;
         public CanvasGroup UnlockConditionGroup;
@@ -93,6 +97,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public CanvasGroup RightActionsHolder;
         public Button MapViewButton;
         public Button ListViewButton;
+        public TMP_Text ListViewLabel;
         public Button SortButton;
         public Button LaunchButton;
 
@@ -260,7 +265,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
             int index = 0;
             int pos = 0;
             MapManager.LoadMap();
-            foreach (PlaylistSong songInfo in Playlist.Songs)
+
+            IEnumerator f_loadSong(PlaylistSong songInfo)
             {
                 string path = $"Songs/{songInfo.ID}/{songInfo.ID}";
                 ResourceRequest req = Resources.LoadAsync<ExternalPlayableSong>(path);
@@ -268,15 +274,48 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 if (!req.asset)
                 {
                     Debug.LogWarning("Couldn't load Playable Song at " + path);
-                    continue;
+                    yield break;
                 }
                 PlayableSong song = ((ExternalPlayableSong)req.asset).Data;
+                LoadedSongs.Add(songInfo);
                 PlayableSongByID.Add(songInfo.ID, song);
                 PlaylistSongByID.Add(songInfo.ID, songInfo);
-
-                index++;
-                pos += 48;
             }
+
+            if (MapManager.sPlaylistStack.Count <= 1)
+            {
+                ListViewLabel.text = "ALL SONGS";
+                Debug.Log("Root playlist loaded, loading all songs recursively");
+                IEnumerator f_loadPlaylist(Playlist playlist)
+                {
+                    Debug.Log($"Loading playlist {playlist.name}");
+                    foreach (PlaylistSong songInfo in playlist.Songs)
+                    {
+                        yield return f_loadSong(songInfo);
+                    }
+                    foreach (PlaylistReference playlistInfo in playlist.Playlists)
+                    {
+                        if (
+                            GameConditional.TestAll(playlistInfo.RevealConditions)
+                            && GameConditional.TestAll(playlistInfo.UnlockConditions)
+                        )
+                        yield return f_loadPlaylist(playlistInfo.Playlist);
+                    }
+                }
+                yield return f_loadPlaylist(Playlist);
+            }
+            else 
+            {
+                ListViewLabel.text = "LIST VIEW";
+                foreach (PlaylistSong songInfo in Playlist.Songs)
+                {
+                    yield return f_loadSong(songInfo);
+                }
+            }
+            
+            // Update Playlist's BGM accordingly
+            BGMIntroSource.clip = Playlist.BackgroundMusicInit;
+            BGMLoopSource.clip = Playlist.BackgroundMusicLoop;
 
             ListView.UpdateSort();
 
@@ -292,6 +331,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             PlayableSongByID.Clear();
             PlaylistSongByID.Clear();
+            LoadedSongs.Clear();
         }
 
         public void UpdateListItems(bool cap = true)
@@ -336,7 +376,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             // Animate map icons to list icons
             float lerpFrom = IsMapView ? 1 : 0;
             float lerpTo = 1 - lerpFrom;
-            IEnumerator MapCoroutine()
+            IEnumerator f_mapCoroutine()
             {
                 var mapListItems = MapManager.sMain.GetMapToListItems(ListView.SongItems);
             
@@ -374,19 +414,35 @@ namespace JANOARG.Client.Behaviors.SongSelect
             IEnumerator CoverCoroutine()
             {
                 SongSelectListSongUI targetSong = ListView.SongItems.FirstOrDefault(item => Mathf.Approximately(item.Target?.Position ?? 0, ListView.TargetScrollOffset));
-                if (targetSong == null) yield break;
-                if (!MapManager.sSongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)) yield break;
-                target.CoverImage.gameObject.SetActive(false);
+                
                 TargetSongCoverHolder.gameObject.SetActive(true);
-                yield return Ease.Animate(lerpFrom == 0 ? 0.6f : 0.5f, (x) =>
+
+                if (
+                    targetSong != null && targetSong.Target != null
+                    && MapManager.sSongMapItemUIsByID.TryGetValue(targetSong.Target.SongID, out SongMapItemUI target)
+                )
                 {
-                    float ease1 = lerpFrom == 0
-                        ? Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.InOut)
-                        : 1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
-                    LerpCover(ease1, target.CoverImage.transform as RectTransform);
-                });
+                    target.CoverImage.gameObject.SetActive(false);
+                    yield return Ease.Animate(lerpFrom == 0 ? 0.6f : 0.5f, (x) =>
+                    {
+                        float ease1 = lerpFrom == 0
+                            ? Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.InOut)
+                            : 1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                        LerpCover(ease1, target.CoverImage.transform as RectTransform);
+                    });
+                    target.CoverImage.gameObject.SetActive(true);
+                }
+                else
+                {
+                    yield return Ease.Animate(lerpFrom == 0 ? 0.6f : 0.5f, (x) =>
+                    {
+                        float ease1 = lerpFrom == 0
+                            ? Ease.Get(Mathf.Pow(x, .5f), EaseFunction.Exponential, EaseMode.InOut)
+                            : 1 - Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                        LerpCover(ease1, TargetSongCoverBackupTarget);
+                    });
+                }
                 TargetSongCoverHolder.gameObject.SetActive(lerpTo > 0);
-                target.CoverImage.gameObject.SetActive(true);
             }
             Coroutine coverCoroutine = null;
 
@@ -396,7 +452,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
                 CurrentPreviewClip = null;
                 coverCoroutine = StartCoroutine(CoverCoroutine());
-                mapCoroutine = StartCoroutine(MapCoroutine());
+                mapCoroutine = StartCoroutine(f_mapCoroutine());
 
                 // Animate
                 yield return Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, ease1 =>
@@ -420,16 +476,17 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
                 // Set current list item to the map item nearest to center of screen
                 var mapSongs = MapManager.sSongMapItemUIsByID.Values.ToList();
+                SongSelectListSong targetSong = null;
                 if (mapSongs.Count > 0)
                 {
-                    float getDistance(SongMapItemUI item) 
+                    float f_getDistance(SongMapItemUI item) 
                         => Vector2.SqrMagnitude(((RectTransform)item.transform).anchoredPosition);
                     SongMapItemUI closestMapSong = null;
                     float closestMapDistance = float.PositiveInfinity;
                     for (int i = 0; i < mapSongs.Count; i++)
                     {
                         if (!mapSongs[i].gameObject.activeSelf) continue;
-                        float distance = getDistance(mapSongs[i]);
+                        float distance = f_getDistance(mapSongs[i]);
                         if (distance < closestMapDistance)
                         {
                             closestMapSong = mapSongs[i];
@@ -437,22 +494,27 @@ namespace JANOARG.Client.Behaviors.SongSelect
                         }
                     }
                     
-                    SongSelectListSong targetSong = (SongSelectListSong)ListView.ItemList.Find(
+                    if (closestMapSong) targetSong = (SongSelectListSong)ListView.ItemList.Find(
                         item => item is SongSelectListSong song && song.SongID == closestMapSong.parent.TargetID
                     );
-                    if (targetSong != null)
-                    {
-                        ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
-                        ListView.TargetSongID = targetSong.SongID;
-                        ListView.IsDirty = true;
-                        ListView.HandleUpdate();
-
-                        PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
-                        SetTargetSong(targetSong.SongID, playableSong);
-                        yield return SetCover(targetSong.SongID, playableSong);
-                        coverCoroutine = StartCoroutine(CoverCoroutine());
-                    }
+                    targetSong ??= (SongSelectListSong)ListView.ItemList.Find(
+                        item => item is SongSelectListSong song && song.SongID == ListView.TargetSongID
+                    );
                 }
+
+                targetSong ??= (SongSelectListSong)ListView.ItemList.Find(
+                    item => item is SongSelectListSong song
+                );
+
+                ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
+                ListView.TargetSongID = targetSong.SongID;
+                ListView.IsDirty = true;
+                ListView.HandleUpdate();
+
+                PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
+                SetTargetSong(targetSong.SongID, playableSong);
+                yield return SetCover(targetSong.SongID, playableSong);
+                coverCoroutine = StartCoroutine(CoverCoroutine());
 
                 // Update list item positions
                 ListView.TargetSongHiddenTarget = ListView.IsTargetSongHidden = false;
@@ -464,7 +526,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 ListView.UpdateListItems(this);
 
                 // Finally start map coroutine
-                mapCoroutine = StartCoroutine(MapCoroutine());
+                mapCoroutine = StartCoroutine(f_mapCoroutine());
 
                 // Animate
                 yield return Ease.Animate(0.6f, (x) =>
@@ -494,8 +556,24 @@ namespace JANOARG.Client.Behaviors.SongSelect
             TargetSongAnim = null;
         }
 
-        public void SetTargetSong(string songID, PlayableSong targetSong)
+        public void SetTargetSong([CanBeNull] string songID, [CanBeNull] PlayableSong targetSong)
         {
+
+            Debug.Log("Setting target song to " + (targetSong != null ? $"{songID}, {targetSong.SongName}" : "UNDEFINED"));
+
+            if (songID == null || targetSong == null)
+            {
+                TargetSongID = null;
+                TargetSong = null;
+                TargetSongInfoName.text = "";
+                TargetSongInfoArtist.text = "";
+                TargetSongInfoInfo.text = "";
+                TargetSongLockedIndicator.SetActive(false);
+                CurrentPreviewClip = null;
+                LaunchButton.gameObject.SetActive(false);
+                return;
+            }
+
             TargetSongID = songID;
             TargetSong = targetSong;
 
@@ -526,7 +604,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             {
                 UnlockConditionText.text = GameConditional.GetDisplayInstructionString(PlaylistSongByID[songID].UnlockConditions);
             }
-
+            
             CurrentPreviewClip = IsTargetSongUnlocked ? targetSong.Clip : PreviewNoiseClip;
             CurrentPreviewRange = IsTargetSongUnlocked ? targetSong.PreviewRange : new(0, 10);
 
@@ -534,7 +612,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
             foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
             DifficultyList.Clear();
             var target = GetNearestDifficulty(targetSong.Charts);
-            foreach (ExternalChartMeta chart in targetSong.Charts)
+            foreach (ExternalChartMeta chart in targetSong.Charts.OrderBy(c => c.DifficultyIndex))
             {
                 string chartID = Path.GetFileNameWithoutExtension(chart.Target);
                 var record = StorageManager.sMain.Scores.Get(songID, chartID);
@@ -554,16 +632,30 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public IEnumerator ListTargetSongShowAnim()
         {
             ListView.TargetSongOffset = ListView.TargetScrollOffset;
-            SongSelectListSongUI targetSong = ListView.SongItems.Find(item => ListView.TargetScrollOffset == item.Target?.Position);
-            ListView.TargetSongID = targetSong.Target.SongID;
-            if (targetSong)
+            SongSelectListSongUI targetSong = null;
+            if (ListView.SongItems.Count > 0)
+                targetSong = ListView.SongItems.Find(item => item.Target != null && Mathf.Approximately(ListView.TargetScrollOffset, item.Target.Position));
+            
+            if (!targetSong)
             {
-                SetTargetSong(targetSong.Target.SongID, targetSong.TargetSong);
-                StartCoroutine(SongBurstAnim(targetSong.CoverImage.rectTransform));
-                yield return SetCover(targetSong.Target.SongID, targetSong.TargetSong);
-                UpdateButtons();
+                if (ListView.SongItems.Count > 0)
+                {
+                    targetSong = ListView.SongItems[0];
+                }
+                else
+                {
+                    ListView.TargetSongID = null;
+                    TargetSong = null;
+                    TargetSongID = null;
+                    yield break;
+                }
             }
-
+            ListView.TargetSongID = targetSong.Target.SongID;
+            SetTargetSong(targetSong.Target.SongID, targetSong.TargetSong);
+            StartCoroutine(SongBurstAnim(targetSong.CoverImage.rectTransform));
+            yield return SetCover(targetSong.Target.SongID, targetSong.TargetSong);
+            UpdateButtons();
+            
             LerpInfo(0);
             LerpDifficulty(0);
             LerpUnlockConditions(0);
@@ -1237,6 +1329,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
             cameraTransform.position = target.position;
 
+            CommonSys.sMain.MainCamera.fieldOfView = 60;
+
             yield return Ease.Animate(1, (t) =>
             {
                 float lerp1 = Ease.Get(t, EaseFunction.Exponential, EaseMode.Out);
@@ -1246,7 +1340,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 if (IsMapView)
                 {
                     MapUIGroup.alpha = Mathf.Ceil(t);
-                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(1 - lerp1, 1.6f));
+                    MapUIGroup.transform.localScale = Vector3.one * (1 + 15 * Mathf.Pow(1 - lerp1, 2f));
                     MapManager.UpdateAllPositions();
                 }
                 else

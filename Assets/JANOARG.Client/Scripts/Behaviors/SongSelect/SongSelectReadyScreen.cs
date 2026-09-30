@@ -10,6 +10,7 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Utils;
 using JANOARG.Client.Behaviors.Player;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {

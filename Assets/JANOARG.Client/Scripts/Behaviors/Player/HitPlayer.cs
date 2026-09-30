@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
@@ -16,7 +17,7 @@ namespace JANOARG.Client.Behaviors.Player
         public float       Time;
         public float       EndTime;
         public List<float> HoldTicks;
-        public float       CurrentPosition;
+        public double       CurrentPosition;
 
         public MeshRenderer Center;
         [FormerlySerializedAs("Left")]
@@ -26,6 +27,12 @@ namespace JANOARG.Client.Behaviors.Player
 
         public MeshFilter   HoldMesh;
         public MeshRenderer HoldRenderer;
+
+        // Vertex count of the index buffer currently uploaded to HoldMesh's Mesh, or -1 if the
+        // mesh has none. The hold-tail triangle list is a pure function of the vertex count (each
+        // generated line adds two vertices and six fixed indices), so the indices only need
+        // re-uploading when that count changes. Reset whenever the mesh is cleared or pooled.
+        public int UploadedHoldIndexCount = -1;
 
         public MeshFilter   FlickMesh;
         public MeshRenderer FlickRenderer;
@@ -40,15 +47,47 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool InDiscreteHitQueue;
 
+        // True while this note is claimed for scoring but not yet finalised: either handed to
+        // DiscreteHitQueue by input, or simply an autoplay note awaiting its chart time. Scoring
+        // runs on the audio clock but drawing runs on the leading visual clock, so the draw pass
+        // hides such a note the moment it reaches the line instead of rendering it past it. Reset
+        // per-note in Init().
+        public bool IsPendingJudgement;
+
         public bool PendingHoldQueue;
         public bool IsProcessed;
         public bool IsTapped;
 
+        // Set when this instance is handed back to the PlayerScreen pool. Since pooled
+        // instances are deactivated rather than Destroyed, code that used to rely on
+        // Unity's "fake null" check (Destroy having run) to detect a finished note must
+        // check this instead.
+        public bool IsReturned;
+
         public void Init()
         {
+            // Reset per-note lifecycle flags unconditionally so a reused (pooled) instance
+            // never inherits state from whatever note previously occupied it.
+            InDiscreteHitQueue = false;
+            PendingHoldQueue = false;
+            IsProcessed = false;
+            IsTapped = false;
+            IsReturned = false;
+            IsPendingJudgement = false;
+            UploadedHoldIndexCount = -1;
+
+            // UpdateMesh below bails if GetZPosition throws, which would leave a pooled
+            // instance wearing the previous note's baked Z and transform.
+            CurrentPosition = double.PositiveInfinity;
+            transform.localPosition = Vector3.zero;
+
             if (Current.StyleIndex >= 0 && Current.StyleIndex < PlayerScreen.sMain.HitStyles.Count)
             {
                 HitStyleManager style = PlayerScreen.sMain.HitStyles[Current.StyleIndex];
+
+                Center.enabled =
+                    LeftPoint.enabled =
+                        RightPoint.enabled = true;
 
                 LeftPoint.sharedMaterial =
                     RightPoint.sharedMaterial =
@@ -67,11 +106,11 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (IsSimultaneous && SimultaneousHighlight.gameObject.activeSelf)
                 {
-                    SimultaneousHighlight.sharedMaterial = 
-                        Current.Type == HitObject.HitType.Catch 
+                    SimultaneousHighlight.sharedMaterial =
+                        Current.Type == HitObject.HitType.Catch
                             ? style.CatchHighlightMaterial : style.NormalHighlightMaterial;
-                    SimultaneousGlow.sharedMaterial = 
-                        Current.Type == HitObject.HitType.Catch 
+                    SimultaneousGlow.sharedMaterial =
+                        Current.Type == HitObject.HitType.Catch
                             ? style.CatchHighlightGlowMaterial : style.NormalHighlightGlowMaterial;
                 }
 
@@ -82,7 +121,12 @@ namespace JANOARG.Client.Behaviors.Player
                     FlickMesh.sharedMesh = float.IsFinite(Current.FlickDirection)
                         ? PlayerScreen.sMain.ArrowFlickIndicator : PlayerScreen.sMain.FreeFlickIndicator;
 
-                    FlickRenderer.sharedMaterial = Center.sharedMaterial;
+                    // Follow normal material (matches Chartmaker)
+                    FlickRenderer.sharedMaterial = style.NormalMaterial;
+                }
+                else
+                {
+                    FlickMesh.gameObject.SetActive(false);
                 }
             }
             else
@@ -90,7 +134,14 @@ namespace JANOARG.Client.Behaviors.Player
                 Center.enabled =
                     LeftPoint.enabled =
                         RightPoint.enabled = false;
+
+                FlickMesh.gameObject.SetActive(false);
             }
+
+            // HoldMesh is a permanent (pooled) child once created — make sure a reused
+            // instance doesn't keep showing a hold tail for a note that isn't a hold.
+            if (HoldMesh != null && Current.HoldLength <= 0)
+                HoldMesh.gameObject.SetActive(false);
 
             UpdateMesh();
         }
@@ -113,7 +164,7 @@ namespace JANOARG.Client.Behaviors.Player
                 Quaternion rotation = CommonSys.sMain.MainCamera.transform.rotation;
 
                 float angle = float.IsFinite(Current.FlickDirection)
-                    ? Current.FlickDirection
+                    ? -Current.FlickDirection
                     : Vector2.SignedAngle(
                         Vector2.right,
                         CommonSys.sMain.MainCamera.WorldToScreenPoint(LeftPoint.transform.position) -
@@ -125,8 +176,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void UpdateMesh()
         {
-            float time = Mathf.Max(Time, PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset);
-            float zPosition;
+            double time = Math.Max(Time, PlayerScreen.sMain.VisualTime + PlayerScreen.sMain.Settings.VisualOffset);
+            double zPosition;
 
             try
             {
@@ -140,7 +191,7 @@ namespace JANOARG.Client.Behaviors.Player
             Lane.GetStartEndPosition(time, out Vector2 start, out Vector2 end);
 
             transform.localPosition = Vector3.LerpUnclamped(start, end, Current.Position + Current.Length / 2) +
-                                      Vector3.forward * zPosition;
+                                      Vector3.forward * (float)zPosition;
 
             transform.localEulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.right, end - start);
 
@@ -152,7 +203,6 @@ namespace JANOARG.Client.Behaviors.Player
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[1];
                 Center.transform.localScale = new Vector3(width, .2f * scale, .2f * scale);
                 SimultaneousHighlight.transform.localScale = new Vector3(width + .2f * scale, .3f * scale, .3f * scale);
-                SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 12f);
                 
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2);
@@ -163,7 +213,6 @@ namespace JANOARG.Client.Behaviors.Player
                 float scale = PlayerScreen.sMain.Settings.HitObjectScale[0];
                 Center.transform.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
                 SimultaneousHighlight.transform.localScale = new Vector3(width + .2f * scale, .6f * scale, .6f * scale);
-                SimultaneousGlow.transform.localScale *= new Vector3Frag(y: SimultaneousHighlight.transform.localScale.y * 6f);
                 LeftPoint.transform.localScale = RightPoint.transform.localScale = new Vector3(.2f, .4f, .4f) * scale;
                 RightPoint.transform.localPosition = Vector3.right * (width / 2 + .2f * scale);
                 LeftPoint.transform.localPosition = -RightPoint.transform.localPosition;

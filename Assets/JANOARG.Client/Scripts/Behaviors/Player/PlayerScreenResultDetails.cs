@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -182,7 +183,7 @@ namespace JANOARG.Client.Behaviors.Player
                         new Vector2(
                             item.Time / PlayerScreen.sTargetSong.Clip.length,
                             item.Type == HitObjectHistoryType.Timing
-                                ? Mathf.Clamp01(.5f - item.Offset / PlayerScreen.sMain.GoodWindow / 2)
+                                ? Mathf.Clamp01((float)(.5f - item.Offset / PlayerScreen.sMain.GoodWindow / 2))
                                 : 0.5f
                         );
 

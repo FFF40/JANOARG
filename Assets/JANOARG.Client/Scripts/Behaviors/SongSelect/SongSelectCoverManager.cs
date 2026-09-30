@@ -43,9 +43,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     {
                         Texture2D tex = (Texture2D)req.asset;
                         tex.name = textureID;
-                        CoverInfos[textureID].Icon = tex;
+                        if (CoverInfos.ContainsKey(textureID)) CoverInfos[textureID].Icon = tex;
+                        else Resources.UnloadAsset(tex);
                     }
-                    CoverInfos[textureID].Coroutine = null;
+                    if (CoverInfos.ContainsKey(textureID)) CoverInfos[textureID].Coroutine = null;
                 }
                 CoverInfos[textureID] = new CoverInfo
                 {

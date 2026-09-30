@@ -32,5 +32,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/JANOARG.Assets/Resources/Playlists/Test/Test Map.unity
     guid: 9b21345aac4725032a0e1dff16314a56
+  - enabled: 1
+    path: Assets/JANOARG.Assets/Resources/Playlists/Snail/Snail Map.unity
+    guid: 9f9a05732a8802842a520d7d57fa9a51
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 7702718b59bb846418d2f5bbd32f4cf5, type: 2}

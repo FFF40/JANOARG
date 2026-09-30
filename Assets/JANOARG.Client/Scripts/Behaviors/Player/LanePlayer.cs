@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using JANOARG.Shared.Data.ChartInfo;
 using Unity.Profiling;
 using UnityEngine;
@@ -36,19 +35,40 @@ namespace JANOARG.Client.Behaviors.Player
 
         public bool LaneStepDirty = false;
         private Mesh          _Mesh;
-        
-        public bool MarkedForRemoval = false; 
+
+        // Lets UpdateMesh skip the full recompute for lanes whose two nearest LaneSteps
+        // both have zero scroll speed (position provably can't have changed) — see the
+        // early-return in UpdateMesh for the full correctness reasoning.
+        private bool     _HasBuiltMeshOnce;
+        private LaneStep _LastCheckedLaneStep0;
+
+        public bool MarkedForRemoval = false;
 
         // WARNING :
         // THIS IS NOT THREAD SAFE
         private readonly List<Vector3> _Verts = new(2048);
         private readonly List<int>     _Tris  = new(1024);
+
+        // Vertex count of the index buffer currently uploaded to _Mesh. f_addLine emits exactly
+        // two vertices and six fixed indices per line, so the triangle list is a pure function of
+        // _Verts.Count — the indices only need re-uploading when that count changes.
+        private int _UploadedIndexCount = -1;
+
+        // Read-only views for JanoargProfilerSampler (custom Profiler counters).
+        internal int MeshVertexCount => _Mesh != null ? _Mesh.vertexCount           : 0;
+        internal int MeshIndexCount  => _Mesh != null ? (int)_Mesh.GetIndexCount(0) : 0;
         
         static readonly ProfilerMarker sr_TimestampRemove = new("Lane UpdateMesh: Remove Timestamps");
         static readonly ProfilerMarker sr_MeshCalc = new("Lane UpdateMesh: Calculate advance");
         static readonly ProfilerMarker sr_MeshLerper = new("Lane UpdateMesh: Lerper");
         static readonly ProfilerMarker sr_MeshLaneStepLooper = new("Lane UpdateMesh: Lane Step Looper");
         static readonly ProfilerMarker sr_MeshUpdater = new("Lane UpdateMesh: Mesh Updater");
+        static readonly ProfilerMarker sr_HitObjectSpawn = new("Lane UpdateHitObjects: Spawn Loop");
+        static readonly ProfilerMarker sr_HitObjectUpdate = new("Lane UpdateHitObjects: Active Update Loop");
+        static readonly ProfilerMarker sr_HitPlayerUpdateSelf = new("HitPlayer.UpdateSelf");
+        static readonly ProfilerMarker sr_HoldMeshUpdate = new("Lane UpdateHoldMesh");
+        static readonly ProfilerMarker sr_LaneUpdateSelf = new("LanePlayer.UpdateSelf (Total)");
+        static readonly ProfilerMarker sr_LaneUpdateSelfTail = new("LanePlayer.UpdateSelf: Transform + Activation");
 
         private Metronome _Metronome;
         
@@ -88,6 +108,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void UpdateSelf(float time, float beat)
         {
+            sr_LaneUpdateSelf.Begin();
+
             if (Current != null)
                 Current.Advance(beat);
             else
@@ -95,24 +117,38 @@ namespace JANOARG.Client.Behaviors.Player
 
             UpdateMesh(time, beat);
 
+            sr_LaneUpdateSelfTail.Begin();
             transform.localPosition = Current.Position;
             transform.localEulerAngles = Current.Rotation;
             Holder.localPosition = Vector3.back * CurrentPosition;
+            bool inRange = CurrentPosition - PositionPoints[0] > -200;
+            sr_LaneUpdateSelfTail.End();
 
-            if (CurrentPosition - PositionPoints[0] > -200)
+            if (inRange)
             {
                 if (!transform.gameObject.activeSelf)
                     transform.gameObject.SetActive(true);
-                
+
                 UpdateHitObjects(time, beat);
             }
+            else if (transform.gameObject.activeSelf)
+            {
+                // Fail safe: a lane promoted too early (e.g. a very slow lane whose
+                // distance-based cueTime lead time undershoots) should stay hidden
+                // instead of rendering its mesh at whatever position CurrentPosition
+                // happens to be before it has a meaningful trajectory to follow.
+                transform.gameObject.SetActive(false);
+            }
+
+            sr_LaneUpdateSelf.End();
         }
 
         private void UpdateMesh(float time, float beat, float maxDistance = 200)
         {
             // No Mesh instantiation
 
-            bool isInvisibleMesh = PlayerScreen.sMain.TransparentMeshLaneIndexes.Any(style => style == Current.StyleIndex);
+            bool isInvisibleLaneMesh = PlayerScreen.sMain.TransparentMeshLaneIndexes.Contains(Current.StyleIndex) || Current.StyleIndex == -1;
+            bool isInvisibleJudgeMesh = PlayerScreen.sMain.TransparentMeshJudgeIndexes.Contains(Current.StyleIndex) || Current.StyleIndex == -1;
             
             _Verts.Clear();
             _Tris.Clear();
@@ -162,54 +198,122 @@ namespace JANOARG.Client.Behaviors.Player
                 PositionPoints.RemoveAt(0);
                 Current.LaneSteps.RemoveAt(0);
             }
-            
-            // Attempt to cull finished lane
-            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time) 
+            sr_TimestampRemove.End();
+
+            // Attempt to cull finished lane. LaneSteps timing alone isn't a reliable "safe to
+            // remove" signal for decorative Group-driven lanes (e.g. meteors): their LaneSteps
+            // are just a timing trick, while what's actually keeping them visually relevant is
+            // their own Position/Rotation storyboard. Also require that storyboard to have
+            // fully finished advancing before culling.
+            bool storyboardFinished = true;
+            foreach (Timestamp ts in Current.Storyboard.Timestamps)
+            {
+                if (beat < ts.Offset + ts.Duration)
+                {
+                    storyboardFinished = false;
+                    break;
+                }
+            }
+
+            if (_Metronome.ToSeconds(Current.LaneSteps[^1].Offset) < time && HitObjects.Count == 0 && storyboardFinished)
             {
                 if (TimeStamps[^1] < time)
                 {
                     if (_Mesh != null)
                         Destroy(_Mesh);
-                    
+
                     if (gameObject != null)
                         Destroy(gameObject);
-                    
+
                     MarkedForRemoval = true;
                 }
+
                 return;
             }
-            
-            sr_TimestampRemove.End();
 
             sr_MeshCalc.Begin();
-            // Advance the two nearest lane steps 
+            // Advance the two nearest lane steps
             // (both should either be one just before and one just after current time
             // or two after current time)
             Current.LaneSteps[0].Advance(beat);
-            if (Current.LaneSteps.Count > 1)
+            bool hasSecondLaneStep = Current.LaneSteps.Count > 1;
+            if (hasSecondLaneStep)
                 Current.LaneSteps[1].Advance(beat);
+
+            // Consume dirty flags from storyboard changes as soon as we know about them, so
+            // they're available before deciding whether to skip recompute below.
+            bool laneStepDirtyThisFrame = false;
+            if (Current.LaneSteps[0].IsDirty)
+            {
+                laneStepDirtyThisFrame = true;
+                Current.LaneSteps[0].IsDirty = false;
+            }
+            if (hasSecondLaneStep && Current.LaneSteps[1].IsDirty)
+            {
+                laneStepDirtyThisFrame = true;
+                Current.LaneSteps[1].IsDirty = false;
+            }
+            if (laneStepDirtyThisFrame)
+                LaneStepDirty = true;
+
+            // If both nearest lane steps have zero scroll speed, CurrentPosition and the
+            // mesh geometry provably cannot have changed since the last full recompute —
+            // unless a storyboard property changed (laneStepDirtyThisFrame) or we've
+            // crossed into a new lane-step pair (sameStepWindow catches that transition,
+            // since the trim above may have just shifted LaneSteps[0] to a new object).
+            // Requiring more than 2 timestamps guarantees there's a future step boundary
+            // left to cross, so that transition (and the JudgeLine enable/disable state
+            // that depends on it) is always caught by the trim invalidating sameStepWindow
+            // — right at the final 2-timestamp segment we always fully recompute instead.
+            bool nearStepsStatic = TimeStamps.Count > 2 &&
+                                    Current.LaneSteps[0].Speed == 0f &&
+                                    (!hasSecondLaneStep || Current.LaneSteps[1].Speed == 0f);
+            bool sameStepWindow = ReferenceEquals(Current.LaneSteps[0], _LastCheckedLaneStep0);
+
+            if (nearStepsStatic && _HasBuiltMeshOnce && !laneStepDirtyThisFrame && sameStepWindow)
+            {
+                sr_MeshCalc.End();
+                return;
+            }
+
+            // NOTE: _LastCheckedLaneStep0/_HasBuiltMeshOnce are set later, only once the
+            // mesh is actually assigned — not here — so a lane that's currently invisible
+            // (e.g. isInvisibleLaneMesh true because its style hasn't faded in yet) keeps
+            // being fully recomputed every frame instead of getting permanently frozen as
+            // invisible the instant this branch is reached once.
+
+            // Z position a lane step's own speed would put us at by point x (seconds).
+            float f_scrollZ(float x) => x * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed;
 
             // Cache last position point (prevent ArgumentOutOfRangeException)
             float lastPositionPoints = PositionPoints.Count > 0 ? PositionPoints[^1] : 0;
-            
-            // Calculate the current Z position
+
+            // Calculate the current Z position — clamp to the last remaining timestamp so a
+            // lane kept alive past its LaneSteps (e.g. one still finishing its own storyboard)
+            // freezes there instead of extrapolating its last step's speed forever.
+            float scrollTime = Mathf.Min(time, TimeStamps[^1]);
             if (TimeStamps.Count <= 1 || TimeStamps[0] > time)
-                CurrentPosition = time * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed;
+                CurrentPosition = f_scrollZ(time);
             else
                 if (PositionPoints.Count != 0)
-                    CurrentPosition = (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0];
+                    CurrentPosition = (scrollTime - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + PositionPoints[0];
                 else
-                    CurrentPosition = (time - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + lastPositionPoints;
+                    CurrentPosition = (scrollTime - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed + lastPositionPoints;
 
             // Calculate the current progress between our two nearest lane step time
             float progress = TimeStamps.Count <= 1
                 ? 0
                 : Mathf.InverseLerp(TimeStamps[0], TimeStamps[1], time);
 
-            // Since the game calculate the current distance scrolled by interpolating two position points
-            // this ensures we have at least 2 position points
-            if (PositionPoints.Count <= 1)
-                PositionPoints.Add(TimeStamps[0] * Current.LaneSteps[0].Speed * PlayerScreen.sMain.Speed);
+            // Seed the first position point (the Z position of LaneSteps[0]) and, until the
+            // lane actually reaches that step, keep it synced to the step's *current*
+            // storyboarded speed — a lane whose Speed storyboard changes before arrival (e.g.
+            // scroll speed dropping to 0 right as a separate Position storyboard takes over)
+            // would otherwise sit far behind a stale anchor and fail the in-range check.
+            if (PositionPoints.Count == 0)
+                PositionPoints.Add(f_scrollZ(TimeStamps[0]));
+            else if (TimeStamps[0] > time)
+                PositionPoints[0] = f_scrollZ(TimeStamps[0]);
             
             sr_MeshCalc.End();
 
@@ -217,7 +321,7 @@ namespace JANOARG.Client.Behaviors.Player
             // we can safely skip lane mesh generation
             if (TimeStamps.Count <= 1)
                 return;
-            
+
             sr_MeshCalc.Begin();
             // Calculate the Z position of the lane step at index 1
             if (PositionPoints.Count <= 2)
@@ -225,7 +329,7 @@ namespace JANOARG.Client.Behaviors.Player
             else
                 PositionPoints[1] = PositionPoints[0] + (TimeStamps[1] - TimeStamps[0]) * Current.LaneSteps[1].Speed * PlayerScreen.sMain.Speed;
             sr_MeshCalc.End();
-            
+
             if (!(CurrentPosition - PositionPoints[0] > -200))
             {
                 // If the current Z position is further than our distance threshold,
@@ -276,7 +380,7 @@ namespace JANOARG.Client.Behaviors.Player
                 JudgeLine.enabled =
                     JudgePointLeft.enabled =
                         JudgePointRight.enabled =
-                            TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
+                            !isInvisibleJudgeMesh && TimeStamps.Count >= 2 && time >= TimeStamps[0] && time < TimeStamps[1];
                 
                 // If the judgment line is enabled, update its current position
                 Transform judgeLineTransform = JudgeLine.transform;
@@ -288,20 +392,9 @@ namespace JANOARG.Client.Behaviors.Player
                 JudgePointRight.transform.localPosition = endPoint;
             }
             sr_MeshLerper.End();
-            
-            
-            // If our two lane step nearest from current time has dirty values because of storyboard,
-            // we mark our lane as dirty for update on the next frame and reset their dirty flags
-            if (Current.LaneSteps[0].IsDirty)
-            {
-                LaneStepDirty = true;
-                Current.LaneSteps[0].IsDirty = false;
-            }
-            if (Current.LaneSteps[1].IsDirty)
-            {
-                LaneStepDirty = true;
-                Current.LaneSteps[1].IsDirty = false;
-            }
+
+            // (Dirty-flag handling for LaneSteps[0]/[1] now happens earlier, before the
+            // static-lane skip check, so it's available before deciding to recompute.)
 
             sr_MeshLaneStepLooper.Begin();
             // Loop through our lane step list
@@ -375,16 +468,42 @@ namespace JANOARG.Client.Behaviors.Player
                 progress = 0;
             }
             sr_MeshLaneStepLooper.End();
-                            
+
             // Skip rendering for invisible lanes
-            if (isInvisibleMesh && HitObjects.Count == 0)
+            if (isInvisibleLaneMesh && HitObjects.Count == 0)
                 return;
-            
+
+            // Only now — once we know the mesh is actually about to be assigned — do we
+            // record that this lane has a real built mesh, so the static-lane skip above
+            // can never freeze a lane that's never actually been rendered.
+            _LastCheckedLaneStep0 = Current.LaneSteps[0];
+            _HasBuiltMeshOnce = true;
+
             sr_MeshUpdater.Begin();
-            // Actually update mesh data
-            _Mesh.Clear(false);
+            // Actually update mesh data.
+            // Clear() is omitted: the setters overwrite from index 0, avoiding its per-frame
+            // reallocation. SetVertices validates the mesh's *current* index buffer against the new
+            // vertex array, so when the topology shrinks the stale indices (which reference vertices
+            // that no longer exist) have to be dropped first or Unity throws.
+            if (_Verts.Count < _UploadedIndexCount)
+                _Mesh.SetTriangles(Array.Empty<int>(), 0, false, 0);
+
             _Mesh.SetVertices(_Verts);
-            _Mesh.SetTriangles(_Tris, 0, true);
+
+            if (_Verts.Count != _UploadedIndexCount)
+            {
+                // Topology changed, so re-upload indices. Assigning triangles also recalculates
+                // the bounds from the current vertices, so no separate bounds pass is needed here.
+                _Mesh.SetTriangles(_Tris, 0, true, 0);
+                _UploadedIndexCount = _Verts.Count;
+            }
+            else
+            {
+                // Topology unchanged: the indices already on the mesh are still correct, but
+                // SetVertices does not recalculate bounds and the vertices have moved, so refresh
+                // them without paying for another index copy/validation.
+                _Mesh.RecalculateBounds();
+            }
             sr_MeshUpdater.End();
         }
 
@@ -393,6 +512,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void UpdateHitObjects(float time, float beat, float maxDistance = 200)
         {
+            sr_HitObjectSpawn.Begin();
             while (Current.Objects.Count > 0)
             {
                 HitObject hit = Current.Objects[0];
@@ -400,7 +520,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (GetZPosition(_HitObjectTime) <= CurrentPosition + maxDistance)
                 {
-                    HitPlayer player = Instantiate(PlayerScreen.sMain.HitSample, Holder);
+                    HitPlayer player = PlayerScreen.sMain.BorrowHitPlayer(Holder);
 
                     player.Original = Original.Objects[_HitObjectOffset];
                     player.Current = Current.Objects[0];
@@ -410,6 +530,8 @@ namespace JANOARG.Client.Behaviors.Player
                         ? PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + hit.HoldLength) : _HitObjectTime;
                     player.HitCoord = HitCoords[0];
 
+                    // Always clear first: a reused (pooled) instance may carry ticks from its previous note.
+                    player.HoldTicks.Clear();
                     if (player.Current.HoldLength > 0)
                     {
                         for (var a = 0.5f; a < player.Current.HoldLength; a += 0.5f) player.HoldTicks.Add(PlayerScreen.sTargetSong.Timing.ToSeconds(hit.Offset + a));
@@ -420,9 +542,10 @@ namespace JANOARG.Client.Behaviors.Player
                     player.Lane = this;
                     HitObjects.Add(player);
 
-                    // PlayerInputManager.main.AddToQueue(player);
-                    PlayerInputManager.sInstance.AddToQueue(player);
+                    // Init first: AddToQueue marks the note pending for autoplay, and Init is what
+                    // resets that flag for a reused pooled instance.
                     player.Init();
+                    PlayerInputManager.sInstance.AddToQueue(player);
 
                     Current.Objects.RemoveAt(0);
                     HitCoords.RemoveAt(0);
@@ -434,28 +557,48 @@ namespace JANOARG.Client.Behaviors.Player
                     break;
                 }
             }
+            sr_HitObjectSpawn.End();
 
-            var active = true;
-
+            sr_HitObjectUpdate.Begin();
             foreach (HitPlayer hitObject in HitObjects)
             {
-                if (active)
-                    hitObject.UpdateSelf(time, beat, LaneStepDirty);
+                sr_HitPlayerUpdateSelf.Begin();
+                hitObject.UpdateSelf(time, beat, LaneStepDirty);
+                sr_HitPlayerUpdateSelf.End();
 
-                if (active && hitObject.CurrentPosition > CurrentPosition + 200)
-                    active = false;
+                // A claimed tap/catch/flick is finalised at its chart time, always on the audio
+                // clock, but it is drawn on the leading visual clock (`time` already includes
+                // VisualOffset). Hide it the moment the draw clock reaches that point so it can
+                // never be rendered past the judgement line. Holds are handled by their tail mesh
+                // instead (see UpdateHoldMesh), and a note claimed at/after the line is finalised
+                // later in the same input frame so it disappears immediately regardless.
+                if (hitObject.IsPendingJudgement && hitObject.Current.HoldLength <= 0 && time >= hitObject.Time)
+                {
+                    hitObject.gameObject.SetActive(false);
+                    continue;
+                }
 
-                hitObject.gameObject.SetActive(active);
+                // A note is hidden by its own distance only, never by another note's. Only
+                // reachable on backward-scrolling lanes: the spawn loop above creates notes
+                // already inside this window, and a forward lane only moves toward them.
+                bool active = hitObject.CurrentPosition <= CurrentPosition + 200;
 
-                if (hitObject.HoldMesh)
-                    hitObject.HoldMesh.gameObject.SetActive(active);
+                // HoldMesh is now a permanent (pooled) child, so its existence no longer
+                // implies this note is a hold — gate on the actual note data instead.
+                bool isHold = hitObject.Current.HoldLength > 0 && hitObject.HoldMesh != null;
+
+                hitObject.gameObject.SetActive(active || (isHold && GetZPosition(hitObject.EndTime) <= CurrentPosition + 200) || (isHold && hitObject.HoldMesh.gameObject.activeSelf));
+
+                if (isHold)
+                    hitObject.HoldMesh.gameObject.SetActive(active || GetZPosition(hitObject.EndTime) <= CurrentPosition + 200);
             }
+            sr_HitObjectUpdate.End();
 
             LaneStepDirty = false;
         }
 
 
-        public float GetZPosition(float time)
+        public double GetZPosition(double time)
         {
             if (TimeStamps == null || TimeStamps.Count == 0 || PositionPoints == null || PositionPoints.Count == 0)
                 return 0f; // failsafe
@@ -488,7 +631,7 @@ namespace JANOARG.Client.Behaviors.Player
                    PlayerScreen.sMain.Speed;
         }
 
-        public void GetStartEndPosition(float time, out Vector2 start, out Vector2 end)
+        public void GetStartEndPosition(double time, out Vector2 start, out Vector2 end)
         {
             int index = -1;
             for (int i = 0; i < TimeStamps.Count; i++){
@@ -511,7 +654,7 @@ namespace JANOARG.Client.Behaviors.Player
             {
                 LaneStep currentStep = Current.LaneSteps[index];
                 LaneStep previousStep = Current.LaneSteps[index - 1];
-                float progress = Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
+                float progress = Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], (float)time);
 
                 if (currentStep.IsLinear)
                 {
@@ -533,10 +676,52 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void UpdateHoldMesh(HitPlayer hit)
         {
+            sr_HoldMeshUpdate.Begin();
+            try
+            {
+                UpdateHoldMeshInternal(hit);
+            }
+            finally
+            {
+                sr_HoldMeshUpdate.End();
+            }
+        }
+
+        private void UpdateHoldMeshInternal(HitPlayer hit)
+        {
+            // Draw-clock time, matching what positions the head and tail. Hoisted so the tail check
+            // below is O(1): GetZPosition(EndTime) <= CurrentPosition is equivalent to
+            // EndTime <= this time (the same monotonic mapping), without the TimeStamps scan.
+            double time = Math.Max(PlayerScreen.sMain.VisualTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
+
+            // A held hold is finalised when its tail reaches the judgement line. Once it has, hide
+            // the head and the tail mesh so the tail can't be drawn past the line. A missed hold is
+            // never flagged and is left to linger as the miss cue.
+            if (hit.IsPendingJudgement && time >= hit.EndTime)
+            {
+                hit.gameObject.SetActive(false);
+
+                if (hit.HoldRenderer != null)
+                    hit.HoldRenderer.gameObject.SetActive(false);
+
+                return;
+            }
+
             if (hit.HoldRenderer == null)
             {
                 hit.HoldRenderer = Instantiate(PlayerScreen.sMain.HoldSample, Holder);
                 hit.HoldMesh = hit.HoldRenderer.GetComponent<MeshFilter>();
+            }
+            else if (hit.HoldRenderer.transform.parent != Holder)
+            {
+                // A pooled HitPlayer's HoldRenderer is a sibling under the lane's Holder, not a
+                // child of the HitPlayer itself, so it isn't reparented when the HitPlayer is
+                // borrowed for a different lane. Only do this when the lane actually changed —
+                // this runs every frame for every active hold, and SetParent's default
+                // worldPositionStays:true fights the scroll (Holder's own position drives the
+                // scroll every frame), so re-parenting unconditionally here would freeze/desync
+                // the mesh's position instead of leaving it to move naturally with Holder.
+                hit.HoldRenderer.transform.SetParent(Holder, false);
             }
 
             if (hit.HoldMesh.mesh == null) 
@@ -564,8 +749,6 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
 
-            float time = Mathf.Max(PlayerScreen.sMain.CurrentTime + PlayerScreen.sMain.Settings.VisualOffset, hit.Time);
-
             int index = -1;
             for (int i = 0; i < TimeStamps.Count; i++)
             {
@@ -574,12 +757,21 @@ namespace JANOARG.Client.Behaviors.Player
                     break;
                 }
             }
-            if (index <= 0 || PositionPoints.Count <= index)
+            // index == 0 means the hold head precedes the lane's first LaneStep (legal chart
+            // data — e.g. a hold offset a tick before its lane's own first step). Clamp to
+            // the first segment like Chartmaker's GetPartOfLane does instead of bailing;
+            // Mathf.InverseLerp below clamps progress to 0 for us. index < 0 (time past the
+            // lane's last step) still bails — clamping that case to the last segment
+            // resurrects finished holds as stray geometry at lane ends.
+            if (index < 0)
                 return;
 
             index = Mathf.Max(index, 1);
 
-            float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], time);
+            if (PositionPoints.Count <= index)
+                return;
+
+            float progress = TimeStamps.Count <= 1 ? 0 : Mathf.InverseLerp(TimeStamps[index - 1], TimeStamps[index], (float)time);
             Vector3 previousStepStartPointPosition, previousStepEndPointPosition, currentStepStartPointPosition, currentStepEndPointPosition;
 
             {
@@ -617,7 +809,8 @@ namespace JANOARG.Client.Behaviors.Player
             for (; index < Mathf.Min(PositionPoints.Count, TimeStamps.Count); index++)
             {
                 float endStepProgress = InverseLerpUnclamped(TimeStamps[index - 1], TimeStamps[index], hit.EndTime);
-                float endStepPosition = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], endStepProgress);
+                float segmentEndProgress = Mathf.Clamp01(endStepProgress);
+                float endStepPosition = Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], segmentEndProgress);
                 LaneStep currentStep = Current.LaneSteps[index];
 
                 currentStepStartPointPosition = Vector3.LerpUnclamped(currentStep.StartPointPosition, currentStep.EndPointPosition, hit.Current.Position);
@@ -626,29 +819,32 @@ namespace JANOARG.Client.Behaviors.Player
                 if (currentStep.IsLinear)
                 {
                     f_addLine(
-                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, endStepProgress) + Vector3.forward * endStepPosition,
-                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, endStepProgress) + Vector3.forward * endStepPosition
+                        Vector3.Lerp(previousStepStartPointPosition, currentStepStartPointPosition, segmentEndProgress) + Vector3.forward * endStepPosition,
+                        Vector3.Lerp(previousStepEndPointPosition, currentStepEndPointPosition, segmentEndProgress) + Vector3.forward * endStepPosition
                     );
                 }
                 else
                 {
                     LaneStep previousStep = Current.LaneSteps[index - 1];
 
-                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;; x = Mathf.Min(endStepProgress, Mathf.Floor(x * 16 + 1.01f) / 16))
+                    for (float x = Mathf.Floor(progress * 16 + 1.01f) / 16;;)
                     {
+                        float sampledProgress = Mathf.Min(segmentEndProgress, x);
                         f_addLine(
                             new Vector3(
-                                Mathf.LerpUnclamped(previousStepStartPointPosition.x, currentStepStartPointPosition.x, currentStep.StartEaseX.Get(x)),
-                                Mathf.LerpUnclamped(previousStepStartPointPosition.y, currentStepStartPointPosition.y, currentStep.StartEaseY.Get(x)),
-                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x)),
+                                Mathf.LerpUnclamped(previousStepStartPointPosition.x, currentStepStartPointPosition.x, currentStep.StartEaseX.Get(sampledProgress)),
+                                Mathf.LerpUnclamped(previousStepStartPointPosition.y, currentStepStartPointPosition.y, currentStep.StartEaseY.Get(sampledProgress)),
+                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], sampledProgress)),
                             new Vector3(
-                                Mathf.LerpUnclamped(previousStepEndPointPosition.x, currentStepEndPointPosition.x, currentStep.EndEaseX.Get(x)),
-                                Mathf.LerpUnclamped(previousStepEndPointPosition.y, currentStepEndPointPosition.y, currentStep.EndEaseY.Get(x)),
-                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], x))
+                                Mathf.LerpUnclamped(previousStepEndPointPosition.x, currentStepEndPointPosition.x, currentStep.EndEaseX.Get(sampledProgress)),
+                                Mathf.LerpUnclamped(previousStepEndPointPosition.y, currentStepEndPointPosition.y, currentStep.EndEaseY.Get(sampledProgress)),
+                                Mathf.Lerp(PositionPoints[index - 1], PositionPoints[index], sampledProgress))
                         );
 
-                        if (x >= Mathf.Min(endStepProgress, 1))
+                        if (sampledProgress >= segmentEndProgress)
                             break;
+
+                        x = Mathf.Floor(sampledProgress * 16 + 1.01f) / 16;
                     }
                 }
 
@@ -663,9 +859,26 @@ namespace JANOARG.Client.Behaviors.Player
                 previousStepEndPointPosition = currentStepEndPointPosition;
             }
 
-            mesh.Clear();
+            // Same upload discipline as the lane body: Clear is unnecessary because both setters
+            // resize and overwrite from index 0, and the hold-tail index list is a pure function of
+            // the vertex count, so it is only re-uploaded when that count changed since this mesh's
+            // last upload. SetVertices does not recalculate bounds, so on the (common) unchanged
+            // frames the bounds are refreshed directly instead of via a full triangle assignment.
+            // Stale, now-too-large indices must be dropped before SetVertices or it throws.
+            if (_Verts.Count < hit.UploadedHoldIndexCount)
+                mesh.SetTriangles(Array.Empty<int>(), 0, false, 0);
+
             mesh.SetVertices(_Verts);
-            mesh.SetTriangles(_Tris, 0);
+
+            if (_Verts.Count != hit.UploadedHoldIndexCount)
+            {
+                mesh.SetTriangles(_Tris, 0, true, 0);
+                hit.UploadedHoldIndexCount = _Verts.Count;
+            }
+            else
+            {
+                mesh.RecalculateBounds();
+            }
             // hit.HoldMesh.mesh = mesh;
         }
 

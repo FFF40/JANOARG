@@ -40,7 +40,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs
                 TargetSong = null;
                 return;
             }
-            if (TargetSong == SongSelectScreen.sMain.PlayableSongByID[target.SongID])
+            if (TargetSong == SongSelectScreen.sMain.PlayableSongByID.GetValueOrDefault(target.SongID, null))
             {
                 return;
             }

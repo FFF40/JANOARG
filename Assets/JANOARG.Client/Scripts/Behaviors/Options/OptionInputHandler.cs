@@ -5,6 +5,7 @@ using System.Linq;
 using JANOARG.Client.Behaviors.Options.Input_Types;
 using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -126,7 +127,7 @@ namespace JANOARG.Client.Behaviors.Options
                     break;
                 }
 
-                case JudgmentOffsetOptionInput:
+                case AudioOffsetOptionInput:
                 case VisualOffsetOptionInput:
                 {
                     var visualOffsetItem = (FloatOptionInput)item;
@@ -412,7 +413,7 @@ namespace JANOARG.Client.Behaviors.Options
 
                     break;
                 }
-                case JudgmentOffsetOptionInput:
+                case AudioOffsetOptionInput:
                 case VisualOffsetOptionInput:
                 {
                     var input = (FloatOptionInput)item;
@@ -494,7 +495,7 @@ namespace JANOARG.Client.Behaviors.Options
         {
             switch (item)
             {
-                case JudgmentOffsetOptionInput:
+                case AudioOffsetOptionInput:
                 case VisualOffsetOptionInput:
                 {
                     onFinish = () =>

@@ -3,6 +3,7 @@ using JANOARG.Client.Behaviors.Panels;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
+using JANOARG.Shared.Utils.Animation;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;

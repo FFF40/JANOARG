@@ -25,6 +25,7 @@ namespace JANOARG.Client.Data.Playlist
     [Serializable]
     public class PlaylistSong
     {
+        [JAPSPicker]
         public string ID;
         [SerializeReference]
         public GameConditional[] RevealConditions;
@@ -41,4 +42,6 @@ namespace JANOARG.Client.Data.Playlist
         [SerializeReference]
         public GameConditional[] UnlockConditions;
     }
+
+    public class JAPSPickerAttribute : PropertyAttribute { }
 }

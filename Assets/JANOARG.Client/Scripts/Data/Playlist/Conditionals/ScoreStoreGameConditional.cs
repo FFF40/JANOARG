@@ -6,6 +6,7 @@ using System.Linq;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Behaviors.SongSelect.List;
+using JANOARG.Client.Data.Playlist;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 
@@ -14,6 +15,7 @@ namespace JANOARG.Client.Data.Playlist.Conditionals
     [Serializable]
     public class ScoreStoreGameConditional : GameConditional
     {
+        [JAPSPicker]
         public string SongID;
         public AchievementReq Achievement = AchievementReq.Cleared;
         public float AchievementThreshold = 0;
