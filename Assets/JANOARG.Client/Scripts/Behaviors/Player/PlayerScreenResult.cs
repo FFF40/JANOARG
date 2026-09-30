@@ -8,7 +8,6 @@ using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Data.Storage;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
-using JANOARG.Client.Utils.Debugging;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
@@ -108,32 +107,16 @@ namespace JANOARG.Client.Behaviors.Player
         {
             _IsSharing = true;
 
-            bool leftActionsActive  = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
-            bool rightActionsActive = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
-
-            FPSCounter fpsCounter = FindObjectOfType<FPSCounter>(true);
-            bool fpsCounterActive = fpsCounter != null && fpsCounter.gameObject.activeSelf;
-
-            if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(false);
-            if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(false);
-            if (fpsCounter != null) fpsCounter.gameObject.SetActive(false);
-
-            yield return new WaitForEndOfFrame();
-
             Texture2D image = null;
 
             try
             {
-                image = ScreenCapture.CaptureScreenshotAsTexture();
+                image = ScreenshotResult(3072, Mathf.RoundToInt(3072f * Screen.height / Screen.width));
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"[PlayerScreenResult] Failed to capture result: {e.Message}");
             }
-
-            if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(leftActionsActive);
-            if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(rightActionsActive);
-            if (fpsCounter != null) fpsCounter.gameObject.SetActive(fpsCounterActive);
 
             if (image != null)
             {
@@ -143,11 +126,118 @@ namespace JANOARG.Client.Behaviors.Player
                 yield return new WaitUntil(() => task.IsCompleted);
 
                 CommonSys.ShareFile(path);
-
-                Destroy(image);
             }
 
             _IsSharing = false;
+        }
+
+        private Texture2D ScreenshotResult(int width, int height)
+        {
+            GameObject cameraObject = new("Result Screenshot Camera", typeof(Camera));
+            Camera screenshotCamera = cameraObject.GetComponent<Camera>();
+            screenshotCamera.clearFlags = CameraClearFlags.SolidColor;
+            screenshotCamera.backgroundColor = PlayerScreen.sTargetSong.BackgroundColor;
+            screenshotCamera.cullingMask = 1 << 6;
+            screenshotCamera.targetDisplay = 7;
+            screenshotCamera.enabled = false;
+
+            GameObject canvasObject = new("Result Screenshot Canvas", typeof(Canvas), typeof(CanvasScaler));
+            canvasObject.layer = 6;
+
+            Canvas canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = screenshotCamera;
+            canvas.targetDisplay = 7;
+            canvas.sortingOrder = 1;
+
+            CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+            CanvasScaler sourceScaler = GetComponentInParent<CanvasScaler>();
+            if (sourceScaler != null)
+            {
+                scaler.uiScaleMode = sourceScaler.uiScaleMode;
+                scaler.referenceResolution = sourceScaler.referenceResolution;
+                scaler.screenMatchMode = sourceScaler.screenMatchMode;
+                scaler.matchWidthOrHeight = sourceScaler.matchWidthOrHeight;
+            }
+
+            Transform originalParent = transform.parent;
+            int       originalIndex  = transform.GetSiblingIndex();
+
+            Transform flashTransform = Flash.transform;
+            Transform flashParent    = flashTransform.parent;
+            int       flashIndex     = flashTransform.GetSiblingIndex();
+
+            Transform[] resultSubtree = transform.GetComponentsInChildren<Transform>(true);
+            Transform[] flashSubtree  = flashTransform.GetComponentsInChildren<Transform>(true);
+            Transform[] subtree       = new Transform[resultSubtree.Length + flashSubtree.Length];
+            int[]       layers        = new int[subtree.Length];
+
+            resultSubtree.CopyTo(subtree, 0);
+            flashSubtree.CopyTo(subtree, resultSubtree.Length);
+
+            bool leftActionsActive  = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
+            bool rightActionsActive = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
+
+            RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
+            Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
+
+            try
+            {
+                if (flashIndex < originalIndex)
+                {
+                    flashTransform.SetParent(canvasObject.transform, false);
+                    transform.SetParent(canvasObject.transform, false);
+                }
+                else
+                {
+                    transform.SetParent(canvasObject.transform, false);
+                    flashTransform.SetParent(canvasObject.transform, false);
+                }
+
+                for (int i = 0; i < subtree.Length; i++)
+                {
+                    layers[i] = subtree[i].gameObject.layer;
+                    subtree[i].gameObject.layer = 6;
+                }
+
+                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(false);
+                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(false);
+
+                rTex.Create();
+
+                screenshotCamera.targetTexture = rTex;
+                Canvas.ForceUpdateCanvases();
+                screenshotCamera.Render();
+
+                RenderTexture.active = rTex;
+                tex2D.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                tex2D.Apply();
+            }
+            finally
+            {
+                screenshotCamera.targetTexture = null;
+                RenderTexture.active = null;
+
+                rTex.Release();
+                Destroy(rTex);
+
+                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(leftActionsActive);
+                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(rightActionsActive);
+
+                for (int i = 0; i < subtree.Length; i++)
+                    subtree[i].gameObject.layer = layers[i];
+
+                transform.SetParent(originalParent, false);
+                flashTransform.SetParent(flashParent, false);
+
+                transform.SetSiblingIndex(originalIndex);
+                flashTransform.SetSiblingIndex(flashIndex);
+
+                Destroy(canvasObject);
+                Destroy(cameraObject);
+            }
+
+            return tex2D;
         }
 
         public void StartEndingAnim()
