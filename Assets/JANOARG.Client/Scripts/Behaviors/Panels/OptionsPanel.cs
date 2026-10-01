@@ -233,7 +233,7 @@ namespace JANOARG.Client.Behaviors.Panels
                         x => storage.Set("INFO:Name", x)
                     );
 
-                    //TODO: Make like ListOptionInput with locked options
+                    //TODO: Make like ListOptionInput with unlockedable options
                     var playerTitle = Spawn<ListOptionInput, string>("Player Title", 
                         () => storage.Get("INFO:PlayerTitle", "Perfectly Generic Player"),
                         x => storage.Set("INFO:PlayerTitle", x)
@@ -245,13 +245,13 @@ namespace JANOARG.Client.Behaviors.Panels
 
 
                     // TODO: Add icons based on song unlocks
-                    var icon = Spawn<ListOptionInput, string>("Player Icon", 
+                    var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
                         () => storage.Get("INFO:PlayerIcon", "none"),
                         x => storage.Set("INFO:PlayerIcon", x)
                         );
                     
-                    // Temporary icons
-                    icon.ValidValues.Add("none", "No icon");
+                    // No icons for now
+                    avatar.ValidValues.Add("none", "No icon");
 
                     var note = Spawn<OptionText>("Online stuff coming soon(?)");
                     note.TitleLabel.fontSize = 8;
@@ -425,9 +425,8 @@ namespace JANOARG.Client.Behaviors.Panels
                     );
                     #endregion
 
-                    #region  Miscellaneous
-                    Spawn <OptionCategoryTitle>("Miscellaneous");
-
+                    #region Interface
+                    Spawn <OptionCategoryTitle>("Interface");
                     // Supposed to be a short
                     var showOffset = Spawn<ListOptionInput, string>("Show offset value", 
                         () => preferences.Get("PLYR:ShowOffset", "1"),
@@ -437,8 +436,24 @@ namespace JANOARG.Client.Behaviors.Panels
                     showOffset.ValidValues.Add("3", "All Judgement");
                     showOffset.ValidValues.Add("2", "Non-Flawless Judgement");
                     showOffset.ValidValues.Add("1", "None");
-                    
-                    
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show FLAWLESS judgments",
+                        () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
+                        x => preferences.Set("PLYR:JudgementTextOnFlawless", x)
+                    );
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Disable early/late indicator",
+                        () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
+                        x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
+                    );
+
+                    #endregion
+
+                    #region  Miscellaneous
+                    Spawn <OptionCategoryTitle>("Miscellaneous");
+
                     Spawn<BooleanOptionInput, bool>(
                         "Highlight simul. notes",
                         () => preferences.Get("PLYR:HighlightSimulNotes", true),
@@ -448,18 +463,6 @@ namespace JANOARG.Client.Behaviors.Panels
                             UpdatePlayerPreview();
                         });
                     
-                    Spawn<BooleanOptionInput, bool>(
-                        "Show FLAWLESS judgments",
-                        () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
-                        x => preferences.Set("PLYR:JudgementTextOnFlawless", x)
-                    );
-                    
-                    Spawn<BooleanOptionInput, bool>(
-                        "Disable early/late indicator",
-                        () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
-                        x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
-                    );
-
                     Spawn<BooleanOptionInput, bool>(
                         "Always show Hit VFX",
                         () => preferences.Get("PLYR:AlwaysShowHitVFX", true),
