@@ -479,40 +479,38 @@ namespace JANOARG.Client.Behaviors.Panels
                     SubtitleLabel.text = " > About";
                     SetScrollerWidth(600);
 
+                    
 
-                    const string NEWLINE_SEPARATOR = "\n• \n"; // Looks more aligned due to skewed scroller
                     AboutPane.SetActive(true);
                     OptionAboutEntry entry;
                     entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
                     entry.BodyLabel.text = "duducat / ducdat0507";
 
                     entry = Spawn<OptionAboutEntry>("PROGRAMMER / MAINTAINER");
-                    entry.BodyLabel.text = "BashhScriptKid • M3galodon";
+                    entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid","M3galodon");
                     
                     //entry = Spawn<OptionAboutEntry>("iOS BUILD PROVIDER");
                     //entry.BodyLabel.text = "kiko/kevernn";
                     
                     entry = Spawn<OptionAboutEntry>("GITHUB CONTRIBUTORS");
-                    entry.BodyLabel.text = "FujiForm2023 • RKevo";
+                    entry.BodyLabel.text = FormatOptionAboutText("FujiForm2023", "RKevo");
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
-                    entry.BodyLabel.text = "Kuttate • Rose Quartz • R3ality • potatofission";
+                    entry.BodyLabel.text = FormatOptionAboutText("Kuttate", "Rose Quartz", "R3ality", "potatofission");
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                    entry.BodyLabel.text = "Sound Souler • mrcool909090 • R3ality  • Scutoid • Ariz Kayaba" 
-                                           + NEWLINE_SEPARATOR +
-                                           "zqr • NOMOREKAWAII • CuboonoP • Rose Quartz • Pa_lette • amaristia";
+                    entry.BodyLabel.text = FormatOptionAboutText("Sound Souler", "mrcool909090", "R3ality", "Scutoid", "Ariz Kayaba",
+                                            "zqr", "NOMOREKAWAII", "CuboonoP", "Rose Quartz", "Pa_lette", "amaristia");
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
-                    entry.BodyLabel.text = "duducat • Pa_lette";
+                    entry.BodyLabel.text = FormatOptionAboutText("duducat", "Pa_lette");
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = "BashhScriptKid • M3galodon • Akanari • leko_uname • BEN789FA"
-                                           + NEWLINE_SEPARATOR +
-                                           "Gyukatsu • kiemo • Samu • VICA • SARYN";
+                    entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid", "M3galodon", "Akanari", "leko_uname", "BEN789FA",
+                                            "Gyukatsu", "kiemo", "Samu", "VICA", "SARYN");
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat • M3galodon • leko_uname • Pa_lette • AARL • BEN789FA • KouNeko";
+                    entry.BodyLabel.text = FormatOptionAboutText("duducat", "M3galodon", "leko_uname", "Pa_lette", "AARL", "BEN789FA", "KouNeko")   ;
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
@@ -520,6 +518,39 @@ namespace JANOARG.Client.Behaviors.Panels
 
                     break;
             }
+        }
+
+        public string FormatOptionAboutText(
+            params string[] contributors)
+        {
+            const int MAX_LINE_LENGTH = 72;
+            const string BULLET = " • ";
+            const string NEWLINE_SEPARATOR = "\n• \n";
+
+            List<string> lines = new List<string>();
+            string currentLine = "";
+
+            foreach (string contributor in contributors)
+            {
+                string addition = string.IsNullOrEmpty(currentLine)
+                    ? contributor
+                    : BULLET + contributor;
+
+                if (currentLine.Length + addition.Length > MAX_LINE_LENGTH)
+                {
+                    lines.Add(currentLine);
+                    currentLine = contributor;
+                }
+                else
+                {
+                    currentLine += addition;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(currentLine))
+                lines.Add(currentLine);
+
+            return string.Join(NEWLINE_SEPARATOR, lines);
         }
 
         public TType GetOptionItemSample<TType>() where TType : OptionItem
