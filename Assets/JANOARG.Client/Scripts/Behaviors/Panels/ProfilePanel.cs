@@ -36,24 +36,7 @@ namespace JANOARG.Client.Behaviors.Panels
 
             PlayerName.text = storage.Get("INFO:Name", "JANOARG");
             PlayerTitle.text = storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
-            string playerIcon = CommonSys.sMain.Storage.Get("INFO:PlayerIcon", "none");
-
-            PlayerAvatar.color = playerIcon == "none" ? Color.black : Color.white;
-
-            PlayerAvatar.sprite = playerIcon switch
-            {
-                "none" => null,
-                _ => Sprite.Create(
-                    Resources.Load<Texture2D>($"Songs/{playerIcon}/icon"),
-                    new Rect(
-                        0,
-                        0,
-                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").width,
-                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").height
-                    ),
-                    new Vector2(0.5f, 0.5f)
-                )
-            };
+            PlayerAvatar = CommonSys.LoadPlayerAvatar(PlayerAvatar);
             
             // TODO: Leveling Stuff
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);

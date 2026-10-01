@@ -1096,7 +1096,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 760, y: -217.87495}
+  m_AnchoredPosition: {x: 760, y: -273.37497}
   m_SizeDelta: {x: 1490, y: 720}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1488541818132383628
@@ -2832,8 +2832,10 @@ MonoBehaviour:
   ScreenshotCanvas: {fileID: 9188133485472949349}
   PlayerName: {fileID: 8052453686088850046}
   PlayerTitle: {fileID: 4853419931887797421}
+  PlayerAvatar: {fileID: 5981748876057662553}
   LevelValue: {fileID: 7937852962334243881}
   AbilityRatingValue: {fileID: 5690814706338577777}
+  IsAnimating: 0
   RatingBreakdownEntries:
   - {fileID: 3798352567796723909}
   - {fileID: 9192981997738255929}

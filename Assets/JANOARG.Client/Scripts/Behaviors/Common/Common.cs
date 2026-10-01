@@ -6,6 +6,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace JANOARG.Client.Behaviors.Common
 {
@@ -341,6 +342,29 @@ namespace JANOARG.Client.Behaviors.Common
             }
 
             return new Vector2Int(width, height);
+        }
+
+        public static Image LoadPlayerAvatar(Image avatarImage)
+        {
+            string playerIcon = sMain.Storage.Get("INFO:PlayerIcon", "none");
+
+            avatarImage.color = playerIcon == "none" ? Color.black : Color.white;
+
+            avatarImage.sprite = playerIcon switch
+            {
+                "none" => null,
+                _ => Sprite.Create(
+                    Resources.Load<Texture2D>($"Songs/{playerIcon}/icon"),
+                    new Rect(
+                        0,
+                        0,
+                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").width,
+                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").height
+                    ),
+                    new Vector2(0.5f, 0.5f)
+                )
+            };
+            return avatarImage;
         }
 
         public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)
