@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Data.Storage;
@@ -66,6 +67,8 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text      MaxComboText;
         public TMP_Text      AverageOffsetText;
 
+        [Space] public TMP_Text ShareMetadata;
+
         [Space] public CanvasGroup LeftActionsHolder;
 
         public RectTransform LeftActionsTransform;
@@ -87,9 +90,204 @@ namespace JANOARG.Client.Behaviors.Player
 
         public PlayerSettings Settings = new();
 
+        private bool _IsSharing;
+
         private void Awake()
         {
             sMain = this;
+
+            Button shareButton = RightActionsTransform.Find("Share")?.GetComponent<Button>();
+            if (shareButton != null) shareButton.onClick.AddListener(ShareResult);
+        }
+
+        public void ShareResult()
+        {
+            if (!_IsSharing) StartCoroutine(ShareResultAnim());
+        }
+
+        private IEnumerator ShareResultAnim()
+        {
+            _IsSharing = true;
+
+            Texture2D image = null;
+
+            try
+            {
+                Vector2Int size = CommonSys.GetShareSize((float)Screen.width / Screen.height);
+                image = ScreenshotResult(size.x, size.y);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[PlayerScreenResult] Failed to capture result: {e.Message}");
+            }
+
+            if (image != null)
+            {
+                string path = Application.persistentDataPath + "/screenshot.png";
+                Task task = File.WriteAllBytesAsync(path, image.EncodeToPNG());
+
+                yield return new WaitUntil(() => task.IsCompleted);
+
+                CommonSys.ShareFile(path);
+            }
+
+            _IsSharing = false;
+        }
+
+        private Texture2D ScreenshotResult(int width, int height)
+        {
+            GameObject cameraObject = new("Result Screenshot Camera", typeof(Camera));
+            Camera screenshotCamera = cameraObject.GetComponent<Camera>();
+            screenshotCamera.orthographic = true;
+            screenshotCamera.clearFlags = CameraClearFlags.SolidColor;
+            screenshotCamera.backgroundColor = PlayerScreen.sTargetSong.BackgroundColor;
+            screenshotCamera.cullingMask = 1 << 6;
+            screenshotCamera.targetDisplay = 7;
+            screenshotCamera.enabled = false;
+
+            GameObject canvasObject = new("Result Screenshot Canvas", typeof(Canvas), typeof(CanvasScaler));
+            canvasObject.layer = 6;
+
+            Canvas canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = screenshotCamera;
+            canvas.targetDisplay = 7;
+            canvas.sortingOrder = 1;
+
+            CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+            CanvasScaler sourceScaler = GetComponentInParent<CanvasScaler>();
+            if (sourceScaler != null)
+            {
+                scaler.uiScaleMode = sourceScaler.uiScaleMode;
+                scaler.referenceResolution = sourceScaler.referenceResolution;
+                scaler.screenMatchMode = sourceScaler.screenMatchMode;
+                scaler.matchWidthOrHeight = sourceScaler.matchWidthOrHeight;
+            }
+
+            Transform originalParent = transform.parent;
+            int       originalIndex  = transform.GetSiblingIndex();
+
+            Transform flashTransform = Flash.transform;
+            Transform flashParent    = flashTransform.parent;
+            int       flashIndex     = flashTransform.GetSiblingIndex();
+
+            ProfileBar profileBar       = ProfileBar.sMain;
+            Transform  profileTransform = profileBar != null ? profileBar.transform : null;
+            Transform  profileParent    = profileTransform != null ? profileTransform.parent : null;
+            int        profileIndex     = profileTransform != null ? profileTransform.GetSiblingIndex() : 0;
+
+            List<Transform> staged = new() { flashTransform, transform };
+
+            if (profileTransform != null)
+                staged.Add(profileTransform);
+
+            List<Transform> subtree = new();
+
+            foreach (Transform root in staged)
+                subtree.AddRange(root.GetComponentsInChildren<Transform>(true));
+
+            int[] layers = new int[subtree.Count];
+
+            bool leftActionsActive   = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
+            bool rightActionsActive  = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
+            bool shareMetadataActive = ShareMetadata != null && ShareMetadata.gameObject.activeSelf;
+
+            bool menuActive     = profileBar != null && profileBar.MenuButtonGroup != null && profileBar.MenuButtonGroup.gameObject.activeSelf;
+            bool backpackActive = profileBar != null && profileBar.RightPane != null && profileBar.RightPane.gameObject.activeSelf;
+            bool changeActive   = profileBar != null && profileBar.ChangeHeader != null && profileBar.ChangeHeader.gameObject.activeSelf;
+
+            const float CONTENT_SCALE = 0.8f;
+
+            Vector3 originalScale      = transform.localScale;
+            Vector3 originalCardScale  = ResultBackground.rectTransform.localScale;
+            Vector3 originalWedgeScale = profileBar != null && profileBar.LeftPane != null ? profileBar.LeftPane.transform.localScale : Vector3.one;
+
+            RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
+            Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
+
+            try
+            {
+                foreach (Transform root in staged)
+                    root.SetParent(canvasObject.transform, false);
+
+                for (int i = 0; i < subtree.Count; i++)
+                {
+                    layers[i] = subtree[i].gameObject.layer;
+                    subtree[i].gameObject.layer = 6;
+                }
+
+                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(false);
+                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(false);
+                if (ShareMetadata != null) ShareMetadata.gameObject.SetActive(true);
+
+                if (profileBar != null)
+                {
+                    if (profileBar.MenuButtonGroup != null) profileBar.MenuButtonGroup.gameObject.SetActive(false);
+                    if (profileBar.RightPane != null) profileBar.RightPane.gameObject.SetActive(false);
+                    if (profileBar.ChangeHeader != null) profileBar.ChangeHeader.gameObject.SetActive(false);
+                }
+
+                transform.localScale = originalScale * CONTENT_SCALE;
+                ResultBackground.rectTransform.localScale = originalCardScale * CONTENT_SCALE;
+
+                if (profileBar != null && profileBar.LeftPane != null)
+                    profileBar.LeftPane.transform.localScale = originalWedgeScale * CONTENT_SCALE;
+
+                rTex.Create();
+
+                screenshotCamera.targetTexture = rTex;
+                Canvas.ForceUpdateCanvases();
+                screenshotCamera.Render();
+
+                RenderTexture.active = rTex;
+                tex2D.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                tex2D.Apply();
+            }
+            finally
+            {
+                screenshotCamera.targetTexture = null;
+                RenderTexture.active = null;
+
+                rTex.Release();
+                Destroy(rTex);
+
+                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(leftActionsActive);
+                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(rightActionsActive);
+                if (ShareMetadata != null) ShareMetadata.gameObject.SetActive(shareMetadataActive);
+
+                if (profileBar != null)
+                {
+                    if (profileBar.MenuButtonGroup != null) profileBar.MenuButtonGroup.gameObject.SetActive(menuActive);
+                    if (profileBar.RightPane != null) profileBar.RightPane.gameObject.SetActive(backpackActive);
+                    if (profileBar.ChangeHeader != null) profileBar.ChangeHeader.gameObject.SetActive(changeActive);
+                }
+
+                transform.localScale = originalScale;
+                ResultBackground.rectTransform.localScale = originalCardScale;
+
+                if (profileBar != null && profileBar.LeftPane != null)
+                    profileBar.LeftPane.transform.localScale = originalWedgeScale;
+
+                for (int i = 0; i < subtree.Count; i++)
+                    subtree[i].gameObject.layer = layers[i];
+
+                transform.SetParent(originalParent, false);
+                flashTransform.SetParent(flashParent, false);
+
+                if (profileTransform != null)
+                    profileTransform.SetParent(profileParent, false);
+
+                transform.SetSiblingIndex(originalIndex);
+                flashTransform.SetSiblingIndex(flashIndex);
+
+                if (profileTransform != null)
+                    profileTransform.SetSiblingIndex(profileIndex);
+
+                Destroy(canvasObject);
+                Destroy(cameraObject);
+            }
+
+            return tex2D;
         }
 
         public void StartEndingAnim()
@@ -144,7 +342,7 @@ namespace JANOARG.Client.Behaviors.Player
             yield return Ease.Animate(1, x =>
                 {
                     ResultBackground.rectTransform.sizeDelta = new Vector2(
-                        ResultBackground.rectTransform.sizeDelta.y,
+                        ResultBackground.rectTransform.sizeDelta.x,
                         Ease.Get(x,EaseFunction.Circle,EaseMode.In) * 50
                         );
                 });
@@ -177,7 +375,7 @@ namespace JANOARG.Client.Behaviors.Player
                     ResultTextBig.characterSpacing = 25 * ease - 40;
 
                     ResultBackground.rectTransform.sizeDelta = new Vector2(
-                        ResultBackground.rectTransform.sizeDelta.y,
+                        ResultBackground.rectTransform.sizeDelta.x,
                         Mathf.Pow(Ease.Get(Mathf.Clamp01(x * 4), EaseFunction.Circle, EaseMode.Out), 2) * 50 + 50
                         );
 
@@ -283,6 +481,12 @@ namespace JANOARG.Client.Behaviors.Player
             ResultText.rectTransform.localScale = Vector3.one;
             int score = Mathf.RoundToInt(PlayerScreen.sMain.CurrentExScore / PlayerScreen.sMain.TotalExScore * 1e6f);
             string rank = Helper.GetRank(score);
+
+            ShareMetadata.text =
+                $"Score recorded at <u>{DateTime.Now:M/d/yyyy, hh.mmtt}</u>\n" +
+                $"Played in <u>{Application.version}</u>";
+            ShareMetadata.color =
+                (Color.white - CommonSys.sMain.MainCamera.backgroundColor) * new ColorFrag(a: 1);
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
                 PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
