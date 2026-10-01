@@ -8,6 +8,7 @@ using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace JANOARG.Client.Behaviors.Panels
 {
@@ -17,8 +18,8 @@ namespace JANOARG.Client.Behaviors.Panels
 
         [Space]
         public TMP_Text PlayerName;
-
         public TMP_Text PlayerTitle;
+        public Image PlayerAvatar;
         public TMP_Text LevelContent;
         public TMP_Text LevelProgress;
         public TMP_Text AbilityRatingContent;
@@ -36,6 +37,24 @@ namespace JANOARG.Client.Behaviors.Panels
 
             PlayerName.text = storage.Get("INFO:Name", "JANOARG");
             PlayerTitle.text = storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
+            string playerIcon = CommonSys.sMain.Storage.Get("INFO:PlayerIcon", "none");
+
+            PlayerAvatar.color = playerIcon == "none" ? Color.black : Color.white;
+
+            PlayerAvatar.sprite = playerIcon switch
+            {
+                "none" => null,
+                _ => Sprite.Create(
+                    Resources.Load<Texture2D>($"Songs/{playerIcon}/icon"),
+                    new Rect(
+                        0,
+                        0,
+                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").width,
+                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").height
+                    ),
+                    new Vector2(0.5f, 0.5f)
+                )
+            };
             
             // TODO: Leveling Stuff
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
@@ -48,7 +67,6 @@ namespace JANOARG.Client.Behaviors.Panels
             AbilityRatingContent.text = ProfileBar.sMain.AbilityRating.ToString("F2");
 
             DisplayTrackStatus(_CurrentDifficulty);
-            
         }
 
         public void UpdateTrackStatus()
@@ -90,12 +108,14 @@ namespace JANOARG.Client.Behaviors.Panels
 
         // Function that gets numbers of AF,FL,CLR and UNL for given player.
         // will return [AF,FL,CLR,UNL]
+        // TODO: Actually implement to count all unlocked songs, not just cleared ones. (Currently, UNL = CLR)
         public int[] TrackStatus(int difficulty)
         {
             var trackCount = new int[4];
             ScoreStore scores = new();
             scores.Load();
 
+            // TODO: Refactor this later to use root playlist then compare with the scores, instead of looping all scores.
             // Loop all scores 
             foreach (KeyValuePair<string, ScoreStoreEntry> entry in scores.entries)
             {

@@ -252,6 +252,7 @@ namespace JANOARG.Client.Behaviors.Panels
                     
                     // No icons for now
                     avatar.ValidValues.Add("none", "No icon");
+                    avatar.ValidValues.Add("lightrays", "light-rays");
 
                     var note = Spawn<OptionText>("Online stuff coming soon(?)");
                     note.TitleLabel.fontSize = 8;

@@ -12839,6 +12839,7 @@ MonoBehaviour:
   ScreenshotCamera: {fileID: 294571165}
   PlayerName: {fileID: 292547876}
   PlayerTitle: {fileID: 1877837188}
+  PlayerAvatar: {fileID: 1778686067}
   LevelContent: {fileID: 1695471487}
   LevelProgress: {fileID: 148365366}
   AbilityRatingContent: {fileID: 1499892307}

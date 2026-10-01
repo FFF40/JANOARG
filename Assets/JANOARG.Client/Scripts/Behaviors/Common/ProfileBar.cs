@@ -44,6 +44,7 @@ namespace JANOARG.Client.Behaviors.Common
         public TMP_Text TitleLabel;
         public CanvasGroup MenuButtonGroup;
         public CanvasGroup AvatarGroup;
+        public Image AvatarImage;
 
         [Space] public RectTransform LevelHolder;
 
@@ -173,6 +174,24 @@ namespace JANOARG.Client.Behaviors.Common
             // Profile
             NameLabel.text = CommonSys.sMain.Storage.Get("INFO:Name", "JANOARG");
             TitleLabel.text = CommonSys.sMain.Storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
+            string playerIcon = CommonSys.sMain.Storage.Get("INFO:PlayerIcon", "none");
+
+            AvatarImage.color = playerIcon == "none" ? Color.black : Color.white;
+
+            AvatarImage.sprite = playerIcon switch
+            {
+                "none" => null,
+                _ => Sprite.Create(
+                    Resources.Load<Texture2D>($"Songs/{playerIcon}/icon"),
+                    new Rect(
+                        0,
+                        0,
+                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").width,
+                        Resources.Load<Texture2D>($"Songs/{playerIcon}/icon").height
+                    ),
+                    new Vector2(0.5f, 0.5f)
+                )
+            };
 
             // Levels
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
