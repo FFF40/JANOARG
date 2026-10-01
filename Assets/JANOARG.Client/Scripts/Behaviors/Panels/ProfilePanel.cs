@@ -22,11 +22,12 @@ namespace JANOARG.Client.Behaviors.Panels
         public TMP_Text LevelContent;
         public TMP_Text LevelProgress;
         public TMP_Text AbilityRatingContent;
+        public TMP_Text TrackStatusCategory;
         public TMP_Text AllFlawlessCount;
         public TMP_Text FullStreakCount;
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
-
+        private int _CurrentDifficulty = 5;
         public bool isAnimating { get; private set; }
 
         public void Awake()
@@ -46,29 +47,56 @@ namespace JANOARG.Client.Behaviors.Panels
 
             AbilityRatingContent.text = ProfileBar.sMain.AbilityRating.ToString("F2");
 
-            int[] trackStatusCount = TrackStatus("all");
+            DisplayTrackStatus(_CurrentDifficulty);
+            
+        }
 
-            AllFlawlessCount.text = trackStatusCount[0]
-                .ToString();
+        public void UpdateTrackStatus()
+        {
+            _CurrentDifficulty++;
+            if (_CurrentDifficulty > 5) _CurrentDifficulty = 0;
+            DisplayTrackStatus(_CurrentDifficulty);
+        }
 
-            FullStreakCount.text = trackStatusCount[1]
-                .ToString();
-
-            ClearedCount.text = trackStatusCount[2]
-                .ToString();
-
-            UnlockedCount.text = trackStatusCount[3]
-                .ToString();
+        public void DisplayTrackStatus(int currentDifficulty)
+        {
+            int[] trackStatus = TrackStatus(currentDifficulty);
+            switch (currentDifficulty)
+            {
+                case 0:
+                    TrackStatusCategory.text = "SIMPLE";
+                    break;
+                case 1:
+                    TrackStatusCategory.text = "NORMAL";
+                    break;
+                case 2:
+                    TrackStatusCategory.text = "COMPLEX";
+                    break;
+                case 3:
+                    TrackStatusCategory.text = "OVERDRIVE";
+                    break;
+                case 4:
+                    TrackStatusCategory.text = "SPECIAL";
+                    break;
+                case 5:
+                    TrackStatusCategory.text = "ALL";
+                    break;
+            }
+            AllFlawlessCount.text = trackStatus[0].ToString();
+            FullStreakCount.text = trackStatus[1].ToString();
+            ClearedCount.text = trackStatus[2].ToString();
+            UnlockedCount.text = trackStatus[3].ToString();
         }
 
         // Function that gets numbers of AF,FL,CLR and UNL for given player.
         // will return [AF,FL,CLR,UNL]
-        public int[] TrackStatus(string difficulty)
+        public int[] TrackStatus(int difficulty)
         {
             var trackCount = new int[4];
             ScoreStore scores = new();
             scores.Load();
 
+            // Loop all scores 
             foreach (KeyValuePair<string, ScoreStoreEntry> entry in scores.entries)
             {
                 string key = entry.Key;
@@ -86,18 +114,46 @@ namespace JANOARG.Client.Behaviors.Panels
                     continue;
                 }
 
-                if (record.ChartID == difficulty || difficulty == "all")
+                // Check if the record's chart index matches the specified difficulty
+                switch (difficulty)
                 {
-                    int[] trackStat = CountStatus(record, difficulty);
-
-                    for (var i = 0; i < trackCount.Length; i++) trackCount[i] += trackStat[i];
+                    case 0: // Simple
+                        if (record.ChartIndex != 0) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 1: // Normal
+                        if (record.ChartIndex != 1) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 2: // Complex
+                        if (record.ChartIndex != 2) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 3: // Overdrive
+                        if (record.ChartIndex != 3) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 4: // Special
+                        if (record.ChartIndex >= 0 && record.ChartIndex <= 3) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 5: // All
+                        IncrementTrackStatus(trackCount, record);
+                        break;
                 }
             }
 
             return trackCount;
         }
 
-        public int[] CountStatus(ScoreStoreEntry record, string diff)
+        public int[] IncrementTrackStatus(int[] trackCount, ScoreStoreEntry record)
+        {
+            int[] trackStat = CountStatus(record);
+            for (var i = 0; i < trackCount.Length; i++) trackCount[i] += trackStat[i];
+            return trackCount;
+        }
+        
+        public int[] CountStatus(ScoreStoreEntry record)
         {
             var allFlawlessCount = 0;
             var fullStreakCount = 0;
