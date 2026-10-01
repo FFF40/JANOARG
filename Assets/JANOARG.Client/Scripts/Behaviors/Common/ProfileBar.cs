@@ -174,6 +174,8 @@ namespace JANOARG.Client.Behaviors.Common
             // Profile
             NameLabel.text = CommonSys.sMain.Storage.Get("INFO:Name", "JANOARG");
             TitleLabel.text = CommonSys.sMain.Storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
+            // TODO: Make this consistently display the avatar since the avatar become blank when going to another map
+            // and it's maybe Unity's fault since it didn't recognize the some of the avatars.
             AvatarImage = CommonSys.LoadPlayerAvatar(AvatarImage);
 
             // Levels
