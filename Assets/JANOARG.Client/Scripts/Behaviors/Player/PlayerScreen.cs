@@ -1752,7 +1752,7 @@ namespace JANOARG.Client.Behaviors.Player
             AlwaysShowHitVFX = CommonSys.sMain.Preferences.Get("PLYR:AlwaysShowHitVFX", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             ShowValueText = short.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowOffset", "1"));
-            ShowStreakIndicator = bool.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowStreakIndicator", "1"));
+            ShowStreakIndicator = CommonSys.sMain.Preferences.Get("PLYR:ShowStreakIndicator", true);
 
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });
