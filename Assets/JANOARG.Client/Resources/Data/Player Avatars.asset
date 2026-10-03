@@ -10,6 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bff3b6fd0f532ab468e0ed9df2983b66, type: 3}
-  m_Name: Player Avatar Constants
+  m_Name: Player Avatars
   m_EditorClassIdentifier: 
-  Avatars: []
+  Avatars:
+  - ID: lightrays
+    Name: light-rays
+    Image: {fileID: 21300000, guid: ac18f2bda95459fc096566d843a9d6e2, type: 3}
+  - ID: intomysterious
+    Name: Into the Mysterious World
+    Image: {fileID: 21300000, guid: 532699ca47d4614aea7a9ab1066367b8, type: 3}

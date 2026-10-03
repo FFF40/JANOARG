@@ -1,15 +1,15 @@
 using UnityEditor;
 using UnityEngine;
-using JANOARG.Client.Data.Constant;
+using JANOARG.Client.Data.Player;
 
-[CustomEditor(typeof(PlayerAvatarConstants))]
+[CustomEditor(typeof(PlayerAvatar))]
 public class PlayerAvatarConstantsEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        PlayerAvatarConstants data = (PlayerAvatarConstants)target;
+        PlayerAvatar data = (PlayerAvatar)target;
 
         GUILayout.Space(10);
 

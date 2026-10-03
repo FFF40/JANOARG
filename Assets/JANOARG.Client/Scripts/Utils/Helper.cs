@@ -33,6 +33,30 @@ namespace JANOARG.Client.Utils
             };
         }
 
+        public static int GetScoreFromRank(string rank)
+        {
+            return rank switch
+            {
+                "1"    =>  1000000,     
+                "SSS+" =>  995000 ,     
+                "SSS"  =>  990000 ,     
+                "SS+"  =>  980000 ,     
+                "SS"   =>  970000 ,     
+                "S+"   =>  960000 ,     
+                "S"    =>  950000 ,     
+                "AAA+" =>  940000 ,     
+                "AAA"  =>  920000 ,     
+                "AA+"  =>  900000 ,     
+                "AA"   =>  875000 ,     
+                "A+"   =>  850000 ,     
+                "A"    =>  800000 ,     
+                "B"    =>  700000 ,     
+                "C"    =>  600000 ,     
+                "D"    =>  1,
+                _      =>  0,
+            };
+        }
+
         public static float GetRating(float constant, float score)
         {
             return score switch

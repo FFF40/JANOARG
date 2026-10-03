@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using JANOARG.Client.Data.Constant;
+using JANOARG.Client.Data.Player;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -19,7 +20,7 @@ namespace JANOARG.Client.Behaviors.Common
         public Camera          MainCamera;
         public RectTransform   CommonCanvas;
         public CommonConstants Constants;
-        public PlayerAvatarConstants PlayerAvatarConstants;
+        public PlayerAvatar PlayerAvatarConstants;
 
         public LoadingBar LoadingBar;
         public Storage    Preferences;

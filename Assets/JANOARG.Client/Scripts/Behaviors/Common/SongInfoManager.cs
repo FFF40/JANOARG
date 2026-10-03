@@ -142,5 +142,40 @@ namespace JANOARG.Client.Behaviors.Common
             return songID; // Fallback to ID if not found
         }
 
+        public string GetDifficultyByIndex(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return "Simple";
+                case 1:
+                    return "Normal";
+                case 2:
+                    return "Complex";
+                case 3:
+                    return "Overdrive";
+                default:
+                    return "Special";
+
+            }
+        }
+
+        public bool IsEntryFullStreak(ScoreStoreEntry entry)
+        {
+            if (entry.BadCount == 0 && entry.GoodCount > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsEntryAllFlawless(ScoreStoreEntry entry)
+        {
+            if (entry.BadCount == 0 && entry.GoodCount == 0)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
