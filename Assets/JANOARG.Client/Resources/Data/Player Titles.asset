@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63c49123e492f2042abab5837851bd02, type: 3}
+  m_Name: Player Titles
+  m_EditorClassIdentifier: 
+  Titles:
+  - ID: none
+    Name: Perfectly Generic Player
+    Rarity: {fileID: 0}
+    UnlockConditions: []
+  - ID: lightrays
+    Name: '[ALL FLAWLESS] light-rays - Normal'
+    Rarity: {fileID: 0}
+    UnlockConditions: []
+  - ID: intomysterious
+    Name: '[ALL FLAWLESS] Into the Mysterious World - Complex'
+    Rarity: {fileID: 0}
+    UnlockConditions: []
+  TitleRarities:
+  - {fileID: 0}
+  references:
+    version: 2
+    RefIds: []

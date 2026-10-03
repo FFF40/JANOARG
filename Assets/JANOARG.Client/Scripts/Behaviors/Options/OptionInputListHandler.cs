@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JANOARG.Client.Behaviors.Options.Input_Types;
 using UnityEngine;
@@ -137,6 +138,11 @@ namespace JANOARG.Client.Behaviors.Options
             ListHolder.anchoredPosition = new Vector2(ListHolder.anchoredPosition.x, ScrollOffset);
 
             OldPosition = CurrentPosition;
+            // Fix for out-of-bounds index if the current value is not in the list
+            if (CurrentPosition < 0 || CurrentPosition >= Items.Count)
+            {
+                CurrentPosition = 0;
+            }
             SetItemActive(Items[CurrentPosition], true);
         }
 

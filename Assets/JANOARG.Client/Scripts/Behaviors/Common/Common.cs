@@ -1,11 +1,15 @@
 using System;
+using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using JANOARG.Client.Data.Constant;
+using JANOARG.Client.Data.Player;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace JANOARG.Client.Behaviors.Common
 {
@@ -16,7 +20,7 @@ namespace JANOARG.Client.Behaviors.Common
         public Camera          MainCamera;
         public RectTransform   CommonCanvas;
         public CommonConstants Constants;
-
+        
         public LoadingBar LoadingBar;
         public Storage    Preferences;
         public Storage    Storage;

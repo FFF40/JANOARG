@@ -9,6 +9,7 @@ using JANOARG.Client.Behaviors.Player;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Client.Data.Constant;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
@@ -86,7 +87,7 @@ namespace JANOARG.Client.Behaviors.Panels
         public Mesh arrowFlickIndicator { get; private set; }
 
         private void Start()
-        {
+        {   
             TabButtons[CurrentTab]
                 .SetFill(1);
 
@@ -233,6 +234,33 @@ namespace JANOARG.Client.Behaviors.Panels
                         x => storage.Set("INFO:Name", x)
                     );
 
+                    //TODO: Make like ListOptionInput with unlockable options
+                    var playerTitle = Spawn<ListOptionInput, string>("Player Title", 
+                        () => storage.Get("INFO:PlayerTitle", "Perfectly Generic Player"),
+                        x => storage.Set("INFO:PlayerTitle", x)
+                        );
+                    
+                    PlayerManager.sMain.PlayerTitles.GetAllSongTitles();
+                    for (int i = 0; i < PlayerManager.sMain.PlayerTitles.Titles.Count; i++)
+                    {
+                        var av = PlayerManager.sMain.PlayerTitles.Titles[i];
+                        playerTitle.ValidValues.Add(av.ID, av.Name);
+                    }
+
+                    // TODO: Add icons based on song unlocks 
+                    var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
+                        () => storage.Get("INFO:PlayerIcon", "none"),
+                        x => storage.Set("INFO:PlayerIcon", x)
+                        );
+                    
+                    avatar.ValidValues.Add("none", "No icon");
+                    PlayerManager.sMain.PlayerAvatars.GetAllSongAvatars();
+                    for (int i = 0; i < PlayerManager.sMain.PlayerAvatars.Avatars.Count; i++)
+                    {
+                        var av = PlayerManager.sMain.PlayerAvatars.Avatars[i];
+                        avatar.ValidValues.Add(av.ID, av.Name);
+                    }
+
                     var note = Spawn<OptionText>("Online stuff coming soon(?)");
                     note.TitleLabel.fontSize = 8;
 
@@ -309,9 +337,8 @@ namespace JANOARG.Client.Behaviors.Panels
                     //     "This mode turns the game into an ✨indie✨scale✨rhythm✨game✨™, enable at your own risk."
                     //     + "\nRequires a restart to reflect changes."
                     // );
-                }
-
                     break;
+                }
 
                 case 1:
                 {
@@ -405,9 +432,8 @@ namespace JANOARG.Client.Behaviors.Panels
                     );
                     #endregion
 
-                    #region  Miscellaneous
-                    Spawn <OptionCategoryTitle>("Miscellaneous");
-
+                    #region Interface
+                    Spawn <OptionCategoryTitle>("Interface");
                     // Supposed to be a short
                     var showOffset = Spawn<ListOptionInput, string>("Show offset value", 
                         () => preferences.Get("PLYR:ShowOffset", "1"),
@@ -417,8 +443,30 @@ namespace JANOARG.Client.Behaviors.Panels
                     showOffset.ValidValues.Add("3", "All Judgement");
                     showOffset.ValidValues.Add("2", "Non-Flawless Judgement");
                     showOffset.ValidValues.Add("1", "None");
-                    
-                    
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show FLAWLESS judgments",
+                        () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
+                        x => preferences.Set("PLYR:JudgementTextOnFlawless", x)
+                    );
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Disable early/late indicator",
+                        () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
+                        x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
+                    );
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show streak indicator",
+                        () => preferences.Get("PLYR:ShowStreakIndicator", true),
+                        x => preferences.Set("PLYR:ShowStreakIndicator", x)
+                    );
+
+                    #endregion
+
+                    #region  Miscellaneous
+                    Spawn <OptionCategoryTitle>("Miscellaneous");
+
                     Spawn<BooleanOptionInput, bool>(
                         "Highlight simul. notes",
                         () => preferences.Get("PLYR:HighlightSimulNotes", true),
@@ -428,18 +476,6 @@ namespace JANOARG.Client.Behaviors.Panels
                             UpdatePlayerPreview();
                         });
                     
-                    Spawn<BooleanOptionInput, bool>(
-                        "Show FLAWLESS judgments",
-                        () => preferences.Get("PLYR:JudgementTextOnFlawless", true),
-                        x => preferences.Set("PLYR:JudgementTextOnFlawless", x)
-                    );
-                    
-                    Spawn<BooleanOptionInput, bool>(
-                        "Disable early/late indicator",
-                        () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
-                        x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
-                    );
-
                     Spawn<BooleanOptionInput, bool>(
                         "Always show Hit VFX",
                         () => preferences.Get("PLYR:AlwaysShowHitVFX", true),
@@ -455,38 +491,38 @@ namespace JANOARG.Client.Behaviors.Panels
                     SubtitleLabel.text = " > About";
                     SetScrollerWidth(600);
 
+                    
 
-                    const string NEWLINE_SEPARATOR = "\n• \n"; // Looks more aligned due to skewed scroller
                     AboutPane.SetActive(true);
                     OptionAboutEntry entry;
                     entry = Spawn<OptionAboutEntry>("LEAD PROGRAMMER / GAME DESIGNER");
                     entry.BodyLabel.text = "duducat / ducdat0507";
 
                     entry = Spawn<OptionAboutEntry>("PROGRAMMER / MAINTAINER");
-                    entry.BodyLabel.text = "BashhScriptKid • M3galodon";
+                    entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid","M3galodon");
                     
                     //entry = Spawn<OptionAboutEntry>("iOS BUILD PROVIDER");
                     //entry.BodyLabel.text = "kiko/kevernn";
                     
                     entry = Spawn<OptionAboutEntry>("GITHUB CONTRIBUTORS");
-                    entry.BodyLabel.text = "FujiForm2023 • RKevo";
+                    entry.BodyLabel.text = FormatOptionAboutText("FujiForm2023", "RKevo");
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (ORIGINAL TRACKS)");
-                    entry.BodyLabel.text = "Kuttate • Rose Quartz • R3ality";
+                    entry.BodyLabel.text = FormatOptionAboutText("Kuttate", "Rose Quartz", "R3ality", "potatofission");
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
-                    entry.BodyLabel.text = "Sound Souler • mrcool909090 • R3ality  • Scutoid • Ariz Kayaba" 
-                                           + NEWLINE_SEPARATOR +
-                                           "zqr • NOMOREKAWAII • CuboonoP • Rose Quartz • Pa_lette";
+                    entry.BodyLabel.text = FormatOptionAboutText("Sound Souler", "mrcool909090", "R3ality", "Scutoid", "Ariz Kayaba",
+                                            "zqr", "NOMOREKAWAII", "CuboonoP", "Rose Quartz", "Pa_lette", "amaristia");
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
-                    entry.BodyLabel.text = "duducat • Pa_lette";
+                    entry.BodyLabel.text = FormatOptionAboutText("duducat", "Pa_lette");
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
-                    entry.BodyLabel.text = "BashhScriptKid • M3galodon • Akanari • leko_uname • BEN789FA • Gyukatsu • kiemo";
+                    entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid", "M3galodon", "Akanari", "leko_uname", "BEN789FA",
+                                            "Gyukatsu", "kiemo", "Samu", "VICA", "SARYN");
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = "duducat • M3galodon • leko_uname • Pa_lette • AARL • BEN789FA";
+                    entry.BodyLabel.text = FormatOptionAboutText("duducat", "M3galodon", "leko_uname", "Pa_lette", "AARL", "BEN789FA", "KouNeko")   ;
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
@@ -494,6 +530,39 @@ namespace JANOARG.Client.Behaviors.Panels
 
                     break;
             }
+        }
+
+        public string FormatOptionAboutText(
+            params string[] contributors)
+        {
+            const int MAX_LINE_LENGTH = 72;
+            const string BULLET = " • ";
+            const string NEWLINE_SEPARATOR = "\n• \n";
+
+            List<string> lines = new List<string>();
+            string currentLine = "";
+
+            foreach (string contributor in contributors)
+            {
+                string addition = string.IsNullOrEmpty(currentLine)
+                    ? contributor
+                    : BULLET + contributor;
+
+                if (currentLine.Length + addition.Length > MAX_LINE_LENGTH)
+                {
+                    lines.Add(currentLine);
+                    currentLine = contributor;
+                }
+                else
+                {
+                    currentLine += addition;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(currentLine))
+                lines.Add(currentLine);
+
+            return string.Join(NEWLINE_SEPARATOR, lines);
         }
 
         public TType GetOptionItemSample<TType>() where TType : OptionItem

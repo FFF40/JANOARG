@@ -44,6 +44,7 @@ namespace JANOARG.Client.Behaviors.Common
         public TMP_Text TitleLabel;
         public CanvasGroup MenuButtonGroup;
         public CanvasGroup AvatarGroup;
+        public Image AvatarImage;
 
         [Space] public RectTransform LevelHolder;
 
@@ -170,8 +171,12 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void UpdateLabels()
         {
-            // Name
+            // Profile
             NameLabel.text = CommonSys.sMain.Storage.Get("INFO:Name", "JANOARG");
+            TitleLabel =  PlayerManager.LoadPlayerTitle(TitleLabel);
+            // TODO: Make this consistently display the avatar since the avatar become blank when going to snail map and can't revert it back
+            // and it's maybe Unity's fault.
+            AvatarImage = PlayerManager.LoadPlayerAvatar(AvatarImage);
 
             // Levels
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);

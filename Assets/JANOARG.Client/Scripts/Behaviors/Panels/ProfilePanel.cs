@@ -8,22 +8,24 @@ using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace ANOARG.Client.Behaviors.Panels
+namespace JANOARG.Client.Behaviors.Panels
 {
     public class ProfilePanel : MonoBehaviour
     {
         public TMP_Text PlayerName;
-
         public TMP_Text PlayerTitle;
+        public Image PlayerAvatar;
         public TMP_Text LevelContent;
         public TMP_Text LevelProgress;
         public TMP_Text AbilityRatingContent;
+        public TMP_Text TrackStatusCategory;
         public TMP_Text AllFlawlessCount;
         public TMP_Text FullStreakCount;
         public TMP_Text ClearedCount;
         public TMP_Text UnlockedCount;
-
+        private int _CurrentDifficulty = 5;
         public GameObject RatingBreakdownModalBody;
         public Sprite CameraIcon;
         public Panel Panel;
@@ -33,9 +35,9 @@ namespace ANOARG.Client.Behaviors.Panels
             Storage storage = CommonSys.sMain.Storage;
 
             PlayerName.text = storage.Get("INFO:Name", "JANOARG");
-            PlayerTitle.text = storage.Get("INFO:Title", "Perfectly Generic Player");
-
-            // TODO: Leveling Stuff
+            PlayerTitle = PlayerManager.LoadPlayerTitle(PlayerTitle);
+            PlayerAvatar = PlayerManager.LoadPlayerAvatar(PlayerAvatar);
+            
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
             LevelContent.text = level.ToString();
 
@@ -45,29 +47,59 @@ namespace ANOARG.Client.Behaviors.Panels
 
             AbilityRatingContent.text = ProfileBar.sMain.AbilityRating.ToString("F2");
 
-            int[] trackStatusCount = TrackStatus("all");
+            DisplayTrackStatus(_CurrentDifficulty);
+        }
 
-            AllFlawlessCount.text = trackStatusCount[0]
-                .ToString();
+        public void UpdateTrackStatus()
+        {
+            _CurrentDifficulty++;
+            if (_CurrentDifficulty > 5) _CurrentDifficulty = 0;
+            DisplayTrackStatus(_CurrentDifficulty);
+        }
 
-            FullStreakCount.text = trackStatusCount[1]
-                .ToString();
-
-            ClearedCount.text = trackStatusCount[2]
-                .ToString();
-
-            UnlockedCount.text = trackStatusCount[3]
-                .ToString();
+        public void DisplayTrackStatus(int currentDifficulty)
+        {
+            int[] trackStatus = TrackStatus(currentDifficulty);
+            switch (currentDifficulty)
+            {
+                case 0:
+                    TrackStatusCategory.text = "SIMPLE";
+                    break;
+                case 1:
+                    TrackStatusCategory.text = "NORMAL";
+                    break;
+                case 2:
+                    TrackStatusCategory.text = "COMPLEX";
+                    break;
+                case 3:
+                    TrackStatusCategory.text = "OVERDRIVE";
+                    break;
+                case 4:
+                    TrackStatusCategory.text = "SPECIAL";
+                    break;
+                case 5:
+                    TrackStatusCategory.text = "ALL";
+                    break;
+            }
+            AllFlawlessCount.text = trackStatus[0].ToString();
+            FullStreakCount.text = trackStatus[1].ToString();
+            ClearedCount.text = trackStatus[2].ToString();
+            UnlockedCount.text = trackStatus[3].ToString();
         }
 
         // Function that gets numbers of AF,FL,CLR and UNL for given player.
         // will return [AF,FL,CLR,UNL]
-        public int[] TrackStatus(string difficulty)
+        // TODO: Actually implement to count all unlocked songs, not just cleared ones. (Currently, UNL = CLR)
+        // TODO: Also make like a helper function for getting scores / PlayableSong data 
+        //       that we use so we will not copy paste the same code in other places. 
+        public int[] TrackStatus(int difficulty)
         {
             var trackCount = new int[4];
             ScoreStore scores = new();
             scores.Load();
 
+            // TODO: Refactor this later to use root playlist then compare with the scores, instead of looping all scores.
+            // Loop all scores 
             foreach (KeyValuePair<string, ScoreStoreEntry> entry in scores.entries)
             {
                 string key = entry.Key;
@@ -85,23 +117,51 @@ namespace ANOARG.Client.Behaviors.Panels
                     continue;
                 }
 
-                if (record.ChartID == difficulty || difficulty == "all")
+                // Check if the record's chart index matches the specified difficulty
+                switch (difficulty)
                 {
-                    int[] trackStat = CountStatus(record, difficulty);
-
-                    for (var i = 0; i < trackCount.Length; i++) trackCount[i] += trackStat[i];
+                    case 0: // Simple
+                        if (record.ChartIndex != 0) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 1: // Normal
+                        if (record.ChartIndex != 1) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 2: // Complex
+                        if (record.ChartIndex != 2) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 3: // Overdrive
+                        if (record.ChartIndex != 3) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 4: // Special
+                        if (record.ChartIndex >= 0 && record.ChartIndex <= 3) continue;
+                        IncrementTrackStatus(trackCount, record);
+                        break;
+                    case 5: // All
+                        IncrementTrackStatus(trackCount, record);
+                        break;
                 }
             }
 
             return trackCount;
         }
 
-        public int[] CountStatus(ScoreStoreEntry record, string diff)
+        public int[] IncrementTrackStatus(int[] trackCount, ScoreStoreEntry record)
         {
-            var allFlawlessCount = 0;
-            var fullStreakCount = 0;
-            var clearedCount = 0;
-            var unlockedCount = 0;
+            int[] trackStat = CountStatus(record);
+            for (var i = 0; i < trackCount.Length; i++) trackCount[i] += trackStat[i];
+            return trackCount;
+        }
+        
+        public int[] CountStatus(ScoreStoreEntry record)
+        {
+            int allFlawlessCount = 0;
+            int fullStreakCount = 0;
+            int clearedCount = 0;
+            int unlockedCount = 0;
 
             if (record.PerfectCount == record.MaxCombo)
             {
