@@ -233,7 +233,7 @@ namespace JANOARG.Client.Behaviors.Panels
                         x => storage.Set("INFO:Name", x)
                     );
 
-                    //TODO: Make like ListOptionInput with unlockedable options
+                    //TODO: Make like ListOptionInput with unlockable options
                     var playerTitle = Spawn<ListOptionInput, string>("Player Title", 
                         () => storage.Get("INFO:PlayerTitle", "Perfectly Generic Player"),
                         x => storage.Set("INFO:PlayerTitle", x)
@@ -244,15 +244,15 @@ namespace JANOARG.Client.Behaviors.Panels
                     playerTitle.ValidValues.Add("..............🐌", "..............🐌");
 
 
-                    // TODO: Add icons based on song unlocks
-                    var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
-                        () => storage.Get("INFO:PlayerIcon", "none"),
-                        x => storage.Set("INFO:PlayerIcon", x)
-                        );
+                    // TODO: Add icons based on song unlocks 
+                    // var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
+                    //     () => storage.Get("INFO:PlayerIcon", "none"),
+                    //     x => storage.Set("INFO:PlayerIcon", x)
+                    //     );
                     
-                    // No icons for now
-                    avatar.ValidValues.Add("none", "No icon");
-                    avatar.ValidValues.Add("lightrays", "light-rays");
+                    // // No icons for now
+                    // avatar.ValidValues.Add("none", "No icon");
+                    // avatar.ValidValues.Add("lightrays", "light-rays");
 
                     var note = Spawn<OptionText>("Online stuff coming soon(?)");
                     note.TitleLabel.fontSize = 8;
@@ -448,6 +448,12 @@ namespace JANOARG.Client.Behaviors.Panels
                         "Disable early/late indicator",
                         () => preferences.Get("PLYR:NoEarlyLateIndicator", false),
                         x => preferences.Set("PLYR:NoEarlyLateIndicator", x)
+                    );
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "Show streak indicator",
+                        () => preferences.Get("PLYR:ShowStreakIndicator", true),
+                        x => preferences.Set("PLYR:ShowStreakIndicator", x)
                     );
 
                     #endregion

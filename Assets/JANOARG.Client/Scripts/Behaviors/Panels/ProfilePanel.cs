@@ -91,6 +91,8 @@ namespace JANOARG.Client.Behaviors.Panels
         // Function that gets numbers of AF,FL,CLR and UNL for given player.
         // will return [AF,FL,CLR,UNL]
         // TODO: Actually implement to count all unlocked songs, not just cleared ones. (Currently, UNL = CLR)
+        // TODO: Also make like a helper function for getting scores / PlayableSong data 
+        //       that we use so we will not copy paste the same code in other places. 
         public int[] TrackStatus(int difficulty)
         {
             var trackCount = new int[4];
@@ -157,10 +159,10 @@ namespace JANOARG.Client.Behaviors.Panels
         
         public int[] CountStatus(ScoreStoreEntry record)
         {
-            var allFlawlessCount = 0;
-            var fullStreakCount = 0;
-            var clearedCount = 0;
-            var unlockedCount = 0;
+            int allFlawlessCount = 0;
+            int fullStreakCount = 0;
+            int clearedCount = 0;
+            int unlockedCount = 0;
 
             if (record.PerfectCount == record.MaxCombo)
             {

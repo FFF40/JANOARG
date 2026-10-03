@@ -1446,7 +1446,9 @@ namespace JANOARG.Client.Behaviors.Player
                 BadCount++;
             }
 
-            ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
+            TotalCombo++;
+
+            ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×" + StreakIndicator();
 
             JudgmentLabel.text = FormatJudgmentLabel(acc, offset, score);
 
@@ -1454,8 +1456,22 @@ namespace JANOARG.Client.Behaviors.Player
                 StopCoroutine(_JudgeAnimation);
 
             _JudgeAnimation = StartCoroutine(JudgmentAnim());
+        }
 
-            TotalCombo++;
+        public string StreakIndicator()
+        {
+            if (!Settings.ShowStreakIndicator)
+                return "";
+
+            if (TotalCombo == PerfectCount) // ALL FLAWLESS
+                return "!!!";
+            else if (TotalCombo == GoodCount) // ALL MISALIGNED
+                return "!?";
+            else if (BadCount == 0 && GoodCount != 0) // FULL STREAK
+                return "!";
+            else // Getting BROKEN will not display the combo text
+                return "";
+
         }
 
         private IEnumerator JudgmentAnim()
@@ -1636,6 +1652,7 @@ namespace JANOARG.Client.Behaviors.Player
             else
                 text = "MISS";
 
+            // Append offset value text if player settings allow it and the offset is significant enough to display
             if (offset != null && Settings.ShowValueText >= (acc == 0 ? 3 : 2) && !double.IsInfinity(offset.Value) && Math.Abs(offset.Value) >= 0.005)                                                                                        
                 text += offsetValue > 0 ? $"(+{offsetValue:0.##}ms)" : $"({offsetValue:0.##}ms)"; 
             
@@ -1718,6 +1735,7 @@ namespace JANOARG.Client.Behaviors.Player
         public float JudgmentOffset;
         public float VisualOffset;
         public short ShowValueText;
+        public bool  ShowStreakIndicator;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
         public bool  HighlightSimulNotes;
@@ -1734,7 +1752,8 @@ namespace JANOARG.Client.Behaviors.Player
             AlwaysShowHitVFX = CommonSys.sMain.Preferences.Get("PLYR:AlwaysShowHitVFX", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             ShowValueText = short.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowOffset", "1"));
-            
+            ShowStreakIndicator = bool.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowStreakIndicator", "1"));
+
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });
 
