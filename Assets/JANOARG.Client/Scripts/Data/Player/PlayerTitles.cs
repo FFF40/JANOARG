@@ -40,7 +40,7 @@ namespace JANOARG.Client.Data.Player
                         continue;
 
                     titlePrefix = isAllFlawless ? "[ALL FLAWLESS] " : "[FULL STREAK] ";
-                    int rarityIndex = score.ChartIndex + (isAllFlawless ? 1 : 0);
+                    int rarityIndex = score.ChartIndex + (isAllFlawless ? 2 : 1);
                     rarityIndex = Mathf.Clamp(rarityIndex, 0, TitleRarities.Count - 1);
 
                     TitleRarity titleRarity = TitleRarities[rarityIndex];

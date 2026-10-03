@@ -19,19 +19,28 @@ namespace JANOARG.Client.Behaviors.Common
 
         public static TMP_Text LoadPlayerTitle(TMP_Text titleText)
         {
-            Title title = new Title(){ID = "Perfectly Generic Player", Name = "Perfectly Generic Player"};
-            string playerTitle = CommonSys.sMain.Storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
-            if (sMain.PlayerTitles.Titles.Any(t => t.ID == playerTitle)){
-                title = sMain.PlayerTitles.Titles.First(t => t.ID == playerTitle); 
-            } else
+            string playerTitle = CommonSys.sMain.Storage.Get(
+                "INFO:PlayerTitle",
+                "Perfectly Generic Player"
+            );
+
+            Title title = sMain.PlayerTitles.Titles
+                .FirstOrDefault(t => t.ID == playerTitle);
+
+            if (title == null)
             {
                 titleText.text = "Perfectly Generic Player";
+                titleText.color = Color.white;
                 return titleText;
             }
+
+            // Set text FIRST
+            titleText.text = title.Name;
+            titleText.ForceMeshUpdate();
+
             if (title.Rarity.Name == "Rainbow")
             {
-                titleText.ForceMeshUpdate();
-
+                titleText.color = Color.white;
                 TMP_TextInfo textInfo = titleText.textInfo;
 
                 for (int i = 0; i < textInfo.characterCount; i++)
@@ -41,16 +50,16 @@ namespace JANOARG.Client.Behaviors.Common
                     if (!character.isVisible)
                         continue;
 
-                    // Rainbow hue based on character position
                     float hue = (float)i / textInfo.characterCount;
 
-                    // Lower saturation, high brightness
+                    // Lower saturation
                     Color color = Color.HSVToRGB(hue, 0.45f, 1.0f);
 
                     int materialIndex = character.materialReferenceIndex;
                     int vertexIndex = character.vertexIndex;
 
-                    Color32[] vertexColors = textInfo.meshInfo[materialIndex].colors32;
+                    Color32[] vertexColors =
+                        textInfo.meshInfo[materialIndex].colors32;
 
                     vertexColors[vertexIndex + 0] = color;
                     vertexColors[vertexIndex + 1] = color;
@@ -59,10 +68,14 @@ namespace JANOARG.Client.Behaviors.Common
                 }
 
                 titleText.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+
             }
             else
             {
-                titleText.color = title.Rarity.Color;
+                Color color = title.Rarity.Color;
+                color.a = 1f;
+
+                titleText.color = color;
             }
 
             return titleText;

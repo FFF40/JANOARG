@@ -15,6 +15,7 @@ namespace JANOARG.Client.Behaviors.Common
         //This Playlist will be the main/root playlist so we can use the PlayableSong's metachart and cover
         public Playlist MainPlaylist;
         public Dictionary<string, PlayableSong> SongDict;
+        private bool _IsFinished;
 
         public void Awake()
         {
@@ -36,6 +37,8 @@ namespace JANOARG.Client.Behaviors.Common
             yield return StartCoroutine(
                 CollectSongsRecursive(MainPlaylist, SongDict, visited)
             );
+
+            _IsFinished = true;
         }
 
         public IEnumerator CollectSongsRecursive(
@@ -90,7 +93,8 @@ namespace JANOARG.Client.Behaviors.Common
         }
 
         public IEnumerator GetCoverImage(PlayableSong song, string id, System.Action<Texture2D> onDone)
-        {
+        {   
+            yield return new WaitUntil(() => sMain._IsFinished);
             if (song == null || song.Cover == null || song.Cover.Layers == null || song.Cover.Layers.Count == 0)
             {
                 onDone?.Invoke(null);
@@ -118,6 +122,7 @@ namespace JANOARG.Client.Behaviors.Common
 
         public IEnumerator GetIconImage(string id, System.Action<Texture2D> onDone)
         {
+            yield return new WaitUntil(() => sMain._IsFinished);
             string path = $"Songs/{id}/icon";
 
             ResourceRequest req = Resources.LoadAsync<Texture2D>(path);
