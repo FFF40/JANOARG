@@ -11,10 +11,10 @@ using JANOARG.Client.Data.Playlist;
 namespace JANOARG.Client.Data.Player
 {
     [CreateAssetMenu(fileName = "Player Title", menuName = "JANOARG/Player/Titles")]
-    public class PlayerTitle : ScriptableObject
+    public class PlayerTitles : ScriptableObject
     {
         public List<Title> Titles;
-
+        public List<TitleRarity> TitleRarities;
         public void GetAllSongTitles()
         {
             // Get scores
@@ -39,8 +39,12 @@ namespace JANOARG.Client.Data.Player
                     if (Titles.Any(x => x.ID == songID))
                         continue;
 
-                    titlePrefix = isAllFlawless ? "[ALL FLAWLESS]" : "[FULL STREAK]";
-                    TitleRarity titleRarity = isAllFlawless ? (TitleRarity)score.ChartIndex + 1 : (TitleRarity)score.ChartIndex;
+                    titlePrefix = isAllFlawless ? "[ALL FLAWLESS] " : "[FULL STREAK] ";
+                    int rarityIndex = score.ChartIndex + (isAllFlawless ? 1 : 0);
+                    rarityIndex = Mathf.Clamp(rarityIndex, 0, TitleRarities.Count - 1);
+
+                    TitleRarity titleRarity = TitleRarities[rarityIndex];
+                    titleSuffix = " - " + SongInfoManager.sMain.GetDifficultyByIndex(score.ChartIndex);
 
                     SongTitle songTitle = new SongTitle
                     {
@@ -70,17 +74,6 @@ namespace JANOARG.Client.Data.Player
         // public GameConditional[] RevealConditions;
         [SerializeReference]
         public GameConditional[] UnlockConditions;
-    }
-
-    public enum TitleRarity
-    {
-        // In ascending order by difficulty to achieve  
-        Normal,
-        Bronze,
-        Silver,
-        Gold,
-        Platinum,
-        Rainbow
     }
 
     public class SongTitle: Title

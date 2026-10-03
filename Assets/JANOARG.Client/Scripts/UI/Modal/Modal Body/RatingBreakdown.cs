@@ -68,7 +68,7 @@ namespace JANOARG.Client.UI
 
             PlayerName.text = CommonSys.sMain.Storage.Get("INFO:Name", "JANOARG");
             PlayerTitle.text = CommonSys.sMain.Storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
-            PlayerAvatar = CommonSys.LoadPlayerAvatar(PlayerAvatar);
+            PlayerAvatar = PlayerManager.LoadPlayerAvatar(PlayerAvatar);
 
             LevelValue.text = CommonSys.sMain.Storage.Get("INFO:Level", 1).ToString();
             AbilityRatingValue.text = ProfileBar.sMain.AbilityRating.ToString("F2");

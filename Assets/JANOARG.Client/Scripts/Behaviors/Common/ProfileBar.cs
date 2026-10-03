@@ -173,10 +173,10 @@ namespace JANOARG.Client.Behaviors.Common
         {
             // Profile
             NameLabel.text = CommonSys.sMain.Storage.Get("INFO:Name", "JANOARG");
-            TitleLabel.text = CommonSys.sMain.Storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
+            TitleLabel =  PlayerManager.LoadPlayerTitle(TitleLabel);
             // TODO: Make this consistently display the avatar since the avatar become blank when going to snail map and can't revert it back
             // and it's maybe Unity's fault.
-            AvatarImage = CommonSys.LoadPlayerAvatar(AvatarImage);
+            AvatarImage = PlayerManager.LoadPlayerAvatar(AvatarImage);
 
             // Levels
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);

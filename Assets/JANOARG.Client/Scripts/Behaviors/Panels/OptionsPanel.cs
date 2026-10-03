@@ -240,10 +240,12 @@ namespace JANOARG.Client.Behaviors.Panels
                         x => storage.Set("INFO:PlayerTitle", x)
                         );
                     
-                    // Temporary titles
-                    playerTitle.ValidValues.Add("Perfectly Generic Player", "Perfectly Generic Player");
-                    playerTitle.ValidValues.Add("..............🐌", "..............🐌");
-
+                    PlayerManager.sMain.PlayerTitles.GetAllSongTitles();
+                    for (int i = 0; i < PlayerManager.sMain.PlayerTitles.Titles.Count; i++)
+                    {
+                        var av = PlayerManager.sMain.PlayerTitles.Titles[i];
+                        playerTitle.ValidValues.Add(av.ID, av.Name);
+                    }
 
                     // TODO: Add icons based on song unlocks 
                     var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
@@ -252,10 +254,10 @@ namespace JANOARG.Client.Behaviors.Panels
                         );
                     
                     avatar.ValidValues.Add("none", "No icon");
-                    CommonSys.sMain.PlayerAvatarConstants.GetAllSongAvatars();
-                    for (int i = 0; i < CommonSys.sMain.PlayerAvatarConstants.Avatars.Count; i++)
+                    PlayerManager.sMain.PlayerAvatars.GetAllSongAvatars();
+                    for (int i = 0; i < PlayerManager.sMain.PlayerAvatars.Avatars.Count; i++)
                     {
-                        var av = CommonSys.sMain.PlayerAvatarConstants.Avatars[i];
+                        var av = PlayerManager.sMain.PlayerAvatars.Avatars[i];
                         avatar.ValidValues.Add(av.ID, av.Name);
                     }
 

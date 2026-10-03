@@ -35,8 +35,8 @@ namespace JANOARG.Client.Behaviors.Panels
             Storage storage = CommonSys.sMain.Storage;
 
             PlayerName.text = storage.Get("INFO:Name", "JANOARG");
-            PlayerTitle.text = storage.Get("INFO:PlayerTitle", "Perfectly Generic Player");
-            PlayerAvatar = CommonSys.LoadPlayerAvatar(PlayerAvatar);
+            PlayerTitle = PlayerManager.LoadPlayerTitle(PlayerTitle);
+            PlayerAvatar = PlayerManager.LoadPlayerAvatar(PlayerAvatar);
             
             int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
             LevelContent.text = level.ToString();

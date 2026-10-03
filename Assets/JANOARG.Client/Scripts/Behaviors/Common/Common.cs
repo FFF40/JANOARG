@@ -20,8 +20,7 @@ namespace JANOARG.Client.Behaviors.Common
         public Camera          MainCamera;
         public RectTransform   CommonCanvas;
         public CommonConstants Constants;
-        public PlayerAvatar PlayerAvatarConstants;
-
+        
         public LoadingBar LoadingBar;
         public Storage    Preferences;
         public Storage    Storage;
@@ -346,26 +345,6 @@ namespace JANOARG.Client.Behaviors.Common
             }
 
             return new Vector2Int(width, height);
-        }
-
-        public static Image LoadPlayerAvatar(Image avatarImage)
-        {
-            string playerIcon = sMain.Storage.Get("INFO:PlayerIcon", "none");
-
-            avatarImage.color = playerIcon == "none"
-                ? Color.black
-                : Color.white;
-
-            if (sMain.PlayerAvatarConstants.Avatars.Any(a => a.ID == playerIcon))
-            {
-                var avatar = sMain.PlayerAvatarConstants.Avatars.First(a => a.ID == playerIcon);
-                avatarImage.sprite = avatar.Image;
-                return avatarImage;
-            } else
-            {
-                avatarImage.sprite = null;
-                return avatarImage;
-            }
         }
 
         public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)

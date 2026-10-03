@@ -10,7 +10,7 @@ using JANOARG.Client.Utils;
 namespace JANOARG.Client.Data.Player
 {
     [CreateAssetMenu(fileName = "Player Avatar", menuName = "JANOARG/Player/Avatars")]
-    public class PlayerAvatar : ScriptableObject
+    public class PlayerAvatars : ScriptableObject
     {
         public List<Avatar> Avatars;
 
