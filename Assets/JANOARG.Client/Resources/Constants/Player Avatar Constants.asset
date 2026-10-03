@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bff3b6fd0f532ab468e0ed9df2983b66, type: 3}
   m_Name: Player Avatar Constants
   m_EditorClassIdentifier: 
-  Avatar: []
+  Avatars: []
