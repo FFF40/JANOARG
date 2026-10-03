@@ -9,6 +9,7 @@ using JANOARG.Client.Behaviors.Player;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Client.Data.Constant;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
@@ -86,7 +87,7 @@ namespace JANOARG.Client.Behaviors.Panels
         public Mesh arrowFlickIndicator { get; private set; }
 
         private void Start()
-        {
+        {   
             TabButtons[CurrentTab]
                 .SetFill(1);
 
@@ -245,14 +246,18 @@ namespace JANOARG.Client.Behaviors.Panels
 
 
                     // TODO: Add icons based on song unlocks 
-                    // var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
-                    //     () => storage.Get("INFO:PlayerIcon", "none"),
-                    //     x => storage.Set("INFO:PlayerIcon", x)
-                    //     );
+                    var avatar = Spawn<ListOptionInput, string>("Player Avatar", 
+                        () => storage.Get("INFO:PlayerIcon", "none"),
+                        x => storage.Set("INFO:PlayerIcon", x)
+                        );
                     
-                    // // No icons for now
-                    // avatar.ValidValues.Add("none", "No icon");
-                    // avatar.ValidValues.Add("lightrays", "light-rays");
+                    avatar.ValidValues.Add("none", "No icon");
+                    CommonSys.sMain.PlayerAvatarConstants.GetAllSongAvatars();
+                    for (int i = 0; i < CommonSys.sMain.PlayerAvatarConstants.Avatars.Count; i++)
+                    {
+                        var av = CommonSys.sMain.PlayerAvatarConstants.Avatars[i];
+                        avatar.ValidValues.Add(av.ID, av.Name);
+                    }
 
                     var note = Spawn<OptionText>("Online stuff coming soon(?)");
                     note.TitleLabel.fontSize = 8;
@@ -330,9 +335,8 @@ namespace JANOARG.Client.Behaviors.Panels
                     //     "This mode turns the game into an ✨indie✨scale✨rhythm✨game✨™, enable at your own risk."
                     //     + "\nRequires a restart to reflect changes."
                     // );
-                }
-
                     break;
+                }
 
                 case 1:
                 {

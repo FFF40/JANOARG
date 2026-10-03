@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,12 +19,11 @@ namespace JANOARG.Client.Behaviors.Common
         public Camera          MainCamera;
         public RectTransform   CommonCanvas;
         public CommonConstants Constants;
+        public PlayerAvatarConstants PlayerAvatarConstants;
 
         public LoadingBar LoadingBar;
         public Storage    Preferences;
         public Storage    Storage;
-
-        private Dictionary<string, Sprite> _PlayerAvatarCache;
 
         [Header("Rendering")]
         [Tooltip("Dynamic-resolution scale for the 3D scene (1 = native). Screen-space overlay UI is " +
@@ -61,8 +61,6 @@ namespace JANOARG.Client.Behaviors.Common
             Storage.Save();
 
             Preferences = new Storage("prefs");
-
-            _PlayerAvatarCache = new Dictionary<string, Sprite>();
 
             // vSyncCount must be 0 for targetFrameRate to take effect;
             // if vsync is on Unity ignores targetFrameRate entirely.
@@ -349,15 +347,6 @@ namespace JANOARG.Client.Behaviors.Common
             return new Vector2Int(width, height);
         }
 
-
-        private static void CachePlayerAvatar(string playerIcon, Sprite avatarImage)
-        {
-            if (!sMain._PlayerAvatarCache.ContainsKey(playerIcon))
-            {
-                sMain._PlayerAvatarCache[playerIcon] = avatarImage;
-            }
-        }
-
         public static Image LoadPlayerAvatar(Image avatarImage)
         {
             string playerIcon = sMain.Storage.Get("INFO:PlayerIcon", "none");
@@ -366,45 +355,16 @@ namespace JANOARG.Client.Behaviors.Common
                 ? Color.black
                 : Color.white;
 
-            if (sMain._PlayerAvatarCache.TryGetValue(
-                    playerIcon,
-                    out Sprite sprite))
+            if (sMain.PlayerAvatarConstants.Avatars.Any(a => a.ID == playerIcon))
             {
-                avatarImage.sprite = sprite;
+                var avatar = sMain.PlayerAvatarConstants.Avatars.First(a => a.ID == playerIcon);
+                avatarImage.sprite = avatar.Image;
                 return avatarImage;
-            }
-
-            if (playerIcon == "none")
+            } else
             {
                 avatarImage.sprite = null;
-                sMain._PlayerAvatarCache[playerIcon] = null;
                 return avatarImage;
             }
-
-            Texture2D texture = Resources.Load<Texture2D>(
-                $"Songs/{playerIcon}/icon"
-            );
-
-            if (texture == null)
-            {
-                Debug.LogWarning(
-                    $"Player avatar not found: Songs/{playerIcon}/icon"
-                );
-
-                avatarImage.sprite = null;
-                return avatarImage;
-            }
-
-            sprite = Sprite.Create(
-                texture,
-                new Rect(0, 0, texture.width, texture.height),
-                new Vector2(0.5f, 0.5f)
-            );
-
-            sMain._PlayerAvatarCache[playerIcon] = sprite;
-            avatarImage.sprite = sprite;
-
-            return avatarImage;
         }
 
         public static void Load(string target, Func<bool> completed, Action onComplete, bool showBar = true)

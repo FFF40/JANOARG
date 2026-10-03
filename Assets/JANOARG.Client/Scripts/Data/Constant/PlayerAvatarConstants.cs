@@ -36,7 +36,7 @@ namespace JANOARG.Client.Data.Constant
                     SongAvatar songAvatar = new SongAvatar
                     {
                         ID = songID,
-                        Name = songID,
+                        Name = SongInfoManager.sMain.GetSongNameByID(songID),
                         Image = avatarSprite,
                         IsUnlocked = score.Score >= Helper.PASSING_SCORE
                     };
@@ -44,6 +44,7 @@ namespace JANOARG.Client.Data.Constant
                     Avatars.Add(songAvatar);
                 }
             }
+            Debug.Log($"Collected {Avatars.Count} song avatars.");
         }
     }
 

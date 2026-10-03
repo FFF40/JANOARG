@@ -7819,6 +7819,7 @@ GameObject:
   - component: {fileID: 1562277644}
   - component: {fileID: 1562277645}
   - component: {fileID: 1562277646}
+  - component: {fileID: 1562277647}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -7929,6 +7930,7 @@ MonoBehaviour:
   MainCamera: {fileID: 309085665}
   CommonCanvas: {fileID: 1562277642}
   Constants: {fileID: 11400000, guid: 6bb282cef15c64caa8efbf043edeec3e, type: 2}
+  PlayerAvatarConstants: {fileID: 11400000, guid: aba41f88dc4aca64a85a21d4ed7db315, type: 2}
   LoadingBar: {fileID: 1508486259}
   RenderScale: 1
 --- !u!114 &1562277644
@@ -7968,6 +7970,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42acb047d9597b3deae6b6c5ca73147f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1562277647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562277638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea4aa9eef8b4a2842a261c3b5a35c6d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MainPlaylist: {fileID: 11400000, guid: 16788cf8b6448b6f698f7c5b7da1a991, type: 2}
 --- !u!1 &1571469826
 GameObject:
   m_ObjectHideFlags: 0
