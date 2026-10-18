@@ -324,8 +324,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         }
 
 
-
-
         public void OnMapPointerDown(BaseEventData data)
         {
             PointerEventData pointerData = (PointerEventData)data;
@@ -348,8 +346,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             isPointerDown = false;
         }
 
-
-
         public void SelectSong(SongMapItem item)
         {
             isPointerDown = false;
@@ -363,7 +359,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             Debug.Log($"{item.TargetStory.name} is Target Story");
 
             yield return new WaitForSeconds(1);
-            LoadingBar.sMain.Show();
+            // LoadingBar.sMain.Show();
 
             CommonSys.sMain.MainCamera.backgroundColor = Color.black;
 
@@ -372,8 +368,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
                 "Storyteller",
                 () => !LoadingBar.sMain.IsAnimating && Storyteller.StorytellerScreen.sMain?.IsInit == true,
                 () => {
-                    LoadingBar.sMain.Hide();
-                    Storyteller.Storyteller.sMain.PlayScript(StorytellerScreen.sScriptToPlay);
+                    // LoadingBar.sMain.Hide();
+
                     }
                 , false);
             SceneManager.UnloadSceneAsync(MapScene);

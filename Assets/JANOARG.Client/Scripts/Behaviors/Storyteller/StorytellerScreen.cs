@@ -9,33 +9,31 @@ namespace JANOARG.Client.Behaviors.Storyteller
     public class StorytellerScreen : MonoBehaviour
     {
         public static StorytellerScreen sMain;
-
         public static StoryScript sScriptToPlay;
         public bool IsInit;
 
-        public void Awake()
+        private void Awake()
         {
             sMain = this;
+            IsInit = false;
             CommonScene.Load();
         }
 
         // Start is called before the first frame update
-        private void Start()
+        private IEnumerator Start()
         {
-            StartCoroutine(StoryRoutine());
-        }
+            if (sScriptToPlay == null)
+                yield break;
 
-        
-        public IEnumerator StoryRoutine()
-        {
-            if (sScriptToPlay)
-            {
-                IsInit = true;
-                Storyteller.sMain.CurrentScript = sScriptToPlay;
-            } else
-            {
-                yield break;   
-            }
+            yield return null; 
+
+            if (Storyteller.sMain == null)
+                yield break;
+
+            Storyteller.sMain.CurrentScript = sScriptToPlay;
+            Storyteller.sMain.PlayScript(sScriptToPlay);
+
+            IsInit = true;
         }
     }
 }

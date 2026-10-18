@@ -114,10 +114,10 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void PlayNextChunk()
         {
-            CurrentChunkIndex++;
             if (CurrentScript.Chunks.Count > CurrentChunkIndex)
             {
                 StartCoroutine(PlayChunk()); 
+                CurrentChunkIndex++;
             } else
             {
                 Debug.Log($"END OF STORY");
@@ -168,7 +168,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
             {
                 yield return UndockInterface();
             }
-
+            
             // Order
             yield return RunPhase(chunk, i => i.OnSceneSet(this));
             yield return RunPhase(chunk, i => i.OnBeforeTextReveal(this));
