@@ -52,39 +52,38 @@ namespace JANOARG.Client.Data.Constant
             if (constants == null || !visited.Add(constants))
                 return;
 
-            if (constants._MusicLookup != null)
+            if (constants.MusicList != null)
             {
                 foreach (Music music in constants.MusicList)
                 {
-                    if (music == null ||
-                        string.IsNullOrEmpty(music.ID))
+                    if (music == null || string.IsNullOrEmpty(music.ID))
                         continue;
 
-                    if (!_MusicLookup.TryAdd(
-                            music.ID, music.MusicClip))
+                    if (!_MusicLookup.TryAdd(music.ID, music.MusicClip))
                     {
                         Debug.LogWarning(
-                            $"Duplicate background ID: {music.ID}",
-                            constants);
-                    }
-                }
-
-                foreach (SoundEffects sound in constants.SFXList)
-                {
-                    if (sound == null ||
-                        string.IsNullOrEmpty(sound.ID))
-                        continue;
-
-                    if (!_SoundLookup.TryAdd(
-                            sound.ID, sound.SoundEffect))
-                    {
-                        Debug.LogWarning(
-                            $"Duplicate background ID: {sound.ID}",
+                            $"Duplicate music ID: {music.ID}",
                             constants);
                     }
                 }
             }
 
+            if (constants.SFXList != null)
+            {
+                foreach (SoundEffects sound in constants.SFXList)
+                {
+                    if (sound == null || string.IsNullOrEmpty(sound.ID))
+                        continue;
+
+                    if (!_SoundLookup.TryAdd(sound.ID, sound.SoundEffect))
+                    {
+                        Debug.LogWarning(
+                            $"Duplicate sound ID: {sound.ID}",
+                            constants);
+                    }
+                }
+            }
+            
             if (constants.MusicList == null && constants.SFXList == null)
                 return;
 
