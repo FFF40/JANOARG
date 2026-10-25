@@ -66,7 +66,6 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 
         public readonly List<TouchClass> TouchClasses = new();
 
-
         /// <summary>
         ///     Touch events recorded since the last input frame. The touch panel reports several events per
         ///     finger between two rendered frames, each with its own timestamp; feeding them all ties flick
@@ -109,7 +108,6 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
             sInstance = this;
         }
 
-
         public void OnDestroy() // Deconstructor
         {
             Touch.onFingerDown -= RecordSample;
@@ -117,25 +115,6 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
             Touch.onFingerUp   -= RecordSample;
             EnhancedTouchSupport.Disable();
         }
-
-
-
-
-        ///     How far the player's flick may deviate from a note's FlickDirection, in degrees.
-        /// </summary>
-
-
-
-        // (fingerIndex, holdNoteEntry), so each call allocated a closure plus a delegate — several per
-        // frame while touches are active. These are plain loops over the same fields.
-
-
-
-
-
-
-
-
 
     }
 }
