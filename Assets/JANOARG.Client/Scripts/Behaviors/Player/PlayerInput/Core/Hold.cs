@@ -1,5 +1,6 @@
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using UnityEngine;
 
 
@@ -165,7 +166,8 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
                 // far more often than a single effect's animation takes to finish).
                 if (holdNoteEntry.IsScoring)
                 {
-                    Color interfaceColor = new Color(PlayerScreen.sCurrentChart.Palette.InterfaceColor.r, PlayerScreen.sCurrentChart.Palette.InterfaceColor.g, PlayerScreen.sCurrentChart.Palette.InterfaceColor.b, 0.32f);
+                    Color interfaceColor = PlayerScreen.sCurrentChart.Palette.InterfaceColor;
+                    interfaceColor *= new Vector4Frag(w: 0.32f);
                     holdNoteEntry.EnsureDedicatedEffects(interfaceColor);
                     JudgeScreenEffect effect = holdNoteEntry.PulseDedicatedEffect();
 
