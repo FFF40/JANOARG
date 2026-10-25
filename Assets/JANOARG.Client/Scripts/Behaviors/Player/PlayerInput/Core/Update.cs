@@ -4,6 +4,7 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
 using UnityEngine;
+using Unity.Profiling;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
@@ -11,6 +12,12 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 {
     public partial class PlayerInputEngine
     {
+        static readonly ProfilerMarker sr_TouchInputLoop       = new("UpdateInput: Touch Input Loop");
+        static readonly ProfilerMarker sr_HitQueueLoop         = new("UpdateInput: HitQueue Processor Loop");
+        static readonly ProfilerMarker sr_HoldQueueBlock       = new("UpdateInput: HoldQueue Processor Block");
+        static readonly ProfilerMarker sr_DiscreteHitQueueLoop = new("UpdateInput: DiscreteHitQueue Processor Loop");
+        static readonly ProfilerMarker sr_HitobjectProcessor   = new("HitobjectProcessor");
+        static readonly ProfilerMarker sr_HoldQueueProcessor   = new("HoldQueue_Processor");
         public void UpdateInput() // Main input thread
         {
 

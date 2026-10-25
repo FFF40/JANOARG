@@ -7,6 +7,23 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 {
     public partial class PlayerInputEngine
     {
+    /// <summary>
+    ///     Second stage of a tap-flick: the tap has already claimed <paramref name = "note"/> into
+    ///     this touch's queue, and this decides whether the flick that followed satisfies it.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Three independent gates, each doing exactly one job: speed (did the finger move fast
+    ///         enough to be a flick — <see cref = "FlickTracker.IsFlicked"/>), distance (did it move
+    ///         far enough to mean it), and containment (is it still on the note).
+    ///     </para>
+    ///     <para>
+    ///         Containment for a directional note is the hit radius stretched indefinitely along
+    ///         FlickDirection — a beam. The beam is symmetric, so a backwards flick sits inside it
+    ///         and is rejected on angle instead; direction is never inferred from position.
+    ///     </para>
+    /// </remarks>
+    /// <returns> true if the note was hit. </returns>
         private bool TryResolveTapFlick(TouchClass touch, HitPlayer note, float flickDistanceThreshold)
         {
             if (!note || note.IsReturned || note.IsProcessed) return false;

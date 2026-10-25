@@ -11,6 +11,10 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
                 if (queue[i] == hit)
                     queue.RemoveAt(i);
         }
+    /// <summary>
+    ///     Adds the given <see cref = "HitPlayer"/> object to the player's hit queue, sorted by time.
+    /// </summary>
+    /// <param name = "hit"> The <see cref = "HitPlayer"/> object to add to the queue. </param>
         public void AddToQueue(HitPlayer hit)
         {
             // Autoplay scores every note at its own chart time, so from the draw pass's point of
@@ -32,6 +36,14 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
                 HitQueue.Remove(hit);
             }
         }
+    /// <summary>
+    /// Unconditionally scrubs every reference to <paramref name="hit"/> from every queue/cache
+    /// this manager holds. Called right before a HitPlayer is returned to PlayerScreen's pool,
+    /// since a pooled instance can be handed out to a brand-new note as soon as the same frame
+    /// it's returned — any stale reference left behind would silently start aliasing that new
+    /// note (same underlying object, so flag-based "is this finished" checks stop working the
+    /// instant it's reused).
+    /// </summary>
         public void PurgeHitPlayer(HitPlayer hit)
         {
             RemoveAllFromQueue(HitQueue, hit);

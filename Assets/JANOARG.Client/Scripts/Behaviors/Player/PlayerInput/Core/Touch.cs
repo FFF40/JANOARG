@@ -8,6 +8,11 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 {
     public partial class PlayerInputEngine
     {
+    /// <summary>
+    ///     Records one touch event for the next input frame. Multiple events can arrive per finger
+    ///     between two frames, so each is buffered with its own timestamp rather than collapsed into
+    ///     whichever position happened to be current when the frame ran.
+    /// </summary>
         private void RecordSample(Finger finger)
         {
             // Input is only judged while a chart is running. Dropping events outside it also keeps the
@@ -26,6 +31,11 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
                 Phase       = touch.phase,
             });
         }
+    /// <summary>
+    ///     Whether a touch-down arrived for this finger since the last input frame. Used to tell a
+    ///     gesture that fitted entirely between two frames (which must be reconstructed and judged)
+    ///     from one whose down happened while input was not being tracked (which must be ignored).
+    /// </summary>
         private bool HasPendingDown(int fingerIndex)
         {
             for (var i = 0; i < _PendingSamples.Count; i++)
@@ -35,6 +45,15 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 
             return false;
         }
+    /// <summary>
+    ///     Feeds every recorded event for this finger into its tracker, in order.
+    /// </summary>
+    /// <remarks>
+    ///     One sample per rendered frame averaged the whole frame's motion into a single speed figure:
+    ///     a short, sharp flick was flattened below the fire threshold, and the same gesture read
+    ///     differently at 30 fps than at 120. Per-event samples measure the movement at the touch
+    ///     panel's own resolution, with the event's real timestamp as <c>dt</c>.
+    /// </remarks>
         private void DrainFlickSamples(TouchClass touch, int fingerIndex)
         {
             for (var i = 0; i < _PendingSamples.Count; i++)
@@ -65,6 +84,10 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 
             return null;
         }
+    /// <summary>
+    ///     Logs a message only once when the PlayerScreen is initialized.
+    /// </summary>
+    /// <param name = "msg"> The message to log. </param>
         private void InitLogger(string msg)
         {
             if (_InitLog) Debug.Log(msg);
