@@ -1461,10 +1461,21 @@ namespace JANOARG.Client.Behaviors.Player
         {
             if (!Settings.ShowStreakIndicator) return "";
 
+            if (TotalCombo == 0) return "";
+
             if (PerfectCount == TotalCombo)
             {
                 return "!!";
-            } else if (BadCount == 0)
+            }
+            else if (PerfectCount == 0 && BadCount == 0 && GoodCount > 0)
+            {
+                return "?!";
+            }
+            else if (PerfectCount == 0 && GoodCount == 0 && BadCount > 0)
+            {
+                return "...?";
+            }
+            else if (BadCount == 0)
             {
                 return "!";
             }
