@@ -11,6 +11,7 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
+// ReSharper disable once CheckNamespace
 namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
 {
     partial class PlayerInputEngine : MonoBehaviour
