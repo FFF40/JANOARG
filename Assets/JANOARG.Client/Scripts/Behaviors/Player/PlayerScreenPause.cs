@@ -54,8 +54,8 @@ namespace JANOARG.Client.Behaviors.Player
                 PlayerScreen.sMain.SuspendMusicSchedule();
                 PlayerScreen.sMain.ComputeAndSaveMedianOffset();
 
-                // PlayerInputManager.main.Fingers.Clear();
-                PlayerInputManager.sInstance.TouchClasses.Clear();
+                // PlayerInputEngine.main.Fingers.Clear();
+                PlayerInputEngine.sInstance.TouchClasses.Clear();
                 Show();
             }
             else

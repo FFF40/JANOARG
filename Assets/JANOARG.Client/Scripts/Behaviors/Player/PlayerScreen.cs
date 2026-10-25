@@ -27,7 +27,7 @@ namespace JANOARG.Client.Behaviors.Player
         static readonly ProfilerMarker sr_HitStylesUpdate = new("PlayerScreen.LateUpdate: HitStyles Loop");
         static readonly ProfilerMarker sr_CameraAdvance = new("PlayerScreen.LateUpdate: Camera Advance");
         static readonly ProfilerMarker sr_SpawnHitEffect = new("PlayerScreen.SpawnHitEffect");
-        static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputManager.UpdateInput");
+        static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputEngine.UpdateInput");
         static readonly ProfilerMarker sr_HoldMeshLoop = new("PlayerScreen.Update: Hold Mesh Loop");
         static readonly ProfilerMarker sr_LanesLoop = new("PlayerScreen.LateUpdate: Lanes Loop (Total)");
 
@@ -1146,7 +1146,7 @@ namespace JANOARG.Client.Behaviors.Player
                 SongEnded      = _SongEnded,
                 ResultExec     = ResultExec,
                 HitsRemaining  = HitsRemaining,
-                HoldQueueCount = PlayerInputManager.sInstance.HoldQueue.Count,
+                HoldQueueCount = PlayerInputEngine.sInstance.HoldQueue.Count,
                 GoodWindow     = GoodWindow,
 
                 PrevTimeSamples = _PrevTimeSamples,
@@ -1176,7 +1176,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             // Process input directly — no coroutine, no +1 frame latency
             sr_UpdateInputCall.Begin();
-            PlayerInputManager.sInstance.UpdateInput();
+            PlayerInputEngine.sInstance.UpdateInput();
             sr_UpdateInputCall.End();
 
             // Re-asked after input, since that is what settles this frame's hit counts.
@@ -1186,7 +1186,7 @@ namespace JANOARG.Client.Behaviors.Player
                     GoodWindow,
                     _SongEnded,
                     HitsRemaining,
-                    PlayerInputManager.sInstance.HoldQueue.Count,
+                    PlayerInputEngine.sInstance.HoldQueue.Count,
                     ResultExec))
             {
                 ComputeAndSaveMedianOffset();
@@ -1480,7 +1480,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Scrub every queue/cache reference before returning to the pool — a pooled
             // instance can be re-borrowed as soon as this same frame's LateUpdate, and any
             // stale reference left behind would silently alias whatever note reuses it.
-            PlayerInputManager.sInstance.PurgeHitPlayer(hitObject);
+            PlayerInputEngine.sInstance.PurgeHitPlayer(hitObject);
 
             ReturnHitPlayer(hitObject);
         }
