@@ -1446,8 +1446,9 @@ namespace JANOARG.Client.Behaviors.Player
                 Combo = 0;
                 BadCount++;
             }
+            TotalCombo++;
 
-            ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
+            ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×" + FormatStreakIndicator();
 
             JudgmentLabel.text = FormatJudgmentLabel(acc, offset, score);
 
@@ -1456,7 +1457,30 @@ namespace JANOARG.Client.Behaviors.Player
 
             _JudgeAnimation = StartCoroutine(JudgmentAnim());
 
-            TotalCombo++;
+        }
+        private string FormatStreakIndicator()
+        {
+            if (!Settings.ShowStreakIndicator) return "";
+
+            if (TotalCombo == 0) return "";
+
+            if (PerfectCount == TotalCombo)
+            {
+                return "!!";
+            }
+            else if (PerfectCount == 0 && BadCount == 0 && GoodCount > 0)
+            {
+                return "?!";
+            }
+            else if (PerfectCount == 0 && GoodCount == 0 && BadCount > 0)
+            {
+                return "...?";
+            }
+            else if (BadCount == 0)
+            {
+                return "!";
+            }
+            return "";
         }
 
         private IEnumerator JudgmentAnim()
@@ -1661,6 +1685,7 @@ namespace JANOARG.Client.Behaviors.Player
             SongProgressBody.color = color * new Color(1, 1, 1, .5f);
         }
 
+        // TODO: Move this to a editor script before removing this method
         private void InitFlickMeshes()
         {
             return; // Asset already assigned
@@ -1720,6 +1745,7 @@ namespace JANOARG.Client.Behaviors.Player
         public short ShowValueText;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
+        public bool  ShowStreakIndicator;
         public bool  HighlightSimulNotes;
         public bool  AlwaysShowHitVFX;
 
@@ -1734,6 +1760,7 @@ namespace JANOARG.Client.Behaviors.Player
             AlwaysShowHitVFX = CommonSys.sMain.Preferences.Get("PLYR:AlwaysShowHitVFX", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             ShowValueText = short.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowOffset", "1"));
+            ShowStreakIndicator = CommonSys.sMain.Preferences.Get("PLYR:ShowStreakIndicator",true);
             
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });
