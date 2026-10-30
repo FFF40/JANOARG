@@ -1082,7 +1082,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 currentCameraZ = targetCameraZ;
             });
 
-            PlayerScreen.sTargetSongPath = $"Songs/{TargetSongID}/{TargetSongID}";
+            string chartsRoot = JANOARG.Client.Behaviors.SongSelect.ExternalManager.ChartDirProvider.GetChartsDirectoryPath();
+            bool isExternal = Directory.Exists(Path.Combine(chartsRoot, TargetSongID));
+            PlayerScreen.sIsExternal = isExternal;
+            PlayerScreen.sTargetSongPath = isExternal
+                ? Path.Combine(chartsRoot, TargetSongID)
+                : $"Songs/{TargetSongID}/{TargetSongID}";
             PlayerScreen.sTargetSong = TargetSong;
             PlayerScreen.sTargetChartMeta = TargetDifficulty.Chart;
             CommonSys.sMain.MainCamera.backgroundColor = TargetSong.BackgroundColor;
