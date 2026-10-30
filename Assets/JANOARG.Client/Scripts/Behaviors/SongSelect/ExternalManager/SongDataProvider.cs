@@ -22,7 +22,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             {
                 var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
                 if (tex.LoadImage(File.ReadAllBytes(path)))
+                {
+                    RuntimeExternalManager.ExternalTextures.Add(tex);
                     return tex;
+                }
             }
             catch (Exception e) { Debug.LogWarning($"Failed to load texture {path}: {e}"); }
             return null;
@@ -77,14 +80,27 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 {
                     yield return req.SendWebRequest();
                     if (req.result == UnityWebRequest.Result.Success)
+                    {
                         song.Clip = DownloadHandlerAudioClip.GetContent(req);
+                        if (song.Clip != null) RuntimeExternalManager.ExternalClips.Add(song.Clip);
+                    }
                 }
             }
 
             // Load cover/icon images
             string iconPath = Path.Combine(dir, song.Cover?.IconTarget ?? "icon.png");
             if (File.Exists(iconPath))
+            {
                 song.Cover.IconCover = LoadSprite(iconPath);
+                if (song.Cover.IconCover != null)
+                    Debug.Log($"[SongDataProvider] Loaded cover for {Path.GetFileName(dir)}");
+                else
+                    Debug.LogWarning($"[SongDataProvider] Failed to load cover image {iconPath}");
+            }
+            else
+            {
+                Debug.LogWarning($"[SongDataProvider] Cover file not found: {iconPath}");
+            }
 
             if (song.Cover?.Layers != null)
             {

@@ -13,6 +13,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
     public class RuntimeExternalManager : MonoBehaviour
     {
         public static RuntimeExternalManager sMain;
+        public static System.Collections.Generic.HashSet<string> ExternalSongIDs = new();
+        public static System.Collections.Generic.HashSet<AudioClip> ExternalClips = new();
+        public static System.Collections.Generic.HashSet<Texture2D> ExternalTextures = new();
 
         public void Awake() => sMain = this;
 
@@ -64,6 +67,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 screen.LoadedSongs.Add(playlistSong);
                 screen.PlayableSongByID[id] = song;
                 screen.PlaylistSongByID[id] = playlistSong;
+                ExternalSongIDs.Add(id);
             }
 
             screen.ListView.UpdateSort();

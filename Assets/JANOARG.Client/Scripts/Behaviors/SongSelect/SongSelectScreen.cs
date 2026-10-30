@@ -222,8 +222,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     }
                     else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
                     {
-                        PreviewSource.clip.UnloadAudioData();
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.ExternalClips.Contains(PreviewSource.clip))
+                            PreviewSource.clip.UnloadAudioData();
                         PreviewSource.clip = CurrentPreviewClip;
+                        if (PreviewSource.clip != null && PreviewSource.clip.loadState != AudioDataLoadState.Loaded)
+                            PreviewSource.clip.LoadAudioData();
                         PreviewSource.Play();
                         PreviewSource.time = CurrentPreviewRange.x;
                     }
@@ -612,6 +615,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
             
             CurrentPreviewClip = IsTargetSongUnlocked ? targetSong.Clip : PreviewNoiseClip;
             CurrentPreviewRange = IsTargetSongUnlocked ? targetSong.PreviewRange : new(0, 10);
+            if (CurrentPreviewClip != null && CurrentPreviewClip.loadState != AudioDataLoadState.Loaded)
+                CurrentPreviewClip.LoadAudioData();
+            if (CurrentPreviewClip == PreviewSource.clip && PreviewSource.clip != null)
+            {
+                PreviewSource.time = CurrentPreviewRange.x;
+                if (!PreviewSource.isPlaying) PreviewSource.Play();
+            }
 
             string songPath = $"Songs/{songID}/{songID}";
             foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
@@ -706,8 +716,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 // Clear old cover
                 foreach (var layer in TargetSongCoverLayers) 
                 {
-                    Resources.UnloadAsset(layer.Image.texture);
-                    Destroy(layer.gameObject);
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.ExternalTextures.Contains(layer.Image.texture))
+                            Resources.UnloadAsset(layer.Image.texture);
+                        Destroy(layer.gameObject);
                 }
                 TargetSongCoverLayers.Clear();
 
@@ -716,13 +727,17 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     // Load new cover
                     foreach (CoverLayer layer in CurrentCover.Layers)
                     {
-                        string path = Path.Combine($"Songs/{songID}", layer.Target);
-                        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
-                        var req = Resources.LoadAsync<Texture2D>(path);
-                        yield return req;
-                        if (req.asset)
+                        Texture2D tex = layer.Texture;
+                        if (tex == null)
                         {
-                            Texture2D tex = (Texture2D)req.asset;
+                            string path = Path.Combine($"Songs/{songID}", layer.Target);
+                            if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                            var req = Resources.LoadAsync<Texture2D>(path);
+                            yield return req;
+                            tex = req.asset as Texture2D;
+                        }
+                        if (tex != null)
+                        {
                             var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
                             layerImage.Layer = layer;
                             layerImage.Image.texture = tex;

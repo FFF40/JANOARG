@@ -29,6 +29,16 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 else 
                     yield return CoverInfos[textureID].Coroutine;
             }
+            else if (song.Cover?.IconCover != null)
+            {
+                CoverInfos[textureID] = new CoverInfo
+                {
+                    Uses = 1,
+                    Icon = song.Cover.IconCover.texture,
+                    Coroutine = null
+                };
+                yield break;
+            }
             else
             {
                 IEnumerator f_load()
@@ -80,11 +90,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
             if (CoverInfos.ContainsKey(textureID))
             {
                 CoverInfos[textureID].Uses--;
-                if (CoverInfos[textureID].Uses <= 0)
-                {
-                    Resources.UnloadAsset(CoverInfos[textureID].Icon);
-                    CoverInfos.Remove(textureID);
-                }
+                    if (CoverInfos[textureID].Uses <= 0)
+                    {
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.ExternalTextures.Contains(CoverInfos[textureID].Icon))
+                            Resources.UnloadAsset(CoverInfos[textureID].Icon);
+                        CoverInfos.Remove(textureID);
+                    }
             }
         }
         public void UnregisterUseSong(string songID)
