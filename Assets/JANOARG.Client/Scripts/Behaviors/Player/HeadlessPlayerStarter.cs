@@ -9,6 +9,12 @@ using UnityEngine.SceneManagement;
 
 namespace JANOARG.Client.Behaviors.Player
 {
+    /// <summary>
+    /// Responsible for initializing and loading a headless player instance,
+    /// specifically for testing or execution purposes without booting Song Select
+    /// and manually selecting a song within.
+    /// </summary>
+    /// <remarks>Requires values from <c>PlayerScreen.sMain.RunChart</c> and <c>PlayerScreen.sMain.Chart</c> as the load target</remarks>
     public class HeadlessPlayerStarter : MonoBehaviour
     {
         public static ExternalPlayableSong sRunChart;
@@ -83,7 +89,7 @@ namespace JANOARG.Client.Behaviors.Player
                 "Player", () => PlayerScreen.sMain && PlayerScreen.sMain.IsReady,
                 () =>
                 {
-                    PlayerScreen.sMain.BeginReadyAnim();
+                    PlayerScreen.sMain!.BeginReadyAnim(); // Asserted by WaitUntil
                     SceneManager.UnloadSceneAsync("HeadlessPlayerStarter");
                     Resources.UnloadUnusedAssets();
                 });
