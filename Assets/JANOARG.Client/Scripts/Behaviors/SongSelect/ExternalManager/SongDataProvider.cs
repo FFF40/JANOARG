@@ -16,6 +16,25 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public void Awake() => sMain = this;
 
+        static Texture2D LoadTexture(string path)
+        {
+            try
+            {
+                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (tex.LoadImage(File.ReadAllBytes(path)))
+                    return tex;
+            }
+            catch (Exception e) { Debug.LogWarning($"Failed to load texture {path}: {e}"); }
+            return null;
+        }
+
+        static Sprite LoadSprite(string path)
+        {
+            var tex = LoadTexture(path);
+            if (tex == null) return null;
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        }
+
         public void LoadSong(string dir, Action<PlayableSong> onComplete)
         {
             StartCoroutine(LoadSongRoutine(dir, onComplete));
@@ -59,6 +78,25 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     yield return req.SendWebRequest();
                     if (req.result == UnityWebRequest.Result.Success)
                         song.Clip = DownloadHandlerAudioClip.GetContent(req);
+                }
+            }
+
+            // Load cover/icon images
+            string iconPath = Path.Combine(dir, song.Cover?.IconTarget ?? "icon.png");
+            if (File.Exists(iconPath))
+                song.Cover.IconCover = LoadSprite(iconPath);
+
+            if (song.Cover?.Layers != null)
+            {
+                foreach (var layer in song.Cover.Layers)
+                {
+                    if (string.IsNullOrEmpty(layer.Target)) continue;
+                    string layerPath = Path.Combine(dir, layer.Target);
+                    if (File.Exists(layerPath))
+                    {
+                        var tex = LoadTexture(layerPath);
+                        if (tex != null) layer.Texture = tex;
+                    }
                 }
             }
 
