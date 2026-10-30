@@ -11,6 +11,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
     {
 
         [Space]
+        [PlaylistPicker]
         public string TargetID;
 
         [NonSerialized]
@@ -28,7 +29,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map.MapItems
         {
             if (Target == null)
             {
-                Target = Array.Find(SongSelectScreen.sMain.Playlist.Playlists, x => x.Playlist.MapName == TargetID);
+                Target = Array.Find(SongSelectScreen.sMain.Playlist.Playlists, x => x.Playlist.ID == TargetID || (string.IsNullOrEmpty(x.Playlist.ID) && x.Playlist.MapName == TargetID));
                 if (Target == null) throw new Exception($"Couldn't find playlist \"{TargetID}\" in the current playlist");
             }
 

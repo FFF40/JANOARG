@@ -9,9 +9,10 @@ namespace JANOARG.Client.Data.Playlist
     [CreateAssetMenu(fileName = "New Playlist", menuName = "JANOARG/Playlist", order = 100)]
     public class Playlist : ScriptableObject
     {
-        [Header("Metadata")]
-        public string MapName;
-        public Color BackgroundColor = Color.black;
+    [Header("Metadata")]
+    public string ID;
+    public string MapName;
+    public Color BackgroundColor = Color.black;
 
         [Header("Items")]
         [FormerlySerializedAs("Items")]
@@ -44,4 +45,5 @@ namespace JANOARG.Client.Data.Playlist
     }
 
     public class JAPSPickerAttribute : PropertyAttribute { }
+    public class PlaylistPickerAttribute : PropertyAttribute { }
 }
