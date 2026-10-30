@@ -303,6 +303,8 @@ namespace JANOARG.Client.Behaviors.Player
         private const int HitPlayerPoolPrewarm = 64;
         private readonly Stack<HitPlayer> _HitPlayerPool = new();
         private int _HitPlayersCreated;
+        
+        #region CUSTOM PROFILER CODE
 
         // Read-only views for JanoargProfilerSampler (custom Profiler counters).
         internal int PendingLaneCount      => _PendingLanes.Count - _PendingLaneCursor;
@@ -369,6 +371,7 @@ namespace JANOARG.Client.Behaviors.Player
                 return count;
             }
         }
+        #endregion
 
         private void PrewarmHitPlayerPool()
         {
