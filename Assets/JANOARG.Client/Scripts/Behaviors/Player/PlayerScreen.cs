@@ -523,6 +523,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                     if (sIsExternal)
                     {
+                        path = Path.Combine(sTargetSongPath, sTargetChartMeta.Target);
                         if (!File.Exists(path) && !path.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
                             path += ".jac";
                         string text = File.ReadAllText(path);
