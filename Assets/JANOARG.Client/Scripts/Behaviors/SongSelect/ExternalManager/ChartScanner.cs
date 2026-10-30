@@ -19,6 +19,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public void Awake()
         {
+            Debug.Log("[ChartScanner] Awake");
             sMain = this;
             ChartDirProvider.EnsureAccess(success =>
             {
@@ -31,6 +32,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 catch (Exception e) { Debug.LogWarning(e); }
                 StartWatching();
                 Rescan();
+                LogFinding();
+                Debug.Log($"[ChartScanner] Scanned {_ChartsDir}: {JAPSDirs.Count} chart folders");
             });
         }
 
@@ -53,9 +56,18 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             {
                 _Dirty = false;
                 Rescan();
+                LogFinding();
             }
         }
         
+        void LogFinding()
+        {
+            var lines = new List<string> { "[ChartScanner] Found the following:" };
+            foreach (var kv in JAPSDirs)
+                lines.Add($"  {kv.Key}: {kv.Value}");
+            Debug.Log(string.Join("\n", lines));
+        }
+
         void StartWatching()
         {
             if (string.IsNullOrEmpty(_ChartsDir) || !Directory.Exists(_ChartsDir)) return;
@@ -107,6 +119,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                         foreach (string file in Directory.GetFiles(subDir, pattern, SearchOption.TopDirectoryOnly))
                         {
                             var info = new FileInfo(file);
+                            // polynomial rolling hash
                             hash = hash * 131 + (ulong)info.Name.GetHashCode();
                             hash = hash * 131 + (ulong)info.Length;
                             hash = hash * 131 + (ulong)info.LastWriteTimeUtc.Ticks;
