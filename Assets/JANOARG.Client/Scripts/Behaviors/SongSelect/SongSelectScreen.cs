@@ -506,10 +506,15 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     item => item is SongSelectListSong song
                 );
 
-                ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
-                ListView.TargetSongID = targetSong.SongID;
+                if (targetSong != null)
+                {
+                    ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
+                    ListView.TargetSongID = targetSong.SongID;
+                }
                 ListView.IsDirty = true;
                 ListView.HandleUpdate();
+
+                if (targetSong == null) yield break;
 
                 PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
                 SetTargetSong(targetSong.SongID, playableSong);
