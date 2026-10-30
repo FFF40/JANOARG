@@ -9,6 +9,7 @@ using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Files;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
@@ -37,6 +38,7 @@ namespace JANOARG.Client.Behaviors.Player
         public static string            sTargetSongPath;
         public static PlayableSong      sTargetSong;
         public static ExternalChartMeta sTargetChartMeta;
+        public static bool              sIsExternal;
         public static ExternalChart     sTargetChart;
 
         public static Chart sCurrentChart;
@@ -518,15 +520,28 @@ namespace JANOARG.Client.Behaviors.Player
                 else
                 {
                     string path = Path.Combine(Path.GetDirectoryName(sTargetSongPath)!, sTargetChartMeta.Target);
-                    Debug.Log(path);
-                    ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
+                    if (sIsExternal)
+                    {
+                        if (!File.Exists(path) && !path.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
+                            path += ".jac";
+                        string text = File.ReadAllText(path);
+                        var chart = JANOARG.Shared.Data.Files.JACDecoder.Decode(text);
+                        sTargetChart = ScriptableObject.CreateInstance<ExternalChart>();
+                        sTargetChart.Data = chart;
+                    }
+                    else
+                    {
+                        Debug.Log(path);
+                        ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    sTargetChart = chartLoadRequest.asset as ExternalChart;
+                        yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
 
-                    if (sTargetChart == null)
-                        throw new InvalidOperationException($"Failed to load chart asset at Resources path '{path}'.");
+                        sTargetChart = chartLoadRequest.asset as ExternalChart;
+
+                        if (sTargetChart == null)
+                            throw new InvalidOperationException($"Failed to load chart asset at Resources path '{path}'.");
+                    }
                 }
 
                 if (!sHeadlessInitialised)
