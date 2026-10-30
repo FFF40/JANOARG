@@ -730,8 +730,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
                         Texture2D tex = layer.Texture;
                         if (tex == null)
                         {
-                            string path = Path.Combine($"Songs/{songID}", layer.Target);
-                            if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                        string target = layer.Target.Replace('\\', '/');
+                        while (target.StartsWith("./")) target = target.Substring(2);
+                        target = target.TrimStart('/');
+                        string path = Path.Combine($"Songs/{songID}", target);
+                        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
                             var req = Resources.LoadAsync<Texture2D>(path);
                             yield return req;
                             tex = req.asset as Texture2D;

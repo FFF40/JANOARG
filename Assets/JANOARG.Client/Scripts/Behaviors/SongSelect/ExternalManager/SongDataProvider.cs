@@ -107,7 +107,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 foreach (var layer in song.Cover.Layers)
                 {
                     if (string.IsNullOrEmpty(layer.Target)) continue;
-                    string layerPath = Path.Combine(dir, layer.Target);
+                    string target = layer.Target.Replace('\\', '/');
+                    while (target.StartsWith("./")) target = target.Substring(2);
+                    target = target.TrimStart('/');
+                    string layerPath = Path.Combine(dir, target);
                     if (File.Exists(layerPath))
                     {
                         var tex = LoadTexture(layerPath);
