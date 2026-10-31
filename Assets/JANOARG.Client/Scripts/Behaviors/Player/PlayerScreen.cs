@@ -281,10 +281,25 @@ namespace JANOARG.Client.Behaviors.Player
             CommonScene.Load();
         }
 
+        // External songs are streamed in song select; for the run we swap in a fully decoded clip on the
+        // shared PlayableSong, then put the streamed one back when the player goes away.
+        private PlayableSong _UpgradedSong;
+        private AudioClip    _StreamedClip;
+
         public void OnDestroy()
         {
             if (sMain == this)
                 sMain = null;
+
+            if (_UpgradedSong != null)
+            {
+                AudioClip full = _UpgradedSong.Clip;
+                _UpgradedSong.Clip = _StreamedClip;
+                if (Music != null && Music.clip == full) Music.clip = null;
+                if (full != null && full != _StreamedClip) Destroy(full);
+                _UpgradedSong = null;
+                _StreamedClip = null;
+            }
         }
 
         public void Start()
@@ -506,6 +521,30 @@ namespace JANOARG.Client.Behaviors.Player
                     // SongSelectReadyScreen.sMain.LoadingBarHolder.gameObject.SetActive(true);
                     // SongSelectReadyScreen.sMain.OverallProgress.text = "0/0";
                     // SongSelectReadyScreen.sMain.CurrentProgress.text = "Loading audio file...";
+                }
+
+                // External songs are only streamed at this point; gameplay needs the full decode.
+                if (sIsExternal && _UpgradedSong == null && Directory.Exists(sTargetSongPath))
+                {
+                    string clipPath = JANOARG.Client.Behaviors.SongSelect.ExternalManager.SongDataProvider
+                        .ResolveClipPath(sTargetSongPath, sTargetSong);
+                    if (clipPath != null)
+                    {
+                        AudioClip fullClip = null;
+                        yield return JANOARG.Client.Behaviors.SongSelect.ExternalManager.SongDataProvider
+                            .LoadClipRoutine(clipPath, false, c => fullClip = c);
+
+                        if (fullClip != null)
+                        {
+                            _UpgradedSong = sTargetSong;
+                            _StreamedClip = sTargetSong.Clip;
+                            sTargetSong.Clip = fullClip;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to fully decode '{clipPath}', playing the streamed clip instead.");
+                        }
+                    }
                 }
 
                 if (sTargetSong.Clip == null)

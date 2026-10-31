@@ -79,6 +79,42 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                                   || f.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase)
                                   || f.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
 
+        /// <summary>
+        /// Resolves a song's audio file from its decoded Clip entry, falling back to a directory scan
+        /// only if that entry is missing or stale. Returns null if no audio file can be found.
+        /// </summary>
+        public static string ResolveClipPath(string dir, PlayableSong song)
+        {
+            string audioPath = ResolveResourcePath(dir, song.ClipPath);
+            if (audioPath != null && File.Exists(audioPath)) return audioPath;
+
+            if (!Directory.Exists(dir)) return null;
+            string fallback = FindAudioFallback(dir);
+            if (fallback != null)
+                Debug.LogWarning($"[SongDataProvider] Clip '{song.ClipPath}' not found in {Path.GetFileName(dir)}, using {Path.GetFileName(fallback)}");
+            return fallback;
+        }
+
+        /// <summary>
+        /// Loads an audio file. <paramref name="stream"/> = true opens it as a stream (cheap, used for song select
+        /// previews); false decodes it fully into memory (what gameplay needs). Calls back with null on failure.
+        /// </summary>
+        public static IEnumerator LoadClipRoutine(string audioPath, bool stream, Action<AudioClip> onComplete)
+        {
+            using (var req = UnityWebRequestMultimedia.GetAudioClip("file://" + audioPath, AudioType.UNKNOWN))
+            {
+                if (stream && req.downloadHandler is DownloadHandlerAudioClip handler)
+                    handler.streamAudio = true;
+
+                yield return req.SendWebRequest();
+
+                AudioClip clip = null;
+                if (req.result == UnityWebRequest.Result.Success)
+                    clip = DownloadHandlerAudioClip.GetContent(req);
+                onComplete?.Invoke(clip);
+            }
+        }
+
         public IEnumerator LoadSongRoutine(string dir, Action<PlayableSong> onComplete)
         {
             string japsPath = FindJapsFile(dir);
@@ -106,26 +142,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 yield break;
             }
 
-            // Load audio clip: take the path straight from the decoded Clip entry, no directory scan.
-            string audioPath = ResolveResourcePath(dir, song.ClipPath);
-            if (audioPath == null || !File.Exists(audioPath))
-            {
-                string fallback = FindAudioFallback(dir);
-                if (fallback != null)
-                    Debug.LogWarning($"[SongDataProvider] Clip '{song.ClipPath}' not found in {Path.GetFileName(dir)}, using {Path.GetFileName(fallback)}");
-                audioPath = fallback;
-            }
+            // Streamed for song select: a full decode blocks the main thread for ~0.8s per song.
+            // PlayerScreen swaps in a fully decoded clip when the song is actually played.
+            string audioPath = ResolveClipPath(dir, song);
             if (!string.IsNullOrEmpty(audioPath))
             {
-                using (var req = UnityWebRequestMultimedia.GetAudioClip("file://" + audioPath, AudioType.UNKNOWN))
-                {
-                    yield return req.SendWebRequest();
-                    if (req.result == UnityWebRequest.Result.Success)
-                    {
-                        song.Clip = DownloadHandlerAudioClip.GetContent(req);
-                        if (song.Clip != null) RuntimeExternalManager.ExternalClips.Add(song.Clip);
-                    }
-                }
+                yield return LoadClipRoutine(audioPath, true, clip => song.Clip = clip);
+                if (song.Clip != null) RuntimeExternalManager.ExternalClips.Add(song.Clip);
             }
 
             // Load cover/icon images
