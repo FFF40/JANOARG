@@ -5,6 +5,7 @@ using System.Linq;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.Behaviors.SongSelect.Map;
 using JANOARG.Client.Data.Playlist;
+using JANOARG.Client.UI.Modal;
 using JANOARG.Shared.Data.ChartInfo;
 using TMPro;
 using UnityEngine;
@@ -18,6 +19,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         // Text overlay handling
         public TMP_Text Messages;
         public TMP_Text ImportProgress;
+
+        public ModalActionButton ReloadButton;
         
         public static System.Collections.Generic.HashSet<string> ExternalSongIDs = new();
 
@@ -96,7 +99,30 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public void Awake() => sMain = this;
 
-        public void Start() => StartCoroutine(Run());
+        public void Start()
+        {
+            if (ReloadButton != null && ReloadButton.Button != null)
+                ReloadButton.Button.onClick.AddListener(Reload);
+            StartCoroutine(Run());
+        }
+
+        public void Reload()
+        {
+            if (SongSelectScreen.sMain != null && SongSelectScreen.sMain.IsAnimating) return;
+            if (ReloadButton != null && ReloadButton.Button != null)
+                ReloadButton.Button.interactable = false;
+            StopAllCoroutines();
+            StartCoroutine(Run());
+            StartCoroutine(ReenableReloadButton());
+        }
+
+        IEnumerator ReenableReloadButton()
+        {
+            yield return new WaitUntil(() => !SongSelectScreen.sMain.IsAnimating);
+            yield return new WaitForSeconds(0.2f);
+            if (ReloadButton != null && ReloadButton.Button != null)
+                ReloadButton.Button.interactable = true;
+        }
 
         IEnumerator Run()
         {

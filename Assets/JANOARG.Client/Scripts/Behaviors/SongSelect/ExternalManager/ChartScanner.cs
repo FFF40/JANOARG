@@ -55,8 +55,12 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (_Dirty)
             {
                 _Dirty = false;
+                var before = new System.Collections.Generic.HashSet<ulong>(JAPSDirs.Keys);
                 Rescan();
                 LogFinding();
+                var after = new System.Collections.Generic.HashSet<ulong>(JAPSDirs.Keys);
+                if (!before.SetEquals(after))
+                    RuntimeExternalManager.BackendError("Changes detected, reload to reimport");
             }
         }
         
