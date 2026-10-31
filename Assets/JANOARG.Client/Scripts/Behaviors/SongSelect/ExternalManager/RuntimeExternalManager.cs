@@ -28,6 +28,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         public ModalActionButton ReloadButton;
 
         public static System.Collections.Generic.HashSet<string> ExternalSongIDs = new();
+        private static readonly System.Collections.Generic.Dictionary<string, ulong> _lastExternalHashes = new();
 
         private static readonly System.Collections.Generic.Queue<string> _backendQueue = new();
         private static string _currentBackendError;
@@ -46,7 +47,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             _currentBackendError = _backendQueue.Dequeue();
             if (sMain != null && sMain.Messages != null)
             {
-                sMain.Messages.text = _currentBackendError;
+                string block = $"[BACKEND]\n{_currentBackendError}";
+                if (string.IsNullOrEmpty(sMain.Messages.text))
+                    sMain.Messages.text = block;
+                else
+                    sMain.Messages.text += "\n" + block;
                 sMain.Messages.gameObject.SetActive(true);
                 if (sMain.ImportProgress != null) sMain.ImportProgress.gameObject.SetActive(false);
             }
@@ -376,39 +381,116 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
             SetProgress($"Found {dirs.Count} chart(s). Importing,");
 
-            var pending = new System.Collections.Generic.List<(string id, PlayableSong song)>();
+            // Build a current id -> hash map so we can detect deletions and "same but changed" charts.
+            var curHashes = new System.Collections.Generic.Dictionary<string, ulong>();
+            if (ChartScanner.sMain != null)
+            {
+                foreach (var kv in ChartScanner.sMain.JAPSDirs)
+                {
+                    string hid = Path.GetFileName(kv.Value.Dir);
+                    if (!curHashes.ContainsKey(hid)) curHashes[hid] = kv.Key;
+                }
+            }
+            else
+            {
+                foreach (var (dir, _) in dirs)
+                {
+                    string hid = Path.GetFileName(dir);
+                    if (!curHashes.ContainsKey(hid)) curHashes[hid] = 0UL;
+                }
+            }
+
+            // Handle deletions: charts that were external before but are gone from disk now.
+            int deletedCount = 0;
+            var deletedIds = new System.Collections.Generic.List<string>();
+            foreach (var id in _lastExternalHashes.Keys)
+                if (!curHashes.ContainsKey(id)) deletedIds.Add(id);
+            foreach (var id in ExternalSongIDs)
+                if (!curHashes.ContainsKey(id) && !deletedIds.Contains(id)) deletedIds.Add(id);
+            foreach (var id in deletedIds)
+            {
+                deletedCount++;
+                screen.LoadedSongs.RemoveAll(ps => ps.ID == id);
+                screen.PlayableSongByID.Remove(id);
+                screen.PlaylistSongByID.Remove(id);
+                ExternalSongIDs.Remove(id);
+                _lastExternalHashes.Remove(id);
+            }
+
+            var pending = new System.Collections.Generic.List<(string id, PlayableSong song, bool changed)>();
             int i = 0;
+            int addedCount = 0;
+            int changedCount = 0;
+            int unchangedCount = 0;
             foreach (var (dir, japsPath) in dirs)
             {
                 i++;
 
-                // Check before loading: decoding a chart we already have just to discard it is pure waste.
                 string id = Path.GetFileName(dir);
-                if (screen.PlayableSongByID.ContainsKey(id))
+                ulong curHash = curHashes.TryGetValue(id, out var ch) ? ch : 0UL;
+                bool wasExternal = _lastExternalHashes.ContainsKey(id);
+
+                if (wasExternal)
                 {
+                    ulong prevHash = _lastExternalHashes[id];
+                    if (prevHash == curHash)
+                    {
+                        unchangedCount++;
+                        SetProgress($"({i}/{dirs.Count}) Skipped {id} (no changes)");
+                        continue;
+                    }
+
+                    // "same but changed": reload it.
+                    PlayableSong loaded = null;
+                    yield return SongDataProvider.sMain != null
+                        ? StartCoroutine(SongDataProvider.sMain.LoadSongRoutine(dir, japsPath, s => loaded = s))
+                        : null;
+
+                    if (loaded == null)
+                    {
+                        BackendError($"Unable to import {id}");
+                        continue;
+                    }
+
+                    changedCount++;
+                    pending.Add((id, loaded, true));
+                    SetProgress($"({i}/{dirs.Count}) Imported {id}");
+                }
+                else if (screen.PlayableSongByID.ContainsKey(id))
+                {
+                    unchangedCount++;
                     SetProgress($"({i}/{dirs.Count}) Skipped {id} (already loaded)");
                     continue;
                 }
-
-                PlayableSong loaded = null;
-                yield return SongDataProvider.sMain != null
-                    ? StartCoroutine(SongDataProvider.sMain.LoadSongRoutine(dir, japsPath, s => loaded = s))
-                    : null;
-
-                if (loaded == null)
+                else
                 {
-                    BackendError($"Unable to import {id}");
-                    continue;
-                }
+                    PlayableSong loaded = null;
+                    yield return SongDataProvider.sMain != null
+                        ? StartCoroutine(SongDataProvider.sMain.LoadSongRoutine(dir, japsPath, s => loaded = s))
+                        : null;
 
-                pending.Add((id, loaded));
-                SetProgress($"({i}/{dirs.Count}) Imported {id}");
+                    if (loaded == null)
+                    {
+                        BackendError($"Unable to import {id}");
+                        continue;
+                    }
+
+                    addedCount++;
+                    pending.Add((id, loaded, false));
+                    SetProgress($"({i}/{dirs.Count}) Imported {id}");
+                }
             }
 
             SetProgress("Import complete. Updating Database.");
 
-            foreach (var (id, song) in pending)
+            foreach (var (id, song, changed) in pending)
             {
+                if (changed)
+                {
+                    screen.LoadedSongs.RemoveAll(ps => ps.ID == id);
+                    screen.PlayableSongByID.Remove(id);
+                    screen.PlaylistSongByID.Remove(id);
+                }
                 var playlistSong = new PlaylistSong { ID = id, RevealConditions = Array.Empty<GameConditional>(), UnlockConditions = Array.Empty<GameConditional>() };
                 screen.LoadedSongs.Add(playlistSong);
                 screen.PlayableSongByID[id] = song;
@@ -427,15 +509,32 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             ClearMessages();
 
             int totalFound = dirs.Count;
-            int newLoaded = pending.Count;
 
             SetMessage($"Found {totalFound} chart(s)!");
 
-            if (newLoaded > 0)
-                SetMessage($"New {newLoaded} chart(s) since last reload.");
-            else
-                SetMessage("No new charts loaded.");
-                
+            var updateParts = new System.Collections.Generic.List<string>();
+            if (deletedCount > 0)   updateParts.Add($"Deleted {deletedCount} chart(s)");
+            if (changedCount > 0)   updateParts.Add($"{changedCount} chart(s) modified");
+            if (addedCount > 0)     updateParts.Add($"Added {addedCount} chart(s)");
+            
+            if (unchangedCount > 0 && unchangedCount != totalFound)
+                updateParts.Add($"{unchangedCount} chart(s) unchanged");
+
+            string updateString;
+
+            // Join all state changes into a single string if available;
+            // otherwise "no changes".
+            updateString = updateParts.Count != 0 
+                ? string.Join(", ", updateParts) : "No changes";
+
+            updateString += " since last reload.";
+            
+
+            SetMessage(updateString);
+
+            _lastExternalHashes.Clear();
+            foreach (var kv in curHashes) _lastExternalHashes[kv.Key] = kv.Value;
+
             SetMessage("Open List View to select.");
         }
     }
