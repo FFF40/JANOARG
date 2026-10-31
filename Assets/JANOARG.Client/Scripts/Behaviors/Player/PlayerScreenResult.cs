@@ -717,6 +717,14 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void CalculateGainsAndSave(int score)
         {
+            // External charts must not affect player status/currency or persisted scores.
+            // Keep the score in the in-memory score store only, so it survives for this session.
+            if (PlayerScreen.sIsExternal)
+            {
+                SaveScoreEntry(score);
+                return;
+            }
+
             float baseOrbs = Helper.CalculateBaseSongGain(
                 PlayerScreen.sTargetSong, PlayerScreen.sCurrentChart, score);
 
