@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using JANOARG.Shared.Data.Files;
 using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
@@ -16,6 +18,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         private volatile bool _Dirty;
         private string _ChartsDir;
         private DateTime _LastScan;
+
+        // Chart targets decoded from each .japs, keyed by path and invalidated when its size/mtime change.
+        // Lets a rescan re-parse only the .japs files that actually changed.
+        private Dictionary<string, (long Length, long Ticks, string[] Targets)> _TargetCache = new();
 
         public void Awake()
         {
@@ -101,40 +107,80 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             _LastScan = DateTime.UtcNow;
 
             var found = new Dictionary<ulong, string>();
+            var newCache = new Dictionary<string, (long Length, long Ticks, string[] Targets)>();
             try
             {
-                foreach (string subDir in Directory.GetDirectories(_ChartsDir))
+                foreach (string subDir in Directory.EnumerateDirectories(_ChartsDir))
                 {
                     // depth 1 only: look for a JAPS file directly inside subDir
-                    bool hasJaps = false;
-                    foreach (string _ in Directory.GetFiles(subDir, "*.japs", SearchOption.TopDirectoryOnly))
-                    {
-                        hasJaps = true;
-                        break;
-                    }
-
-                    if (!hasJaps)
+                    string japsPath = SongDataProvider.FindJapsFile(subDir);
+                    if (japsPath == null)
                         continue;
 
-                    ulong hash = 0;
-                    // Hash all JAC and JAPS files: name + size + last-modified ticks
-                    foreach (string pattern in new[] { "*.jac", "*.japs" })
-                    {
-                        foreach (string file in Directory.GetFiles(subDir, pattern, SearchOption.TopDirectoryOnly))
-                        {
-                            var info = new FileInfo(file);
-                            // polynomial rolling hash
-                            hash = hash * 131 + (ulong)info.Name.GetHashCode();
-                            hash = hash * 131 + (ulong)info.Length;
-                            hash = hash * 131 + (ulong)info.LastWriteTimeUtc.Ticks;
-                        }
-                    }
-                    found[hash] = subDir;
+                    found[HashChart(subDir, japsPath, newCache)] = subDir;
                 }
+                _TargetCache = newCache;
             }
             catch (Exception e) { Debug.LogWarning($"Rescan failed: {e}"); }
 
             JAPSDirs = found;
+        }
+
+        // Hash the JAPS and every JAC it references: name + size + last-modified ticks.
+        // The JAC list comes from the JAPS itself, so no directory listing is needed.
+        ulong HashChart(string subDir, string japsPath, Dictionary<string, (long Length, long Ticks, string[] Targets)> newCache)
+        {
+            var japsInfo = new FileInfo(japsPath);
+            ulong hash = MixFile(0, japsInfo);
+
+            foreach (string target in GetChartTargets(japsPath, japsInfo, newCache))
+            {
+                // Same resolution as PlayerScreen.LoadChart: Target may omit the .jac extension.
+                string jacPath = Path.Combine(subDir, target);
+                var jacInfo = new FileInfo(jacPath);
+                if (!jacInfo.Exists && !jacPath.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
+                    jacInfo = new FileInfo(jacPath + ".jac");
+                if (jacInfo.Exists)
+                    hash = MixFile(hash, jacInfo);
+            }
+            return hash;
+        }
+
+        // polynomial rolling hash
+        static ulong MixFile(ulong hash, FileInfo info)
+        {
+            hash = hash * 131 + (ulong)info.Name.GetHashCode();
+            hash = hash * 131 + (ulong)info.Length;
+            hash = hash * 131 + (ulong)info.LastWriteTimeUtc.Ticks;
+            return hash;
+        }
+
+        string[] GetChartTargets(string japsPath, FileInfo japsInfo, Dictionary<string, (long Length, long Ticks, string[] Targets)> newCache)
+        {
+            long length = japsInfo.Length;
+            long ticks = japsInfo.LastWriteTimeUtc.Ticks;
+
+            if (!_TargetCache.TryGetValue(japsPath, out var entry) || entry.Length != length || entry.Ticks != ticks)
+            {
+                string[] targets;
+                try
+                {
+                    targets = JAPSDecoder.Decode(File.ReadAllText(japsPath)).Charts
+                        .Select(c => c.Target)
+                        .Where(t => !string.IsNullOrEmpty(t))
+                        .ToArray();
+                }
+                catch (Exception e)
+                {
+                    // Undecodable JAPS: still tracked via its own hash; the import will report the failure.
+                    Debug.LogWarning($"[ChartScanner] Could not read chart targets from {japsPath}: {e.Message}");
+                    targets = Array.Empty<string>();
+                }
+                entry = (length, ticks, targets);
+            }
+
+            newCache[japsPath] = entry;
+            return entry.Targets;
         }
     }
 }

@@ -357,20 +357,24 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             SetProgress("OK", false);
             SetProgress("Scanning directory.");
 
-            var dirs = Directory.GetDirectories(root)
-                .Where(d => Directory.GetFiles(d, "*.japs", SearchOption.TopDirectoryOnly).Any())
-                .ToList();
+            // Locate each chart's .japs once here and hand the path to the loader.
+            var dirs = new System.Collections.Generic.List<(string dir, string japsPath)>();
+            foreach (string d in Directory.EnumerateDirectories(root))
+            {
+                string japs = SongDataProvider.FindJapsFile(d);
+                if (japs != null) dirs.Add((d, japs));
+            }
 
             SetProgress($"Found {dirs.Count} chart(s). Importing,");
 
             var pending = new System.Collections.Generic.List<(string id, PlayableSong song)>();
             int i = 0;
-            foreach (string dir in dirs)
+            foreach (var (dir, japsPath) in dirs)
             {
                 i++;
                 PlayableSong loaded = null;
                 yield return SongDataProvider.sMain != null
-                    ? StartCoroutine(SongDataProvider.sMain.LoadSongRoutine(dir, s => loaded = s))
+                    ? StartCoroutine(SongDataProvider.sMain.LoadSongRoutine(dir, japsPath, s => loaded = s))
                     : null;
 
                 if (loaded == null)

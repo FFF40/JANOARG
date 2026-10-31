@@ -48,18 +48,55 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             StartCoroutine(LoadAllSongsRoutine(onComplete));
         }
 
+        /// <summary>Returns the first .japs file directly inside <paramref name="dir"/>, or null.</summary>
+        public static string FindJapsFile(string dir)
+        {
+            try
+            {
+                return Directory.EnumerateFiles(dir, "*.japs", SearchOption.TopDirectoryOnly).FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Failed to enumerate {dir}: {e}");
+                return null;
+            }
+        }
+
+        // Resources in a .japs are relative to the chart folder (same as JAPSImporter).
+        static string ResolveResourcePath(string dir, string target)
+        {
+            if (string.IsNullOrEmpty(target)) return null;
+            target = target.Replace('\\', '/');
+            while (target.StartsWith("./")) target = target.Substring(2);
+            target = target.TrimStart('/');
+            return Path.Combine(dir, target);
+        }
+
+        // Only for charts whose Clip entry is missing or stale.
+        static string FindAudioFallback(string dir) =>
+            Directory.EnumerateFiles(dir, "*.*", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault(f => f.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase)
+                                  || f.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase)
+                                  || f.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+
         public IEnumerator LoadSongRoutine(string dir, Action<PlayableSong> onComplete)
+        {
+            string japsPath = FindJapsFile(dir);
+            if (string.IsNullOrEmpty(japsPath))
+            {
+                Debug.LogWarning($"No .japs file in {dir}");
+                onComplete?.Invoke(null);
+                yield break;
+            }
+            yield return LoadSongRoutine(dir, japsPath, onComplete);
+        }
+
+        /// <summary>Loads a song when the caller has already located its .japs file.</summary>
+        public IEnumerator LoadSongRoutine(string dir, string japsPath, Action<PlayableSong> onComplete)
         {
             PlayableSong song = null;
             try
             {
-                string japsPath = Directory.GetFiles(dir, "*.japs", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                if (string.IsNullOrEmpty(japsPath))
-                {
-                    Debug.LogWarning($"No .japs file in {dir}");
-                    onComplete?.Invoke(null);
-                    yield break;
-                }
                 song = JAPSDecoder.Decode(File.ReadAllText(japsPath));
             }
             catch (Exception e)
@@ -69,11 +106,15 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 yield break;
             }
 
-            // Load audio clip from the directory
-            string audioPath = Directory.GetFiles(dir, "*.*", SearchOption.TopDirectoryOnly)
-                .FirstOrDefault(f => f.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase)
-                                  || f.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase)
-                                  || f.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+            // Load audio clip: take the path straight from the decoded Clip entry, no directory scan.
+            string audioPath = ResolveResourcePath(dir, song.ClipPath);
+            if (audioPath == null || !File.Exists(audioPath))
+            {
+                string fallback = FindAudioFallback(dir);
+                if (fallback != null)
+                    Debug.LogWarning($"[SongDataProvider] Clip '{song.ClipPath}' not found in {Path.GetFileName(dir)}, using {Path.GetFileName(fallback)}");
+                audioPath = fallback;
+            }
             if (!string.IsNullOrEmpty(audioPath))
             {
                 using (var req = UnityWebRequestMultimedia.GetAudioClip("file://" + audioPath, AudioType.UNKNOWN))
@@ -107,10 +148,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 foreach (var layer in song.Cover.Layers)
                 {
                     if (string.IsNullOrEmpty(layer.Target)) continue;
-                    string target = layer.Target.Replace('\\', '/');
-                    while (target.StartsWith("./")) target = target.Substring(2);
-                    target = target.TrimStart('/');
-                    string layerPath = Path.Combine(dir, target);
+                    string layerPath = ResolveResourcePath(dir, layer.Target);
                     if (File.Exists(layerPath))
                     {
                         var tex = LoadTexture(layerPath);
