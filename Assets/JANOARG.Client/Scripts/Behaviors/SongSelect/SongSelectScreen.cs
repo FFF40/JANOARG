@@ -222,7 +222,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     }
                     else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
                     {
-                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.ExternalClips.Contains(PreviewSource.clip))
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sExternalClips.Contains(PreviewSource.clip))
                             PreviewSource.clip.UnloadAudioData();
                         PreviewSource.clip = CurrentPreviewClip;
                         if (PreviewSource.clip != null && PreviewSource.clip.loadState != AudioDataLoadState.Loaded)
@@ -721,7 +721,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 // Clear old cover
                 foreach (var layer in TargetSongCoverLayers) 
                 {
-                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.ExternalTextures.Contains(layer.Image.texture))
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sExternalTextures.Contains(layer.Image.texture))
                             Resources.UnloadAsset(layer.Image.texture);
                         Destroy(layer.gameObject);
                 }

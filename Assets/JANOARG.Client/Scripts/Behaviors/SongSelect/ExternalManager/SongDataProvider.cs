@@ -23,7 +23,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
                 if (tex.LoadImage(File.ReadAllBytes(path)))
                 {
-                    RuntimeExternalManager.ExternalTextures.Add(tex);
+                    RuntimeExternalManager.sExternalTextures.Add(tex);
                     return tex;
                 }
             }
@@ -148,7 +148,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (!string.IsNullOrEmpty(audioPath))
             {
                 yield return LoadClipRoutine(audioPath, true, clip => song.Clip = clip);
-                if (song.Clip != null) RuntimeExternalManager.ExternalClips.Add(song.Clip);
+                if (song.Clip != null) RuntimeExternalManager.sExternalClips.Add(song.Clip);
             }
 
             // Load cover/icon images

@@ -9,9 +9,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 {
     public class ChartDirProvider
     {
-        public const string CHARTS_FOLDER_NAME = "JANOARG Charts";
+        private const string _CHARTS_FOLDER_NAME = "JANOARG Charts";
 
-        public static string GetStorageRootDirectory()
+        private static string GetStorageRootDirectory()
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             try
@@ -42,7 +42,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         }
 
         public static string GetChartsDirectoryPath() =>
-            Path.Combine(GetStorageRootDirectory(), CHARTS_FOLDER_NAME);
+            Path.Combine(GetStorageRootDirectory(), _CHARTS_FOLDER_NAME);
 
         public static bool ChartsDirectoryExists() =>
             Directory.Exists(GetChartsDirectoryPath());

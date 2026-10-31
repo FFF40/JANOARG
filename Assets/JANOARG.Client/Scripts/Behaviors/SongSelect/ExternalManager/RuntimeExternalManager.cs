@@ -27,27 +27,27 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public ModalActionButton ReloadButton;
 
-        public static System.Collections.Generic.HashSet<string> ExternalSongIDs = new();
-        private static readonly System.Collections.Generic.Dictionary<string, ulong> _lastExternalHashes = new();
+        public static System.Collections.Generic.HashSet<string> sExternalSongIDs = new();
+        private static readonly System.Collections.Generic.Dictionary<string, ulong> sr_LastExternalHashes = new();
 
-        private static readonly System.Collections.Generic.Queue<string> _backendQueue = new();
-        private static string _currentBackendError;
-        private static bool _canReload;
+        private static readonly System.Collections.Generic.Queue<string> sr_BackendQueue = new();
+        private static string s_currentBackendError;
+        private static bool s_canReload;
 
         public static void BackendError(string msg)
         {
-            _backendQueue.Enqueue(msg);
-            if (_currentBackendError == null)
+            sr_BackendQueue.Enqueue(msg);
+            if (s_currentBackendError == null)
                 ShowNextBackendError();
         }
 
         private static void ShowNextBackendError()
         {
-            if (_backendQueue.Count == 0) { _currentBackendError = null; HideMessages(); return; }
-            _currentBackendError = _backendQueue.Dequeue();
+            if (sr_BackendQueue.Count == 0) { s_currentBackendError = null; HideMessages(); return; }
+            s_currentBackendError = sr_BackendQueue.Dequeue();
             if (sMain != null && sMain.Messages != null)
             {
-                string block = $"[BACKEND]\n{_currentBackendError}";
+                string block = $"[BACKEND]\n{s_currentBackendError}";
                 if (string.IsNullOrEmpty(sMain.Messages.text))
                     sMain.Messages.text = block;
                 else
@@ -55,12 +55,12 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 sMain.Messages.gameObject.SetActive(true);
                 if (sMain.ImportProgress != null) sMain.ImportProgress.gameObject.SetActive(false);
             }
-            Debug.LogWarning($"[BACKEND] {_currentBackendError}");
+            Debug.LogWarning($"[BACKEND] {s_currentBackendError}");
         }
 
         public static void DismissBackendError()
         {
-            _currentBackendError = null;
+            s_currentBackendError = null;
             ShowNextBackendError();
         }
 
@@ -105,38 +105,38 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 sMain.Messages.gameObject.SetActive(false);
         }
 
-        public static System.Collections.Generic.HashSet<AudioClip> ExternalClips = new();
-        public static System.Collections.Generic.HashSet<Texture2D> ExternalTextures = new();
+        public static System.Collections.Generic.HashSet<AudioClip> sExternalClips = new();
+        public static System.Collections.Generic.HashSet<Texture2D> sExternalTextures = new();
 
-        private RectTransform _textsRt;
-        private CanvasGroup _textsCg;
-        private Coroutine _textsAnim;
-        private bool _textsVisible;
+        private RectTransform _TextsRt;
+        private CanvasGroup _TextsCg;
+        private Coroutine _TextsAnim;
+        private bool _TextsVisible;
 
-        private RectTransform _reloadRt;
-        private CanvasGroup _reloadCg;
-        private Coroutine _reloadAnim;
-        private bool _reloadVisible;
+        private RectTransform _ReloadRt;
+        private CanvasGroup _ReloadCg;
+        private Coroutine _ReloadAnim;
+        private bool _ReloadVisible;
 
         public void Awake()
         {
             sMain = this;
-            _canReload = false;
+            s_canReload = false;
             if (Messages != null) Messages.raycastTarget = false;
             if (ImportProgress != null) ImportProgress.raycastTarget = false;
 
             if (Texts != null)
             {
-                _textsRt = Texts.GetComponent<RectTransform>();
-                _textsCg = Texts.GetComponent<CanvasGroup>();
-                if (_textsCg == null) _textsCg = Texts.AddComponent<CanvasGroup>();
+                _TextsRt = Texts.GetComponent<RectTransform>();
+                _TextsCg = Texts.GetComponent<CanvasGroup>();
+                if (_TextsCg == null) _TextsCg = Texts.AddComponent<CanvasGroup>();
             }
 
             if (ReloadButton != null)
             {
-                _reloadRt = ReloadButton.GetComponent<RectTransform>();
-                _reloadCg = ReloadButton.GetComponent<CanvasGroup>();
-                if (_reloadCg == null) _reloadCg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+                _ReloadRt = ReloadButton.GetComponent<RectTransform>();
+                _ReloadCg = ReloadButton.GetComponent<CanvasGroup>();
+                if (_ReloadCg == null) _ReloadCg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
             }
         }
 
@@ -157,61 +157,61 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             // Text overlay: animate show/hide on view toggle (mirrored horizontally vs Reload).
             bool wantTextsVisible = isMapView && Texts != null
                 && ((Messages != null && Messages.text.Length > 0) || (ImportProgress != null && ImportProgress.text.Length > 0));
-            if (wantTextsVisible != _textsVisible)
+            if (wantTextsVisible != _TextsVisible)
             {
-                _textsVisible = wantTextsVisible;
-                if (_textsAnim != null) StopCoroutine(_textsAnim);
-                _textsAnim = StartCoroutine(wantTextsVisible ? ShowTextsAnim() : HideTextsAnim());
+                _TextsVisible = wantTextsVisible;
+                if (_TextsAnim != null) StopCoroutine(_TextsAnim);
+                _TextsAnim = StartCoroutine(wantTextsVisible ? ShowTextsAnim() : HideTextsAnim());
             }
 
             // Reload button: also animate on view toggle (but only when reload is available).
-            bool wantReloadVisible = isMapView && _canReload && ReloadButton != null;
-            if (wantReloadVisible != _reloadVisible)
+            bool wantReloadVisible = isMapView && s_canReload && ReloadButton != null;
+            if (wantReloadVisible != _ReloadVisible)
             {
-                _reloadVisible = wantReloadVisible;
-                if (_reloadAnim != null) StopCoroutine(_reloadAnim);
-                _reloadAnim = StartCoroutine(wantReloadVisible ? ShowReloadButton() : HideReloadButton());
+                _ReloadVisible = wantReloadVisible;
+                if (_ReloadAnim != null) StopCoroutine(_ReloadAnim);
+                _ReloadAnim = StartCoroutine(wantReloadVisible ? ShowReloadButton() : HideReloadButton());
             }
         }
 
         private IEnumerator ShowTextsAnim()
         {
-            if (Texts == null || _textsRt == null || _textsCg == null) yield break;
+            if (Texts == null || _TextsRt == null || _TextsCg == null) yield break;
 
             Texts.SetActive(true);
 
-            Vector2 originalPos = _textsRt.anchoredPosition;
-            _textsRt.anchoredPosition = new Vector2(originalPos.x - 40, originalPos.y);
-            _textsCg.alpha = 0f;
+            Vector2 originalPos = _TextsRt.anchoredPosition;
+            _TextsRt.anchoredPosition = new Vector2(originalPos.x - 40, originalPos.y);
+            _TextsCg.alpha = 0f;
 
             yield return Ease.Animate(0.3f, a =>
             {
                 float e = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                _textsRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x - 40, originalPos.x, e), originalPos.y);
-                _textsCg.alpha = e;
+                _TextsRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x - 40, originalPos.x, e), originalPos.y);
+                _TextsCg.alpha = e;
             });
         }
 
         private IEnumerator HideTextsAnim()
         {
-            if (Texts == null || _textsRt == null || _textsCg == null) yield break;
+            if (Texts == null || _TextsRt == null || _TextsCg == null) yield break;
             if (!Texts.activeSelf) yield break;
 
-            Vector2 originalPos = _textsRt.anchoredPosition;
-            float startAlpha = _textsCg.alpha;
+            Vector2 originalPos = _TextsRt.anchoredPosition;
+            float startAlpha = _TextsCg.alpha;
 
             yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, a =>
             {
-                _textsRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x - 40, a), originalPos.y);
-                _textsCg.alpha = Mathf.Lerp(startAlpha, 0f, a);
+                _TextsRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x - 40, a), originalPos.y);
+                _TextsCg.alpha = Mathf.Lerp(startAlpha, 0f, a);
             });
 
             Texts.SetActive(false);
-            _textsCg.alpha = startAlpha;
-            _textsRt.anchoredPosition = originalPos;
+            _TextsCg.alpha = startAlpha;
+            _TextsRt.anchoredPosition = originalPos;
         }
 
-        private Coroutine _reimportCoroutine;
+        private Coroutine _ReimportCoroutine;
 
         public void Reload()
         {
@@ -219,8 +219,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (SongSelectScreen.sMain != null && SongSelectScreen.sMain.IsAnimating) return;
 
             // Only allow one reimport coroutine at a time.
-            if (_reimportCoroutine != null) StopCoroutine(_reimportCoroutine);
-            _reimportCoroutine = StartCoroutine(ReimportRoutine());
+            if (_ReimportCoroutine != null) StopCoroutine(_ReimportCoroutine);
+            _ReimportCoroutine = StartCoroutine(ReimportRoutine());
         }
 
         private IEnumerator ReimportRoutine()
@@ -265,7 +265,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (ReloadButton != null && ReloadButton.Button != null)
                 ReloadButton.Button.interactable = true;
 
-            _reimportCoroutine = null;
+            _ReimportCoroutine = null;
         }
 
         private IEnumerator HideReloadButton()
@@ -279,26 +279,26 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 yield break;
             }
 
-            if (_reloadRt == null || _reloadCg == null)
+            if (_ReloadRt == null || _ReloadCg == null)
                 yield break;
 
-            Vector2 originalPos = _reloadRt.anchoredPosition;
+            Vector2 originalPos = _ReloadRt.anchoredPosition;
 
             // If it isn't currently active, nothing to animate.
             if (!ReloadButton.gameObject.activeSelf)
                 yield break;
 
-            float startAlpha = _reloadCg.alpha;
+            float startAlpha = _ReloadCg.alpha;
 
             yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, t =>
             {
-                _reloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x + 40, t), originalPos.y);
-                _reloadCg.alpha = Mathf.Lerp(startAlpha, 0f, t);
+                _ReloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x + 40, t), originalPos.y);
+                _ReloadCg.alpha = Mathf.Lerp(startAlpha, 0f, t);
             });
 
             ReloadButton.gameObject.SetActive(false);
-            _reloadCg.alpha = startAlpha;
-            _reloadRt.anchoredPosition = originalPos;
+            _ReloadCg.alpha = startAlpha;
+            _ReloadRt.anchoredPosition = originalPos;
         }
 
 
@@ -308,19 +308,19 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (ReloadButton == null || SongSelectScreen.sMain == null || !SongSelectScreen.sMain.IsMapView)
                 yield break;
 
-            if (_reloadRt == null || _reloadCg == null)
+            if (_ReloadRt == null || _ReloadCg == null)
                 yield break;
 
-            Vector2 originalPos = _reloadRt.anchoredPosition;
+            Vector2 originalPos = _ReloadRt.anchoredPosition;
             ReloadButton.gameObject.SetActive(true);
-            _reloadRt.anchoredPosition = new Vector2(originalPos.x + 40, originalPos.y);
-            _reloadCg.alpha = 0f;
+            _ReloadRt.anchoredPosition = new Vector2(originalPos.x + 40, originalPos.y);
+            _ReloadCg.alpha = 0f;
 
             yield return Ease.Animate(0.3f, a =>
             {
                 float e = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                _reloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x + 40, originalPos.x, e), originalPos.y);
-                _reloadCg.alpha = e;
+                _ReloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x + 40, originalPos.x, e), originalPos.y);
+                _ReloadCg.alpha = e;
             });
         }
 
@@ -403,9 +403,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             // Handle deletions: charts that were external before but are gone from disk now.
             int deletedCount = 0;
             var deletedIds = new System.Collections.Generic.List<string>();
-            foreach (var id in _lastExternalHashes.Keys)
+            foreach (var id in sr_LastExternalHashes.Keys)
                 if (!curHashes.ContainsKey(id)) deletedIds.Add(id);
-            foreach (var id in ExternalSongIDs)
+            foreach (var id in sExternalSongIDs)
                 if (!curHashes.ContainsKey(id) && !deletedIds.Contains(id)) deletedIds.Add(id);
             foreach (var id in deletedIds)
             {
@@ -413,8 +413,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 screen.LoadedSongs.RemoveAll(ps => ps.ID == id);
                 screen.PlayableSongByID.Remove(id);
                 screen.PlaylistSongByID.Remove(id);
-                ExternalSongIDs.Remove(id);
-                _lastExternalHashes.Remove(id);
+                sExternalSongIDs.Remove(id);
+                sr_LastExternalHashes.Remove(id);
             }
 
             var pending = new System.Collections.Generic.List<(string id, PlayableSong song, bool changed)>();
@@ -428,11 +428,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
                 string id = Path.GetFileName(dir);
                 ulong curHash = curHashes.TryGetValue(id, out var ch) ? ch : 0UL;
-                bool wasExternal = _lastExternalHashes.ContainsKey(id);
+                bool wasExternal = sr_LastExternalHashes.ContainsKey(id);
 
                 if (wasExternal)
                 {
-                    ulong prevHash = _lastExternalHashes[id];
+                    ulong prevHash = sr_LastExternalHashes[id];
                     if (prevHash == curHash)
                     {
                         unchangedCount++;
@@ -495,14 +495,14 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 screen.LoadedSongs.Add(playlistSong);
                 screen.PlayableSongByID[id] = song;
                 screen.PlaylistSongByID[id] = playlistSong;
-                ExternalSongIDs.Add(id);
+                sExternalSongIDs.Add(id);
             }
 
             screen.ListView.UpdateSort();
             screen.ListView.UpdateListItems(screen);
             screen.ListView.IsDirty = false;
 
-            _canReload = true;
+            s_canReload = true;
 
             yield return StartCoroutine(ShowReloadButton());
 
@@ -532,8 +532,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
             SetMessage(updateString);
 
-            _lastExternalHashes.Clear();
-            foreach (var kv in curHashes) _lastExternalHashes[kv.Key] = kv.Value;
+            sr_LastExternalHashes.Clear();
+            foreach (var kv in curHashes) sr_LastExternalHashes[kv.Key] = kv.Value;
 
             SetMessage("Open List View to select.");
         }

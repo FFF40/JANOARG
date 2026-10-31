@@ -92,7 +92,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 CoverInfos[textureID].Uses--;
                     if (CoverInfos[textureID].Uses <= 0)
                     {
-                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.ExternalTextures.Contains(CoverInfos[textureID].Icon))
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sExternalTextures.Contains(CoverInfos[textureID].Icon))
                             Resources.UnloadAsset(CoverInfos[textureID].Icon);
                         CoverInfos.Remove(textureID);
                     }
