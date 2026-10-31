@@ -51,7 +51,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 catch (Exception e) { Debug.LogWarning(e); }
                 StartWatching();
                 Rescan();
-                LogFinding();
+                // LogFinding();
                 Debug.Log($"[ChartScanner] Scanned {_ChartsDir}: {JAPSDirs.Count} chart folders");
             });
         }
@@ -74,10 +74,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (_Dirty)
             {
                 _Dirty = false;
-                var before = new System.Collections.Generic.HashSet<ulong>(JAPSDirs.Keys);
+                var before = new HashSet<ulong>(JAPSDirs.Keys);
                 Rescan();
-                LogFinding();
-                var after = new System.Collections.Generic.HashSet<ulong>(JAPSDirs.Keys);
+                // LogFinding();
+                var after = new HashSet<ulong>(JAPSDirs.Keys);
                 if (!before.SetEquals(after))
                     RuntimeExternalManager.BackendError("Changes detected, reload to reimport");
             }
