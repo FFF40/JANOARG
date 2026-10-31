@@ -17,6 +17,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
     public class RuntimeExternalManager : MonoBehaviour
     {
         public static RuntimeExternalManager sMain;
+        
+        private static bool s_FirstImport = true;
 
         // Text overlay handling
         public TMP_Text Messages;
@@ -546,13 +548,15 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
             updateString += " since last reload.";
             
-
-            SetMessage(updateString);
+            if (!s_FirstImport)
+                SetMessage(updateString);
 
             sr_LastExternalHashes.Clear();
             foreach (var kv in curHashes) sr_LastExternalHashes[kv.Key] = kv.Value;
 
             SetMessage("Open List View to select.");
+            
+            s_FirstImport = false;
         }
     }
 }
