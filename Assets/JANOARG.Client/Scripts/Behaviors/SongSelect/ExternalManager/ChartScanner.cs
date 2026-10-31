@@ -29,8 +29,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         private FileSystemWatcher _Watcher;
         private volatile bool _Dirty;
+        private volatile bool _WatcherNeedsRestart;
         private string _ChartsDir;
         private DateTime _LastScan;
+        private DateTime _LastPoll;
 
         // Chart targets decoded from each .japs, keyed by path and invalidated when its size/mtime change.
         // Lets a rescan re-parse only the .japs files that actually changed.
@@ -50,7 +52,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 }
                 catch (Exception e) { Debug.LogWarning(e); }
                 StartWatching();
+                if (GetComponent<ParallelPollWatch>() == null)
+                    gameObject.AddComponent<ParallelPollWatch>();
                 Rescan();
+                _LastPoll = DateTime.UtcNow;
                 // LogFinding();
                 Debug.Log($"[ChartScanner] Scanned {_ChartsDir}: {JAPSDirs.Count} chart folders");
             });
@@ -69,8 +74,22 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         // Bind to CHARTS_FOLDER_NAME directory for any file changes, then trigger a rescan
         // Dig to only depth 1 of dir, push to JAPSDir if found a JAPS file within, otherwise bail and ignore
         // Kind of like osu!stable I guess??
+        public void MarkDirty() => _Dirty = true;
+
         public void Update()
         {
+            if (_WatcherNeedsRestart)
+            {
+                _WatcherNeedsRestart = false;
+                if (_Watcher != null)
+                {
+                    _Watcher.EnableRaisingEvents = false;
+                    _Watcher.Dispose();
+                    _Watcher = null;
+                }
+                StartWatching();
+            }
+
             if (_Dirty)
             {
                 _Dirty = false;
@@ -98,16 +117,18 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             {
                 _Watcher = new FileSystemWatcher(_ChartsDir)
                 {
-                    IncludeSubdirectories = false,
+                    IncludeSubdirectories = true,
                     NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName
-                                 | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
+                                 | NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.Size,
                     Filter = "*.*",
+                    InternalBufferSize = 65536,
                     EnableRaisingEvents = true
                 };
                 _Watcher.Created += (_, _) => _Dirty = true;
                 _Watcher.Changed += (_, _) => _Dirty = true;
                 _Watcher.Deleted += (_, _) => _Dirty = true;
                 _Watcher.Renamed += (_, _) => _Dirty = true;
+                _Watcher.Error += (_, e) => { _Dirty = true; _WatcherNeedsRestart = true; Debug.LogWarning($"[ChartScanner] Watcher error: {e.GetException()}"); };
             }
             catch (Exception e) { Debug.LogWarning($"Could not watch charts directory: {e}"); }
         }
@@ -126,6 +147,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             Rescan(force: true);
             // This scan is current; pending watcher events don't need another one.
             _Dirty = false;
+            _LastPoll = DateTime.UtcNow;
             return JAPSDirs.Values.ToList();
         }
 
@@ -135,6 +157,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             // Throttle to avoid spamming
             if (!force && (DateTime.UtcNow - _LastScan).TotalMilliseconds < 250) { _Dirty = true; return; }
             _LastScan = DateTime.UtcNow;
+            _LastPoll = DateTime.UtcNow;
 
             var found = new Dictionary<ulong, ChartEntry>();
             var newCache = new Dictionary<string, (long Length, long Ticks, string[] Targets)>();
