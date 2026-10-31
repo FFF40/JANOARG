@@ -7,7 +7,7 @@ using UnityEngine.Android;
 
 namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 {
-    public class ChartDirProvider
+    public static class ChartDirProvider
     {
         private const string _CHARTS_FOLDER_NAME = "JANOARG Charts";
 
