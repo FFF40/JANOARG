@@ -410,7 +410,17 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             yield return StartCoroutine(ShowReloadButton());
 
             ClearMessages();
-            SetMessage($"Imported {pending.Count} chart(s)!");
+
+            int totalFound = dirs.Count;
+            int newLoaded = pending.Count;
+
+            SetMessage($"Found {totalFound} chart(s)!");
+
+            if (newLoaded > 0)
+                SetMessage($"New {newLoaded} chart(s) since last reload.");
+            else
+                SetMessage("No new charts loaded.");
+                
             SetMessage("Open List View to select.");
         }
     }
