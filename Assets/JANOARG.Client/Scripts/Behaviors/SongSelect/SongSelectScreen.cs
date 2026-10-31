@@ -517,7 +517,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 ListView.IsDirty = true;
                 ListView.HandleUpdate();
 
-                if (targetSong == null) yield break;
+                if (targetSong == null)
+                {
+                    IsAnimating = false;
+                    TargetSongAnim = null;
+                    yield break;
+                }
 
                 PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
                 SetTargetSong(targetSong.SongID, playableSong);
