@@ -17,13 +17,16 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
     public class RuntimeExternalManager : MonoBehaviour
     {
         public static RuntimeExternalManager sMain;
-        
+
         // Text overlay handling
         public TMP_Text Messages;
         public TMP_Text ImportProgress;
 
+        // Grouping for said overlay for unified hide/show animation
+        public GameObject Texts;
+
         public ModalActionButton ReloadButton;
-        
+
         public static System.Collections.Generic.HashSet<string> ExternalSongIDs = new();
 
         private static readonly System.Collections.Generic.Queue<string> _backendQueue = new();
@@ -100,12 +103,36 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         public static System.Collections.Generic.HashSet<AudioClip> ExternalClips = new();
         public static System.Collections.Generic.HashSet<Texture2D> ExternalTextures = new();
 
+        private RectTransform _textsRt;
+        private CanvasGroup _textsCg;
+        private Coroutine _textsAnim;
+        private bool _textsVisible;
+
+        private RectTransform _reloadRt;
+        private CanvasGroup _reloadCg;
+        private Coroutine _reloadAnim;
+        private bool _reloadVisible;
+
         public void Awake()
         {
             sMain = this;
             _canReload = false;
             if (Messages != null) Messages.raycastTarget = false;
             if (ImportProgress != null) ImportProgress.raycastTarget = false;
+
+            if (Texts != null)
+            {
+                _textsRt = Texts.GetComponent<RectTransform>();
+                _textsCg = Texts.GetComponent<CanvasGroup>();
+                if (_textsCg == null) _textsCg = Texts.AddComponent<CanvasGroup>();
+            }
+
+            if (ReloadButton != null)
+            {
+                _reloadRt = ReloadButton.GetComponent<RectTransform>();
+                _reloadCg = ReloadButton.GetComponent<CanvasGroup>();
+                if (_reloadCg == null) _reloadCg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         public void Start()
@@ -119,14 +146,64 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public void Update()
         {
-            if (ReloadButton == null) return;
+            var screen = SongSelectScreen.sMain;
+            bool isMapView = screen != null && screen.IsMapView;
 
-            bool visible = _canReload
-                && SongSelectScreen.sMain != null
-                && SongSelectScreen.sMain.IsMapView;
+            // Text overlay: animate show/hide on view toggle (mirrored horizontally vs Reload).
+            bool wantTextsVisible = isMapView && Texts != null
+                && ((Messages != null && Messages.text.Length > 0) || (ImportProgress != null && ImportProgress.text.Length > 0));
+            if (wantTextsVisible != _textsVisible)
+            {
+                _textsVisible = wantTextsVisible;
+                if (_textsAnim != null) StopCoroutine(_textsAnim);
+                _textsAnim = StartCoroutine(wantTextsVisible ? ShowTextsAnim() : HideTextsAnim());
+            }
 
-            if (ReloadButton.gameObject.activeSelf != visible)
-                ReloadButton.gameObject.SetActive(visible);
+            // Reload button: also animate on view toggle (but only when reload is available).
+            bool wantReloadVisible = isMapView && _canReload && ReloadButton != null;
+            if (wantReloadVisible != _reloadVisible)
+            {
+                _reloadVisible = wantReloadVisible;
+                if (_reloadAnim != null) StopCoroutine(_reloadAnim);
+                _reloadAnim = StartCoroutine(wantReloadVisible ? ShowReloadButton() : HideReloadButton());
+            }
+        }
+
+        private IEnumerator ShowTextsAnim()
+        {
+            if (Texts == null || _textsRt == null || _textsCg == null) yield break;
+
+            Texts.SetActive(true);
+
+            Vector2 originalPos = _textsRt.anchoredPosition;
+            _textsRt.anchoredPosition = new Vector2(originalPos.x - 40, originalPos.y);
+            _textsCg.alpha = 0f;
+
+            yield return Ease.Animate(0.3f, a =>
+            {
+                float e = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                _textsRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x - 40, originalPos.x, e), originalPos.y);
+                _textsCg.alpha = e;
+            });
+        }
+
+        private IEnumerator HideTextsAnim()
+        {
+            if (Texts == null || _textsRt == null || _textsCg == null) yield break;
+            if (!Texts.activeSelf) yield break;
+
+            Vector2 originalPos = _textsRt.anchoredPosition;
+            float startAlpha = _textsCg.alpha;
+
+            yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, a =>
+            {
+                _textsRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x - 40, a), originalPos.y);
+                _textsCg.alpha = Mathf.Lerp(startAlpha, 0f, a);
+            });
+
+            Texts.SetActive(false);
+            _textsCg.alpha = startAlpha;
+            _textsRt.anchoredPosition = originalPos;
         }
 
         private Coroutine _reimportCoroutine;
@@ -197,27 +274,26 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 yield break;
             }
 
-            var rt = ReloadButton.GetComponent<RectTransform>();
-            var cg = ReloadButton.GetComponent<CanvasGroup>();
-            if (cg == null) cg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+            if (_reloadRt == null || _reloadCg == null)
+                yield break;
 
-            Vector2 originalPos = rt.anchoredPosition;
+            Vector2 originalPos = _reloadRt.anchoredPosition;
 
             // If it isn't currently active, nothing to animate.
             if (!ReloadButton.gameObject.activeSelf)
                 yield break;
 
-            float startAlpha = cg.alpha;
+            float startAlpha = _reloadCg.alpha;
 
             yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, t =>
             {
-                rt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x + 40, t), originalPos.y);
-                cg.alpha = Mathf.Lerp(startAlpha, 0f, t);
+                _reloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x + 40, t), originalPos.y);
+                _reloadCg.alpha = Mathf.Lerp(startAlpha, 0f, t);
             });
 
             ReloadButton.gameObject.SetActive(false);
-            cg.alpha = startAlpha;
-            rt.anchoredPosition = originalPos;
+            _reloadCg.alpha = startAlpha;
+            _reloadRt.anchoredPosition = originalPos;
         }
 
 
@@ -227,20 +303,19 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (ReloadButton == null || SongSelectScreen.sMain == null || !SongSelectScreen.sMain.IsMapView)
                 yield break;
 
-            var rt = ReloadButton.GetComponent<RectTransform>();
-            var cg = ReloadButton.GetComponent<CanvasGroup>();
-            if (cg == null) cg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+            if (_reloadRt == null || _reloadCg == null)
+                yield break;
 
-            Vector2 originalPos = rt.anchoredPosition;
+            Vector2 originalPos = _reloadRt.anchoredPosition;
             ReloadButton.gameObject.SetActive(true);
-            rt.anchoredPosition = new Vector2(originalPos.x + 40, originalPos.y);
-            cg.alpha = 0f;
+            _reloadRt.anchoredPosition = new Vector2(originalPos.x + 40, originalPos.y);
+            _reloadCg.alpha = 0f;
 
             yield return Ease.Animate(0.3f, a =>
             {
                 float e = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                rt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x + 40, originalPos.x, e), originalPos.y);
-                cg.alpha = e;
+                _reloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x + 40, originalPos.x, e), originalPos.y);
+                _reloadCg.alpha = e;
             });
         }
 
