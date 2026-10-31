@@ -381,6 +381,15 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             foreach (var (dir, japsPath) in dirs)
             {
                 i++;
+
+                // Check before loading: decoding a chart we already have just to discard it is pure waste.
+                string id = Path.GetFileName(dir);
+                if (screen.PlayableSongByID.ContainsKey(id))
+                {
+                    SetProgress($"({i}/{dirs.Count}) Skipped {id} (already loaded)");
+                    continue;
+                }
+
                 PlayableSong loaded = null;
                 yield return SongDataProvider.sMain != null
                     ? StartCoroutine(SongDataProvider.sMain.LoadSongRoutine(dir, japsPath, s => loaded = s))
@@ -388,14 +397,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
                 if (loaded == null)
                 {
-                    BackendError($"Unable to import {Path.GetFileName(dir)}");
-                    continue;
-                }
-
-                string id = Path.GetFileName(dir);
-                if (screen.PlayableSongByID.ContainsKey(id))
-                {
-                    SetProgress($"({i}/{dirs.Count}) Skipped {id} (already loaded)");
+                    BackendError($"Unable to import {id}");
                     continue;
                 }
 
