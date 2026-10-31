@@ -7,12 +7,25 @@ using UnityEngine;
 
 namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 {
+    /// <summary>A chart folder and the .japs file found directly inside it.</summary>
+    internal readonly struct ChartEntry
+    {
+        public readonly string Dir;
+        public readonly string JapsPath;
+
+        public ChartEntry(string dir, string japsPath)
+        {
+            Dir = dir;
+            JapsPath = japsPath;
+        }
+    }
+
     public class ChartScanner : MonoBehaviour
     {
         public static ChartScanner sMain;
 
         // ulong is used for hashes
-        internal Dictionary<ulong, string> JAPSDirs = new();
+        internal Dictionary<ulong, ChartEntry> JAPSDirs = new();
 
         private FileSystemWatcher _Watcher;
         private volatile bool _Dirty;
@@ -74,7 +87,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         {
             var lines = new List<string> { "[ChartScanner] Found the following:" };
             foreach (var kv in JAPSDirs)
-                lines.Add($"  {kv.Key}: {kv.Value}");
+                lines.Add($"  {kv.Key}: {kv.Value.Dir}");
             Debug.Log(string.Join("\n", lines));
         }
 
@@ -99,14 +112,31 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             catch (Exception e) { Debug.LogWarning($"Could not watch charts directory: {e}"); }
         }
 
-        void Rescan()
+        /// <summary>
+        /// Rescans immediately (bypassing the throttle) and returns the current chart folders.
+        /// Used by the importer so it shares this scanner's result instead of sweeping the disk itself.
+        /// </summary>
+        internal List<ChartEntry> ScanNow()
+        {
+            // The access callback in Awake may not have run (e.g. permission prompt); the importer has
+            // already verified access before calling this, so resolve the directory ourselves.
+            if (string.IsNullOrEmpty(_ChartsDir)) _ChartsDir = ChartDirProvider.GetChartsDirectoryPath();
+            if (_Watcher == null) StartWatching();
+
+            Rescan(force: true);
+            // This scan is current; pending watcher events don't need another one.
+            _Dirty = false;
+            return JAPSDirs.Values.ToList();
+        }
+
+        void Rescan(bool force = false)
         {
             if (string.IsNullOrEmpty(_ChartsDir) || !Directory.Exists(_ChartsDir)) return;
             // Throttle to avoid spamming
-            if ((DateTime.UtcNow - _LastScan).TotalMilliseconds < 250) { _Dirty = true; return; }
+            if (!force && (DateTime.UtcNow - _LastScan).TotalMilliseconds < 250) { _Dirty = true; return; }
             _LastScan = DateTime.UtcNow;
 
-            var found = new Dictionary<ulong, string>();
+            var found = new Dictionary<ulong, ChartEntry>();
             var newCache = new Dictionary<string, (long Length, long Ticks, string[] Targets)>();
             try
             {
@@ -117,7 +147,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     if (japsPath == null)
                         continue;
 
-                    found[HashChart(subDir, japsPath, newCache)] = subDir;
+                    found[HashChart(subDir, japsPath, newCache)] = new ChartEntry(subDir, japsPath);
                 }
                 _TargetCache = newCache;
             }
@@ -131,7 +161,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         ulong HashChart(string subDir, string japsPath, Dictionary<string, (long Length, long Ticks, string[] Targets)> newCache)
         {
             var japsInfo = new FileInfo(japsPath);
-            ulong hash = MixFile(0, japsInfo);
+            // Seed with the folder name so copies of a chart folder (identical files) don't collide.
+            ulong hash = (ulong)Path.GetFileName(subDir).GetHashCode();
+            hash = MixFile(hash, japsInfo);
 
             foreach (string target in GetChartTargets(japsPath, japsInfo, newCache))
             {

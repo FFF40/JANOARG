@@ -357,12 +357,21 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             SetProgress("OK", false);
             SetProgress("Scanning directory.");
 
-            // Locate each chart's .japs once here and hand the path to the loader.
+            // ChartScanner owns directory scanning; take its fresh result rather than sweeping the disk again.
             var dirs = new System.Collections.Generic.List<(string dir, string japsPath)>();
-            foreach (string d in Directory.EnumerateDirectories(root))
+            if (ChartScanner.sMain != null)
             {
-                string japs = SongDataProvider.FindJapsFile(d);
-                if (japs != null) dirs.Add((d, japs));
+                foreach (var entry in ChartScanner.sMain.ScanNow())
+                    dirs.Add((entry.Dir, entry.JapsPath));
+            }
+            else
+            {
+                // No scanner in the scene: fall back to a local sweep.
+                foreach (string d in Directory.EnumerateDirectories(root))
+                {
+                    string japs = SongDataProvider.FindJapsFile(d);
+                    if (japs != null) dirs.Add((d, japs));
+                }
             }
 
             SetProgress($"Found {dirs.Count} chart(s). Importing,");

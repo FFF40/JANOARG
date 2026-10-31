@@ -163,11 +163,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         IEnumerator LoadAllSongsRoutine(Action<List<PlayableSong>> onComplete)
         {
             var songs = new List<PlayableSong>();
-            var dirs = ChartScanner.sMain != null ? new List<string>(ChartScanner.sMain.JAPSDirs.Values) : new List<string>();
-            foreach (string dir in dirs)
+            var entries = ChartScanner.sMain != null ? new List<ChartEntry>(ChartScanner.sMain.JAPSDirs.Values) : new List<ChartEntry>();
+            foreach (var entry in entries)
             {
                 PlayableSong loaded = null;
-                yield return LoadSongRoutine(dir, s => loaded = s);
+                yield return LoadSongRoutine(entry.Dir, entry.JapsPath, s => loaded = s);
                 if (loaded != null) songs.Add(loaded);
             }
             onComplete?.Invoke(songs);
