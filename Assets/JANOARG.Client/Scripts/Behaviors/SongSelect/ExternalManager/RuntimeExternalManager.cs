@@ -29,6 +29,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public static System.Collections.Generic.HashSet<string> sExternalSongIDs = new();
         private static readonly System.Collections.Generic.Dictionary<string, ulong> sr_LastExternalHashes = new();
+        // In-session cache of loaded external songs, keyed by folder id, so re-entering a playlist
+        // can re-add them without a full reimport/reload of their assets.
+        private static readonly System.Collections.Generic.Dictionary<string, (ulong Hash, PlayableSong Song)> sr_ExternalSongCache = new();
 
         private static readonly System.Collections.Generic.Queue<string> sr_BackendQueue = new();
         private static string s_currentBackendError;
@@ -415,6 +418,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 screen.PlaylistSongByID.Remove(id);
                 sExternalSongIDs.Remove(id);
                 sr_LastExternalHashes.Remove(id);
+                sr_ExternalSongCache.Remove(id);
             }
 
             var pending = new System.Collections.Generic.List<(string id, PlayableSong song, bool changed)>();
@@ -435,9 +439,20 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     ulong prevHash = sr_LastExternalHashes[id];
                     if (prevHash == curHash)
                     {
-                        unchangedCount++;
-                        SetProgress($"({i}/{dirs.Count}) Skipped {id} (no changes)");
-                        continue;
+                        if (screen.PlayableSongByID.ContainsKey(id))
+                        {
+                            unchangedCount++;
+                            SetProgress($"({i}/{dirs.Count}) Skipped {id} (already loaded)");
+                            continue;
+                        }
+                        if (sr_ExternalSongCache.TryGetValue(id, out var cached) && cached.Hash == curHash)
+                        {
+                            unchangedCount++;
+                            pending.Add((id, cached.Song, false));
+                            SetProgress($"({i}/{dirs.Count}) Re-added {id} (cached)");
+                            continue;
+                        }
+                        // Cache miss: fall through and reload.
                     }
 
                     // "same but changed": reload it.
@@ -453,6 +468,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     }
 
                     changedCount++;
+                    sr_ExternalSongCache[id] = (curHash, loaded);
                     pending.Add((id, loaded, true));
                     SetProgress($"({i}/{dirs.Count}) Imported {id}");
                 }
@@ -476,6 +492,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     }
 
                     addedCount++;
+                    sr_ExternalSongCache[id] = (curHash, loaded);
                     pending.Add((id, loaded, false));
                     SetProgress($"({i}/{dirs.Count}) Imported {id}");
                 }

@@ -121,7 +121,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName
                                  | NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.Size,
                     Filter = "*.*",
-                    InternalBufferSize = 65536,
+                    InternalBufferSize = 65536, // 64KB, max allowed by runtime
                     EnableRaisingEvents = true
                 };
                 _Watcher.Created += (_, _) => _Dirty = true;
