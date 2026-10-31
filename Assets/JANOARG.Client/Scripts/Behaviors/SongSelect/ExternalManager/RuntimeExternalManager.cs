@@ -3,10 +3,12 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using JANOARG.Client.Behaviors.SongSelect;
+using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect.Map;
 using JANOARG.Client.Data.Playlist;
 using JANOARG.Client.UI.Modal;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 
@@ -26,6 +28,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         private static readonly System.Collections.Generic.Queue<string> _backendQueue = new();
         private static string _currentBackendError;
+        private static bool _canReload;
 
         public static void BackendError(string msg)
         {
@@ -97,31 +100,148 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         public static System.Collections.Generic.HashSet<AudioClip> ExternalClips = new();
         public static System.Collections.Generic.HashSet<Texture2D> ExternalTextures = new();
 
-        public void Awake() => sMain = this;
+        public void Awake()
+        {
+            sMain = this;
+            _canReload = false;
+            if (Messages != null) Messages.raycastTarget = false;
+            if (ImportProgress != null) ImportProgress.raycastTarget = false;
+        }
 
         public void Start()
         {
+            if (ReloadButton != null)
+                ReloadButton.gameObject.SetActive(false);
             if (ReloadButton != null && ReloadButton.Button != null)
                 ReloadButton.Button.onClick.AddListener(Reload);
             StartCoroutine(Run());
         }
 
-        public void Reload()
+        public void Update()
         {
-            if (SongSelectScreen.sMain != null && SongSelectScreen.sMain.IsAnimating) return;
-            if (ReloadButton != null && ReloadButton.Button != null)
-                ReloadButton.Button.interactable = false;
-            StopAllCoroutines();
-            StartCoroutine(Run());
-            StartCoroutine(ReenableReloadButton());
+            if (ReloadButton == null) return;
+
+            bool visible = _canReload
+                && SongSelectScreen.sMain != null
+                && SongSelectScreen.sMain.IsMapView;
+
+            if (ReloadButton.gameObject.activeSelf != visible)
+                ReloadButton.gameObject.SetActive(visible);
         }
 
-        IEnumerator ReenableReloadButton()
+        private Coroutine _reimportCoroutine;
+
+        public void Reload()
         {
-            yield return new WaitUntil(() => !SongSelectScreen.sMain.IsAnimating);
-            yield return new WaitForSeconds(0.2f);
+            Debug.Log("[RuntimeExternalManager] Reload clicked");
+            if (SongSelectScreen.sMain != null && SongSelectScreen.sMain.IsAnimating) return;
+
+            // Only allow one reimport coroutine at a time.
+            if (_reimportCoroutine != null) StopCoroutine(_reimportCoroutine);
+            _reimportCoroutine = StartCoroutine(ReimportRoutine());
+        }
+
+        private IEnumerator ReimportRoutine()
+        {
+            var screen = SongSelectScreen.sMain;
+            if (screen == null) yield break;
+
+            // Disable button immediately (even if we hide it due to list view).
+            if (ReloadButton != null && ReloadButton.Button != null)
+                ReloadButton.Button.interactable = false;
+
+            // Hide actions + profile bar exactly like playlist switching.
+            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, t =>
+            {
+                ProfileBar.sMain?.SetVisibility(1 - t);
+                screen.LerpActions(1 - t);
+            }));
+
+            // Also hide the reload button with a matching slide+fade.
+            yield return HideReloadButton();
+
+            // External has no playlist map item target; best-effort target is this RuntimeExternalManager.
+            if (MapManager.sMain != null)
+                yield return screen.LeaveInAnim(transform);
+
+            // Run reimport.
+            yield return Run();
+
+            // Show actions + profile bar like playlist switching.
+            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, t =>
+            {
+                ProfileBar.sMain?.SetVisibility(t);
+                screen.LerpActions(t);
+            }));
+
+            // Reload button "show" is already implemented.
+            yield return ShowReloadButton();
+
+            // Give the show animation a moment before re-enabling.
+            yield return new WaitForSeconds(0.05f);
+
             if (ReloadButton != null && ReloadButton.Button != null)
                 ReloadButton.Button.interactable = true;
+
+            _reimportCoroutine = null;
+        }
+
+        private IEnumerator HideReloadButton()
+        {
+            if (ReloadButton == null) yield break;
+
+            // If we're in list view, the button is already hidden.
+            if (SongSelectScreen.sMain != null && !SongSelectScreen.sMain.IsMapView)
+            {
+                ReloadButton.gameObject.SetActive(false);
+                yield break;
+            }
+
+            var rt = ReloadButton.GetComponent<RectTransform>();
+            var cg = ReloadButton.GetComponent<CanvasGroup>();
+            if (cg == null) cg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+
+            Vector2 originalPos = rt.anchoredPosition;
+
+            // If it isn't currently active, nothing to animate.
+            if (!ReloadButton.gameObject.activeSelf)
+                yield break;
+
+            float startAlpha = cg.alpha;
+
+            yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, t =>
+            {
+                rt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x + 40, t), originalPos.y);
+                cg.alpha = Mathf.Lerp(startAlpha, 0f, t);
+            });
+
+            ReloadButton.gameObject.SetActive(false);
+            cg.alpha = startAlpha;
+            rt.anchoredPosition = originalPos;
+        }
+
+
+
+        IEnumerator ShowReloadButton()
+        {
+            if (ReloadButton == null || SongSelectScreen.sMain == null || !SongSelectScreen.sMain.IsMapView)
+                yield break;
+
+            var rt = ReloadButton.GetComponent<RectTransform>();
+            var cg = ReloadButton.GetComponent<CanvasGroup>();
+            if (cg == null) cg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+
+            Vector2 originalPos = rt.anchoredPosition;
+            ReloadButton.gameObject.SetActive(true);
+            rt.anchoredPosition = new Vector2(originalPos.x + 40, originalPos.y);
+            cg.alpha = 0f;
+
+            yield return Ease.Animate(0.3f, a =>
+            {
+                float e = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                rt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x + 40, originalPos.x, e), originalPos.y);
+                cg.alpha = e;
+            });
         }
 
         IEnumerator Run()
@@ -210,23 +330,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             screen.ListView.UpdateListItems(screen);
             screen.ListView.IsDirty = false;
 
-            ForceListViewAndDisableMapButton(screen);
+            _canReload = true;
+
+            yield return StartCoroutine(ShowReloadButton());
 
             ClearMessages();
             SetMessage($"Imported {pending.Count} chart(s)!");
             SetMessage("Open List View to select.");
-        }
-
-        static void ForceListViewAndDisableMapButton(SongSelectScreen screen)
-        {
-            if (MapManager.sMain == null || !MapManager.sMain.MapScene.IsValid())
-                return;
-
-            if (screen.IsMapView)
-                screen.ToggleView();
-
-            screen.MapViewButton.gameObject.SetActive(false);
-            screen.UpdateButtons();
         }
     }
 }
