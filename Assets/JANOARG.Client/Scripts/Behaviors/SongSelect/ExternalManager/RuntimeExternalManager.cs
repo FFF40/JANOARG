@@ -121,7 +121,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         private RectTransform _ReloadRt;
         private CanvasGroup _ReloadCg;
         private Coroutine _ReloadAnim;
-        private bool _ReloadVisible;
+        private Vector2 _ReloadBasePos;
+        private Vector2 _ReloadHiddenPos;
+        private float _ReloadBaseAlpha = 1f;
+        private bool _ReloadTargetVisible;
+        private bool _ReloadForcedHidden;
 
         public void Awake()
         {
@@ -142,6 +146,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 _ReloadRt = ReloadButton.GetComponent<RectTransform>();
                 _ReloadCg = ReloadButton.GetComponent<CanvasGroup>();
                 if (_ReloadCg == null) _ReloadCg = ReloadButton.gameObject.AddComponent<CanvasGroup>();
+
+                if (_ReloadRt != null)
+                {
+                    _ReloadBasePos = _ReloadRt.anchoredPosition;
+                    _ReloadHiddenPos = _ReloadBasePos + new Vector2(40f, 0f);
+                    _ReloadBaseAlpha = 1f;
+                }
             }
         }
 
@@ -170,13 +181,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             }
 
             // Reload button: also animate on view toggle (but only when reload is available).
-            bool wantReloadVisible = isMapView && s_canReload && ReloadButton != null;
-            if (wantReloadVisible != _ReloadVisible)
-            {
-                _ReloadVisible = wantReloadVisible;
-                if (_ReloadAnim != null) StopCoroutine(_ReloadAnim);
-                _ReloadAnim = StartCoroutine(wantReloadVisible ? ShowReloadButton() : HideReloadButton());
-            }
+            bool wantReloadVisible = isMapView && s_canReload && ReloadButton != null && !_ReloadForcedHidden;
+            if (wantReloadVisible != _ReloadTargetVisible)
+                PlayReloadAnimation(wantReloadVisible);
         }
 
         private IEnumerator ShowTextsAnim()
@@ -235,6 +242,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
             CameraColourShifter.sMain?.BeginReimport();
 
+            _ReloadForcedHidden = true;
+
             try
             {
                 // Disable button immediately (even if we hide it due to list view).
@@ -249,7 +258,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 }));
 
                 // Also hide the reload button with a matching slide+fade.
-                yield return HideReloadButton();
+                yield return PlayReloadAnimation(false);
 
                 // External has no playlist map item target; best-effort target is this RuntimeExternalManager.
                 if (MapManager.sMain != null)
@@ -264,6 +273,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             }
             finally
             {
+                _ReloadForcedHidden = false;
                 CameraColourShifter.sMain?.EndReimport();
             }
 
@@ -274,8 +284,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                 screen.LerpActions(t);
             }));
 
-            // Reload button "show" is already implemented.
-            yield return ShowReloadButton();
+            yield return PlayReloadAnimation(screen != null && screen.IsMapView);
 
             // Give the show animation a moment before re-enabling.
             yield return new WaitForSeconds(0.05f);
@@ -286,60 +295,73 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             _ReimportCoroutine = null;
         }
 
-        private IEnumerator HideReloadButton()
+        private Coroutine PlayReloadAnimation(bool visible)
         {
-            if (ReloadButton == null) yield break;
+            _ReloadTargetVisible = visible;
 
-            // If we're in list view, the button is already hidden.
-            if (SongSelectScreen.sMain != null && !SongSelectScreen.sMain.IsMapView)
+            if (_ReloadAnim != null)
+                StopCoroutine(_ReloadAnim);
+
+            _ReloadAnim = StartCoroutine(AnimateReloadButton(visible));
+            return _ReloadAnim;
+        }
+
+        private IEnumerator AnimateReloadButton(bool visible)
+        {
+            if (ReloadButton == null || _ReloadRt == null || _ReloadCg == null)
             {
-                ReloadButton.gameObject.SetActive(false);
+                _ReloadAnim = null;
                 yield break;
             }
 
-            if (_ReloadRt == null || _ReloadCg == null)
-                yield break;
-
-            Vector2 originalPos = _ReloadRt.anchoredPosition;
-
-            // If it isn't currently active, nothing to animate.
-            if (!ReloadButton.gameObject.activeSelf)
-                yield break;
-
-            float startAlpha = _ReloadCg.alpha;
-
-            yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, t =>
+            if (visible)
             {
-                _ReloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x, originalPos.x + 40, t), originalPos.y);
-                _ReloadCg.alpha = Mathf.Lerp(startAlpha, 0f, t);
-            });
+                bool wasHidden = !ReloadButton.gameObject.activeSelf;
+                ReloadButton.gameObject.SetActive(true);
 
-            ReloadButton.gameObject.SetActive(false);
-            _ReloadCg.alpha = startAlpha;
-            _ReloadRt.anchoredPosition = originalPos;
-        }
+                if (wasHidden)
+                {
+                    _ReloadRt.anchoredPosition = _ReloadHiddenPos;
+                    _ReloadCg.alpha = 0f;
+                }
 
+                Vector2 startPos = _ReloadRt.anchoredPosition;
+                float startAlpha = _ReloadCg.alpha;
 
+                yield return Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, e =>
+                {
+                    _ReloadRt.anchoredPosition = Vector2.Lerp(startPos, _ReloadBasePos, e);
+                    _ReloadCg.alpha = Mathf.Lerp(startAlpha, _ReloadBaseAlpha, e);
+                });
 
-        IEnumerator ShowReloadButton()
-        {
-            if (ReloadButton == null || SongSelectScreen.sMain == null || !SongSelectScreen.sMain.IsMapView)
-                yield break;
-
-            if (_ReloadRt == null || _ReloadCg == null)
-                yield break;
-
-            Vector2 originalPos = _ReloadRt.anchoredPosition;
-            ReloadButton.gameObject.SetActive(true);
-            _ReloadRt.anchoredPosition = new Vector2(originalPos.x + 40, originalPos.y);
-            _ReloadCg.alpha = 0f;
-
-            yield return Ease.Animate(0.3f, a =>
+                _ReloadRt.anchoredPosition = _ReloadBasePos;
+                _ReloadCg.alpha = _ReloadBaseAlpha;
+            }
+            else
             {
-                float e = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
-                _ReloadRt.anchoredPosition = new Vector2(Mathf.Lerp(originalPos.x + 40, originalPos.x, e), originalPos.y);
-                _ReloadCg.alpha = e;
-            });
+                if (!ReloadButton.gameObject.activeSelf)
+                {
+                    _ReloadRt.anchoredPosition = _ReloadBasePos;
+                    _ReloadCg.alpha = _ReloadBaseAlpha;
+                    _ReloadAnim = null;
+                    yield break;
+                }
+
+                Vector2 startPos = _ReloadRt.anchoredPosition;
+                float startAlpha = _ReloadCg.alpha;
+
+                yield return Ease.Animate(0.2f, EaseFunction.Cubic, EaseMode.In, e =>
+                {
+                    _ReloadRt.anchoredPosition = Vector2.Lerp(startPos, _ReloadHiddenPos, e);
+                    _ReloadCg.alpha = Mathf.Lerp(startAlpha, 0f, e);
+                });
+
+                ReloadButton.gameObject.SetActive(false);
+                _ReloadRt.anchoredPosition = _ReloadBasePos;
+                _ReloadCg.alpha = _ReloadBaseAlpha;
+            }
+
+            _ReloadAnim = null;
         }
 
         IEnumerator Run()
@@ -535,8 +557,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             screen.ListView.IsDirty = false;
 
             s_canReload = true;
-
-            yield return StartCoroutine(ShowReloadButton());
 
             ClearMessages();
 
