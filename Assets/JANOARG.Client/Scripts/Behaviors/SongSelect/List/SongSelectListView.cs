@@ -286,6 +286,19 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
                     }
             }
 
+            if (ItemList.Count > 0)
+            {
+                float min = ItemList[0].Position;
+                float max = ItemList[^1].Position;
+                TargetScrollOffset = Mathf.Clamp(TargetScrollOffset, min, max);
+                TargetSongOffset = Mathf.Clamp(TargetSongOffset, min, max);
+                ScrollOffset = Mathf.Clamp(ScrollOffset, min - 20, max + 20);
+            }
+            else
+            {
+                TargetScrollOffset = TargetSongOffset = ScrollOffset = 0;
+            }
+
             foreach (SongSelectListItem item in ItemList)
             {
                 item.PositionOffset = 45 * Mathf.Clamp(item.Position - TargetSongOffset, -1, 1);
@@ -387,7 +400,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.List
             // Update song cursor        
             float selOffset = ScrollOffset - TargetScrollOffset;
             ItemCursor.rectTransform.anchoredPosition = new(ItemCursor.rectTransform.anchoredPosition.x, selOffset);
-            if (!screen.IsAnimating && screen.TargetSongAnim == null)
+            if (!screen.IsMapView && !screen.IsAnimating && screen.TargetSongAnim == null)
             {
                 screen.TargetSongCoverHolder.anchoredPosition = new(0, selOffset / 2);
             }
