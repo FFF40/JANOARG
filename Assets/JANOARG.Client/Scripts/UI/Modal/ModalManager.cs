@@ -8,7 +8,8 @@ namespace JANOARG.Client.UI.Modal
         public static ModalManager sInstance { get; private set; }
 
         public RectTransform ModalHolder;
-        public TMP_Text LabelBody;
+        public GameObject TextBody;
+        public TMP_Text TextBodyLabel;
         public Modal ModalSample;
         public ModalActionButton[] LeftActionSamples;
         public ModalActionButton[] RightActionSamples;
@@ -20,8 +21,8 @@ namespace JANOARG.Client.UI.Modal
 
         public Modal Spawn(string title, string body, ModalAction[] leftActions = null, ModalAction[] rightActions = null)
         {
-            LabelBody.text = body;
-            return Spawn(title, LabelBody.gameObject, leftActions, rightActions);
+            if (TextBodyLabel != null) TextBodyLabel.text = body;
+            return Spawn(title, TextBody, leftActions, rightActions);
         }
 
         public Modal Spawn(string title, GameObject body, ModalAction[] leftActions = null, ModalAction[] rightActions = null, bool cloneBody = true)
@@ -29,8 +30,11 @@ namespace JANOARG.Client.UI.Modal
             Modal modal = Instantiate(ModalSample, ModalHolder);
 
             modal.TitleLabel.text = title;
-            if (cloneBody) Instantiate(body, modal.BodyHolder);
-            else body.transform.SetParent(modal.BodyHolder);
+            if (body != null)
+            {
+                if (cloneBody) Instantiate(body, modal.BodyHolder);
+                else body.transform.SetParent(modal.BodyHolder);
+            }
 
             if (leftActions != null) foreach (ModalAction action in leftActions)
             {

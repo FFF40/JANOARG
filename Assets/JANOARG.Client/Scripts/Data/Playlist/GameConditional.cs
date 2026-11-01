@@ -19,12 +19,14 @@ namespace JANOARG.Client.Data.Playlist
 
         public static bool TestAll(IEnumerable<GameConditional> conditionals)
         {
-            return conditionals.All(x => x.Test());
+            if (conditionals == null) return true;
+            return conditionals.All(x => x != null && x.Test());
         }
 
         public static string GetDisplayInstructionString(IEnumerable<GameConditional> conditionals)
         {
             StringBuilder builder = new();
+            if (conditionals == null) return builder.ToString();
             foreach (var conditional in conditionals)
             {
                 bool completed = conditional.Test();

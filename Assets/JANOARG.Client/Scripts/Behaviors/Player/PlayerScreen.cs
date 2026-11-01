@@ -9,6 +9,7 @@ using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Files;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
@@ -37,6 +38,7 @@ namespace JANOARG.Client.Behaviors.Player
         public static string            sTargetSongPath;
         public static PlayableSong      sTargetSong;
         public static ExternalChartMeta sTargetChartMeta;
+        public static bool              sIsExternal;
         public static ExternalChart     sTargetChart;
 
         public static Chart sCurrentChart;
@@ -279,10 +281,25 @@ namespace JANOARG.Client.Behaviors.Player
             CommonScene.Load();
         }
 
+        // External songs are streamed in song select; for the run we swap in a fully decoded clip on the
+        // shared PlayableSong, then put the streamed one back when the player goes away.
+        private PlayableSong _UpgradedSong;
+        private AudioClip    _StreamedClip;
+
         public void OnDestroy()
         {
             if (sMain == this)
                 sMain = null;
+
+            if (_UpgradedSong != null)
+            {
+                AudioClip full = _UpgradedSong.Clip;
+                _UpgradedSong.Clip = _StreamedClip;
+                if (Music != null && Music.clip == full) Music.clip = null;
+                if (full != null && full != _StreamedClip) Destroy(full);
+                _UpgradedSong = null;
+                _StreamedClip = null;
+            }
         }
 
         public void Start()
@@ -506,6 +523,30 @@ namespace JANOARG.Client.Behaviors.Player
                     // SongSelectReadyScreen.sMain.CurrentProgress.text = "Loading audio file...";
                 }
 
+                // External songs are only streamed at this point; gameplay needs the full decode.
+                if (sIsExternal && _UpgradedSong == null && Directory.Exists(sTargetSongPath))
+                {
+                    string clipPath = JANOARG.Client.Behaviors.SongSelect.ExternalManager.SongDataProvider
+                        .ResolveClipPath(sTargetSongPath, sTargetSong);
+                    if (clipPath != null)
+                    {
+                        AudioClip fullClip = null;
+                        yield return JANOARG.Client.Behaviors.SongSelect.ExternalManager.SongDataProvider
+                            .LoadClipRoutine(clipPath, false, c => fullClip = c);
+
+                        if (fullClip != null)
+                        {
+                            _UpgradedSong = sTargetSong;
+                            _StreamedClip = sTargetSong.Clip;
+                            sTargetSong.Clip = fullClip;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to fully decode '{clipPath}', playing the streamed clip instead.");
+                        }
+                    }
+                }
+
                 if (sTargetSong.Clip == null)
                     throw new InvalidOperationException($"Target song '{sTargetSong.SongName}' is missing its audio clip.");
 
@@ -518,15 +559,29 @@ namespace JANOARG.Client.Behaviors.Player
                 else
                 {
                     string path = Path.Combine(Path.GetDirectoryName(sTargetSongPath)!, sTargetChartMeta.Target);
-                    Debug.Log(path);
-                    ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
+                    if (sIsExternal)
+                    {
+                        path = Path.Combine(sTargetSongPath, sTargetChartMeta.Target);
+                        if (!File.Exists(path) && !path.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
+                            path += ".jac";
+                        string text = File.ReadAllText(path);
+                        var chart = JANOARG.Shared.Data.Files.JACDecoder.Decode(text);
+                        sTargetChart = ScriptableObject.CreateInstance<ExternalChart>();
+                        sTargetChart.Data = chart;
+                    }
+                    else
+                    {
+                        Debug.Log(path);
+                        ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    sTargetChart = chartLoadRequest.asset as ExternalChart;
+                        yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
 
-                    if (sTargetChart == null)
-                        throw new InvalidOperationException($"Failed to load chart asset at Resources path '{path}'.");
+                        sTargetChart = chartLoadRequest.asset as ExternalChart;
+
+                        if (sTargetChart == null)
+                            throw new InvalidOperationException($"Failed to load chart asset at Resources path '{path}'.");
+                    }
                 }
 
                 if (!sHeadlessInitialised)

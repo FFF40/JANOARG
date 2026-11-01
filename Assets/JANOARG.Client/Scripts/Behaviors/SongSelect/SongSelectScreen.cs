@@ -222,8 +222,11 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     }
                     else if (PreviewSource.clip.loadState == AudioDataLoadState.Loaded)
                     {
-                        PreviewSource.clip.UnloadAudioData();
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sExternalClips.Contains(PreviewSource.clip))
+                            PreviewSource.clip.UnloadAudioData();
                         PreviewSource.clip = CurrentPreviewClip;
+                        if (PreviewSource.clip != null && PreviewSource.clip.loadState != AudioDataLoadState.Loaded)
+                            PreviewSource.clip.LoadAudioData();
                         PreviewSource.Play();
                         PreviewSource.time = CurrentPreviewRange.x;
                     }
@@ -506,10 +509,20 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     item => item is SongSelectListSong song
                 );
 
-                ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
-                ListView.TargetSongID = targetSong.SongID;
+                if (targetSong != null)
+                {
+                    ListView.TargetSongOffset = ListView.TargetScrollOffset = ListView.ScrollOffset = targetSong.Position;
+                    ListView.TargetSongID = targetSong.SongID;
+                }
                 ListView.IsDirty = true;
                 ListView.HandleUpdate();
+
+                if (targetSong == null)
+                {
+                    IsAnimating = false;
+                    TargetSongAnim = null;
+                    yield break;
+                }
 
                 PlayableSong playableSong = PlayableSongByID[targetSong.SongID];
                 SetTargetSong(targetSong.SongID, playableSong);
@@ -607,6 +620,13 @@ namespace JANOARG.Client.Behaviors.SongSelect
             
             CurrentPreviewClip = IsTargetSongUnlocked ? targetSong.Clip : PreviewNoiseClip;
             CurrentPreviewRange = IsTargetSongUnlocked ? targetSong.PreviewRange : new(0, 10);
+            if (CurrentPreviewClip != null && CurrentPreviewClip.loadState != AudioDataLoadState.Loaded)
+                CurrentPreviewClip.LoadAudioData();
+            if (CurrentPreviewClip == PreviewSource.clip && PreviewSource.clip != null)
+            {
+                PreviewSource.time = CurrentPreviewRange.x;
+                if (!PreviewSource.isPlaying) PreviewSource.Play();
+            }
 
             string songPath = $"Songs/{songID}/{songID}";
             foreach (SongSelectDifficulty diff in DifficultyList) Destroy(diff.gameObject);
@@ -701,8 +721,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 // Clear old cover
                 foreach (var layer in TargetSongCoverLayers) 
                 {
-                    Resources.UnloadAsset(layer.Image.texture);
-                    Destroy(layer.gameObject);
+                        if (!JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sExternalTextures.Contains(layer.Image.texture))
+                            Resources.UnloadAsset(layer.Image.texture);
+                        Destroy(layer.gameObject);
                 }
                 TargetSongCoverLayers.Clear();
 
@@ -711,13 +732,20 @@ namespace JANOARG.Client.Behaviors.SongSelect
                     // Load new cover
                     foreach (CoverLayer layer in CurrentCover.Layers)
                     {
-                        string path = Path.Combine($"Songs/{songID}", layer.Target);
-                        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
-                        var req = Resources.LoadAsync<Texture2D>(path);
-                        yield return req;
-                        if (req.asset)
+                        Texture2D tex = layer.Texture;
+                        if (tex == null)
                         {
-                            Texture2D tex = (Texture2D)req.asset;
+                        string target = layer.Target.Replace('\\', '/');
+                        while (target.StartsWith("./")) target = target.Substring(2);
+                        target = target.TrimStart('/');
+                        string path = Path.Combine($"Songs/{songID}", target);
+                        if (Path.HasExtension(path)) path = Path.ChangeExtension(path, "")[0..^1];
+                            var req = Resources.LoadAsync<Texture2D>(path);
+                            yield return req;
+                            tex = req.asset as Texture2D;
+                        }
+                        if (tex != null)
+                        {
                             var layerImage = Instantiate(CoverLayerSample, TargetSongCoverLayerHolder);
                             layerImage.Layer = layer;
                             layerImage.Image.texture = tex;
@@ -1031,6 +1059,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         public IEnumerator SongLaunchAnim()
         {
+            var colourShifter = JANOARG.Client.Behaviors.SongSelect.ExternalManager.CameraColourShifter.sMain;
+            if (colourShifter != null) colourShifter.Deactivate();
+
             IsAnimating = true;
 
             string[] launchTextList = new[]{
@@ -1077,7 +1108,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 currentCameraZ = targetCameraZ;
             });
 
-            PlayerScreen.sTargetSongPath = $"Songs/{TargetSongID}/{TargetSongID}";
+            string chartsRoot = JANOARG.Client.Behaviors.SongSelect.ExternalManager.ChartDirProvider.GetChartsDirectoryPath();
+            bool isExternal = Directory.Exists(Path.Combine(chartsRoot, TargetSongID));
+            PlayerScreen.sIsExternal = isExternal;
+            PlayerScreen.sTargetSongPath = isExternal
+                ? Path.Combine(chartsRoot, TargetSongID)
+                : $"Songs/{TargetSongID}/{TargetSongID}";
             PlayerScreen.sTargetSong = TargetSong;
             PlayerScreen.sTargetChartMeta = TargetDifficulty.Chart;
             CommonSys.sMain.MainCamera.backgroundColor = TargetSong.BackgroundColor;
@@ -1253,6 +1289,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
         public IEnumerator LeaveOutAnim()
         {
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
+
+            var externalRuntime = JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sMain;
+            if (externalRuntime != null) externalRuntime.PrepareForMapLeave();
+
+            var colourShifter = JANOARG.Client.Behaviors.SongSelect.ExternalManager.CameraColourShifter.sMain;
+            if (colourShifter != null) colourShifter.FadeToBlackForLeave();
 
             // If player's in map view, hide current song and force map view
             bool isMapViewBeginning = IsMapView;
