@@ -233,26 +233,39 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             var screen = SongSelectScreen.sMain;
             if (screen == null) yield break;
 
-            // Disable button immediately (even if we hide it due to list view).
-            if (ReloadButton != null && ReloadButton.Button != null)
-                ReloadButton.Button.interactable = false;
+            CameraColourShifter.sMain?.BeginReimport();
 
-            // Hide actions + profile bar exactly like playlist switching.
-            StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, t =>
+            try
             {
-                ProfileBar.sMain?.SetVisibility(1 - t);
-                screen.LerpActions(1 - t);
-            }));
+                // Disable button immediately (even if we hide it due to list view).
+                if (ReloadButton != null && ReloadButton.Button != null)
+                    ReloadButton.Button.interactable = false;
 
-            // Also hide the reload button with a matching slide+fade.
-            yield return HideReloadButton();
+                // Hide actions + profile bar exactly like playlist switching.
+                StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, t =>
+                {
+                    ProfileBar.sMain?.SetVisibility(1 - t);
+                    screen.LerpActions(1 - t);
+                }));
 
-            // External has no playlist map item target; best-effort target is this RuntimeExternalManager.
-            if (MapManager.sMain != null)
-                yield return screen.LeaveInAnim(transform);
+                // Also hide the reload button with a matching slide+fade.
+                yield return HideReloadButton();
 
-            // Run reimport.
-            yield return Run();
+                // External has no playlist map item target; best-effort target is this RuntimeExternalManager.
+                if (MapManager.sMain != null)
+                    yield return screen.LeaveInAnim(transform);
+
+                Color mapCover = screen.MapCover.color;
+                mapCover.a = 0f;
+                screen.MapCover.color = mapCover;
+
+                // Run reimport.
+                yield return Run();
+            }
+            finally
+            {
+                CameraColourShifter.sMain?.EndReimport();
+            }
 
             // Show actions + profile bar like playlist switching.
             StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, t =>
