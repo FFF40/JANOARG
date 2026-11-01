@@ -18,9 +18,14 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         private volatile bool _Running;
         private ulong _PreviousSignature;
         private bool _HasPrevious;
+        private string _ChartsDir;
 
         void OnEnable()
         {
+            // Application.persistentDataPath (used on desktop/iOS) may only be accessed from the
+            // main thread, so resolve the directory here rather than inside Loop().
+            _ChartsDir = ChartDirProvider.GetChartsDirectoryPath();
+
             _Running = true;
             _Thread = new Thread(Loop) { IsBackground = true, Name = "ChartPoll" };
             _Thread.Start();
@@ -45,8 +50,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             {
                 try
                 {
-                    string dir = ChartDirProvider.GetChartsDirectoryPath();
-                    ulong signature = ComputeSignature(dir);
+                    ulong signature = ComputeSignature(_ChartsDir);
                     if (_HasPrevious && signature != _PreviousSignature)
                     {
                         ChartScanner.sMain?.MarkDirty();
