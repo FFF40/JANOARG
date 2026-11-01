@@ -316,6 +316,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 }
             }
             
+            // Chart filenames (Targets) are mutable and get reused, but DifficultyIndex is a
+            // chart's stable slot. Re-home scores saved before a chart was renamed/retargeted so
+            // they do not linger as duplicate or mislabelled entries.
+            if (StorageManager.sMain.Scores.ReconcileCharts(PlayableSongByID))
+                StorageManager.sMain.Save();
+
             // Update Playlist's BGM accordingly
             BGMIntroSource.clip = Playlist.BackgroundMusicInit;
             BGMLoopSource.clip = Playlist.BackgroundMusicLoop;
