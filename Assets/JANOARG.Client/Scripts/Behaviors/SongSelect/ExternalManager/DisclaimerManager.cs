@@ -16,8 +16,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         {
             const string BODY =
                 "You've discovered the external chart loading feature!\n" +
-                "This feature is intended for testing charts that you, or others you know, \n" +
-                "have created using the JANOARG Chartmaker software.\n\n" +
+                "This feature is intended for testing charts that you, or others you know, have created using the JANOARG Chartmaker software.\n\n" +
                 "However, this goes without saying that any songs submitted here DOES NOT mean it is officially licensed by us,\n" +
                 "as it is added as <b>user-submitted</b> creations and is not subject to our management." +
                 "\n\n" +
