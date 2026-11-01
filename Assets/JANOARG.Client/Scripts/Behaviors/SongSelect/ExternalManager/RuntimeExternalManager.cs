@@ -126,6 +126,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
         private float _ReloadBaseAlpha = 1f;
         private bool _ReloadTargetVisible;
         private bool _ReloadForcedHidden;
+        private bool _Leaving;
 
         public void Awake()
         {
@@ -167,6 +168,8 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
 
         public void Update()
         {
+            if (_Leaving) return;
+
             var screen = SongSelectScreen.sMain;
             bool isMapView = screen != null && screen.IsMapView;
 
@@ -221,6 +224,67 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             Texts.SetActive(false);
             _TextsCg.alpha = startAlpha;
             _TextsRt.anchoredPosition = originalPos;
+        }
+
+        /// <summary>
+        /// Fades the external overlays out before the map scene is unloaded, so leaving the
+        /// External map via SongSelectScreen.Return doesn't make them pop out abruptly.
+        /// </summary>
+        public void PrepareForMapLeave()
+        {
+            if (_Leaving) return;
+            _Leaving = true;
+            s_canReload = false;
+
+            // Stop any pending import/reload work and in-flight overlay animations.
+            StopAllCoroutines();
+            _TextsAnim = null;
+            _ReloadAnim = null;
+            _ReimportCoroutine = null;
+
+            StartCoroutine(LeaveMapAnim());
+        }
+
+        private IEnumerator LeaveMapAnim()
+        {
+            bool textsActive = Texts != null && Texts.activeSelf && _TextsRt != null && _TextsCg != null;
+            bool reloadActive = ReloadButton != null && ReloadButton.gameObject.activeSelf && _ReloadRt != null && _ReloadCg != null;
+
+            if (!textsActive && !reloadActive) yield break;
+
+            float textsAlpha = textsActive ? _TextsCg.alpha : 0f;
+            Vector2 textsPos = textsActive ? _TextsRt.anchoredPosition : Vector2.zero;
+            float reloadAlpha = reloadActive ? _ReloadCg.alpha : 0f;
+            Vector2 reloadPos = reloadActive ? _ReloadRt.anchoredPosition : Vector2.zero;
+
+            yield return Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.In, a =>
+            {
+                if (textsActive)
+                {
+                    _TextsCg.alpha = Mathf.Lerp(textsAlpha, 0f, a);
+                    _TextsRt.anchoredPosition = new Vector2(Mathf.Lerp(textsPos.x, textsPos.x - 40f, a), textsPos.y);
+                }
+
+                if (reloadActive)
+                {
+                    _ReloadCg.alpha = Mathf.Lerp(reloadAlpha, 0f, a);
+                    _ReloadRt.anchoredPosition = Vector2.Lerp(reloadPos, _ReloadHiddenPos, a);
+                }
+            });
+
+            if (textsActive)
+            {
+                Texts.SetActive(false);
+                _TextsCg.alpha = textsAlpha;
+                _TextsRt.anchoredPosition = textsPos;
+            }
+
+            if (reloadActive)
+            {
+                ReloadButton.gameObject.SetActive(false);
+                _ReloadCg.alpha = reloadAlpha;
+                _ReloadRt.anchoredPosition = reloadPos;
+            }
         }
 
         private Coroutine _ReimportCoroutine;

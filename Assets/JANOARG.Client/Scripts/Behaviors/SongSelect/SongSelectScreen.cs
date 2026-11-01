@@ -1287,6 +1287,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
         {
             Transform cameraTransform = CommonSys.sMain.MainCamera.transform;
 
+            var externalRuntime = JANOARG.Client.Behaviors.SongSelect.ExternalManager.RuntimeExternalManager.sMain;
+            if (externalRuntime != null) externalRuntime.PrepareForMapLeave();
+
+            var colourShifter = JANOARG.Client.Behaviors.SongSelect.ExternalManager.CameraColourShifter.sMain;
+            if (colourShifter != null) colourShifter.FadeToBlackForLeave();
+
             // If player's in map view, hide current song and force map view
             bool isMapViewBeginning = IsMapView;
             if (!IsMapView)

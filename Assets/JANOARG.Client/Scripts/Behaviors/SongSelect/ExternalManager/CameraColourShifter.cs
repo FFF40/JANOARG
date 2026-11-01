@@ -96,12 +96,19 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             ApplyColour(_Current);
         }
 
-        public void BeginReimport()
+        public void BeginReimport() => FadeToBlack(false);
+
+        /// <summary>
+        /// Fades the camera background to black and holds it while the map scene is unloaded.
+        /// </summary>
+        public void FadeToBlackForLeave() => FadeToBlack(false);
+
+        private void FadeToBlack(bool rebuildOnBlack)
         {
             if (EnsureCamera())
                 _Current = _Camera.backgroundColor;
 
-            _RebuildOnBlack = false;
+            _RebuildOnBlack = rebuildOnBlack;
             _QuickResume = false;
             _FromColour = _Current;
             _Timer = 0f;
