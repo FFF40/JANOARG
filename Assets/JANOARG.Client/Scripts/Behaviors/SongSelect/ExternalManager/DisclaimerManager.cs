@@ -8,7 +8,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
     {
         public void Awake()
         {
-            if (true || !CommonSys.sMain.Storage.Get("EXTRNL:HasReadDisclaimer", false))
+            if (!CommonSys.sMain.Storage.Get("EXTRNL:HasReadDisclaimer", false))
                 SpawnDisclaimer();
         }
 
