@@ -96,6 +96,9 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             ApplyColour(_Current);
         }
 
+        /// <summary>Stops applying colours so the launch flow can own the camera again.</summary>
+        public void Deactivate() => enabled = false;
+
         public void BeginReimport() => FadeToBlack(false);
 
         /// <summary>
@@ -331,11 +334,11 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     if (song.Charts != null && song.Charts.Count > 0)
                     {
                         foreach (ExternalChartMeta chartMeta in song.Charts)
-                            _Colours.Add(TryGetChartInterfaceColour(songID, song, chartMeta));
+                            _Colours.Add(TryGetChartBackgroundColour(songID, song, chartMeta));
                     }
                     else
                     {
-                        _Colours.Add(song.InterfaceColor);
+                        _Colours.Add(song.BackgroundColor);
                     }
 
                     _Colours.Add(SampleCover(song));
@@ -354,18 +357,40 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             Revision++;
         }
 
-        private static Color TryGetChartInterfaceColour(string songID, PlayableSong song, ExternalChartMeta chartMeta)
+        private static Color TryGetChartBackgroundColour(string songID, PlayableSong song, ExternalChartMeta chartMeta)
         {
             try
             {
                 Chart chart = LoadChart(songID, chartMeta);
                 if (chart != null)
-                    return chart.Palette.InterfaceColor;
+                    return GetStoryboardedPalette(chart.Palette).BackgroundColor;
             }
-            catch
+            catch (Exception e)
             {
+                Debug.LogWarning($"[SongColourManager] Failed to read chart colour for '{songID}': {e}");
             }
-            return song.InterfaceColor;
+            return song.BackgroundColor;
+        }
+
+        // Gameplay advances the palette each frame. For the menu palette, use the colour the
+        // storyboard settles on rather than the base value it starts from.
+        private static Palette GetStoryboardedPalette(Palette source)
+        {
+            float time = 0f;
+
+            foreach (Timestamp timestamp in source.Storyboard.Timestamps)
+            {
+                switch (timestamp.ID)
+                {
+                    case TimestampIDs.BackgroundColor_R:
+                    case TimestampIDs.BackgroundColor_G:
+                    case TimestampIDs.BackgroundColor_B:
+                        time = Mathf.Max(time, (float)timestamp.Offset + timestamp.Duration);
+                        break;
+                }
+            }
+
+            return (Palette)source.GetStoryboardableObject(time);
         }
 
         private static Chart LoadChart(string songID, ExternalChartMeta chartMeta)
@@ -373,19 +398,20 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (chartMeta == null || string.IsNullOrEmpty(chartMeta.Target))
                 return null;
 
-            string target = chartMeta.Target;
-            if (!target.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
-                target += ".jac";
-
-            string externalPath = Path.Combine(ChartDirProvider.GetChartsDirectoryPath(), songID, target);
-            if (File.Exists(externalPath))
+            // Mirror SongSelectScreen/PlayerScreen: a song is external when its folder exists.
+            string externalDir = Path.Combine(ChartDirProvider.GetChartsDirectoryPath(), songID);
+            if (Directory.Exists(externalDir))
             {
-                string text = File.ReadAllText(externalPath);
-                return JACDecoder.Decode(text);
+                string path = Path.Combine(externalDir, chartMeta.Target);
+                if (!File.Exists(path) && !path.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
+                    path += ".jac";
+                if (!File.Exists(path))
+                    return null;
+
+                return JACDecoder.Decode(File.ReadAllText(path));
             }
 
-            string resourceName = Path.GetFileNameWithoutExtension(chartMeta.Target);
-            ExternalChart asset = Resources.Load<ExternalChart>("Songs/" + songID + "/" + resourceName);
+            ExternalChart asset = Resources.Load<ExternalChart>("Songs/" + songID + "/" + chartMeta.Target);
             if (asset != null && asset.Data != null)
                 return asset.Data;
 

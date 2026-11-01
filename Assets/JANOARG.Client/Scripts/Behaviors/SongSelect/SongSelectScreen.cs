@@ -1059,6 +1059,9 @@ namespace JANOARG.Client.Behaviors.SongSelect
 
         public IEnumerator SongLaunchAnim()
         {
+            var colourShifter = JANOARG.Client.Behaviors.SongSelect.ExternalManager.CameraColourShifter.sMain;
+            if (colourShifter != null) colourShifter.Deactivate();
+
             IsAnimating = true;
 
             string[] launchTextList = new[]{
