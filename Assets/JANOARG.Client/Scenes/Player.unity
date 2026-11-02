@@ -12620,7 +12620,7 @@ MonoBehaviour:
   SongInfoTransform: {fileID: 1400112298}
   SongNameText: {fileID: 1400112301}
   SongArtistText: {fileID: 1400112302}
-  SongExternalIndicator: {fileID: 0}
+  SongExternalIndicator: {fileID: 966055331}
   SongDifficultyText: {fileID: 1400112300}
   SongCoverImage: {fileID: 875832414}
   BestScoreText: {fileID: 1634619773}
@@ -13339,7 +13339,7 @@ MonoBehaviour:
   PlayerHUD: {fileID: 150717746}
   SongNameLabel: {fileID: 2716741191531877648}
   SongArtistLabel: {fileID: 2716741192140814569}
-  SongExternalIndicator: {fileID: 0}
+  SongExternalIndicator: {fileID: 1394217072}
   DifficultyNameLabel: {fileID: 1625559570}
   DifficultyLabel: {fileID: 1586923649}
   SongProgress: {fileID: 1743933712}
