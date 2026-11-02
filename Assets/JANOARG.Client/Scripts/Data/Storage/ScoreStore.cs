@@ -21,7 +21,11 @@ namespace JANOARG.Client.Data.Storage
 
         public void Save()
         {
-            CommonSys.sMain.Storage.Set("ScoreStore", entries.Values.ToArray());
+            var sanitisedEntry = entries.Values
+                .Where(entry => !entry.IsExternal)
+                .ToArray();
+
+            CommonSys.sMain.Storage.Set("ScoreStore", sanitisedEntry);
         }
 
         public ScoreStoreEntry Get(string songID, string chartID)
@@ -185,5 +189,8 @@ namespace JANOARG.Client.Data.Storage
         [XmlAttribute("MaxCombo")]     public int MaxCombo;
 
         [XmlAttribute("Rating")]       public float Rating;
+        
+        // No XML attribute, meant to block the score from writing to database
+        public bool IsExternal;
     }
 }

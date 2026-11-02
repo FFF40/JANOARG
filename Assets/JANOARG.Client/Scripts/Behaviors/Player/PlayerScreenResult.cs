@@ -723,7 +723,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Keep the score in the in-memory score store only, so it survives for this session.
             if (PlayerScreen.sIsExternal)
             {
-                SaveScoreEntry(score);
+                SaveScoreEntry(score, PlayerScreen.sIsExternal);
                 return;
             }
 
@@ -748,7 +748,7 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
             
-            SaveScoreEntry(score);   
+            SaveScoreEntry(score, PlayerScreen.sIsExternal);   
             ProfileBar.sMain.CompleteSong((long)baseOrbs, (long)baseCoins);
             StorageManager.sMain.Save();
         }
@@ -1009,7 +1009,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsAnimating = false;
         }
 
-        private void SaveScoreEntry(int score)
+        private void SaveScoreEntry(int score, bool isExternal = false)
         {
             ScoreStoreEntry entry = new()
             {
@@ -1022,7 +1022,8 @@ namespace JANOARG.Client.Behaviors.Player
                 GoodCount = PlayerScreen.sMain.GoodCount,
                 BadCount = PlayerScreen.sMain.BadCount,
                 MaxCombo = PlayerScreen.sMain.MaxCombo,
-                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex >= 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0
+                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex >= 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0,
+                IsExternal = isExternal
             };
 
             StorageManager.sMain.Scores.Register(entry);
