@@ -298,7 +298,9 @@ namespace JANOARG.Client.Behaviors.Common
 
         public static void ShareFile(string path)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_EDITOR
+        Application.OpenURL("file://" + System.IO.Path.GetDirectoryName(path));
+#elif UNITY_ANDROID
             try
             {
                 using (var player = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))

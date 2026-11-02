@@ -1104,7 +1104,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ModalHolder: {fileID: 200974789}
-  LabelBody: {fileID: 0}
+  TextBody: {fileID: 7682148934956543455, guid: 23fb242ac953b01fd8cf85b9b6e534d2, type: 3}
+  TextBodyLabel: {fileID: 2277710130324363897, guid: 23fb242ac953b01fd8cf85b9b6e534d2, type: 3}
   ModalSample: {fileID: 8934046914300804573, guid: 9ab2e4daea07a415c8ae7c4e87a460de, type: 3}
   LeftActionSamples:
   - {fileID: 612095770627379864, guid: 8ca4fb7854a32aede92e8ab51772711e, type: 3}

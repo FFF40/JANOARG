@@ -51,6 +51,7 @@ namespace JANOARG.Client.Behaviors.Player
         public RectTransform SongInfoTransform;
         public TMP_Text      SongNameText;
         public TMP_Text      SongArtistText;
+        public TMP_Text      SongExternalIndicator;
         public TMP_Text      SongDifficultyText;
         public RawImage      SongCoverImage;
 
@@ -67,7 +68,9 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text      MaxComboText;
         public TMP_Text      AverageOffsetText;
 
-        [Space] public TMP_Text ShareMetadata;
+        [Space] 
+        public GameObject ShareInfoHolder;
+        public TMP_Text ShareMetadata;
 
         [Space] public CanvasGroup LeftActionsHolder;
 
@@ -188,9 +191,9 @@ namespace JANOARG.Client.Behaviors.Player
 
             int[] layers = new int[subtree.Count];
 
-            bool leftActionsActive   = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
-            bool rightActionsActive  = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
-            bool shareMetadataActive = ShareMetadata != null && ShareMetadata.gameObject.activeSelf;
+            bool leftActionsActive   = LeftActionsHolder.gameObject.activeSelf;
+            bool rightActionsActive  = RightActionsHolder.gameObject.activeSelf;
+            bool shareMetadataActive = ShareInfoHolder.activeSelf;
 
             bool menuActive     = profileBar != null && profileBar.MenuButtonGroup != null && profileBar.MenuButtonGroup.gameObject.activeSelf;
             bool backpackActive = profileBar != null && profileBar.RightPane != null && profileBar.RightPane.gameObject.activeSelf;
@@ -216,15 +219,15 @@ namespace JANOARG.Client.Behaviors.Player
                     subtree[i].gameObject.layer = 6;
                 }
 
-                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(false);
-                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(false);
-                if (ShareMetadata != null) ShareMetadata.gameObject.SetActive(true);
+                LeftActionsHolder.gameObject.SetActive(false);
+                RightActionsHolder.gameObject.SetActive(false);
+                ShareInfoHolder.SetActive(true);
 
                 if (profileBar != null)
                 {
-                    if (profileBar.MenuButtonGroup != null) profileBar.MenuButtonGroup.gameObject.SetActive(false);
-                    if (profileBar.RightPane != null) profileBar.RightPane.gameObject.SetActive(false);
-                    if (profileBar.ChangeHeader != null) profileBar.ChangeHeader.gameObject.SetActive(false);
+                    profileBar.MenuButtonGroup.gameObject.SetActive(false);
+                    profileBar.RightPane.gameObject.SetActive(false);
+                    profileBar.ChangeHeader.gameObject.SetActive(false);
                 }
 
                 transform.localScale = originalScale * CONTENT_SCALE;
@@ -251,15 +254,15 @@ namespace JANOARG.Client.Behaviors.Player
                 rTex.Release();
                 Destroy(rTex);
 
-                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(leftActionsActive);
-                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(rightActionsActive);
-                if (ShareMetadata != null) ShareMetadata.gameObject.SetActive(shareMetadataActive);
+                LeftActionsHolder.gameObject.SetActive(leftActionsActive);
+                RightActionsHolder.gameObject.SetActive(rightActionsActive);
+                ShareInfoHolder.SetActive(shareMetadataActive);
 
                 if (profileBar != null)
                 {
-                    if (profileBar.MenuButtonGroup != null) profileBar.MenuButtonGroup.gameObject.SetActive(menuActive);
-                    if (profileBar.RightPane != null) profileBar.RightPane.gameObject.SetActive(backpackActive);
-                    if (profileBar.ChangeHeader != null) profileBar.ChangeHeader.gameObject.SetActive(changeActive);
+                    profileBar.MenuButtonGroup.gameObject.SetActive(menuActive);
+                    profileBar.RightPane.gameObject.SetActive(backpackActive);
+                    profileBar.ChangeHeader.gameObject.SetActive(changeActive);
                 }
 
                 transform.localScale = originalScale;
@@ -483,10 +486,8 @@ namespace JANOARG.Client.Behaviors.Player
             string rank = Helper.GetRank(score);
 
             ShareMetadata.text =
-                $"Score recorded at <u>{DateTime.Now:M/d/yyyy, hh.mmtt}</u>\n" +
-                $"Played in <u>{Application.version}</u>";
-            ShareMetadata.color =
-                (Color.white - CommonSys.sMain.MainCamera.backgroundColor) * new ColorFrag(a: 1);
+                $"{DateTime.Now:M/d/yyyy, hh.mmtt}\n" +
+                $"{Application.version}";
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
                 PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
@@ -595,6 +596,7 @@ namespace JANOARG.Client.Behaviors.Player
             SongInfoHolder.gameObject.SetActive(true);
             SongNameText.text = PlayerScreen.sTargetSong.SongName;
             SongArtistText.text = PlayerScreen.sTargetSong.SongArtist;
+            SongExternalIndicator.gameObject.SetActive(PlayerScreen.sIsExternal);
             SongDifficultyText.text = Helper.FormatDifficulty(PlayerScreen.sTargetChart.Data.DifficultyLevel);
 
             SongDifficultyText.color =
@@ -717,6 +719,14 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void CalculateGainsAndSave(int score)
         {
+            // External charts must not affect player status/currency or persisted scores.
+            // Keep the score in the in-memory score store only, so it survives for this session.
+            if (PlayerScreen.sIsExternal)
+            {
+                SaveScoreEntry(score);
+                return;
+            }
+
             float baseOrbs = Helper.CalculateBaseSongGain(
                 PlayerScreen.sTargetSong, PlayerScreen.sCurrentChart, score);
 

@@ -1,4 +1,5 @@
 using JANOARG.Client.Behaviors.Player;
+using JANOARG.Client.Behaviors.Player.PlayerInput.Core;
 using UnityEngine;
 
 namespace JANOARG.Client.Profiling
@@ -35,7 +36,7 @@ namespace JANOARG.Client.Profiling
             JanoargProfiler.ActiveLaneGroups.Value = player.LaneGroups.Count;
             JanoargProfiler.ActiveHitObjects.Value = player.ActiveHitObjectCount;
 
-            PlayerInputManager input = PlayerInputManager.sInstance;
+            PlayerInputEngine input = PlayerInputEngine.sInstance;
             JanoargProfiler.ActiveHoldNotes.Value = input != null ? input.HoldQueue.Count    : 0;
             JanoargProfiler.ActiveTouches.Value   = input != null ? input.TouchClasses.Count : 0;
 

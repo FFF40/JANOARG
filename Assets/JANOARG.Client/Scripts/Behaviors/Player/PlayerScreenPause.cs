@@ -1,5 +1,6 @@
 using System.Collections;
 using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Player.PlayerInput.Core;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils.Animation;
@@ -54,8 +55,8 @@ namespace JANOARG.Client.Behaviors.Player
                 PlayerScreen.sMain.SuspendMusicSchedule();
                 PlayerScreen.sMain.ComputeAndSaveMedianOffset();
 
-                // PlayerInputManager.main.Fingers.Clear();
-                PlayerInputManager.sInstance.TouchClasses.Clear();
+                // PlayerInputEngine.main.Fingers.Clear();
+                PlayerInputEngine.sInstance.TouchClasses.Clear();
                 Show();
             }
             else
