@@ -291,6 +291,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 Debug.Log("Root playlist loaded, loading all songs recursively");
                 IEnumerator f_loadPlaylist(Playlist playlist)
                 {
+                    if (playlist == null)
+                    {
+                        yield break;
+                    }
                     Debug.Log($"Loading playlist {playlist.name}");
                     foreach (PlaylistSong songInfo in playlist.Songs)
                     {
