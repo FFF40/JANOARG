@@ -51,6 +51,7 @@ namespace JANOARG.Client.Behaviors.Player
         public RectTransform SongInfoTransform;
         public TMP_Text      SongNameText;
         public TMP_Text      SongArtistText;
+        public TMP_Text      SongExternalIndicator;
         public TMP_Text      SongDifficultyText;
         public RawImage      SongCoverImage;
 
@@ -595,6 +596,7 @@ namespace JANOARG.Client.Behaviors.Player
             SongInfoHolder.gameObject.SetActive(true);
             SongNameText.text = PlayerScreen.sTargetSong.SongName;
             SongArtistText.text = PlayerScreen.sTargetSong.SongArtist;
+            SongExternalIndicator.gameObject.SetActive(PlayerScreen.sIsExternal);
             SongDifficultyText.text = Helper.FormatDifficulty(PlayerScreen.sTargetChart.Data.DifficultyLevel);
 
             SongDifficultyText.color =

@@ -60,8 +60,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         [Space]
         public TMP_Text SongNameLabel;
-
         public TMP_Text SongArtistLabel;
+        public TMP_Text SongExternalIndicator;
         public TMP_Text DifficultyNameLabel;
         public TMP_Text DifficultyLabel;
 
@@ -512,6 +512,7 @@ namespace JANOARG.Client.Behaviors.Player
 
                 SongNameLabel.text = sTargetSong.SongName;
                 SongArtistLabel.text = sTargetSong.SongArtist;
+                SongExternalIndicator.gameObject.SetActive(sIsExternal);
 
                 DifficultyNameLabel.text = sTargetChartMeta.DifficultyName;
                 DifficultyLabel.text = sTargetChartMeta.DifficultyLevel;
@@ -1733,7 +1734,7 @@ namespace JANOARG.Client.Behaviors.Player
 
         public void SetInterfaceColor(Color color)
         {
-            SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color =
+            SongNameLabel.color = SongArtistLabel.color = SongExternalIndicator.color = DifficultyLabel.color = DifficultyNameLabel.color =
                 SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color =
                     PauseLabel.color = color;
 
