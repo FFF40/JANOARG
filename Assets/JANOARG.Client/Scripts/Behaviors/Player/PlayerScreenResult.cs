@@ -791,6 +791,13 @@ namespace JANOARG.Client.Behaviors.Player
 
         private IEnumerator LoadCoverImageRoutine()
         {
+            Sprite iconCover = PlayerScreen.sTargetSong.Cover?.IconCover;
+            if (iconCover != null && iconCover.texture != null)
+            {
+                SongCoverImage.texture = iconCover.texture;
+                yield break;
+            }
+
             string path = Path.Combine(
                 Path.GetDirectoryName(PlayerScreen.sTargetSongPath)!,
                 PlayerScreen.sTargetSong.Cover.IconTarget);
