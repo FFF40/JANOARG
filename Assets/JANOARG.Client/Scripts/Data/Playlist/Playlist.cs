@@ -28,6 +28,9 @@ namespace JANOARG.Client.Data.Playlist
     {
         [JAPSPicker]
         public string ID;
+
+        [NonSerialized]
+        public bool IsExternal;
         [SerializeReference]
         public GameConditional[] RevealConditions;
         [SerializeReference]

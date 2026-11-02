@@ -1120,11 +1120,12 @@ namespace JANOARG.Client.Behaviors.SongSelect
                 currentCameraZ = targetCameraZ;
             });
 
-            string chartsRoot = JANOARG.Client.Behaviors.SongSelect.ExternalManager.ChartDirProvider.GetChartsDirectoryPath();
-            bool isExternal = Directory.Exists(Path.Combine(chartsRoot, TargetSongID));
+            bool isExternal = !string.IsNullOrEmpty(TargetSongID)
+                && PlaylistSongByID.TryGetValue(TargetSongID, out PlaylistSong launchSong)
+                && launchSong.IsExternal;
             PlayerScreen.sIsExternal = isExternal;
             PlayerScreen.sTargetSongPath = isExternal
-                ? Path.Combine(chartsRoot, TargetSongID)
+                ? Path.Combine(JANOARG.Client.Behaviors.SongSelect.ExternalManager.ChartDirProvider.GetChartsDirectoryPath(), TargetSongID)
                 : $"Songs/{TargetSongID}/{TargetSongID}";
             PlayerScreen.sTargetSong = TargetSong;
             PlayerScreen.sTargetChartMeta = TargetDifficulty.Chart;

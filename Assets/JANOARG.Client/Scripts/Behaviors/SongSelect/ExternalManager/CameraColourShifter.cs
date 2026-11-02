@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Data.Playlist;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Data.Files;
 using JANOARG.Shared.Utils.Animation;
@@ -398,10 +399,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
             if (chartMeta == null || string.IsNullOrEmpty(chartMeta.Target))
                 return null;
 
-            // Mirror SongSelectScreen/PlayerScreen: a song is external when its folder exists.
-            string externalDir = Path.Combine(ChartDirProvider.GetChartsDirectoryPath(), songID);
-            if (Directory.Exists(externalDir))
+            bool isExternal = SongSelectScreen.sMain != null
+                && SongSelectScreen.sMain.PlaylistSongByID.TryGetValue(songID, out PlaylistSong playlistSong)
+                && playlistSong.IsExternal;
+
+            if (isExternal)
             {
+                string externalDir = Path.Combine(ChartDirProvider.GetChartsDirectoryPath(), songID);
                 string path = Path.Combine(externalDir, chartMeta.Target);
                 if (!File.Exists(path) && !path.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
                     path += ".jac";

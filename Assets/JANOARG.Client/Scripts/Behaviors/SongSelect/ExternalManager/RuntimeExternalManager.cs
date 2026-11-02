@@ -609,7 +609,13 @@ namespace JANOARG.Client.Behaviors.SongSelect.ExternalManager
                     screen.PlayableSongByID.Remove(id);
                     screen.PlaylistSongByID.Remove(id);
                 }
-                var playlistSong = new PlaylistSong { ID = id, RevealConditions = Array.Empty<GameConditional>(), UnlockConditions = Array.Empty<GameConditional>() };
+                var playlistSong = new PlaylistSong
+                {
+                    ID = id,
+                    IsExternal = true,
+                    RevealConditions = Array.Empty<GameConditional>(),
+                    UnlockConditions = Array.Empty<GameConditional>()
+                };
                 screen.LoadedSongs.Add(playlistSong);
                 screen.PlayableSongByID[id] = song;
                 screen.PlaylistSongByID[id] = playlistSong;
