@@ -1056,12 +1056,14 @@ namespace JANOARG.Client.Behaviors.SongSelect
         }
         public void Return()
         {
+            if (MapManager.sMain != null && MapManager.sMain.isNavigating) return;
+
             if (TargetMapItem is SongMapItem)
             {
                 if (TargetSongAnim != null) StopCoroutine(TargetSongAnim);
                 TargetSongAnim = StartCoroutine(MapTargetSongHideAnim());
             }
-            else if (MapManager.sPlaylistStack.Count > 1)
+            else if (TargetSongAnim == null && MapManager.sPlaylistStack.Count > 1)
             {
                 MapManager.sMain.NavigatePreviousMap();
             }
