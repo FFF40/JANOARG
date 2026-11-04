@@ -287,6 +287,18 @@ namespace JANOARG.Client.Behaviors.Panels
                         }
                     );
 
+                    Spawn<OptionCategoryTitle>("Graphics");
+
+                    Spawn<BooleanOptionInput, bool>(
+                        "VSync",
+                        () => preferences.Get("GRPH:Vsync", false),
+                        x =>
+                        {
+                            preferences.Set("GRPH:Vsync", x);
+                            CommonSys.sMain.SetVSync(x);
+                        }
+                    );
+
                     // TODO: Localisation?
 
                     // Spawn<OptionCategoryTitle>("Localization");

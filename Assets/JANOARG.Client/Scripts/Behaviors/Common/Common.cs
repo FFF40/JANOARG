@@ -134,6 +134,20 @@ namespace JANOARG.Client.Behaviors.Common
             ApplyFrameRate();
         }
 
+        /// <summary>
+        ///     Toggles VSync without touching the stored frame-rate cap. The cap is remembered and
+        ///     re-applied when VSync is turned back off.
+        /// </summary>
+        public void SetVSync(bool vSync)
+        {
+            if (_VSync == vSync)
+                return;
+
+            _VSync = vSync;
+
+            ApplyFrameRate();
+        }
+
         private void ApplyFrameRate()
         {
             // vSyncCount must be 0 for targetFrameRate to take effect; with VSync on Unity ignores the
