@@ -299,6 +299,18 @@ namespace JANOARG.Client.Behaviors.Panels
                         }
                     );
 
+                    Spawn<BooleanOptionInput, bool>(
+                        "Low Resolution Mode",
+                        () => preferences.Get("GRPH:LowRes", false),
+                        x =>
+                        {
+                            preferences.Set("GRPH:LowRes", x);
+                            float renderScale = !x ? 1f : .7f;
+                            CommonSys.sMain.SetRenderScale(renderScale);
+                        }
+                    );
+                    
+
                     // TODO: Localisation?
 
                     // Spawn<OptionCategoryTitle>("Localization");

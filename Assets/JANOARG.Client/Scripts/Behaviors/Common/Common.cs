@@ -75,13 +75,10 @@ namespace JANOARG.Client.Behaviors.Common
             // re-assert it on every scene load.
             SceneManager.sceneLoaded += OnSceneLoaded;
 
-            // Dynamic resolution: opt the render camera in and scale the 3D render target. No-op at
-            // 1.0; lower RenderScale on fillrate-bound devices. It scales only the 3D scene — the
-            // screen-space-overlay HUD stays full resolution, so only lanes/effects soften.
-            if (MainCamera != null)
-                MainCamera.allowDynamicResolution = true;
-
-            ScalableBufferManager.ResizeBuffers(RenderScale, RenderScale);
+            // Resolution scale: 1 = native. Below that the 3D scene is rendered into a smaller
+            // RenderTexture and upscaled, which scales only the 3D scene — the screen-space-overlay
+            // HUD stays full resolution, so only lanes/effects soften.
+            SetRenderScale(RenderScale);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log(
@@ -97,6 +94,12 @@ namespace JANOARG.Client.Behaviors.Common
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
 
+            if (_lowResolution != null)
+            {
+                Destroy(_lowResolution.gameObject);
+                _lowResolution = null;
+            }
+
             if (sMain == this)
                 sMain = null;
         }
@@ -111,6 +114,8 @@ namespace JANOARG.Client.Behaviors.Common
         private int  _TargetHz  = 60;
         private int  _DisplayHz;
         private bool _VSync;
+
+        private LowResolutionMode _lowResolution;
 
         /// <summary>The refresh rate reported by the current display, in Hz.</summary>
         public int DisplayRefreshRate => _DisplayHz;
@@ -146,6 +151,34 @@ namespace JANOARG.Client.Behaviors.Common
             _VSync = vSync;
 
             ApplyFrameRate();
+        }
+
+        /// <summary>Whether the low-resolution 3D path is currently active.</summary>
+        public bool LowResolutionActive => _lowResolution != null && _lowResolution.IsActive;
+
+        /// <summary>
+        ///     Applies a low-resolution render scale (1 = native, lower = fewer 3D pixels). The 3D scene is
+        ///     rendered into a scaled RenderTexture and upscaled, while screen-space-overlay UI stays full
+        ///     resolution. Works on every graphics backend, unlike dynamic-resolution buffer scaling.
+        /// </summary>
+        public void SetRenderScale(float scale)
+        {
+            RenderScale = Mathf.Clamp(scale, 0.5f, 1f);
+
+            if (Mathf.Approximately(RenderScale, 1f))
+            {
+                _lowResolution?.SetActive(false);
+                return;
+            }
+
+            if (MainCamera == null)
+                return;
+
+            if (_lowResolution == null)
+                _lowResolution = LowResolutionMode.Create(MainCamera);
+
+            _lowResolution.SetScale(RenderScale);
+            _lowResolution.SetActive(true);
         }
 
         private void ApplyFrameRate()
