@@ -236,8 +236,6 @@ namespace JANOARG.Client.Behaviors.Player
         // PlayerClockDecision.VisualTime. NaN means "no history, snap on the next frame", which is the
         // correct state at startup and after any seek or resync.
         private double _VisualTime = double.NaN;
-        private double _LastSampleStep;
-        private int    _PrevTimeSamples;
 
         /// <summary>
         ///     Chart time for drawing. Anything that positions or shapes a visual reads this; anything that
@@ -712,8 +710,6 @@ namespace JANOARG.Client.Behaviors.Player
             _SongEndDSP = double.NaN;
             _SongStartDSP = double.NaN;
             _VisualTime = double.NaN;
-            _LastSampleStep = 0;
-            _PrevTimeSamples = 0;
             PlayerScreenPause.sMain.PauseTime = -10;
             IsReady = true;
             AlreadyInitialised = true;
@@ -1209,9 +1205,7 @@ namespace JANOARG.Client.Behaviors.Player
                 HoldQueueCount = PlayerInputEngine.sInstance.HoldQueue.Count,
                 GoodWindow     = GoodWindow,
 
-                PrevTimeSamples = _PrevTimeSamples,
                 PrevVisualTime  = _VisualTime,
-                LastSampleStep  = _LastSampleStep,
             });
 
             _LastDSPTime = dspNow;
@@ -1219,9 +1213,7 @@ namespace JANOARG.Client.Behaviors.Player
             PlaybackTime = clock.PlaybackTime;
             _SongEnded   = clock.SongEnded;
 
-            _VisualTime      = clock.VisualTime;
-            _LastSampleStep  = clock.SampleStep;
-            _PrevTimeSamples = timeSamples;
+            _VisualTime = clock.VisualTime;
 
             // Audio lifecycle — use PlayScheduled on restart to avoid buffer-boundary snap.
             // Only fires for a source that stopped before its scheduled end; one that stopped because it
@@ -1377,8 +1369,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Drop the draw clock's history: it extrapolates forward from the previous frame, and after a
             // seek that previous frame belongs to a different part of the song. NaN makes it snap to
             // whatever the audio clock reports next instead of sliding there.
-            _VisualTime      = double.NaN;
-            _PrevTimeSamples = Music.timeSamples;
+            _VisualTime = double.NaN;
 
             // Only anchor from timeSamples when music is actively playing.
             if (Music.isPlaying && CurrentTime >= 0)

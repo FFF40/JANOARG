@@ -58,21 +58,17 @@ namespace JANOARG.Client.Behaviors.Common
 
             Preferences = new Storage("prefs");
 
-            // vSyncCount must be 0 for targetFrameRate to take effect;
-            // if vsync is on Unity ignores targetFrameRate entirely.
-            // -1 = truly unlimited (vs the previous 1000 cap).
-            QualitySettings.vSyncCount = 0;
-
             // Match the target to the panel's actual rate. On Android the vsync scheduler decides the
             // presented rate, so asking for more than the panel reports (or letting Unity's target
             // drift above it) can push the pacer onto a higher grid it then half-rates.
-            int displayHz = Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value);
+            _DisplayHz = Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value);
 
-            _TargetHz = displayHz > 0 ? Mathf.Min(_MAX_FPS, displayHz) : _MAX_FPS;
+            _TargetHz = _UNLIMITED_FPS
+                ? UnlimitedFrameRate
+                : _DisplayHz > 0 ? Mathf.Min(_MAX_FPS, _DisplayHz) : _MAX_FPS;
+            _VSync = false;
 
-            // Exact refresh rate. The +1 "off the vsync" trick is a workaround for the non-Swappy
-            // limiter; with Optimized Frame Pacing on, Swappy wants an exact divisor of the refresh.
-            Application.targetFrameRate = _UNLIMITED_FPS ? -1 : _TargetHz;
+            ApplyFrameRate();
 
             // Unity resets Application.targetFrameRate when a scene loads (a known Android behaviour):
             // the app runs fine until the first scene transition, then locks to the OS default 30. So
@@ -87,13 +83,9 @@ namespace JANOARG.Client.Behaviors.Common
 
             ScalableBufferManager.ResizeBuffers(RenderScale, RenderScale);
 
-#if UNITY_ANDROID && !UNITY_EDITOR
-            RequestDisplayRefresh(Application.targetFrameRate);
-#endif
-
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log(
-                $"[CommonSys] FPS target={Application.targetFrameRate} (max={_MAX_FPS}, display={displayHz}Hz) " +
+                $"[CommonSys] FPS target={Application.targetFrameRate} (max={_MAX_FPS}, display={_DisplayHz}Hz) " +
                 $"vsync={QualitySettings.vSyncCount} res={Screen.currentResolution.width}x{Screen.currentResolution.height} " +
                 $"renderScale={RenderScale:0.00} api={SystemInfo.graphicsDeviceType} gpu={SystemInfo.graphicsDeviceName}");
 #endif
@@ -109,16 +101,59 @@ namespace JANOARG.Client.Behaviors.Common
                 sMain = null;
         }
 
-        // The effective target computed once in Awake; re-asserted on every scene load.
-        private int _TargetHz = 60;
+        /// <summary>
+        ///     Sentinel for an uncapped frame rate, matching <see cref="Application.targetFrameRate" />'s
+        ///     own "no cap" value.
+        /// </summary>
+        public const int UnlimitedFrameRate = -1;
+
+        // Chosen in Awake (or by SetFrameRate) and re-asserted on every scene load; VSync overrides the cap.
+        private int  _TargetHz  = 60;
+        private int  _DisplayHz;
+        private bool _VSync;
+
+        /// <summary>The refresh rate reported by the current display, in Hz.</summary>
+        public int DisplayRefreshRate => _DisplayHz;
+
+        /// <summary>The frame-rate cap currently in effect, or <see cref="UnlimitedFrameRate" />.</summary>
+        public int TargetFrameRate => _TargetHz;
+
+        /// <summary>Whether presentation is currently synchronised to the display.</summary>
+        public bool VSyncEnabled => _VSync;
+
+        /// <summary>
+        ///     Applies a frame-rate cap and VSync preference, now and after every scene load. Exposed so a
+        ///     graphics/options menu can drive it; pass <see cref="UnlimitedFrameRate" /> (or any value
+        ///     &lt;= 0) to uncap. With VSync on, Unity ignores the cap and follows the display's refresh.
+        /// </summary>
+        public void SetFrameRate(int targetHz, bool vSync)
+        {
+            _TargetHz = targetHz;
+            _VSync    = vSync;
+
+            ApplyFrameRate();
+        }
+
+        private void ApplyFrameRate()
+        {
+            // vSyncCount must be 0 for targetFrameRate to take effect; with VSync on Unity ignores the
+            // cap entirely and paces presentation to the display instead.
+            QualitySettings.vSyncCount  = _VSync ? 1 : 0;
+            Application.targetFrameRate = _VSync || _TargetHz <= 0 ? -1 : _TargetHz;
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Match the panel to whatever we actually want to present: the cap when VSync is off, the
+            // display's own rate otherwise.
+            int refreshHz = _VSync || _TargetHz <= 0 ? _DisplayHz : _TargetHz;
+
+            if (refreshHz > 0)
+                RequestDisplayRefresh(refreshHz);
+#endif
+        }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            Application.targetFrameRate = _UNLIMITED_FPS ? -1 : _TargetHz;
-
-#if UNITY_ANDROID && !UNITY_EDITOR
-            RequestDisplayRefresh(_TargetHz);
-#endif
+            ApplyFrameRate();
         }
 
         // Application.targetFrameRate sets the render-loop target but does not switch the panel's
