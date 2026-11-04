@@ -78,7 +78,9 @@ namespace JANOARG.Client.Behaviors.Common
             // Resolution scale: 1 = native. Below that the 3D scene is rendered into a smaller
             // RenderTexture and upscaled, which scales only the 3D scene — the screen-space-overlay
             // HUD stays full resolution, so only lanes/effects soften.
-            SetRenderScale(RenderScale);
+            // Saved preferences override the build-time defaults so the options menu and boot agree.
+            SetVSync(Preferences.Get("GRPH:Vsync", false));
+            SetLowResolution(Preferences.Get("GRPH:LowRes", false));
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log(
@@ -155,6 +157,18 @@ namespace JANOARG.Client.Behaviors.Common
 
         /// <summary>Whether the low-resolution 3D path is currently active.</summary>
         public bool LowResolutionActive => _lowResolution != null && _lowResolution.IsActive;
+
+        /// <summary>Render scale used by the "Low Resolution Mode" option (0.7 cuts ~half the pixels).</summary>
+        public const float LowResolutionScale = 0.7f;
+
+        /// <summary>
+        ///     Toggles the low-resolution mode, using <see cref="LowResolutionScale" /> when enabled. The
+        ///     options menu and boot path share this so the two cannot drift apart.
+        /// </summary>
+        public void SetLowResolution(bool enabled)
+        {
+            SetRenderScale(enabled ? LowResolutionScale : 1f);
+        }
 
         /// <summary>
         ///     Applies a low-resolution render scale (1 = native, lower = fewer 3D pixels). The 3D scene is

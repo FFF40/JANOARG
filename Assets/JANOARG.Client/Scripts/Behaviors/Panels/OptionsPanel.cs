@@ -305,8 +305,7 @@ namespace JANOARG.Client.Behaviors.Panels
                         x =>
                         {
                             preferences.Set("GRPH:LowRes", x);
-                            float renderScale = !x ? 1f : .7f;
-                            CommonSys.sMain.SetRenderScale(renderScale);
+                            CommonSys.sMain.SetLowResolution(x);
                         }
                     );
                     
