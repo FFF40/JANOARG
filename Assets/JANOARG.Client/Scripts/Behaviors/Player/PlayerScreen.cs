@@ -1271,8 +1271,9 @@ namespace JANOARG.Client.Behaviors.Player
             if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
                 SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
 
-            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
-                SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+            // cheap: renderer tint only, no canvas dirty. reapplied every frame so new
+            // TMP fallback submeshes get tinted too.
+            SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
             sr_LaneStylesUpdate.Begin();
             for (var a = 0; a < LaneStyles.Count; a++)
@@ -1726,16 +1727,61 @@ namespace JANOARG.Client.Behaviors.Player
             RenderSettings.fogColor = color;
         }
 
+        // one tint source for the HUD. CanvasRenderer.SetColor is a draw-time multiply,
+        // so theme fades don't dirty any canvas. TMP fallback glyphs get their own
+        // TMP_SubMeshUI CanvasRenderers, so cache those too.
+        private readonly Dictionary<Graphic, CanvasRenderer[]> _interfaceRenderers = new();
+        private readonly Dictionary<Graphic, int>             _interfaceRendererChildCount = new();
+
+        private void ApplyInterfaceTint(Graphic graphic, Color tint)
+        {
+            if (graphic == null) return;
+
+            // tint multiplies the baked vertex colour, so flatten base to white first.
+            // no-op for most elements.
+            if (graphic.color != Color.white)
+                graphic.color = Color.white;
+
+            int childCount = graphic.transform.childCount;
+
+            if (!_interfaceRenderers.TryGetValue(graphic, out CanvasRenderer[] renderers) ||
+                _interfaceRendererChildCount[graphic] != childCount)
+            {
+                TMP_SubMeshUI[] subMeshes = graphic is TMP_Text
+                    ? graphic.GetComponentsInChildren<TMP_SubMeshUI>(true)
+                    : System.Array.Empty<TMP_SubMeshUI>();
+
+                renderers = new CanvasRenderer[subMeshes.Length + 1];
+                renderers[0] = graphic.canvasRenderer;
+
+                for (var i = 0; i < subMeshes.Length; i++)
+                    renderers[i + 1] = subMeshes[i].canvasRenderer;
+
+                _interfaceRenderers[graphic] = renderers;
+                _interfaceRendererChildCount[graphic] = childCount;
+            }
+
+            for (var i = 0; i < renderers.Length; i++)
+                renderers[i].SetColor(tint);
+        }
+
         public void SetInterfaceColor(Color color)
         {
-            SongNameLabel.color = SongArtistLabel.color = SongExternalIndicator.color = DifficultyLabel.color = DifficultyNameLabel.color =
-                SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color =
-                    PauseLabel.color = color;
+            ApplyInterfaceTint(SongNameLabel, color);
+            ApplyInterfaceTint(SongArtistLabel, color);
+            ApplyInterfaceTint(SongExternalIndicator, color);
+            ApplyInterfaceTint(DifficultyNameLabel, color);
+            ApplyInterfaceTint(DifficultyLabel, color);
+            ApplyInterfaceTint(SongProgressTip, color);
+            ApplyInterfaceTint(SongProgressGlow, color);
+            ApplyInterfaceTint(JudgmentLabel, color);
+            ApplyInterfaceTint(ComboLabel, color);
+            ApplyInterfaceTint(PauseLabel, color);
 
             foreach (Graphic digit in ScoreDigits)
-                digit.color = color;
+                ApplyInterfaceTint(digit, color);
 
-            SongProgressBody.color = color * new Color(1, 1, 1, .5f);
+            ApplyInterfaceTint(SongProgressBody, color * new Color(1, 1, 1, .5f));
         }
 
         // TODO: Move this to a editor script before removing this method
