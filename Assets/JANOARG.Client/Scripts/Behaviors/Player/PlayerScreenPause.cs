@@ -29,6 +29,11 @@ namespace JANOARG.Client.Behaviors.Player
 
         [Space] public Coroutine CurrentAnimation;
 
+        // Set while ShowAnim is running. A focus bounce can request Continue() before the
+        // pause menu has finished animating in; queue it so the run still resumes on its own.
+        private bool _PauseIsShowing;
+        private bool _ContinueQueued;
+
         private void Awake()
         {
             sMain = this;
@@ -68,6 +73,8 @@ namespace JANOARG.Client.Behaviors.Player
         public void Show()
         {
             if (CurrentAnimation != null) StopCoroutine(CurrentAnimation);
+            _PauseIsShowing = true;
+            _ContinueQueued = false;
             CurrentAnimation = StartCoroutine(ShowAnim());
         }
 
@@ -87,12 +94,26 @@ namespace JANOARG.Client.Behaviors.Player
                 });
 
             CurrentAnimation = null;
+            _PauseIsShowing = false;
+
+            // A resume request arrived while the menu was still animating in; honour it now
+            // instead of leaving the run paused with no further event to trigger it.
+            if (_ContinueQueued)
+            {
+                _ContinueQueued = false;
+                Continue();
+            }
         }
 
         public void Continue()
         {
-            if (CurrentAnimation != null) return;
+            if (CurrentAnimation != null)
+            {
+                if (_PauseIsShowing) _ContinueQueued = true;
+                return;
+            }
 
+            _PauseIsShowing = false;
             CurrentAnimation = StartCoroutine(ContinueAnim());
         }
 

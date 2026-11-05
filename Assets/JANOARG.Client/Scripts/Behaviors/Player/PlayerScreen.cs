@@ -1422,6 +1422,45 @@ namespace JANOARG.Client.Behaviors.Player
         // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause.
         private bool _PausedByFocusLoss;
 
+        /// <summary>
+        ///     Pauses an in-progress run for an OS interruption (focus loss, app backgrounding).
+        ///     Deliberately mirrors the manual pause path's audio handling, which matters twice over:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             While the lead-in is still running the clip has a pending <c>PlayScheduled</c>, and
+        ///             <c>Pause()</c> does not cancel it — the song would start behind the pause menu.
+        ///             <c>Stop()</c> kills the pending schedule.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="SuspendMusicSchedule" /> drops the scheduled start/end DSP anchors. Without
+        ///             it, an interruption that outlives the originally scheduled song end leaves
+        ///             <c>_SongEndDSP</c> in the past, so <see cref="PlayerClock" /> latches "song ended" on
+        ///             resume and the restart path refuses to bring the audio back.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        private void PauseForInterruption()
+        {
+            if (!IsPlaying || ResultExec)
+                return;
+
+            _PausedByFocusLoss = true;
+            IsPlaying = false;
+
+            // Before chart time zero the source has a pending PlayScheduled; Pause() won't cancel it.
+            if (CurrentTime < 0)
+                Music.Stop();
+            else
+                Music.Pause();
+
+            SuspendMusicSchedule();
+            _LastDSPTime = AudioSettings.dspTime;
+            ComputeAndSaveMedianOffset();
+
+            PlayerInputEngine.sInstance.TouchClasses.Clear();
+            PlayerScreenPause.sMain.Show();
+        }
+
         public void OnApplicationFocus(bool hasFocus)
         {
 #if UNITY_EDITOR
@@ -1430,16 +1469,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (!hasFocus)
             {
-                if (IsPlaying && !ResultExec)
-                {
-                    _PausedByFocusLoss = true;
-                    IsPlaying = false;
-                    Music.Pause();
-                    _LastDSPTime = AudioSettings.dspTime;
-                    ComputeAndSaveMedianOffset();
-                    PlayerScreenPause.sMain.Show();
-                }
-
+                PauseForInterruption();
                 return;
             }
 
@@ -1458,15 +1488,7 @@ namespace JANOARG.Client.Behaviors.Player
             #else
                 if (isPaused)
                 {
-                    if (IsPlaying)
-                    {
-                        _PausedByFocusLoss = true;
-                        IsPlaying = false;
-                        Music.Pause();
-                        _LastDSPTime = AudioSettings.dspTime;
-                        ComputeAndSaveMedianOffset();
-                        PlayerScreenPause.sMain.Show();
-                    }
+                    PauseForInterruption();
                 }
                 else if (_PausedByFocusLoss)
                 {
