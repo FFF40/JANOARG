@@ -21,7 +21,7 @@ A rhythm game where everything can move.
 ## Code contributing
 
 ### Requirement:
-* **A copy of Unity Editor, version 2022.3.**
+* **A copy of Unity Editor, version 6000.6.8f1**
 * **A text editor that can edit code.** Even rudimentary ones like Notepad can do, though we recommend ones that support full Unity and C# integration such as [JetBrains Rider](https://www.jetbrains.com/rider/) or [Visual Studio Code](https://code.visualstudio.com/).
 
 ## Additional contributing (No programming skills required)
