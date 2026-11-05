@@ -12,6 +12,7 @@ using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Client.Data.Playlist;
 using JANOARG.Client.Behaviors.SongSelect.List;
 using JANOARG.Client.UI;
+using JANOARG.Client.Utils;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItems;
 using JANOARG.Client.Behaviors.Player;
@@ -329,6 +330,10 @@ namespace JANOARG.Client.Behaviors.SongSelect
             // Update Playlist's BGM accordingly
             BGMIntroSource.clip = Playlist.BackgroundMusicInit;
             BGMLoopSource.clip = Playlist.BackgroundMusicLoop;
+
+            // Prewarm TMP faces/glyphs for the whole catalog so dynamic font atlas work
+            // doesn't hitch while browsing or when a song starts.
+            yield return FontPrewarmer.PrewarmSongCatalog(PlayableSongByID.Values);
 
             ListView.UpdateSort();
 

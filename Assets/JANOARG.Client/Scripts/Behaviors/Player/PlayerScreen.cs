@@ -508,6 +508,9 @@ namespace JANOARG.Client.Behaviors.Player
                 if (sTargetChartMeta == null)
                     throw new InvalidOperationException("Target chart metadata is missing before chart load.");
 
+                // Prewarm the exact strings shown in gameplay (also covers external charts).
+                yield return FontPrewarmer.PrewarmSong(sTargetSong, sTargetChartMeta);
+
                 SongNameLabel.text = sTargetSong.SongName;
                 SongArtistLabel.text = sTargetSong.SongArtist;
                 SongExternalIndicator.gameObject.SetActive(sIsExternal);
