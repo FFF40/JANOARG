@@ -155,7 +155,7 @@ namespace JANOARG.Client.Behaviors.Common
             ApplyFrameRate();
         }
 
-        /// <summary>Whether the low-resolution 3D path is currently active.</summary>
+        /// <summary>Whether the URP Render Scale low-resolution path is currently active.</summary>
         public bool LowResolutionActive => _lowResolution != null && _lowResolution.IsActive;
 
         /// <summary>Render scale used by the "Low Resolution Mode" option (0.7 cuts ~half the pixels).</summary>
@@ -171,28 +171,18 @@ namespace JANOARG.Client.Behaviors.Common
         }
 
         /// <summary>
-        ///     Applies a low-resolution render scale (1 = native, lower = fewer 3D pixels). The 3D scene is
-        ///     rendered into a scaled RenderTexture and upscaled, while screen-space-overlay UI stays full
-        ///     resolution. Works on every graphics backend, unlike dynamic-resolution buffer scaling.
+        ///     Applies a URP Render Scale (1 = native, lower = fewer 3D pixels). The pipeline scales the
+        ///     camera render target while screen-space-overlay UI stays at full resolution.
         /// </summary>
         public void SetRenderScale(float scale)
         {
             RenderScale = Mathf.Clamp(scale, 0.5f, 1f);
 
-            if (Mathf.Approximately(RenderScale, 1f))
-            {
-                _lowResolution?.SetActive(false);
-                return;
-            }
-
-            if (MainCamera == null)
-                return;
-
             if (_lowResolution == null)
-                _lowResolution = LowResolutionMode.Create(MainCamera);
+                _lowResolution = LowResolutionMode.Create();
 
             _lowResolution.SetScale(RenderScale);
-            _lowResolution.SetActive(true);
+            _lowResolution.SetActive(!Mathf.Approximately(RenderScale, 1f));
         }
 
         private void ApplyFrameRate()
