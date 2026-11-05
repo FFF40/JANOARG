@@ -3,6 +3,5 @@
 --- !u!890905787 &1
 VersionControlSettings:
   m_ObjectHideFlags: 0
-  m_Mode: Visible Meta Files
-  m_CollabEditorSettings:
-    inProgressEnabled: 1
+  m_Mode: Unity Version Control
+  m_TrackPackagesOutsideProject: 0
