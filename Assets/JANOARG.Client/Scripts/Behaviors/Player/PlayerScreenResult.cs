@@ -207,6 +207,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
             Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
+            bool          fullResPushed = false;
 
             try
             {
@@ -240,6 +241,10 @@ namespace JANOARG.Client.Behaviors.Player
 
                 screenshotCamera.targetTexture = rTex;
                 Canvas.ForceUpdateCanvases();
+
+                CommonSys.sMain?.PushFullResolution();
+                fullResPushed = true;
+
                 screenshotCamera.Render();
 
                 RenderTexture.active = rTex;
@@ -248,6 +253,9 @@ namespace JANOARG.Client.Behaviors.Player
             }
             finally
             {
+                if (fullResPushed)
+                    CommonSys.sMain?.PopFullResolution();
+
                 screenshotCamera.targetTexture = null;
                 RenderTexture.active = null;
 
