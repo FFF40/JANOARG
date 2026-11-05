@@ -178,11 +178,27 @@ namespace JANOARG.Client.Behaviors.Common
         {
             RenderScale = Mathf.Clamp(scale, 0.5f, 1f);
 
-            if (_lowResolution == null)
-                _lowResolution = LowResolutionMode.Create();
-
+            EnsureLowResolutionMode();
             _lowResolution.SetScale(RenderScale);
             _lowResolution.SetActive(!Mathf.Approximately(RenderScale, 1f));
+        }
+
+        /// <summary>Force native rendering until the matching pop (options preview, screenshots).</summary>
+        public void PushFullResolution()
+        {
+            EnsureLowResolutionMode();
+            _lowResolution.PushFullResolution();
+        }
+
+        public void PopFullResolution()
+        {
+            _lowResolution?.PopFullResolution();
+        }
+
+        void EnsureLowResolutionMode()
+        {
+            if (_lowResolution == null)
+                _lowResolution = LowResolutionMode.Create();
         }
 
         private void ApplyFrameRate()

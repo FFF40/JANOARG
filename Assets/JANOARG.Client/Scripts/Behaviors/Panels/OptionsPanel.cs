@@ -51,6 +51,8 @@ namespace JANOARG.Client.Behaviors.Panels
         public Camera   PreviewCamera;
         public RawImage PreviewTextureTarget;
 
+        private bool _previewFullRes;
+
         [Space]
         public GameObject ArtifactHolder;
 
@@ -122,6 +124,12 @@ namespace JANOARG.Client.Behaviors.Panels
 
         public void OnDestroy()
         {
+            if (_previewFullRes)
+            {
+                _previewFullRes = false;
+                CommonSys.sMain?.PopFullResolution();
+            }
+
             Destroy(PreviewTexture);
             Destroy(artifactTexture);
             Destroy(freeFlickIndicator);
@@ -889,7 +897,15 @@ namespace JANOARG.Client.Behaviors.Panels
         private IEnumerator PreviewAnim(bool shown)
         {
             if (shown)
+            {
+                if (!_previewFullRes)
+                {
+                    _previewFullRes = true;
+                    CommonSys.sMain?.PushFullResolution();
+                }
+
                 PreviewCamera.gameObject.SetActive(true);
+            }
 
             yield return Ease.Animate(
                 .5f, x =>
@@ -915,7 +931,15 @@ namespace JANOARG.Client.Behaviors.Panels
                 });
 
             if (!shown)
+            {
                 PreviewCamera.gameObject.SetActive(false);
+
+                if (_previewFullRes)
+                {
+                    _previewFullRes = false;
+                    CommonSys.sMain?.PopFullResolution();
+                }
+            }
         }
 
         private static RectTransform RT(MonoBehaviour item)
