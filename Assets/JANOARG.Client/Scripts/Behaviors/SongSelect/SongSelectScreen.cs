@@ -232,7 +232,7 @@ namespace JANOARG.Client.Behaviors.SongSelect
                         PreviewSource.time = CurrentPreviewRange.x;
                     }
                 }
-                else if (PreviewSource.time > CurrentPreviewRange.y)
+                else if (PreviewSource.clip != null && PreviewSource.time > CurrentPreviewRange.y)
                 {
                     PreviewSource.time -= CurrentPreviewRange.y - CurrentPreviewRange.x;
                 }
