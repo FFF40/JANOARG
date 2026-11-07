@@ -12,14 +12,14 @@ using UnityEngine;
 namespace JANOARG.Client.Data.Story.Instructions
 {
     [Serializable]
-    public class MusicSetStoryInstruction : StoryInstruction
+    public class SetMusicStoryInstruction : StoryInstruction
     {
         public string Id;
         public float FadeDuration = 2.0f;
 
         // In-dialog
-        [StoryTag("MusicSet")]
-        public MusicSetStoryInstruction(string id, string duration = "2.0")
+        [StoryTag("SetMusic")]
+        public SetMusicStoryInstruction(string id, string duration = "2.0")
         {
             Id = id;
             Match match = Regex.Match(duration, @"(?<number>\d+(?:\.\d+)?)");
@@ -60,7 +60,6 @@ namespace JANOARG.Client.Data.Story.Instructions
                 }
             }
 
-            // Background opacity will be set to 1(fully visible) before changing the background
             teller.BackgroundMusicPlayer.enabled = true;
             yield return Ease.Animate(FadeDuration, (a) =>
             {

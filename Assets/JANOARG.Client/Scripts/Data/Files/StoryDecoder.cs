@@ -86,32 +86,32 @@ namespace JANOARG.Client.Data.Files
                 if (line.StartsWith("#")) continue;
 
                 // Parse Scene Setting 
-                // BackgroundSet :: BackgroundID
-                if (line.StartsWith("BackgroundSet"))
+                // SetBackground :: BackgroundID
+                if (line.StartsWith("SetBackground"))
                 {
-                    Debug.Log($"Line {line} in BackgroundSet");
+                    Debug.Log($"Line {line} in SetBackground");
                     Match match;
                     Regex separator = new(@"(?<action>.+?)\s*::\s*(?<content>.+)");
                     if ((match = separator.Match(line)).Success)
                     {
-                        BackgroundSetStoryInstruction backgroundSetIns =
-                         new BackgroundSetStoryInstruction(match.Groups["content"].ToString());
+                        SetBackgroundStoryInstruction backgroundSetIns =
+                         new SetBackgroundStoryInstruction(match.Groups["content"].ToString());
                         Debug.Log($"'{match.Groups["content"]}' is the Id");
                         currentChunk.Instructions.Add(backgroundSetIns);
                     }
                     continue;
                 }
 
-                // MusicSet :: MusicID
-                if (line.StartsWith("MusicSet"))
+                // SetMusic :: MusicID
+                if (line.StartsWith("SetMusic"))
                 {
-                    Debug.Log($"Line {line} in MusicSet");
+                    Debug.Log($"Line {line} in SetMusic");
                     Match match;
                     Regex separator = new(@"(?<action>.+?)\s*::\s*(?<content>.+)");
                     if ((match = separator.Match(line)).Success)
                     {
-                        MusicSetStoryInstruction musicSetIns =
-                         new MusicSetStoryInstruction(match.Groups["content"].ToString());
+                        SetMusicStoryInstruction musicSetIns =
+                         new SetMusicStoryInstruction(match.Groups["content"].ToString());
                         Debug.Log($"'{match.Groups["content"]}' is the Id");
                         currentChunk.Instructions.Add(musicSetIns);
                     }

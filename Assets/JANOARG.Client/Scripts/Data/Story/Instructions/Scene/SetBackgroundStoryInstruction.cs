@@ -12,14 +12,14 @@ using UnityEngine;
 namespace JANOARG.Client.Data.Story.Instructions
 {
     [Serializable]
-    public class BackgroundSetStoryInstruction : StoryInstruction
+    public class SetBackgroundStoryInstruction : StoryInstruction
     {
         public string Id;
         public float Duration = 1.0f;
 
         // In-dialog
-        [StoryTag("BackgroundSet")]
-        public BackgroundSetStoryInstruction(string id, string duration = "1.0")
+        [StoryTag("SetBackground")]
+        public SetBackgroundStoryInstruction(string id, string duration = "1.0")
         {
             Id = id;
             Match match = Regex.Match(duration, @"(?<number>\d+(?:\.\d+)?)");

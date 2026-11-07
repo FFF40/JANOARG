@@ -7,12 +7,16 @@ namespace JANOARG.Client.Data.Story
 {
     public class StoryScript : ScriptableObject
     {
-        public string ChapterCount;
-        public string ChapterName;
-        public string EpisodeCount;
-        public string EpisodeName;
+        // TODO: Metadata support
+        // public string ChapterCount;
+        // public string ChapterName;
+        // public string EpisodeCount;
+        // public string EpisodeName;
+        // public string SceneWriter;
         public List<StoryChunk> Chunks = new();
-        public List<StoryLocalization> Localizations = new();
+        
+        // TODO: Localization support
+        // public List<StoryLocalization> Localizations = new();
     }
 
     [Serializable]
@@ -23,6 +27,6 @@ namespace JANOARG.Client.Data.Story
 
     public class StoryLocalization
     {
-        
+        public string Translator;
     }
 }
