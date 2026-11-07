@@ -672,15 +672,28 @@ namespace JANOARG.Client.UI
             ScreenshotCamera.targetTexture = rTex;
             Canvas.ForceUpdateCanvases();
 
-            ScreenshotCamera.Render();
-
             Texture2D tex2D = new(width, height, TextureFormat.ARGB32, false);
-            RenderTexture.active = rTex;
-            tex2D.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-            tex2D.Apply();
+            bool      fullResPushed = false;
 
-            ScreenshotCamera.targetTexture = null;
-            rTex.Release();
+            try
+            {
+                CommonSys.sMain?.PushFullResolution();
+                fullResPushed = true;
+
+                ScreenshotCamera.Render();
+
+                RenderTexture.active = rTex;
+                tex2D.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                tex2D.Apply();
+            }
+            finally
+            {
+                if (fullResPushed)
+                    CommonSys.sMain?.PopFullResolution();
+
+                ScreenshotCamera.targetTexture = null;
+                rTex.Release();
+            }
 
             return tex2D;
         }

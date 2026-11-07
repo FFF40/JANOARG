@@ -51,6 +51,7 @@ namespace JANOARG.Client.Behaviors.Player
         public RectTransform SongInfoTransform;
         public TMP_Text      SongNameText;
         public TMP_Text      SongArtistText;
+        public TMP_Text      SongExternalIndicator;
         public TMP_Text      SongDifficultyText;
         public RawImage      SongCoverImage;
 
@@ -67,7 +68,9 @@ namespace JANOARG.Client.Behaviors.Player
         public TMP_Text      MaxComboText;
         public TMP_Text      AverageOffsetText;
 
-        [Space] public TMP_Text ShareMetadata;
+        [Space] 
+        public GameObject ShareInfoHolder;
+        public TMP_Text ShareMetadata;
 
         [Space] public CanvasGroup LeftActionsHolder;
 
@@ -188,9 +191,9 @@ namespace JANOARG.Client.Behaviors.Player
 
             int[] layers = new int[subtree.Count];
 
-            bool leftActionsActive   = LeftActionsHolder != null && LeftActionsHolder.gameObject.activeSelf;
-            bool rightActionsActive  = RightActionsHolder != null && RightActionsHolder.gameObject.activeSelf;
-            bool shareMetadataActive = ShareMetadata != null && ShareMetadata.gameObject.activeSelf;
+            bool leftActionsActive   = LeftActionsHolder.gameObject.activeSelf;
+            bool rightActionsActive  = RightActionsHolder.gameObject.activeSelf;
+            bool shareMetadataActive = ShareInfoHolder.activeSelf;
 
             bool menuActive     = profileBar != null && profileBar.MenuButtonGroup != null && profileBar.MenuButtonGroup.gameObject.activeSelf;
             bool backpackActive = profileBar != null && profileBar.RightPane != null && profileBar.RightPane.gameObject.activeSelf;
@@ -204,6 +207,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
             Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
+            bool          fullResPushed = false;
 
             try
             {
@@ -216,15 +220,15 @@ namespace JANOARG.Client.Behaviors.Player
                     subtree[i].gameObject.layer = 6;
                 }
 
-                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(false);
-                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(false);
-                if (ShareMetadata != null) ShareMetadata.gameObject.SetActive(true);
+                LeftActionsHolder.gameObject.SetActive(false);
+                RightActionsHolder.gameObject.SetActive(false);
+                ShareInfoHolder.SetActive(true);
 
                 if (profileBar != null)
                 {
-                    if (profileBar.MenuButtonGroup != null) profileBar.MenuButtonGroup.gameObject.SetActive(false);
-                    if (profileBar.RightPane != null) profileBar.RightPane.gameObject.SetActive(false);
-                    if (profileBar.ChangeHeader != null) profileBar.ChangeHeader.gameObject.SetActive(false);
+                    profileBar.MenuButtonGroup.gameObject.SetActive(false);
+                    profileBar.RightPane.gameObject.SetActive(false);
+                    profileBar.ChangeHeader.gameObject.SetActive(false);
                 }
 
                 transform.localScale = originalScale * CONTENT_SCALE;
@@ -237,6 +241,10 @@ namespace JANOARG.Client.Behaviors.Player
 
                 screenshotCamera.targetTexture = rTex;
                 Canvas.ForceUpdateCanvases();
+
+                CommonSys.sMain?.PushFullResolution();
+                fullResPushed = true;
+
                 screenshotCamera.Render();
 
                 RenderTexture.active = rTex;
@@ -245,21 +253,24 @@ namespace JANOARG.Client.Behaviors.Player
             }
             finally
             {
+                if (fullResPushed)
+                    CommonSys.sMain?.PopFullResolution();
+
                 screenshotCamera.targetTexture = null;
                 RenderTexture.active = null;
 
                 rTex.Release();
                 Destroy(rTex);
 
-                if (LeftActionsHolder != null) LeftActionsHolder.gameObject.SetActive(leftActionsActive);
-                if (RightActionsHolder != null) RightActionsHolder.gameObject.SetActive(rightActionsActive);
-                if (ShareMetadata != null) ShareMetadata.gameObject.SetActive(shareMetadataActive);
+                LeftActionsHolder.gameObject.SetActive(leftActionsActive);
+                RightActionsHolder.gameObject.SetActive(rightActionsActive);
+                ShareInfoHolder.SetActive(shareMetadataActive);
 
                 if (profileBar != null)
                 {
-                    if (profileBar.MenuButtonGroup != null) profileBar.MenuButtonGroup.gameObject.SetActive(menuActive);
-                    if (profileBar.RightPane != null) profileBar.RightPane.gameObject.SetActive(backpackActive);
-                    if (profileBar.ChangeHeader != null) profileBar.ChangeHeader.gameObject.SetActive(changeActive);
+                    profileBar.MenuButtonGroup.gameObject.SetActive(menuActive);
+                    profileBar.RightPane.gameObject.SetActive(backpackActive);
+                    profileBar.ChangeHeader.gameObject.SetActive(changeActive);
                 }
 
                 transform.localScale = originalScale;
@@ -323,7 +334,7 @@ namespace JANOARG.Client.Behaviors.Player
                 ring.rectTransform.localPosition = Vector2.zero;
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
-                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
+                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new ColorFrag(a: 0.5f);
 
             StartCoroutine(
                 Ease.Animate(
@@ -351,7 +362,7 @@ namespace JANOARG.Client.Behaviors.Player
             ResultText.rectTransform.localScale = Vector3.one;
             ResultText.rectTransform.anchoredPosition = Vector2.zero;
             ResultTextBig.text = ResultText.text;
-            ResultTextBig.color = PlayerScreen.sCurrentChart.Palette.InterfaceColor;
+            ResultTextBig.color = PlayerScreen.sCurrentChart.Palette.InterfaceColor * new ColorFrag(a: 1f);
 
             yield return Ease.Animate(
                 4, x =>
@@ -430,7 +441,7 @@ namespace JANOARG.Client.Behaviors.Player
                     PlayerScreen.sMain.SetInterfaceColor(
                         PlayerScreen.sCurrentChart.Palette
                             .InterfaceColor *
-                        new Color(1, 1, 1, 1 - x));
+                        new ColorFrag(a: 1 - x));
 
                     FanfareSource.volume = x * .3f * Settings.BackgroundMusicVolume;
                 });
@@ -483,13 +494,11 @@ namespace JANOARG.Client.Behaviors.Player
             string rank = Helper.GetRank(score);
 
             ShareMetadata.text =
-                $"Score recorded at <u>{DateTime.Now:M/d/yyyy, hh.mmtt}</u>\n" +
-                $"Played in <u>{Application.version}</u>";
-            ShareMetadata.color =
-                (Color.white - CommonSys.sMain.MainCamera.backgroundColor) * new ColorFrag(a: 1);
+                $"{DateTime.Now:M/d/yyyy, hh.mmtt}\n" +
+                $"{Application.version}";
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
-                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
+                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new ColorFrag(a: 0.5f);
 
             var markIndex = 0;
             foreach (RectTransform mark in ScoreBarMarks) mark.gameObject.SetActive(false);
@@ -595,6 +604,7 @@ namespace JANOARG.Client.Behaviors.Player
             SongInfoHolder.gameObject.SetActive(true);
             SongNameText.text = PlayerScreen.sTargetSong.SongName;
             SongArtistText.text = PlayerScreen.sTargetSong.SongArtist;
+            SongExternalIndicator.gameObject.SetActive(PlayerScreen.sIsExternal);
             SongDifficultyText.text = Helper.FormatDifficulty(PlayerScreen.sTargetChart.Data.DifficultyLevel);
 
             SongDifficultyText.color =
@@ -717,6 +727,14 @@ namespace JANOARG.Client.Behaviors.Player
 
         private void CalculateGainsAndSave(int score)
         {
+            // External charts must not affect player status/currency or persisted scores.
+            // Keep the score in the in-memory score store only, so it survives for this session.
+            if (PlayerScreen.sIsExternal)
+            {
+                SaveScoreEntry(score, PlayerScreen.sIsExternal);
+                return;
+            }
+
             float baseOrbs = Helper.CalculateBaseSongGain(
                 PlayerScreen.sTargetSong, PlayerScreen.sCurrentChart, score);
 
@@ -738,7 +756,7 @@ namespace JANOARG.Client.Behaviors.Player
                 }
             }
             
-            SaveScoreEntry(score);   
+            SaveScoreEntry(score, PlayerScreen.sIsExternal);   
             ProfileBar.sMain.CompleteSong((long)baseOrbs, (long)baseCoins);
             StorageManager.sMain.Save();
         }
@@ -781,6 +799,13 @@ namespace JANOARG.Client.Behaviors.Player
 
         private IEnumerator LoadCoverImageRoutine()
         {
+            Sprite iconCover = PlayerScreen.sTargetSong.Cover?.IconCover;
+            if (iconCover != null && iconCover.texture != null)
+            {
+                SongCoverImage.texture = iconCover.texture;
+                yield break;
+            }
+
             string path = Path.Combine(
                 Path.GetDirectoryName(PlayerScreen.sTargetSongPath)!,
                 PlayerScreen.sTargetSong.Cover.IconTarget);
@@ -999,7 +1024,7 @@ namespace JANOARG.Client.Behaviors.Player
             IsAnimating = false;
         }
 
-        private void SaveScoreEntry(int score)
+        private void SaveScoreEntry(int score, bool isExternal = false)
         {
             ScoreStoreEntry entry = new()
             {
@@ -1012,7 +1037,8 @@ namespace JANOARG.Client.Behaviors.Player
                 GoodCount = PlayerScreen.sMain.GoodCount,
                 BadCount = PlayerScreen.sMain.BadCount,
                 MaxCombo = PlayerScreen.sMain.MaxCombo,
-                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex >= 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0
+                Rating = PlayerScreen.sTargetChartMeta.DifficultyIndex >= 0 ? Helper.GetRating(PlayerScreen.sTargetChartMeta.ChartConstant, score) : 0,
+                IsExternal = isExternal
             };
 
             StorageManager.sMain.Scores.Register(entry);

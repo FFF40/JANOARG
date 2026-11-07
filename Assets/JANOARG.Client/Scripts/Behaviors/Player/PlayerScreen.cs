@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JANOARG.Client.Behaviors.Common;
+using JANOARG.Client.Behaviors.Player.PlayerInput.Core;
 using JANOARG.Client.Behaviors.SongSelect;
 using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Data.Files;
 using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
@@ -27,7 +29,7 @@ namespace JANOARG.Client.Behaviors.Player
         static readonly ProfilerMarker sr_HitStylesUpdate = new("PlayerScreen.LateUpdate: HitStyles Loop");
         static readonly ProfilerMarker sr_CameraAdvance = new("PlayerScreen.LateUpdate: Camera Advance");
         static readonly ProfilerMarker sr_SpawnHitEffect = new("PlayerScreen.SpawnHitEffect");
-        static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputManager.UpdateInput");
+        static readonly ProfilerMarker sr_UpdateInputCall = new("PlayerScreen.Update: PlayerInputEngine.UpdateInput");
         static readonly ProfilerMarker sr_HoldMeshLoop = new("PlayerScreen.Update: Hold Mesh Loop");
         static readonly ProfilerMarker sr_LanesLoop = new("PlayerScreen.LateUpdate: Lanes Loop (Total)");
 
@@ -36,6 +38,7 @@ namespace JANOARG.Client.Behaviors.Player
         public static string            sTargetSongPath;
         public static PlayableSong      sTargetSong;
         public static ExternalChartMeta sTargetChartMeta;
+        public static bool              sIsExternal;
         public static ExternalChart     sTargetChart;
 
         public static Chart sCurrentChart;
@@ -57,8 +60,8 @@ namespace JANOARG.Client.Behaviors.Player
 
         [Space]
         public TMP_Text SongNameLabel;
-
         public TMP_Text SongArtistLabel;
+        public TMP_Text SongExternalIndicator;
         public TMP_Text DifficultyNameLabel;
         public TMP_Text DifficultyLabel;
 
@@ -233,8 +236,6 @@ namespace JANOARG.Client.Behaviors.Player
         // PlayerClockDecision.VisualTime. NaN means "no history, snap on the next frame", which is the
         // correct state at startup and after any seek or resync.
         private double _VisualTime = double.NaN;
-        private double _LastSampleStep;
-        private int    _PrevTimeSamples;
 
         /// <summary>
         ///     Chart time for drawing. Anything that positions or shapes a visual reads this; anything that
@@ -278,10 +279,25 @@ namespace JANOARG.Client.Behaviors.Player
             CommonScene.Load();
         }
 
+        // External songs are streamed in song select; for the run we swap in a fully decoded clip on the
+        // shared PlayableSong, then put the streamed one back when the player goes away.
+        private PlayableSong _UpgradedSong;
+        private AudioClip    _StreamedClip;
+
         public void OnDestroy()
         {
             if (sMain == this)
                 sMain = null;
+
+            if (_UpgradedSong != null)
+            {
+                AudioClip full = _UpgradedSong.Clip;
+                _UpgradedSong.Clip = _StreamedClip;
+                if (Music != null && Music.clip == full) Music.clip = null;
+                if (full != null && full != _StreamedClip) Destroy(full);
+                _UpgradedSong = null;
+                _StreamedClip = null;
+            }
         }
 
         public void Start()
@@ -302,6 +318,8 @@ namespace JANOARG.Client.Behaviors.Player
         private const int HitPlayerPoolPrewarm = 64;
         private readonly Stack<HitPlayer> _HitPlayerPool = new();
         private int _HitPlayersCreated;
+        
+        #region CUSTOM PROFILER CODE
 
         // Read-only views for JanoargProfilerSampler (custom Profiler counters).
         internal int PendingLaneCount      => _PendingLanes.Count - _PendingLaneCursor;
@@ -368,6 +386,7 @@ namespace JANOARG.Client.Behaviors.Player
                 return count;
             }
         }
+        #endregion
 
         private void PrewarmHitPlayerPool()
         {
@@ -489,8 +508,12 @@ namespace JANOARG.Client.Behaviors.Player
                 if (sTargetChartMeta == null)
                     throw new InvalidOperationException("Target chart metadata is missing before chart load.");
 
+                // Prewarm the exact strings shown in gameplay (also covers external charts).
+                yield return FontPrewarmer.PrewarmSong(sTargetSong, sTargetChartMeta);
+
                 SongNameLabel.text = sTargetSong.SongName;
                 SongArtistLabel.text = sTargetSong.SongArtist;
+                SongExternalIndicator.gameObject.SetActive(sIsExternal);
 
                 DifficultyNameLabel.text = sTargetChartMeta.DifficultyName;
                 DifficultyLabel.text = sTargetChartMeta.DifficultyLevel;
@@ -500,6 +523,30 @@ namespace JANOARG.Client.Behaviors.Player
                     // SongSelectReadyScreen.sMain.LoadingBarHolder.gameObject.SetActive(true);
                     // SongSelectReadyScreen.sMain.OverallProgress.text = "0/0";
                     // SongSelectReadyScreen.sMain.CurrentProgress.text = "Loading audio file...";
+                }
+
+                // External songs are only streamed at this point; gameplay needs the full decode.
+                if (sIsExternal && _UpgradedSong == null && Directory.Exists(sTargetSongPath))
+                {
+                    string clipPath = JANOARG.Client.Behaviors.SongSelect.ExternalManager.SongDataProvider
+                        .ResolveClipPath(sTargetSongPath, sTargetSong);
+                    if (clipPath != null)
+                    {
+                        AudioClip fullClip = null;
+                        yield return JANOARG.Client.Behaviors.SongSelect.ExternalManager.SongDataProvider
+                            .LoadClipRoutine(clipPath, false, c => fullClip = c);
+
+                        if (fullClip != null)
+                        {
+                            _UpgradedSong = sTargetSong;
+                            _StreamedClip = sTargetSong.Clip;
+                            sTargetSong.Clip = fullClip;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to fully decode '{clipPath}', playing the streamed clip instead.");
+                        }
+                    }
                 }
 
                 if (sTargetSong.Clip == null)
@@ -514,15 +561,29 @@ namespace JANOARG.Client.Behaviors.Player
                 else
                 {
                     string path = Path.Combine(Path.GetDirectoryName(sTargetSongPath)!, sTargetChartMeta.Target);
-                    Debug.Log(path);
-                    ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
+                    if (sIsExternal)
+                    {
+                        path = Path.Combine(sTargetSongPath, sTargetChartMeta.Target);
+                        if (!File.Exists(path) && !path.EndsWith(".jac", StringComparison.OrdinalIgnoreCase))
+                            path += ".jac";
+                        string text = File.ReadAllText(path);
+                        var chart = JANOARG.Shared.Data.Files.JACDecoder.Decode(text);
+                        sTargetChart = ScriptableObject.CreateInstance<ExternalChart>();
+                        sTargetChart.Data = chart;
+                    }
+                    else
+                    {
+                        Debug.Log(path);
+                        ResourceRequest chartLoadRequest = Resources.LoadAsync<ExternalChart>(path);
 
-                    sTargetChart = chartLoadRequest.asset as ExternalChart;
+                        yield return new WaitUntil(() => chartLoadRequest.isDone && sTargetSong.Clip.loadState == AudioDataLoadState.Loaded);
 
-                    if (sTargetChart == null)
-                        throw new InvalidOperationException($"Failed to load chart asset at Resources path '{path}'.");
+                        sTargetChart = chartLoadRequest.asset as ExternalChart;
+
+                        if (sTargetChart == null)
+                            throw new InvalidOperationException($"Failed to load chart asset at Resources path '{path}'.");
+                    }
                 }
 
                 if (!sHeadlessInitialised)
@@ -652,8 +713,6 @@ namespace JANOARG.Client.Behaviors.Player
             _SongEndDSP = double.NaN;
             _SongStartDSP = double.NaN;
             _VisualTime = double.NaN;
-            _LastSampleStep = 0;
-            _PrevTimeSamples = 0;
             PlayerScreenPause.sMain.PauseTime = -10;
             IsReady = true;
             AlreadyInitialised = true;
@@ -1146,12 +1205,10 @@ namespace JANOARG.Client.Behaviors.Player
                 SongEnded      = _SongEnded,
                 ResultExec     = ResultExec,
                 HitsRemaining  = HitsRemaining,
-                HoldQueueCount = PlayerInputManager.sInstance.HoldQueue.Count,
+                HoldQueueCount = PlayerInputEngine.sInstance.HoldQueue.Count,
                 GoodWindow     = GoodWindow,
 
-                PrevTimeSamples = _PrevTimeSamples,
                 PrevVisualTime  = _VisualTime,
-                LastSampleStep  = _LastSampleStep,
             });
 
             _LastDSPTime = dspNow;
@@ -1159,9 +1216,7 @@ namespace JANOARG.Client.Behaviors.Player
             PlaybackTime = clock.PlaybackTime;
             _SongEnded   = clock.SongEnded;
 
-            _VisualTime      = clock.VisualTime;
-            _LastSampleStep  = clock.SampleStep;
-            _PrevTimeSamples = timeSamples;
+            _VisualTime = clock.VisualTime;
 
             // Audio lifecycle — use PlayScheduled on restart to avoid buffer-boundary snap.
             // Only fires for a source that stopped before its scheduled end; one that stopped because it
@@ -1176,7 +1231,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             // Process input directly — no coroutine, no +1 frame latency
             sr_UpdateInputCall.Begin();
-            PlayerInputManager.sInstance.UpdateInput();
+            PlayerInputEngine.sInstance.UpdateInput();
             sr_UpdateInputCall.End();
 
             // Re-asked after input, since that is what settles this frame's hit counts.
@@ -1186,7 +1241,7 @@ namespace JANOARG.Client.Behaviors.Player
                     GoodWindow,
                     _SongEnded,
                     HitsRemaining,
-                    PlayerInputManager.sInstance.HoldQueue.Count,
+                    PlayerInputEngine.sInstance.HoldQueue.Count,
                     ResultExec))
             {
                 ComputeAndSaveMedianOffset();
@@ -1211,18 +1266,21 @@ namespace JANOARG.Client.Behaviors.Player
             float visualTime = (float)VisualTime + Settings.VisualOffset;
             float visualBeat = sTargetSong.Timing.ToBeat(visualTime);
 
-            sCurrentChart.Palette.Advance(visualBeat);
+            if (!ResultExec)
+                sCurrentChart.Palette.Advance(visualBeat);
 
             if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
                 SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
 
-            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
-                SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+            // cheap: renderer tint only, no canvas dirty. reapplied every frame so new
+            // TMP fallback submeshes get tinted too.
+            SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
             sr_LaneStylesUpdate.Begin();
             for (var a = 0; a < LaneStyles.Count; a++)
             {
-                sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
+                if (!ResultExec)
+                    sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
                 LaneStyles[a].Update(sCurrentChart.Palette.LaneStyles[a]);
 
                 if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
@@ -1240,7 +1298,8 @@ namespace JANOARG.Client.Behaviors.Player
             sr_HitStylesUpdate.Begin();
             for (var a = 0; a < HitStyles.Count; a++)
             {
-                sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
+                if (!ResultExec)
+                    sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
                 HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a], sCurrentChart.Palette.BackgroundColor);
             }
             sr_HitStylesUpdate.End();
@@ -1317,8 +1376,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Drop the draw clock's history: it extrapolates forward from the previous frame, and after a
             // seek that previous frame belongs to a different part of the song. NaN makes it snap to
             // whatever the audio clock reports next instead of sliding there.
-            _VisualTime      = double.NaN;
-            _PrevTimeSamples = Music.timeSamples;
+            _VisualTime = double.NaN;
 
             // Only anchor from timeSamples when music is actively playing.
             if (Music.isPlaying && CurrentTime >= 0)
@@ -1367,6 +1425,45 @@ namespace JANOARG.Client.Behaviors.Player
         // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause.
         private bool _PausedByFocusLoss;
 
+        /// <summary>
+        ///     Pauses an in-progress run for an OS interruption (focus loss, app backgrounding).
+        ///     Deliberately mirrors the manual pause path's audio handling, which matters twice over:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             While the lead-in is still running the clip has a pending <c>PlayScheduled</c>, and
+        ///             <c>Pause()</c> does not cancel it — the song would start behind the pause menu.
+        ///             <c>Stop()</c> kills the pending schedule.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="SuspendMusicSchedule" /> drops the scheduled start/end DSP anchors. Without
+        ///             it, an interruption that outlives the originally scheduled song end leaves
+        ///             <c>_SongEndDSP</c> in the past, so <see cref="PlayerClock" /> latches "song ended" on
+        ///             resume and the restart path refuses to bring the audio back.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        private void PauseForInterruption()
+        {
+            if (!IsPlaying || ResultExec)
+                return;
+
+            _PausedByFocusLoss = true;
+            IsPlaying = false;
+
+            // Before chart time zero the source has a pending PlayScheduled; Pause() won't cancel it.
+            if (CurrentTime < 0)
+                Music.Stop();
+            else
+                Music.Pause();
+
+            SuspendMusicSchedule();
+            _LastDSPTime = AudioSettings.dspTime;
+            ComputeAndSaveMedianOffset();
+
+            PlayerInputEngine.sInstance.TouchClasses.Clear();
+            PlayerScreenPause.sMain.Show();
+        }
+
         public void OnApplicationFocus(bool hasFocus)
         {
 #if UNITY_EDITOR
@@ -1375,16 +1472,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (!hasFocus)
             {
-                if (IsPlaying && !ResultExec)
-                {
-                    _PausedByFocusLoss = true;
-                    IsPlaying = false;
-                    Music.Pause();
-                    _LastDSPTime = AudioSettings.dspTime;
-                    ComputeAndSaveMedianOffset();
-                    PlayerScreenPause.sMain.Show();
-                }
-
+                PauseForInterruption();
                 return;
             }
 
@@ -1403,15 +1491,7 @@ namespace JANOARG.Client.Behaviors.Player
             #else
                 if (isPaused)
                 {
-                    if (IsPlaying)
-                    {
-                        _PausedByFocusLoss = true;
-                        IsPlaying = false;
-                        Music.Pause();
-                        _LastDSPTime = AudioSettings.dspTime;
-                        ComputeAndSaveMedianOffset();
-                        PlayerScreenPause.sMain.Show();
-                    }
+                    PauseForInterruption();
                 }
                 else if (_PausedByFocusLoss)
                 {
@@ -1445,8 +1525,9 @@ namespace JANOARG.Client.Behaviors.Player
                 Combo = 0;
                 BadCount++;
             }
+            TotalCombo++;
 
-            ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×";
+            ComboLabel.text = Helper.PadScore(Combo.ToString(), 4) + "<voffset=0.065em>×" + FormatStreakIndicator();
 
             JudgmentLabel.text = FormatJudgmentLabel(acc, offset, score);
 
@@ -1455,7 +1536,30 @@ namespace JANOARG.Client.Behaviors.Player
 
             _JudgeAnimation = StartCoroutine(JudgmentAnim());
 
-            TotalCombo++;
+        }
+        private string FormatStreakIndicator()
+        {
+            if (!Settings.ShowStreakIndicator) return "";
+
+            if (TotalCombo == 0) return "";
+
+            if (PerfectCount == TotalCombo)
+            {
+                return "!!";
+            }
+            else if (PerfectCount == 0 && BadCount == 0 && GoodCount > 0)
+            {
+                return "?!";
+            }
+            else if (PerfectCount == 0 && GoodCount == 0 && BadCount > 0)
+            {
+                return "...?";
+            }
+            else if (BadCount == 0)
+            {
+                return "!";
+            }
+            return "";
         }
 
         private IEnumerator JudgmentAnim()
@@ -1480,7 +1584,7 @@ namespace JANOARG.Client.Behaviors.Player
             // Scrub every queue/cache reference before returning to the pool — a pooled
             // instance can be re-borrowed as soon as this same frame's LateUpdate, and any
             // stale reference left behind would silently alias whatever note reuses it.
-            PlayerInputManager.sInstance.PurgeHitPlayer(hitObject);
+            PlayerInputEngine.sInstance.PurgeHitPlayer(hitObject);
 
             ReturnHitPlayer(hitObject);
         }
@@ -1648,18 +1752,64 @@ namespace JANOARG.Client.Behaviors.Player
             RenderSettings.fogColor = color;
         }
 
-        public void SetInterfaceColor(Color color)
+        // one tint source for the HUD. CanvasRenderer.SetColor is a draw-time multiply,
+        // so theme fades don't dirty any canvas. TMP fallback glyphs get their own
+        // TMP_SubMeshUI CanvasRenderers, so cache those too.
+        private readonly Dictionary<Graphic, CanvasRenderer[]> _interfaceRenderers = new();
+        private readonly Dictionary<Graphic, int>             _interfaceRendererChildCount = new();
+
+        private void ApplyInterfaceTint(Graphic graphic, Color tint)
         {
-            SongNameLabel.color = SongArtistLabel.color = DifficultyLabel.color = DifficultyNameLabel.color =
-                SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color =
-                    PauseLabel.color = color;
+            if (graphic == null) return;
 
-            foreach (Graphic digit in ScoreDigits)
-                digit.color = color;
+            // tint multiplies the baked vertex colour, so flatten base to white first.
+            // no-op for most elements.
+            if (graphic.color != Color.white)
+                graphic.color = Color.white;
 
-            SongProgressBody.color = color * new Color(1, 1, 1, .5f);
+            int childCount = graphic.transform.childCount;
+
+            if (!_interfaceRenderers.TryGetValue(graphic, out CanvasRenderer[] renderers) ||
+                _interfaceRendererChildCount[graphic] != childCount)
+            {
+                TMP_SubMeshUI[] subMeshes = graphic is TMP_Text
+                    ? graphic.GetComponentsInChildren<TMP_SubMeshUI>(true)
+                    : System.Array.Empty<TMP_SubMeshUI>();
+
+                renderers = new CanvasRenderer[subMeshes.Length + 1];
+                renderers[0] = graphic.canvasRenderer;
+
+                for (var i = 0; i < subMeshes.Length; i++)
+                    renderers[i + 1] = subMeshes[i].canvasRenderer;
+
+                _interfaceRenderers[graphic] = renderers;
+                _interfaceRendererChildCount[graphic] = childCount;
+            }
+
+            for (var i = 0; i < renderers.Length; i++)
+                renderers[i].SetColor(tint);
         }
 
+        public void SetInterfaceColor(Color color)
+        {
+            ApplyInterfaceTint(SongNameLabel, color);
+            ApplyInterfaceTint(SongArtistLabel, color);
+            ApplyInterfaceTint(SongExternalIndicator, color);
+            ApplyInterfaceTint(DifficultyNameLabel, color);
+            ApplyInterfaceTint(DifficultyLabel, color);
+            ApplyInterfaceTint(SongProgressTip, color);
+            ApplyInterfaceTint(SongProgressGlow, color);
+            ApplyInterfaceTint(JudgmentLabel, color);
+            ApplyInterfaceTint(ComboLabel, color);
+            ApplyInterfaceTint(PauseLabel, color);
+
+            foreach (Graphic digit in ScoreDigits)
+                ApplyInterfaceTint(digit, color);
+
+            ApplyInterfaceTint(SongProgressBody, color * new Color(1, 1, 1, .5f));
+        }
+
+        // TODO: Move this to a editor script before removing this method
         private void InitFlickMeshes()
         {
             return; // Asset already assigned
@@ -1719,6 +1869,7 @@ namespace JANOARG.Client.Behaviors.Player
         public short ShowValueText;
         public bool  ShowFlawlessText;
         public bool  NoEarlyLateText;
+        public bool  ShowStreakIndicator;
         public bool  HighlightSimulNotes;
         public bool  AlwaysShowHitVFX;
 
@@ -1733,6 +1884,7 @@ namespace JANOARG.Client.Behaviors.Player
             AlwaysShowHitVFX = CommonSys.sMain.Preferences.Get("PLYR:AlwaysShowHitVFX", true);
             NoEarlyLateText = CommonSys.sMain.Preferences.Get("PLYR:NoEarlyLateIndicator", false);
             ShowValueText = short.Parse(CommonSys.sMain.Preferences.Get("PLYR:ShowOffset", "1"));
+            ShowStreakIndicator = CommonSys.sMain.Preferences.Get("PLYR:ShowStreakIndicator",true);
             
             BackgroundMusicVolume = prefs.Get("PLYR:BGMusicVolume", 100f) / 100;
             HitsoundVolume = prefs.Get("PLYR:HitsoundVolume", new[] { 60f });

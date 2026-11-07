@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using JANOARG.Client.Behaviors.Common;
@@ -25,15 +24,30 @@ namespace JANOARG.Client.Utils.Debugging
         private double _CachedAvgDelta = double.NaN;
         private volatile bool _HasValidAverages = false;
         
-        private CultureInfo _Invariant;
         private FrameTiming[] _FrameTimes = new FrameTiming[10];
+
+        // TMP float SetText writes into its backing array, so no interpolation garbage.
+        private const string FormatReady =
+            "frame: {0:0}fps / {1:0.00}ms, avg: {2:0.0}fps / {3:0.00}ms\n" +
+            "strain: {4:0.00}ms cpu, {5:0.00}ms gpu";
+
+        private const string FormatReadyNoStrain =
+            "frame: {0:0}fps / {1:0.00}ms, avg: {2:0.0}fps / {3:0.00}ms\n" +
+            "strain: (unavailable)";
+
+        private const string FormatPending =
+            "frame: {0:0}fps / {1:0.00}ms, avg: -- fps / -- ms\n" +
+            "strain: {4:0.00}ms cpu, {5:0.00}ms gpu";
+
+        private const string FormatPendingNoStrain =
+            "frame: {0:0}fps / {1:0.00}ms, avg: -- fps / -- ms\n" +
+            "strain: (unavailable)";
         
         private CancellationTokenSource _CancellationTokenSource;
         private Task _BackgroundTask;
 
         private void Start()
         {
-            _Invariant = CultureInfo.InvariantCulture;
             _CancellationTokenSource = new CancellationTokenSource();
             
             // Start background averaging task
@@ -102,8 +116,8 @@ namespace JANOARG.Client.Utils.Debugging
 
             if (Timer >= Interval)
             {
-                // Get current frame data (lightweight)
-                double frame = Time.smoothDeltaTime;
+                // clamp so zero delta can't make fps infinite (TMP rejects infinity).
+                double frame = Math.Max((double)Time.smoothDeltaTime, 0.0001);
                 double fps = 1 / frame;
                 double delta = 1e3 * frame;
                 
@@ -139,13 +153,21 @@ namespace JANOARG.Client.Utils.Debugging
                 }
 #endif
 
-                // Use cached averages from background thread
-                double avgFPS = _HasValidAverages ? _CachedAvgFPS : Double.NaN;
-                double avgDelta = _HasValidAverages ? _CachedAvgDelta : Double.NaN;
+                // TMP can't format NaN, so only feed averages once valid.
+                double avgFPS = _HasValidAverages ? _CachedAvgFPS : 0;
+                double avgDelta = _HasValidAverages ? _CachedAvgDelta : 0;
 
-                // Simple string formatting (reduced allocations)
-                Text.text = $"frame: {fps:0}fps / {delta:0.00}ms, avg: {avgFPS:0.0}fps / {avgDelta:0.00}ms\n" +
-                           $"strain: {(frameTiming > 0 ? $"{cpuStrain:0.00}ms cpu, {gpuStrain:0.00}ms gpu" : "(unavailable)")}";
+                bool hasStrain = frameTiming > 0;
+
+                string format = _HasValidAverages
+                    ? (hasStrain ? FormatReady : FormatReadyNoStrain)
+                    : (hasStrain ? FormatPending : FormatPendingNoStrain);
+
+                Text.SetText(
+                    format,
+                    (float)fps, (float)delta,
+                    (float)avgFPS, (float)avgDelta,
+                    (float)cpuStrain, (float)gpuStrain);
                 
                 Timer -= Interval;
             }

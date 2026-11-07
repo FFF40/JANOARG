@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JANOARG.Client.Behaviors.Player.PlayerInput.Core;
 using JANOARG.Shared.Data.ChartInfo;
 using Unity.Profiling;
 using UnityEngine;
@@ -545,7 +546,7 @@ namespace JANOARG.Client.Behaviors.Player
                     // Init first: AddToQueue marks the note pending for autoplay, and Init is what
                     // resets that flag for a reused pooled instance.
                     player.Init();
-                    PlayerInputManager.sInstance.AddToQueue(player);
+                    PlayerInputEngine.sInstance.AddToQueue(player);
 
                     Current.Objects.RemoveAt(0);
                     HitCoords.RemoveAt(0);

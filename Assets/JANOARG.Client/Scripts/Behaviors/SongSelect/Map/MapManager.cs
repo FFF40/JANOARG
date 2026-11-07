@@ -45,6 +45,7 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         public float DragScale = 20;
 
         public bool isReady { get; private set; }
+        public bool isNavigating { get; private set; }
         public bool isPointerDown { get; private set; }
         public Vector2 scrollVelocity { get; private set; }
 
@@ -145,11 +146,26 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         public void NavigateToMap(PlaylistReference playlist)
         {
+            if (isNavigating) return;
+
+            isNavigating = true;
             isReady = false;
             StartCoroutine(NavigateToMapAnim(playlist));
         }
 
         public IEnumerator NavigateToMapAnim(PlaylistReference playlist)
+        {
+            try
+            {
+                yield return NavigateToMapRoutine(playlist);
+            }
+            finally
+            {
+                isNavigating = false;
+            }
+        }
+
+        private IEnumerator NavigateToMapRoutine(PlaylistReference playlist)
         {
             var targetItem = sPlaylistMapItemsByID.Values.FirstOrDefault(p => p.Target == playlist);
 
@@ -180,11 +196,26 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
 
         public void NavigatePreviousMap()
         {
+            if (isNavigating || sPlaylistStack.Count <= 1) return;
+
+            isNavigating = true;
             isReady = false;
             StartCoroutine(NavigatePreviousMapAnim());
         }
 
         public IEnumerator NavigatePreviousMapAnim()
+        {
+            try
+            {
+                yield return NavigatePreviousMapRoutine();
+            }
+            finally
+            {
+                isNavigating = false;
+            }
+        }
+
+        private IEnumerator NavigatePreviousMapRoutine()
         {
             StartCoroutine(Ease.Animate(0.3f, EaseFunction.Cubic, EaseMode.Out, (t) => {
                 ProfileBar.sMain.SetVisibility(1 - t);

@@ -20,6 +20,16 @@ namespace JANOARG.Client.Behaviors.Player
 
         public float Size = 120;
 
+        // base rect sizes. scale instead of sizeDelta = no rect-dimension dirty.
+        private Vector2 _ringBaseSize;
+        private Vector2 _circleBaseSize;
+
+        private void Awake()
+        {
+            _ringBaseSize   = RingBackground.rectTransform.rect.size;
+            _circleBaseSize = CircleFill.rectTransform.rect.size;
+        }
+
         public void SetShapeAccuracy(bool circle, float? acc = null)
         {
             if (circle && acc.HasValue) // Normal hitobject
@@ -51,8 +61,15 @@ namespace JANOARG.Client.Behaviors.Player
             float expEased = Ease.Get(1 - x, EaseFunction.Exponential, EaseMode.In);
             float ease = 1 - expEased * expEased;
 
-            RingBackground.rectTransform.sizeDelta = Vector2.one * (40 + (Size * ease) + (x * 10));
-            CircleFill.rectTransform.sizeDelta = Vector2.one * (40 - (30 * ease));
+            float ringSize   = 40 + (Size * ease) + (x * 10);
+            float circleSize = 40 - (30 * ease);
+
+            RingBackground.rectTransform.localScale = new Vector3(
+                ringSize / Mathf.Max(_ringBaseSize.x, 0.0001f),
+                ringSize / Mathf.Max(_ringBaseSize.y, 0.0001f), 1f);
+            CircleFill.rectTransform.localScale = new Vector3(
+                circleSize / Mathf.Max(_circleBaseSize.x, 0.0001f),
+                circleSize / Mathf.Max(_circleBaseSize.y, 0.0001f), 1f);
 
             float circleEased = Ease.Get(x, EaseFunction.Circle, EaseMode.In);
             Group.alpha = EaseUtils.ToZero(1, circleEased);
