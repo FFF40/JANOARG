@@ -39,4 +39,5 @@ EditorBuildSettings:
     path: Assets/JANOARG.Assets/Resources/Playlists/External/External Map.unity
     guid: f024d363b60c1c28a8eaa53d96a93028
   m_configObjects:
+    com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 7702718b59bb846418d2f5bbd32f4cf5, type: 2}

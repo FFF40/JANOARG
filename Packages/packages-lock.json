@@ -26,7 +26,7 @@
     },
     "com.unity.burst": {
       "version": "2.0.0",
-      "depth": 2,
+      "depth": 1,
       "source": "builtin",
       "dependencies": {}
     },
@@ -53,6 +53,18 @@
       "depth": 0,
       "source": "registry",
       "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.dt.app-ui": {
+      "version": "2.2.4",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.androidjni": "1.0.0",
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.modules.screencapture": "1.0.0"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.editorcoroutines": {

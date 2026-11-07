@@ -688,7 +688,7 @@ PlayerSettings:
   webEnableSubmoduleStrippingCompatibility: 0
   webProgressiveAssetLoading: 0
   scriptingDefineSymbols:
-    Android: LEVELPLAY_DEPENDENCIES_INSTALLED
+    Android: LEVELPLAY_DEPENDENCIES_INSTALLED;SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
