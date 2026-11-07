@@ -1244,62 +1244,9 @@ namespace JANOARG.Client.Behaviors.Player
                     PlayerInputEngine.sInstance.HoldQueue.Count,
                     ResultExec))
             {
-                ForceDefaultChartColors();
                 ComputeAndSaveMedianOffset();
                 PlayerScreenResult.sMain.StartEndingAnim();
                 ResultExec = true;
-            }
-        }
-
-        // The chart storyboard may leave the palette/lane/hit colours faded or non-default at
-        // the finish. Restore the authored default colours from the untouched chart data so the
-        // ending and result do not inherit the last storyboard state.
-        private void ForceDefaultChartColors()
-        {
-            Palette source = sTargetChart.Data.Palette;
-            Palette target = sCurrentChart.Palette;
-
-            target.BackgroundColor = source.BackgroundColor;
-            target.InterfaceColor  = source.InterfaceColor;
-            SetBackgroundColor(target.BackgroundColor);
-            SetInterfaceColor(target.InterfaceColor);
-
-            int laneStyleCount = Mathf.Min(target.LaneStyles.Count, source.LaneStyles.Count);
-            for (int i = 0; i < laneStyleCount; i++)
-            {
-                LaneStyle src = source.LaneStyles[i];
-                LaneStyle dst = target.LaneStyles[i];
-
-                dst.LaneColor  = src.LaneColor;
-                dst.JudgeColor = src.JudgeColor;
-                LaneStyles[i].Update(dst);
-
-                if (dst.LaneColor.a != 0)
-                    TransparentMeshLaneIndexes.Remove(i);
-                else if (!TransparentMeshLaneIndexes.Contains(i))
-                    TransparentMeshLaneIndexes.Add(i);
-
-                if (dst.JudgeColor.a == 0)
-                {
-                    if (!TransparentMeshJudgeIndexes.Contains(i))
-                        TransparentMeshJudgeIndexes.Add(i);
-                }
-                else
-                {
-                    TransparentMeshJudgeIndexes.Remove(i);
-                }
-            }
-
-            int hitStyleCount = Mathf.Min(target.HitStyles.Count, source.HitStyles.Count);
-            for (int i = 0; i < hitStyleCount; i++)
-            {
-                HitStyle src = source.HitStyles[i];
-                HitStyle dst = target.HitStyles[i];
-
-                dst.NormalColor   = src.NormalColor;
-                dst.CatchColor    = src.CatchColor;
-                dst.HoldTailColor = src.HoldTailColor;
-                HitStyles[i].Update(dst, target.BackgroundColor);
             }
         }
 
