@@ -51,8 +51,11 @@ namespace JANOARG.Client.Behaviors.Panels
         public Camera   PreviewCamera;
         public RawImage PreviewTextureTarget;
 
+        private bool _previewFullRes;
+
         [Space]
-        public GameObject    ArtifactHolder;
+        public GameObject ArtifactHolder;
+
         public CanvasGroup   ArtifactHolderGroup;
         public RawImage      ArtifactTarget;
         public RectTransform ArtifactGradient;
@@ -65,12 +68,12 @@ namespace JANOARG.Client.Behaviors.Panels
         public Transform  PreviewNormalLeft;
         public Transform  PreviewNormalRight;
         public MeshFilter PreviewNormalFlick;
-        
+
         public Transform      PreviewNormalSimulCenter;
         public Transform      PreviewNormalSimulLeft;
         public Transform      PreviewNormalSimulRight;
         public SpriteRenderer PreviewNormalSimulGlow;
-        public MeshRenderer     PreviewNormalSimulBold;
+        public MeshRenderer   PreviewNormalSimulBold;
 
 
         public Transform  PreviewCatchCenter;
@@ -109,7 +112,7 @@ namespace JANOARG.Client.Behaviors.Panels
 
             if (CurrentPanel)
             {
-                CurrentPanel.BackgroundGroup  = ArtifactHolderGroup;
+                CurrentPanel.BackgroundGroup = ArtifactHolderGroup;
                 CurrentPanel.BackgroundHolder = (RectTransform)ArtifactHolder.transform;
             }
 
@@ -121,6 +124,12 @@ namespace JANOARG.Client.Behaviors.Panels
 
         public void OnDestroy()
         {
+            if (_previewFullRes)
+            {
+                _previewFullRes = false;
+                CommonSys.sMain?.PopFullResolution();
+            }
+
             Destroy(PreviewTexture);
             Destroy(artifactTexture);
             Destroy(freeFlickIndicator);
@@ -238,7 +247,7 @@ namespace JANOARG.Client.Behaviors.Panels
                     //     () => storage.Get("INFO:PlayerTitle", "Perfectly Generic Player"),
                     //     x => storage.Set("INFO:PlayerTitle", x)
                     //     );
-                    
+
                     // // Temporary titles
                     // playerTitle.ValidValues.Add("Perfectly Generic Player", "Perfectly Generic Player");
                     // playerTitle.ValidValues.Add("..............🐌", "..............🐌");
@@ -249,7 +258,7 @@ namespace JANOARG.Client.Behaviors.Panels
                     //     () => storage.Get("INFO:PlayerIcon", "none"),
                     //     x => storage.Set("INFO:PlayerIcon", x)
                     //     );
-                    
+
                     // No icons for now
                     // avatar.ValidValues.Add("none", "No icon");
 
@@ -308,7 +317,7 @@ namespace JANOARG.Client.Behaviors.Panels
                             CommonSys.sMain.SetLowResolution(x);
                         }
                     );
-                    
+
 
                     // TODO: Localisation?
 
@@ -369,7 +378,7 @@ namespace JANOARG.Client.Behaviors.Panels
                     sample.Max = 500;
                     sample.Step = 1;
                     sample.Unit = "ms";
-                    
+
                     Spawn<AudioOffsetOptionInput, float>(
                         "Audio Offset",
                         () => preferences.Get("PLYR:AudioOffset", 0f),
@@ -418,7 +427,7 @@ namespace JANOARG.Client.Behaviors.Panels
                     );
                     #endregion
 
-                    #region  Visual
+                    #region Visual
                     Spawn<OptionCategoryTitle>("Visual");
 
                     sample.Min = msample.Min = .2f;
@@ -449,13 +458,14 @@ namespace JANOARG.Client.Behaviors.Panels
                     #endregion
 
                     #region Interface
-                    Spawn <OptionCategoryTitle>("Interface");
+                    Spawn<OptionCategoryTitle>("Interface");
+
                     // Supposed to be a short
-                    var showOffset = Spawn<ListOptionInput, string>("Show offset value", 
+                    var showOffset = Spawn<ListOptionInput, string>("Show offset value",
                         () => preferences.Get("PLYR:ShowOffset", "1"),
                         x => preferences.Set("PLYR:ShowOffset", x)
-                        );
-                    
+                    );
+
                     showOffset.ValidValues.Add("3", "All Judgement");
                     showOffset.ValidValues.Add("2", "Non-Flawless Judgement");
                     showOffset.ValidValues.Add("1", "None");
@@ -477,11 +487,10 @@ namespace JANOARG.Client.Behaviors.Panels
                         () => preferences.Get("PLYR:ShowStreakIndicator", true),
                         x => preferences.Set("PLYR:ShowStreakIndicator", x)
                     );
-
                     #endregion
 
-                    #region  Miscellaneous
-                    Spawn <OptionCategoryTitle>("Miscellaneous");
+                    #region Miscellaneous
+                    Spawn<OptionCategoryTitle>("Miscellaneous");
 
                     Spawn<BooleanOptionInput, bool>(
                         "Highlight simul. notes",
@@ -491,7 +500,7 @@ namespace JANOARG.Client.Behaviors.Panels
                             preferences.Set("PLYR:HighlightSimulNotes", x);
                             UpdatePlayerPreview();
                         });
-                    
+
                     Spawn<BooleanOptionInput, bool>(
                         "Always show Hit VFX",
                         () => preferences.Get("PLYR:AlwaysShowHitVFX", true),
@@ -515,11 +524,11 @@ namespace JANOARG.Client.Behaviors.Panels
                     entry.BodyLabel.text = "duducat / ducdat0507";
 
                     entry = Spawn<OptionAboutEntry>("PROGRAMMER / MAINTAINER");
-                    entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid","M3galodon");
-                    
+                    entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid", "M3galodon");
+
                     //entry = Spawn<OptionAboutEntry>("iOS BUILD PROVIDER");
                     //entry.BodyLabel.text = "kiko/kevernn";
-                    
+
                     entry = Spawn<OptionAboutEntry>("GITHUB CONTRIBUTORS");
                     entry.BodyLabel.text = FormatOptionAboutText("FujiForm2023", "RKevo");
 
@@ -527,18 +536,20 @@ namespace JANOARG.Client.Behaviors.Panels
                     entry.BodyLabel.text = FormatOptionAboutText("Kuttate", "Rose Quartz", "R3ality", "potatofission");
 
                     entry = Spawn<OptionAboutEntry>("SOUNDTRACK COMPOSERS (LICENSED / FREE USE TRACKS)");
+
                     entry.BodyLabel.text = FormatOptionAboutText("Sound Souler", "mrcool909090", "R3ality", "Scutoid", "Ariz Kayaba",
-                                            "zqr", "NOMOREKAWAII", "CuboonoP", "Rose Quartz", "Pa_lette", "amaristia");
+                        "zqr", "NOMOREKAWAII", "CuboonoP", "Rose Quartz", "Pa_lette", "amaristia");
 
                     entry = Spawn<OptionAboutEntry>("UI BACKGROUND MUSIC COMPOSERS");
                     entry.BodyLabel.text = FormatOptionAboutText("duducat", "Pa_lette");
 
                     entry = Spawn<OptionAboutEntry>("COVER ILLUSTRATORS");
+
                     entry.BodyLabel.text = FormatOptionAboutText("BashhScriptKid", "M3galodon", "Akanari", "leko_uname", "BEN789FA",
-                                            "Gyukatsu", "kiemo", "Samu", "VICA", "SARYN");
+                        "Gyukatsu", "kiemo", "Samu", "VICA", "SARYN");
 
                     entry = Spawn<OptionAboutEntry>("CHART DESIGNERS");
-                    entry.BodyLabel.text = FormatOptionAboutText("duducat", "M3galodon", "leko_uname", "Pa_lette", "AARL", "BEN789FA", "KouNeko")   ;
+                    entry.BodyLabel.text = FormatOptionAboutText("duducat", "M3galodon", "leko_uname", "Pa_lette", "AARL", "BEN789FA", "KouNeko");
 
                     entry = Spawn<OptionAboutEntry>(string.Empty);
                     entry.BodyLabel.text = "...and players like you!";
@@ -656,6 +667,7 @@ namespace JANOARG.Client.Behaviors.Panels
             if (PreviewHighlightMaterial && PreviewHighlightGlowMaterial) return;
 
             Material baseMaterial = InternalChartTool.LoadStyleMaterial("Highlight", "Default");
+
             if (!baseMaterial) return;
 
             (Color highlight, Color glow) = InternalChartTool.CalculateSimultaneousColors(Color.white, Color.black);
@@ -694,7 +706,8 @@ namespace JANOARG.Client.Behaviors.Panels
                 PreviewNormalLeft.localPosition = -PreviewNormalRight.localPosition;
             }
 
-            {   // For glowing (simultaneous) note
+            {
+                // For glowing (simultaneous) note
                 float scale = settings.HitObjectScale[0]; // Same as normal hit
                 PreviewNormalSimulCenter.localScale = new Vector3(width - .2f * scale, .4f * scale, .4f * scale);
                 PreviewNormalSimulLeft.localScale = PreviewNormalSimulRight.localScale = new Vector3(.2f, .4f, .4f) * scale;
@@ -739,6 +752,7 @@ namespace JANOARG.Client.Behaviors.Panels
         {
             foreach (OptionItem item in CurrentItems)
                 Destroy(item.gameObject);
+
             CurrentItems.Clear();
         }
 
@@ -746,12 +760,12 @@ namespace JANOARG.Client.Behaviors.Panels
         {
             string url = target switch
             {
-                "github"  => "https://github.com/FFF40",
+                "github" => "https://github.com/FFF40",
                 "discord" => "https://discord.gg/vXJTPFQBHm",
-                "reddit"  => "https://reddit.com/r/fff40",
+                "reddit" => "https://reddit.com/r/fff40",
                 "twitter" => "https://twitter.com/FFF40_Studios",
-                "bsky"    => "https://bsky.app/profile/fff40.studio",
-                _         => ""
+                "bsky" => "https://bsky.app/profile/fff40.studio",
+                _ => ""
             };
 
             if (!string.IsNullOrEmpty(url)) Application.OpenURL(url);
@@ -779,7 +793,7 @@ namespace JANOARG.Client.Behaviors.Panels
 
         private Texture2D CreateArtifactedTexture()
         {
-            int width  = Mathf.Max(1, Screen.width / 4);
+            int width = Mathf.Max(1, Screen.width / 4);
             int height = Mathf.Max(1, Screen.height / 4);
 
             RenderTexture source = new RenderTexture(width, height, 32, DefaultFormat.LDR);
@@ -831,6 +845,7 @@ namespace JANOARG.Client.Behaviors.Panels
                 if (roll < .55f)
                 {
                     byte value = (byte)Random.Range(0, 28);
+
                     pixel = new Color32(
                         (byte)(value + Random.Range(0, 6)),
                         (byte)(value + Random.Range(0, 6)),
@@ -865,7 +880,8 @@ namespace JANOARG.Client.Behaviors.Panels
             for (int bandCount = Random.Range(2, 6); bandCount > 0; bandCount--)
             {
                 int start = Random.Range(0, height);
-                int end   = Mathf.Min(height, start + Random.Range(1, Mathf.Max(2, height / 12)));
+                int end = Mathf.Min(height, start + Random.Range(1, Mathf.Max(2, height / 12)));
+
                 Color32 color = new(
                     (byte)Random.Range(0, 256),
                     (byte)Random.Range(0, 256),
@@ -873,15 +889,23 @@ namespace JANOARG.Client.Behaviors.Panels
                     (byte)Random.Range(96, 256));
 
                 for (int y = start; y < end; y++)
-                    for (int x = 0; x < width; x++)
-                        pixels[y * width + x] = color;
+                for (int x = 0; x < width; x++)
+                    pixels[y * width + x] = color;
             }
         }
 
         private IEnumerator PreviewAnim(bool shown)
         {
             if (shown)
+            {
+                if (!_previewFullRes)
+                {
+                    _previewFullRes = true;
+                    CommonSys.sMain?.PushFullResolution();
+                }
+
                 PreviewCamera.gameObject.SetActive(true);
+            }
 
             yield return Ease.Animate(
                 .5f, x =>
@@ -907,7 +931,15 @@ namespace JANOARG.Client.Behaviors.Panels
                 });
 
             if (!shown)
+            {
                 PreviewCamera.gameObject.SetActive(false);
+
+                if (_previewFullRes)
+                {
+                    _previewFullRes = false;
+                    CommonSys.sMain?.PopFullResolution();
+                }
+            }
         }
 
         private static RectTransform RT(MonoBehaviour item)

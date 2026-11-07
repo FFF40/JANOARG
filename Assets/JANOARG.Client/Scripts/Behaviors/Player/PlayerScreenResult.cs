@@ -207,6 +207,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
             Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
+            bool          fullResPushed = false;
 
             try
             {
@@ -240,6 +241,10 @@ namespace JANOARG.Client.Behaviors.Player
 
                 screenshotCamera.targetTexture = rTex;
                 Canvas.ForceUpdateCanvases();
+
+                CommonSys.sMain?.PushFullResolution();
+                fullResPushed = true;
+
                 screenshotCamera.Render();
 
                 RenderTexture.active = rTex;
@@ -248,6 +253,9 @@ namespace JANOARG.Client.Behaviors.Player
             }
             finally
             {
+                if (fullResPushed)
+                    CommonSys.sMain?.PopFullResolution();
+
                 screenshotCamera.targetTexture = null;
                 RenderTexture.active = null;
 
@@ -326,7 +334,7 @@ namespace JANOARG.Client.Behaviors.Player
                 ring.rectTransform.localPosition = Vector2.zero;
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
-                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
+                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new ColorFrag(a: 0.5f);
 
             StartCoroutine(
                 Ease.Animate(
@@ -354,7 +362,7 @@ namespace JANOARG.Client.Behaviors.Player
             ResultText.rectTransform.localScale = Vector3.one;
             ResultText.rectTransform.anchoredPosition = Vector2.zero;
             ResultTextBig.text = ResultText.text;
-            ResultTextBig.color = PlayerScreen.sCurrentChart.Palette.InterfaceColor;
+            ResultTextBig.color = PlayerScreen.sCurrentChart.Palette.InterfaceColor * new ColorFrag(a: 1f);
 
             yield return Ease.Animate(
                 4, x =>
@@ -433,7 +441,7 @@ namespace JANOARG.Client.Behaviors.Player
                     PlayerScreen.sMain.SetInterfaceColor(
                         PlayerScreen.sCurrentChart.Palette
                             .InterfaceColor *
-                        new Color(1, 1, 1, 1 - x));
+                        new ColorFrag(a: 1 - x));
 
                     FanfareSource.volume = x * .3f * Settings.BackgroundMusicVolume;
                 });
@@ -490,7 +498,7 @@ namespace JANOARG.Client.Behaviors.Player
                 $"{Application.version}";
 
             ScoreExplosionRings[0].color = ScoreExplosionRings[1].color =
-                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new Color(1, 1, 1, 0.5f);
+                PlayerScreen.sCurrentChart.Palette.InterfaceColor * new ColorFrag(a: 0.5f);
 
             var markIndex = 0;
             foreach (RectTransform mark in ScoreBarMarks) mark.gameObject.SetActive(false);

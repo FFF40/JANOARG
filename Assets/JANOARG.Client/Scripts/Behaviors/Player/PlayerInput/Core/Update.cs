@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using JANOARG.Client.Behaviors.Common;
 using JANOARG.Shared.Data.ChartInfo;
 using UnityEditor;
@@ -172,12 +171,23 @@ namespace JANOARG.Client.Behaviors.Player.PlayerInput.Core
                         bool flickTimedOut = Math.Abs(Player.CurrentTime - touchClass.FlickTime) >
                                              Player.PerfectWindow;
 
-                        bool nearAnyFlickable = Enumerable.Any<HitPlayer>(HitQueue, hit =>
-                            hit.Current.Flickable &&
-                            !hit.IsProcessed &&
-                            Math.Abs((double)(hit.Time - Player.CurrentTime)) <=
-                            Player.PassWindow
-                        );
+                        // for loop, not LINQ. the lambda allocated every frame a flick was active.
+                        bool nearAnyFlickable = false;
+                        double passWindow = Player.PassWindow;
+                        double currentTime = Player.CurrentTime;
+
+                        for (var h = 0; h < HitQueue.Count; h++)
+                        {
+                            HitPlayer hit = HitQueue[h];
+
+                            if (hit.Current.Flickable &&
+                                !hit.IsProcessed &&
+                                Math.Abs((double)(hit.Time - currentTime)) <= passWindow)
+                            {
+                                nearAnyFlickable = true;
+                                break;
+                            }
+                        }
 
                         if (flickTimedOut && nearAnyFlickable)
                         {

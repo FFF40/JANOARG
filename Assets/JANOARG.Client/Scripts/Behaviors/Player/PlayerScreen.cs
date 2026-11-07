@@ -508,6 +508,9 @@ namespace JANOARG.Client.Behaviors.Player
                 if (sTargetChartMeta == null)
                     throw new InvalidOperationException("Target chart metadata is missing before chart load.");
 
+                // Prewarm the exact strings shown in gameplay (also covers external charts).
+                yield return FontPrewarmer.PrewarmSong(sTargetSong, sTargetChartMeta);
+
                 SongNameLabel.text = sTargetSong.SongName;
                 SongArtistLabel.text = sTargetSong.SongArtist;
                 SongExternalIndicator.gameObject.SetActive(sIsExternal);
@@ -1263,18 +1266,21 @@ namespace JANOARG.Client.Behaviors.Player
             float visualTime = (float)VisualTime + Settings.VisualOffset;
             float visualBeat = sTargetSong.Timing.ToBeat(visualTime);
 
-            sCurrentChart.Palette.Advance(visualBeat);
+            if (!ResultExec)
+                sCurrentChart.Palette.Advance(visualBeat);
 
             if (CommonSys.sMain.MainCamera.backgroundColor != sCurrentChart.Palette.BackgroundColor)
                 SetBackgroundColor(sCurrentChart.Palette.BackgroundColor);
 
-            if (SongNameLabel.color != sCurrentChart.Palette.InterfaceColor)
-                SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
+            // cheap: renderer tint only, no canvas dirty. reapplied every frame so new
+            // TMP fallback submeshes get tinted too.
+            SetInterfaceColor(sCurrentChart.Palette.InterfaceColor);
 
             sr_LaneStylesUpdate.Begin();
             for (var a = 0; a < LaneStyles.Count; a++)
             {
-                sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
+                if (!ResultExec)
+                    sCurrentChart.Palette.LaneStyles[a].Advance(visualBeat);
                 LaneStyles[a].Update(sCurrentChart.Palette.LaneStyles[a]);
 
                 if (sCurrentChart.Palette.LaneStyles[a].LaneColor.a != 0 && TransparentMeshLaneIndexes.Contains(a))
@@ -1292,7 +1298,8 @@ namespace JANOARG.Client.Behaviors.Player
             sr_HitStylesUpdate.Begin();
             for (var a = 0; a < HitStyles.Count; a++)
             {
-                sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
+                if (!ResultExec)
+                    sCurrentChart.Palette.HitStyles[a].Advance(visualBeat);
                 HitStyles[a].Update(sCurrentChart.Palette.HitStyles[a], sCurrentChart.Palette.BackgroundColor);
             }
             sr_HitStylesUpdate.End();
@@ -1418,6 +1425,45 @@ namespace JANOARG.Client.Behaviors.Player
         // Tracks whether we auto-paused due to focus loss, so we don't stomp a manual pause.
         private bool _PausedByFocusLoss;
 
+        /// <summary>
+        ///     Pauses an in-progress run for an OS interruption (focus loss, app backgrounding).
+        ///     Deliberately mirrors the manual pause path's audio handling, which matters twice over:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             While the lead-in is still running the clip has a pending <c>PlayScheduled</c>, and
+        ///             <c>Pause()</c> does not cancel it — the song would start behind the pause menu.
+        ///             <c>Stop()</c> kills the pending schedule.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="SuspendMusicSchedule" /> drops the scheduled start/end DSP anchors. Without
+        ///             it, an interruption that outlives the originally scheduled song end leaves
+        ///             <c>_SongEndDSP</c> in the past, so <see cref="PlayerClock" /> latches "song ended" on
+        ///             resume and the restart path refuses to bring the audio back.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        private void PauseForInterruption()
+        {
+            if (!IsPlaying || ResultExec)
+                return;
+
+            _PausedByFocusLoss = true;
+            IsPlaying = false;
+
+            // Before chart time zero the source has a pending PlayScheduled; Pause() won't cancel it.
+            if (CurrentTime < 0)
+                Music.Stop();
+            else
+                Music.Pause();
+
+            SuspendMusicSchedule();
+            _LastDSPTime = AudioSettings.dspTime;
+            ComputeAndSaveMedianOffset();
+
+            PlayerInputEngine.sInstance.TouchClasses.Clear();
+            PlayerScreenPause.sMain.Show();
+        }
+
         public void OnApplicationFocus(bool hasFocus)
         {
 #if UNITY_EDITOR
@@ -1426,16 +1472,7 @@ namespace JANOARG.Client.Behaviors.Player
 
             if (!hasFocus)
             {
-                if (IsPlaying && !ResultExec)
-                {
-                    _PausedByFocusLoss = true;
-                    IsPlaying = false;
-                    Music.Pause();
-                    _LastDSPTime = AudioSettings.dspTime;
-                    ComputeAndSaveMedianOffset();
-                    PlayerScreenPause.sMain.Show();
-                }
-
+                PauseForInterruption();
                 return;
             }
 
@@ -1454,15 +1491,7 @@ namespace JANOARG.Client.Behaviors.Player
             #else
                 if (isPaused)
                 {
-                    if (IsPlaying)
-                    {
-                        _PausedByFocusLoss = true;
-                        IsPlaying = false;
-                        Music.Pause();
-                        _LastDSPTime = AudioSettings.dspTime;
-                        ComputeAndSaveMedianOffset();
-                        PlayerScreenPause.sMain.Show();
-                    }
+                    PauseForInterruption();
                 }
                 else if (_PausedByFocusLoss)
                 {
@@ -1723,16 +1752,61 @@ namespace JANOARG.Client.Behaviors.Player
             RenderSettings.fogColor = color;
         }
 
+        // one tint source for the HUD. CanvasRenderer.SetColor is a draw-time multiply,
+        // so theme fades don't dirty any canvas. TMP fallback glyphs get their own
+        // TMP_SubMeshUI CanvasRenderers, so cache those too.
+        private readonly Dictionary<Graphic, CanvasRenderer[]> _interfaceRenderers = new();
+        private readonly Dictionary<Graphic, int>             _interfaceRendererChildCount = new();
+
+        private void ApplyInterfaceTint(Graphic graphic, Color tint)
+        {
+            if (graphic == null) return;
+
+            // tint multiplies the baked vertex colour, so flatten base to white first.
+            // no-op for most elements.
+            if (graphic.color != Color.white)
+                graphic.color = Color.white;
+
+            int childCount = graphic.transform.childCount;
+
+            if (!_interfaceRenderers.TryGetValue(graphic, out CanvasRenderer[] renderers) ||
+                _interfaceRendererChildCount[graphic] != childCount)
+            {
+                TMP_SubMeshUI[] subMeshes = graphic is TMP_Text
+                    ? graphic.GetComponentsInChildren<TMP_SubMeshUI>(true)
+                    : System.Array.Empty<TMP_SubMeshUI>();
+
+                renderers = new CanvasRenderer[subMeshes.Length + 1];
+                renderers[0] = graphic.canvasRenderer;
+
+                for (var i = 0; i < subMeshes.Length; i++)
+                    renderers[i + 1] = subMeshes[i].canvasRenderer;
+
+                _interfaceRenderers[graphic] = renderers;
+                _interfaceRendererChildCount[graphic] = childCount;
+            }
+
+            for (var i = 0; i < renderers.Length; i++)
+                renderers[i].SetColor(tint);
+        }
+
         public void SetInterfaceColor(Color color)
         {
-            SongNameLabel.color = SongArtistLabel.color = SongExternalIndicator.color = DifficultyLabel.color = DifficultyNameLabel.color =
-                SongProgressTip.color = SongProgressGlow.color = JudgmentLabel.color = ComboLabel.color =
-                    PauseLabel.color = color;
+            ApplyInterfaceTint(SongNameLabel, color);
+            ApplyInterfaceTint(SongArtistLabel, color);
+            ApplyInterfaceTint(SongExternalIndicator, color);
+            ApplyInterfaceTint(DifficultyNameLabel, color);
+            ApplyInterfaceTint(DifficultyLabel, color);
+            ApplyInterfaceTint(SongProgressTip, color);
+            ApplyInterfaceTint(SongProgressGlow, color);
+            ApplyInterfaceTint(JudgmentLabel, color);
+            ApplyInterfaceTint(ComboLabel, color);
+            ApplyInterfaceTint(PauseLabel, color);
 
             foreach (Graphic digit in ScoreDigits)
-                digit.color = color;
+                ApplyInterfaceTint(digit, color);
 
-            SongProgressBody.color = color * new Color(1, 1, 1, .5f);
+            ApplyInterfaceTint(SongProgressBody, color * new Color(1, 1, 1, .5f));
         }
 
         // TODO: Move this to a editor script before removing this method
