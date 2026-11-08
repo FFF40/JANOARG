@@ -88,6 +88,27 @@ namespace JANOARG.Client.Data.Files
                 // Skip if comment
                 if (line.StartsWith("#")) continue;
 
+                // Parse Section
+                if (line.StartsWith("Section"))
+                {
+                    Debug.Log($"Line {line} in Section");
+                    Match match;
+                    Regex separator = new(@"(?<action>.+?)\s*::\s*(?<content>.+)");
+                    if ((match = separator.Match(line)).Success)
+                    {
+                        SectionStoryInstruction sectionIns =
+                        new SectionStoryInstruction
+                        (   
+                            match.Groups["content"].ToString(),
+                            script.Chunks.Count - 1
+                        );
+                        Debug.Log($"'{match.Groups["content"]}' is the section name");
+                        currentChunk.Instructions.Add(sectionIns);
+                        script.Sections[sectionIns.Name] = sectionIns.Index;
+                    }
+                    continue;
+                }
+
                 // Parse Scene Setting 
                 // SetBackground :: BackgroundID
                 if (line.StartsWith("SetBackground"))

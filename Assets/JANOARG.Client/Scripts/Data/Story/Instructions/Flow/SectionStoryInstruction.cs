@@ -12,7 +12,7 @@ namespace JANOARG.Client.Data.Story.Instructions
         public string Name;
         public int Index;
 
-        [StoryTag("Section")]
+        
         public SectionStoryInstruction(string name, int index)
         {
             if (string.IsNullOrWhiteSpace(name))
