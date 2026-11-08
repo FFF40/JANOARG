@@ -20,9 +20,9 @@ namespace JANOARG.Client.Data.Files
         private static Dictionary<string, StoryTagInfo> s_StoryTags;
 
         private static readonly Regex sr_ActorParseRegex =
-            new(@"^(?<actor>(?:[0-9a-zA-Z]+\s,\s)*[0-9a-zA-Z]+)\s*::\s+(?<content>.*)");
+            new(@"^(?<actor>(?:[0-9a-zA-Z]+\s,\s)*[0-9a-zA-Z]+)\s*::\s*(?<content>.*)");
         private static readonly Regex StoryTagRegex = new(
-            @"^\[(?<tag>\w+)\((?<arguments>.*?)\)\]"
+            @"^\[(?<tag>\w+)\s*\((?<arguments>.*?)\)\]"
         );
 
         private static readonly Regex ArgumentRegex = new(
@@ -64,7 +64,7 @@ namespace JANOARG.Client.Data.Files
             StoryChunk currentChunk = new();
             script.Chunks.Add(currentChunk);
 
-            string[] lines = str.Split("\n");
+            string[] lines = str.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
 
             foreach (string line in lines)
             {
@@ -80,6 +80,9 @@ namespace JANOARG.Client.Data.Files
                     }
 
                     continue;
+                } else
+                {
+                    Debug.Log($"Line {line} in Decoder");
                 }
 
                 // Skip if comment

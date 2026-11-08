@@ -76,6 +76,11 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void Start()
         {
+            if (Constants == null)
+            {
+                Debug.LogError($"Storyteller: No Story Constants assigned!");
+                return;
+            }
             DialogueLabel.text = "";
         }
 

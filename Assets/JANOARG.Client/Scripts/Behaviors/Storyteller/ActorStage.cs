@@ -349,7 +349,6 @@ namespace JANOARG.Client.Behaviors.Storyteller
         OutRight
     }
 
-    [SerializeField]
     public class StagePosition
     {
         private readonly List<string> _Aliases = new();

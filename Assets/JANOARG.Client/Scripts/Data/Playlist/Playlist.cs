@@ -50,16 +50,6 @@ namespace JANOARG.Client.Data.Playlist
     }
 
     [Serializable]
-    public class PlaylistStory
-    {
-        public StoryScript ID;
-        [SerializeReference]
-        public GameConditional[] RevealConditions;
-        [SerializeReference]
-        public GameConditional[] UnlockConditions;
-    }
-
-    [Serializable]
     public class PlaylistReference
     {
         public Playlist Playlist;
