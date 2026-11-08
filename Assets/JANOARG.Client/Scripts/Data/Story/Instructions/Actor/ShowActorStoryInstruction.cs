@@ -1,31 +1,32 @@
 using System;
-using System.Collections;
+using UnityEngine;
 using JANOARG.Client.Behaviors.Storyteller;
 using JANOARG.Client.Data.Files;
+using System.Collections;
 
 namespace JANOARG.Client.Data.Story.Instructions
 {
     [Serializable]
-    public class ActorMoveStoryInstruction : StoryInstruction
+    public class ShowActorStoryInstruction : StoryInstruction
     {
         public string Alias;
+        public string SpriteId;
         public ActorPosition Destination;
-        public float Duration;
 
-        [StoryTag("ActorMove")]
-        public ActorMoveStoryInstruction(string id , string destination, string duration)
+        [StoryTag("ShowActor")]
+        public ShowActorStoryInstruction(string id , string spriteId, string destination)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                throw new ArgumentNullException("Actor Show Instruction: Alias is null or empty."); 
             }
-            Alias = id;
-
-            if (!Single.TryParse(duration, out Duration))
+            if (string.IsNullOrWhiteSpace(spriteId))
             {
                throw new ArgumentNullException("Actor Show Instruction: SpriteId is null or empty."); 
             }
-
+            
+            Alias = id;
+            SpriteId = spriteId;
             if (!Enum.TryParse(destination, true, out Destination))
             {
                 throw new ArgumentException($"Invalid actor position: {destination}");
@@ -34,8 +35,7 @@ namespace JANOARG.Client.Data.Story.Instructions
 
         public override IEnumerator OnBeforeTextReveal(Storyteller teller)
         {
-            yield return teller.ActorStage.MoveActor(Alias,Destination,Duration);
+            yield return teller.ActorStage.ShowActor(Alias,SpriteId,Destination);
         }
-
     }
 }

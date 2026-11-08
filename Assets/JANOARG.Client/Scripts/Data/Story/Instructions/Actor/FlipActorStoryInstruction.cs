@@ -7,12 +7,12 @@ using System.Collections;
 namespace JANOARG.Client.Data.Story.Instructions
 {
     [Serializable]
-    public class ActorFlipStoryInstruction : StoryInstruction
+    public class FlipActorStoryInstruction : StoryInstruction
     {
         public string Alias;
 
-        [StoryTag("ActorFlip")]
-        public ActorFlipStoryInstruction(string id)
+        [StoryTag("FlipActor")]
+        public FlipActorStoryInstruction(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
