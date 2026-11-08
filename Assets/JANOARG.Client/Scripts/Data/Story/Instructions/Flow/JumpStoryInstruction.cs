@@ -9,6 +9,9 @@ namespace JANOARG.Client.Data.Story.Instructions
     [Serializable]
     public class JumpStoryInstruction : StoryInstruction
     {
+        public override bool isSilent  => true;
+        public override bool endsChunk => true;
+
         public string TargetSection;
 
         [StoryTag("Jump")]
@@ -23,7 +26,7 @@ namespace JANOARG.Client.Data.Story.Instructions
 
         public override IEnumerator OnAfterTextReveal(Storyteller teller)
         {
-            teller._PendingSectionJump = TargetSection;
+            teller.PendingSectionJump = TargetSection;
             yield break;
         }
     }

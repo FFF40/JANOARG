@@ -29,6 +29,8 @@ namespace JANOARG.Client.Data.Files
             @"[^,]+"
         );
 
+        private static readonly Regex CommandRegex =
+            new(@"^(?<action>Section|SetBackground|SetMusic)\s*::\s*(?<content>.+)$");
 #if UNITY_EDITOR
         [DidReloadScripts]
 #endif
@@ -61,203 +63,134 @@ namespace JANOARG.Client.Data.Files
             if (s_StoryTags == null) InitiateStoryTags();
 
             var script = ScriptableObject.CreateInstance<StoryScript>();
-            StoryChunk currentChunk = new();
+            var currentChunk = new StoryChunk();
             script.Chunks.Add(currentChunk);
+
+            bool splitPending = false; // next instruction must start a new chunk
+            bool actorChecked = false; // already looked for "Actor ::" in this chunk
+
+            StoryChunk Chunk()
+            {
+                if (splitPending && currentChunk.Instructions.Count > 0)
+                {
+                    currentChunk = new StoryChunk();
+                    script.Chunks.Add(currentChunk);
+                    actorChecked = false;
+                }
+                splitPending = false;
+                return currentChunk;
+            }
+
+            void Add(StoryInstruction ins)
+            {
+                Chunk().Instructions.Add(ins);
+                if (ins.endsChunk) splitPending = true;
+            }
 
             string[] lines = str.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
 
-            foreach (string line in lines)
+            foreach (string rawLine in lines)
             {
-                var index = 0;
+                // Trim: trailing spaces after a tag would otherwise become a text instruction
+                string line = rawLine.Trim();
 
-                // Skip if line is null and empty
-                if (string.IsNullOrEmpty(line))
-                {
-                    if (currentChunk.Instructions.Count > 0)
-                    {
-                        currentChunk = new StoryChunk();
-                        script.Chunks.Add(currentChunk);
-                    }
-
-                    continue;
-                } else
-                {
-                    Debug.Log($"Line {line} in Decoder");
-                }
-
-                // Skip if comment
+                if (line.Length == 0) { splitPending = true; continue; }
                 if (line.StartsWith("#")) continue;
 
-                // Parse Section
-                if (line.StartsWith("Section"))
+                // Commands: Section / SetBackground / SetMusic
+                Match cmd = CommandRegex.Match(line);
+                if (cmd.Success)
                 {
-                    Debug.Log($"Line {line} in Section");
-                    Match match;
-                    Regex separator = new(@"(?<action>.+?)\s*::\s*(?<content>.+)");
-                    if ((match = separator.Match(line)).Success)
+                    string content = cmd.Groups["content"].Value.Trim();
+                    switch (cmd.Groups["action"].Value)
                     {
-                        SectionStoryInstruction sectionIns =
-                        new SectionStoryInstruction
-                        (   
-                            match.Groups["content"].ToString(),
-                            script.Chunks.Count - 1
-                        );
-                        Debug.Log($"'{match.Groups["content"]}' is the section name");
-                        currentChunk.Instructions.Add(sectionIns);
-                        script.Sections[sectionIns.Name] = sectionIns.Index;
+                        case "Section":
+                        {
+                            splitPending = true;              // a section always begins a chunk
+                            StoryChunk chunk = Chunk();
+                            var sec = new SectionStoryInstruction(content, script.Chunks.Count - 1);
+                            chunk.Instructions.Add(sec);
+                            script.Sections[sec.Name] = sec.Index;
+                            break;
+                        }
+                        case "SetBackground": Add(new SetBackgroundStoryInstruction(content)); break;
+                        case "SetMusic":      Add(new SetMusicStoryInstruction(content));      break;
                     }
                     continue;
                 }
 
-                // Parse Scene Setting 
-                // SetBackground :: BackgroundID
-                if (line.StartsWith("SetBackground"))
+                int index = 0;
+
+                // Actor prefix (first line of each chunk only)
+                Chunk(); // may start a new chunk and reset actorChecked
+                if (!actorChecked)
                 {
-                    Debug.Log($"Line {line} in SetBackground");
-                    Match match;
-                    Regex separator = new(@"(?<action>.+?)\s*::\s*(?<content>.+)");
-                    if ((match = separator.Match(line)).Success)
+                    actorChecked = true;
+                    Match m = sr_ActorParseRegex.Match(line);
+                    if (m.Success)
                     {
-                        SetBackgroundStoryInstruction backgroundSetIns =
-                         new SetBackgroundStoryInstruction(match.Groups["content"].ToString());
-                        Debug.Log($"'{match.Groups["content"]}' is the Id");
-                        currentChunk.Instructions.Add(backgroundSetIns);
-                    }
-                    continue;
-                }
-
-                // SetMusic :: MusicID
-                if (line.StartsWith("SetMusic"))
-                {
-                    Debug.Log($"Line {line} in SetMusic");
-                    Match match;
-                    Regex separator = new(@"(?<action>.+?)\s*::\s*(?<content>.+)");
-                    if ((match = separator.Match(line)).Success)
-                    {
-                        SetMusicStoryInstruction musicSetIns =
-                         new SetMusicStoryInstruction(match.Groups["content"].ToString());
-                        Debug.Log($"'{match.Groups["content"]}' is the Id");
-                        currentChunk.Instructions.Add(musicSetIns);
-                    }
-                    continue;
-                }
-
-                // PlaceSet :: Text
-                if (line.StartsWith("#")) continue;
-
-                // TimeDateSet :: 16-06-3280, 12:45AM
-                if (line.StartsWith("#")) continue;
-
-
-                // Check if there is a Actor 
-                if (currentChunk.Instructions.Count == 0)
-                {
-                    Match match;
-                    SetActorStoryInstruction authorIns = new();
-                    currentChunk.Instructions.Add(authorIns);
-                    Debug.Log($"Checking if line {line} has actors");
-                    // Regex
-                    if ((match = sr_ActorParseRegex.Match(line)).Success)
-                    {
-                        index = match.Groups["content"].Index;
-                        Debug.Log($"{match.Groups["actor"]} in Decoder");
-                        // Split actor if there is a comma
-                        authorIns.Actors.AddRange(
-                            match.Groups["actor"]
-                                .Value.Split(" , "));
+                        index = m.Groups["content"].Index;
+                        var authorIns = new SetActorStoryInstruction();
+                        authorIns.Actors.AddRange(m.Groups["actor"].Value.Split(" , "));
+                        Add(authorIns);
                     }
                 }
 
-                // Skip whitespace
                 while (index < line.Length && char.IsWhiteSpace(line[index])) index++;
 
-                // Parse text and control tags
                 while (index < line.Length)
                 {
-                    // Parse control tags
                     if (line[index] == '[')
                     {
                         Match match = StoryTagRegex.Match(line.Substring(index));
-
                         if (match.Success)
                         {
-                            string keyword = match.Groups["tag"].Value;
+                            string keyword   = match.Groups["tag"].Value;
                             string arguments = match.Groups["arguments"].Value;
+                            index += match.Length;
 
                             if (!s_StoryTags.TryGetValue(keyword, out StoryTagInfo tagInfo))
                             {
                                 Debug.LogWarning($"Unknown story tag \"{keyword}\"");
-                                index += match.Length;
                                 continue;
                             }
 
                             ParameterInfo[] parameters = tagInfo.Constructor.GetParameters();
-                            List<string> stringParams = new();
-
-                            foreach (Match argMatch in ArgumentRegex.Matches(arguments))
-                            {
-                                stringParams.Add(argMatch.Value.Trim());
-                            }
+                            var stringParams = new List<string>();
+                            foreach (Match a in ArgumentRegex.Matches(arguments))
+                                stringParams.Add(a.Value.Trim());
 
                             if (stringParams.Count != parameters.Length)
                             {
-                                Debug.LogWarning(
-                                    $"Tag \"{keyword}\" expects {parameters.Length} arguments, " +
-                                    $"but received {stringParams.Count}. {String.Join(",",stringParams)}"
-                                );
-
-                                index += match.Length;
+                                Debug.LogWarning($"Tag \"{keyword}\" expects {parameters.Length} arguments, " +
+                                                $"but received {stringParams.Count}.");
                                 continue;
                             }
 
-                            currentChunk.Instructions.Add(
-                                (StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray())
-                            );
-
-                            index += match.Length;
+                            Add((StoryInstruction)tagInfo.Constructor.Invoke(stringParams.ToArray()));
                             continue;
-                        } 
-
-                        // Debug.LogWarning($"Invalid story tag format: {line}");
-                        // index++;
-                        
+                        }
                     }
 
-                    // Parse ordinary text
-                    StringBuilder storyboard = new();
-
+                    // Ordinary text
+                    var sb = new StringBuilder();
                     while (index < line.Length && line[index] != '[')
                     {
-                        if (line[index] == '\\' && index + 1 < line.Length)
-                            index++;
-
-                        storyboard.Append(line[index]);
+                        if (line[index] == '\\' && index + 1 < line.Length) index++;
+                        sb.Append(line[index]);
                         index++;
                     }
+                    if (sb.Length == 0 && index < line.Length) { sb.Append(line[index]); index++; } // lone '['
 
-                    if (index < line.Length && line[index] == '[' && storyboard.Length == 0)
-                    {
-                        storyboard.Append(line[index]);
-                        index++;
-                    }
-
-                    if (storyboard.Length > 0)
-                    {
-                        currentChunk.Instructions.Add(
-                            new TextPrintStoryInstruction
-                            {
-                                Text = storyboard.ToString()
-                            }
-                        );
-                    }
+                    if (sb.Length > 0)
+                        Add(new TextPrintStoryInstruction { Text = sb.ToString() });
                 }
             }
-            if (currentChunk.Instructions.Count == 0) script.Chunks.Remove(currentChunk);
 
+            if (currentChunk.Instructions.Count == 0) script.Chunks.Remove(currentChunk);
             return script;
         }
     }
-
 
     [AttributeUsage(AttributeTargets.Constructor)]
     public class StoryTagAttribute : Attribute

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using JANOARG.Client.Data.Story.Instructions;
 using UnityEngine;
 
@@ -25,6 +26,8 @@ namespace JANOARG.Client.Data.Story
         {
             return Sections.TryGetValue(name, out index);
         }
+
+       
         
 
     }
@@ -33,6 +36,7 @@ namespace JANOARG.Client.Data.Story
     public class StoryChunk
     {
         [SerializeReference] public List<StoryInstruction> Instructions = new();
+        public bool isSilent => Instructions.Count > 0 && Instructions.All(i => i.isSilent);
     }
 
     public class StoryLocalization

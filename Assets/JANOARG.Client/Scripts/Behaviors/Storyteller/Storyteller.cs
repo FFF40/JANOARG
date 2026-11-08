@@ -9,6 +9,7 @@ using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace JANOARG.Client.Behaviors.Storyteller
 {
@@ -49,7 +50,10 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public RectTransform ActorHolder;
 
-        public string _PendingSectionJump;
+        public string PendingSectionJump;
+        public List<int> CallStack = new();
+        [NonSerialized] public int? PendingChunkIndex;
+
         // public List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
         // public List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
         // public bool AreConditionsMet = false;
@@ -107,7 +111,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
             CurrentScript = script;
             CurrentChunkIndex = 0;
 
-            StartCoroutine(PlayChunk());
+            StartCoroutine(PlayChunk(CurrentScript.Chunks[CurrentChunkIndex]));
         }
 
         public void OnScreenClick()
@@ -120,73 +124,77 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void PlayNextChunk()
         {
-            if (CurrentScript.Chunks.Count > CurrentChunkIndex)
-            {
-                StartCoroutine(PlayChunk()); 
-                CurrentChunkIndex++;
-            } else
-            {
-                Debug.Log($"END OF STORY");
-            }
+            if (_IsPlaying) return;
+            StartCoroutine(PlayUntilInput());
         }
 
-        public IEnumerator PlayChunk()
+        private IEnumerator PlayUntilInput()
         {
             _IsPlaying = true;
-            // If have jump section pending, jump to that section instead of the next chunk
-            if (!string.IsNullOrWhiteSpace(_PendingSectionJump))
+            SetNextChunkIndicatorState(0);
+
+            while (CurrentChunkIndex < CurrentScript.Chunks.Count)
             {
-                if (CurrentScript.TryGetLabel(_PendingSectionJump, out int index))
+                // Increment BEFORE playing, so CurrentChunkIndex == "the chunk after this one".
+                // Call stores that value as its return point.
+                StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex++];
+
+                yield return PlayChunk(chunk);
+
+                if (!chunk.isSilent) yield break; // wait for the player's click
+            }
+
+            Debug.Log("END OF STORY");
+            _IsPlaying = false;
+        }
+
+        public IEnumerator PlayChunk(StoryChunk chunk)
+        {
+            bool silent = chunk.isSilent;
+            if (!silent)
+            {
+                _IsPlaying = true;
+                
+                SetNextChunkIndicatorState(0);
+                Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
+
+                yield return Ease.Animate(0.2f, (x) =>
                 {
-                    CurrentChunkIndex = index;
-                    _PendingSectionJump = null;
-                } else
+                    float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
+                    DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
+
+                    DialogueLabel.rectTransform.anchoredPosition = dialoguePos + EaseUtils.FromZero(5, x, EaseFunction.Cubic, EaseMode.In) * Vector2.down;
+                });
+
+                // Reset Dialog Label and Name Label
+                SetNameLabelText("");
+                DialogueLabel.text = "";
+                DialogueLabel.color = Color.white;
+                DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
+                
+                // Prefilling the labels
+                foreach (StoryInstruction instruction in chunk.Instructions)
+                    instruction.OnTextBuild(this);
+
+                CurrentCharacterIndex = 0;
+                TimeBuffer = 0;
+                SpeedFactor = 1;
+                CurrentVertexIndexes = new int[DialogueLabel.textInfo.meshInfo.Length];
+                CurrentRevealEffect = new FloatInTypeEffect();
+                IsMeshDirty = true;
+                ResetDialogueMesh();
+
+                Debug.Log($"Dialog: {NameLabel.text} : {DialogueLabel.text}");
+                // If DialogLabel and NameLabel is empty, dock the textbox
+                if (string.IsNullOrEmpty(NameLabel.text) && string.IsNullOrEmpty(DialogueLabel.text))
                 {
-                    Debug.LogError($"Jump Section: {_PendingSectionJump} not found in script.");
+                    yield return DockInterface();
+                }
+                else
+                {
+                    yield return UndockInterface();
                 }
             }
-            StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
-
-            SetNextChunkIndicatorState(0);
-            Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
-
-            yield return Ease.Animate(0.2f, (x) =>
-            {
-                float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
-                DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
-
-                DialogueLabel.rectTransform.anchoredPosition = dialoguePos + EaseUtils.FromZero(5, x, EaseFunction.Cubic, EaseMode.In) * Vector2.down;
-            });
-
-            // Reset Dialog Label and Name Label
-            SetNameLabelText("");
-            DialogueLabel.text = "";
-            DialogueLabel.color = Color.white;
-            DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
-            
-            // Prefilling the labels
-            foreach (StoryInstruction instruction in chunk.Instructions)
-                instruction.OnTextBuild(this);
-
-            CurrentCharacterIndex = 0;
-            TimeBuffer = 0;
-            SpeedFactor = 1;
-            CurrentVertexIndexes = new int[DialogueLabel.textInfo.meshInfo.Length];
-            CurrentRevealEffect = new FloatInTypeEffect();
-            IsMeshDirty = true;
-            ResetDialogueMesh();
-
-            Debug.Log($"Dialog: {NameLabel.text} : {DialogueLabel.text}");
-            // If DialogLabel and NameLabel is empty, dock the textbox
-            if (string.IsNullOrEmpty(NameLabel.text) && string.IsNullOrEmpty(DialogueLabel.text))
-            {
-                yield return DockInterface();
-            }
-            else
-            {
-                yield return UndockInterface();
-            }
-            
             // Order
             yield return RunPhase(chunk, i => i.OnSceneSet(this));
             yield return RunPhase(chunk, i => i.OnBeforeTextReveal(this));
@@ -195,8 +203,22 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
             yield return new WaitWhile(() => ActiveCoroutines > 0);
 
-            _IsPlaying = false;
-            SetNextChunkIndicatorState(1);
+            if (PendingChunkIndex.HasValue)
+            {
+                CurrentChunkIndex = PendingChunkIndex.Value;
+                PendingChunkIndex = null;
+            }
+            else if (!string.IsNullOrEmpty(PendingSectionJump))
+            {
+                ResolvePendingJump();
+            }
+
+            if (!silent)
+            {
+                _IsPlaying = false;
+                SetNextChunkIndicatorState(1);
+            }
+
         }
 
         private IEnumerator RunPhase(StoryChunk chunk, Func<StoryInstruction, IEnumerator> hook)
@@ -206,6 +228,18 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 IEnumerator routine = hook(ins);
                 if (routine != null) yield return routine;
             }
+        }
+
+        public void ResolvePendingJump()
+        {
+            if (string.IsNullOrWhiteSpace(PendingSectionJump)) return;
+
+            if (CurrentScript.TryGetLabel(PendingSectionJump, out int index))
+                CurrentChunkIndex = index;
+            else
+                Debug.LogError($"Jump Section: {PendingSectionJump} not found in script.");
+
+            PendingSectionJump = null;
         }
 
         public void ResetDialogueMesh()

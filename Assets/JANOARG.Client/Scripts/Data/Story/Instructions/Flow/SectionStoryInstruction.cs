@@ -6,9 +6,11 @@ using JANOARG.Client.Data.Files;
 
 namespace JANOARG.Client.Data.Story.Instructions
 {
+
     [Serializable]
     public class SectionStoryInstruction : StoryInstruction
     {
+        public override bool endsChunk => true;
         public string Name;
         public int Index;
 
