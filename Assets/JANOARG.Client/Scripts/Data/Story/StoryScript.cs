@@ -13,10 +13,20 @@ namespace JANOARG.Client.Data.Story
         // public string EpisodeCount;
         // public string EpisodeName;
         // public string SceneWriter;
-        public List<StoryChunk> Chunks = new();
-        
+
         // TODO: Localization support
         // public List<StoryLocalization> Localizations = new();
+
+        public List<StoryChunk> Chunks = new();
+        
+        [SerializeField]
+        public Dictionary<string, int> Sections = new();
+        public bool TryGetLabel(string name, out int index)
+        {
+            return Sections.TryGetValue(name, out index);
+        }
+        
+
     }
 
     [Serializable]

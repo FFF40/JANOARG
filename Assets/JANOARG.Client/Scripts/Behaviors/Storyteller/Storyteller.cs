@@ -49,6 +49,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public RectTransform ActorHolder;
 
+        public string _PendingSectionJump;
         // public List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
         // public List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
         // public bool AreConditionsMet = false;
@@ -132,6 +133,18 @@ namespace JANOARG.Client.Behaviors.Storyteller
         public IEnumerator PlayChunk()
         {
             _IsPlaying = true;
+            // If have jump section pending, jump to that section instead of the next chunk
+            if (!string.IsNullOrWhiteSpace(_PendingSectionJump))
+            {
+                if (CurrentScript.TryGetLabel(_PendingSectionJump, out int index))
+                {
+                    CurrentChunkIndex = index;
+                    _PendingSectionJump = null;
+                } else
+                {
+                    Debug.LogError($"Jump Section: {_PendingSectionJump} not found in script.");
+                }
+            }
             StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
 
             SetNextChunkIndicatorState(0);
