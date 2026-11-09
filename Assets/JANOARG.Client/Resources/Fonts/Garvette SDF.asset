@@ -108,6 +108,7 @@ Material:
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,14 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Garvette SDF
   m_EditorClassIdentifier: 
-  hashCode: -986548525
-  material: {fileID: -8989296655413232944}
-  materialHashCode: 1733606931
   m_Version: 1.1.0
-  m_SourceFontFileGUID: d3d0dedcb270fe54ab146849355b81e8
-  m_SourceFontFile_EditorRef: {fileID: 12800000, guid: d3d0dedcb270fe54ab146849355b81e8, type: 3}
-  m_SourceFontFile: {fileID: 12800000, guid: d3d0dedcb270fe54ab146849355b81e8, type: 3}
-  m_AtlasPopulationMode: 1
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Garvette
@@ -150,6 +144,31 @@ MonoBehaviour:
     m_StrikethroughOffset: 6
     m_StrikethroughThickness: 2.475586
     m_TabWidth: 12
+  m_Material: {fileID: -8989296655413232944}
+  m_SourceFontFileGUID: d3d0dedcb270fe54ab146849355b81e8
+  m_CreationSettings:
+    sourceFontFileName: 
+    sourceFontFileGUID: d3d0dedcb270fe54ab146849355b81e8
+    faceIndex: 0
+    pointSizeSamplingMode: 0
+    pointSize: 39
+    padding: 20
+    paddingMode: 0
+    packingMode: 0
+    atlasWidth: 512
+    atlasHeight: 1024
+    characterSetSelectionMode: 1
+    characterSequence: 32 - 126, 160 - 255, 8192 - 8303, 8364, 8482, 9633
+    referencedFontAssetGUID: e4a07389ef7f0ae4f91e910aaa3faf4f
+    referencedTextAssetGUID: 
+    fontStyle: 0
+    fontStyleModifier: 0
+    renderMode: 4165
+    includeFontFeatures: 0
+  m_SourceFontFile: {fileID: 12800000, guid: d3d0dedcb270fe54ab146849355b81e8, type: 3}
+  m_SourceFontFilePath: 
+  m_AtlasPopulationMode: 1
+  InternalDynamicOS: 0
   m_GlyphTable:
   - m_Index: 3
     m_Metrics:
@@ -1486,7 +1505,12 @@ MonoBehaviour:
   - {fileID: 1042465171824963998}
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 0
+  m_GetFontFeatures: 1
   m_ClearDynamicDataOnBuild: 0
+  m_AtlasWidth: 512
+  m_AtlasHeight: 1024
+  m_AtlasPadding: 20
+  m_AtlasRenderMode: 4165
   m_UsedGlyphRects:
   - m_X: 0
     m_Y: 0
@@ -1969,60 +1993,17 @@ MonoBehaviour:
     m_Y: 504
     m_Width: 2
     m_Height: 519
-  m_fontInfo:
-    Name: 
-    PointSize: 0
-    Scale: 0
-    CharacterCount: 0
-    LineHeight: 0
-    Baseline: 0
-    Ascender: 0
-    CapHeight: 0
-    Descender: 0
-    CenterLine: 0
-    SuperscriptOffset: 0
-    SubscriptOffset: 0
-    SubSize: 0
-    Underline: 0
-    UnderlineThickness: 0
-    strikethrough: 0
-    strikethroughThickness: 0
-    TabWidth: 0
-    Padding: 0
-    AtlasWidth: 0
-    AtlasHeight: 0
-  atlas: {fileID: 0}
-  m_AtlasWidth: 512
-  m_AtlasHeight: 1024
-  m_AtlasPadding: 20
-  m_AtlasRenderMode: 4165
-  m_glyphInfoList: []
-  m_KerningTable:
-    kerningPairs: []
   m_FontFeatureTable:
+    m_MultipleSubstitutionRecords: []
+    m_LigatureSubstitutionRecords: []
     m_GlyphPairAdjustmentRecords: []
-  fallbackFontAssets: []
+    m_MarkToBaseAdjustmentRecords: []
+    m_MarkToMarkAdjustmentRecords: []
+  m_ShouldReimportFontFeatures: 0
   m_FallbackFontAssetTable:
   - {fileID: 11400000, guid: d71c634505dcb0945a839d30ef76384a, type: 2}
   - {fileID: 11400000, guid: 65176bde51c3dce42a899f10bdc2f7a0, type: 2}
   - {fileID: 11400000, guid: 0159476e8859170448df5440a2db8bbf, type: 2}
-  m_CreationSettings:
-    sourceFontFileName: 
-    sourceFontFileGUID: d3d0dedcb270fe54ab146849355b81e8
-    pointSizeSamplingMode: 0
-    pointSize: 39
-    padding: 20
-    packingMode: 0
-    atlasWidth: 512
-    atlasHeight: 1024
-    characterSetSelectionMode: 1
-    characterSequence: 32 - 126, 160 - 255, 8192 - 8303, 8364, 8482, 9633
-    referencedFontAssetGUID: e4a07389ef7f0ae4f91e910aaa3faf4f
-    referencedTextAssetGUID: 
-    fontStyle: 0
-    fontStyleModifier: 0
-    renderMode: 4165
-    includeFontFeatures: 0
   m_FontWeightTable:
   - regularTypeface: {fileID: 0}
     italicTypeface: {fileID: 0}
@@ -2049,8 +2030,35 @@ MonoBehaviour:
   normalSpacingOffset: 0
   boldStyle: 0.1
   boldSpacing: 0
-  italicStyle: 25
+  italicStyle: 15
   tabSize: 10
+  m_fontInfo:
+    Name: 
+    PointSize: 0
+    Scale: 0
+    CharacterCount: 0
+    LineHeight: 0
+    Baseline: 0
+    Ascender: 0
+    CapHeight: 0
+    Descender: 0
+    CenterLine: 0
+    SuperscriptOffset: 0
+    SubscriptOffset: 0
+    SubSize: 0
+    Underline: 0
+    UnderlineThickness: 0
+    strikethrough: 0
+    strikethroughThickness: 0
+    TabWidth: 0
+    Padding: 0
+    AtlasWidth: 0
+    AtlasHeight: 0
+  m_glyphInfoList: []
+  m_KerningTable:
+    kerningPairs: []
+  fallbackFontAssets: []
+  atlas: {fileID: 0}
 --- !u!28 &1042465171824963998
 Texture2D:
   m_ObjectHideFlags: 0
@@ -2061,10 +2069,8 @@ Texture2D:
   m_ImageContentsHash:
     serializedVersion: 2
     Hash: 00000000000000000000000000000000
-  m_ForcedFallbackFormat: 4
-  m_DownscaleFallback: 0
   m_IsAlphaChannelOptional: 0
-  serializedVersion: 2
+  serializedVersion: 4
   m_Width: 512
   m_Height: 1024
   m_CompleteImageSize: 524288
