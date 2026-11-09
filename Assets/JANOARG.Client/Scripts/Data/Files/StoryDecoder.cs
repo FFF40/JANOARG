@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using JANOARG.Client.Data.Story;
 using JANOARG.Client.Data.Story.Instructions;
 using UnityEngine;
+using System.Linq;
+
 #if UNITY_EDITOR
 using UnityEditor.Callbacks;
 #endif
@@ -24,16 +26,17 @@ namespace JANOARG.Client.Data.Files
         private static readonly Regex StoryTagRegex = new(
             @"^\[(?<tag>\w+)\s*\((?<arguments>.*?)\)\]"
         );
-
         private static readonly Regex ArgumentRegex = new(
             @"[^,]+"
         );
-
         private static readonly Regex CommandRegex =
-            new(@"^(?<action>Section|SetBackground|SetMusic)\s*::\s*(?<content>.+)$");
-#if UNITY_EDITOR
+            new(@"^(?<action>Section|SetBackground|SetMusic|If)\s*::\s*(?<content>.+)$");
+        private static readonly Regex ChoiceRegex =
+            new(@"^\*\s*(?<text>.+?)\s*->\s*(?<target>\w+)(?:\s*\?\s*(?<cond>.+))?$");
+
+        #if UNITY_EDITOR
         [DidReloadScripts]
-#endif
+        #endif
         public static void InitiateStoryTags()
         {
             s_StoryTags = new Dictionary<string, StoryTagInfo>();
@@ -66,6 +69,8 @@ namespace JANOARG.Client.Data.Files
             var currentChunk = new StoryChunk();
             script.Chunks.Add(currentChunk);
 
+            var condStack = new List<StoryCondition>();
+            ChoiceStoryInstruction openChoice = null;
             bool splitPending = false; // next instruction must start a new chunk
             bool actorChecked = false; // already looked for "Actor ::" in this chunk
 
@@ -77,6 +82,12 @@ namespace JANOARG.Client.Data.Files
                     script.Chunks.Add(currentChunk);
                     actorChecked = false;
                 }
+
+                if (currentChunk.Instructions.Count == 0)   // empty chunk: (re)stamp conditions
+                    currentChunk.Conditions = condStack
+                        .Select(c => new StoryCondition { Expression = c.Expression, Negate = c.Negate })
+                        .ToList();
+
                 splitPending = false;
                 return currentChunk;
             }
@@ -96,6 +107,43 @@ namespace JANOARG.Client.Data.Files
 
                 if (line.Length == 0) { splitPending = true; continue; }
                 if (line.StartsWith("#")) continue;
+                
+                // Else / EndIf
+                if (line == "Else")
+                {
+                    if (condStack.Count == 0) Debug.LogWarning("Else without If.");
+                    else condStack[^1].Negate = !condStack[^1].Negate;
+                    splitPending = true; openChoice = null; continue;
+                }
+                if (line == "EndIf")
+                {
+                    if (condStack.Count == 0) Debug.LogWarning("EndIf without If.");
+                    else condStack.RemoveAt(condStack.Count - 1);
+                    splitPending = true; openChoice = null; continue;
+                }
+
+                // Choice options: "* Text -> section ? condition"
+                if (line.StartsWith("*"))
+                {
+                    Match cm = ChoiceRegex.Match(line);
+                    if (!cm.Success) { Debug.LogWarning($"Invalid choice line: {line}"); continue; }
+
+                    if (openChoice == null)
+                    {
+                        openChoice = new ChoiceStoryInstruction();
+                        Chunk().Instructions.Add(openChoice);
+                    }
+
+                    openChoice.Options.Add(new ChoiceOption
+                    {
+                        Text = cm.Groups["text"].Value,
+                        Target = cm.Groups["target"].Value,
+                        Condition = cm.Groups["cond"].Success ? cm.Groups["cond"].Value.Trim() : null
+                    });
+                    splitPending = true;   // whatever follows starts a new chunk
+                    continue;
+                }
+
 
                 // Commands: Section / SetBackground / SetMusic
                 Match cmd = CommandRegex.Match(line);
@@ -111,6 +159,12 @@ namespace JANOARG.Client.Data.Files
                             var sec = new SectionStoryInstruction(content, script.Chunks.Count - 1);
                             chunk.Instructions.Add(sec);
                             script.Sections[sec.Name] = sec.Index;
+                            break;
+                        }
+                        case "If":
+                        {
+                            condStack.Add(new StoryCondition { Expression = content });
+                            splitPending = true;
                             break;
                         }
                         case "SetBackground": Add(new SetBackgroundStoryInstruction(content)); break;

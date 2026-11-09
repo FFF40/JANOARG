@@ -54,13 +54,12 @@ namespace JANOARG.Client.Behaviors.Storyteller
         public List<int> CallStack = new();
         [NonSerialized] public int? PendingChunkIndex;
 
-        // public List<DecisionItem> CurrentDecisionItems = new List<DecisionItem>();
-        // public List<DecisionItem> CurrentFlagChecks = new List<DecisionItem>();
-        // public bool AreConditionsMet = false;
-        // public GameObject DecisionHolder;
-        // public GameObject DecisionItemPrefab;
+        [SerializeField] private Transform _ChoiceContainer;
+        [SerializeField] private Button _ChoiceButtonPrefab;
 
         [Space]
+        public GameObject PlayNextButton;
+
         public float CharacterDuration = 0.01f;
 
         public float SpeedFactor = 1;
@@ -141,7 +140,10 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
                 yield return PlayChunk(chunk);
 
-                if (!chunk.isSilent) yield break; // wait for the player's click
+                if (chunk.isSilent || chunk.hasChoice) continue; // wait for the player's click
+                _IsPlaying = false;
+                SetNextChunkIndicatorState(1);
+                yield break;
             }
 
             Debug.Log("END OF STORY");
@@ -212,15 +214,27 @@ namespace JANOARG.Client.Behaviors.Storyteller
             {
                 ResolvePendingJump();
             }
-
-            if (!silent)
-            {
-                _IsPlaying = false;
-                SetNextChunkIndicatorState(1);
-            }
-
         }
 
+        #region Coroutine Management
+        public void RegisterCoroutine(IEnumerator routine)
+        {
+            IEnumerator f_registration()
+            {
+                ActiveCoroutines++;
+
+                try
+                {
+                    yield return routine;
+                }
+                finally
+                {
+                    ActiveCoroutines--;
+                }
+            }
+
+            StartCoroutine(f_registration());
+        }
         private IEnumerator RunPhase(StoryChunk chunk, Func<StoryInstruction, IEnumerator> hook)
         {
             foreach (StoryInstruction ins in chunk.Instructions)
@@ -242,6 +256,9 @@ namespace JANOARG.Client.Behaviors.Storyteller
             PendingSectionJump = null;
         }
 
+        #endregion
+        
+        #region Dialogue Mesh Management
         public void ResetDialogueMesh()
         {
             TMP_TextInfo textInfo = DialogueLabel.textInfo;
@@ -268,26 +285,8 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
             }
         }
-
-        public void RegisterCoroutine(IEnumerator routine)
-        {
-            IEnumerator f_registration()
-            {
-                ActiveCoroutines++;
-
-                try
-                {
-                    yield return routine;
-                }
-                finally
-                {
-                    ActiveCoroutines--;
-                }
-            }
-
-            StartCoroutine(f_registration());
-        }
-
+        #endregion
+        
         private float          _CurrentNextChunkIndicatorPosition = 0;
         private EaseEnumerator _CurrentNextChunkIndicatorRoutine  = null;
 
@@ -304,6 +303,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
             StartCoroutine(_CurrentNextChunkIndicatorRoutine);
         }
 
+        #region UI Management
         private EaseEnumerator _CurrentNameFieldRoutine = null;
 
         public void SetNameLabelText(string label)
@@ -367,6 +367,79 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 ResetDialogueMesh();
             });
         }
+        #endregion
+
+        #region Condition Management
+        [SerializeField]
+        public Dictionary<string, int> Variables = new(); // reset this when a new playthrough starts
+        private static readonly string[] sr_Ops = { ">=", "<=", "==", "!=", ">", "<" };
+
+        public bool Evaluate(string expr)
+        {
+            foreach (string term in expr.Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries))
+                if (!EvaluateTerm(term.Trim())) return false;
+            return true;
+        }
+
+        private bool EvaluateTerm(string t)
+        {
+            foreach (string op in sr_Ops) 
+            {
+                int i = t.IndexOf(op, StringComparison.Ordinal);
+                if (i < 0) continue;
+
+                int l = ValueOf(t.Substring(0, i).Trim());
+                int r = ValueOf(t.Substring(i + op.Length).Trim());
+                return op switch
+                {
+                    ">=" => l >= r, "<=" => l <= r,
+                    "==" => l == r, "!=" => l != r,
+                    ">"  => l > r,  _    => l < r
+                };
+            }
+
+            // bare flag: "met_guard" or "!met_guard"
+            bool neg = t.StartsWith("!");
+            int v = ValueOf(neg ? t.Substring(1).Trim() : t);
+            return (v != 0) != neg;
+        }
+
+        public int ValueOf(string token) =>
+            int.TryParse(token, out int n) ? n
+            : Variables.TryGetValue(token, out int v) ? v : 0;
+        #endregion
+
+        #region Choice Management
+        
+
+        public IEnumerator ShowChoices(List<ChoiceOption> options, Action<ChoiceOption> onPicked)
+        {
+            ChoiceOption picked = null;
+            var buttons = new List<GameObject>();
+            _ChoiceContainer.gameObject.SetActive(true);
+            PlayNextButton.SetActive(false);
+
+            foreach (ChoiceOption opt in options)
+            {
+                Button btn = Instantiate(_ChoiceButtonPrefab, _ChoiceContainer, false);
+                btn.GetComponentInChildren<TMP_Text>().text = opt.Text;
+                ChoiceOption captured = opt;
+                btn.onClick.AddListener(() => picked = captured);
+                buttons.Add(btn.gameObject);
+            }
+
+            // Force the layout to calculate now, not at the end of the frame
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_ChoiceContainer);
+
+            yield return new WaitUntil(() => picked != null);
+
+            foreach (GameObject b in buttons) Destroy(b);
+            _ChoiceContainer.gameObject.SetActive(false);
+            PlayNextButton.SetActive(true);
+            onPicked(picked);
+        }
+        #endregion
     
     }
 }
