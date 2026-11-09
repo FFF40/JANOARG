@@ -25,6 +25,7 @@ namespace JANOARG.Client.Data.Story.Instructions
         {
             var isWait = false;
 
+            teller.TimeBuffer = 0f;
             while (teller.CurrentCharacterIndex < _StopPoint)
             {
                 int index = teller.CurrentCharacterIndex;

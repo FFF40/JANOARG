@@ -9,6 +9,7 @@ using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace JANOARG.Client.Behaviors.Storyteller
 {
@@ -25,6 +26,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
         public int CurrentCharacterIndex;
 
         [Space]
+        public RectTransform Interface;
         public TMP_Text DialogueLabel;
 
         public TMP_Text      NameLabel;
@@ -33,6 +35,31 @@ namespace JANOARG.Client.Behaviors.Storyteller
         public Graphic       NextChunkIndicator;
 
         [Space]
+        public TMP_Text PlaceText;
+        public TMP_Text TimeText;
+        
+        public StoryActorStage ActorStage;
+        public Image BackgroundImage;
+
+        public CanvasGroup FullScreenNarrationGroup;
+        public TMP_Text FullScreenNarrationText;
+
+        public AudioSource BackgroundMusicPlayer;
+        public AudioSource SoundEffectsPlayer;
+        [NonSerialized] public float MaxVolume;
+
+        public RectTransform ActorHolder;
+
+        public string PendingSectionJump;
+        public List<int> CallStack = new();
+        [NonSerialized] public int? PendingChunkIndex;
+
+        [SerializeField] private Transform _ChoiceContainer;
+        [SerializeField] private Button _ChoiceButtonPrefab;
+
+        [Space]
+        public GameObject PlayNextButton;
+
         public float CharacterDuration = 0.01f;
 
         public float SpeedFactor = 1;
@@ -53,6 +80,11 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void Start()
         {
+            if (Constants == null)
+            {
+                Debug.LogError($"Storyteller: No Story Constants assigned!");
+                return;
+            }
             DialogueLabel.text = "";
         }
 
@@ -78,7 +110,7 @@ namespace JANOARG.Client.Behaviors.Storyteller
             CurrentScript = script;
             CurrentChunkIndex = 0;
 
-            StartCoroutine(PlayChunk());
+            StartCoroutine(PlayChunk(CurrentScript.Chunks[CurrentChunkIndex]));
         }
 
         public void OnScreenClick()
@@ -91,54 +123,142 @@ namespace JANOARG.Client.Behaviors.Storyteller
 
         public void PlayNextChunk()
         {
-            CurrentChunkIndex++;
-            StartCoroutine(PlayChunk());
+            if (_IsPlaying) return;
+            StartCoroutine(PlayUntilInput());
         }
 
-        public IEnumerator PlayChunk()
+        private IEnumerator PlayUntilInput()
         {
             _IsPlaying = true;
-            StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex];
-
             SetNextChunkIndicatorState(0);
-            Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
 
-            yield return Ease.Animate(0.2f, (x) =>
+            while (CurrentChunkIndex < CurrentScript.Chunks.Count)
             {
-                float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
-                DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
+                // Increment BEFORE playing, so CurrentChunkIndex == "the chunk after this one".
+                // Call stores that value as its return point.
+                StoryChunk chunk = CurrentScript.Chunks[CurrentChunkIndex++];
 
-                DialogueLabel.rectTransform.anchoredPosition = dialoguePos + EaseUtils.FromZero(5, x, EaseFunction.Cubic, EaseMode.In) * Vector2.down;
-            });
+                yield return PlayChunk(chunk);
 
-            DialogueLabel.text = "";
-            DialogueLabel.color = Color.white;
-            DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
-
-            foreach (StoryInstruction instruction in chunk.Instructions)
-                instruction.OnTextBuild(this);
-
-            CurrentCharacterIndex = 0;
-            TimeBuffer = 0;
-            SpeedFactor = 1;
-            CurrentVertexIndexes = new int[DialogueLabel.textInfo.meshInfo.Length];
-            CurrentRevealEffect = new FloatInTypeEffect();
-            IsMeshDirty = true;
-            ResetDialogueMesh();
-
-            foreach (StoryInstruction instruction in chunk.Instructions)
-            {
-                IEnumerator chunkRoutine = instruction.OnTextReveal(this);
-
-                if (chunkRoutine != null) yield return chunkRoutine;
+                if (chunk.isSilent || chunk.hasChoice) continue; // wait for the player's click
+                _IsPlaying = false;
+                SetNextChunkIndicatorState(1);
+                yield break;
             }
+
+            Debug.Log("END OF STORY");
+            _IsPlaying = false;
+        }
+
+        public IEnumerator PlayChunk(StoryChunk chunk)
+        {
+            bool silent = chunk.isSilent;
+            if (!silent)
+            {
+                _IsPlaying = true;
+                
+                SetNextChunkIndicatorState(0);
+                Vector2 dialoguePos = DialogueLabel.rectTransform.anchoredPosition;
+
+                yield return Ease.Animate(0.2f, (x) =>
+                {
+                    float ease = Ease.Get(x, EaseFunction.Quadratic, EaseMode.Out);
+                    DialogueLabel.color = new Color(1, 1, 1, 1 - ease);
+
+                    DialogueLabel.rectTransform.anchoredPosition = dialoguePos + EaseUtils.FromZero(5, x, EaseFunction.Cubic, EaseMode.In) * Vector2.down;
+                });
+
+                // Reset Dialog Label and Name Label
+                SetNameLabelText("");
+                DialogueLabel.text = "";
+                DialogueLabel.color = Color.white;
+                DialogueLabel.rectTransform.anchoredPosition = dialoguePos;
+                
+                // Prefilling the labels
+                foreach (StoryInstruction instruction in chunk.Instructions)
+                    instruction.OnTextBuild(this);
+
+                CurrentCharacterIndex = 0;
+                TimeBuffer = 0;
+                SpeedFactor = 1;
+                CurrentVertexIndexes = new int[DialogueLabel.textInfo.meshInfo.Length];
+                CurrentRevealEffect = new FloatInTypeEffect();
+                IsMeshDirty = true;
+                ResetDialogueMesh();
+
+                Debug.Log($"Dialog: {NameLabel.text} : {DialogueLabel.text}");
+                // If DialogLabel and NameLabel is empty, dock the textbox
+                if (string.IsNullOrEmpty(NameLabel.text) && string.IsNullOrEmpty(DialogueLabel.text))
+                {
+                    yield return DockInterface();
+                }
+                else
+                {
+                    yield return UndockInterface();
+                }
+            }
+            // Order
+            yield return RunPhase(chunk, i => i.OnSceneSet(this));
+            yield return RunPhase(chunk, i => i.OnBeforeTextReveal(this));
+            yield return RunPhase(chunk, i => i.OnTextReveal(this));
+            yield return RunPhase(chunk, i => i.OnAfterTextReveal(this));
 
             yield return new WaitWhile(() => ActiveCoroutines > 0);
 
-            _IsPlaying = false;
-            SetNextChunkIndicatorState(1);
+            if (PendingChunkIndex.HasValue)
+            {
+                CurrentChunkIndex = PendingChunkIndex.Value;
+                PendingChunkIndex = null;
+            }
+            else if (!string.IsNullOrEmpty(PendingSectionJump))
+            {
+                ResolvePendingJump();
+            }
         }
 
+        #region Coroutine Management
+        public void RegisterCoroutine(IEnumerator routine)
+        {
+            IEnumerator f_registration()
+            {
+                ActiveCoroutines++;
+
+                try
+                {
+                    yield return routine;
+                }
+                finally
+                {
+                    ActiveCoroutines--;
+                }
+            }
+
+            StartCoroutine(f_registration());
+        }
+        private IEnumerator RunPhase(StoryChunk chunk, Func<StoryInstruction, IEnumerator> hook)
+        {
+            foreach (StoryInstruction ins in chunk.Instructions)
+            {
+                IEnumerator routine = hook(ins);
+                if (routine != null) yield return routine;
+            }
+        }
+
+        public void ResolvePendingJump()
+        {
+            if (string.IsNullOrWhiteSpace(PendingSectionJump)) return;
+
+            if (CurrentScript.TryGetLabel(PendingSectionJump, out int index))
+                CurrentChunkIndex = index;
+            else
+                Debug.LogError($"Jump Section: {PendingSectionJump} not found in script.");
+
+            PendingSectionJump = null;
+        }
+
+        #endregion
+        
+        #region Dialogue Mesh Management
         public void ResetDialogueMesh()
         {
             TMP_TextInfo textInfo = DialogueLabel.textInfo;
@@ -165,21 +285,8 @@ namespace JANOARG.Client.Behaviors.Storyteller
                 DialogueLabel.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
             }
         }
-
-        public void RegisterCoroutine(IEnumerator routine)
-        {
-            IEnumerator f_registration()
-            {
-                ActiveCoroutines++;
-
-                yield return routine;
-
-                ActiveCoroutines--;
-            }
-
-            StartCoroutine(f_registration());
-        }
-
+        #endregion
+        
         private float          _CurrentNextChunkIndicatorPosition = 0;
         private EaseEnumerator _CurrentNextChunkIndicatorRoutine  = null;
 
@@ -196,17 +303,19 @@ namespace JANOARG.Client.Behaviors.Storyteller
             StartCoroutine(_CurrentNextChunkIndicatorRoutine);
         }
 
+        #region UI Management
         private EaseEnumerator _CurrentNameFieldRoutine = null;
 
         public void SetNameLabelText(string label)
         {
             _CurrentNameFieldRoutine?.Skip();
-
+            NameLabel.text = "";
             float fromAlpha = NameLabelGroup.alpha;
             float toAlpha = string.IsNullOrWhiteSpace(label) ? 0 : 1;
             float fromXPos = NameLabelHolder.anchorMin.x;
             float toXPos = 0;
 
+            // Reveal / Persist
             if (toAlpha > 0)
             {
                 NameLabel.text = label;
@@ -225,5 +334,112 @@ namespace JANOARG.Client.Behaviors.Storyteller
             });
             StartCoroutine(_CurrentNameFieldRoutine);
         }
+    
+        public IEnumerator DockInterface()
+        {
+            Vector2 start = Interface.offsetMax;
+            Vector2 end = start;
+            end.y = -490f;
+
+            if (Interface.offsetMax.y == end.y) yield break;
+            yield return Ease.Animate(0.5f, a =>
+            {
+                float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                Interface.offsetMax = Vector2.Lerp(start, end, ease);
+            });
+        }
+
+        public IEnumerator UndockInterface()
+        {
+            Vector2 start = Interface.offsetMax;
+            Vector2 end = start;
+            end.y = -400f;
+            
+            if (Interface.offsetMax.y == end.y) yield break;
+            yield return Ease.Animate(0.5f, a =>
+            {
+                float ease = Ease.Get(a, EaseFunction.Cubic, EaseMode.Out);
+                Interface.offsetMax = Vector2.Lerp(start, end, ease);
+
+                // To make text is still invis when animating and make the text anim not break 
+                // idk why this works :sob:
+                DialogueLabel.ForceMeshUpdate();
+                ResetDialogueMesh();
+            });
+        }
+        #endregion
+
+        #region Condition Management
+        [SerializeField]
+        public Dictionary<string, int> Variables = new(); // reset this when a new playthrough starts
+        private static readonly string[] sr_Ops = { ">=", "<=", "==", "!=", ">", "<" };
+
+        public bool Evaluate(string expr)
+        {
+            foreach (string term in expr.Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries))
+                if (!EvaluateTerm(term.Trim())) return false;
+            return true;
+        }
+
+        private bool EvaluateTerm(string t)
+        {
+            foreach (string op in sr_Ops) 
+            {
+                int i = t.IndexOf(op, StringComparison.Ordinal);
+                if (i < 0) continue;
+
+                int l = ValueOf(t.Substring(0, i).Trim());
+                int r = ValueOf(t.Substring(i + op.Length).Trim());
+                return op switch
+                {
+                    ">=" => l >= r, "<=" => l <= r,
+                    "==" => l == r, "!=" => l != r,
+                    ">"  => l > r,  _    => l < r
+                };
+            }
+
+            // bare flag: "met_guard" or "!met_guard"
+            bool neg = t.StartsWith("!");
+            int v = ValueOf(neg ? t.Substring(1).Trim() : t);
+            return (v != 0) != neg;
+        }
+
+        public int ValueOf(string token) =>
+            int.TryParse(token, out int n) ? n
+            : Variables.TryGetValue(token, out int v) ? v : 0;
+        #endregion
+
+        #region Choice Management
+        
+
+        public IEnumerator ShowChoices(List<ChoiceOption> options, Action<ChoiceOption> onPicked)
+        {
+            ChoiceOption picked = null;
+            var buttons = new List<GameObject>();
+            _ChoiceContainer.gameObject.SetActive(true);
+            PlayNextButton.SetActive(false);
+
+            foreach (ChoiceOption opt in options)
+            {
+                Button btn = Instantiate(_ChoiceButtonPrefab, _ChoiceContainer, false);
+                btn.GetComponentInChildren<TMP_Text>().text = opt.Text;
+                ChoiceOption captured = opt;
+                btn.onClick.AddListener(() => picked = captured);
+                buttons.Add(btn.gameObject);
+            }
+
+            // Force the layout to calculate now, not at the end of the frame
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)_ChoiceContainer);
+
+            yield return new WaitUntil(() => picked != null);
+
+            foreach (GameObject b in buttons) Destroy(b);
+            _ChoiceContainer.gameObject.SetActive(false);
+            PlayNextButton.SetActive(true);
+            onPicked(picked);
+        }
+        #endregion
+    
     }
 }

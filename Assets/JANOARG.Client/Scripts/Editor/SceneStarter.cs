@@ -23,15 +23,15 @@ namespace JANOARG.Client.Editor
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            string targetScene = PlayerPrefs.GetString("TargetScene");
+            // string targetScene = PlayerPrefs.GetString("TargetScene");
 
-            if (!string.IsNullOrEmpty(targetScene))
-                if (state == PlayModeStateChange.EnteredPlayMode)
-                {
-                    UnityEngine.Debug.ClearDeveloperConsole();
-                    UnityEngine.Debug.Log("Loading scene " + targetScene);
-                    EditorSceneManager.LoadSceneInPlayMode(targetScene, new LoadSceneParameters(LoadSceneMode.Single));
-                }
+            // if (!string.IsNullOrEmpty(targetScene))
+            //     if (state == PlayModeStateChange.EnteredPlayMode)
+            //     {
+            //         UnityEngine.Debug.ClearDeveloperConsole();
+            //         UnityEngine.Debug.Log("Loading scene " + targetScene);
+            //         EditorSceneManager.LoadSceneInPlayMode(targetScene, new LoadSceneParameters(LoadSceneMode.Single));
+            //     }
         }
     }
 }

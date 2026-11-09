@@ -6,6 +6,7 @@ using JANOARG.Client.Behaviors.Common;
 using JANOARG.Client.Behaviors.SongSelect.List.ListItemUIs;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItems;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapItemUIs;
+using JANOARG.Client.Behaviors.Storyteller;
 using JANOARG.Client.Data.Playlist;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils.Animation;
@@ -29,6 +30,10 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         public static Dictionary<string, SongMapItemUI> sSongMapItemUIsByID = new();
         public static Dictionary<string, PlaylistMapItem> sPlaylistMapItemsByID = new();
         public static Dictionary<string, PlaylistMapItemUI> sPlaylistMapItemUIsByID = new();
+
+        public static Dictionary<string, StoryMapItem> sStoryMapItemsByID = new();
+        public static Dictionary<string, StoryMapItemUI> sStoryMapItemUIsByID = new();
+
         public static Dictionary<MapItem, HashSet<MapProp>> sPropsByDependency = new();
 
 
@@ -350,8 +355,6 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
         }
 
 
-
-
         public void OnMapPointerDown(BaseEventData data)
         {
             PointerEventData pointerData = (PointerEventData)data;
@@ -374,13 +377,35 @@ namespace JANOARG.Client.Behaviors.SongSelect.Map
             isPointerDown = false;
         }
 
-
-
         public void SelectSong(SongMapItem item)
         {
             isPointerDown = false;
             if (SongSelectScreen.sMain.TargetSongAnim != null) StopCoroutine(SongSelectScreen.sMain.TargetSongAnim);
             SongSelectScreen.sMain.TargetSongAnim = StartCoroutine(SongSelectScreen.sMain.MapTargetSongShowAnim(item));
+        }
+
+        public IEnumerator LoadStory(StoryMapItem item)
+        {
+            isPointerDown = false;
+            Debug.Log($"{item.TargetStory.name} is Target Story");
+
+            yield return new WaitForSeconds(1);
+            // LoadingBar.sMain.Show();
+
+            CommonSys.sMain.MainCamera.backgroundColor = Color.black;
+
+            StorytellerScreen.sScriptToPlay = item.TargetStory;
+            CommonSys.Load(
+                "Storyteller",
+                () => !LoadingBar.sMain.IsAnimating && Storyteller.StorytellerScreen.sMain?.IsInit == true,
+                () => {
+                    // LoadingBar.sMain.Hide();
+
+                    }
+                , false);
+            SceneManager.UnloadSceneAsync(MapScene);
+            SceneManager.UnloadSceneAsync("Song Select");
+            Resources.UnloadUnusedAssets();
         }
     }
 }

@@ -110,3 +110,7 @@ InitTestScene*.unity*
 obj/Debug
 Assembly-CSharp-Editor.csproj
 Assembly-CSharp.csproj
+
+# Temporary while M3ga develop the storyteller
+/Assets/DONT ADD/*
+/Assets/DONT ADD.meta
