@@ -195,15 +195,15 @@ namespace JANOARG.Client.Behaviors.Player
             bool rightActionsActive  = RightActionsHolder.gameObject.activeSelf;
             bool shareMetadataActive = ShareInfoHolder.activeSelf;
 
-            bool menuActive     = profileBar != null && profileBar.MenuButtonGroup != null && profileBar.MenuButtonGroup.gameObject.activeSelf;
-            bool backpackActive = profileBar != null && profileBar.RightPane != null && profileBar.RightPane.gameObject.activeSelf;
-            bool changeActive   = profileBar != null && profileBar.ChangeHeader != null && profileBar.ChangeHeader.gameObject.activeSelf;
+            bool menuActive     = profileBar != null && profileBar.MenuButtonContainer != null && profileBar.MenuButtonContainer.gameObject.activeSelf;
+            bool backpackActive = profileBar != null && profileBar.RightPaneGroup != null && profileBar.RightPaneGroup.gameObject.activeSelf;
+            bool changeActive   = profileBar != null && profileBar.ChangeWiper != null && profileBar.ChangeWiper.gameObject.activeSelf;
 
             const float CONTENT_SCALE = 0.8f;
 
             Vector3 originalScale      = transform.localScale;
             Vector3 originalCardScale  = ResultBackground.rectTransform.localScale;
-            Vector3 originalWedgeScale = profileBar != null && profileBar.LeftPane != null ? profileBar.LeftPane.transform.localScale : Vector3.one;
+            Vector3 originalWedgeScale = profileBar != null && profileBar.LeftPaneGroup != null ? profileBar.LeftPaneGroup.transform.localScale : Vector3.one;
 
             RenderTexture rTex  = new(width, height, 24, RenderTextureFormat.ARGB32);
             Texture2D     tex2D = new(width, height, TextureFormat.ARGB32, false);
@@ -226,16 +226,16 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (profileBar != null)
                 {
-                    profileBar.MenuButtonGroup.gameObject.SetActive(false);
-                    profileBar.RightPane.gameObject.SetActive(false);
-                    profileBar.ChangeHeader.gameObject.SetActive(false);
+                    profileBar.MenuButtonContainer.gameObject.SetActive(false);
+                    profileBar.RightPaneGroup.gameObject.SetActive(false);
+                    profileBar.ChangeWiper.gameObject.SetActive(false);
                 }
 
                 transform.localScale = originalScale * CONTENT_SCALE;
                 ResultBackground.rectTransform.localScale = originalCardScale * CONTENT_SCALE;
 
-                if (profileBar != null && profileBar.LeftPane != null)
-                    profileBar.LeftPane.transform.localScale = originalWedgeScale * CONTENT_SCALE;
+                if (profileBar != null && profileBar.LeftPaneWiper != null)
+                    profileBar.LeftPaneWiper.transform.localScale = originalWedgeScale * CONTENT_SCALE;
 
                 rTex.Create();
 
@@ -268,16 +268,16 @@ namespace JANOARG.Client.Behaviors.Player
 
                 if (profileBar != null)
                 {
-                    profileBar.MenuButtonGroup.gameObject.SetActive(menuActive);
-                    profileBar.RightPane.gameObject.SetActive(backpackActive);
-                    profileBar.ChangeHeader.gameObject.SetActive(changeActive);
+                    profileBar.MenuButtonContainer.gameObject.SetActive(menuActive);
+                    profileBar.RightPaneGroup.gameObject.SetActive(backpackActive);
+                    profileBar.ChangeWiper.gameObject.SetActive(changeActive);
                 }
 
                 transform.localScale = originalScale;
                 ResultBackground.rectTransform.localScale = originalCardScale;
 
-                if (profileBar != null && profileBar.LeftPane != null)
-                    profileBar.LeftPane.transform.localScale = originalWedgeScale;
+                if (profileBar != null && profileBar.RightPaneGroup != null)
+                    profileBar.RightPaneGroup.transform.localScale = originalWedgeScale;
 
                 for (int i = 0; i < subtree.Count; i++)
                     subtree[i].gameObject.layer = layers[i];
