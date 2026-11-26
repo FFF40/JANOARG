@@ -9,7 +9,7 @@ namespace JANOARG.Client.UI
             var rt = GetComponent<RectTransform>();
             var screen = new Rect(0, 0, Screen.width, Screen.height);
             Rect safeArea = Screen.safeArea;
-            float scale = Screen.width / 800f;
+            float scale = Screen.width / 960f;
 
             rt.anchoredPosition = new Vector2(
                 0,

@@ -43,7 +43,7 @@ namespace JANOARG.Client.Behaviors.Common
         public RectTransform AvatarContainer;
 
         [Space]
-        public RectTransform LevelHolder;
+        // public RectTransform LevelHolder;
         public TMP_Text LevelLabel;
         public TMP_Text LevelText;
         // public TMP_Text LevelProgressText;
@@ -51,7 +51,7 @@ namespace JANOARG.Client.Behaviors.Common
         public Graphic LevelBackgroundGraphic;
         public Graphic LevelFillGraphic;
 
-        [Space] 
+        // [Space] 
         // public GameObject LevelUpHolder;        
         // public Graphic LevelUpLevelGraphic;
         // public TMP_Text LevelUpLevelText;
@@ -59,7 +59,7 @@ namespace JANOARG.Client.Behaviors.Common
         // public TMP_Text LevelUpLabelText;
 
         [Space]
-        public RectTransform AbilityRatingHolder;
+        // public RectTransform AbilityRatingHolder;
         public TMP_Text AbilityRatingLabel;
         public TMP_Text AbilityRatingText;
 
@@ -72,15 +72,29 @@ namespace JANOARG.Client.Behaviors.Common
         public TMP_Text BonusLabel;
         public Graphic[] BonusBlocks;
 
+        [Header("Level Up")]
+        public CanvasGroup LevelUpPaneGroup;
+        public GraphicWiper LevelUpPaneWiper;
+        public TMP_Text LevelUpLabel;
+        public RectTransform LevelUpProgressContainer;
+        public TMP_Text LevelUpBeforeLabel;
+        public Image LevelUpArrow;
+        public TMP_Text LevelUpAfterLabel;
+
         [Header("Change Header")]
         public GraphicWiper ChangeWiper;
         public GameObject ChangeCoinBox;
+        public RectTransform ChangeCoinIcon;
         public TMP_Text ChangeCoinLabel;
         public GameObject ChangeOrbBox;
+        public RectTransform ChangeOrbIcon;
         public TMP_Text ChangeOrbLabel;
+        public GameObject ChangeXPBox;
+        public TMP_Text ChangeXPLabel;
         public GameObject ChangeARBox;
         public TMP_Text ChangeARLabel;
         public GameObject ChangeEssenceBox;
+        public RectTransform ChangeEssenceIcon;
         public TMP_Text ChangeEssenceLabel;
 
         [Header("Collecting Particle")]
@@ -92,10 +106,6 @@ namespace JANOARG.Client.Behaviors.Common
         public RectTransform ParticleCoinTarget;
         public RectTransform ParticleOrbTarget;
         public RectTransform ParticleEssenceTarget;
-        public Graphic ParticleCoinFlash;
-        public Graphic ParticleOrbFlash;
-        public Graphic ParticleEssenceFlash;
-        private Coroutine _LevelUpAnimation;
 
         [Header("Modals")]
         public GameObject TipJarModalBody;
@@ -106,6 +116,7 @@ namespace JANOARG.Client.Behaviors.Common
         private Coroutine _SongCurrencyGainAnimation;
         private bool _SongGainSkipLock;
         private bool _SongGainSkipQueued;
+        private Coroutine _LevelUpAnimation;
 
         public float totalEssence => SongEssence;
 
@@ -125,6 +136,8 @@ namespace JANOARG.Client.Behaviors.Common
             SetVisibility(0);
             SetRewardLerp(0);
             SetChangeLerp(0);
+
+            LevelUpPaneWiper.FillAmount = 0;
         }
 
         private void Update()
@@ -177,7 +190,7 @@ namespace JANOARG.Client.Behaviors.Common
 
             // AR & Essence
             AbilityRatingText.text = AbilityRating.ToString("F2", CultureInfo.InvariantCulture);
-            EssenceLabel.text = "+" + totalEssence.ToString("F1", CultureInfo.InvariantCulture) + "%";
+            EssenceLabel.text = (totalEssence + 100).ToString("F1", CultureInfo.InvariantCulture) + "%";
 
             UpdateDailyCoinBonus();
             UpdateBonusLabels();
@@ -255,7 +268,6 @@ namespace JANOARG.Client.Behaviors.Common
             float arChange = AbilityRating - arOld;
             float essenceChange = totalEssence - essenceOld;
 
-            // TODO daily bonus
             int bonusMult = GetDailyCoinBonus();
             long finalCoins = baseCoins * bonusMult;
             var finalOrbs = (long)(baseOrbs * (1 + totalEssence / 100));
@@ -276,12 +288,17 @@ namespace JANOARG.Client.Behaviors.Common
 
             long levelGoal = Helper.GetLevelGoal(levelNew);
 
+            float levelFraction = -progOld / (float)levelGoal;
+
             while (progNew >= levelGoal)
             {
                 levelNew++;
+                levelFraction += 1;
                 progNew -= levelGoal;
                 levelGoal = Helper.GetLevelGoal(levelNew);
             }
+
+            levelFraction += progNew / (float)levelGoal;
 
             // Save
             CommonSys.sMain.Storage.Set("CURR:Coins", coinsNew);
@@ -297,13 +314,17 @@ namespace JANOARG.Client.Behaviors.Common
             // Animation setup
             yield return new WaitForSeconds(.4f);
 
-            ChangeARLabel.gameObject.SetActive(arOld != AbilityRating);
+            ChangeXPBox.SetActive(!Mathf.Approximately(levelFraction, 0));
             ChangeARBox.SetActive(arOld != AbilityRating);
-            ChangeEssenceLabel.gameObject.SetActive(essenceOld != totalEssence);
             ChangeEssenceBox.SetActive(essenceOld != totalEssence);
 
             ChangeCoinLabel.text = "+" + Helper.FormatCurrency(baseCoins);
             ChangeOrbLabel.text = "+" + Helper.FormatCurrency(finalOrbs);
+
+            ChangeXPLabel.text = (levelFraction < 0 ? "−" : "+") +
+                                      Mathf.Abs(levelFraction * 100)
+                                          .ToString("0.0") +
+                                      "%";
 
             ChangeARLabel.text = (arChange < 0 ? "−" : "+") +
                                  Mathf.Abs(arChange)
@@ -318,6 +339,7 @@ namespace JANOARG.Client.Behaviors.Common
             // LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
 
             // Actual animation
+
             yield return Ease.Animate(
                 0.5f, x =>
                 {
@@ -329,11 +351,121 @@ namespace JANOARG.Client.Behaviors.Common
 
                     float lerp2 = Ease.Get(x / .6f, EaseFunction.Quintic, EaseMode.Out);
                     SetChangeLerp(lerp2);
-                });
+                }
+            );
+
+            _SongGainSkipLock = true;
 
             int pCount;
 
             // Coin particles
+            EaseEnumerator coinAnim = null;
+            pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseCoins), 1, 15);
+            List<CollectingParticle> coinParticles = new();
+
+            while (baseCoins > 0)
+            {
+                long amount = baseCoins / pCount;
+                baseCoins -= amount;
+                pCount--;
+
+                coinParticles.Add(
+                    SpawnParticle(
+                        CoinParticleSample, RT(ChangeCoinIcon.transform), ParticleCoinTarget,
+                        () =>
+                        {
+                            coinsOld += amount;
+                            CoinLabel.text = Helper.FormatCurrency(coinsOld);
+                            SetRewardLerp(1);
+
+                            coinAnim?.Skip();
+
+                            coinAnim = Ease.EnumAnimate(
+                                    .2f, x =>
+                                    {
+                                        CoinLabel.margin *=
+                                            new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+                                    });
+                            StartCoroutine(coinAnim);
+                        }));
+            }
+
+            // Orb particles
+            EaseEnumerator orbAnim = null;
+            pCount = (int)Mathf.Clamp(Mathf.Sqrt(baseOrbs), 1, 30);
+
+            while (finalOrbs > 0)
+            {
+                long amount = finalOrbs / pCount;
+                finalOrbs -= amount;
+                pCount--;
+
+                SpawnParticle(
+                    OrbParticleSample, RT(ChangeOrbIcon.transform), ParticleOrbTarget, () =>
+                    {
+                        orbsOld +=
+                            amount;
+
+                        OrbLabel.text =
+                            Helper
+                                .FormatCurrency(
+                                    orbsOld);
+
+                        progOld +=
+                            amount;
+
+                        if (progOld >= levelGoal)
+                        {
+                            levelOld++;
+
+                            progOld -= levelGoal;
+
+                            levelGoal = Helper.GetLevelGoal(levelNew);
+
+                            if (_LevelUpAnimation != null)
+                                StopCoroutine(_LevelUpAnimation);
+
+                            _LevelUpAnimation =
+                                StartCoroutine(LevelUpAnim(levelOld));
+                        }
+
+                        LevelProgressBar.maxValue = levelGoal;
+
+                        LevelProgressBar.value = progOld;
+
+                        SetRewardLerp(1);
+
+                        if (orbAnim != null)
+                            orbAnim.Skip();
+
+                        orbAnim = Ease.EnumAnimate(.2f, x =>
+                                {
+                                    OrbLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
+                                }
+                            );
+                        StartCoroutine(orbAnim);
+                    });
+            }
+
+            // Essence particles
+            EaseEnumerator essenceAnim = null;
+            pCount = essenceOld == totalEssence ? 0 : (int)Mathf.Clamp(essenceChange * 10, 1, 50);
+
+            for (var i = 0; i < pCount; i++)
+                SpawnParticle(EssenceParticleSample, RT(ChangeEssenceIcon.transform), ParticleEssenceTarget, () =>
+                {
+                    essenceOld += essenceChange / pCount;
+                    arOld += arChange / pCount;
+                    AbilityRatingText.text = arOld.ToString("F2", CultureInfo.InvariantCulture);
+                    EssenceLabel.text = "+" + essenceOld.ToString("F1", CultureInfo.InvariantCulture) + "%";
+
+                    essenceAnim?.Skip();
+
+                    essenceAnim = Ease.EnumAnimate(.2f, x =>
+                    {
+                    });
+                    StartCoroutine(essenceAnim);
+                });
 
             _SongGainSkipLock = true;
 
@@ -342,6 +474,20 @@ namespace JANOARG.Client.Behaviors.Common
             {
                 yield return new WaitForSeconds(0.3f);
 
+                foreach (CollectingParticle sourceParticle in coinParticles)
+                {
+                    sourceParticle.Velocity = 600 * Random.insideUnitCircle.normalized;
+
+                    for (int i = 1; i < bonusMult; i++)
+                    {
+                        CollectingParticle particle = Instantiate(sourceParticle, CollectingParticleHolder);
+                        particle.Velocity = 600 * Random.insideUnitCircle.normalized;
+                        particle.Lifetime *= Mathf.Pow(Random.Range(1f, 1.2f), 2);
+                        particle.SpinVelocity = Random.Range(-100, 100f);
+                        particle.OnComplete = sourceParticle.OnComplete;
+                        particle.Reset();
+                    }
+                }
                 int index = CommonSys.sMain.Storage.Get("INFO:BonusCount", 0) - 1;
                 BonusLabel.text = bonusMult + "× BONUS!";
                 ChangeCoinLabel.text = "+" + Helper.FormatCurrency(finalCoins) + " (×" + bonusMult + ")";
@@ -378,7 +524,7 @@ namespace JANOARG.Client.Behaviors.Common
                     });
             }
 
-            yield return null;
+            yield return new WaitForSeconds(1);
             yield return new WaitUntil(() => CollectingParticleHolder.childCount == 0);
             yield return new WaitUntil(() => _LevelUpAnimation == null);
             yield return new WaitForSeconds(1);
@@ -435,7 +581,35 @@ namespace JANOARG.Client.Behaviors.Common
 
         private IEnumerator LevelUpAnim(int level)
         {
-            yield return null;
+            LevelUpBeforeLabel.text = (level - 1).ToString();
+            LevelUpAfterLabel.text = level.ToString();
+
+            LevelUpPaneWiper.Angle = 15;
+
+            yield return Ease.Animate(
+                0.8f, x =>
+                {
+                    float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    LevelUpPaneWiper.FillAmount = lerp;
+                    
+                    float lerp2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                    LevelUpProgressContainer.anchoredPosition *= new Vector2Frag(x: -12 * (1 - lerp2));
+
+                    LevelUpBeforeLabel.alpha = Mathf.Clamp01(x * 2 + Random.value) * 0.2f;
+                    LevelUpArrow.color *= new ColorFrag(a: Mathf.Clamp01(x * 2 - 0.5f + Random.value) * 0.2f);
+                    LevelUpAfterLabel.alpha = Mathf.Clamp01(x * 2 - 1f + Random.value) * 0.2f;
+                });
+
+            LevelUpPaneWiper.Angle = 195;
+            LevelText.text = level.ToString();
+
+            yield return Ease.Animate(
+                0.8f, x =>
+                {
+                    float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+                    LevelUpPaneWiper.FillAmount = 1 - lerp;
+                });
+
             _LevelUpAnimation = null;
         }
 
@@ -504,7 +678,7 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void SetRewardLerp(float lerp)
         {
-            
+
         }
 
         public void SetChangeLerp(float lerp)
