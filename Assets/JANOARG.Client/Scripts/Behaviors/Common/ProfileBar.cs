@@ -579,25 +579,33 @@ namespace JANOARG.Client.Behaviors.Common
                 });
         }
 
-        private IEnumerator LevelUpAnim(int level)
+        internal IEnumerator LevelUpAnim(int level)
         {
             LevelUpBeforeLabel.text = (level - 1).ToString();
             LevelUpAfterLabel.text = level.ToString();
 
             LevelUpPaneWiper.Angle = 15;
 
+            Coroutine c1 = StartCoroutine(Ease.Animate(
+                1.2f, x =>
+                {
+                    LevelUpLabel.alpha = Mathf.Clamp01(x * 2 + Random.value);
+
+                    LevelUpBeforeLabel.alpha = Mathf.Clamp01(x * 2 - 0.333f + Random.value) * 0.2f;
+                    LevelUpArrow.color *= new ColorFrag(a: Mathf.Clamp01(x * 2 - 0.667f + Random.value) * 0.2f);
+                    LevelUpAfterLabel.alpha = Mathf.Clamp01(x * 2 - 1f + Random.value) * 0.2f;
+                }
+            ));
+
             yield return Ease.Animate(
                 0.8f, x =>
                 {
-                    float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    float lerp = Ease.Get(Mathf.Pow(x, 0.7f), EaseFunction.Exponential, EaseMode.Out);
                     LevelUpPaneWiper.FillAmount = lerp;
                     
-                    float lerp2 = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
-                    LevelUpProgressContainer.anchoredPosition *= new Vector2Frag(x: -12 * (1 - lerp2));
-
-                    LevelUpBeforeLabel.alpha = Mathf.Clamp01(x * 2 + Random.value) * 0.2f;
-                    LevelUpArrow.color *= new ColorFrag(a: Mathf.Clamp01(x * 2 - 0.5f + Random.value) * 0.2f);
-                    LevelUpAfterLabel.alpha = Mathf.Clamp01(x * 2 - 1f + Random.value) * 0.2f;
+                    float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    LevelUpProgressContainer.anchoredPosition *= new Vector2Frag(x: 12 * (1 - lerp2));
+                    LevelUpLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -12 * (1 - lerp2));
                 });
 
             LevelUpPaneWiper.Angle = 195;
@@ -608,7 +616,13 @@ namespace JANOARG.Client.Behaviors.Common
                 {
                     float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
                     LevelUpPaneWiper.FillAmount = 1 - lerp;
+                    
+                    float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+                    LevelUpProgressContainer.anchoredPosition *= new Vector2Frag(x: -12 * lerp2);
+                    LevelUpLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: 12 * lerp2);
                 });
+
+            yield return c1;
 
             _LevelUpAnimation = null;
         }
@@ -723,6 +737,15 @@ namespace JANOARG.Client.Behaviors.Common
             if (GUILayout.Button("Do EXP Animation"))
                 if (EditorApplication.isPlaying)
                     ((ProfileBar)serializedObject.targetObject).CompleteSong(408, 128);
+            if (GUILayout.Button("Play Level Up Animation"))
+            {
+                if (EditorApplication.isPlaying)
+                {
+                    var obj = (ProfileBar)serializedObject.targetObject;
+                    int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
+                    obj.StartCoroutine(obj.LevelUpAnim(level));
+                }
+            }
 
             DrawDefaultInspector();
         }
