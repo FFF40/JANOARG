@@ -27,6 +27,7 @@ using System.Linq;
 using JANOARG.Client.Behaviors.SongSelect.Map.MapProps;
 using JANOARG.Shared.Utils.Animation;
 using JetBrains.Annotations;
+using JANOARG.Chartmaker.UI.Themeable;
 
 namespace JANOARG.Client.Behaviors.SongSelect
 {
@@ -341,6 +342,8 @@ namespace JANOARG.Client.Behaviors.SongSelect
             IsInit = true;
             IsBGMInit = false;
             BGMVolume = -0.5f;
+
+            Themer.sMain.SetDarkTheme(Playlist.BackgroundColor.grayscale < 0.5);
 
             if (!LoadingBar.sMain.gameObject.activeSelf) Intro();
         }

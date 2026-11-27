@@ -205,6 +205,7 @@ GameObject:
   - component: {fileID: 33472990}
   - component: {fileID: 33472992}
   - component: {fileID: 33472991}
+  - component: {fileID: 33472993}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -331,6 +332,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 33472989}
   m_CullTransparentMesh: 1
+--- !u!114 &33472993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33472989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 33472991}
+  ID: Foreground.0
 --- !u!1 &66691558
 GameObject:
   m_ObjectHideFlags: 0
@@ -342,6 +357,7 @@ GameObject:
   - component: {fileID: 66691559}
   - component: {fileID: 66691561}
   - component: {fileID: 66691560}
+  - component: {fileID: 66691562}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -468,6 +484,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 66691558}
   m_CullTransparentMesh: 1
+--- !u!114 &66691562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66691558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 66691560}
+  ID: Foreground.0
 --- !u!1 &70316240
 GameObject:
   m_ObjectHideFlags: 0
@@ -714,6 +744,7 @@ GameObject:
   - component: {fileID: 85547607}
   - component: {fileID: 85547609}
   - component: {fileID: 85547608}
+  - component: {fileID: 85547610}
   m_Layer: 5
   m_Name: Orbs
   m_TagString: Untagged
@@ -782,6 +813,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 85547606}
   m_CullTransparentMesh: 1
+--- !u!114 &85547610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85547606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 85547608}
+  ID: Orb.Background
 --- !u!1 &101624310
 GameObject:
   m_ObjectHideFlags: 0
@@ -793,6 +838,7 @@ GameObject:
   - component: {fileID: 101624311}
   - component: {fileID: 101624313}
   - component: {fileID: 101624312}
+  - component: {fileID: 101624314}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -919,6 +965,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 101624310}
   m_CullTransparentMesh: 1
+--- !u!114 &101624314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101624310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 101624312}
+  ID: Foreground.0
 --- !u!1 &135292898
 GameObject:
   m_ObjectHideFlags: 0
@@ -1005,6 +1065,7 @@ GameObject:
   - component: {fileID: 168883408}
   - component: {fileID: 168883410}
   - component: {fileID: 168883409}
+  - component: {fileID: 168883411}
   m_Layer: 5
   m_Name: Coins
   m_TagString: Untagged
@@ -1077,6 +1138,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 168883407}
   m_CullTransparentMesh: 1
+--- !u!114 &168883411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 168883407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 168883409}
+  ID: Coin.Background
 --- !u!1 &189863767
 GameObject:
   m_ObjectHideFlags: 0
@@ -1113,104 +1188,6 @@ RectTransform:
   m_AnchoredPosition: {x: -30, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &190696059
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 190696060}
-  - component: {fileID: 190696063}
-  - component: {fileID: 190696062}
-  - component: {fileID: 190696061}
-  m_Layer: 5
-  m_Name: Icon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &190696060
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190696059}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1599726522}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -16, y: 16}
-  m_SizeDelta: {x: 32, y: 32}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &190696061
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190696059}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
-  m_IgnoreLayout: 0
-  m_MinWidth: -1
-  m_MinHeight: -1
-  m_PreferredWidth: 32
-  m_PreferredHeight: -1
-  m_FlexibleWidth: -1
-  m_FlexibleHeight: -1
-  m_LayoutPriority: 1
-  m_MaxWidth: Infinity
-  m_MaxHeight: -1
---- !u!114 &190696062
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190696059}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 3286163911610860551, guid: 01fe46fdbc3562ebe828ed6661f2a7dd, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &190696063
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 190696059}
-  m_CullTransparentMesh: 1
 --- !u!1 &193627574
 GameObject:
   m_ObjectHideFlags: 0
@@ -2300,143 +2277,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 327020576}
   m_CullTransparentMesh: 1
---- !u!1 &333608868
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 333608869}
-  - component: {fileID: 333608871}
-  - component: {fileID: 333608870}
-  m_Layer: 5
-  m_Name: Tip
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &333608869
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 333608868}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1980332466}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0.5}
---- !u!114 &333608870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 333608868}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: 'Did you know?: '
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3bac3b85a55cb652f95cd8cf512963c1, type: 2}
-  m_sharedMaterial: {fileID: 3369883171422029462, guid: 3bac3b85a55cb652f95cd8cf512963c1, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 11
-  m_fontSizeBase: 11
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 2
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 4096
-  m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_characterHorizontalScale: 1
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656bu
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_EmojiFallbackSupport: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &333608871
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 333608868}
-  m_CullTransparentMesh: 1
 --- !u!1 &338554533
 GameObject:
   m_ObjectHideFlags: 0
@@ -2587,6 +2427,7 @@ GameObject:
   - component: {fileID: 348092135}
   - component: {fileID: 348092134}
   - component: {fileID: 348092136}
+  - component: {fileID: 348092137}
   m_Layer: 5
   m_Name: Menu Button
   m_TagString: Untagged
@@ -2679,7 +2520,7 @@ MonoBehaviour:
     m_SelectedColor: {r: 0, g: 0, b: 0, a: 1}
     m_DisabledColor: {r: 0, g: 0, b: 0, a: 1}
     m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
+    m_FadeDuration: 0
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
@@ -2708,6 +2549,24 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &348092137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348092132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 411d004449a8cf44b9c3bd227ba8e8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.SelectableThemeable
+  Target: {fileID: 348092136}
+  NormalID: Background.1
+  HighlightedID: Background.1
+  SelectedID: 
+  PressedID: Background.0
+  DisabledID: 
 --- !u!1 &355587243
 GameObject:
   m_ObjectHideFlags: 0
@@ -3206,6 +3065,7 @@ GameObject:
   - component: {fileID: 475121524}
   - component: {fileID: 475121523}
   - component: {fileID: 475121522}
+  - component: {fileID: 475121525}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -3292,6 +3152,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 475121520}
   m_CullTransparentMesh: 1
+--- !u!114 &475121525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 475121520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 475121523}
+  ID: Foreground.0
 --- !u!1 &478357459
 GameObject:
   m_ObjectHideFlags: 0
@@ -3303,6 +3177,7 @@ GameObject:
   - component: {fileID: 478357460}
   - component: {fileID: 478357462}
   - component: {fileID: 478357461}
+  - component: {fileID: 478357463}
   m_Layer: 5
   m_Name: Essence Amount
   m_TagString: Untagged
@@ -3429,6 +3304,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 478357459}
   m_CullTransparentMesh: 1
+--- !u!114 &478357463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478357459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 478357461}
+  ID: Foreground.0
 --- !u!1 &493391037
 GameObject:
   m_ObjectHideFlags: 0
@@ -3461,6 +3350,7 @@ RectTransform:
   m_Children:
   - {fileID: 1100250995}
   - {fileID: 326757159}
+  - {fileID: 1588767959}
   m_Father: {fileID: 1298865579}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -3677,6 +3567,7 @@ GameObject:
   - component: {fileID: 554805066}
   - component: {fileID: 554805065}
   - component: {fileID: 554805064}
+  - component: {fileID: 554805067}
   m_Layer: 5
   m_Name: Coins
   m_TagString: Untagged
@@ -3769,6 +3660,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 554805062}
   m_CullTransparentMesh: 1
+--- !u!114 &554805067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554805062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 554805065}
+  ID: Coin.Background
 --- !u!1 &556218155
 GameObject:
   m_ObjectHideFlags: 0
@@ -3945,6 +3850,7 @@ GameObject:
   - component: {fileID: 602384513}
   - component: {fileID: 602384515}
   - component: {fileID: 602384514}
+  - component: {fileID: 602384516}
   m_Layer: 5
   m_Name: Tick 1
   m_TagString: Untagged
@@ -4009,6 +3915,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 602384512}
   m_CullTransparentMesh: 1
+--- !u!114 &602384516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 602384512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 602384514}
+  ID: Foreground.0
 --- !u!1 &604375995
 GameObject:
   m_ObjectHideFlags: 0
@@ -4020,6 +3940,7 @@ GameObject:
   - component: {fileID: 604375996}
   - component: {fileID: 604375998}
   - component: {fileID: 604375997}
+  - component: {fileID: 604375999}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -4146,6 +4067,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 604375995}
   m_CullTransparentMesh: 1
+--- !u!114 &604375999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604375995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 604375997}
+  ID: Foreground.0
 --- !u!1 &622512337
 GameObject:
   m_ObjectHideFlags: 0
@@ -4157,6 +4092,7 @@ GameObject:
   - component: {fileID: 622512338}
   - component: {fileID: 622512340}
   - component: {fileID: 622512339}
+  - component: {fileID: 622512341}
   m_Layer: 5
   m_Name: Bonus
   m_TagString: Untagged
@@ -4283,6 +4219,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 622512337}
   m_CullTransparentMesh: 1
+--- !u!114 &622512341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622512337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 622512339}
+  ID: Foreground.0
 --- !u!1 &640801380
 GameObject:
   m_ObjectHideFlags: 0
@@ -4466,6 +4416,7 @@ GameObject:
   - component: {fileID: 689210271}
   - component: {fileID: 689210273}
   - component: {fileID: 689210272}
+  - component: {fileID: 689210274}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -4592,6 +4543,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 689210270}
   m_CullTransparentMesh: 1
+--- !u!114 &689210274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 689210270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 689210272}
+  ID: Foreground.0
 --- !u!1 &700261752
 GameObject:
   m_ObjectHideFlags: 0
@@ -4603,6 +4568,7 @@ GameObject:
   - component: {fileID: 700261753}
   - component: {fileID: 700261755}
   - component: {fileID: 700261754}
+  - component: {fileID: 700261756}
   m_Layer: 5
   m_Name: Ability Rating
   m_TagString: Untagged
@@ -4669,6 +4635,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 700261752}
   m_CullTransparentMesh: 1
+--- !u!114 &700261756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700261752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 700261754}
+  ID: AR.Background.0
 --- !u!1 &703427182
 GameObject:
   m_ObjectHideFlags: 0
@@ -4681,6 +4661,7 @@ GameObject:
   - component: {fileID: 703427186}
   - component: {fileID: 703427185}
   - component: {fileID: 703427184}
+  - component: {fileID: 703427187}
   m_Layer: 5
   m_Name: Experience
   m_TagString: Untagged
@@ -4773,6 +4754,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 703427182}
   m_CullTransparentMesh: 1
+--- !u!114 &703427187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703427182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 703427185}
+  ID: XP.Highlight
 --- !u!1 &736750696
 GameObject:
   m_ObjectHideFlags: 0
@@ -4950,6 +4945,7 @@ GameObject:
   - component: {fileID: 761096316}
   - component: {fileID: 761096318}
   - component: {fileID: 761096317}
+  - component: {fileID: 761096319}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -5076,6 +5072,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761096315}
   m_CullTransparentMesh: 1
+--- !u!114 &761096319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761096315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 761096317}
+  ID: Foreground.0
 --- !u!1 &776754146
 GameObject:
   m_ObjectHideFlags: 0
@@ -5087,6 +5097,7 @@ GameObject:
   - component: {fileID: 776754147}
   - component: {fileID: 776754149}
   - component: {fileID: 776754148}
+  - component: {fileID: 776754150}
   m_Layer: 5
   m_Name: Tick 3
   m_TagString: Untagged
@@ -5151,6 +5162,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 776754146}
   m_CullTransparentMesh: 1
+--- !u!114 &776754150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776754146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 776754148}
+  ID: Foreground.0
 --- !u!1 &795939209
 GameObject:
   m_ObjectHideFlags: 0
@@ -5492,6 +5517,7 @@ GameObject:
   - component: {fileID: 844742051}
   - component: {fileID: 844742053}
   - component: {fileID: 844742052}
+  - component: {fileID: 844742054}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -5618,6 +5644,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 844742050}
   m_CullTransparentMesh: 1
+--- !u!114 &844742054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 844742050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 844742052}
+  ID: Foreground.0
 --- !u!1 &849918769
 GameObject:
   m_ObjectHideFlags: 0
@@ -5853,6 +5893,7 @@ GameObject:
   - component: {fileID: 884067413}
   - component: {fileID: 884067412}
   - component: {fileID: 884067414}
+  - component: {fileID: 884067415}
   m_Layer: 5
   m_Name: Level
   m_TagString: Untagged
@@ -5971,6 +6012,20 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &884067415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 884067410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 884067412}
+  ID: XP.Background
 --- !u!1 &968403660
 GameObject:
   m_ObjectHideFlags: 0
@@ -6062,6 +6117,7 @@ GameObject:
   - component: {fileID: 986508325}
   - component: {fileID: 986508324}
   - component: {fileID: 986508323}
+  - component: {fileID: 986508326}
   m_Layer: 5
   m_Name: Ability Rating
   m_TagString: Untagged
@@ -6154,143 +6210,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 986508321}
   m_CullTransparentMesh: 1
---- !u!1 &996392750
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 996392751}
-  - component: {fileID: 996392753}
-  - component: {fileID: 996392752}
-  m_Layer: 5
-  m_Name: Tip (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &996392751
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 996392750}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1980332466}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0.5}
---- !u!114 &996392752
+--- !u!114 &986508326
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 996392750}
+  m_GameObject: {fileID: 986508321}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: We like snails
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
-  m_sharedMaterial: {fileID: -6645923801699503097, guid: 3f796aa8b18de334cb25c2d1c591948a, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 11
-  m_fontSizeBase: 11
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 4096
-  m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_characterHorizontalScale: 1
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656bu
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_EmojiFallbackSupport: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &996392753
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 996392750}
-  m_CullTransparentMesh: 1
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 986508324}
+  ID: AR.Background.0
 --- !u!1 &1051721278
 GameObject:
   m_ObjectHideFlags: 0
@@ -6302,6 +6235,7 @@ GameObject:
   - component: {fileID: 1051721279}
   - component: {fileID: 1051721281}
   - component: {fileID: 1051721280}
+  - component: {fileID: 1051721282}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -6428,6 +6362,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1051721278}
   m_CullTransparentMesh: 1
+--- !u!114 &1051721282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051721278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1051721280}
+  ID: Foreground.0
 --- !u!1 &1066999712
 GameObject:
   m_ObjectHideFlags: 0
@@ -6650,6 +6598,7 @@ GameObject:
   - component: {fileID: 1096890355}
   - component: {fileID: 1096890354}
   - component: {fileID: 1096890356}
+  - component: {fileID: 1096890357}
   m_Layer: 5
   m_Name: Orbs
   m_TagString: Untagged
@@ -6742,6 +6691,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1096890357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096890352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1096890354}
+  ID: Orb.Background
 --- !u!1 &1100250994
 GameObject:
   m_ObjectHideFlags: 0
@@ -6754,6 +6717,7 @@ GameObject:
   - component: {fileID: 1100250998}
   - component: {fileID: 1100250997}
   - component: {fileID: 1100250996}
+  - component: {fileID: 1100250999}
   m_Layer: 5
   m_Name: Name & Title
   m_TagString: Untagged
@@ -6846,6 +6810,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
   m_ReverseArrangement: 0
+--- !u!114 &1100250999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100250994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1100250996}
+  ID: Background.0
 --- !u!1 &1166832426
 GameObject:
   m_ObjectHideFlags: 0
@@ -6995,6 +6973,7 @@ GameObject:
   - component: {fileID: 1199400051}
   - component: {fileID: 1199400050}
   - component: {fileID: 1199400052}
+  - component: {fileID: 1199400053}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -7081,126 +7060,20 @@ MonoBehaviour:
   m_LayoutPriority: 1
   m_MaxWidth: -1
   m_MaxHeight: -1
---- !u!1 &1230348661
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1230348666}
-  - component: {fileID: 1230348665}
-  - component: {fileID: 1230348664}
-  - component: {fileID: 1230348663}
-  - component: {fileID: 1230348662}
-  m_Layer: 5
-  m_Name: Loading Screen
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1230348662
+--- !u!114 &1199400053
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1230348661}
+  m_GameObject: {fileID: 1199400048}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
-  m_Padding: {x: 0, y: 0, z: 0, w: 0}
-  m_Softness: {x: 0, y: 0}
---- !u!114 &1230348663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1230348661}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
---- !u!114 &1230348664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1230348661}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
---- !u!223 &1230348665
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1230348661}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!224 &1230348666
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1230348661}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1725765859}
-  - {fileID: 1980332466}
-  - {fileID: 1599726522}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -126, y: -382}
-  m_SizeDelta: {x: 960, y: 480}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1199400050}
+  ID: Foreground.0
 --- !u!1 &1298219331
 GameObject:
   m_ObjectHideFlags: 0
@@ -7313,7 +7186,6 @@ RectTransform:
   - {fileID: 348092133}
   - {fileID: 1654883872}
   - {fileID: 493391038}
-  - {fileID: 1588767959}
   m_Father: {fileID: 1344250013}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -7668,6 +7540,7 @@ GameObject:
   - component: {fileID: 1355220045}
   - component: {fileID: 1355220044}
   - component: {fileID: 1355220043}
+  - component: {fileID: 1355220046}
   m_Layer: 5
   m_Name: Essence
   m_TagString: Untagged
@@ -7760,6 +7633,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1355220041}
   m_CullTransparentMesh: 1
+--- !u!114 &1355220046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355220041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1355220044}
+  ID: Orb.Background
 --- !u!1 &1359830934
 GameObject:
   m_ObjectHideFlags: 0
@@ -7908,6 +7795,7 @@ GameObject:
   - component: {fileID: 1386130989}
   - component: {fileID: 1386130991}
   - component: {fileID: 1386130990}
+  - component: {fileID: 1386130992}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -8034,6 +7922,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1386130988}
   m_CullTransparentMesh: 1
+--- !u!114 &1386130992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386130988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1386130990}
+  ID: Foreground.0
 --- !u!1 &1466366983
 GameObject:
   m_ObjectHideFlags: 0
@@ -8221,6 +8123,7 @@ GameObject:
   - component: {fileID: 1533125755}
   - component: {fileID: 1533125757}
   - component: {fileID: 1533125756}
+  - component: {fileID: 1533125758}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -8347,6 +8250,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1533125754}
   m_CullTransparentMesh: 1
+--- !u!114 &1533125758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533125754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1533125756}
+  ID: Foreground.0
 --- !u!1 &1546646244
 GameObject:
   m_ObjectHideFlags: 0
@@ -8449,6 +8366,7 @@ GameObject:
   - component: {fileID: 1550813574}
   - component: {fileID: 1550813576}
   - component: {fileID: 1550813575}
+  - component: {fileID: 1550813577}
   m_Layer: 5
   m_Name: Essence Icon
   m_TagString: Untagged
@@ -8513,6 +8431,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1550813573}
   m_CullTransparentMesh: 1
+--- !u!114 &1550813577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550813573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1550813575}
+  ID: Foreground.0
 --- !u!1 &1560698982
 GameObject:
   m_ObjectHideFlags: 0
@@ -8603,7 +8535,6 @@ GameObject:
   - component: {fileID: 1562277643}
   - component: {fileID: 1562277644}
   - component: {fileID: 1562277645}
-  - component: {fileID: 1562277646}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -8742,18 +8673,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AudioMixer: {fileID: 24100000, guid: 606287d1c8c9886669e259bcd1fd7af4, type: 2}
---- !u!114 &1562277646
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1562277638}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42acb047d9597b3deae6b6c5ca73147f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1566788282
 GameObject:
   m_ObjectHideFlags: 0
@@ -8765,6 +8684,7 @@ GameObject:
   - component: {fileID: 1566788283}
   - component: {fileID: 1566788285}
   - component: {fileID: 1566788284}
+  - component: {fileID: 1566788286}
   m_Layer: 5
   m_Name: Tick 2
   m_TagString: Untagged
@@ -8829,6 +8749,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1566788282}
   m_CullTransparentMesh: 1
+--- !u!114 &1566788286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1566788282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1566788284}
+  ID: Foreground.0
 --- !u!1 &1586276135
 GameObject:
   m_ObjectHideFlags: 0
@@ -9020,12 +8954,12 @@ RectTransform:
   m_Children:
   - {fileID: 1587101682}
   - {fileID: 1748551497}
-  m_Father: {fileID: 1298865579}
+  m_Father: {fileID: 493391038}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 32, y: 0}
-  m_SizeDelta: {x: -64, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!225 &1588767960
 CanvasGroup:
@@ -9060,7 +8994,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Angle: 195
-  m_FillAmount: 1
+  m_FillAmount: 0
 --- !u!114 &1588767962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9153,43 +9087,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b7d6c035f7672f408899b6c6ca87a48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1599726521
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1599726522}
-  m_Layer: 5
-  m_Name: Loader
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1599726522
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1599726521}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 190696060}
-  - {fileID: 1729750529}
-  m_Father: {fileID: 1230348666}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -22, y: 22}
-  m_SizeDelta: {x: 38, y: 32}
-  m_Pivot: {x: 1, y: 0}
 --- !u!1 &1614813460
 GameObject:
   m_ObjectHideFlags: 0
@@ -9328,6 +9225,7 @@ GameObject:
   - component: {fileID: 1621632319}
   - component: {fileID: 1621632321}
   - component: {fileID: 1621632320}
+  - component: {fileID: 1621632322}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -9454,6 +9352,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1621632318}
   m_CullTransparentMesh: 1
+--- !u!114 &1621632322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1621632318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1621632320}
+  ID: Foreground.0
 --- !u!1 &1629203634
 GameObject:
   m_ObjectHideFlags: 0
@@ -9695,6 +9607,7 @@ GameObject:
   - component: {fileID: 1640529512}
   - component: {fileID: 1640529514}
   - component: {fileID: 1640529513}
+  - component: {fileID: 1640529515}
   m_Layer: 5
   m_Name: Tick 4
   m_TagString: Untagged
@@ -9759,6 +9672,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1640529511}
   m_CullTransparentMesh: 1
+--- !u!114 &1640529515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1640529511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1640529513}
+  ID: Foreground.0
 --- !u!1 &1648489847
 GameObject:
   m_ObjectHideFlags: 0
@@ -9988,6 +9915,7 @@ GameObject:
   - component: {fileID: 1672099285}
   - component: {fileID: 1672099287}
   - component: {fileID: 1672099286}
+  - component: {fileID: 1672099288}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -10114,218 +10042,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1672099284}
   m_CullTransparentMesh: 1
---- !u!1 &1725765858
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1725765859}
-  - component: {fileID: 1725765861}
-  - component: {fileID: 1725765860}
-  m_Layer: 5
-  m_Name: Background
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1725765859
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1725765858}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1230348666}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1725765860
+--- !u!114 &1672099288
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1725765858}
+  m_GameObject: {fileID: 1672099284}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.9941593, g: 1, b: 0.85342926, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1725765861
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1725765858}
-  m_CullTransparentMesh: 1
---- !u!1 &1729750528
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1729750529}
-  - component: {fileID: 1729750531}
-  - component: {fileID: 1729750530}
-  m_Layer: 5
-  m_Name: Text
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1729750529
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1729750528}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1599726522}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -38, y: 16}
-  m_SizeDelta: {x: 0, y: 10}
-  m_Pivot: {x: 1, y: 0.5}
---- !u!114 &1729750530
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1729750528}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: NOW LOADING...
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e4a07389ef7f0ae4f91e910aaa3faf4f, type: 2}
-  m_sharedMaterial: {fileID: -8989296655413232944, guid: e4a07389ef7f0ae4f91e910aaa3faf4f, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 8
-  m_fontSizeBase: 8
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 3
-  m_HorizontalAlignment: 4
-  m_VerticalAlignment: 4096
-  m_textAlignment: 65535
-  m_characterSpacing: 20
-  m_characterHorizontalScale: 1
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 0
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656bu
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_EmojiFallbackSupport: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &1729750531
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1729750528}
-  m_CullTransparentMesh: 1
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1672099286}
+  ID: Foreground.0
 --- !u!1 &1748551496
 GameObject:
   m_ObjectHideFlags: 0
@@ -10474,6 +10204,7 @@ GameObject:
   - component: {fileID: 1805826822}
   - component: {fileID: 1805826824}
   - component: {fileID: 1805826823}
+  - component: {fileID: 1805826825}
   m_Layer: 5
   m_Name: Tick 5
   m_TagString: Untagged
@@ -10538,6 +10269,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1805826821}
   m_CullTransparentMesh: 1
+--- !u!114 &1805826825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1805826821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1805826823}
+  ID: Foreground.0
 --- !u!1 &1822350204
 GameObject:
   m_ObjectHideFlags: 0
@@ -10549,6 +10294,7 @@ GameObject:
   - component: {fileID: 1822350205}
   - component: {fileID: 1822350207}
   - component: {fileID: 1822350206}
+  - component: {fileID: 1822350208}
   m_Layer: 5
   m_Name: Value
   m_TagString: Untagged
@@ -10675,6 +10421,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1822350204}
   m_CullTransparentMesh: 1
+--- !u!114 &1822350208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1822350204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1822350206}
+  ID: Foreground.0
 --- !u!1 &1823772354
 GameObject:
   m_ObjectHideFlags: 0
@@ -10830,6 +10590,7 @@ GameObject:
   - component: {fileID: 1952952644}
   - component: {fileID: 1952952646}
   - component: {fileID: 1952952645}
+  - component: {fileID: 1952952647}
   m_Layer: 5
   m_Name: Fill
   m_TagString: Untagged
@@ -10894,70 +10655,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1952952643}
   m_CullTransparentMesh: 1
---- !u!1 &1980332465
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1980332466}
-  - component: {fileID: 1980332467}
-  m_Layer: 5
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1980332466
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1980332465}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 333608869}
-  - {fileID: 996392751}
-  m_Father: {fileID: 1230348666}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 100, y: 0}
-  m_SizeDelta: {x: 400, y: 100}
-  m_Pivot: {x: 0, y: 0.5}
---- !u!114 &1980332467
+--- !u!114 &1952952647
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1980332465}
+  m_GameObject: {fileID: 1952952643}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 1
-  m_ChildScaleHeight: 1
-  m_ReverseArrangement: 0
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 1952952645}
+  ID: XP.Highlight
 --- !u!1 &1983047871
 GameObject:
   m_ObjectHideFlags: 0
@@ -11044,6 +10755,7 @@ GameObject:
   - component: {fileID: 2078269968}
   - component: {fileID: 2078269970}
   - component: {fileID: 2078269969}
+  - component: {fileID: 2078269971}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -11170,6 +10882,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2078269967}
   m_CullTransparentMesh: 1
+--- !u!114 &2078269971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078269967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 2078269969}
+  ID: Foreground.0
 --- !u!1 &2078906812
 GameObject:
   m_ObjectHideFlags: 0
@@ -11345,6 +11071,7 @@ GameObject:
   - component: {fileID: 2080239364}
   - component: {fileID: 2080239366}
   - component: {fileID: 2080239365}
+  - component: {fileID: 2080239367}
   m_Layer: 5
   m_Name: Name
   m_TagString: Untagged
@@ -11471,6 +11198,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2080239363}
   m_CullTransparentMesh: 1
+--- !u!114 &2080239367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2080239363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 2080239365}
+  ID: Foreground.0
 --- !u!1 &2091959293
 GameObject:
   m_ObjectHideFlags: 0
@@ -11483,6 +11224,7 @@ GameObject:
   - component: {fileID: 2091959297}
   - component: {fileID: 2091959296}
   - component: {fileID: 2091959295}
+  - component: {fileID: 2091959298}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -11569,6 +11311,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2091959293}
   m_CullTransparentMesh: 1
+--- !u!114 &2091959298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2091959293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112007ee840cdb34d86a376beb511d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.ThemeableTypes.GraphicThemeable
+  Target: {fileID: 2091959296}
+  ID: Foreground.0
 --- !u!1 &2111691404
 GameObject:
   m_ObjectHideFlags: 0
@@ -11644,6 +11400,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2111691404}
   m_CullTransparentMesh: 1
+--- !u!1 &2121930037
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2121930038}
+  - component: {fileID: 2121930039}
+  m_Layer: 0
+  m_Name: Themer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2121930038
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121930037}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2121930039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121930037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87914a502fbbdae44910735180ed722f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JANOARG.Chartmaker.UI.Themeable.Themer
+  LightTheme: {fileID: 11400000, guid: d4e51d5de84342c0c89a5fdcf62e87c8, type: 2}
+  DarkTheme: {fileID: 11400000, guid: d32fe5c00989913f2ac40c1a3b311676, type: 2}
 --- !u!1 &2130906463
 GameObject:
   m_ObjectHideFlags: 0
@@ -11708,6 +11510,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 309085666}
+  - {fileID: 2121930038}
   - {fileID: 1562277642}
   - {fileID: 968403663}
-  - {fileID: 1230348666}
