@@ -1,5 +1,6 @@
 using System.Collections;
 using JANOARG.Client.Behaviors.Panels;
+using JANOARG.Client.UI;
 using JANOARG.Client.Utils;
 using JANOARG.Shared.Data.ChartInfo;
 using JANOARG.Shared.Utils;
@@ -18,13 +19,18 @@ namespace JANOARG.Client.Behaviors.Common
         public CanvasGroup Background;
         public Graphic     MainBackground;
 
-        [Space] public AudioMixer AudioMixer;
+        [Space] 
+        public AudioMixer AudioMixer;
 
-        [Space] public RectTransform LeftPanel;
-
+        [Space] 
+        public RectTransform LeftPanel;
+        public Graphic     LeftPanelBackground;
         public CanvasGroup LeftPanelGroup;
+        public RectTransform LeftPanelContent;
+        public GraphicWiper LeftPanelBackButtonWiper;
+        public GraphicWiper[] LeftPanelMenuItemWipers;
 
-        public bool IsAnimating;
+        public bool IsAnimating { get; private set; }
 
         public void Awake()
         {
@@ -47,7 +53,7 @@ namespace JANOARG.Client.Behaviors.Common
 
             MainBackground.color = CommonSys.sMain.MainCamera.backgroundColor * new Color(1, 1, 1, 0) +
                                    new Color(0, 0, 0, 0.75f);
-
+            SetLeftPanelVisibility(0);
             AudioManager.sMain.SetSceneLayerLowPassCutoff(1000, 0.5f);
 
             yield return Ease.Animate(
@@ -134,8 +140,11 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void SetLeftPanelVisibility(float a)
         {
-            LeftPanelGroup.alpha = a * a;
-            LeftPanel.anchoredPosition *= new Vector2Frag(-10 * (1 - a));
+            LeftPanelBackground.color *= new ColorFrag(a: a * a);
+            LeftPanelBackButtonWiper.FillAmount = a;
+            foreach (var wiper in LeftPanelMenuItemWipers) wiper.FillAmount = a;
+            LeftPanelContent.anchoredPosition *= new Vector2Frag(12 * (1 - a));
+            LeftPanelBackButtonWiper.rectTransform.anchoredPosition *= new Vector2Frag(8 + 12 * a);
         }
 
         public void ShowPanel(string sceneName)

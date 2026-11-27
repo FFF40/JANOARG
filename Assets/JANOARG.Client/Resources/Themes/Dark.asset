@@ -19,6 +19,12 @@ MonoBehaviour:
     Value: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   - Key: Foreground.0
     Value: {r: 1, g: 1, b: 1, a: 1}
+  - Key: Primary.Background.0
+    Value: {r: 0.94509804, g: 0.94509804, b: 0.94509804, a: 1}
+  - Key: Primary.Background.1
+    Value: {r: 1, g: 1, b: 1, a: 1}
+  - Key: Primary.Foreground.0
+    Value: {r: 0, g: 0, b: 0, a: 1}
   - Key: XP.Background
     Value: {r: 0.101960786, g: 0.101960786, b: 0.101960786, a: 1}
   - Key: XP.Highlight
@@ -53,3 +59,5 @@ MonoBehaviour:
     Value: {r: 0.8980392, g: 0.79607844, b: 0.99607843, a: 1}
   - Key: Diff.Other.Foreground
     Value: {r: 1, g: 1, b: 1, a: 1}
+  - Key: Screen.Background
+    Value: {r: 0, g: 0, b: 0, a: 1}
