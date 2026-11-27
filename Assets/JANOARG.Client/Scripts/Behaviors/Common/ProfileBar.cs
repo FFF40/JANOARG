@@ -30,65 +30,71 @@ namespace JANOARG.Client.Behaviors.Common
 
         public float SongEssence;
 
-        [FormerlySerializedAs("bonusCount")]
         [Space]
         public int BonusCount;
-
-        [FormerlySerializedAs("bonusReset")] public long BonusReset;
+        public long BonusReset;
 
         [Header("Left Pane")]
-        public CanvasGroup LeftPane;
-
-        public LayoutGroup LeftLayout;
+        public CanvasGroup LeftPaneGroup;
+        public GraphicWiper LeftPaneWiper;
         public TMP_Text NameLabel;
         public TMP_Text TitleLabel;
-        public CanvasGroup MenuButtonGroup;
-        public CanvasGroup AvatarGroup;
+        public RectTransform MenuButtonContainer;
+        public RectTransform AvatarContainer;
 
-        [Space] public RectTransform LevelHolder;
-
+        [Space]
+        // public RectTransform LevelHolder;
         public TMP_Text LevelLabel;
         public TMP_Text LevelText;
-        public TMP_Text LevelProgressText;
+        // public TMP_Text LevelProgressText;
         public Slider LevelProgressBar;
         public Graphic LevelBackgroundGraphic;
         public Graphic LevelFillGraphic;
 
-        [Space] public GameObject LevelUpHolder;
+        // [Space] 
+        // public GameObject LevelUpHolder;        
+        // public Graphic LevelUpLevelGraphic;
+        // public TMP_Text LevelUpLevelText;
+        // public Graphic LevelUpLabelGraphic;
+        // public TMP_Text LevelUpLabelText;
 
-        public Graphic LevelUpLevelGraphic;
-        public TMP_Text LevelUpLevelText;
-        public Graphic LevelUpLabelGraphic;
-        public TMP_Text LevelUpLabelText;
-
-        [Space] public RectTransform AbilityRatingHolder;
-
+        [Space]
+        // public RectTransform AbilityRatingHolder;
         public TMP_Text AbilityRatingLabel;
         public TMP_Text AbilityRatingText;
 
         [Header("Right Pane")]
-        public CanvasGroup RightPane;
-
-        public LayoutGroup RightLayout;
+        public CanvasGroup RightPaneGroup;
+        public GraphicWiper RightPaneWiper;
         public TMP_Text CoinLabel;
         public TMP_Text OrbLabel;
         public TMP_Text EssenceLabel;
         public TMP_Text BonusLabel;
         public Graphic[] BonusBlocks;
 
-        [Header("Change Header")]
-        public CanvasGroup ChangeHeader;
+        [Header("Level Up")]
+        public CanvasGroup LevelUpPaneGroup;
+        public GraphicWiper LevelUpPaneWiper;
+        public TMP_Text LevelUpLabel;
+        public RectTransform LevelUpProgressContainer;
+        public TMP_Text LevelUpBeforeLabel;
+        public Image LevelUpArrow;
+        public TMP_Text LevelUpAfterLabel;
 
-        public LayoutGroup ChangeLayout;
-        public LayoutGroup ChangeCurrencyPane;
-        public LayoutGroup ChangeAREssencePane;
-        public GameObject ChangeCoinIcon;
+        [Header("Change Header")]
+        public GraphicWiper ChangeWiper;
+        public GameObject ChangeCoinBox;
+        public RectTransform ChangeCoinIcon;
         public TMP_Text ChangeCoinLabel;
-        public GameObject ChangeOrbIcon;
+        public GameObject ChangeOrbBox;
+        public RectTransform ChangeOrbIcon;
         public TMP_Text ChangeOrbLabel;
-        public GameObject ChangeARIcon;
+        public GameObject ChangeXPBox;
+        public TMP_Text ChangeXPLabel;
+        public GameObject ChangeARBox;
         public TMP_Text ChangeARLabel;
-        public GameObject ChangeEssenceIcon;
+        public GameObject ChangeEssenceBox;
+        public RectTransform ChangeEssenceIcon;
         public TMP_Text ChangeEssenceLabel;
 
         [Header("Collecting Particle")]
@@ -100,10 +106,6 @@ namespace JANOARG.Client.Behaviors.Common
         public RectTransform ParticleCoinTarget;
         public RectTransform ParticleOrbTarget;
         public RectTransform ParticleEssenceTarget;
-        public Graphic ParticleCoinFlash;
-        public Graphic ParticleOrbFlash;
-        public Graphic ParticleEssenceFlash;
-        private Coroutine _LevelUpAnimation;
 
         [Header("Modals")]
         public GameObject TipJarModalBody;
@@ -114,6 +116,7 @@ namespace JANOARG.Client.Behaviors.Common
         private Coroutine _SongCurrencyGainAnimation;
         private bool _SongGainSkipLock;
         private bool _SongGainSkipQueued;
+        private Coroutine _LevelUpAnimation;
 
         public float totalEssence => SongEssence;
 
@@ -132,8 +135,9 @@ namespace JANOARG.Client.Behaviors.Common
             UpdateLabels();
             SetVisibility(0);
             SetRewardLerp(0);
+            SetChangeLerp(0);
 
-            ChangeHeader.gameObject.SetActive(false);
+            LevelUpPaneWiper.FillAmount = 0;
         }
 
         private void Update()
@@ -142,7 +146,7 @@ namespace JANOARG.Client.Behaviors.Common
             {
                 lastBonusUpdate += Time.deltaTime;
 
-                if (lastBonusUpdate >= 20 && RightPane.alpha > 0)
+                if (lastBonusUpdate >= 20 && RightPaneWiper.FillAmount > 0)
                 {
                     UpdateDailyCoinBonus();
                     UpdateBonusLabels();
@@ -186,7 +190,7 @@ namespace JANOARG.Client.Behaviors.Common
 
             // AR & Essence
             AbilityRatingText.text = AbilityRating.ToString("F2", CultureInfo.InvariantCulture);
-            EssenceLabel.text = "+" + totalEssence.ToString("F1", CultureInfo.InvariantCulture) + "%";
+            EssenceLabel.text = (totalEssence + 100).ToString("F1", CultureInfo.InvariantCulture) + "%";
 
             UpdateDailyCoinBonus();
             UpdateBonusLabels();
@@ -264,7 +268,6 @@ namespace JANOARG.Client.Behaviors.Common
             float arChange = AbilityRating - arOld;
             float essenceChange = totalEssence - essenceOld;
 
-            // TODO daily bonus
             int bonusMult = GetDailyCoinBonus();
             long finalCoins = baseCoins * bonusMult;
             var finalOrbs = (long)(baseOrbs * (1 + totalEssence / 100));
@@ -285,12 +288,17 @@ namespace JANOARG.Client.Behaviors.Common
 
             long levelGoal = Helper.GetLevelGoal(levelNew);
 
+            float levelFraction = -progOld / (float)levelGoal;
+
             while (progNew >= levelGoal)
             {
                 levelNew++;
+                levelFraction += 1;
                 progNew -= levelGoal;
                 levelGoal = Helper.GetLevelGoal(levelNew);
             }
+
+            levelFraction += progNew / (float)levelGoal;
 
             // Save
             CommonSys.sMain.Storage.Set("CURR:Coins", coinsNew);
@@ -306,15 +314,17 @@ namespace JANOARG.Client.Behaviors.Common
             // Animation setup
             yield return new WaitForSeconds(.4f);
 
-            ChangeARLabel.gameObject.SetActive(arOld != AbilityRating);
-            ChangeARIcon.SetActive(arOld != AbilityRating);
-            ChangeEssenceLabel.gameObject.SetActive(essenceOld != totalEssence);
-            ChangeEssenceIcon.SetActive(essenceOld != totalEssence);
-            ChangeAREssencePane.gameObject.SetActive(ChangeARIcon.activeSelf || ChangeEssenceIcon.activeSelf);
+            ChangeXPBox.SetActive(!Mathf.Approximately(levelFraction, 0));
+            ChangeARBox.SetActive(arOld != AbilityRating);
+            ChangeEssenceBox.SetActive(essenceOld != totalEssence);
 
-            ChangeHeader.gameObject.SetActive(true);
             ChangeCoinLabel.text = "+" + Helper.FormatCurrency(baseCoins);
             ChangeOrbLabel.text = "+" + Helper.FormatCurrency(finalOrbs);
+
+            ChangeXPLabel.text = (levelFraction < 0 ? "−" : "+") +
+                                      Mathf.Abs(levelFraction * 100)
+                                          .ToString("0.0") +
+                                      "%";
 
             ChangeARLabel.text = (arChange < 0 ? "−" : "+") +
                                  Mathf.Abs(arChange)
@@ -326,9 +336,10 @@ namespace JANOARG.Client.Behaviors.Common
                                       "%";
 
             levelGoal = Helper.GetLevelGoal(levelOld);
-            LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
+            // LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
 
             // Actual animation
+
             yield return Ease.Animate(
                 0.5f, x =>
                 {
@@ -340,7 +351,10 @@ namespace JANOARG.Client.Behaviors.Common
 
                     float lerp2 = Ease.Get(x / .6f, EaseFunction.Quintic, EaseMode.Out);
                     SetChangeLerp(lerp2);
-                });
+                }
+            );
+
+            _SongGainSkipLock = true;
 
             int pCount;
 
@@ -371,8 +385,6 @@ namespace JANOARG.Client.Behaviors.Common
                                     {
                                         CoinLabel.margin *=
                                             new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
-
-                                        ParticleCoinFlash.color *= new ColorFrag(a: 1 - x);
                                     });
                             StartCoroutine(coinAnim);
                         }));
@@ -417,8 +429,6 @@ namespace JANOARG.Client.Behaviors.Common
                                 StartCoroutine(LevelUpAnim(levelOld));
                         }
 
-                        LevelProgressText.text = Helper.FormatCurrency(progOld) + " / " + Helper.FormatCurrency(levelGoal);
-
                         LevelProgressBar.maxValue = levelGoal;
 
                         LevelProgressBar.value = progOld;
@@ -431,8 +441,6 @@ namespace JANOARG.Client.Behaviors.Common
                         orbAnim = Ease.EnumAnimate(.2f, x =>
                                 {
                                     OrbLabel.margin *= new Vector4Frag(y: 3 - 3 * Ease.Get(x, EaseFunction.Cubic, EaseMode.Out));
-
-                                    ParticleOrbFlash.color *= new ColorFrag(a: 1 - x);
                                 }
                             );
                         StartCoroutine(orbAnim);
@@ -455,7 +463,6 @@ namespace JANOARG.Client.Behaviors.Common
 
                     essenceAnim = Ease.EnumAnimate(.2f, x =>
                     {
-                        ParticleEssenceFlash.color *= new ColorFrag(a: 1 - x);
                     });
                     StartCoroutine(essenceAnim);
                 });
@@ -471,7 +478,7 @@ namespace JANOARG.Client.Behaviors.Common
                 {
                     sourceParticle.Velocity = 600 * Random.insideUnitCircle.normalized;
 
-                    for (var i = 1; i < bonusMult; i++)
+                    for (int i = 1; i < bonusMult; i++)
                     {
                         CollectingParticle particle = Instantiate(sourceParticle, CollectingParticleHolder);
                         particle.Velocity = 600 * Random.insideUnitCircle.normalized;
@@ -481,7 +488,6 @@ namespace JANOARG.Client.Behaviors.Common
                         particle.Reset();
                     }
                 }
-
                 int index = CommonSys.sMain.Storage.Get("INFO:BonusCount", 0) - 1;
                 BonusLabel.text = bonusMult + "× BONUS!";
                 ChangeCoinLabel.text = "+" + Helper.FormatCurrency(finalCoins) + " (×" + bonusMult + ")";
@@ -493,11 +499,11 @@ namespace JANOARG.Client.Behaviors.Common
                         SetBonusBlock(BonusBlocks[index], 1 - lerp);
                         SetChangeLerp(1);
 
-                        RT(LeftLayout)
-                            .anchoredPosition = (1 - lerp) * 10 * Vector2.right;
+                        // RT(LeftLayout)
+                        //     .anchoredPosition = (1 - lerp) * 10 * Vector2.right;
 
-                        RT(RightLayout)
-                            .anchoredPosition = (1 - lerp) * 10 * Vector2.left;
+                        // RT(RightLayout)
+                        //     .anchoredPosition = (1 - lerp) * 10 * Vector2.left;
 
                         SetRewardLerp(1);
 
@@ -518,7 +524,7 @@ namespace JANOARG.Client.Behaviors.Common
                     });
             }
 
-            yield return null;
+            yield return new WaitForSeconds(1);
             yield return new WaitUntil(() => CollectingParticleHolder.childCount == 0);
             yield return new WaitUntil(() => _LevelUpAnimation == null);
             yield return new WaitForSeconds(1);
@@ -539,7 +545,6 @@ namespace JANOARG.Client.Behaviors.Common
                     SetChangeLerp(1 - lerp2);
                 });
 
-            ChangeHeader.gameObject.SetActive(false);
             _SongCurrencyGainAnimation = null;
 
             yield return null;
@@ -574,54 +579,51 @@ namespace JANOARG.Client.Behaviors.Common
                 });
         }
 
-        private IEnumerator LevelUpAnim(int level)
+        internal IEnumerator LevelUpAnim(int level)
         {
-            LevelUpHolder.SetActive(true);
-            LevelUpLevelGraphic.rectTransform.anchorMin = new Vector2(0, 0);
-            LevelUpLabelGraphic.rectTransform.anchorMin = new Vector2(0, 0);
+            LevelUpBeforeLabel.text = (level - 1).ToString();
+            LevelUpAfterLabel.text = level.ToString();
 
-            StartCoroutine(
-                Ease.Animate(
-                    1.2f,
-                    x =>
-                    {
-                        LevelUpLevelText.text =
-                            $"<alpha=#{(int)Math.Clamp((x * 2 + Random.value) * 256, 0, 255):x2}>" +
-                            (level - 1) +
-                            $"<alpha=#{(int)Math.Clamp((x * 2 - .5 + Random.value) * 256, 0, 255):x2}>" +
-                            " → " +
-                            $"<alpha=#{(int)Math.Clamp((x * 2 - 1 + Random.value) * 256, 0, 255):x2}>" +
-                            level;
-                    }));
+            LevelUpPaneWiper.Angle = 15;
+
+            Coroutine c1 = StartCoroutine(Ease.Animate(
+                1.2f, x =>
+                {
+                    LevelUpLabel.alpha = Mathf.Clamp01(x * 2 + Random.value);
+
+                    LevelUpBeforeLabel.alpha = Mathf.Clamp01(x * 2 - 0.333f + Random.value) * 0.2f;
+                    LevelUpArrow.color *= new ColorFrag(a: Mathf.Clamp01(x * 2 - 0.667f + Random.value) * 0.2f);
+                    LevelUpAfterLabel.alpha = Mathf.Clamp01(x * 2 - 1f + Random.value) * 0.2f;
+                }
+            ));
 
             yield return Ease.Animate(
-                .7f, x =>
+                0.8f, x =>
                 {
-                    float lerp = Ease.Get(
-                        Mathf.Pow(x, .7f), EaseFunction.Exponential,
-                        EaseMode.Out);
-
-                    LevelUpLevelGraphic.rectTransform.anchorMax = new Vector2(lerp, 1);
-
-                    LevelUpLabelText.rectTransform.anchoredPosition =
-                        new Vector2(0, -50 * EaseUtils.ToZero(1, x, EaseFunction.Exponential, EaseMode.Out));
+                    float lerp = Ease.Get(Mathf.Pow(x, 0.7f), EaseFunction.Exponential, EaseMode.Out);
+                    LevelUpPaneWiper.FillAmount = lerp;
+                    
+                    float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    LevelUpProgressContainer.anchoredPosition *= new Vector2Frag(x: 12 * (1 - lerp2));
+                    LevelUpLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: -12 * (1 - lerp2));
                 });
 
+            LevelUpPaneWiper.Angle = 195;
             LevelText.text = level.ToString();
 
             yield return Ease.Animate(
-                0.7f, x =>
+                0.8f, x =>
                 {
-                    float lerp = Ease.Get(
-                        Mathf.Pow(x, 1.5f), EaseFunction.Exponential,
-                        EaseMode.In);
-
-                    LevelUpLevelGraphic.rectTransform.anchorMin =
-                        LevelUpLabelGraphic.rectTransform.anchorMin =
-                            new Vector2(lerp, 0);
+                    float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+                    LevelUpPaneWiper.FillAmount = 1 - lerp;
+                    
+                    float lerp2 = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+                    LevelUpProgressContainer.anchoredPosition *= new Vector2Frag(x: -12 * lerp2);
+                    LevelUpLabel.rectTransform.anchoredPosition *= new Vector2Frag(y: 12 * lerp2);
                 });
 
-            LevelUpHolder.SetActive(false);
+            yield return c1;
+
             _LevelUpAnimation = null;
         }
 
@@ -681,75 +683,26 @@ namespace JANOARG.Client.Behaviors.Common
 
         public void SetVisibility(float a)
         {
-            LeftPane.alpha = RightPane.alpha = a * a;
-            LeftPane.blocksRaycasts = RightPane.blocksRaycasts = Mathf.Approximately(a, 1);
+            LeftPaneWiper.FillAmount = RightPaneWiper.FillAmount = a * a;
+            LeftPaneGroup.blocksRaycasts = RightPaneGroup.blocksRaycasts = Mathf.Approximately(a, 1);
 
-            RT(LeftPane)
-                .anchoredPosition *= new Vector2Frag(-10 * (1 - a));
-
-            RT(RightPane)
-                .anchoredPosition *= new Vector2Frag(10 * (1 - a));
+            RT(LeftPaneWiper).anchoredPosition *= new Vector2Frag(12 * a);
+            RT(RightPaneWiper).anchoredPosition *= new Vector2Frag(-12 * a);
         }
 
         public void SetRewardLerp(float lerp)
         {
-            AbilityRatingHolder.sizeDelta *= new Vector2Frag(60 + 20 * lerp);
-            LevelHolder.anchoredPosition *= new Vector2Frag(AbilityRatingHolder.rect.xMin - 1);
-            LevelHolder.sizeDelta *= new Vector2Frag(60 + 60 * lerp);
 
-            LevelLabel.rectTransform.sizeDelta = new Vector2(-12 - 80 * lerp, 0);
-            AbilityRatingLabel.rectTransform.sizeDelta = new Vector2(-12 - 6 * lerp, 0);
-            LevelText.rectTransform.sizeDelta = new Vector2(-12 - 6 * lerp, -2 * lerp);
-            AbilityRatingText.rectTransform.sizeDelta = new Vector2(-12 - 16 * lerp, -28 * lerp);
-
-            AbilityRatingText.fontSize = LevelText.fontSize = 8 + 3 * lerp;
-
-            NameLabel.alpha = TitleLabel.alpha = MenuButtonGroup.alpha =
-                AvatarGroup.alpha = 1 - lerp;
-
-            LevelProgressText.alpha = lerp;
-
-            LevelText.color = LevelLabel.color = Color.Lerp(Color.black, Color.white, lerp);
-            LevelBackgroundGraphic.color = new Color(1, 1, 1, .75f - .6f * lerp);
-            LevelFillGraphic.color = new Color(1, 1, 1, 1 - .6f * lerp);
-
-            float width = 300 + RightLayout.preferredWidth - RightLayout.minWidth;
-
-            float safeOffset = -RT(this).sizeDelta.x / 2;
-
-            RT(LeftLayout)
-                .anchoredPosition = new Vector2(
-                Mathf.Lerp(
-                    -1000,
-                    -500 -
-                    safeOffset -
-                    width / 2 -
-                    (LeftLayout.preferredWidth - LeftLayout.minWidth), lerp),
-                0);
-
-            RT(RightLayout)
-                .anchoredPosition = new Vector2(Mathf.Lerp(1000, 600 + safeOffset + width / 2, lerp), 0);
         }
 
         public void SetChangeLerp(float lerp)
         {
-            ChangeHeader.alpha = lerp;
-
-            ChangeAREssencePane.padding.left = ChangeAREssencePane.padding.right =
-                ChangeCurrencyPane.padding.left = ChangeCurrencyPane.padding.right = 10;
-
-            RT(ChangeAREssencePane)
-                .sizeDelta *= new Vector2Frag(ChangeAREssencePane.preferredWidth * lerp);
-
-            RT(ChangeCurrencyPane)
-                .sizeDelta *= new Vector2Frag(ChangeCurrencyPane.preferredWidth * lerp);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(RT(ChangeHeader));
+            ChangeWiper.FillAmount = lerp;
         }
 
         public void SetBonusBlock(Graphic target, float lerp)
         {
-            target.rectTransform.sizeDelta *= new Vector2Frag(y: 1 + 6 * lerp);
+            target.rectTransform.sizeDelta *= new Vector2Frag(y: 2 + 4 * lerp);
             target.color *= new ColorFrag(a: .6f + .4f * lerp);
         }
 
@@ -784,6 +737,15 @@ namespace JANOARG.Client.Behaviors.Common
             if (GUILayout.Button("Do EXP Animation"))
                 if (EditorApplication.isPlaying)
                     ((ProfileBar)serializedObject.targetObject).CompleteSong(408, 128);
+            if (GUILayout.Button("Play Level Up Animation"))
+            {
+                if (EditorApplication.isPlaying)
+                {
+                    var obj = (ProfileBar)serializedObject.targetObject;
+                    int level = CommonSys.sMain.Storage.Get("INFO:Level", 1);
+                    obj.StartCoroutine(obj.LevelUpAnim(level));
+                }
+            }
 
             DrawDefaultInspector();
         }

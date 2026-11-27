@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using JANOARG.Client.UI;
 using JANOARG.Shared.Data.ChartInfo;
+using JANOARG.Shared.Utils;
 using JANOARG.Shared.Utils.Animation;
 using TMPro;
 using UnityEngine;
@@ -60,16 +62,16 @@ namespace JANOARG.Client.Behaviors.Common
             new("CONNECTION ESTABLISHED")
         };
 
-        public RectTransform StatusHolder;
+        [Space]
+        public Image Background;
+
         public TMP_Text      StatusText;
-        public RectTransform StatusCompletedHolder;
+        public Image         StatusLoaderImage;
+        public GraphicWiper  StatusCompletedWiper;
         public TMP_Text      StatusCompletedText;
 
         [Space]
         public TMP_Text FlavorText;
-
-        public Image FlavorBackground;
-        public Image FlavorBackground2;
 
         [Space]
         public Slider ProgressBar;
@@ -104,33 +106,22 @@ namespace JANOARG.Client.Behaviors.Common
         {
             IsAnimating = true;
             StatusText.text = "NOW LOADING...";
-            StatusCompletedHolder.sizeDelta = new Vector2(0, 0);
+            StatusCompletedWiper.FillAmount = 0;
+
+            Color backgroundColor = CommonSys.sMain.MainCamera.backgroundColor;
+            Color foregroundColor = backgroundColor.grayscale < 0.5f ? Color.white : Color.black;
+
+            Background.color = backgroundColor;
+            StatusText.color = FlavorText.color = StatusLoaderImage.color = foregroundColor;
 
             yield return Ease.Animate(
-                2.5f, a =>
+                2.5f, x =>
                 {
+                    float lerp = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                    Background.color *= new ColorFrag(a: lerp);
 
-                    FlavorBackground.rectTransform.sizeDelta =
-                        new Vector2(FlavorBackground.rectTransform.sizeDelta.x, EaseUtils.FromZero(100, a * 3f, EaseFunction.Exponential, EaseMode.Out));
-
-                    float lerp2 = Ease.Get(
-                        a * 3f - 0.15f, EaseFunction.Exponential,
-                        EaseMode.Out);
-
-                    FlavorBackground2.rectTransform.sizeDelta =
-                        new Vector2(
-                            FlavorBackground2.rectTransform.sizeDelta.x,
-                            lerp2 * 100);
-
-
-                    StatusHolder.anchoredPosition = new Vector2(
-                        1000 +
-                        (StatusHolder.rect.width - 1000 + _Self.sizeDelta.x / -2) *
-                        EaseUtils.ToZero(1, a * 3f, EaseFunction.Exponential, EaseMode.Out), 0);
-
-
-                    FlavorText.rectTransform.anchoredPosition =
-                        new Vector2(1200 - EaseUtils.FromZero(100, a, EaseFunction.Exponential, EaseMode.Out), 0);
+                    FlavorText.color *= new ColorFrag(a: Mathf.Clamp01(x * 8));
+                    StatusText.color = StatusLoaderImage.color *= new ColorFrag(a: Mathf.Clamp01(x * 8 - 0.5f));
                 });
 
             IsAnimating = false;
@@ -146,52 +137,32 @@ namespace JANOARG.Client.Behaviors.Common
         {
             IsAnimating = true;
 
-            StatusCompletedText.text = FlavorTextEntry.GetRandom(srCompletedStatuses)
-                .Message;
-
-            StatusCompletedText.ForceMeshUpdate();
-            float width = StatusCompletedText.preferredWidth + 70;
-            float padding = -_Self.sizeDelta.x / 2;
-            StatusCompletedText.rectTransform.anchoredPosition = new Vector2(-padding / 2, 0);
-
-            yield return Ease.Animate(
-                1, a =>
+            StatusCompletedText.text = FlavorTextEntry.GetRandom(srCompletedStatuses).Message;
+            Coroutine c1 = StartCoroutine(Ease.Animate(
+                0.5f, x =>
                 {
-                    float lerp = Ease.Get(
-                        a * 1.2f - 0.1f, EaseFunction.Exponential,
-                        EaseMode.In);
+                    float lerp = Ease.Get(x, EaseFunction.Cubic, EaseMode.Out);
+                    Background.color *= new ColorFrag(a: 1 - lerp);
+                    FlavorText.color = StatusText.color = StatusLoaderImage.color *= new ColorFrag(a: 1 - lerp);
+                }
+            ));
 
-                    float lerp2 = Ease.Get(a * 1.2f, EaseFunction.Exponential, EaseMode.In);
-                    float lerp3 = Ease.Get(a * 2f, EaseFunction.Exponential, EaseMode.Out);
-                    float lerp4 = Ease.Get(a, EaseFunction.Exponential, EaseMode.In);
-
-                    float lerp5 = Ease.Get(
-                        a * 1.5f - 0.5f, EaseFunction.Exponential,
-                        EaseMode.In);
-
-                    FlavorBackground.rectTransform.sizeDelta =
-                        new Vector2(
-                            FlavorBackground.rectTransform.sizeDelta.x,
-                            (1 - lerp) * 100 * (1 - .3f * lerp3));
-
-                    FlavorBackground2.rectTransform.sizeDelta =
-                        new Vector2(
-                            FlavorBackground2.rectTransform.sizeDelta.x,
-                            (1 - lerp2) * 100 * (1 - .35f * lerp3));
-
-                    StatusCompletedHolder.sizeDelta =
-                        new Vector2((width + padding) * lerp3, 0);
-
-                    FlavorText.rectTransform.anchoredPosition =
-                        new Vector2(1100 - 300 * lerp4, 0);
-
-                    StatusHolder.anchoredPosition = new Vector2(
-                        1000 - (width - StatusHolder.rect.width + 1000) * lerp3, 0
-                    );
-
-                    StatusHolder.anchoredPosition +=
-                        new Vector2((width + padding) * lerp5, 0);
+            StatusCompletedWiper.Angle = 15;
+            yield return Ease.Animate(
+                0.4f, x =>
+                {
+                    float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.Out);
+                    StatusCompletedWiper.FillAmount = lerp;
                 });
+            StatusCompletedWiper.Angle = 195;
+            yield return Ease.Animate(
+                0.4f, x =>
+                {
+                    float lerp = Ease.Get(x, EaseFunction.Exponential, EaseMode.In);
+                    StatusCompletedWiper.FillAmount = 1 - lerp;
+                });
+
+            yield return c1;
 
             gameObject.SetActive(false);
             IsAnimating = false;

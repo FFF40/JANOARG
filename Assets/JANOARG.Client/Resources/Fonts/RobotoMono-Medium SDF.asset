@@ -3027,7 +3027,7 @@ MonoBehaviour:
   normalSpacingOffset: 0
   boldStyle: 0.75
   boldSpacing: 0
-  italicStyle: 25
+  italicStyle: 15
   tabSize: 10
   m_fontInfo:
     Name: 
